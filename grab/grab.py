@@ -99,14 +99,14 @@ class Grab(object):
         method = self.config['method'].lower()
         if method == 'post':
             self.curl.setopt(pycurl.POST, 1)
-            if payload:
-                self.curl.setopt(pycurl.POSTFIELDS, payload)
-            elif post:
-                post_data = urllib.urlencode(post)
+            if self.config['payload']:
+                self.curl.setopt(pycurl.POSTFIELDS, self.config['payload'])
+            elif self.config['post']:
+                post_data = urllib.urlencode(self.config['post'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
         elif method == 'put':
             self.curl.setopt(pycurl.PUT, 1)
-            self.curl.setopt(pycurl.READFUNCTION, StringIO.StringIO(payload).read) 
+            self.curl.setopt(pycurl.READFUNCTION, StringIO.StringIO(self.config['payload']).read) 
         elif method == 'delete':
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
         else:
@@ -114,15 +114,14 @@ class Grab(object):
             self.curl.setopt(pycurl.HTTPGET, 1)
 
         if self.config['headers']:
-            headers = ['%s: %s' % x for x in headers.iteritems()]
+            headers = ['%s: %s' % x for x in self.config['headers'].iteritems()]
             self.curl.setopt(pycurl.HTTPHEADER, headers)
 
 
     def parse_headers(self):
         for line in re.split('\r?\n', ''.join(self.response_head)):
-            if not self.status_line:
+            if not self.response_status:
                 self.response_status = line
-                self.response_code = line.split(' ')[0]
             try:
                 name, value = line.split(': ', 1)
                 if 'Set-Cookie' == name:
@@ -138,7 +137,8 @@ class Grab(object):
     def request(self):
         self.process_config()
 
-        self.status_line = None
+        self.response_status = None
+        self.response_code = None
         self.response_head = []
         self.response_body = []
         self.headers = {}
@@ -146,6 +146,7 @@ class Grab(object):
 
         self.curl.perform()
 
+        self.response_code = self.curl.getinfo(pycurl.HTTP_CODE)
         self.response_head = ''.join(self.response_head)
         self.response_body = ''.join(self.response_body)
 
