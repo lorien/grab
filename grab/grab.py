@@ -28,8 +28,18 @@ DEFAULT_CONFIG = dict(
     proxy_type = None,
     post = None,
     payload = None,
-    headers = None,
-    method = None
+    method = None,
+    headers = {
+        'Accept': 'text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
+        'Accept-Language': 'en-us;q=0.7,en,ru;q=0.3',
+        'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.7',
+        'Keep-Alive': '300',
+    },
+    user_agent = 'Mozilla/5.0 (X11; U; Linux i686; ru; rv:1.8.1.5) Gecko/20070806 Firefox/2.0.0.5',
+    reuse_cookies = True,
+    reuse_referer = True,
+    cookies = {},
+    referer = None
 )
 
 
@@ -50,6 +60,8 @@ class Grab(object):
 
 
     def setup(self, **kwargs):
+        if 'headers' in kwargs:
+            self.config['headers'].upate(kwargs['headers'])
         self.config.update(kwargs)
 
 
@@ -68,7 +80,6 @@ class Grab(object):
         Setup curl instance with the config.
         """
 
-        logging.debug('URL: %s' % self.config['url'])
         self.curl.setopt(pycurl.URL, self.config['url'])
         self.curl.setopt(pycurl.FOLLOWLOCATION, 1)
         self.curl.setopt(pycurl.MAXREDIRS, 5)
@@ -77,6 +88,7 @@ class Grab(object):
         self.curl.setopt(pycurl.NOSIGNAL, 1)
         self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
         self.curl.setopt(pycurl.HEADERFUNCTION, self.head_processor)
+        self.curl.setopt(pycurl.USERAGENT, self.config['user_agent'])
 
         if self.config['proxy']:
             # str is required to force unicode values
@@ -90,32 +102,63 @@ class Grab(object):
             logging.debug('Using proxy %s of type %s' % (self.config['proxy'],
                 self.config['proxy_type']))
 
-        if not self.config['method']:
-            if self.config['payload'] or self.config['post']:
-                self.config['method'] = 'post'
-            else:
-                self.config['method'] = 'get'
+        method = (self.config['method'] or '').upper()
 
-        method = self.config['method'].lower()
-        if method == 'post':
+        if not method:
+            if self.config['payload'] or self.config['post']:
+                method = 'POST'
+            else:
+                method = 'GET'
+
+        if method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
             if self.config['payload']:
                 self.curl.setopt(pycurl.POSTFIELDS, self.config['payload'])
             elif self.config['post']:
                 post_data = urllib.urlencode(self.config['post'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
-        elif method == 'put':
+        elif method == 'PUT':
             self.curl.setopt(pycurl.PUT, 1)
             self.curl.setopt(pycurl.READFUNCTION, StringIO.StringIO(self.config['payload']).read) 
-        elif method == 'delete':
+        elif method == 'DELETE':
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
         else:
             # Assume the GET method
             self.curl.setopt(pycurl.HTTPGET, 1)
+        
+        logging.debug('%s %s' % (method, self.config['url']))
 
         if self.config['headers']:
             headers = ['%s: %s' % x for x in self.config['headers'].iteritems()]
             self.curl.setopt(pycurl.HTTPHEADER, headers)
+
+
+        # CURLOPT_COOKIELIST
+        # Pass a char * to a cookie string. Cookie can be either in Netscape / Mozilla format or just regular HTTP-style header (Set-Cookie: ...) format. If cURL cookie engine was not enabled it will enable its cookie engine. Passing a magic string "ALL" will erase all cookies known by cURL. (Added in 7.14.1) Passing the special string "SESS" will only erase all session cookies known by cURL. (Added in 7.15.4) Passing the special string "FLUSH" will write all cookies known by cURL to the file specified by CURLOPT_COOKIEJAR. (Added in 7.17.1)
+
+        if self.config['reuse_cookies']:
+            self.curl.setopt(pycurl.COOKIELIST, '')
+        else:
+            self.curl.setopt(pycurl.COOKIELIST, 'ALL')
+
+
+        #CURLOPT_COOKIE
+        # Pass a pointer to a zero terminated string as parameter. It will be used to set a cookie in the http request. The format of the string should be NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie should contain.
+        # If you need to set multiple cookies, you need to set them all using a single option and thus you need to concatenate them all in one single string. Set multiple cookies in one string like this: "name1=content1; name2=content2;" etc.
+        # Note that this option sets the cookie header explictly in the outgoing request(s). If multiple requests are done due to authentication, followed redirections or similar, they will all get this cookie passed on.
+        # Using this option multiple times will only make the latest string override the previous ones. 
+
+        if self.config['cookies']:
+            chunks = []
+            for key, value in self.config['cookies'].iteritems():
+                key = urllib.quote_plus(key)
+                value = urllib.quote_plus(value)
+                chunks.append('%s=%s;' % (key, value))
+            self.curl.setopt(pycurl.COOKIE, ''.join(chunks))
+
+        if self.config['referer']:
+            self.curl.setopt(pycurl.REFERER, str(self.config['referer']))
+
 
 
     def parse_headers(self):
@@ -124,19 +167,26 @@ class Grab(object):
                 self.response_status = line
             try:
                 name, value = line.split(': ', 1)
-                if 'Set-Cookie' == name:
-                    match = re.search('^([^=]+)=([^;]+)*', value)
-                    if match:
-                        self.cookies[match.group(1)] = match.group(2)
-                else:
-                    self.headers[name] = value
+                #if 'Set-Cookie' == name:
+                    #match = re.search('^([^=]+)=([^;]+)*', value)
+                    #if match:
+                        #self.cookies[match.group(1)] = match.group(2)
+                #else:
+                self.headers[name] = value
             except ValueError:
                 pass
 
 
-    def request(self):
-        self.process_config()
+    def parse_cookies(self):
+        for line in self.curl.getinfo(pycurl.INFO_COOKIELIST):
+            # Example of line:
+            # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
+            chunks = line.split('\t')
+            key, value = chunks[-2:]
+            self.cookies[key] = value
 
+
+    def request(self):
         self.response_status = None
         self.response_code = None
         self.response_head = []
@@ -144,13 +194,23 @@ class Grab(object):
         self.headers = {}
         self.cookies = {}
 
+        self.process_config()
         self.curl.perform()
 
         self.response_code = self.curl.getinfo(pycurl.HTTP_CODE)
         self.response_head = ''.join(self.response_head)
         self.response_body = ''.join(self.response_body)
 
+        self.parse_cookies()
         self.parse_headers()
+
+        #if self.config['reuse_cookies']:
+            #self.config['cookies'].update(self.cookies)
+        #else:
+            #self.config['cookies'] = {}
+
+        if self.config['reuse_referer']:
+            self.config['referer'] = self.config['url']
 
         response = {'body': self.response_body,
                     'headers': self.headers,
