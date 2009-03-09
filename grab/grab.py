@@ -5,6 +5,8 @@ import os
 import urllib
 import re
 
+from html import make_unicode, find_refresh_url, decode_entities
+
 __all__ = ['Grab', 'request']
 
 # We should ignore SIGPIPE when using pycurl.NOSIGNAL - see
@@ -39,7 +41,12 @@ DEFAULT_CONFIG = dict(
     reuse_cookies = True,
     reuse_referer = True,
     cookies = {},
-    referer = None
+    referer = None,
+    unicode_body = True,
+    guess_encodings = ['windows-1251', 'koi8-r', 'utf-8'],
+    decode_entities = True,
+    log_file = None,
+    follow_refresh = False
 )
 
 
@@ -80,7 +87,7 @@ class Grab(object):
         Setup curl instance with the config.
         """
 
-        self.curl.setopt(pycurl.URL, self.config['url'])
+        self.curl.setopt(pycurl.URL, str(self.config['url']))
         self.curl.setopt(pycurl.FOLLOWLOCATION, 1)
         self.curl.setopt(pycurl.MAXREDIRS, 5)
         self.curl.setopt(pycurl.CONNECTTIMEOUT, self.config['connect_timeout'])
@@ -163,7 +170,7 @@ class Grab(object):
 
     def parse_headers(self):
         for line in re.split('\r?\n', ''.join(self.response_head)):
-            if not self.response_status:
+            if line.startswith('HTTP'):
                 self.response_status = line
             try:
                 name, value = line.split(': ', 1)
@@ -197,9 +204,37 @@ class Grab(object):
         self.process_config()
         self.curl.perform()
 
+        # It is very importent to delete old POST data after
+        # request or that data will be used again in next request :-/
+        self.config['post'] = None
+        self.config['payload'] = None
+        self.config['method'] = None
+
         self.response_code = self.curl.getinfo(pycurl.HTTP_CODE)
         self.response_head = ''.join(self.response_head)
         self.response_body = ''.join(self.response_body)
+
+
+        if self.config['unicode_body']:
+            self.response_body = make_unicode(
+                self.response_body, self.config['guess_encodings'])
+
+            # Try to decode entities only if unicode_body option is set
+            if self.config['decode_entities']:
+                self.response_body = decode_entities(self.response_body)
+        else:
+            if self.config['decode_entities']:
+                raise Exception('decode_entities option requires unicode_body option to be enabled')
+
+        
+        if self.config['log_file']:
+            body = self.response_body
+            # If we convert body to unicode then we should make a
+            # bytestream for saving it to file
+            if isinstance(body, unicode):
+                body = body.encode('utf-8')
+            file(self.config['log_file'], 'w').write(body)
+
 
         self.parse_cookies()
         self.parse_headers()
@@ -211,6 +246,15 @@ class Grab(object):
 
         if self.config['reuse_referer']:
             self.config['referer'] = self.config['url']
+
+        if self.config['follow_refresh']:
+            url = find_refresh_url(self.response_body)
+            if url:
+                logging.debug('Following refresh url: %s' % url)
+                # TODO check max redirect count
+                self.setup(url=url)
+                return self.request()
+
 
         response = {'body': self.response_body,
                     'headers': self.headers,
@@ -225,3 +269,16 @@ class Grab(object):
 
     def response_time(self):
         return self.curl.getinfo(pycurl.TOTAL_TIME)
+
+
+    @property
+    def soup(self):
+        from BeautifulSoup import BeautifulSoup
+        if self.config['decode_entities']:
+            raise Exception('You should not use BeautifulSoup with enabled decode_entities option')
+        return BeautifulSoup(self.response_body)
+
+
+    def input_value(self, name):
+        elem = self.soup.find('input', attrs={'name': name})
+        return elem['value'] if elem else None
