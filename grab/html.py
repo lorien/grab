@@ -47,7 +47,6 @@ def make_unicode(html, guess_encodings):
     if match:
         match = RE_CHARSET.search(match.group(0))
         if match:
-            logging.debug('FOUND CHARSET: %s' % match.group(1))
             guess_encodings = set([match.group(1)] + list(guess_encodings))
 
     for encoding in guess_encodings:

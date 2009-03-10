@@ -4,8 +4,10 @@ import logging
 import os
 import urllib
 import re
+import random
 
 from html import make_unicode, find_refresh_url, decode_entities
+import user_agent
 
 __all__ = ['Grab', 'request']
 
@@ -37,14 +39,14 @@ DEFAULT_CONFIG = dict(
         'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.7',
         'Keep-Alive': '300',
     },
-    user_agent = 'Mozilla/5.0 (X11; U; Linux i686; ru; rv:1.8.1.5) Gecko/20070806 Firefox/2.0.0.5',
+    user_agent = random.choice(user_agent.variants),
     reuse_cookies = True,
     reuse_referer = True,
     cookies = {},
     referer = None,
     unicode_body = True,
     guess_encodings = ['windows-1251', 'koi8-r', 'utf-8'],
-    decode_entities = True,
+    decode_entities = False,
     log_file = None,
     follow_refresh = False
 )
