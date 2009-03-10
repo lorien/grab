@@ -39,7 +39,7 @@ DEFAULT_CONFIG = dict(
         'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.7',
         'Keep-Alive': '300',
     },
-    user_agent = random.choice(user_agent.variants),
+    user_agent = '',
     reuse_cookies = True,
     reuse_referer = True,
     cookies = {},
@@ -66,6 +66,7 @@ class Grab(object):
     def __init__(self):
         self.config = DEFAULT_CONFIG.copy()
         self.curl = pycurl.Curl()
+        self.config['user_agent'] = random.choice(user_agent.variants)
 
 
     def setup(self, **kwargs):
