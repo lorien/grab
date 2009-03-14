@@ -39,7 +39,7 @@ DEFAULT_CONFIG = dict(
         'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.7',
         'Keep-Alive': '300',
     },
-    user_agent = '',
+    user_agent = random.choice(user_agent.variants),
     reuse_cookies = True,
     reuse_referer = True,
     cookies = {},
@@ -66,12 +66,11 @@ class Grab(object):
     def __init__(self):
         self.config = DEFAULT_CONFIG.copy()
         self.curl = pycurl.Curl()
-        self.config['user_agent'] = random.choice(user_agent.variants)
 
 
     def setup(self, **kwargs):
         if 'headers' in kwargs:
-            self.config['headers'].upate(kwargs['headers'])
+            self.config['headers'].update(kwargs['headers'])
         self.config.update(kwargs)
 
 
@@ -139,7 +138,7 @@ class Grab(object):
         logging.debug('%s %s' % (method, self.config['url']))
 
         if self.config['headers']:
-            headers = ['%s: %s' % x for x in self.config['headers'].iteritems()]
+            headers = [str('%s: %s' % x) for x in self.config['headers'].iteritems()]
             self.curl.setopt(pycurl.HTTPHEADER, headers)
 
 
@@ -217,6 +216,7 @@ class Grab(object):
         self.response_head = ''.join(self.response_head)
         self.response_body = ''.join(self.response_body)
 
+        origin_response_body = self.response_body
 
         if self.config['unicode_body']:
             self.response_body = make_unicode(
@@ -230,6 +230,9 @@ class Grab(object):
                 raise Exception('decode_entities option requires unicode_body option to be enabled')
 
         
+        # Save processed body
+        # That means that log file contents could be not the same
+        # as origin response from server
         if self.config['log_file']:
             body = self.response_body
             # If we convert body to unicode then we should make a
@@ -238,20 +241,14 @@ class Grab(object):
                 body = body.encode('utf-8')
             file(self.config['log_file'], 'w').write(body)
 
-
         self.parse_cookies()
         self.parse_headers()
 
-        #if self.config['reuse_cookies']:
-            #self.config['cookies'].update(self.cookies)
-        #else:
-            #self.config['cookies'] = {}
-
         if self.config['reuse_referer']:
-            self.config['referer'] = self.config['url']
+            self.config['referer'] = self.response_url()
 
         if self.config['follow_refresh']:
-            url = find_refresh_url(self.response_body)
+            url = find_refresh_url(origin_response_body)
             if url:
                 logging.debug('Following refresh url: %s' % url)
                 # TODO check max redirect count
@@ -272,6 +269,10 @@ class Grab(object):
 
     def response_time(self):
         return self.curl.getinfo(pycurl.TOTAL_TIME)
+
+
+    def response_url(self):
+        return self.curl.getinfo(pycurl.EFFECTIVE_URL)
 
 
     @property
