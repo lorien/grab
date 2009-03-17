@@ -99,6 +99,10 @@ class Grab(object):
         self.curl.setopt(pycurl.HEADERFUNCTION, self.head_processor)
         self.curl.setopt(pycurl.USERAGENT, self.config['user_agent'])
 
+        # Ignore SSL errors
+        self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)
+        self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)
+
         if self.config['proxy']:
             # str is required to force unicode values
             self.curl.setopt(pycurl.PROXY, str(self.config['proxy'])) 
