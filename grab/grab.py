@@ -48,7 +48,8 @@ DEFAULT_CONFIG = dict(
     guess_encodings = ['windows-1251', 'koi8-r', 'utf-8'],
     decode_entities = False,
     log_file = None,
-    follow_refresh = False
+    follow_refresh = False,
+    log_dir = False
 )
 
 
@@ -66,6 +67,7 @@ class Grab(object):
     def __init__(self):
         self.config = DEFAULT_CONFIG.copy()
         self.curl = pycurl.Curl()
+        self.counter = 0
 
 
     def setup(self, **kwargs):
@@ -139,7 +141,7 @@ class Grab(object):
             # Assume the GET method
             self.curl.setopt(pycurl.HTTPGET, 1)
         
-        logging.debug('%s %s' % (method, self.config['url']))
+        logging.debug('[%02d] %s %s' % (self.counter, method, self.config['url']))
 
         if self.config['headers']:
             headers = [str('%s: %s' % x) for x in self.config['headers'].iteritems()]
@@ -206,6 +208,7 @@ class Grab(object):
         self.response_body = []
         self.headers = {}
         self.cookies = {}
+        self.counter += 1
 
         self.process_config()
         self.curl.perform()
@@ -244,6 +247,18 @@ class Grab(object):
             if isinstance(body, unicode):
                 body = body.encode('utf-8')
             file(self.config['log_file'], 'w').write(body)
+
+
+        if self.config['log_dir']:
+            fname = os.path.join(self.config['log_dir'], '%02d.html' % self.counter)
+            #body = self.response_body
+            ## If we convert body to unicode then we should make a
+            ## bytestream for saving it to file
+            #if isinstance(body, unicode):
+                #body = body.encode('utf-8')
+            body = origin_response_body
+            file(fname, 'w').write(self.response_head + body)
+            
 
         self.parse_cookies()
         self.parse_headers()
