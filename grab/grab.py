@@ -108,9 +108,8 @@ class Grab(object):
         if self.config['proxy']:
             # str is required to force unicode values
             self.curl.setopt(pycurl.PROXY, str(self.config['proxy'])) 
-            # CURLPROXY_HTTP, CURLPROXY_HTTP_1_0 (added in 7.19.4),
-            # CURLPROXY_SOCKS4 (added in 7.15.2), CURLPROXY_SOCKS5,
-            # CURLPROXY_SOCKS4A (added in 7.18.0) and CURLPROXY_SOCKS5_HOSTNAME (added in 7.18.0)
+
+            # Pass a long with this option to set type of the proxy. Available options for this are CURLPROXY_HTTP, CURLPROXY_HTTP_1_0 (added in 7.19.4), CURLPROXY_SOCKS4 (added in 7.15.2), CURLPROXY_SOCKS5, CURLPROXY_SOCKS4A (added in 7.18.0) and CURLPROXY_SOCKS5_HOSTNAME (added in 7.18.0). The HTTP type is default. (Added in 7.10) 
             if self.config['proxy_type']:
                 ptype = getattr(pycurl, 'PROXYTYPE_%s' % self.config['proxy_type'].upper())
                 self.curl.setopt(pycurl.PROXYTYPE, ptype)
@@ -296,10 +295,12 @@ class Grab(object):
 
     @property
     def soup(self):
-        from BeautifulSoup import BeautifulSoup
+        import html5lib
+        from html5lib import treebuilders
         if self.config['decode_entities']:
             raise Exception('You should not use BeautifulSoup with enabled decode_entities option')
-        return BeautifulSoup(self.response_body)
+        parser = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder("beautifulsoup"))
+        return parser.parse(self.response_body)
 
 
     def input_value(self, name):
