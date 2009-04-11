@@ -221,8 +221,7 @@ class Grab(object):
         self.response_code = self.curl.getinfo(pycurl.HTTP_CODE)
         self.response_head = ''.join(self.response_head)
         self.response_body = ''.join(self.response_body)
-
-        origin_response_body = self.response_body
+        self.original_response_body = self.response_body
 
         if self.config['unicode_body']:
             self.response_body = make_unicode(
@@ -236,26 +235,14 @@ class Grab(object):
                 raise Exception('decode_entities option requires unicode_body option to be enabled')
 
         
-        # Save processed body
-        # That means that log file contents could be not the same
-        # as origin response from server
         if self.config['log_file']:
-            body = self.response_body
-            # If we convert body to unicode then we should make a
-            # bytestream for saving it to file
-            if isinstance(body, unicode):
-                body = body.encode('utf-8')
+            body = self.original_response_body
             file(self.config['log_file'], 'w').write(body)
 
 
         if self.config['log_dir']:
             fname = os.path.join(self.config['log_dir'], '%02d.html' % self.counter)
-            #body = self.response_body
-            ## If we convert body to unicode then we should make a
-            ## bytestream for saving it to file
-            #if isinstance(body, unicode):
-                #body = body.encode('utf-8')
-            body = origin_response_body
+            body = self.original_response_body
             file(fname, 'w').write(self.response_head + body)
             
 
@@ -266,7 +253,7 @@ class Grab(object):
             self.config['referer'] = self.response_url()
 
         if self.config['follow_refresh']:
-            url = find_refresh_url(origin_response_body)
+            url = find_refresh_url(self.original_response_body)
             if url:
                 logging.debug('Following refresh url: %s' % url)
                 # TODO check max redirect count
@@ -300,7 +287,7 @@ class Grab(object):
         if self.config['decode_entities']:
             raise Exception('You should not use BeautifulSoup with enabled decode_entities option')
         parser = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder("beautifulsoup"))
-        return parser.parse(self.response_body)
+        return parser.parse(self.original_response_body)
 
 
     def input_value(self, name):
