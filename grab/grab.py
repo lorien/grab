@@ -214,6 +214,7 @@ class Grab(object):
         self.headers = {}
         self.cookies = {}
         self.counter += 1
+        self._soup = None
 
         self.process_config()
         try:
@@ -281,6 +282,7 @@ class Grab(object):
                     'code': self.response_code,
                     'curl': self.curl,
                     'status': self.response_status,
+                    'get_soup': lambda: self.soup,
                     }
 
         return response
@@ -296,12 +298,16 @@ class Grab(object):
 
     @property
     def soup(self):
-        import html5lib
-        from html5lib import treebuilders
-        if self.config['decode_entities']:
-            raise Exception('You should not use BeautifulSoup with enabled decode_entities option')
-        parser = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder("beautifulsoup"))
-        return parser.parse(self.original_response_body)
+        if not self._soup:
+            from BeautifulSoup import BeautifulSoup
+            #import html5lib
+            #from html5lib import treebuilders
+            if self.config['decode_entities']:
+                raise Exception('You should not use BeautifulSoup with enabled decode_entities option')
+            #parser = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder("beautifulsoup"))
+            #self._soup = parser.parse(self.original_response_body)
+            self._soup = BeautifulSoup(self.original_response_body)
+        return self._soup
 
 
     def input_value(self, name):
