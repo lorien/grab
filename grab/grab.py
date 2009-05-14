@@ -49,7 +49,9 @@ DEFAULT_CONFIG = dict(
     decode_entities = False,
     log_file = None,
     follow_refresh = False,
-    log_dir = False
+    log_dir = False,
+    nohead = False,
+    nobody = False
 )
 
 
@@ -77,11 +79,15 @@ class Grab(object):
 
 
     def head_processor(self, data):
+        if self.config['nohead']:
+            return 0
         self.response_head.append(data)
         return len(data)
 
 
     def body_processor(self, data):
+        if self.config['nobody']:
+            return 0
         self.response_body.append(data)
         return len(data)
 
@@ -210,7 +216,15 @@ class Grab(object):
         self.counter += 1
 
         self.process_config()
-        self.curl.perform()
+        try:
+            self.curl.perform()
+        except pycurl.error, err:
+            # CURLE_WRITE_ERROR
+            # An error occurred when writing received data to a local file, or
+            # an error was returned to libcurl from a write callback.
+            # This is expected error and we should ignore it
+            if 23 == err[0]:
+                pass
 
         # It is very importent to delete old POST data after
         # request or that data will be used again in next request :-/
