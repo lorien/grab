@@ -234,6 +234,8 @@ class Grab(object):
         self.config['method'] = None
 
         self.response_code = self.curl.getinfo(pycurl.HTTP_CODE)
+        #if 400 <= self.response_code:
+            #raise IOError('Response code is %s: ' % self.response_code)
         self.response_head = ''.join(self.response_head)
         self.response_body = ''.join(self.response_body)
         self.original_response_body = self.response_body
