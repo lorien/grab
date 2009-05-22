@@ -53,7 +53,9 @@ def make_unicode(html, guess_encodings):
         except UnicodeDecodeError:
             pass
     else:
-        return u'OMG!'
+        # Dirty hack
+        logging.error('Converting document to UTF-8 in ingore mode!')
+        return html.decode('utf-8', 'ignore')
 
 
 def find_refresh_url(html):

@@ -283,13 +283,18 @@ class Grab(object):
         self.response_body = ''.join(self.response_body)
         self.original_response_body = self.response_body
 
-        if self.config['unicode_body']:
-            self.response_body = make_unicode(
-                self.response_body, self.config['guess_encodings'])
+        self.parse_cookies()
+        self.parse_headers()
 
-            # Try to decode entities only if unicode_body option is set
-            if self.config['decode_entities']:
-                self.response_body = decode_entities(self.response_body)
+        if self.config['unicode_body']:
+            # Do converting only for text/* Content-Type
+            if self.headers.get('Content-Type', '').startswith('text/'):
+                self.response_body = make_unicode(
+                    self.response_body, self.config['guess_encodings'])
+
+                # Try to decode entities only if unicode_body option is set
+                if self.config['decode_entities']:
+                    self.response_body = decode_entities(self.response_body)
         else:
             if self.config['decode_entities']:
                 raise Exception('decode_entities option requires unicode_body option to be enabled')
@@ -308,9 +313,6 @@ class Grab(object):
             fname = os.path.join(self.config['log_dir'], '%02d.orig' % self.counter)
             file(fname, 'w').write(body)
             
-
-        self.parse_cookies()
-        self.parse_headers()
 
         if self.config['reuse_referer']:
             self.config['referer'] = self.response_url()
