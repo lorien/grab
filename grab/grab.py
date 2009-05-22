@@ -360,4 +360,26 @@ class Grab(object):
 
     def input_value(self, name):
         elem = self.soup.find('input', attrs={'name': name})
-        return elem['value'] if elem else None
+        return elem and elem['value'] or None
+
+
+    def repeat(self, anchor, action=None, number=10, args=None):
+        """
+        Make requests until "anchor" string will be found in response
+        or number of requests exeeds the "number".
+        """
+
+        for x in xrange(number):
+            if args:
+                self.setup(**args)
+            if action:
+                action()
+            else:
+                self.request()
+            if anchor in self.response_body:
+                return
+        else:
+            message = 'Substring "%s" not found in response.' % anchor
+            if isinstance(message, unicode):
+                message = message.encode('utf-8')
+            raise IOError(message)
