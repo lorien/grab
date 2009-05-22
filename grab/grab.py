@@ -304,6 +304,9 @@ class Grab(object):
             fname = os.path.join(self.config['log_dir'], '%02d.html' % self.counter)
             body = self.original_response_body
             file(fname, 'w').write(self.response_head + body)
+
+            fname = os.path.join(self.config['log_dir'], '%02d.orig' % self.counter)
+            file(fname, 'w').write(body)
             
 
         self.parse_cookies()
