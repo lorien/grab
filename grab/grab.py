@@ -30,6 +30,10 @@ DEFAULT_CONFIG = dict(
     connect_timeout = 5,
     proxy = None,
     proxy_type = None,
+    proxy_userpwd = None,
+    proxy_file = None,
+    proxy_random = True,
+    proxy_list = False,
     post = None,
     payload = None,
     method = None,
@@ -111,17 +115,6 @@ class Grab(object):
         self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)
         self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)
 
-        if self.config['proxy']:
-            # str is required to force unicode values
-            self.curl.setopt(pycurl.PROXY, str(self.config['proxy'])) 
-
-            # Pass a long with this option to set type of the proxy. Available options for this are CURLPROXY_HTTP, CURLPROXY_HTTP_1_0 (added in 7.19.4), CURLPROXY_SOCKS4 (added in 7.15.2), CURLPROXY_SOCKS5, CURLPROXY_SOCKS4A (added in 7.18.0) and CURLPROXY_SOCKS5_HOSTNAME (added in 7.18.0). The HTTP type is default. (Added in 7.10) 
-            if self.config['proxy_type']:
-                ptype = getattr(pycurl, 'PROXYTYPE_%s' % self.config['proxy_type'].upper())
-                self.curl.setopt(pycurl.PROXYTYPE, ptype)
-            logging.debug('Using proxy %s of type %s' % (self.config['proxy'],
-                self.config['proxy_type']))
-
         method = (self.config['method'] or '').upper()
 
         if not method:
@@ -179,6 +172,56 @@ class Grab(object):
         if self.config['referer']:
             self.curl.setopt(pycurl.REFERER, str(self.config['referer']))
 
+
+        """
+        Proxy configuration
+        You have three way to define proxy:
+         1) Setup "proxy"
+         2) Setup "proxy_file", which will fill the "proxy_list"
+         3) Setup "proxy_list"
+        For all three ways you can setup "proxy_type" and "proxy_userpwd"
+        Also for 2nd and 3rd way you can setup "proxy_random" which is True by default
+        """
+
+        # Note that 'proxy_file' overwrite 'proxy' configuration
+        if self.config['proxy_file']:
+            self.load_proxy_file(self.config['proxy_file'])
+
+        # Note that 'proxy_random' overwrite 'proxy' configuration
+        if self.config['proxy_random'] and self.config['proxy_list']:
+            self.config['proxy'] = random.choice(self.config['proxy_list'])
+
+        if self.config['proxy']:
+            # str is required to force unicode values
+            self.curl.setopt(pycurl.PROXY, str(self.config['proxy'])) 
+
+            # Pass a long with this option to set type of the proxy. Available options for this are CURLPROXY_HTTP, CURLPROXY_HTTP_1_0 (added in 7.19.4), CURLPROXY_SOCKS4 (added in 7.15.2), CURLPROXY_SOCKS5, CURLPROXY_SOCKS4A (added in 7.18.0) and CURLPROXY_SOCKS5_HOSTNAME (added in 7.18.0). The HTTP type is default. (Added in 7.10) 
+            if self.config['proxy_userpwd']:
+                self.curl.setopt(pycurl.PROXYUSERPWD, self.config['proxy_userpwd'])
+
+
+        if self.config['proxy_type']:
+            ptype = getattr(pycurl, 'PROXYTYPE_%s' % self.config['proxy_type'].upper())
+            self.curl.setopt(pycurl.PROXYTYPE, ptype)
+
+        if self.config['proxy']:
+            if self.config['proxy_userpwd']:
+                auth = ' with authorization'
+            else:
+                auth = ''
+            logging.debug('Using proxy %s of type %s%s' % (
+                self.config['proxy'], self.config['proxy_type'], auth))
+
+
+    def load_proxy_file(self, path):
+        if path != self.config['proxy_file'] or not self.config['proxy_list']:
+            items = []
+            for line in file(path):
+                line = line.strip()
+                if ':' in line:
+                    items.append(line)
+            self.config['proxy_list'] = items
+            self.config['proxy'] = random.choice(self.config['proxy_list'])
 
 
     def parse_headers(self):
