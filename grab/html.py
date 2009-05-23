@@ -41,11 +41,13 @@ def make_unicode(html, guess_encodings):
     RE_CONTENT_TYPE_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*.?Content-Type[^>]+', re.I)
     RE_CHARSET = re.compile(r'charset\s*=\s*([-_a-z0-9]+)', re.I)
   
+    charset = None
     match = RE_CONTENT_TYPE_TAG.search(html)
     if match:
         match = RE_CHARSET.search(match.group(0))
         if match:
-            guess_encodings = [match.group(1)] + list(guess_encodings)
+            charset = match.group(1)
+            guess_encodings = [charset] + list(guess_encodings)
 
     for encoding in guess_encodings:
         try:
@@ -54,8 +56,9 @@ def make_unicode(html, guess_encodings):
             pass
     else:
         # Dirty hack
-        logging.error('Converting document to UTF-8 in ingore mode!')
-        return html.decode('utf-8', 'ignore')
+        charset = charset or 'utf-8'
+        logging.error('Converting document from %s charset in ingore mode!' % charset)
+        return html.decode(charset, 'ignore')
 
 
 def find_refresh_url(html):
