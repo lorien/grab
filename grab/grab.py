@@ -5,6 +5,7 @@ import os
 import urllib
 import re
 import random
+from copy import deepcopy
 
 from html import make_unicode, find_refresh_url, decode_entities
 import user_agent
@@ -70,10 +71,17 @@ def request(url, **kwargs):
 
 
 class Grab(object):
+    counter = 0
+
     def __init__(self):
-        self.config = DEFAULT_CONFIG.copy()
+        self.config = deepcopy(DEFAULT_CONFIG)
         self.curl = pycurl.Curl()
-        self.counter = 0
+
+    def clone(self):
+        g = Grab()
+        g.config = deepcopy(self.config)
+        g.setup(cookies=self.cookies)
+        return g
 
 
     def setup(self, **kwargs):
