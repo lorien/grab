@@ -378,8 +378,14 @@ class Grab(object):
                 action()
             else:
                 self.request()
-            if anchor in self.response_body:
-                return
+            
+            if isinstance(anchor, (list, tuple)):
+                searches = anchor
+            else:
+                searches = [anchor]
+            for search in searches:
+                if search in self.response_body:
+                    return
         else:
             message = 'Substring "%s" not found in response.' % anchor
             if isinstance(message, unicode):
