@@ -28,7 +28,7 @@ except ImportError:
 
 DEFAULT_CONFIG = dict(
     timeout = 15,
-    connect_timeout = 5,
+    connect_timeout = 10,
     proxy = None,
     proxy_type = None,
     proxy_userpwd = None,
@@ -81,6 +81,13 @@ class Grab(object):
         g = Grab()
         g.config = deepcopy(self.config)
         g.setup(cookies=self.cookies)
+
+        keys = ['response_status', 'response_code', 'response_head',
+                'original_response_body',
+                'response_body', 'headers', 'cookies', 'counter', '_soup']
+        for key in keys:
+            setattr(g, key, getattr(self, key))
+
         return g
 
 
