@@ -377,7 +377,10 @@ class Grab(object):
 
     def input_value(self, name):
         elem = self.soup.find('input', attrs={'name': name})
-        return elem and elem['value'] or None
+        if elem:
+            return elem['value']
+        else:
+            return None
 
 
     def repeat(self, anchor, action=None, number=10, args=None):
