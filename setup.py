@@ -27,7 +27,7 @@ for dirpath, dirnames, filenames in os.walk(PACKAGE):
 
 setup(
     version = '0.1.0',
-    description = 'Pycurl wrapper'
+    description = 'Pycurl wrapper',
     author = 'Grigoriy Petukhov',
     author_email = 'lorien@lorien.name',
     url = 'http://bitbucket.org/lorien/grab/',
