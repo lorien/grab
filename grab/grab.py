@@ -365,12 +365,8 @@ class Grab(object):
     def soup(self):
         if not self._soup:
             from BeautifulSoup import BeautifulSoup
-            #import html5lib
-            #from html5lib import treebuilders
             if self.config['decode_entities']:
                 raise Exception('You should not use BeautifulSoup with enabled decode_entities option')
-            #parser = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder("beautifulsoup"))
-            #self._soup = parser.parse(self.original_response_body)
             self._soup = BeautifulSoup(self.original_response_body)
         return self._soup
 
