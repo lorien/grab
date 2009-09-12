@@ -25,6 +25,8 @@ try:
 except ImportError:
     pass
 
+SCRIPT_TAG = re.compile(r'(<script[^>]*>).+?(</script>)', re.I|re.S)
+
 
 DEFAULT_CONFIG = dict(
     timeout = 15,
@@ -56,7 +58,7 @@ DEFAULT_CONFIG = dict(
     follow_refresh = False,
     log_dir = False,
     nohead = False,
-    nobody = False
+    nobody = False,
 )
 
 
@@ -365,9 +367,13 @@ class Grab(object):
     def soup(self):
         if not self._soup:
             from BeautifulSoup import BeautifulSoup
-            if self.config['decode_entities']:
-                raise Exception('You should not use BeautifulSoup with enabled decode_entities option')
-            self._soup = BeautifulSoup(self.original_response_body)
+            # Seems that is obsoleted
+            #if self.config['decode_entities']:
+                #raise Exception('You should not use BeautifulSoup with enabled decode_entities option')
+            # Do some magick to make BeautifulSoup happy
+            data = SCRIPT_TAG.sub(r'\1\2', self.original_response_body)
+
+            self._soup = BeautifulSoup(data)
         return self._soup
 
 
