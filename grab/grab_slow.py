@@ -5,12 +5,12 @@ import os
 import urllib
 import re
 import random
-from copy import deepcopy, copy
+from copy import deepcopy
 
 from html import make_unicode, find_refresh_url, decode_entities
 import user_agent
 
-#__all__ = ['Grab', 'request']
+__all__ = ['Grab', 'request']
 
 # We should ignore SIGPIPE when using pycurl.NOSIGNAL - see
 # the libcurl tutorial for more info.
@@ -31,21 +31,7 @@ def REX_INPUT(name):
     return re.compile(r'<input[^>]+name\s*=\s*["\']?%s["\' ][^>]*>' % re.escape(name), re.S)
 REX_VALUE = re.compile(r'value\s*=\s*["\']?([^"\'> ]+)', re.S)
 
-def clone_config(cfg):
-    """
-    Works faster than deepcopy.
-    """
-
-    res = {}
-    for key, value in cfg.iteritems():
-        if isinstance(value, (list, dict)):
-            res[key] = copy(value)
-        else:
-            res[key] = copy(value)
-    return res
-
-
-def default_config(): return dict(
+DEFAULT_CONFIG = dict(
     timeout = 15,
     connect_timeout = 10,
     proxy = None,
@@ -72,38 +58,49 @@ def default_config(): return dict(
     guess_encodings = ['windows-1251', 'koi8-r', 'utf-8'],
     decode_entities = False,
     log_file = None,
-    log_dir = False,
     follow_refresh = False,
+    log_dir = False,
     nohead = False,
     nobody = False,
 )
+
+
+def request(url, **kwargs):
+    """
+    Shortcut for single request.
+    """
+
+    grab = Grab()
+    grab.setup(url=url, **kwargs)
+    return grab.request()
 
 
 class Grab(object):
     counter = 0
 
     def __init__(self):
-        self.config = default_config()
+        self.config = deepcopy(DEFAULT_CONFIG)
         self.curl = pycurl.Curl()
-        self.reset()
 
     def clone(self):
         g = Grab()
-        g.config = clone_config(self.config)
-        g.setup(cookies=self.cookies)
+        g.config = deepcopy(self.config)
+        g.setup(cookies=getattr(self, 'cookies', {}))
 
         keys = ['response_status', 'response_code', 'response_head',
-                'original_response_body', 'response_body',
-                'headers', 'cookies', 'counter', '_soup']
+                'original_response_body',
+                'response_body', 'headers', 'cookies', 'counter', '_soup']
         for key in keys:
-            setattr(g, key, getattr(self, key))
+            setattr(g, key, getattr(self, key, ''))
 
         return g
+
 
     def setup(self, **kwargs):
         if 'headers' in kwargs:
             self.config['headers'].update(kwargs['headers'])
         self.config.update(kwargs)
+
 
     def head_processor(self, data):
         if self.config['nohead']:
@@ -111,11 +108,13 @@ class Grab(object):
         self.response_head.append(data)
         return len(data)
 
+
     def body_processor(self, data):
         if self.config['nobody']:
             return 0
         self.response_body.append(data)
         return len(data)
+
 
     def process_config(self):
         """
@@ -163,8 +162,7 @@ class Grab(object):
         logging.debug('[%02d] %s %s' % (self.counter, method, self.config['url']))
 
         if self.config['headers']:
-            headers = [str('%s: %s' % x) for x\
-                       in self.config['headers'].iteritems()]
+            headers = [str('%s: %s' % x) for x in self.config['headers'].iteritems()]
             self.curl.setopt(pycurl.HTTPHEADER, headers)
 
 
@@ -245,38 +243,42 @@ class Grab(object):
             self.config['proxy_list'] = items
             self.config['proxy'] = random.choice(self.config['proxy_list'])
 
+
     def parse_headers(self):
-        #for line in re.split('\r?\n', self.response_head):
-        for line in self.response_head.split('\n'):
-            line = line.rstrip('\r')
+        for line in re.split('\r?\n', ''.join(self.response_head)):
             if line.startswith('HTTP'):
                 self.response_status = line
             try:
                 name, value = line.split(': ', 1)
+                #if 'Set-Cookie' == name:
+                    #match = re.search('^([^=]+)=([^;]+)*', value)
+                    #if match:
+                        #self.cookies[match.group(1)] = match.group(2)
+                #else:
                 self.headers[name] = value
             except ValueError:
                 pass
+
 
     def parse_cookies(self):
         for line in self.curl.getinfo(pycurl.INFO_COOKIELIST):
             # Example of line:
             # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
             chunks = line.split('\t')
-            self.cookies[chunks[-2]] = chunks[-1]
+            key, value = chunks[-2:]
+            self.cookies[key] = value
 
-    def reset(self):
+
+    def request(self):
         self.response_status = None
         self.response_code = None
         self.response_head = []
         self.response_body = []
-        self.original_response_body = ''
         self.headers = {}
         self.cookies = {}
         self.counter += 1
         self._soup = None
 
-    def request(self):
-        self.reset()
         self.process_config()
         try:
             self.curl.perform()
@@ -289,8 +291,7 @@ class Grab(object):
                 pass
 
         # It is very importent to delete old POST data after
-        # request. In other case such data will be used again
-        # in next request :-/
+        # request or that data will be used again in next request :-/
         self.config['post'] = None
         self.config['payload'] = None
         self.config['method'] = None
@@ -317,10 +318,12 @@ class Grab(object):
         else:
             if self.config['decode_entities']:
                 raise Exception('decode_entities option requires unicode_body option to be enabled')
+
         
         if self.config['log_file']:
             body = self.original_response_body
             file(self.config['log_file'], 'w').write(body)
+
 
         if self.config['log_dir']:
             fname = os.path.join(self.config['log_dir'], '%02d.html' % self.counter)
@@ -329,6 +332,7 @@ class Grab(object):
 
             fname = os.path.join(self.config['log_dir'], '%02d.orig' % self.counter)
             file(fname, 'w').write(body)
+            
 
         if self.config['reuse_referer']:
             self.config['referer'] = self.response_url()
@@ -336,15 +340,31 @@ class Grab(object):
         if self.config['follow_refresh']:
             url = find_refresh_url(self.original_response_body)
             if url:
+                logging.debug('Following refresh url: %s' % url)
                 # TODO check max redirect count
                 self.setup(url=url)
                 return self.request()
 
+
+        response = {'body': self.response_body,
+                    'headers': self.headers,
+                    'time': self.response_time(),
+                    'code': self.response_code,
+                    'curl': self.curl,
+                    'status': self.response_status,
+                    'get_soup': lambda: self.soup,
+                    }
+
+        return response
+
+
     def response_time(self):
         return self.curl.getinfo(pycurl.TOTAL_TIME)
 
+
     def response_url(self):
         return self.curl.getinfo(pycurl.EFFECTIVE_URL)
+
 
     @property
     def soup(self):
@@ -359,6 +379,7 @@ class Grab(object):
             self._soup = BeautifulSoup(data)
         return self._soup
 
+
     def input_value(self, name):
         try:
             elem = REX_INPUT(name).search(self.original_response_body).group(0)
@@ -369,6 +390,7 @@ class Grab(object):
                 return REX_VALUE.search(elem).group(1)
             except AttributeError:
                 return None
+
 
     def repeat(self, anchor, action=None, number=10, args=None):
         """
@@ -396,21 +418,3 @@ class Grab(object):
             if isinstance(message, unicode):
                 message = message.encode('utf-8')
             raise IOError(message)
-
-
-def request(url, **kwargs):
-    """
-    Shortcut for single request.
-    """
-
-    grab = Grab()
-    grab.setup(url=url, **kwargs)
-    grab.request()
-    return {'body': self.response_body,
-            'headers': self.headers,
-            'time': self.response_time(),
-            'code': self.response_code,
-            'curl': self.curl,
-            'status': self.response_status,
-            'get_soup': lambda: self.soup,
-    }

@@ -38,7 +38,7 @@ def make_unicode(html, guess_encodings):
     Convert byte stream to unicode.
     """
 
-    RE_CONTENT_TYPE_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*.?Content-Type[^>]+', re.I)
+    RE_CONTENT_TYPE_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']Content-Type[^>]+', re.I|re.S)
     RE_CHARSET = re.compile(r'charset\s*=\s*([-_a-z0-9]+)', re.I)
   
     charset = None
@@ -47,7 +47,12 @@ def make_unicode(html, guess_encodings):
         match = RE_CHARSET.search(match.group(0))
         if match:
             charset = match.group(1)
-            guess_encodings = [charset] + list(guess_encodings)
+            guess_encodings = list(guess_encodings)
+            if charset in guess_encodings:
+                guess_encodings.remove(charset)
+                guess_encodings.insert(0, charset)
+            else:
+                guess_encodings.insert(0, charset)
 
     for encoding in guess_encodings:
         try:
