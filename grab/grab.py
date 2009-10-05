@@ -153,7 +153,7 @@ class Grab(object):
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
         elif method == 'PUT':
             self.curl.setopt(pycurl.PUT, 1)
-            self.curl.setopt(pycurl.READFUNCTION, StringIO.StringIO(self.config['payload']).read) 
+            self.curl.setopt(pycurl.READFUNCTION, StringIO(self.config['payload']).read) 
         elif method == 'DELETE':
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
         else:
@@ -406,11 +406,11 @@ def request(url, **kwargs):
     grab = Grab()
     grab.setup(url=url, **kwargs)
     grab.request()
-    return {'body': self.response_body,
-            'headers': self.headers,
-            'time': self.response_time(),
-            'code': self.response_code,
-            'curl': self.curl,
-            'status': self.response_status,
-            'get_soup': lambda: self.soup,
+    return {'body': grab.response_body,
+            'headers': grab.headers,
+            'time': grab.response_time(),
+            'code': grab.response_code,
+            'curl': grab.curl,
+            'status': grab.response_status,
+            'get_soup': lambda: grab.soup,
     }
