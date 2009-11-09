@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pycurl
 from StringIO import StringIO
 import logging
@@ -10,6 +11,7 @@ from copy import deepcopy, copy
 from html import make_unicode, find_refresh_url, decode_entities
 import user_agent
 
+log = logging.getLogger('grab')
 #__all__ = ['Grab', 'request']
 
 # We should ignore SIGPIPE when using pycurl.NOSIGNAL - see
@@ -26,6 +28,18 @@ except ImportError:
     pass
 
 SCRIPT_TAG = re.compile(r'(<script[^>]*>).+?(</script>)', re.I|re.S)
+
+
+def main():
+    # testing
+    logging.basicConfig(level=logging.DEBUG, format='%(levelname)-8s %(message)s')
+    g = Grab()
+    g.setup(log_dir='var')
+    g.setup(url='ya.ru')
+    #~ g.setup(url='http://webmaster.yandex.ru/check.xml')
+    #~ print g.config
+    g.request()
+
 
 def REX_INPUT(name):
     return re.compile(r'<input[^>]+name\s*=\s*["\']?%s["\' ][^>]*>' % re.escape(name), re.S)
@@ -80,7 +94,7 @@ def default_config(): return dict(
 
 
 class Grab(object):
-    counter = 0
+    counter = -1
 
     def __init__(self):
         self.config = default_config()
@@ -160,7 +174,7 @@ class Grab(object):
             # Assume the GET method
             self.curl.setopt(pycurl.HTTPGET, 1)
         
-        logging.debug('[%02d] %s %s' % (self.counter, method, self.config['url']))
+        log.debug('[%02d] %s %s' % (self.counter, method, self.config['url']))
 
         if self.config['headers']:
             headers = [str('%s: %s' % x) for x\
@@ -231,7 +245,7 @@ class Grab(object):
                 auth = ' with authorization'
             else:
                 auth = ''
-            logging.debug('Using proxy %s of type %s%s' % (
+            log.debug('Using proxy %s of type %s%s' % (
                 self.config['proxy'], self.config['proxy_type'], auth))
 
 
@@ -323,11 +337,16 @@ class Grab(object):
             file(self.config['log_file'], 'w').write(body)
 
         if self.config['log_dir']:
-            fname = os.path.join(self.config['log_dir'], '%02d.html' % self.counter)
+            fname = os.path.join(self.config['log_dir'], '%02d.heads' % self.counter)
             body = self.original_response_body
             file(fname, 'w').write(self.response_head + body)
 
-            fname = os.path.join(self.config['log_dir'], '%02d.orig' % self.counter)
+            fext = 'html'
+            dirs = self.response_url().split('//')[1].strip().split('/')
+            if len(dirs) > 1:
+                fext = dirs[-1].split('.')[-1]
+                
+            fname = os.path.join(self.config['log_dir'], '%02d.%s' % (self.counter, fext))
             file(fname, 'w').write(body)
 
         if self.config['reuse_referer']:
@@ -414,3 +433,7 @@ def request(url, **kwargs):
             'status': grab.response_status,
             'get_soup': lambda: grab.soup,
     }
+
+
+if __name__ == "__main__":
+    main()
