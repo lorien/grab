@@ -4,7 +4,7 @@ import logging
 import os
 import urllib
 import re
-import random
+from random import randint, choice
 from copy import deepcopy, copy
 
 from html import make_unicode, find_refresh_url, decode_entities
@@ -58,12 +58,12 @@ def default_config(): return dict(
     payload = None,
     method = None,
     headers = {
-        'Accept': 'text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
-        'Accept-Language': 'en-us;q=0.7,en,ru;q=0.3',
-        'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.7',
+        'Accept': 'text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d' % randint(2, 5),
+        'Accept-Language': 'en-us;q=0.%d,en,ru;q=0.%d' % (randint(5, 9), randint(1, 4)),
+        'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.%d' % randint(5, 7),
         'Keep-Alive': '300',
     },
-    user_agent = random.choice(user_agent.variants),
+    user_agent = choice(user_agent.variants),
     reuse_cookies = True,
     reuse_referer = True,
     cookies = {},
@@ -76,6 +76,8 @@ def default_config(): return dict(
     follow_refresh = False,
     nohead = False,
     nobody = False,
+    remove_scripts = True,
+    soup_lib = 'beautifulsoup',
 )
 
 
@@ -211,7 +213,7 @@ class Grab(object):
 
         # Note that 'proxy_random' overwrite 'proxy' configuration
         if self.config['proxy_random'] and self.config['proxy_list']:
-            self.config['proxy'] = random.choice(self.config['proxy_list'])
+            self.config['proxy'] = choice(self.config['proxy_list'])
 
         if self.config['proxy']:
             # str is required to force unicode values
@@ -243,7 +245,7 @@ class Grab(object):
                 if ':' in line:
                     items.append(line)
             self.config['proxy_list'] = items
-            self.config['proxy'] = random.choice(self.config['proxy_list'])
+            self.config['proxy'] = choice(self.config['proxy_list'])
 
     def parse_headers(self):
         #for line in re.split('\r?\n', self.response_head):
@@ -349,14 +351,19 @@ class Grab(object):
     @property
     def soup(self):
         if not self._soup:
-            from BeautifulSoup import BeautifulSoup
-            # Seems that is obsoleted
-            #if self.config['decode_entities']:
-                #raise Exception('You should not use BeautifulSoup with enabled decode_entities option')
-            # Do some magick to make BeautifulSoup happy
-            data = SCRIPT_TAG.sub(r'\1\2', self.original_response_body)
+            if self.config['soup_lib'] == 'html5lib':
+                import html5lib
+                self._soup = html5lib.parse(self.original_response_body,
+                                            treebuilder='beautifulsoup')
+            else:
+                from BeautifulSoup import BeautifulSoup
+                # Do some magick to make BeautifulSoup happy
+                if self.config['remove_scripts']:
+                    data = SCRIPT_TAG.sub(r'\1\2', self.original_response_body)
+                else:
+                    data = self.original_response_body
 
-            self._soup = BeautifulSoup(data)
+                self._soup = BeautifulSoup(data)
         return self._soup
 
     def input_value(self, name):
