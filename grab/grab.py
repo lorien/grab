@@ -385,6 +385,19 @@ class Grab(object):
                 self._soup = BeautifulSoup(data)
         return self._soup
 
+    @property
+    def etree(self):
+        """
+        Return the root of tree builded with ElementTree API of lxml library.
+        """
+
+        if not hasattr(self, '_etree'):
+            import html5lib
+            self._etree =html5lib.parse(self.original_response_body,
+                                        treebuilder='lxml',
+                                        namespaceHTMLElements=False).getroot()
+        return self._etree
+
     def input_value(self, name):
         try:
             elem = REX_INPUT(name).search(self.original_response_body).group(0)
@@ -422,6 +435,9 @@ class Grab(object):
             if isinstance(message, unicode):
                 message = message.encode('utf-8')
             raise IOError(message)
+
+    def get_form(number=0):
+        return self.soup.findAll('form')[number]
 
 
 def request(url, **kwargs):
