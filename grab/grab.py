@@ -27,6 +27,9 @@ try:
 except ImportError:
     pass
 
+class GrabError(pycurl.error):
+    pass
+
 SCRIPT_TAG = re.compile(r'(<script[^>]*>).+?(</script>)', re.I|re.S)
 
 
@@ -138,7 +141,10 @@ class Grab(object):
         Setup curl instance with the config.
         """
 
-        self.curl.setopt(pycurl.URL, str(self.config['url']))
+        url = self.config['url']
+        if isinstance(url, unicode):
+            url = url.encode('utf-8')
+        self.curl.setopt(pycurl.URL, url)
         self.curl.setopt(pycurl.FOLLOWLOCATION, 1)
         self.curl.setopt(pycurl.MAXREDIRS, 5)
         self.curl.setopt(pycurl.CONNECTTIMEOUT, self.config['connect_timeout'])
@@ -296,13 +302,15 @@ class Grab(object):
         self.process_config()
         try:
             self.curl.perform()
-        except pycurl.error, err:
+        except pycurl.error, ex:
             # CURLE_WRITE_ERROR
             # An error occurred when writing received data to a local file, or
             # an error was returned to libcurl from a write callback.
             # This is expected error and we should ignore it
-            if 23 == err[0]:
+            if 23 == ex[0]:
                 pass
+            else:
+                raise GrabError(ex[0], ex[1])
 
         # It is very importent to delete old POST data after
         # request. In other case such data will be used again
