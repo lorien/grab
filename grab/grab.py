@@ -8,7 +8,7 @@ import re
 from random import randint, choice
 from copy import deepcopy, copy
 
-from html import make_unicode, find_refresh_url, decode_entities
+from html import make_unicode, find_refresh_url
 import user_agent
 
 log = logging.getLogger('grab')
@@ -85,9 +85,8 @@ def default_config(): return dict(
     reuse_referer = True,
     cookies = {},
     referer = None,
-    unicode_body = True,
+    unicode_body = False,
     guess_encodings = ['windows-1251', 'koi8-r', 'utf-8'],
-    decode_entities = False,
     log_file = None,
     log_dir = False,
     follow_refresh = False,
@@ -217,24 +216,6 @@ class Grab(object):
             self.curl.setopt(pycurl.REFERER, str(self.config['referer']))
 
 
-        """
-        Proxy configuration
-        You have three way to define proxy:
-         1) Setup "proxy"
-         2) Setup "proxy_file", which will fill the "proxy_list"
-         3) Setup "proxy_list"
-        For all three ways you can setup "proxy_type" and "proxy_userpwd"
-        Also for 2nd and 3rd way you can setup "proxy_random" which is True by default
-        """
-
-        # Note that 'proxy_file' overwrite 'proxy' configuration
-        if self.config['proxy_file']:
-            self.load_proxy_file(self.config['proxy_file'])
-
-        # Note that 'proxy_random' overwrite 'proxy' configuration
-        if self.config['proxy_random'] and self.config['proxy_list']:
-            self.config['proxy'] = choice(self.config['proxy_list'])
-
         if self.config['proxy']:
             # str is required to force unicode values
             self.curl.setopt(pycurl.PROXY, str(self.config['proxy'])) 
@@ -256,16 +237,6 @@ class Grab(object):
             log.debug('Using proxy %s of type %s%s' % (
                 self.config['proxy'], self.config['proxy_type'], auth))
 
-
-    def load_proxy_file(self, path):
-        if path != self.config['proxy_file'] or not self.config['proxy_list']:
-            items = []
-            for line in file(path):
-                line = line.strip()
-                if ':' in line:
-                    items.append(line)
-            self.config['proxy_list'] = items
-            self.config['proxy'] = choice(self.config['proxy_list'])
 
     def parse_headers(self):
         #for line in re.split('\r?\n', self.response_head):
@@ -329,27 +300,14 @@ class Grab(object):
         self.parse_cookies()
         self.parse_headers()
 
-        if self.config['unicode_body']:
-            # Do converting only for text/* Content-Type
-            if self.headers.get('Content-Type', '').startswith('text/'):
-                self.response_body = make_unicode(
-                    self.response_body, self.config['guess_encodings'])
-
-                # Try to decode entities only if unicode_body option is set
-                if self.config['decode_entities']:
-                    self.response_body = decode_entities(self.response_body)
-        else:
-            if self.config['decode_entities']:
-                raise Exception('decode_entities option requires unicode_body option to be enabled')
-        
         if self.config['log_file']:
             body = self.original_response_body
-            file(self.config['log_file'], 'w').write(body)
+            open(self.config['log_file'], 'w').write(body)
 
         if self.config['log_dir']:
             fname = os.path.join(self.config['log_dir'], '%02d.heads' % self.counter)
             body = self.original_response_body
-            file(fname, 'w').write(self.response_head + body)
+            open(fname, 'w').write(self.response_head + body)
 
             fext = 'html'
             dirs = self.response_url().split('//')[1].strip().split('/')
@@ -357,7 +315,7 @@ class Grab(object):
                 fext = dirs[-1].split('.')[-1]
                 
             fname = os.path.join(self.config['log_dir'], '%02d.%s' % (self.counter, fext))
-            file(fname, 'w').write(body)
+            open(fname, 'w').write(body)
 
         if self.config['reuse_referer']:
             self.config['referer'] = self.response_url()
@@ -393,18 +351,20 @@ class Grab(object):
                 self._soup = BeautifulSoup(data)
         return self._soup
 
+
     @property
     def etree(self):
         """
         Return the root of tree builded with ElementTree API of lxml library.
         """
 
-        if not hasattr(self, '_etree'):
-            import html5lib
-            self._etree =html5lib.parse(self.original_response_body,
-                                        treebuilder='lxml',
-                                        namespaceHTMLElements=False).getroot()
-        return self._etree
+        import html5lib
+        from lxml import etree
+        try:
+            return html5lib.parse(self.original_response_body, treebuilder='lxml', namespaceHTMLElements=False).getroot()
+        except Exception:
+            return etree.parse(StringIO(self.original_response_body), etree.HTMLParser()).getroot()
+
 
     def input_value(self, name):
         try:
@@ -446,6 +406,10 @@ class Grab(object):
 
     def get_form(number=0):
         return self.soup.findAll('form')[number]
+
+    @property
+    def unicode_response_body(self):
+        return make_unicode(self.response_body, self.config['guess_encodings'])
 
 
 def request(url, **kwargs):
