@@ -93,7 +93,6 @@ def default_config(): return dict(
     nohead = False,
     nobody = False,
     remove_scripts = True,
-    soup_lib = 'beautifulsoup',
 )
 
 
@@ -111,7 +110,7 @@ class Grab(object):
         g.setup(cookies=self.cookies)
 
         keys = ['response_status', 'response_code', 'response_head',
-                'original_response_body', 'response_body',
+                'response_body',
                 'headers', 'cookies', 'counter', '_soup']
         for key in keys:
             setattr(g, key, getattr(self, key))
@@ -262,7 +261,6 @@ class Grab(object):
         self.response_code = None
         self.response_head = []
         self.response_body = []
-        self.original_response_body = ''
         self.headers = {}
         self.cookies = {}
         self.counter += 1
@@ -295,19 +293,16 @@ class Grab(object):
             #raise IOError('Response code is %s: ' % self.response_code)
         self.response_head = ''.join(self.response_head)
         self.response_body = ''.join(self.response_body)
-        self.original_response_body = self.response_body
 
         self.parse_cookies()
         self.parse_headers()
 
         if self.config['log_file']:
-            body = self.original_response_body
-            open(self.config['log_file'], 'w').write(body)
+            open(self.config['log_file'], 'w').write(self.response_body)
 
         if self.config['log_dir']:
             fname = os.path.join(self.config['log_dir'], '%02d.heads' % self.counter)
-            body = self.original_response_body
-            open(fname, 'w').write(self.response_head + body)
+            open(fname, 'w').write(self.response_head + self.response_body)
 
             fext = 'html'
             dirs = self.response_url().split('//')[1].strip().split('/')
@@ -315,13 +310,13 @@ class Grab(object):
                 fext = dirs[-1].split('.')[-1]
                 
             fname = os.path.join(self.config['log_dir'], '%02d.%s' % (self.counter, fext))
-            open(fname, 'w').write(body)
+            open(fname, 'w').write(self.response_body)
 
         if self.config['reuse_referer']:
             self.config['referer'] = self.response_url()
 
         if self.config['follow_refresh']:
-            url = find_refresh_url(self.original_response_body)
+            url = find_refresh_url(self.response_body)
             if url:
                 # TODO check max redirect count
                 self.setup(url=url)
@@ -336,19 +331,13 @@ class Grab(object):
     @property
     def soup(self):
         if not self._soup:
-            if self.config['soup_lib'] == 'html5lib':
-                import html5lib
-                self._soup = html5lib.parse(self.original_response_body,
-                                            treebuilder='beautifulsoup')
+            from BeautifulSoup import BeautifulSoup
+            # Do some magick to make BeautifulSoup happy
+            if self.config['remove_scripts']:
+                data = SCRIPT_TAG.sub(r'\1\2', self.response_body)
             else:
-                from BeautifulSoup import BeautifulSoup
-                # Do some magick to make BeautifulSoup happy
-                if self.config['remove_scripts']:
-                    data = SCRIPT_TAG.sub(r'\1\2', self.original_response_body)
-                else:
-                    data = self.original_response_body
-
-                self._soup = BeautifulSoup(data)
+                data = self.response_body
+            self._soup = BeautifulSoup(data)
         return self._soup
 
 
@@ -356,19 +345,27 @@ class Grab(object):
     def etree(self):
         """
         Return the root of tree builded with ElementTree API of lxml library.
+        Note that this API is extended version of standart ElementTree API of
+        xml.etree module. For example lxml library provide xpath method for the
+        ``Element`` instances.
         """
 
         import html5lib
         from lxml import etree
+        # First use the html5lib. If it fails try to use lxml parser.
         try:
-            return html5lib.parse(self.original_response_body, treebuilder='lxml', namespaceHTMLElements=False).getroot()
+            return html5lib.parse(self.response_body, treebuilder='lxml', namespaceHTMLElements=False).getroot()
         except Exception:
-            return etree.parse(StringIO(self.original_response_body), etree.HTMLParser()).getroot()
+            return etree.parse(StringIO(self.response_body), etree.HTMLParser()).getroot()
 
 
     def input_value(self, name):
+        """
+        Return the value of INPUT element.
+        """
+
         try:
-            elem = REX_INPUT(name).search(self.original_response_body).group(0)
+            elem = REX_INPUT(name).search(self.response_body).group(0)
         except AttributeError:
             return None
         else:
