@@ -26,7 +26,7 @@ for dirpath, dirnames, filenames in os.walk(PACKAGE):
             data_files.append(os.path.join(prefix, f))
 
 setup(
-    version = '0.1.0',
+    version = '0.1.1',
     description = 'Pycurl wrapper',
     author = 'Grigoriy Petukhov',
     author_email = 'lorien@lorien.name',
