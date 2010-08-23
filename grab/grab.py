@@ -7,6 +7,8 @@ import urllib
 import re
 from random import randint, choice
 from copy import deepcopy, copy
+import threading
+from urlparse import urljoin
 
 from html import make_unicode, find_refresh_url
 import user_agent
@@ -31,6 +33,24 @@ class GrabError(pycurl.error):
     pass
 
 SCRIPT_TAG = re.compile(r'(<script[^>]*>).+?(</script>)', re.I|re.S)
+
+
+def request(url, **kwargs):
+    """
+    Shortcut for single request.
+    """
+
+    grab = Grab()
+    grab.setup(url=url, **kwargs)
+    grab.request()
+    return {'body': grab.response_body,
+            'headers': grab.headers,
+            'time': grab.response_time(),
+            'code': grab.response_code,
+            'curl': grab.curl,
+            'status': grab.response_status,
+            'get_soup': lambda: grab.soup,
+    }
 
 
 def main():
@@ -80,6 +100,7 @@ def default_config(): return dict(
         'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.%d' % randint(5, 7),
         'Keep-Alive': '300',
     },
+    charset = 'utf-8',
     user_agent = choice(user_agent.variants),
     reuse_cookies = True,
     reuse_referer = True,
@@ -169,7 +190,7 @@ class Grab(object):
             if self.config['payload']:
                 self.curl.setopt(pycurl.POSTFIELDS, self.config['payload'])
             elif self.config['post']:
-                post_data = urllib.urlencode(self.config['post'])
+                post_data = self.urlencode(self.config['post'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
         elif method == 'PUT':
             self.curl.setopt(pycurl.PUT, 1)
@@ -265,8 +286,12 @@ class Grab(object):
         self.cookies = {}
         self.counter += 1
         self._soup = None
+        self._tree = None
+        self._form = None
 
-    def request(self):
+    def request(self, **kwargs):
+        if kwargs:
+            self.setup(**kwargs)
         self.reset()
         self.process_config()
         try:
@@ -301,15 +326,20 @@ class Grab(object):
             open(self.config['log_file'], 'w').write(self.response_body)
 
         if self.config['log_dir']:
-            fname = os.path.join(self.config['log_dir'], '%02d.heads' % self.counter)
+            tname = threading.currentThread().name.lower()
+            if tname == 'mainthread':
+                tname = ''
+            else:
+                tname = '-%s' % tname
+            fname = os.path.join(self.config['log_dir'], '%02d%s.heads' % (self.counter, tname))
             open(fname, 'w').write(self.response_head + self.response_body)
 
             fext = 'html'
-            dirs = self.response_url().split('//')[1].strip().split('/')
-            if len(dirs) > 1:
-                fext = dirs[-1].split('.')[-1]
+            #dirs = self.response_url().split('//')[1].strip().split('/')
+            #if len(dirs) > 1:
+                #fext = dirs[-1].split('.')[-1]
                 
-            fname = os.path.join(self.config['log_dir'], '%02d.%s' % (self.counter, fext))
+            fname = os.path.join(self.config['log_dir'], '%02d%s.%s' % (self.counter, tname, fext))
             open(fname, 'w').write(self.response_body)
 
         if self.config['reuse_referer']:
@@ -342,7 +372,7 @@ class Grab(object):
 
 
     @property
-    def etree(self):
+    def legacy_etree(self):
         """
         Return the root of tree builded with ElementTree API of lxml library.
         Note that this API is extended version of standart ElementTree API of
@@ -351,12 +381,20 @@ class Grab(object):
         """
 
         import html5lib
-        from lxml import etree
         # First use the html5lib. If it fails try to use lxml parser.
         try:
             return html5lib.parse(self.response_body, treebuilder='lxml', namespaceHTMLElements=False).getroot()
         except Exception:
-            return etree.parse(StringIO(self.response_body), etree.HTMLParser()).getroot()
+            return self.tree
+            #return etree.parse(StringIO(self.response_body), etree.HTMLParser()).getroot()
+
+
+    @property
+    def tree(self):
+        if self._tree is None:
+            from lxml.html import fromstring
+            self._tree = fromstring(self.response_body)
+        return self._tree
 
 
     def input_value(self, name):
@@ -408,23 +446,81 @@ class Grab(object):
     def unicode_response_body(self):
         return make_unicode(self.response_body, self.config['guess_encodings'])
 
+    def follow_link(self, anchor):
+        self.tree.make_links_absolute(self.config['url'])
+        #import pdb; pdb.set_trace()
+        for item in self.tree.iterlinks():
+            if item[0].tag == 'a':
+                found = False
+                text = item[0].text or u''
+                # if object is regular expression
+                if hasattr(anchor, 'finditer'):
+                    if anchor.search(text):
+                        found = True
+                else:
+                    if text.find(anchor) > -1:
+                        found = True
+                if found:
+                    return self.request(url=item[2])
 
-def request(url, **kwargs):
-    """
-    Shortcut for single request.
-    """
+    def choose_form(self, index):
+        self._form = self.tree.forms[index]
 
-    grab = Grab()
-    grab.setup(url=url, **kwargs)
-    grab.request()
-    return {'body': grab.response_body,
-            'headers': grab.headers,
-            'time': grab.response_time(),
-            'code': grab.response_code,
-            'curl': grab.curl,
-            'status': grab.response_status,
-            'get_soup': lambda: grab.soup,
-    }
+    @property
+    def form(self):
+        if self._form is None:
+            # Automatically select the form with most big number of fields
+            forms = [(idx, len(x.fields)) for idx, x in enumerate(self.tree.forms)]
+            idx = sorted(forms, key=lambda x: x[1], reverse=True)[0][0]
+            self.choose_form(idx)
+        return self._form
+
+    def set_input(self, name, value):
+        elem = self.form.inputs[name]
+
+        processed = False
+        if elem.tag == 'input' and elem.type == 'checkbox':
+            if isinstance(value, bool):
+                elem.checked = value
+                processed = True
+        
+        if not processed:
+            elem.value = value
+
+    def submit(self, button_name=None):
+        self.setup(url=urljoin(self.config['url'], self.form.action))
+        post = dict(self.form.fields)
+        if button_name is not None:
+            post[button_name] = u'Зарегистрировать'
+        self.setup(post=post)
+        return self.request()
+
+    def urlencode(self, items):
+        if isinstance(items, dict):
+            items = items.items()
+        def process(item):
+            key, value = item
+            if isinstance(value, unicode):
+                value = value.encode(self.config['charset'])
+            elif value is None:
+                value = ''
+            return key, value
+        items = urllib.urlencode(map(process, items))
+        logging.debug(items)
+        return items
+
+    def search(self, anchor):
+        if isinstance(anchor, unicode):
+            anchor = anchor.encode(self.config['charset'])
+        return anchor if self.response_body.find(anchor) > -1 else None
+
+    def search_rex(self, rex, flags=0):
+        if not hasattr(rex, 'finditer'):
+            rex = re.compile(rex, flags)
+        return rex.search(self.response_body) or None
+
+    def xpath(self, path):
+        return self.tree.xpath(path)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,6 @@
-\.pyc$
-\.swp$
-^old/
-^doc/
+syntax: glob
+*.pyc
+*.swp
+*.egg-info/
+dist/
+update_pypi.sh
