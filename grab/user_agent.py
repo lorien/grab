@@ -35,4 +35,4 @@ Opera/9.10 (Windows NT 5.1; U; en)
 Opera/9.23 (Windows NT 5.1; U; en)
 Opera/9.50 (Windows NT 5.1; U; en)
 Opera/9.50 (Windows NT 6.0; U; en)
-Opera/9.60 (Windows NT 5.1; U; en) Presto/2.1.1"""
+Opera/9.60 (Windows NT 5.1; U; en) Presto/2.1.1""".splitlines()

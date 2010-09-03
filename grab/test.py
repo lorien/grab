@@ -9,18 +9,22 @@ from grab import Grab
 class GrabTestCase(TestCase):
     def test_input_value(self):
         g = Grab()
-        g.original_response_body = '<input name="foo" value="bar" />';
+        g.response_body = '<input name="foo" value="bar" />';
         self.assertEqual('bar', g.input_value('foo'))
-        g.original_response_body = '<input value="bar" name="foo" />';
+        g.response_body = '<input value="bar" name="foo" />';
         self.assertEqual('bar', g.input_value('foo'))
-        g.original_response_body = "<input value='bar' name='foo' />";
+        g.response_body = "<input value='bar' name='foo' />";
         self.assertEqual('bar', g.input_value('foo'))
-        g.original_response_body = '<input value=bar name=foo />';
+        g.response_body = '<input value=bar name=foo />';
         self.assertEqual('bar', g.input_value('foo'))
-        g.original_response_body = '<input name="foo2" value="bar" />';
+        g.response_body = '<input name="foo2" value="bar" />';
         self.assertEqual(None, g.input_value('foo'))
-        g.original_response_body = ''
+        g.response_body = ''
         self.assertEqual(None, g.input_value('foo'))
+
+    def test_user_agent(self):
+        g = Grab()
+        self.assertTrue(len(g.config['user_agent']) > 1)
 
 
 if __name__ == '__main__':

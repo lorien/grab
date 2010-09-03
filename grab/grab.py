@@ -32,6 +32,9 @@ except ImportError:
 class GrabError(pycurl.error):
     pass
 
+class DataNotFound(Exception):
+    pass
+
 SCRIPT_TAG = re.compile(r'(<script[^>]*>).+?(</script>)', re.I|re.S)
 
 
@@ -289,6 +292,11 @@ class Grab(object):
         self._tree = None
         self._form = None
 
+    def go(self, url):
+        if self.config.get('url'):
+            url = urljoin(self.config['url'], url)
+        return self.request(url=url)
+
     def request(self, **kwargs):
         if kwargs:
             self.setup(**kwargs)
@@ -446,22 +454,36 @@ class Grab(object):
     def unicode_response_body(self):
         return make_unicode(self.response_body, self.config['guess_encodings'])
 
-    def follow_link(self, anchor):
+    def follow_link(self, anchor=None, href=None):
+        if anchor is None and href is None:
+            raise Exception('You have to provide anchor or href argument')
         self.tree.make_links_absolute(self.config['url'])
         #import pdb; pdb.set_trace()
         for item in self.tree.iterlinks():
             if item[0].tag == 'a':
                 found = False
                 text = item[0].text or u''
+                url = item[2]
                 # if object is regular expression
-                if hasattr(anchor, 'finditer'):
-                    if anchor.search(text):
-                        found = True
-                else:
-                    if text.find(anchor) > -1:
-                        found = True
+                if anchor:
+                    if hasattr(anchor, 'finditer'):
+                        if anchor.search(text):
+                            found = True
+                    else:
+                        if text.find(anchor) > -1:
+                            found = True
+                if href:
+                    if hasattr(href, 'finditer'):
+                        if href.search(url):
+                            found = True
+                    else:
+                        if url.startswith(href) > -1:
+                            found = True
                 if found:
+                    url = urljoin(self.config['url'], item[2])
                     return self.request(url=item[2])
+        raise DataNotFound('Cannot find link ANCHOR=%s, HREF=%s' %\
+                           (anchor, href))
 
     def choose_form(self, index):
         self._form = self.tree.forms[index]
@@ -479,13 +501,19 @@ class Grab(object):
         elem = self.form.inputs[name]
 
         processed = False
-        if elem.tag == 'input' and elem.type == 'checkbox':
+        if getattr(elem, 'type', None) == 'checkbox':
             if isinstance(value, bool):
                 elem.checked = value
                 processed = True
         
         if not processed:
             elem.value = value
+
+    def set_inputs(self, arg):
+        if not isinstance(arg, dict):
+            arg = dict(arg)
+        for key, value in arg.iteritems():
+            self.set_input(key, value)
 
     def submit(self, button_name=None):
         self.setup(url=urljoin(self.config['url'], self.form.action))
@@ -510,6 +538,8 @@ class Grab(object):
         return items
 
     def search(self, anchor):
+        if hasattr(anchor, 'finditer'):
+            return anchor.search(self.response_body) or None
         if isinstance(anchor, unicode):
             anchor = anchor.encode(self.config['charset'])
         return anchor if self.response_body.find(anchor) > -1 else None
@@ -519,8 +549,19 @@ class Grab(object):
             rex = re.compile(rex, flags)
         return rex.search(self.response_body) or None
 
+    def assert_string(self, *args, **kwargs):
+        if not self.search(*args, **kwargs):
+            raise DataNotFound(u'Could not found string: %s' % anchor)
+
+    def assert_rex(self, *args, **kwargs):
+        if not self.search_rex(*args, **kwargs):
+            raise DataNotFound(u'Could not found regexp')
+
     def xpath(self, path):
         return self.tree.xpath(path)
+
+    def reload(self):
+        g.go('')
 
 
 if __name__ == "__main__":
