@@ -335,7 +335,7 @@ class Grab(object):
             open(self.config['log_file'], 'w').write(self.response_body)
 
         if self.config['log_dir']:
-            tname = threading.currentThread().name.lower()
+            tname = threading.currentThread().getName().lower()
             if tname == 'mainthread':
                 tname = ''
             else:
