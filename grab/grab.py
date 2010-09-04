@@ -117,6 +117,7 @@ def default_config(): return dict(
     nohead = False,
     nobody = False,
     remove_scripts = True,
+    use_cache = False,
 )
 
 
@@ -518,8 +519,11 @@ class Grab(object):
     def submit(self, button_name=None):
         self.setup(url=urljoin(self.config['url'], self.form.action))
         post = dict(self.form.fields)
-        if button_name is not None:
-            post[button_name] = u'Зарегистрировать'
+        # TODO: check out how to handle forms
+        # with multiple submit buttons
+        #if not button_name in post:
+            #if button_name is not None:
+                #post[button_name] = 
         self.setup(post=post)
         return self.request()
 
