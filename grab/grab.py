@@ -517,14 +517,24 @@ class Grab(object):
             self.set_input(key, value)
 
     def submit(self, button_name=None):
-        self.setup(url=urljoin(self.config['url'], self.form.action))
+        action_url = urljoin(self.config['url'], self.form.action)
+        self.setup(url=action_url)
         post = dict(self.form.fields)
+        for elem in self.form.inputs:
+            if elem.tag == 'select':
+                if not post[elem.name]:
+                    post[elem.name] = elem.value_options[0]
+        #import pdb; pdb.set_trace()
         # TODO: check out how to handle forms
         # with multiple submit buttons
         #if not button_name in post:
             #if button_name is not None:
-                #post[button_name] = 
-        self.setup(post=post)
+                #post[button_name] = '
+        if self.form.method == 'POST':
+            self.setup(post=post)
+        else:
+            url = action_url.split('?')[0] + '?' + self.urlencode(post.items())
+            self.setup(url=url)
         return self.request()
 
     def urlencode(self, items):
