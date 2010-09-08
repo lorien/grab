@@ -510,6 +510,10 @@ class Grab(object):
         if not processed:
             elem.value = value
 
+    def set_input_by_id(self, _id, value):
+        name = self.tree.xpath('//*[@id="%s"]' % _id)[0].get('name')
+        return self.set_input(name, value)
+
     def set_inputs(self, arg):
         if not isinstance(arg, dict):
             arg = dict(arg)
@@ -523,7 +527,7 @@ class Grab(object):
         for elem in self.form.inputs:
             if elem.tag == 'select':
                 if not post[elem.name]:
-                    post[elem.name] = elem.value_options[0]
+                    post[elem.name] = elem.value_options[-1]
         #import pdb; pdb.set_trace()
         # TODO: check out how to handle forms
         # with multiple submit buttons
