@@ -9,6 +9,7 @@ from random import randint, choice
 from copy import deepcopy, copy
 import threading
 from urlparse import urljoin
+import email
 
 from html import make_unicode, find_refresh_url
 import user_agent
@@ -117,11 +118,12 @@ def default_config(): return dict(
     nohead = False,
     nobody = False,
     remove_scripts = True,
-    use_cache = False,
+    debug = False,
 )
 
 
 class Grab(object):
+    Error = GrabError
     counter = -1
 
     def __init__(self):
@@ -159,6 +161,11 @@ class Grab(object):
         self.response_body.append(data)
         return len(data)
 
+    def debug_processor(self, _type, text):
+        if _type == pycurl.INFOTYPE_HEADER_OUT:
+            text = '\n'.join(text.splitlines()[1:])
+            self.request_headers = dict(email.message_from_string(text))
+
     def process_config(self):
         """
         Setup curl instance with the config.
@@ -176,6 +183,10 @@ class Grab(object):
         self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
         self.curl.setopt(pycurl.HEADERFUNCTION, self.head_processor)
         self.curl.setopt(pycurl.USERAGENT, self.config['user_agent'])
+
+        if self.config['debug']:
+            self.curl.setopt(pycurl.VERBOSE, 1)
+            self.curl.setopt(pycurl.DEBUGFUNCTION, self.debug_processor)
 
         # Ignore SSL errors
         self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)
@@ -286,6 +297,7 @@ class Grab(object):
         self.response_code = None
         self.response_head = []
         self.response_body = []
+        self.request_headers = None
         self.headers = {}
         self.cookies = {}
         self.counter += 1
@@ -340,8 +352,8 @@ class Grab(object):
                 tname = ''
             else:
                 tname = '-%s' % tname
-            fname = os.path.join(self.config['log_dir'], '%02d%s.heads' % (self.counter, tname))
-            open(fname, 'w').write(self.response_head + self.response_body)
+            fname = os.path.join(self.config['log_dir'], '%02d%s.log' % (self.counter, tname))
+            open(fname, 'w').write(self.response_head)
 
             fext = 'html'
             #dirs = self.response_url().split('//')[1].strip().split('/')
@@ -519,6 +531,12 @@ class Grab(object):
             arg = dict(arg)
         for key, value in arg.iteritems():
             self.set_input(key, value)
+
+    def set_inputs_by_id(self, arg):
+        if not isinstance(arg, dict):
+            arg = dict(arg)
+        for _id, value in arg.iteritems():
+            self.set_input_by_id(_id, value)
 
     def submit(self, button_name=None):
         action_url = urljoin(self.config['url'], self.form.action)
