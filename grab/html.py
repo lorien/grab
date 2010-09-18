@@ -36,6 +36,8 @@ def decode_entities(text):
 def make_unicode(html, guess_encodings):
     """
     Convert byte stream to unicode.
+
+    TOD: replace guess encoding bicycle with BeautifulSoup detector
     """
 
     RE_CONTENT_TYPE_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']Content-Type[^>]+', re.I|re.S)
