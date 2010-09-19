@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import pycurl
 #from StringIO import StringIO
-#import logging
+import logging
 #import os
 #import urllib
-#import re
-#from random import randint, choice
+import re
+from random import randint, choice
 #from copy import deepcopy, copy
 #import threading
 #from urlparse import urljoin
@@ -17,8 +17,9 @@ import user_agent
 logger = logging.getLogger('grab')
 __all__ = ['Grab']
 
+DEFAULT_EXTENSIONS = ['grab.ext.lxml', 'grab.ext.lxml_form']
 
-# @lorien: I do not understand this shit. Maybe you?
+# @lorien: I do not understand these signals. Maybe you?
 
 # We should ignore SIGPIPE when using pycurl.NOSIGNAL - see
 # the libcurl tutorial for more info.
@@ -37,17 +38,18 @@ except ImportError:
     pass
 
 class GrabError(pycurl.error):
+    """
+    Wrapper for ``pycurl.error``
+    """
+
     pass
 
-#class DataNotFound(Exception):
-    #pass
+class DataNotFound(Exception):
+    pass
 
-#SCRIPT_TAG = re.compile(r'(<script[^>]*>).+?(</script>)', re.I|re.S)
-
-
-#def REX_INPUT(name):
-    #return re.compile(r'<input[^>]+name\s*=\s*["\']?%s["\' ][^>]*>' % re.escape(name), re.S)
-#REX_VALUE = re.compile(r'value\s*=\s*["\']?([^"\'> ]+)', re.S)
+def REX_INPUT(name):
+    return re.compile(r'<input[^>]+name\s*=\s*["\']?%s["\' ][^>]*>' % re.escape(name), re.S)
+REX_VALUE = re.compile(r'value\s*=\s*["\']?([^"\'> ]+)', re.S)
 
 def clone_config(cfg):
     """
@@ -90,23 +92,8 @@ def default_config():
         follow_refresh = False,
         nohead = False,
         nobody = False,
-        soup_remove_scripts = True,
         debug = False,
     )
-
-def common_headers(self):
-    """
-    Build headers which sends typical browser.
-    """
-
-    return {
-        'Accept': 'text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d' % randint(2, 5),
-        'Accept-Language': 'en-us;q=0.%d,en,ru;q=0.%d' % (randint(5, 9), randint(1, 4)),
-        'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.%d' % randint(5, 7),
-        'Keep-Alive': '300',
-    }
-
-
 
 class Response(object):
     """
@@ -134,13 +121,15 @@ class Response(object):
         self.headers = {}
         for line in self.head.split('\n'):
             line = line.rstrip('\r')
-            if line.startswith('HTTP'):
-                self.status = line
-            try:
-                name, value = line.split(': ', 1)
-                self.headers[name] = value
-            except ValueError, ex:
-                logging.error('Invalid header line: %s' % line)
+            if line:
+                if line.startswith('HTTP'):
+                    self.status = line
+                else:
+                    try:
+                        name, value = line.split(': ', 1)
+                        self.headers[name] = value
+                    except ValueError, ex:
+                        logging.error('Invalid header line: %s' % line)
 
     @property
     def unicode_body(self):
@@ -162,11 +151,49 @@ class Grab(object):
     # of Grab instance is creating
     clonable_attributes = ['request_headers', 'cookies', 'request_counter']
 
-    def __init__(self):
+    # Info about loaded extensions
+    extensions = []
+
+    def __init__(self, extensions=DEFAULT_EXTENSIONS, extra_extensions=None):
+        if extra_extensions:
+            extensions = extensions + extra_extensions
+        for mod_path in extensions:
+            # Can't win in the fight with relative imports...
+            # Doing simple hack
+            if mod_path.startswith('grab.'):
+                mod_path = mod_path[5:]
+            mod = __import__(mod_path, globals(), locals(), ['foo'])
+            self.load_extension(mod.Extension)
         self.config = default_config()
-        self.default_headers = common_headers()
+        for ext in self.extensions:
+            try:
+                self.config.update(ext.extra_default_config())
+            except AttributeError:
+                pass
+        self.default_headers = self.common_headers()
         self.curl = pycurl.Curl()
         self.reset()
+
+    def load_extension(self, ext_class):
+        for attr in ext_class.export_attributes:
+            self.add_to_class(attr, ext_class.__dict__[attr])
+        self.extensions.append(ext_class())
+
+    @classmethod
+    def add_to_class(cls, name, obj):
+        setattr(cls, name, obj)
+
+    def common_headers(self):
+        """
+        Build headers which sends typical browser.
+        """
+
+        return {
+            'Accept': 'text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d' % randint(2, 5),
+            'Accept-Language': 'en-us;q=0.%d,en,ru;q=0.%d' % (randint(5, 9), randint(1, 4)),
+            'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.%d' % randint(5, 7),
+            'Keep-Alive': '300',
+        }
 
     def reset(self):
         """
@@ -179,10 +206,14 @@ class Grab(object):
         self.cookies = {}
         self.request_counter += 1
         self._soup = None
-        self._tree = None
-        self._form = None
         self.response_head_chunks = []
         self.response_body_chunks = []
+
+        for ext in self.extensions:
+            try:
+                ext.extra_reset(self)
+            except AttributeError:
+                pass
 
     def clone(self):
         """
@@ -290,7 +321,7 @@ class Grab(object):
             headers.update(self.config['headers'])
         headers_tuples = [str('%s: %s' % x) for x\
                           in self.config['headers'].iteritems()]
-        self.curl.setopt(pycurl.HTTPHEADER, headers)
+        self.curl.setopt(pycurl.HTTPHEADER, headers_tuples)
 
 
         # CURLOPT_COOKIELIST
@@ -349,9 +380,9 @@ class Grab(object):
 
         logger.debug('[%02d] %s %s%s' % (self.request_counter, method, self.config['url'], proxy_info))
 
-    def process_cookies(self):
+    def extract_cookies(self):
         """
-        Populate ``self.response`` with cookies extracted from pycurl instance.
+        Extract cookies.
         """
 
         # Example of line:
@@ -360,7 +391,7 @@ class Grab(object):
         for line in self.curl.getinfo(pycurl.INFO_COOKIELIST):
             chunks = line.split('\t')
             cookies[chunks[-2]] = chunks[-1]
-        self.reponse.cookies = cookies
+        return cookies
 
     def go(self, url):
         """
@@ -422,13 +453,13 @@ class Grab(object):
                 return self.request(url=url)
 
     def prepare_response(self):
+        self.response.head = ''.join(self.response_head_chunks)
+        self.response.body = ''.join(self.response_body_chunks)
         self.response.parse()
-        self.process_cookies()
+        self.response.cookies = self.extract_cookies()
         self.response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
-        self.response.head = ''.join(self.response_head_chunks)
-        self.response.body = ''.join(self.response_body_chunks)
 
     def save_dumps(self):
         if self.config['log_dir']:
@@ -448,25 +479,6 @@ class Grab(object):
             fname = os.path.join(self.config['log_dir'], '%02d%s.%s' % (self.request_counter, tname, fext))
             open(fname, 'w').write(self.response.body)
 
-    @property
-    def soup(self):
-        if not self._soup:
-            from BeautifulSoup import BeautifulSoup
-            # Do some magick to make BeautifulSoup happy
-            if self.config['soup_remove_scripts']:
-                data = SCRIPT_TAG.sub(r'\1\2', self.response.body)
-            else:
-                data = self.response.body
-            self._soup = BeautifulSoup(data)
-        return self._soup
-
-    @property
-    def tree(self):
-        if self._tree is None:
-            from lxml.html import fromstring
-            self._tree = fromstring(self.response_body)
-        return self._tree
-
     def input_value(self, name):
         """
         Return the value of INPUT element.
@@ -484,164 +496,73 @@ class Grab(object):
             except AttributeError:
                 return None
 
-    #def repeat(self, anchor, action=None, number=10, args=None):
-        #"""
-        #Make requests until "anchor" string will be found in response
-        #or number of requests exeeds the "number".
-        #"""
+    def repeat(self, anchor, action=None, limit=10, args=None):
+        """
+        Make requests until ``acnhor`` found in 
+        response body or number of request exeeds the ``limit``
+        """
 
-        #for x in xrange(number):
-            #if args:
-                #self.setup(**args)
-            #if action:
-                #action()
-            #else:
-                #self.request()
-            
-            #if isinstance(anchor, (list, tuple)):
-                #searches = anchor
-            #else:
-                #searches = [anchor]
-            #for search in searches:
-                #if search in self.response_body:
-                    #return
-        #else:
-            #message = 'Substring "%s" not found in response.' % anchor
-            #if isinstance(message, unicode):
-                #message = message.encode('utf-8')
-            #raise IOError(message)
+        for x in xrange(limit):
+            if args:
+                self.setup(**args)
+            if action:
+                action()
+            else:
+                self.request()
+            if isinstance(anchor, (list, tuple)):
+                searches = anchor
+            else:
+                searches = [anchor]
+            for search in searches:
+                if search in self.response_body:
+                    return
+        else:
+            message = 'Substring "%s" not found in response.' % anchor
+            if isinstance(message, unicode):
+                message = message.encode('utf-8')
+            raise IOError(message)
 
-    #def get_form(number=0):
-        #return self.soup.findAll('form')[number]
+    def urlencode(self, items):
+        """
+        Smart urlencode which know how to process unicode strings and None values.
+        """
 
-    #def follow_link(self, anchor=None, href=None):
-        #if anchor is None and href is None:
-            #raise Exception('You have to provide anchor or href argument')
-        #self.tree.make_links_absolute(self.config['url'])
-        ##import pdb; pdb.set_trace()
-        #for item in self.tree.iterlinks():
-            #if item[0].tag == 'a':
-                #found = False
-                #text = item[0].text or u''
-                #url = item[2]
-                ## if object is regular expression
-                #if anchor:
-                    #if hasattr(anchor, 'finditer'):
-                        #if anchor.search(text):
-                            #found = True
-                    #else:
-                        #if text.find(anchor) > -1:
-                            #found = True
-                #if href:
-                    #if hasattr(href, 'finditer'):
-                        #if href.search(url):
-                            #found = True
-                    #else:
-                        #if url.startswith(href) > -1:
-                            #found = True
-                #if found:
-                    #url = urljoin(self.config['url'], item[2])
-                    #return self.request(url=item[2])
-        #raise DataNotFound('Cannot find link ANCHOR=%s, HREF=%s' %\
-                           #(anchor, href))
+        if isinstance(items, dict):
+            items = items.items()
+        def process(item):
+            key, value = item
+            if isinstance(value, unicode):
+                value = value.encode(self.config['charset'])
+            elif value is None:
+                value = ''
+            return key, value
+        return urllib.urlencode(map(process, items))
 
-    #def choose_form(self, index):
-        #self._form = self.tree.forms[index]
+    def search(self, anchor):
+        """
+        Search for string or regular expression.
+        """
 
-    #@property
-    #def form(self):
-        #if self._form is None:
-            ## Automatically select the form with most big number of fields
-            #forms = [(idx, len(x.fields)) for idx, x in enumerate(self.tree.forms)]
-            #idx = sorted(forms, key=lambda x: x[1], reverse=True)[0][0]
-            #self.choose_form(idx)
-        #return self._form
+        if hasattr(anchor, 'finditer'):
+            return rex.search(self.response_body) or None
+        else:
+            if isinstance(anchor, unicode):
+                anchor = anchor.encode(self.config['charset'])
+            return anchor if self.response_body.find(anchor) > -1 else None
 
-    #def set_input(self, name, value):
-        #elem = self.form.inputs[name]
-
-        #processed = False
-        #if getattr(elem, 'type', None) == 'checkbox':
-            #if isinstance(value, bool):
-                #elem.checked = value
-                #processed = True
+    def assert_pattern(self, anchor):
+        """
+        Search for string or regexp.
         
-        #if not processed:
-            #elem.value = value
+        If nothing found raise DataNotFound exception.
+        """
 
-    #def set_input_by_id(self, _id, value):
-        #name = self.tree.xpath('//*[@id="%s"]' % _id)[0].get('name')
-        #return self.set_input(name, value)
+        if not self.search(*args, **kwargs):
+            raise DataNotFound(u'Could not found pattern: %s' % anchor)
 
-    #def set_inputs(self, arg):
-        #if not isinstance(arg, dict):
-            #arg = dict(arg)
-        #for key, value in arg.iteritems():
-            #self.set_input(key, value)
+    def reload(self):
+        """
+        Load current url again.
+        """
 
-    #def set_inputs_by_id(self, arg):
-        #if not isinstance(arg, dict):
-            #arg = dict(arg)
-        #for _id, value in arg.iteritems():
-            #self.set_input_by_id(_id, value)
-
-    #def submit(self, button_name=None):
-        #action_url = urljoin(self.config['url'], self.form.action)
-        #self.setup(url=action_url)
-        #post = dict(self.form.fields)
-        #for elem in self.form.inputs:
-            #if elem.tag == 'select':
-                #if not post[elem.name]:
-                    #post[elem.name] = elem.value_options[-1]
-        ##import pdb; pdb.set_trace()
-        ## TODO: check out how to handle forms
-        ## with multiple submit buttons
-        ##if not button_name in post:
-            ##if button_name is not None:
-                ##post[button_name] = '
-        #if self.form.method == 'POST':
-            #self.setup(post=post)
-        #else:
-            #url = action_url.split('?')[0] + '?' + self.urlencode(post.items())
-            #self.setup(url=url)
-        #return self.request()
-
-    #def urlencode(self, items):
-        #if isinstance(items, dict):
-            #items = items.items()
-        #def process(item):
-            #key, value = item
-            #if isinstance(value, unicode):
-                #value = value.encode(self.config['charset'])
-            #elif value is None:
-                #value = ''
-            #return key, value
-        #items = urllib.urlencode(map(process, items))
-        #logging.debug(items)
-        #return items
-
-    #def search(self, anchor):
-        #if hasattr(anchor, 'finditer'):
-            #return anchor.search(self.response_body) or None
-        #if isinstance(anchor, unicode):
-            #anchor = anchor.encode(self.config['charset'])
-        #return anchor if self.response_body.find(anchor) > -1 else None
-
-    #def search_rex(self, rex, flags=0):
-        #if not hasattr(rex, 'finditer'):
-            #rex = re.compile(rex, flags)
-        #return rex.search(self.response_body) or None
-
-    #def assert_string(self, *args, **kwargs):
-        #if not self.search(*args, **kwargs):
-            #raise DataNotFound(u'Could not found string: %s' % anchor)
-
-    #def assert_rex(self, *args, **kwargs):
-        #if not self.search_rex(*args, **kwargs):
-            #raise DataNotFound(u'Could not found regexp')
-
-    #def xpath(self, path):
-        #return self.tree.xpath(path)
-
-    #def reload(self):
-        #g.go('')
+        g.go('')
