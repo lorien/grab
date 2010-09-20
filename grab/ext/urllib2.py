@@ -1,14 +1,15 @@
 from __future__ import absolute_import
 import logging
 import urllib2
+import cookielib
+import socket
 
 from grab.grab import GrabError
 
 logger = logging.getLogger('grab')
 
 class Extension(object):
-    export_attributes = ['head_processor', 'body_processor', 'debug_processor',
-                         'process_config', 'extract_cookies', 'prepare_response']
+    export_attributes = ['process_config', 'extract_cookies', 'prepare_response']
     transport = True
 
     def extra_init(self, grab):
@@ -19,9 +20,8 @@ class Extension(object):
         #grab._referer = None
         #self.headers = headers.random_request()
 
-    #def extra_reset(self, grab):
-        #grab.response_head_chunks = []
-        #grab.response_body_chunks = []
+    def extra_reset(self, grab):
+        self._post_data = None
 
     def process_config(self):
         url = self.config['url']
@@ -60,17 +60,19 @@ class Extension(object):
             else:
                 method = 'GET'
 
+        post_data = None
         if method == 'POST':
             #self.curl.setopt(pycurl.POST, 1)
             #if self.config['payload']:
                 #self.curl.setopt(pycurl.POSTFIELDS, self.config['payload'])
             #elif self.config['post']:
-                #post_data = self.urlencode(self.config['post'])
+            if self.config['post']:
+                self._post_data = self.urlencode(self.config['post'])
                 #self.curl.setopt(pycurl.POSTFIELDS, post_data)
-        elif method == 'PUT':
+        #elif method == 'PUT':
             #self.curl.setopt(pycurl.PUT, 1)
             #self.curl.setopt(pycurl.READFUNCTION, StringIO(self.config['payload']).read) 
-        elif method == 'DELETE':
+        #elif method == 'DELETE':
             #self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
         else:
             #self.curl.setopt(pycurl.HTTPGET, 1)
@@ -81,9 +83,11 @@ class Extension(object):
         headers = self.default_headers
         if self.config['headers']:
             headers.update(self.config['headers'])
-        headers_tuples = [str('%s: %s' % x) for x\
-                          in self.config['headers'].iteritems()]
-        self.curl.setopt(pycurl.HTTPHEADER, headers_tuples)
+        for key, value in headers.iteritems():
+            req.add_header(key, value)
+        #headers_tuples = [str('%s: %s' % x) for x\
+                          #in self.config['headers'].iteritems()]
+        #self.curl.setopt(pycurl.HTTPHEADER, headers_tuples)
 
 
         # CURLOPT_COOKIELIST
@@ -93,11 +97,11 @@ class Extension(object):
         # Passing the special string "SESS" will only erase all session cookies known by cURL. (Added in 7.15.4)
         # Passing the special string "FLUSH" will write all cookies known by cURL to the file specified by CURLOPT_COOKIEJAR. (Added in 7.17.1)
 
-        if self.config['reuse_cookies']:
-            # Setting empty string will activate curl cookie engine
-            self.curl.setopt(pycurl.COOKIELIST, '')
-        else:
-            self.curl.setopt(pycurl.COOKIELIST, 'ALL')
+        #if self.config['reuse_cookies']:
+            ## Setting empty string will activate curl cookie engine
+            #self.curl.setopt(pycurl.COOKIELIST, '')
+        #else:
+            #self.curl.setopt(pycurl.COOKIELIST, 'ALL')
 
 
         # CURLOPT_COOKIE
@@ -106,76 +110,80 @@ class Extension(object):
         # Note that this option sets the cookie header explictly in the outgoing request(s). If multiple requests are done due to authentication, followed redirections or similar, they will all get this cookie passed on.
         # Using this option multiple times will only make the latest string override the previous ones. 
 
-        if self.config['cookies']:
-            chunks = []
-            for key, value in self.config['cookies'].iteritems():
-                key = urllib.quote_plus(key)
-                value = urllib.quote_plus(value)
-                chunks.append('%s=%s;' % (key, value))
-            self.curl.setopt(pycurl.COOKIE, ''.join(chunks))
+        #if self.config['cookies']:
+            #chunks = []
+            #for key, value in self.config['cookies'].iteritems():
+                #key = urllib.quote_plus(key)
+                #value = urllib.quote_plus(value)
+                #chunks.append('%s=%s;' % (key, value))
+            #self.curl.setopt(pycurl.COOKIE, ''.join(chunks))
 
         if self.config['referer']:
-            self.curl.setopt(pycurl.REFERER, str(self.config['referer']))
+            #self.curl.setopt(pycurl.REFERER, str(self.config['referer']))
+            req.add_header('Referer', str(self.config['referer']))
 
         if self.config['proxy']:
-            self.curl.setopt(pycurl.PROXY, str(self.config['proxy'])) 
+            #self.curl.setopt(pycurl.PROXY, str(self.config['proxy'])) 
+            req.set_proxy(str(self.config['proxy']))
 
-        if self.config['proxy_userpwd']:
-            self.curl.setopt(pycurl.PROXYUSERPWD, self.config['proxy_userpwd'])
+        #if self.config['proxy_userpwd']:
+            #self.curl.setopt(pycurl.PROXYUSERPWD, self.config['proxy_userpwd'])
 
         # PROXYTYPE
         # Pass a long with this option to set type of the proxy. Available options for this are CURLPROXY_HTTP, CURLPROXY_HTTP_1_0 (added in 7.19.4), CURLPROXY_SOCKS4 (added in 7.15.2), CURLPROXY_SOCKS5, CURLPROXY_SOCKS4A (added in 7.18.0) and CURLPROXY_SOCKS5_HOSTNAME (added in 7.18.0). The HTTP type is default. (Added in 7.10) 
 
-        if self.config['proxy_type']:
-            ptype = getattr(pycurl, 'PROXYTYPE_%s' % self.config['proxy_type'].upper())
-            self.curl.setopt(pycurl.PROXYTYPE, ptype)
+        #if self.config['proxy_type']:
+            #ptype = getattr(pycurl, 'PROXYTYPE_%s' % self.config['proxy_type'].upper())
+            #self.curl.setopt(pycurl.PROXYTYPE, ptype)
 
         if self.config['proxy']:
-            if self.config['proxy_userpwd']:
-                auth = ' with authorization'
-            else:
-                auth = ''
+            #if self.config['proxy_userpwd']:
+                #auth = ' with authorization'
+            #else:
+                #auth = ''
+            auth = ''
             proxy_info = ' via %s proxy of type %s%s' % (
                 self.config['proxy'], self.config['proxy_type'], auth)
         else:
             proxy_info = ''
 
         logger.debug('[%02d] %s %s%s' % (self.request_counter, method, self.config['url'], proxy_info))
+        self.req = req
 
     def extract_cookies(self):
         """
         Extract cookies.
         """
 
-        # Example of line:
-        # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
-        cookies = {}
-        for line in self.curl.getinfo(pycurl.INFO_COOKIELIST):
-            chunks = line.split('\t')
-            cookies[chunks[-2]] = chunks[-1]
-        return cookies
-
+        return {}
 
     def request(self, grab):
         try:
-            grab.curl.perform()
-        except pycurl.error, ex:
-            # CURLE_WRITE_ERROR
-            # An error occurred when writing received data to a local file, or
-            # an error was returned to libcurl from a write callback.
-            # This is expected error and we should ignore it
-            if 23 == ex[0]:
-                pass
-            else:
-                raise GrabError(ex[0], ex[1])
+            grab._resp = grab._opener.open(grab.req)
+            grab._resp_body = grab._resp.read()
+        except urllib2.URLError:
+            raise GrabError(ex[0], ex[1])
+        #try:
+            #grab.curl.perform()
+        #except pycurl.error, ex:
+            ## CURLE_WRITE_ERROR
+            ## An error occurred when writing received data to a local file, or
+            ## an error was returned to libcurl from a write callback.
+            ## This is expected error and we should ignore it
+            #if 23 == ex[0]:
+                #pass
+            #else:
+                #raise GrabError(ex[0], ex[1])
 
     def prepare_response(self):
-        self.response.head = ''.join(self.response_head_chunks)
-        self.response.body = ''.join(self.response_body_chunks)
-        self.response.parse()
-        self.response.cookies = self.extract_cookies()
-        self.response.code = self.curl.getinfo(pycurl.HTTP_CODE)
-        self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
-        self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
+        self.response.body = self._resp_body
+        self.response.headers = dict(self._resp.headers)
+        #self.response.head = ''.join(self.response_head_chunks)
+        #self.response.body = ''.join(self.response_body_chunks)
+        #self.response.parse()
+        #self.response.cookies = self.extract_cookies()
+        #self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
+        self.response.code = self._resp.code
+        self.response.url = self._resp.geturl()
 
 

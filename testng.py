@@ -4,6 +4,6 @@ import os
 import sys
 
 logging.basicConfig(level=logging.DEBUG)
-g = Grab()
+g = Grab(['grab.ext.urllib2', 'grab.ext.lxml'])
 g.go('http://google.com')
-print g.form_fields()
+print g.xpath('//title')[0].text
