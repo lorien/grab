@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from lxml.html import fromstring
 from grab import DataNotFound
+from urlparse import urljoin
 
 class Extension(object):
     export_attributes = ['choose_form', 'form', 'set_input',
@@ -53,7 +54,7 @@ class Extension(object):
         name = self.tree.xpath('//*[@id="%s"]' % _id)[0].get('name')
         return self.set_input(name, value)
 
-    def submit(self, submit_control=None):
+    def submit(self, submit_control=None, make_request=True, url=None):
         """
         Submit form. Take care about all fields which was not set explicitly.
         """
@@ -63,8 +64,8 @@ class Extension(object):
         # because it does not contains empty fields
         # and also contains data for unchecked checkboxes and etc
 
-        post = self.form_fields()
 
+        post = self.form_fields()
         submit_controls = []
         for elem in self.form.inputs:
             if elem.tag == 'input' and elem.type == 'submit':
@@ -73,20 +74,26 @@ class Extension(object):
         # Submit only one element of submit type
         if submit_control is None:
             if submit_controls:
-                submit_control = submit_controsl[0]
-        if submit_control:
+                submit_control = submit_controls[0]
+        if submit_control is not None:
             for elem in submit_controls:
-                if elem.name != submit_control:
-                    if elem.name in self.post:
-                        del self.fields[elem.name]
+                if elem.name != submit_control.name:
+                    if elem.name in post:
+                        del post[elem.name]
 
-        action_url = urljoin(self.config['url'], self.form.action)
+        if url:
+            action_url = url
+        else:
+            action_url = urljoin(self.config['url'], self.form.action)
         if self.form.method == 'POST':
             self.setup(post=post, url=action_url)
         else:
             url = action_url.split('?')[0] + '?' + self.urlencode(post.items())
             self.setup(url=url)
-        return self.request()
+        if make_request:
+            return self.request()
+        else:
+            return None
 
     def form_fields(self):
         fields = dict(self.form.fields)

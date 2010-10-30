@@ -1,6 +1,8 @@
 from __future__ import absolute_import
+import email
 import pycurl
 import logging
+import urllib
 
 from grab.grab import GrabError
 
@@ -147,6 +149,10 @@ class Extension(object):
         if self.config['cookies']:
             chunks = []
             for key, value in self.config['cookies'].iteritems():
+                if isinstance(key, unicode):
+                    key = key.encode(charset)
+                if isinstance(value, unicode):
+                    value = value.encode(charset)
                 key = urllib.quote_plus(key)
                 value = urllib.quote_plus(value)
                 chunks.append('%s=%s;' % (key, value))
