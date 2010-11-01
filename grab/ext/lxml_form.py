@@ -82,10 +82,11 @@ class Extension(object):
                         del post[elem.name]
 
         if url:
-            action_url = url
+            action_url = urljoin(self.config['url'], url)
         else:
             action_url = urljoin(self.config['url'], self.form.action)
         if self.form.method == 'POST':
+            #print '\n'.join('%s: %s' % x for x in post.iteritems())
             self.setup(post=post, url=action_url)
         else:
             url = action_url.split('?')[0] + '?' + self.urlencode(post.items())

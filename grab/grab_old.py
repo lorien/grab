@@ -327,6 +327,10 @@ class Grab(object):
             else:
                 raise GrabError(ex[0], ex[1])
 
+        if self.config['post']:
+            print 'POST: %s' % self.config['post']
+        print 'REQUEST: %s' % self.request_headers
+
         # It is very importent to delete old POST data after
         # request. In other case such data will be used again
         # in next request :-/
@@ -598,6 +602,12 @@ class Grab(object):
 
     def reload(self):
         g.go('')
+
+    @property
+    def response(self):
+        class Foo(object):
+            body = self.response_body
+        return Foo()
 
 
 if __name__ == "__main__":

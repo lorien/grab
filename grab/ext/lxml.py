@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 from lxml.html import fromstring
+from urlparse import urljoin
+
 from grab import DataNotFound
 
 class Extension(object):

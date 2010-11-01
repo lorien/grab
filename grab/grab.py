@@ -70,6 +70,7 @@ def default_config():
         nohead = False,
         nobody = False,
         debug = False,
+        debug_post = False,
     )
 
 class Response(object):
@@ -111,7 +112,7 @@ class Response(object):
     @property
     def unicode_body(self):
         if not self._unicode_body:
-            self._unicode_body = make_unicode(self.response_body, self.config['guess_encodings'])
+            self._unicode_body = make_unicode(self.response.body, self.config['guess_encodings'])
         return self._unicode_body
 
 
@@ -239,10 +240,13 @@ class Grab(object):
         self.process_config()
 
         self.transport_extension.request(self)
+        if self.config['debug_post']:
+            logging.debug('POST: %s' % self.config['post'])
 
         # It's vital to delete old POST data after request is performed.
         # If POST data remains when next request will try to use them again!
         # This is not what typical user waits.
+        self.old_config = clone_config(self.config) 
         self.config['post'] = None
         self.config['payload'] = None
         self.config['method'] = None
@@ -263,7 +267,7 @@ class Grab(object):
 
         # TODO: check max redirect count
         if self.config['follow_refresh']:
-            url = find_refresh_url(self.response_body)
+            url = find_refresh_url(self.response.body)
             if url:
                 return self.request(url=url)
 
@@ -295,7 +299,7 @@ class Grab(object):
         """
 
         try:
-            elem = REX_INPUT(name).search(self.response_body).group(0)
+            elem = REX_INPUT(name).search(self.response.body).group(0)
         except AttributeError:
             return None
         else:
@@ -326,11 +330,11 @@ class Grab(object):
         """
 
         if hasattr(anchor, 'finditer'):
-            return rex.search(self.response_body) or None
+            return rex.search(self.response.body) or None
         else:
             if isinstance(anchor, unicode):
                 anchor = anchor.encode(self.config['charset'])
-            return anchor if self.response_body.find(anchor) > -1 else None
+            return anchor if self.response.body.find(anchor) > -1 else None
 
     def assert_pattern(self, anchor):
         """
@@ -348,3 +352,7 @@ class Grab(object):
         """
 
         g.go('')
+
+    def repeat_request(self):
+        self.config = self.old_config
+        self.request()
