@@ -10,9 +10,9 @@ class Extendsion(object):
         grab._soup = None
 
     def extra_default_config(self):
-        return dict(
-            'soup_remove_scripts': True
-        )
+        return {
+            'soup_remove_scripts': True,
+        }
 
     @property
     def soup(self):
