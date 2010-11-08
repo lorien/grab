@@ -133,7 +133,7 @@ class Grab(object):
     extensions = []
     transport_extension = None
 
-    def __init__(self, extensions=DEFAULT_EXTENSIONS, extra_extensions=None):
+    def __init__(self, extensions=DEFAULT_EXTENSIONS, extra_extensions=None, **kwargs):
         if extra_extensions:
             extensions = extensions + extra_extensions
         for mod_path in extensions:
@@ -152,6 +152,8 @@ class Grab(object):
         self.default_headers = self.common_headers()
         self.trigger_extensions('init')
         self.reset()
+        if kwargs:
+            self.setup(**kwargs)
 
     def trigger_extensions(self, event):
         for ext in self.extensions:
@@ -216,6 +218,10 @@ class Grab(object):
         Change configuration.
         """
 
+        if 'url' in kwargs:
+            if self.config.get('url'):
+                url = urljoin(self.config['url'], kwargs['url'])
+                kwargs['url'] = url
         self.config.update(kwargs)
 
     def go(self, url):
@@ -227,8 +233,6 @@ class Grab(object):
                 absolute URL of previous request.
         """
 
-        if self.config.get('url'):
-            url = urljoin(self.config['url'], url)
         return self.request(url=url)
 
 
@@ -241,7 +245,10 @@ class Grab(object):
 
         self.transport_extension.request(self)
         if self.config['debug_post']:
-            logging.debug('POST: %s' % self.config['post'])
+            if self.config['post']:
+                items = sorted(self.config['post'].items(), key=lambda x: x[0])
+                rows = '\n'.join('%-25s: %s' % x for x in items)
+                logging.debug('POST request:\n%s\n' % rows)
 
         # It's vital to delete old POST data after request is performed.
         # If POST data remains when next request will try to use them again!

@@ -50,9 +50,13 @@ class Extension(object):
         raise DataNotFound('Cannot find link ANCHOR=%s, HREF=%s' %\
                            (anchor, href))
 
-    def xpath(self, path):
+    def xpath(self, path, filter=None):
         """
         Shortcut to ``self.tree.xpath``.
         """
 
-        return self.tree.xpath(path)
+        items = self.tree.xpath(path)
+        if filter:
+            return [x for x in items if filter(x)]
+        else:
+            return items 

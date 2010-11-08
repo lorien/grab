@@ -5,7 +5,9 @@ from urlparse import urljoin
 
 class Extension(object):
     export_attributes = ['choose_form', 'form', 'set_input',
-                         'set_input_by_id', 'submit', 'form_fields']
+                         'set_input_by_id', 'submit', 'form_fields',
+                         'set_input_by_number',
+                         ]
         
     def extra_reset(self, grab):
         grab._lxml_form = None
@@ -53,6 +55,21 @@ class Extension(object):
 
         name = self.tree.xpath('//*[@id="%s"]' % _id)[0].get('name')
         return self.set_input(name, value)
+
+    def set_input_by_number(self, number, value, xpath=None):
+        """
+        Set the value of element of current form.
+
+        Args:
+            number: the number of element
+        """
+
+        if xpath:
+            elem = self.form.xpath('.//' + xpath)[number]
+        else:
+            elem = self.form.xpath('.//input[@type="text"]')[number]
+
+        return self.set_input(elem.get('name'), value)
 
     def submit(self, submit_control=None, make_request=True, url=None):
         """
@@ -102,4 +119,10 @@ class Extension(object):
             if elem.tag == 'select':
                 if not fields[elem.name]:
                     fields[elem.name] = elem.value_options[-1]
+            if getattr(elem, 'type', None) == 'radio':
+                if not fields[elem.name]:
+                    fields[elem.name] = elem.get('value')
+            if getattr(elem, 'type', None) == 'checkbox':
+                if not elem.checked:
+                    del fields[elem.name]
         return fields
