@@ -1,6 +1,7 @@
 syntax: glob
 *.pyc
 *.swp
+*.orig
 *.egg-info/
 dist/
-update_pypi.sh
+pypi.sh

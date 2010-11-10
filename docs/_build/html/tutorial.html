@@ -1,0 +1,170 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Grab Tutorial &mdash; Grab v0.2 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Grab v0.2 documentation" href="index.html" />
+    <link rel="prev" title="Grab 0.2 Documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="index.html" title="Grab 0.2 Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Grab v0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="grab-tutorial">
+<span id="tutorial"></span><h1>Grab Tutorial<a class="headerlink" href="#grab-tutorial" title="Permalink to this headline">¶</a></h1>
+<p>Usage of grab library consists of several repeatable steps:</p>
+<blockquote>
+<ul class="simple">
+<li>Create grab instance and configure it (one time)</li>
+<li>Build network request and submit it</li>
+<li>Doing something with response</li>
+</ul>
+</blockquote>
+<p>Grab uses pycurl to process HTTP requests and responses.
+Grab have modular architecture - you can develop extension which will allow
+to use grab with you favorite network library (urllib, urllib2, socket etc)</p>
+<div class="section" id="live-code-examples">
+<h2>Live code examples<a class="headerlink" href="#live-code-examples" title="Permalink to this headline">¶</a></h2>
+<p>Retreive google images search page and parse title tag contents:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">grab</span> <span class="kn">import</span> <span class="n">Grab</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s">&#39;http://images.google.com&#39;</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;&lt;title&gt;([^&gt;]+)&lt;/title&gt;&#39;</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Also we can use XPath to process HTML. Under the hood Grab uses lxml library
+to build HTML DOM Tree and search XPath expressions. Each lxml DOM element
+provides ElementTree API. In following example we find element with XPath and
+then use it text attribute which is provided by ElementTree API:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span> <span class="n">g</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s">&#39;//title&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">xpath</span></tt> method is shortcut to <tt class="docutils literal"><span class="pre">g.tree.xpath</span></tt> where <tt class="docutils literal"><span class="pre">tree</span></tt> is the property
+which returns lxml DOM tree. The DOM tree object is calculated only one time when
+first call to <tt class="docutils literal"><span class="pre">tree</span></tt> attribute is occured. All subsequent call to <tt class="docutils literal"><span class="pre">tree</span></tt> attribute
+retreive cached value. The <tt class="docutils literal"><span class="pre">g.xpath()</span></tt> is equivalent to <tt class="docutils literal"><span class="pre">g.tree.xpath</span></tt> which in turn
+is equivalent to following code:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">lxml.html</span> <span class="kn">import</span> <span class="n">fromstring</span>
+<span class="k">return</span> <span class="n">fromstring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Grab use many lxml features including form processing. Grab automatically parse HTML
+forms and allow to submit them using their default values. You do not have to process
+hidden form fields - Grab will do it for you.</p>
+<p>By defult Grab save cookies from response and submit them in subsequent requests. This allows
+to emulate site sessions: sign in the site and fetch pages which requires user authorization.</p>
+<p>In following example we log in bitbucket and send private message:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">grab</span> <span class="kn">import</span> <span class="n">Grab</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s">&#39;http://bitbucket.org/account/signin/&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;...&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s">&#39;password&#39;</span><span class="p">,</span> <span class="s">&#39;...&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
+
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s">&#39;/account/notifications/send/&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s">&#39;recipient&#39;</span><span class="p">,</span> <span class="s">&#39;lorien&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">,</span> <span class="s">&#39;Hi!&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s">&#39;message&#39;</span><span class="p">,</span> <span class="s">&#39;How are you?&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">set_input</span></tt> sets the value of the input element in selected form. If you did not select the form
+the Grab do it automatically. By default it selects the form with the most biggest
+number of input elements.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Grab Tutorial</a><ul>
+<li><a class="reference internal" href="#live-code-examples">Live code examples</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Grab 0.2 Documentation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tutorial.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="index.html" title="Grab 0.2 Documentation"
+             >previous</a> |</li>
+        <li><a href="index.html">Grab v0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Grigority Petukhov.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.3.
+    </div>
+  </body>
+</html>
