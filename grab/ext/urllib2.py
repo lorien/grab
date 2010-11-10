@@ -13,7 +13,6 @@ class Extension(object):
     transport = True
 
     def extra_init(self, grab):
-        #grab.curl = pycurl.Curl()
         cj = cookielib.CookieJar()
         grab._opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj),
                                            urllib2.HTTPSHandler())

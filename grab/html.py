@@ -61,11 +61,10 @@ def make_unicode(html, guess_encodings):
             return html.decode(encoding)
         except UnicodeDecodeError:
             pass
-    else:
-        # Dirty hack
-        charset = charset or 'utf-8'
-        logging.error('Converting document from %s charset in ingore mode!' % charset)
-        return html.decode(charset, 'ignore')
+    # Dirty hack
+    charset = charset or 'utf-8'
+    logging.error('Converting document from %s charset in ingore mode!' % charset)
+    return html.decode(charset, 'ignore')
 
 
 def find_refresh_url(html):

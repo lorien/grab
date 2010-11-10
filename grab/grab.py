@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-from StringIO import StringIO
 import logging
 import os
 import urllib
-import re
 from random import randint, choice
 from copy import copy
 import threading
 from urlparse import urljoin
-import email
+from copy import deepcopy
 
 from html import make_unicode, find_refresh_url
 import user_agent
@@ -24,9 +22,8 @@ class GrabError(IOError):
 class DataNotFound(Exception):
     pass
 
-def REX_INPUT(name):
-    return re.compile(r'<input[^>]+name\s*=\s*["\']?%s["\' ][^>]*>' % re.escape(name), re.S)
-REX_VALUE = re.compile(r'value\s*=\s*["\']?([^"\'> ]+)', re.S)
+class ImproperlyConfigured(Exception):
+    pass
 
 def clone_config(cfg):
     """
@@ -78,24 +75,27 @@ class Response(object):
     HTTP Response.
     """
 
-    keys = ['status', 'code', 'head', 'body', 'headers',
-            'time', 'url', 'cookies']
-
     def __init__(self):
-        for key in self.keys:
-            setattr(self, key, None)
+        self.status = None
+        self.code = None
+        self.head = None
+        self.body = None
+        self.headers =None
+        self.time = None
+        self.url = None
+        self.cookies = None
 
     def clone(self):
-        obj = Response()
-        for key in self.keys:
-            setattr(obj, key, getattr(self, key))
+        '''
+        Shortcut for deepcopy
+        '''
+        obj = deepcopy(self)
         return obj
 
     def parse(self):
         """
         This method is called after Grab instance performes network request.
         """
-
         self.headers = {}
         for line in self.head.split('\n'):
             line = line.rstrip('\r')
@@ -107,13 +107,7 @@ class Response(object):
                         name, value = line.split(': ', 1)
                         self.headers[name] = value
                     except ValueError, ex:
-                        logging.error('Invalid header line: %s' % line)
-
-    @property
-    def unicode_body(self):
-        if not self._unicode_body:
-            self._unicode_body = make_unicode(self.response.body, self.config['guess_encodings'])
-        return self._unicode_body
+                        logging.error('Invalid header line: %s' % line, exc_info=ex)
 
 
 class Grab(object):
@@ -124,10 +118,6 @@ class Grab(object):
     # Its values will be displayed in logging messages and also used
     # in names of dumps
     request_counter = -1
-
-    # Attributes which should be processed when clone
-    # of Grab instance is creating
-    clonable_attributes = ['request_headers', 'request_counter']
 
     # Info about loaded extensions
     extensions = []
@@ -161,6 +151,16 @@ class Grab(object):
                 getattr(ext, 'extra_%s' % event)(self)
             except AttributeError:
                 pass
+
+    def process_config(self):
+        raise ImproperlyConfigured('process_config method should be redefined by transport extension')
+
+    def extract_cookies(self):
+           raise ImproperlyConfigured('extract_cookies method should be redefined by transport extension')
+
+    def prepare_response(self):
+           raise ImproperlyConfigured('prepare_response method should be redefined by transport extension')
+
 
     def load_extension(self, ext_class):
         for attr in ext_class.export_attributes:
@@ -200,18 +200,9 @@ class Grab(object):
 
     def clone(self):
         """
-        Create clone of Grab instance.
-
-        Try to save its state: cookies, referer, response data
+        Shortcut for deepcopy
         """
-
-        g = Grab()
-        g.config = clone_config(self.config)
-        g.setup(cookies=self.response.cookies)
-        g.response = self.response.clone()
-        for key in self.clonable_attributes:
-            setattr(g, key, getattr(self, key))
-        return g
+        return deepcopy(self)
 
     def setup(self, **kwargs):
         """
@@ -298,23 +289,6 @@ class Grab(object):
             fname = os.path.join(self.config['log_dir'], '%02d%s.%s' % (self.request_counter, tname, fext))
             open(fname, 'w').write(self.response.body)
 
-    def input_value(self, name):
-        """
-        Return the value of INPUT element.
-
-        This method does not use DOM parses, just simple regular expressions.
-        """
-
-        try:
-            elem = REX_INPUT(name).search(self.response.body).group(0)
-        except AttributeError:
-            return None
-        else:
-            try:
-                return REX_VALUE.search(elem).group(1)
-            except AttributeError:
-                return None
-
     def urlencode(self, items):
         """
         Smart urlencode which know how to process unicode strings and None values.
@@ -335,9 +309,8 @@ class Grab(object):
         """
         Search for string or regular expression.
         """
-
         if hasattr(anchor, 'finditer'):
-            return rex.search(self.response.body) or None
+            return anchor.search(self.response.body) or None
         else:
             if isinstance(anchor, unicode):
                 anchor = anchor.encode(self.config['charset'])
@@ -350,7 +323,7 @@ class Grab(object):
         If nothing found raise DataNotFound exception.
         """
 
-        if not self.search(*args, **kwargs):
+        if not self.search(anchor):
             raise DataNotFound(u'Could not found pattern: %s' % anchor)
 
     def reload(self):
@@ -358,8 +331,14 @@ class Grab(object):
         Load current url again.
         """
 
-        g.go('')
+        self.go('')
 
     def repeat_request(self):
         self.config = self.old_config
         self.request()
+
+    @property
+    def unicode_body(self):
+        if not self._unicode_body:
+            self._unicode_body = make_unicode(self.response.body, self.config['guess_encodings'])
+        return self._unicode_body
