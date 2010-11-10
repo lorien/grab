@@ -25,20 +25,6 @@ class DataNotFound(Exception):
 class ImproperlyConfigured(Exception):
     pass
 
-def clone_config(cfg):
-    """
-    Similar to copy.deepcopy but works faster.
-    """
-
-    res = {}
-    for key, value in cfg.iteritems():
-        if isinstance(value, (list, dict)):
-            res[key] = copy(value)
-        else:
-            res[key] = copy(value)
-    return res
-
-
 def default_config():
     return dict(
         timeout = 15,
@@ -85,13 +71,6 @@ class Response(object):
         self.url = None
         self.cookies = None
 
-    def clone(self):
-        '''
-        Shortcut for deepcopy
-        '''
-        obj = deepcopy(self)
-        return obj
-
     def parse(self):
         """
         This method is called after Grab instance performes network request.
@@ -118,6 +97,10 @@ class Grab(object):
     # Its values will be displayed in logging messages and also used
     # in names of dumps
     request_counter = -1
+
+    # Attributes which should be processed when clone
+    # of Grab instance is creating
+    clonable_attributes = ['request_headers', 'request_counter']
 
     # Info about loaded extensions
     extensions = []
@@ -200,9 +183,32 @@ class Grab(object):
 
     def clone(self):
         """
-        Shortcut for deepcopy
+        Create clone of Grab instance.
+
+        Try to save its state: cookies, referer, response data
         """
-        return deepcopy(self)
+
+        g = Grab()
+        g.config = deepcopy(self.config)
+        # Important for pycurl transport
+        # By default pycurl use own implementation 
+        # of cookies. So when we create new Grab instance
+        # and hence new pycurl instance and configure it
+        # with ``config`` of old Grab instance then new
+        # pycurl instance does not 
+        # anything about cookies (because info about them
+        # does not contains in config - it contains in some
+        # internal structure of old pycurl instance.
+        # What is why we explicitly configure cookies
+        # of new pycurl instance - we know where to get them
+        # cookies are always processed in Response instance
+        # Yeh... newer wrote so long comment!
+        g.setup(cookies=self.response.cookies)
+        g.response = deepcopy(self.response)
+        for key in self.clonable_attributes:
+            setattr(g, key, getattr(self, key))
+        return g
+
 
     def setup(self, **kwargs):
         """
@@ -244,7 +250,7 @@ class Grab(object):
         # It's vital to delete old POST data after request is performed.
         # If POST data remains when next request will try to use them again!
         # This is not what typical user waits.
-        self.old_config = clone_config(self.config) 
+        self.old_config = deepcopy(self.config) 
         self.config['post'] = None
         self.config['payload'] = None
         self.config['method'] = None
@@ -337,6 +343,8 @@ class Grab(object):
         self.config = self.old_config
         self.request()
 
+    # TODO: probably should be in Response class
+    # or in new extension which also should include search and assert_pattern methods
     @property
     def unicode_body(self):
         if not self._unicode_body:
