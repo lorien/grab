@@ -87,12 +87,12 @@ is equivalent to following code:</p>
 <p>Grab use many lxml features including form processing. Grab automatically parse HTML
 forms and allow to submit them using their default values. You do not have to process
 hidden form fields - Grab will do it for you.</p>
-<p>By defult Grab save cookies from response and submit them in subsequent requests. This allow
+<p>By defult Grab save cookies from response and submit them in subsequent requests. This allows
 to emulate site sessions: sign in the site and fetch pages which requires user authorization.</p>
 <p>In following example we log in bitbucket and send private message:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">grab</span> <span class="kn">import</span> <span class="n">Grab</span>
 
-<span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="n">log_file</span><span class="o">=</span><span class="s">&#39;log.html&#39;</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
 <span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s">&#39;http://bitbucket.org/account/signin/&#39;</span><span class="p">)</span>
 <span class="n">g</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;...&#39;</span><span class="p">)</span>
 <span class="n">g</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s">&#39;password&#39;</span><span class="p">,</span> <span class="s">&#39;...&#39;</span><span class="p">)</span>
@@ -105,7 +105,7 @@ to emulate site sessions: sign in the site and fetch pages which requires user a
 <span class="n">g</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
 </pre></div>
 </div>
-<p><tt class="docutils literal"><span class="pre">set_input</span></tt> set the value of the input element in selected form. If you did not select the form
+<p><tt class="docutils literal"><span class="pre">set_input</span></tt> sets the value of the input element in selected form. If you did not select the form
 the Grab do it automatically. By default it selects the form with the most biggest
 number of input elements.</p>
 </div>

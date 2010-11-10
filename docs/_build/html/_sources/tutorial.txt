@@ -46,14 +46,14 @@ Grab use many lxml features including form processing. Grab automatically parse 
 forms and allow to submit them using their default values. You do not have to process 
 hidden form fields - Grab will do it for you.
 
-By defult Grab save cookies from response and submit them in subsequent requests. This allow
+By defult Grab save cookies from response and submit them in subsequent requests. This allows
 to emulate site sessions: sign in the site and fetch pages which requires user authorization.
 
 In following example we log in bitbucket and send private message::
 
     from grab import Grab
 
-    g = Grab(log_file='log.html')
+    g = Grab()
     g.go('http://bitbucket.org/account/signin/')
     g.set_input('username', '...')
     g.set_input('password', '...')
@@ -65,6 +65,6 @@ In following example we log in bitbucket and send private message::
     g.set_input('message', 'How are you?')
     g.submit()
 
-``set_input`` set the value of the input element in selected form. If you did not select the form
+``set_input`` sets the value of the input element in selected form. If you did not select the form
 the Grab do it automatically. By default it selects the form with the most biggest
 number of input elements.
