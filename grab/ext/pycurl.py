@@ -121,9 +121,9 @@ class Extension(object):
         headers = self.default_headers
         if self.config['headers']:
             headers.update(self.config['headers'])
-        headers_tuples = [str('%s: %s' % x) for x\
-                          in self.config['headers'].iteritems()]
-        self.curl.setopt(pycurl.HTTPHEADER, headers_tuples)
+        header_tuples = [str('%s: %s' % x) for x\
+                         in headers.iteritems()]
+        self.curl.setopt(pycurl.HTTPHEADER, header_tuples)
 
 
         # CURLOPT_COOKIELIST
