@@ -54,6 +54,7 @@ def default_config():
         nobody = False,
         debug = False,
         debug_post = False,
+        encoding = 'gzip',
     )
 
 class Response(object):

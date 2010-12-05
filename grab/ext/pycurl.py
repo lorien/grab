@@ -186,6 +186,9 @@ class Extension(object):
 
         logger.debug('[%02d] %s %s%s' % (self.request_counter, method, self.config['url'], proxy_info))
 
+        if self.config['encoding']:
+            self.curl.setopt(pycurl.ENCODING, self.config['encoding'])
+
     def extract_cookies(self):
         """
         Extract cookies.
