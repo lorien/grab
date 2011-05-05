@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from lxml.html import fromstring
+from lxml.html import HTMLParser
 from urlparse import urljoin
 
 from grab import DataNotFound
@@ -13,7 +14,8 @@ class Extension(object):
     @property
     def tree(self):
         if self._lxml_tree is None:
-            self._lxml_tree = fromstring(self.response.body)
+            parser = HTMLParser(encoding=self.config['charset'])
+            self._lxml_tree = fromstring(self.response.body, parser=parser)
         return self._lxml_tree
 
     def follow_link(self, anchor=None, href=None):
