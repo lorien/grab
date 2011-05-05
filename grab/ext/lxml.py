@@ -1,12 +1,16 @@
 from __future__ import absolute_import
-from lxml.html import fromstring
-from lxml.html import HTMLParser
+from lxml.html import fromstring, HTMLParser
+from lxml.cssselect import CSSSelector
 from urlparse import urljoin
+import re
 
 from grab import DataNotFound
 
+
+REX_NUMBER = re.compile(r'\d+')
+
 class Extension(object):
-    export_attributes = ['tree', 'follow_link', 'xpath']
+    export_attributes = ['tree', 'follow_link', 'xpath', 'itercss', 'css', 'css_text', 'css_number']
 
     def extra_reset(self, grab):
         grab._lxml_tree = None
@@ -62,3 +66,41 @@ class Extension(object):
             return [x for x in items if filter(x)]
         else:
             return items 
+
+    def css(self, path):
+        """
+        Shortcut to lxml.cssselect.
+
+        Return first element
+
+        Documentation: http://lxml.de/cssselect.html
+        """
+
+        return self.itercss(path)[0]
+
+    def itercss(self, path):
+        """
+        Shortcut to lxml.cssselect
+
+        Documentation: http://lxml.de/cssselect.html
+        """
+
+        sel = CSSSelector(path)
+        return sel(self.tree)
+
+
+    def css_text(self, path):
+        """
+        Extract text of first element found by css path.
+        """
+
+        return self.css(path).text_content().strip()
+
+
+    def css_number(self, path):
+        """
+        Find number in text of first element found by css path.
+        """
+
+        sel = CSSSelector(path)
+        return REX_NUMBER.search(self.css_text(path)).group(0)
