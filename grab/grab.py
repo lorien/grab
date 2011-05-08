@@ -13,6 +13,7 @@ import user_agent
 
 __all__ = ['Grab', 'GrabError', 'DataNotFound']
 
+GLOBAL_STATE = {'request_counter': 0}
 DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form']
 logger = logging.getLogger('grab')
 
@@ -94,11 +95,6 @@ class Grab(object):
     # Shortcut to grab.GrabError
     Error = GrabError
 
-    # This counter will used in enumerating network queries.
-    # Its values will be displayed in logging messages and also used
-    # in names of dumps
-    request_counter = -1
-
     # Attributes which should be processed when clone
     # of Grab instance is creating
     clonable_attributes = ['request_headers', 'request_counter']
@@ -128,6 +124,20 @@ class Grab(object):
         self.reset()
         if kwargs:
             self.setup(**kwargs)
+
+    
+    @property
+    def request_counter(self):
+        # This counter will used in enumerating network queries.
+        # Its value will be displayed in logging messages and also used
+        # in names of dumps
+        # I use mutable module variable to allow different
+        # instances of Grab maintain single counter
+        # This could be helpful in debuggin when your script
+        # creates multiple Grab instances - in case of shared counter
+        # grab instances do not overwrite dump logs
+        return GLOBAL_STATE['request_counter']
+
 
     def trigger_extensions(self, event):
         for ext in self.extensions:
@@ -179,8 +189,11 @@ class Grab(object):
         self.response = Response()
         self.request_headers = None
         self.cookies = {}
-        self.request_counter += 1
+        self.increase_request_counter()
         self.trigger_extensions('reset')
+
+    def increase_request_counter(self):
+        GLOBAL_STATE['request_counter'] += 1
 
     def clone(self):
         """
