@@ -97,7 +97,7 @@ class Grab(object):
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
-    clonable_attributes = ['request_headers', 'request_counter']
+    clonable_attributes = ['request_headers']
 
     # Info about loaded extensions
     extensions = []
@@ -189,7 +189,6 @@ class Grab(object):
         self.response = Response()
         self.request_headers = None
         self.cookies = {}
-        self.increase_request_counter()
         self.trigger_extensions('reset')
 
     def increase_request_counter(self):
@@ -250,6 +249,7 @@ class Grab(object):
     def request(self, **kwargs):
         # Reset the state setted by prevous request
         self.reset()
+        self.increase_request_counter()
         if kwargs:
             self.setup(**kwargs)
         self.process_config()
