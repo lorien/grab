@@ -7,6 +7,7 @@ from copy import copy
 import threading
 from urlparse import urljoin
 from copy import deepcopy
+import time
 
 from html import make_unicode, find_refresh_url
 import user_agent
@@ -364,3 +365,15 @@ class Grab(object):
         if not self._unicode_body:
             self._unicode_body = make_unicode(self.response.body, self.config['guess_encodings'])
         return self._unicode_body
+
+    def sleep(self, limit1=None, limit2=None):
+        if limit1 is None and limit2 is None:
+            limit1 = 0
+            limit2 = 1
+        elif limit1 is None or limit2 is None:
+            raise Exception('sleep function accepts 0 or 2 arguments')
+        limit1 = int(limit1 * 1000)
+        limit2 = int(limit2 * 1000)
+        sleep_time = randint(limit1, limit2) / 1000.0
+        logger.debug('Sleeping for %f seconds' % sleep_time)
+        time.sleep(sleep_time)
