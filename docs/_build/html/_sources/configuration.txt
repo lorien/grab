@@ -1,8 +1,8 @@
 .. _configuration:
 
-=========================
-Configuring grab instance
-=========================
+=============
+Configuration
+=============
 
 You can configure grab using ``setup`` method:
 

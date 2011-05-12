@@ -35,6 +35,7 @@ Documenation sections
     :maxdepth: 1
 
     tutorial
+    api
     configuration
 
 
