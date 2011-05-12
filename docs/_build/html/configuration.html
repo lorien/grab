@@ -50,97 +50,100 @@
   <div class="section" id="configuration">
 <span id="id1"></span><h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
 <p>You can configure grab using <tt class="docutils literal"><span class="pre">setup</span></tt> method:</p>
-<blockquote>
-g = Grab()
-g.setup(opt1=val1, opt2=val2)</blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">opt1</span><span class="o">=</span><span class="n">val1</span><span class="p">,</span> <span class="n">opt2</span><span class="o">=</span><span class="n">val2</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>You can pass configuration to constructor:</p>
-<blockquote>
-g = Grab(opt1=val1, opt2=val2)</blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="n">opt1</span><span class="o">=</span><span class="n">val1</span><span class="p">,</span> <span class="n">opt2</span><span class="o">=</span><span class="n">val2</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>You can pass configuration to <tt class="docutils literal"><span class="pre">request</span></tt> method:</p>
-<blockquote>
-g = Grab()
-g.request(opt1=val1, opt2=val2)</blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">opt1</span><span class="o">=</span><span class="n">val1</span><span class="p">,</span> <span class="n">opt2</span><span class="o">=</span><span class="n">val2</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="available-options">
 <h1>Available options<a class="headerlink" href="#available-options" title="Permalink to this headline">¶</a></h1>
 <dl class="docutils">
-<dt>url</dt>
+<dt><strong>url</strong></dt>
 <dd><p class="first">URL of requested document.</p>
 <p class="last">You can use relative url - it will be joined with the absolute url of previously
 requested document. Special symbols in URL should be properly quoted.</p>
 </dd>
-<dt>timeout</dt>
+<dt><strong>timeout</strong></dt>
 <dd>Max. time to work with remote document. Default is 15.</dd>
-<dt>connect_timeout</dt>
+<dt><strong>connect_timeout</strong></dt>
 <dd>Max. time to wait for the start of response of remote document. Default is 10.</dd>
-<dt>user_agent</dt>
+<dt><strong>user_agent</strong></dt>
 <dd><p class="first">Value of User-Agent HTTP header. Default is random choice from set of real-world user agents.</p>
 <p class="last">See &#8220;grab.user_agents&#8221; module.</p>
 </dd>
-<dt>debug</dt>
+<dt><strong>debug</strong></dt>
 <dd>True value enable debug mode which save request headers and make them available
 via <tt class="docutils literal"><span class="pre">request_header</span></tt> attribute of grab instance.</dd>
-<dt>method</dt>
+<dt><strong>method</strong></dt>
 <dd><p class="first">Set the http method. By default POST method is used if <tt class="docutils literal"><span class="pre">post</span></tt> or <tt class="docutils literal"><span class="pre">payload</span></tt>
 options were configured. In any other case the default method is GET.</p>
 <p class="last">You can specify POST, PUT, DELETE or GET.</p>
 </dd>
-<dt>post</dt>
+<dt><strong>post</strong></dt>
 <dd><p class="first">Sequence of two-value tuples or dictionary.</p>
 <p class="last">If value is unicode then it is converted to byte string using value of
 <tt class="docutils literal"><span class="pre">charset</span></tt> option.</p>
 </dd>
-<dt>payload</dt>
+<dt><strong>payload</strong></dt>
 <dd>Raw value to send in POST or PUT request.</dd>
-<dt>headers</dt>
+<dt><strong>headers</strong></dt>
 <dd>Extra http headers. The value of this option will be merged with
 default headers which are Accept, Accept-Language, Accept-Charset and Keep-Alive.</dd>
-<dt>reuse_cookies</dt>
+<dt><strong>reuse_cookies</strong></dt>
 <dd>If true then remember cookies and request them in next requests.
 If false then clear cookies before each request.
 Default: True</dd>
-<dt>cookies</dt>
+<dt><strong>cookies</strong></dt>
 <dd>Explicitly specify cookies to send in the request. If <tt class="docutils literal"><span class="pre">reuse_cookies</span></tt> option
 is enabled then value of <tt class="docutils literal"><span class="pre">cookies</span></tt> will be merged with remembered cookies.</dd>
-<dt>referer</dt>
+<dt><strong>referer</strong></dt>
 <dd><p class="first">Set Referrer header.</p>
 <p class="last">Default: URL of previous request.</p>
 </dd>
-<dt>reuse_referer:</dt>
+<dt><strong>reuse_referer</strong>:</dt>
 <dd><p class="first">Set Referer header to the URL of previous request.</p>
 <p class="last">Default: True</p>
 </dd>
-<dt>proxy</dt>
+<dt><strong>proxy</strong></dt>
 <dd>Proxy address in format &#8220;server:port&#8221;</dd>
-<dt>proxy_userpwd</dt>
+<dt><strong>proxy_userpwd</strong></dt>
 <dd>Access credentials in format &#8220;username:password&#8221;</dd>
-<dt>proxy_type</dt>
+<dt><strong>proxy_type</strong></dt>
 <dd>Type of proxy. Available values: http, socks4, socks5</dd>
-<dt>encoding</dt>
+<dt><strong>encoding</strong></dt>
 <dd>WTF? What is charset and what is encoding options?</dd>
-<dt>charset</dt>
+<dt><strong>charset</strong></dt>
 <dd>Charset of remote document. Charset value will be used in encoding request data and
 in parsing of response data.</dd>
-<dt>guess_encodings</dt>
+<dt><strong>guess_encodings</strong></dt>
 <dd>List of charsets which will be tried to build the unicode version of the response document.</dd>
-<dt>log_file</dt>
+<dt><strong>log_file</strong></dt>
 <dd><p class="first">File to log the response body.</p>
 <p class="last">Default: None</p>
 </dd>
-<dt>log_dir</dt>
+<dt><strong>log_dir</strong></dt>
 <dd>Directory to save response bodies. Each response is saved in two documents. XX.log contains
 HTTP headers of the response. XX.html contains the body of response. XX is a number. Each request
 has a number. First request hasnumber 1, second request has number 2 and so on. You can see number
 of requests in the console output if you setup your script to display logging messages of DEBUG level.</dd>
-<dt>follow_refresh</dt>
+<dt><strong>follow_refresh</strong></dt>
 <dd>Follow the url in &lt;meta refresh&gt; tag.</dd>
-<dt>nohead</dt>
+<dt><strong>nohead</strong></dt>
 <dd>Do not process HTTP headers of the response. This mean that processing of response will
 be broken as soon as possible.</dd>
-<dt>nohead</dt>
+<dt><strong>nohead</strong></dt>
 <dd>Do not process body of request. That works for request of any kind, not only for PUT.
 This makes sense if you want to reduce traffic usage.</dd>
-<dt>debug_post</dt>
+<dt><strong>debug_post</strong></dt>
 <dd>Output to console the content of POST requests.</dd>
 </dl>
 </div>
