@@ -1,0 +1,241 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Interface of Grab &mdash; Grab v0.2 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Grab v0.2 documentation" href="index.html" />
+    <link rel="next" title="Configuration" href="configuration.html" />
+    <link rel="prev" title="Real World Examples" href="examples.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuration"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="Real World Examples"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Grab v0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interface-of-grab">
+<span id="api"></span><h1>Interface of Grab<a class="headerlink" href="#interface-of-grab" title="Permalink to this headline">¶</a></h1>
+<p>Grab is a set of core methods which could be extended by extensions.
+By default grab instance initiated with three extensions: <cite>grab.ext.pycurl</cite>,
+<cite>grab.ext.lxml</cite> and <cite>grab.ext.lxml_form</cite>. Some of grab extensions are called
+<cite>transports</cite>. These extensions provide network functionality: setting up network library,
+sending and receiving data. By default grab use <cite>grab.ext.pycurl</cite> extension. Also
+<cite>grab.ext.urllib</cite> transport is available, but for now it does not support all grab features.</p>
+<span class="target" id="module-grab.grab"></span><dl class="class">
+<dt id="grab.grab.Grab">
+<em class="property">class </em><tt class="descclassname">grab.grab.</tt><tt class="descname">Grab</tt><a class="headerlink" href="#grab.grab.Grab" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="grab.grab.Grab.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>extensions=['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form'], extra_extensions=None, **kwargs</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>By default grab instance is initiated with some extensions. You can
+override list of extension in <tt class="docutils literal"><span class="pre">extensions</span></tt> attribute or specify additional
+extensions in <tt class="docutils literal"><span class="pre">extra_extensions</span></tt> attribute. All other named arguments will
+be treated as settings.</p>
+</dd></dl>
+
+<p>Available settings are listed in  <a class="reference internal" href="configuration.html#configuration"><em>Configuration</em></a>.</p>
+<p>Example:</p>
+<div class="highlight-python"><pre>g = Grab(url='http://yandex.ru, timeout=1)
+resp = g.request()</pre>
+</div>
+<dl class="method">
+<dt id="grab.grab.Grab.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="headerlink" href="#grab.grab.Grab.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset all attributes which could be modified during previous request
+or which is not initialized yet if this is the new Grab instance.</p>
+<p>This methods is automatically called before each network request.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="grab.grab.Grab.clone">
+<tt class="descname">clone</tt><big>(</big><big>)</big><a class="headerlink" href="#grab.grab.Grab.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create clone of Grab instance.</p>
+<p>Cloned instance will have the same state: cookies, referer, response data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="grab.grab.Grab.setup">
+<tt class="descname">setup</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setting up Grab instance configuration.</p>
+</dd></dl>
+
+<p>See <a class="reference internal" href="configuration.html#configuration"><em>Configuration</em></a>.</p>
+<dl class="method">
+<dt id="grab.grab.Grab.go">
+<tt class="descname">go</tt><big>(</big><em>url</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.go" title="Permalink to this definition">¶</a></dt>
+<dd><p>Go to <tt class="docutils literal"><span class="pre">url</span></tt></p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">url:</th><td class="field-body">could be absolute or relative. If relative then t will be appended to the
+absolute URL of previous request.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd></dl>
+
+<p>This is shortcut to <tt class="docutils literal"><span class="pre">request(url=url)</span></tt></p>
+<dl class="method">
+<dt id="grab.grab.Grab.request">
+<tt class="descname">request</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform network request.</p>
+<p>You can specify grab settings in <tt class="docutils literal"><span class="pre">**kwargs</span></tt>.</p>
+<p>Returns: <tt class="docutils literal"><span class="pre">grab.Response</span></tt> objects.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="grab.grab.Grab.search">
+<tt class="descname">search</tt><big>(</big><em>anchor</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search for string or regular expression.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">anchor:</th><td class="field-body">could be byte string, unicode string or regular expression.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p>Returns: first found fragment or <tt class="xref docutils literal"><span class="pre">None</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="grab.grab.Grab.assert_pattern">
+<tt class="descname">assert_pattern</tt><big>(</big><em>anchor</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.assert_pattern" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that document contains <tt class="docutils literal"><span class="pre">anchor</span></tt> pattern.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">anchor:</th><td class="field-body">could be byte string, unicode string or regular expression.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p>If nothing found raise <tt class="docutils literal"><span class="pre">DataNotFound</span></tt> exception.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="grab.grab.Grab.reload">
+<tt class="descname">reload</tt><big>(</big><big>)</big><a class="headerlink" href="#grab.grab.Grab.reload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make the same network request again.</p>
+<p>All cookies, POST data, headers will be sent again.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="grab.grab.Grab.repeat_request">
+<tt class="descname">repeat_request</tt><big>(</big><big>)</big><a class="headerlink" href="#grab.grab.Grab.repeat_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>WTF: What the difference with <tt class="docutils literal"><span class="pre">reload</span></tt> method?</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples.html"
+                        title="previous chapter">Real World Examples</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="configuration.html"
+                        title="next chapter">Configuration</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/api.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuration"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="Real World Examples"
+             >previous</a> |</li>
+        <li><a href="index.html">Grab v0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Grigority Petukhov.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.3.
+    </div>
+  </body>
+</html>

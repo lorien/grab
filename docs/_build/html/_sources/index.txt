@@ -21,20 +21,13 @@ Basic grab functions:
 See :ref:`tutorial` for understanding main concepts of the Grab
 
 
-Similar projects
-================
-
- * Mechanize: http://wwwsearch.sourceforge.net/mechanize/
- * Scrapy: http://scrapy.org/
-
-
 Documenation sections
 =====================
 
 .. toctree::
     :maxdepth: 1
 
-    tutorial
+    examples
     api
     configuration
 

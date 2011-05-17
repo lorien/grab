@@ -23,7 +23,12 @@ logger = logging.getLogger('grab')
 try:
     import signal
     from signal import SIGPIPE, SIG_IGN
-    signal.signal(SIGPIPE, SIG_IGN)
+    try:
+        signal.signal(SIGPIPE, SIG_IGN)
+    except ValueError:
+        # Ignore the exception
+        # ValueError: signal only works in main thread
+        pass
 except ImportError:
     pass
 
