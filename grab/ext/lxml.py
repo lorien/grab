@@ -8,6 +8,7 @@ from grab import DataNotFound
 
 
 REX_NUMBER = re.compile(r'\d+')
+REX_SPACE = re.compile(r'\s', re.U)
 
 class Extension(object):
     export_attributes = ['tree', 'follow_link', 'xpath', 'itercss', 'css', 'css_text', 'css_number']
@@ -97,10 +98,13 @@ class Extension(object):
         return self.css(path).text_content().strip()
 
 
-    def css_number(self, path):
+    def css_number(self, path, ignore_spaces=False):
         """
         Find number in text of first element found by css path.
         """
 
         sel = CSSSelector(path)
-        return REX_NUMBER.search(self.css_text(path)).group(0)
+        text = self.css_text(path)
+        if ignore_spaces:
+            text = REX_SPACE.sub('', text)
+        return REX_NUMBER.search(text).group(0)
