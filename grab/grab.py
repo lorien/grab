@@ -15,7 +15,8 @@ import user_agent
 __all__ = ['Grab', 'GrabError', 'DataNotFound']
 
 GLOBAL_STATE = {'request_counter': 0}
-DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form']
+DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
+                      'grab.ext.django']
 logger = logging.getLogger('grab')
 
 class GrabError(IOError):
