@@ -35,7 +35,8 @@ except ImportError:
 
 class Extension(object):
     export_attributes = ['head_processor', 'body_processor', 'debug_processor',
-                         'process_config', 'extract_cookies', 'prepare_response']
+                         'process_config', 'extract_cookies', 'prepare_response',
+                         'dump_cookies', 'load_cookies']
     transport = True
 
     def extra_init(self, grab):
@@ -164,6 +165,9 @@ class Extension(object):
                 chunks.append('%s=%s;' % (key, value))
             self.curl.setopt(pycurl.COOKIE, ''.join(chunks))
 
+        if self.config['cookiefile']:
+            self.load_cookies(self.config['cookiefile'])
+
         if self.config['referer']:
             self.curl.setopt(pycurl.REFERER, str(self.config['referer']))
 
@@ -231,3 +235,22 @@ class Extension(object):
         self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
 
+    def load_cookies(self, path):
+        """
+        Load cookies from the file.
+
+        The cookie data may be in Netscape / Mozilla cookie data format or just regular HTTP-style headers dumped to a file.
+        """
+
+        self.curl.setopt(pycurl.COOKIEFILE, path)
+
+
+    def dump_cookies(self, path):
+        """
+        Dump all cookies to file.
+
+        Each cookie is dumped in the format:
+        # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
+        """
+
+        open(path, 'w').write('\n'.join(self.curl.getinfo(pycurl.INFO_COOKIELIST)))

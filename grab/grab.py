@@ -44,6 +44,7 @@ def default_config():
         reuse_cookies = True,
         reuse_referer = True,
         cookies = {},
+        cookiefile = None,
         referer = None,
         guess_encodings = ['windows-1251', 'koi8-r', 'utf-8'],
         log_file = None,
@@ -152,7 +153,6 @@ class Grab(object):
 
         self.response = Response()
         self.request_headers = None
-        self.cookies = {}
         self.trigger_extensions('reset')
 
     def clone(self):
@@ -245,6 +245,9 @@ class Grab(object):
             open(self.config['log_file'], 'w').write(self.response.body)
 
         self.save_dumps()
+
+        if self.config['cookiefile']:
+            self.dump_cookies(self.config['cookiefile'])
 
         if self.config['reuse_referer']:
             self.config['referer'] = self.response.url
