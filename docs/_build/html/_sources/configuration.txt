@@ -125,3 +125,7 @@ Available options
 
 **debug_post**
     Output to console the content of POST requests.
+
+**cookiefile**
+    Before each request load cookies from this file. After each request save received cookies to 
+    this file. Cookies in this file could be in Netscape/Mozilla format or just at HTTP-headers dump.

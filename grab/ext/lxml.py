@@ -11,7 +11,8 @@ REX_NUMBER = re.compile(r'\d+')
 REX_SPACE = re.compile(r'\s', re.U)
 
 class Extension(object):
-    export_attributes = ['tree', 'follow_link', 'xpath', 'itercss', 'css', 'css_text', 'css_number']
+    export_attributes = ['tree', 'follow_link', 'xpath', 'itercss', 'css', 'css_text', 'css_number',
+                         'get_xpath', 'get_xpath_number', 'get_xpath_text']
 
     def extra_reset(self, grab):
         grab._lxml_tree = None
@@ -105,6 +106,21 @@ class Extension(object):
 
         sel = CSSSelector(path)
         text = self.css_text(path)
+        if ignore_spaces:
+            text = REX_SPACE.sub('', text)
+        return REX_NUMBER.search(text).group(0)
+
+    def get_xpath(self, path, filter=None):
+
+        return self.xpath(path, filter)[0]
+
+    def get_xpath_text(self, path, filter=None):
+
+        return self.get_xpath(path, filter=filter).text_content().strip()
+
+    def get_xpath_number(self, path, filter=None, ignore_spaces=False):
+
+        text = self.get_xpath_text(path, filter=filter)
         if ignore_spaces:
             text = REX_SPACE.sub('', text)
         return REX_NUMBER.search(text).group(0)
