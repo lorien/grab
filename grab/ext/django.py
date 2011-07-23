@@ -1,3 +1,6 @@
+# Copyright: 2011, Grigoriy Petukhov
+# Author: Grigoriy Petukhov (http://lorien.name)
+# License: BSD
 from __future__ import absolute_import
 from urlparse import urlsplit
 
@@ -12,7 +15,7 @@ class Extension(object):
         from django.core.files.base import ContentFile
 
         if not name:
-            path = urlsplit(self.respone.url).path
+            path = urlsplit(self.response.url).path
             name = path.rstrip('/').split('/')[-1]
 
         content_file = ContentFile(self.response.body)
