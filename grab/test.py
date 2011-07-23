@@ -1,3 +1,6 @@
+# Copyright: 2011, Grigoriy Petukhov
+# Author: Grigoriy Petukhov (http://lorien.name)
+# License: BSD
 import unittest
 from unittest import TestCase
 import sys

@@ -1,3 +1,6 @@
+# Copyright: 2011, Grigoriy Petukhov
+# Author: Grigoriy Petukhov (http://lorien.name)
+# License: BSD
 from __future__ import absolute_import
 from lxml.html import fromstring
 from grab import DataNotFound

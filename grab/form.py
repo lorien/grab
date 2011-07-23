@@ -1,3 +1,6 @@
+# Copyright: 2011, Grigoriy Petukhov
+# Author: Grigoriy Petukhov (http://lorien.name)
+# License: BSD
 class Form(object):
     def __init__(self, soup):
         self.soup = soup

@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Copyright: 2011, Grigoriy Petukhov
+# Author: Grigoriy Petukhov (http://lorien.name)
+# License: BSD
 variants = """Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 2.0.50727)
