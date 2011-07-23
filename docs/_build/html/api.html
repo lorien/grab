@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -14,13 +12,12 @@
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
         VERSION:     '0.2',
-        COLLAPSE_INDEX: false,
+        COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Grab v0.2 documentation" href="index.html" />
     <link rel="next" title="Configuration" href="configuration.html" />
@@ -34,8 +31,8 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
+          <a href="modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
         <li class="right" >
           <a href="configuration.html" title="Configuration"
              accesskey="N">next</a> |</li>
@@ -51,27 +48,26 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="interface-of-grab">
-<span id="api"></span><h1>Interface of Grab<a class="headerlink" href="#interface-of-grab" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-grab.grab">
+<span id="api"></span><h1>Interface of Grab<a class="headerlink" href="#module-grab.grab" title="Permalink to this headline">¶</a></h1>
 <p>Grab is a set of core methods which could be extended by extensions.
 By default grab instance initiated with three extensions: <cite>grab.ext.pycurl</cite>,
 <cite>grab.ext.lxml</cite> and <cite>grab.ext.lxml_form</cite>. Some of grab extensions are called
 <cite>transports</cite>. These extensions provide network functionality: setting up network library,
 sending and receiving data. By default grab use <cite>grab.ext.pycurl</cite> extension. Also
 <cite>grab.ext.urllib</cite> transport is available, but for now it does not support all grab features.</p>
-<span class="target" id="module-grab.grab"></span><dl class="class">
+<dl class="class">
 <dt id="grab.grab.Grab">
 <em class="property">class </em><tt class="descclassname">grab.grab.</tt><tt class="descname">Grab</tt><a class="headerlink" href="#grab.grab.Grab" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="grab.grab.Grab.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>extensions=['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form', 'grab.ext.django'], extra_extensions=None, **kwargs</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>By default grab instance is initiated with some extensions. You can
+<tt class="descname">__init__</tt><big>(</big><em>extensions=</em><span class="optional">[</span>, <em>'grab.ext.pycurl'</em>, <em>'grab.ext.lxml'</em>, <em>'grab.ext.lxml_form'</em>, <em>'grab.ext.django'</em><span class="optional">]</span>, <em>extra_extensions=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.__init__" title="Permalink to this definition">¶</a></dt>
+<dd>By default grab instance is initiated with some extensions. You can
 override list of extension in <tt class="docutils literal"><span class="pre">extensions</span></tt> attribute or specify additional
 extensions in <tt class="docutils literal"><span class="pre">extra_extensions</span></tt> attribute. All other named arguments will
-be treated as settings.</p>
-</dd></dl>
+be treated as settings.</dd></dl>
 
-<p>Available settings are listed in  <a class="reference internal" href="configuration.html#configuration"><em>Configuration</em></a>.</p>
+<p>Available settings are listed in  <a class="reference external" href="configuration.html#configuration"><em>Configuration</em></a>.</p>
 <p>Example:</p>
 <div class="highlight-python"><pre>g = Grab(url='http://yandex.ru, timeout=1)
 resp = g.request()</pre>
@@ -94,10 +90,9 @@ or which is not initialized yet if this is the new Grab instance.</p>
 <dl class="method">
 <dt id="grab.grab.Grab.setup">
 <tt class="descname">setup</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.setup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Setting up Grab instance configuration.</p>
-</dd></dl>
+<dd>Setting up Grab instance configuration.</dd></dl>
 
-<p>See <a class="reference internal" href="configuration.html#configuration"><em>Configuration</em></a>.</p>
+<p>See <a class="reference external" href="configuration.html#configuration"><em>Configuration</em></a>.</p>
 <dl class="method">
 <dt id="grab.grab.Grab.go">
 <tt class="descname">go</tt><big>(</big><em>url</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.go" title="Permalink to this definition">¶</a></dt>
@@ -174,8 +169,7 @@ absolute URL of previous request.</td>
 <dl class="method">
 <dt id="grab.grab.Grab.repeat_request">
 <tt class="descname">repeat_request</tt><big>(</big><big>)</big><a class="headerlink" href="#grab.grab.Grab.repeat_request" title="Permalink to this definition">¶</a></dt>
-<dd><p>WTF: What the difference with <tt class="docutils literal"><span class="pre">reload</span></tt> method?</p>
-</dd></dl>
+<dd>WTF: What the difference with <tt class="docutils literal"><span class="pre">reload</span></tt> method?</dd></dl>
 
 </dd></dl>
 
@@ -187,30 +181,30 @@ absolute URL of previous request.</td>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="examples.html"
-                        title="previous chapter">Real World Examples</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="configuration.html"
-                        title="next chapter">Configuration</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/api.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="examples.html"
+                                  title="previous chapter">Real World Examples</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="configuration.html"
+                                  title="next chapter">Configuration</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/api.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -222,7 +216,7 @@ absolute URL of previous request.</td>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
+          <a href="modindex.html" title="Global Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="configuration.html" title="Configuration"
@@ -234,8 +228,8 @@ absolute URL of previous request.</td>
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2010, Grigority Petukhov.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.3.
+      &copy; Copyright 2010, Grigority Petukhov.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.6.
     </div>
   </body>
 </html>
