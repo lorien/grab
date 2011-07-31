@@ -18,7 +18,7 @@ import user_agent
 
 __all__ = ['Grab', 'GrabError', 'DataNotFound']
 
-RE_META_CHARSET = re.compile(r'<meta[^>]+content\s*=\s*charset=([-\w]+)')
+RE_META_CHARSET = re.compile(r'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)', re.I)
 
 GLOBAL_STATE = {'request_counter': 0}
 DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
@@ -91,7 +91,7 @@ class Response(object):
                     self.status = line
                 else:
                     try:
-                        name, value = line.split(': ', 1)
+                        name, value = [x.strip() for x in line.split(':', 1)]
                         self.headers[name] = value
                     except ValueError, ex:
                         logging.error('Invalid header line: %s' % line, exc_info=ex)
@@ -105,7 +105,7 @@ class Response(object):
         # Try to extract charset from http-equiv meta tag
         if self.body:
             pos = self.body.lower().find('</head>')
-            if pos:
+            if pos > -1:
                 html_head = self.body.lower()[:pos]
                 if html_head.find('http-equiv') > -1:
                     try:
@@ -116,7 +116,7 @@ class Response(object):
         if not charset:
             if 'Content-Type' in self.headers:
                 pos = self.headers['Content-Type'].find('charset=')
-                if pos:
+                if pos > -1:
                     charset = self.headers['Content-Type'][(pos + 8):]
 
         if charset:
