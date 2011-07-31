@@ -23,7 +23,7 @@ class Extension(object):
     @property
     def tree(self):
         if self._lxml_tree is None:
-            parser = HTMLParser(encoding=self.config['charset'])
+            parser = HTMLParser(encoding=self.response.charset)
             self._lxml_tree = fromstring(self.response.body, parser=parser)
         return self._lxml_tree
 

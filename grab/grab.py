@@ -11,11 +11,14 @@ import threading
 from urlparse import urljoin
 from copy import deepcopy
 import time
+import re
 
 from html import make_unicode, find_refresh_url
 import user_agent
 
 __all__ = ['Grab', 'GrabError', 'DataNotFound']
+
+RE_META_CHARSET = re.compile(r'<meta[^>]+content\s*=\s*charset=([-\w]+)')
 
 GLOBAL_STATE = {'request_counter': 0}
 DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
@@ -74,6 +77,7 @@ class Response(object):
         self.time = None
         self.url = None
         self.cookies = None
+        self.charset = 'utf-8'
 
     def parse(self):
         """
@@ -91,6 +95,34 @@ class Response(object):
                         self.headers[name] = value
                     except ValueError, ex:
                         logging.error('Invalid header line: %s' % line, exc_info=ex)
+
+        self.charset = self.detect_charset()
+
+
+    def detect_charset(self):
+        charset = None
+
+        # Try to extract charset from http-equiv meta tag
+        if self.body:
+            pos = self.body.lower().find('</head>')
+            if pos:
+                html_head = self.body.lower()[:pos]
+                if html_head.find('http-equiv') > -1:
+                    try:
+                        charset = RE_META_CHARSET.search(html_head).group(1)
+                    except AttributeError:
+                        pass
+
+        if not charset:
+            if 'Content-Type' in self.headers:
+                pos = self.headers['Content-Type'].find('charset=')
+                if pos:
+                    charset = self.headers['Content-Type'][(pos + 8):]
+
+        if charset:
+            self.charset = charset
+                    
+
 
     #@property
     #def unicode_body(self):

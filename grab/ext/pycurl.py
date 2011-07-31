@@ -160,9 +160,9 @@ class Extension(object):
             chunks = []
             for key, value in self.config['cookies'].iteritems():
                 if isinstance(key, unicode):
-                    key = key.encode(charset)
+                    key = key.encode(self.config['charset'])
                 if isinstance(value, unicode):
-                    value = value.encode(charset)
+                    value = value.encode(self.config['charset'])
                 key = urllib.quote_plus(key)
                 value = urllib.quote_plus(value)
                 chunks.append('%s=%s;' % (key, value))
