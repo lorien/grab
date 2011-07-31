@@ -96,7 +96,7 @@ class Response(object):
                     except ValueError, ex:
                         logging.error('Invalid header line: %s' % line, exc_info=ex)
 
-        self.charset = self.detect_charset()
+        self.detect_charset()
 
 
     def detect_charset(self):
