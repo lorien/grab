@@ -36,8 +36,6 @@ class ImproperlyConfigured(Exception):
 
 def default_config():
     return dict(
-        timeout = 15,
-        connect_timeout = 10,
         proxy = None,
         proxy_type = None,
         proxy_userpwd = None,
@@ -61,6 +59,11 @@ def default_config():
         debug = False,
         debug_post = False,
         encoding = 'gzip',
+        # Timeouts
+        timeout = 15,
+        connect_timeout = 10,
+        hammer_mode = False,
+        hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30))
     )
 
 class Response(object):
@@ -248,14 +251,41 @@ class Grab(object):
         Returns: ``grab.Response`` objects.
         """
 
-        # Reset the state setted by prevous request
-        self.reset()
-        self.increase_request_counter()
-        if kwargs:
-            self.setup(**kwargs)
-        self.process_config()
 
-        self.transport_extension.request(self)
+        if self.config['hammer_mode']:
+            hammer_timeouts = list(self.config['hammer_timeouts'])
+            connect_timeout, total_timeout = hammer_timeouts.pop(0)
+            self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
+
+        while True:
+            try:
+                # Reset the state setted by prevous request
+                self.reset()
+                self.increase_request_counter()
+                if kwargs:
+                    self.setup(**kwargs)
+                self.process_config()
+
+                self.transport_extension.request(self)
+            except GrabError, ex:
+                # In hammer mode try to use next timeouts
+                if self.config['hammer_mode'] and ex[0] == 28:
+                    # If not more timeouts
+                    # then raise an error
+                    if not hammer_timeouts:
+                        raise
+                    else:
+                        connect_timeout, total_timeout = hammer_timeouts.pop(0)
+                        self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
+                        logging.debug('Trying another timeouts. Connect: %d sec., total: %d sec.' % (connect_timeout, total_timeout))
+                # If we are not in hammer mode
+                # Then just raise an error
+                else:
+                    raise
+            else:
+                # Break the infinite loop in case of success reponse
+                break
+
         if self.config['debug_post']:
             if self.config['post']:
                 items = sorted(self.config['post'].items(), key=lambda x: x[0])
