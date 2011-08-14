@@ -6,6 +6,7 @@ import email
 import pycurl
 import logging
 import urllib
+from StringIO import StringIO
 
 from grab.grab import GrabError
 
@@ -75,7 +76,9 @@ class Extension(object):
         """
 
         if _type == pycurl.INFOTYPE_HEADER_OUT:
-            text = '\n'.join(text.splitlines()[1:])
+            lines = text.splitlines()
+            self.request_head = lines[0] 
+            text = '\n'.join(lines[1:])
             self.request_headers = dict(email.message_from_string(text))
 
     def process_config(self):
@@ -125,6 +128,8 @@ class Extension(object):
             self.curl.setopt(pycurl.READFUNCTION, StringIO(self.config['payload']).read) 
         elif method == 'DELETE':
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
+        elif method == 'HEAD':
+            self.curl.setopt(pycurl.NOBODY, 1)
         else:
             self.curl.setopt(pycurl.HTTPGET, 1)
         
