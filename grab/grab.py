@@ -63,7 +63,9 @@ def default_config():
         timeout = 15,
         connect_timeout = 10,
         hammer_mode = False,
-        hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30))
+        hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
+        ignore_unicode_errors = True,
+        lowercased_tree = False,
     )
 
 class Response(object):
@@ -124,16 +126,6 @@ class Response(object):
 
         if charset:
             self.charset = charset
-                    
-
-
-    #@property
-    #def unicode_body(self):
-        ## TODO: probably should be in Response class
-        ## or in new extension which also should include search and assert_pattern methods
-        #if not self._unicode_body:
-            #self._unicode_body = make_unicode(self.response.body, self.config['guess_encodings'])
-        #return self._unicode_body
 
 
 class Grab(object):
@@ -477,4 +469,14 @@ class Grab(object):
                 value = ''
             return key, value
         return urllib.urlencode(map(process, items))
+
+
+    ## TODO: probably should be in Response class
+    ## or in new extension which also should include search and assert_pattern methods
+    def response_unicode_body(self):
+        if self.config['ignore_unicode_errors']:
+            errors = 'ignore'
+        else:
+            errors = 'strict'
+        return self.response.body.decode(self.response.charset, errors)
 

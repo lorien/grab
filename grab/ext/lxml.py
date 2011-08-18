@@ -2,7 +2,7 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 from __future__ import absolute_import
-from lxml.html import fromstring, HTMLParser
+from lxml.html import fromstring
 from lxml.cssselect import CSSSelector
 from urlparse import urljoin
 import re
@@ -23,8 +23,10 @@ class Extension(object):
     @property
     def tree(self):
         if self._lxml_tree is None:
-            parser = HTMLParser(encoding=self.response.charset)
-            self._lxml_tree = fromstring(self.response.body, parser=parser)
+            body = self.response_unicode_body()
+            if self.config['lowercased_tree']:
+                body = body.lower()
+            self._lxml_tree = fromstring(body)
         return self._lxml_tree
 
     def follow_link(self, anchor=None, href=None):
