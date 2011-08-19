@@ -206,7 +206,9 @@ class Grab(object):
         # What is why we explicitly configure cookies
         # of new pycurl instance - we know where to get them from:
         # cookies are always processed in Response instance
-        g.setup(cookies=self.response.cookies)
+        cookies = self.config['cookies']
+        cookies.update(self.response.cookies)
+        g.setup(cookies=cookies)
         g.response = deepcopy(self.response)
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
@@ -223,7 +225,7 @@ class Grab(object):
                 kwargs['url'] = url
         self.config.update(kwargs)
 
-    def go(self, url):
+    def go(self, url, **kwargs):
         """
         Go to ``url``
 
@@ -232,7 +234,7 @@ class Grab(object):
                 absolute URL of previous request.
         """
 
-        return self.request(url=url)
+        return self.request(url=url, **kwargs)
 
     def request(self, **kwargs):
         """
@@ -240,9 +242,16 @@ class Grab(object):
 
         You can specify grab settings in ``**kwargs``.
 
+        Any keywrod argument will be passed to ``self.config`` except:
+
+        * controller - it should be callable which will be called at the end
+        of request. You can control the results of request with controller 
+        function and, for example, do the same request again in case of some error.
+
         Returns: ``grab.Response`` objects.
         """
 
+        controller = kwargs.pop('controller', None)
 
         if self.config['hammer_mode']:
             hammer_timeouts = list(self.config['hammer_timeouts'])
@@ -275,7 +284,7 @@ class Grab(object):
                 else:
                     raise
             else:
-                # Break the infinite loop in case of success reponse
+                # Break the infinite loop in case of success response
                 break
 
         if self.config['debug_post']:
@@ -315,6 +324,9 @@ class Grab(object):
             if url:
                 return self.request(url=url)
 
+        if controller:
+            controller(self)
+
         return self.response
 
     def search(self, anchor):
@@ -330,7 +342,7 @@ class Grab(object):
             return anchor.search(self.response.body) or None
         else:
             if isinstance(anchor, unicode):
-                anchor = anchor.encode(self.config['charset'])
+                anchor = anchor.encode(self.response.charset)
             return anchor if self.response.body.find(anchor) > -1 else None
 
     def assert_pattern(self, anchor):
@@ -346,24 +358,35 @@ class Grab(object):
         if not self.search(anchor):
             raise DataNotFound(u'Could not found pattern: %s' % anchor)
 
-    def reload(self):
-        """
-        Make the same network request again.
+    #def reload(self):
+        #"""
+        #Make the same network request again.
 
-        All cookies, POST data, headers will be sent again.
-        """
+        #All cookies, POST data, headers will be sent again.
+        #"""
 
-        self.go('')
+        #self.go('')
 
     def repeat_request(self):
         """
-        WTF: What the difference with ``reload`` method?
+        #Make the same network request again.
+
+        #All cookies, POST data, headers will be sent again.
         """
 
         self.config = self.old_config
         self.request()
 
     def sleep(self, limit1=None, limit2=None):
+        """
+        Sleep baby.
+
+        If one argument given then sleep for random time
+        between 0 and ``limit1`` seconds.
+        If two arguments given then sleep for random time
+        between ``limit1`` and ``limit2`` seconds.
+        """
+
         if limit1 is None and limit2 is None:
             limit1 = 0
             limit2 = 1
@@ -464,7 +487,7 @@ class Grab(object):
         def process(item):
             key, value = item
             if isinstance(value, unicode):
-                value = value.encode(self.config['charset'])
+                value = value.encode(self.response.charset)
             elif value is None:
                 value = ''
             return key, value

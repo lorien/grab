@@ -74,7 +74,7 @@ class Extension(object):
 
         return self.set_input(elem.get('name'), value)
 
-    def submit(self, submit_control=None, make_request=True, url=None):
+    def submit(self, submit_control=None, make_request=True, url=None, extra_post=None):
         """
         Submit form. Take care about all fields which was not set explicitly.
         """
@@ -105,6 +105,10 @@ class Extension(object):
             action_url = urljoin(self.config['url'], url)
         else:
             action_url = urljoin(self.config['url'], self.form.action)
+
+        if extra_post:
+            post.update(extra_post)
+
         if self.form.method == 'POST':
             #print '\n'.join('%s: %s' % x for x in post.iteritems())
             self.setup(post=post, url=action_url)
