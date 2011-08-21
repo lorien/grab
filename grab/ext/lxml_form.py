@@ -102,9 +102,9 @@ class Extension(object):
                         del post[elem.name]
 
         if url:
-            action_url = urljoin(self.config['url'], url)
+            action_url = urljoin(self.response.url, url)
         else:
-            action_url = urljoin(self.config['url'], self.form.action)
+            action_url = urljoin(self.response.url, self.form.action)
 
         if extra_post:
             post.update(extra_post)
