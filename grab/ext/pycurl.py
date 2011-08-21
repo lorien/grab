@@ -181,6 +181,8 @@ class Extension(object):
 
         if self.config['proxy']:
             self.curl.setopt(pycurl.PROXY, str(self.config['proxy'])) 
+        else:
+            self.curl.setopt(pycurl.PROXY, '')
 
         if self.config['proxy_userpwd']:
             self.curl.setopt(pycurl.PROXYUSERPWD, self.config['proxy_userpwd'])
