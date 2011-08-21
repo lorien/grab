@@ -24,6 +24,8 @@ GLOBAL_STATE = {'request_counter': 0}
 DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
                       'grab.ext.django']
 logger = logging.getLogger('grab')
+RE_NUMBER = re.compile(r'\d+')
+RE_NUMBER_WITH_SPACES = re.compile(r'[\s\d]+', re.U)
 
 class GrabError(IOError):
     pass
@@ -503,3 +505,12 @@ class Grab(object):
             errors = 'strict'
         return self.response.body.decode(self.response.charset, errors)
 
+    def find_number(self, value, ignore_spaces=False):
+        "Find number or raise IndexError."
+        try:
+            if ignore_spaces:
+                return RE_NUMBER_WITH_SPACES.search(value).group(0)
+            else:
+                return RE_NUMBER.search(value).group(0)
+        except AttributeError:
+            raise IndexError
