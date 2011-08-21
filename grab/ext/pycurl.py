@@ -40,7 +40,7 @@ except ImportError:
 class Extension(object):
     export_attributes = ['head_processor', 'body_processor', 'debug_processor',
                          'process_config', 'extract_cookies', 'prepare_response',
-                         'dump_cookies', 'load_cookies']
+                         'dump_cookies', 'load_cookies', 'clear_cookies']
     transport = True
 
     def extra_init(self, grab):
@@ -262,3 +262,13 @@ class Extension(object):
         """
 
         open(path, 'w').write('\n'.join(self.curl.getinfo(pycurl.INFO_COOKIELIST)))
+
+    def clear_cookies(self):
+        """
+        Clear all cookies.
+        """
+
+        # Write tests
+        self.curl.setopt(pycurl.COOKIELIST, 'ALL')
+        self.config['cookies'] = {}
+        self.response.cookies = None

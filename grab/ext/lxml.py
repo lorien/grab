@@ -109,6 +109,7 @@ class Extension(object):
         Find number in text of first element found by css path.
         """
 
+        # TODO: use self.find_number
         sel = CSSSelector(path)
         text = self.css_text(path)
         if ignore_spaces:
