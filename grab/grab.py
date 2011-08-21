@@ -381,21 +381,18 @@ class Grab(object):
         self.config = self.old_config
         self.request()
 
-    def sleep(self, limit1=None, limit2=None):
+    def sleep(self, limit1=1, limit2=None):
         """
         Sleep baby.
-
-        If one argument given then sleep for random time
-        between 0 and ``limit1`` seconds.
-        If two arguments given then sleep for random time
-        between ``limit1`` and ``limit2`` seconds.
+        
+        Arguments given:
+        0 - sleep for [0, 1] seconds
+        1 - sleep for [0, limit1] seconds
+        2 - sleep for [limit1, limit2] seconds
         """
 
-        if limit1 is None and limit2 is None:
-            limit1 = 0
-            limit2 = 1
-        elif limit1 is None or limit2 is None:
-            raise Exception('sleep function accepts 0 or 2 arguments')
+        if limit2 is None:
+            limit1, limit2 = 0, limit1
         limit1 = int(limit1 * 1000)
         limit2 = int(limit2 * 1000)
         sleep_time = randint(limit1, limit2) / 1000.0
