@@ -125,8 +125,6 @@ class Extension(object):
         return self.get_xpath(path, filter=filter).text_content().strip()
 
     def get_xpath_number(self, path, filter=None, ignore_spaces=False):
-
+        # NEED TESTS
         text = self.get_xpath_text(path, filter=filter)
-        if ignore_spaces:
-            text = REX_SPACE.sub('', text)
-        return REX_NUMBER.search(text).group(0)
+        return self.find_number(text, ignore_spaces=ignore_spaces)

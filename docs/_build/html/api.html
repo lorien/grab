@@ -95,7 +95,7 @@ or which is not initialized yet if this is the new Grab instance.</p>
 <p>See <a class="reference external" href="configuration.html#configuration"><em>Configuration</em></a>.</p>
 <dl class="method">
 <dt id="grab.grab.Grab.go">
-<tt class="descname">go</tt><big>(</big><em>url</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.go" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">go</tt><big>(</big><em>url</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.go" title="Permalink to this definition">¶</a></dt>
 <dd><p>Go to <tt class="docutils literal"><span class="pre">url</span></tt></p>
 <dl class="docutils">
 <dt>Args:</dt>
@@ -118,6 +118,12 @@ absolute URL of previous request.</td>
 <tt class="descname">request</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#grab.grab.Grab.request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform network request.</p>
 <p>You can specify grab settings in <tt class="docutils literal"><span class="pre">**kwargs</span></tt>.</p>
+<p>Any keywrod argument will be passed to <tt class="docutils literal"><span class="pre">self.config</span></tt> except:</p>
+<ul class="simple">
+<li>controller - it should be callable which will be called at the end</li>
+</ul>
+<p>of request. You can control the results of request with controller 
+function and, for example, do the same request again in case of some error.</p>
 <p>Returns: <tt class="docutils literal"><span class="pre">grab.Response</span></tt> objects.</p>
 </dd></dl>
 
@@ -160,16 +166,11 @@ absolute URL of previous request.</td>
 </dd></dl>
 
 <dl class="method">
-<dt id="grab.grab.Grab.reload">
-<tt class="descname">reload</tt><big>(</big><big>)</big><a class="headerlink" href="#grab.grab.Grab.reload" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make the same network request again.</p>
-<p>All cookies, POST data, headers will be sent again.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="grab.grab.Grab.repeat_request">
 <tt class="descname">repeat_request</tt><big>(</big><big>)</big><a class="headerlink" href="#grab.grab.Grab.repeat_request" title="Permalink to this definition">¶</a></dt>
-<dd>WTF: What the difference with <tt class="docutils literal"><span class="pre">reload</span></tt> method?</dd></dl>
+<dd><p>#Make the same network request again.</p>
+<p>#All cookies, POST data, headers will be sent again.</p>
+</dd></dl>
 
 </dd></dl>
 

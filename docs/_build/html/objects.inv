@@ -11,5 +11,4 @@ grab.grab.Grab class api.html
 grab.grab.Grab.assert_pattern method api.html
 grab.grab.Grab.setup method api.html
 grab.grab.Grab.reset method api.html
-grab.grab.Grab.reload method api.html
 grab.grab.Grab.clone method api.html
