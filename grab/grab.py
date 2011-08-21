@@ -174,6 +174,7 @@ class Grab(object):
         self.reset()
         if kwargs:
             self.setup(**kwargs)
+        self.clone_counter = 0
 
     def reset(self):
         """
@@ -214,6 +215,7 @@ class Grab(object):
         g.response = deepcopy(self.response)
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
+        g.clone_counter = self.clone_counter + 1
         return g
 
     def setup(self, **kwargs):
