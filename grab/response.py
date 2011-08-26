@@ -66,7 +66,7 @@ class Response(object):
             self.charset = charset
 
     def unicode_body(self, ignore_errors=True):
-        if self.ignore_errors:
+        if ignore_errors:
             errors = 'ignore'
         else:
             errors = 'strict'

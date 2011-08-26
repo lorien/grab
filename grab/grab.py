@@ -26,11 +26,11 @@ from html import make_unicode, find_refresh_url
 import user_agent
 from response import Response
 
-__all__ = ['Grab', 'GrabError', 'DataNotFound']
+__all__ = ['Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseError']
 
 GLOBAL_STATE = {'request_counter': 0}
 DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
-                      'grab.ext.django']
+                      'grab.ext.django', 'grab.ext.text']
 logger = logging.getLogger('grab')
 
 class GrabError(Exception):
@@ -44,6 +44,9 @@ class GrabNetworkError(IOError, GrabError):
     """
 
 class DataNotFound(IndexError, GrabError):
+    pass
+
+class GrabMisuseError(GrabError):
     pass
 
 def default_config():

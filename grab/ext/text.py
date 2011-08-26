@@ -1,8 +1,7 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-from __future__ import absolute_import
-from grab import DataNotFound, GrabError
+from grab import DataNotFound, GrabError, GrabMisuseError
 import re
 
 RE_NUMBER = re.compile(r'\d+')
@@ -27,7 +26,7 @@ class Extension(object):
 
         if isinstance(anchor, unicode):
             if byte:
-                raise GrabError('The anchor should be bytes string in byte mode')
+                raise GrabMisuseError('The anchor should be bytes string in byte mode')
             else:
                 return anchor in self.response.unicode_body()
 
@@ -35,7 +34,7 @@ class Extension(object):
             if byte:
                 return anchor in self.response.body
             else:
-                raise GrabError('The anchor should be unicode string in non-byte mode')
+                raise GrabMisuseError('The anchor should be byte string in non-byte mode')
 
     def search_rex(self, rex, byte=False):
         """
@@ -51,9 +50,9 @@ class Extension(object):
         """
 
         if byte:
-            return anchor.search(self.response.body) or None
+            return rex.search(self.response.body) or None
         else:
-            return anchor.search(self.response.unicode_body()) or None
+            return rex.search(self.response.unicode_body()) or None
 
     def assert_substring(self, anchor, byte=False):
         """
@@ -68,8 +67,8 @@ class Extension(object):
         If `rex` expression is not found then raise `DataNotFound` exception.
         """
 
-        if not self.search_rex(anchor, byte=byte): 
-            raise DataNotFound('Substring not found: %s' % anchor)
+        if not self.search_rex(rex, byte=byte): 
+            raise DataNotFound('Regexp not found')
 
     def find_number(self, text, ignore_spaces=False):
         """
@@ -82,11 +81,14 @@ class Extension(object):
         """
 
         if ignore_spaces:
-            match = self.drop_spaces(RE_NUMBER_WITH_SPACES.search(text))
+            match = RE_NUMBER_WITH_SPACES.search(text)
         else:
             match = RE_NUMBER.search(text)
         if match:
-            return match.group(0)
+            if ignore_spaces:
+                return self.drop_spaces(match.group(0))
+            else:
+                return match.group(0)
         else:
             raise DataNotFound
 
@@ -95,4 +97,4 @@ class Extension(object):
         Drop all space-chars in the `text`.
         """
 
-        return RE_SPACE.sub('', value).strip()
+        return RE_SPACE.sub('', text).strip()
