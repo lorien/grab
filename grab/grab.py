@@ -2,6 +2,15 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
+"""
+Exceptions:
+
+Exception
+-> GrabError
+---> GrabNetworkError <- IOError 
+---> DataNotFound
+"""
+
 import logging
 import os
 import urllib
@@ -15,26 +24,26 @@ import re
 
 from html import make_unicode, find_refresh_url
 import user_agent
+from response import Response
 
 __all__ = ['Grab', 'GrabError', 'DataNotFound']
-
-RE_META_CHARSET = re.compile(r'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)', re.I)
 
 GLOBAL_STATE = {'request_counter': 0}
 DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
                       'grab.ext.django']
 logger = logging.getLogger('grab')
-RE_NUMBER = re.compile(r'\d+')
-RE_NUMBER_WITH_SPACES = re.compile(r'\d[\s\d]+', re.U)
-RE_SPACE = re.compile(r'\s+', re.U)
 
-class GrabError(IOError):
-    pass
+class GrabError(Exception):
+    """
+    All custom Grab exception should be children of that class.
+    """
 
-class DataNotFound(Exception):
-    pass
+class GrabNetworkError(IOError, GrabError):
+    """
+    Wrapper about pycurl error.
+    """
 
-class ImproperlyConfigured(Exception):
+class DataNotFound(IndexError, GrabError):
     pass
 
 def default_config():
@@ -67,68 +76,10 @@ def default_config():
         connect_timeout = 10,
         hammer_mode = False,
         hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
-        ignore_unicode_errors = True,
         lowercased_tree = False,
     )
 
-class Response(object):
-    """
-    HTTP Response.
-    """
 
-    def __init__(self):
-        self.status = None
-        self.code = None
-        self.head = None
-        self.body = None
-        self.headers =None
-        self.time = None
-        self.url = None
-        self.cookies = None
-        self.charset = 'utf-8'
-
-    def parse(self):
-        """
-        This method is called after Grab instance performes network request.
-        """
-        self.headers = {}
-        for line in self.head.split('\n'):
-            line = line.rstrip('\r')
-            if line:
-                if line.startswith('HTTP'):
-                    self.status = line
-                else:
-                    try:
-                        name, value = [x.strip() for x in line.split(':', 1)]
-                        self.headers[name] = value
-                    except ValueError, ex:
-                        logging.error('Invalid header line: %s' % line, exc_info=ex)
-
-        self.detect_charset()
-
-
-    def detect_charset(self):
-        charset = None
-
-        # Try to extract charset from http-equiv meta tag
-        if self.body:
-            pos = self.body.lower().find('</head>')
-            if pos > -1:
-                html_head = self.body.lower()[:pos]
-                if html_head.find('http-equiv') > -1:
-                    try:
-                        charset = RE_META_CHARSET.search(html_head).group(1)
-                    except AttributeError:
-                        pass
-
-        if not charset:
-            if 'Content-Type' in self.headers:
-                pos = self.headers['Content-Type'].find('charset=')
-                if pos > -1:
-                    charset = self.headers['Content-Type'][(pos + 8):]
-
-        if charset:
-            self.charset = charset
 
 
 class Grab(object):
@@ -213,7 +164,7 @@ class Grab(object):
         cookies = self.config['cookies']
         cookies.update(self.response.cookies)
         g.setup(cookies=cookies)
-        g.response = deepcopy(self.response)
+        g.response = self.response.copy()
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
         g.clone_counter = self.clone_counter + 1
@@ -253,7 +204,7 @@ class Grab(object):
         of request. You can control the results of request with controller 
         function and, for example, do the same request again in case of some error.
 
-        Returns: ``grab.Response`` objects.
+        Returns: ``Response`` objects.
         """
 
         controller = kwargs.pop('controller', None)
@@ -298,7 +249,7 @@ class Grab(object):
                 rows = '\n'.join('%-25s: %s' % x for x in items)
                 logging.debug('POST request:\n%s\n' % rows)
 
-        # It's vital to delete old POST data after request is performed.
+        # It's important to delete old POST data after request is performed.
         # If POST data remains when next request will try to use them again!
         # This is not what typical user waits.
         self.old_config = deepcopy(self.config) 
@@ -334,52 +285,14 @@ class Grab(object):
 
         return self.response
 
-    def search(self, anchor):
-        """
-        Search for string or regular expression.
-
-        Args:
-            :anchor: could be byte string, unicode string or regular expression.
-
-        Returns: first found fragment or ``None``
-        """
-        if hasattr(anchor, 'finditer'):
-            return anchor.search(self.response.body) or None
-        else:
-            if isinstance(anchor, unicode):
-                anchor = anchor.encode(self.response.charset)
-            return anchor if self.response.body.find(anchor) > -1 else None
-
-    def assert_pattern(self, anchor):
-        """
-        Test that document contains ``anchor`` pattern.
-
-        Args:
-            :anchor: could be byte string, unicode string or regular expression.
-        
-        If nothing found raise ``DataNotFound`` exception.
-        """
-
-        if not self.search(anchor):
-            raise DataNotFound(u'Could not found pattern: %s' % anchor)
-
-    #def reload(self):
-        #"""
-        #Make the same network request again.
-
-        #All cookies, POST data, headers will be sent again.
-        #"""
-
-        #self.go('')
-
     def repeat_request(self):
         """
-        #Make the same network request again.
+        Make the same network request again.
 
-        #All cookies, POST data, headers will be sent again.
+        All cookies, POST data, headers will be sent again.
         """
 
-        self.config = self.old_config
+        self.config = deepcopy(self.old_config)
         self.request()
 
     def sleep(self, limit1=1, limit2=None):
@@ -425,14 +338,13 @@ class Grab(object):
                 pass
 
     def process_config(self):
-        raise ImproperlyConfigured('process_config method should be redefined by transport extension')
+        raise NotImplemented('process_config method should be redefined by transport extension')
 
     def extract_cookies(self):
-           raise ImproperlyConfigured('extract_cookies method should be redefined by transport extension')
+       raise NotImplemented('extract_cookies method should be redefined by transport extension')
 
     def prepare_response(self):
-           raise ImproperlyConfigured('prepare_response method should be redefined by transport extension')
-
+       raise NotImplemented('prepare_response method should be redefined by transport extension')
 
     def load_extension(self, ext_class):
         for attr in ext_class.export_attributes:
@@ -494,26 +406,3 @@ class Grab(object):
                 value = ''
             return key, value
         return urllib.urlencode(map(process, items))
-
-
-    ## TODO: probably should be in Response class
-    ## or in new extension which also should include search and assert_pattern methods
-    def response_unicode_body(self):
-        if self.config['ignore_unicode_errors']:
-            errors = 'ignore'
-        else:
-            errors = 'strict'
-        return self.response.body.decode(self.response.charset, errors)
-
-    def find_number(self, value, ignore_spaces=False):
-        "Find number or raise IndexError."
-        try:
-            if ignore_spaces:
-                return self.drop_spaces(RE_NUMBER_WITH_SPACES.search(value).group(0))
-            else:
-                return RE_NUMBER.search(value).group(0)
-        except AttributeError:
-            raise IndexError
-
-    def drop_spaces(self, value):
-        return RE_SPACE.sub('', value).strip()
