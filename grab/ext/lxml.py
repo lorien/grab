@@ -14,7 +14,8 @@ REX_NUMBER = re.compile(r'\d+')
 REX_SPACE = re.compile(r'\s', re.U)
 
 class Extension(object):
-    export_attributes = ['tree', 'follow_link', 'get_node_text',
+    export_attributes = ['tree', 'follow_link',
+                         'get_node_text', 'find_node_number',
                          'xpath', 'xpath_text', 'xpath_number', 'xpath_list',
                          'css', 'css_text', 'css_number', 'css_list']
 
@@ -23,6 +24,10 @@ class Extension(object):
 
     @property
     def tree(self):
+        """
+        Return lxml ElementTree tree of the document.
+        """
+
         if self._lxml_tree is None:
             body = self.response.unicode_body()
             if self.config['lowercased_tree']:
@@ -61,11 +66,13 @@ class Extension(object):
                 if found:
                     url = urljoin(self.config['url'], item[2])
                     return self.request(url=item[2])
-        raise DataNotFound('Cannot find link ANCHOR=%s, HREF=%s' %\
-                           (anchor, href))
+        raise DataNotFound('Cannot find link ANCHOR=%s, HREF=%s' % (anchor, href))
 
     def get_node_text(self, node):
         return self.normalize_space(' '.join(node.xpath('./descendant-or-self::*[name() != "script" and name() != "style"]/text()[normalize-space()]')))
+
+    def find_node_number(self, node):
+        return self.find_number(self.get_node_text(node))
 
     def xpath(self, path, filter=None):
         """
@@ -118,8 +125,6 @@ class Extension(object):
         """
 
         return self.tree.cssselect(path)
-        #sel = CSSSelector(path)(self.tree)
-        #return sel(self.tree)
 
     def css_text(self, path):
         """

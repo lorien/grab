@@ -127,6 +127,10 @@ class LXMLExtensionTest(unittest.TestCase):
         elem = self.lxml_tree.xpath('//div[@id="fly"]')[0]
         self.assertEqual(self.g.get_node_text(elem), u'му ха')
 
+    def test_find_node_number(self):
+        node = self.lxml_tree.xpath('//li[@id="num-1"]')[0]
+        self.assertEqual('100', self.g.find_node_number(node))
+
     def test_xpath(self):
         self.assertEqual('bee-em', self.g.xpath('//em').get('id'))
         self.assertEqual('num-2', self.g.xpath(u'//*[text() = "item #2"]').get('id'))
@@ -145,6 +149,10 @@ class LXMLExtensionTest(unittest.TestCase):
         self.assertRaises(DataNotFound,
             lambda: self.g.xpath_number('//liza'))
 
+    def test_xpath_list(self):
+        self.assertEqual(['num-1', 'num-2'],
+            [x.get('id') for x in self.g.xpath_list('//li')])
+
     def test_css(self):
         self.assertEqual('bee-em', self.g.css('em').get('id'))
         self.assertEqual('num-2', self.g.css('#num-2').get('id'))
@@ -162,6 +170,10 @@ class LXMLExtensionTest(unittest.TestCase):
         self.assertEqual('1002', self.g.css_number('li', ignore_spaces=True))
         self.assertRaises(DataNotFound,
             lambda: self.g.css_number('liza'))
+
+    def test_css_list(self):
+        self.assertEqual(['num-1', 'num-2'],
+            [x.get('id') for x in self.g.css_list('li')])
 
 
 if __name__ == '__main__':
