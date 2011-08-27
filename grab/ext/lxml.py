@@ -71,8 +71,8 @@ class Extension(object):
     def get_node_text(self, node):
         return self.normalize_space(' '.join(node.xpath('./descendant-or-self::*[name() != "script" and name() != "style"]/text()[normalize-space()]')))
 
-    def find_node_number(self, node):
-        return self.find_number(self.get_node_text(node))
+    def find_node_number(self, node, ignore_spaces=False):
+        return self.find_number(self.get_node_text(node), ignore_spaces=ignore_spaces)
 
     def xpath(self, path, filter=None):
         """

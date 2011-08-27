@@ -130,6 +130,7 @@ class LXMLExtensionTest(unittest.TestCase):
     def test_find_node_number(self):
         node = self.lxml_tree.xpath('//li[@id="num-1"]')[0]
         self.assertEqual('100', self.g.find_node_number(node))
+        self.assertEqual('1002', self.g.find_node_number(node, ignore_spaces=True))
 
     def test_xpath(self):
         self.assertEqual('bee-em', self.g.xpath('//em').get('id'))
