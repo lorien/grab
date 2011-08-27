@@ -10,7 +10,7 @@ RE_SPACE = re.compile(r'\s+', re.U)
 
 class Extension(object):
     export_attributes = ['search', 'search_rex', 'assert_substring', 'assert_rex',
-                         'find_number', 'drop_spaces']
+                         'find_number', 'drop_space', 'normalize_space']
         
     def search(self, anchor, byte=False):
         """
@@ -86,15 +86,24 @@ class Extension(object):
             match = RE_NUMBER.search(text)
         if match:
             if ignore_spaces:
-                return self.drop_spaces(match.group(0))
+                return self.drop_space(match.group(0))
             else:
                 return match.group(0)
         else:
             raise DataNotFound
 
-    def drop_spaces(self, text):
+    def drop_space(self, text):
         """
         Drop all space-chars in the `text`.
         """
 
-        return RE_SPACE.sub('', text).strip()
+        return RE_SPACE.sub('', text)
+
+    def normalize_space(self, text):
+        """
+        Replace sequence of space-chars with one space char.
+
+        Drop leading and trimming space-chars.
+        """
+
+        return RE_SPACE.sub(' ', text).strip()

@@ -5,13 +5,37 @@ import re
 
 from grab import Grab, GrabMisuseError, DataNotFound
 
+HTML = u"""
+<head>
+    <title>фыва</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=cp1251" />
+</head>
+<body>
+    <div id="bee">
+        <div class="wrapper">
+            <strong id="bee-strong">пче</strong><em id="bee-em">ла</em>
+        </div>
+        <script type="text/javascript">
+        mozilla = 777;
+        </script>
+        <style type="text/css">
+        body { color: green; }
+        </style>
+    </div>
+    <div id="fly">
+        <strong id="fly-strong">му\n</strong><em id="fly-em">ха</em>
+    </div>
+    <ul id="num">
+        <li id="num-1">item #100 2</li>
+        <li id="num-2">item #2</li>
+    </ul>
+""".encode('cp1251')
+
 class TextExtensionTest(unittest.TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
-        # Note that we use cp1251 encoding to fully test
-        # unicode/non-unicode issues
         self.g = Grab()
-        self.g.response.body = u'<strong>фыва</strong>'.encode('cp1251')
+        self.g.response.body = HTML
         self.g.response.charset = 'cp1251'
 
     def test_search(self):
@@ -68,11 +92,76 @@ class TextExtensionTest(unittest.TestCase):
         self.assertRaises(DataNotFound,
             lambda: self.g.find_number(u'фыва'))
 
-    def test_drop_spaces(self):
-        self.assertEqual('', self.g.drop_spaces(' '))
-        self.assertEqual('f', self.g.drop_spaces(' f '))
-        self.assertEqual('fb', self.g.drop_spaces(' f b '))
-        self.assertEqual(u'триглаза', self.g.drop_spaces(u' тр и гла' + '\t' + '\n' + u' за '))
+    def test_drop_space(self):
+        self.assertEqual('', self.g.drop_space(' '))
+        self.assertEqual('f', self.g.drop_space(' f '))
+        self.assertEqual('fb', self.g.drop_space(' f b '))
+        self.assertEqual(u'триглаза', self.g.drop_space(u' тр и гла' + '\t' + '\n' + u' за '))
+
+
+class LXMLExtensionTest(unittest.TestCase):
+    def setUp(self):
+        # Create fake grab instance with fake response
+        self.g = Grab()
+        self.g.response.body = HTML
+        self.g.response.charset = 'cp1251'
+
+        from lxml.html import fromstring
+        self.lxml_tree = fromstring(self.g.response.body)
+
+    def test_lxml_text_content_fail(self):
+        # lxml node text_content() method do not put spaces between text
+        # content of adjacent XML nodes
+        self.assertEqual(self.lxml_tree.xpath('//div[@id="bee"]/div')[0].text_content().strip(), u'пчела')
+        self.assertEqual(self.lxml_tree.xpath('//div[@id="fly"]')[0].text_content().strip(), u'му\nха')
+
+    def test_lxml_xpath(self):
+        names = set(x.tag for x in self.lxml_tree.xpath('//div[@id="bee"]//*'))
+        self.assertEqual(set(['em', 'div', 'strong', 'style', 'script']), names)
+        names = set(x.tag for x in self.lxml_tree.xpath('//div[@id="bee"]//*[name() != "script" and name() != "style"]'))
+        self.assertEqual(set(['em', 'div', 'strong']), names)
+
+    def test_get_node_text(self):
+        elem = self.lxml_tree.xpath('//div[@id="bee"]')[0]
+        self.assertEqual(self.g.get_node_text(elem), u'пче ла')
+        elem = self.lxml_tree.xpath('//div[@id="fly"]')[0]
+        self.assertEqual(self.g.get_node_text(elem), u'му ха')
+
+    def test_xpath(self):
+        self.assertEqual('bee-em', self.g.xpath('//em').get('id'))
+        self.assertEqual('num-2', self.g.xpath(u'//*[text() = "item #2"]').get('id'))
+        self.assertRaises(DataNotFound,
+            lambda: self.g.xpath('//em[@id="baz"]'))
+
+    def test_xpath_text(self):
+        self.assertEqual(u'пче ла', self.g.xpath_text('//*[@id="bee"]'))
+        self.assertEqual(u'пче ла му ха item #100 2 item #2', self.g.xpath_text('/html/body'))
+        self.assertRaises(DataNotFound,
+            lambda: self.g.xpath_text('//code'))
+
+    def test_xpath_number(self):
+        self.assertEqual('100', self.g.xpath_number('//li'))
+        self.assertEqual('1002', self.g.xpath_number('//li', ignore_spaces=True))
+        self.assertRaises(DataNotFound,
+            lambda: self.g.xpath_number('//liza'))
+
+    def test_css(self):
+        self.assertEqual('bee-em', self.g.css('em').get('id'))
+        self.assertEqual('num-2', self.g.css('#num-2').get('id'))
+        self.assertRaises(DataNotFound,
+            lambda: self.g.css('em#baz'))
+
+    def test_css_text(self):
+        self.assertEqual(u'пче ла', self.g.css_text('#bee'))
+        self.assertEqual(u'пче ла му ха item #100 2 item #2', self.g.css_text('html body'))
+        self.assertRaises(DataNotFound,
+            lambda: self.g.css_text('code'))
+
+    def test_css_number(self):
+        self.assertEqual('100', self.g.css_number('li'))
+        self.assertEqual('1002', self.g.css_number('li', ignore_spaces=True))
+        self.assertRaises(DataNotFound,
+            lambda: self.g.css_number('liza'))
 
 
 if __name__ == '__main__':
