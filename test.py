@@ -1,9 +1,53 @@
 #!/usr/bin/env python
 # coding: utf-8
 import unittest
+from unittest import TestCase
 import re
+import threading
+import time
+from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+import urllib
 
 from grab import Grab, GrabMisuseError, DataNotFound
+
+# The port on which the fake http server listens requests
+FAKE_SERVER_PORT = 9876
+
+# Simple URL which could be used in tests
+BASE_URL = 'http://localhost:%d' % FAKE_SERVER_PORT
+
+# This global objects is used by Fake HTTP Server
+# It return content of HTML variable for any GET request
+RESPONSE = {'get': ''}
+
+class FakeServerThread(threading.Thread):
+    def __init__(self, *args, **kwargs):
+        super(FakeServerThread, self).__init__(*args, **kwargs)
+        self.daemon = True
+
+    def start(self):
+        super(FakeServerThread, self).start()
+        time.sleep(0.1)
+
+    def run(self):
+        class RequestHandlerClass(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(RESPONSE['get'])
+
+            def log_message(*args, **kwargs):
+                "Do not log to console"
+                pass
+
+        server_address = ('localhost', FAKE_SERVER_PORT)
+        try:
+            httpd = HTTPServer(server_address, RequestHandlerClass)
+            httpd.serve_forever()
+        except IOError:
+            # Do nothing if server alrady is running
+            pass
+
 
 HTML = u"""
 <head>
@@ -31,7 +75,7 @@ HTML = u"""
     </ul>
 """.encode('cp1251')
 
-class TextExtensionTest(unittest.TestCase):
+class TextExtensionTest(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
         self.g = Grab()
@@ -176,6 +220,32 @@ class LXMLExtensionTest(unittest.TestCase):
         self.assertEqual(['num-1', 'num-2'],
             [x.get('id') for x in self.g.css_list('li')])
 
+
+class TestFakeServer(TestCase):
+    def setUp(self):
+        FakeServerThread().start()
+
+    def test_server(self):
+        RESPONSE['get'] = 'zorro'
+        data = urllib.urlopen(BASE_URL).read()
+        self.assertEqual(data, RESPONSE['get'])
+
+
+class TestGrab(TestCase):
+    def setUp(self):
+        FakeServerThread().start()
+
+    def test_basic(self):
+        RESPONSE['get'] = 'the cat'
+        g = Grab()
+        g.go(BASE_URL)
+        self.assertEqual('the cat', g.response.body)
+
+    def test_xml_with_declaration(self):
+        RESPONSE['get'] = '<?xml version="1.0" encoding="UTF-8"?><root><foo>foo</foo></root>'
+        g = Grab()
+        g.go(BASE_URL)
+        self.assertTrue(g.xpath('//foo').text == 'foo')
 
 if __name__ == '__main__':
     unittest.main()
