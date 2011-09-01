@@ -247,5 +247,10 @@ class TestGrab(TestCase):
         g.go(BASE_URL)
         self.assertTrue(g.xpath('//foo').text == 'foo')
 
+    def test_incorrect_option_name(self):
+        g = Grab()
+        self.assertRaises(GrabMisuseError,
+            lambda: g.setup(save_the_word=True))
+
 if __name__ == '__main__':
     unittest.main()

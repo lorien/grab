@@ -43,14 +43,22 @@ class GrabNetworkError(IOError, GrabError):
     Wrapper about pycurl error.
     """
 
+
 class DataNotFound(IndexError, GrabError):
-    pass
+    """
+    Indictes that required data is not found.
+    """
+
 
 class GrabMisuseError(GrabError):
-    pass
+    """
+    Indicates incorrect usage of grab API.
+    """
+
 
 def default_config():
     return dict(
+        url = None,
         proxy = None,
         proxy_type = None,
         proxy_userpwd = None,
@@ -82,6 +90,7 @@ def default_config():
         lowercased_tree = False,
     )
 
+VALID_CONFIG_KEYS = default_config().keys()
 
 
 
@@ -177,6 +186,10 @@ class Grab(object):
         """
         Setting up Grab instance configuration.
         """
+
+        for key in kwargs:
+            if not key in VALID_CONFIG_KEYS:
+                raise GrabMisuseError('Unknown option: %s' % key)
 
         if 'url' in kwargs:
             if self.config.get('url'):
