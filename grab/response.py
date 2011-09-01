@@ -4,6 +4,8 @@ The Response class is the result of network request maden with Grab instance.
 import re
 from copy import deepcopy
 
+RE_XML_DECLARATION = re.compile(r'^<\?xml[^>]+\?>', re.I)
+RE_DECLARATION_ENCODING = re.compile(r'encoding\s*=\s*["\']([^"\']+)["\']')
 RE_META_CHARSET = re.compile(r'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)', re.I)
 
 class Response(object):
@@ -56,6 +58,17 @@ class Response(object):
                     except AttributeError:
                         pass
 
+        # Try to process XML declaration
+        if not charset:
+            if self.body:
+                if self.body.startswith('<?xml'):
+                    match = RE_XML_DECLARATION.search(self.body)
+                    if match:
+                        enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
+                        if enc_match:
+                            charset = enc_match.group(1)
+
+
         if not charset:
             if 'Content-Type' in self.headers:
                 pos = self.headers['Content-Type'].find('charset=')
@@ -70,7 +83,8 @@ class Response(object):
             errors = 'ignore'
         else:
             errors = 'strict'
-        return self.body.decode(self.charset, errors)
+        ubody = self.body.decode(self.charset, errors)
+        return RE_XML_DECLARATION.sub('', ubody)
 
     def copy(self):
         return deepcopy(self)

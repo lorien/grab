@@ -9,7 +9,6 @@ import re
 
 from grab import DataNotFound
 
-
 REX_NUMBER = re.compile(r'\d+')
 REX_SPACE = re.compile(r'\s', re.U)
 
