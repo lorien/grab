@@ -162,16 +162,7 @@ class Extension(object):
         # Using this option multiple times will only make the latest string override the previous ones. 
 
         if self.config['cookies']:
-            chunks = []
-            for key, value in self.config['cookies'].iteritems():
-                if isinstance(key, unicode):
-                    key = key.encode(self.config['charset'])
-                if isinstance(value, unicode):
-                    value = value.encode(self.config['charset'])
-                key = urllib.quote_plus(key)
-                value = urllib.quote_plus(value)
-                chunks.append('%s=%s;' % (key, value))
-            self.curl.setopt(pycurl.COOKIE, ''.join(chunks))
+            self.curl.setopt(pycurl.COOKIE, self.urlencode(self.config['cookies']))
 
         if self.config['cookiefile']:
             self.load_cookies(self.config['cookiefile'])
