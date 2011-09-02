@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'grab',
-    version = '0.2.20',
+    version = '0.3',
     description = 'Pycurl wrapper',
     url = 'http://bitbucket.org/lorien/grab/',
     author = 'Grigoriy Petukhov',
@@ -12,7 +12,7 @@ setup(
     include_package_data = True,
 
     license = "BSD",
-    keywords = "pycurl curl network parsing grabbing",
+    keywords = "pycurl curl network parsing grabbing scraping lxml xpath",
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
