@@ -250,7 +250,7 @@ class Grab(object):
                     else:
                         connect_timeout, total_timeout = hammer_timeouts.pop(0)
                         self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
-                        logging.debug('Trying another timeouts. Connect: %d sec., total: %d sec.' % (connect_timeout, total_timeout))
+                        logger.debug('Trying another timeouts. Connect: %d sec., total: %d sec.' % (connect_timeout, total_timeout))
                 # If we are not in hammer mode
                 # Then just raise an error
                 else:
@@ -263,7 +263,7 @@ class Grab(object):
             if self.config['post']:
                 items = sorted(self.config['post'].items(), key=lambda x: x[0])
                 rows = '\n'.join('%-25s: %s' % x for x in items)
-                logging.debug('POST request:\n%s\n' % rows)
+                logger.debug('POST request:\n%s\n' % rows)
 
         # It's important to delete old POST data after request is performed.
         # If POST data remains when next request will try to use them again!
