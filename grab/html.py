@@ -81,7 +81,7 @@ def find_refresh_url(html):
     html = html.replace('&#34;', '"').replace('&quot;', '"')
 
     RE_REFRESH_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']*Refresh[^>]+', re.I)
-    RE_REFRESH_URL = re.compile(r'url=["\']*([^\'"> ]+)')
+    RE_REFRESH_URL = re.compile(r'url=["\']*([^\'"> ]+)', re.I)
 
     match = RE_REFRESH_TAG.search(html)
     if match:
