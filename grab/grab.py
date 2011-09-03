@@ -82,6 +82,7 @@ def default_config():
         debug = False,
         debug_post = False,
         encoding = 'gzip',
+        userpwd = None,
         # Timeouts
         timeout = 15,
         connect_timeout = 10,

@@ -200,6 +200,9 @@ class Extension(object):
         if self.config['encoding']:
             self.curl.setopt(pycurl.ENCODING, self.config['encoding'])
 
+        if self.config['userpwd']:
+            self.curl.setopt(pycurl.USERPWD, self.config['userpwd'])
+
     def extract_cookies(self):
         """
         Extract cookies.
