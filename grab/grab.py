@@ -63,7 +63,8 @@ def default_config():
         proxy_type = None,
         proxy_userpwd = None,
         post = None,
-        payload = None,
+        multipart_post = None,
+        #payload = None,
         method = None,
         headers = {},
         charset = 'utf-8',
@@ -101,7 +102,7 @@ class Grab(object):
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
-    clonable_attributes = ['request_headers']
+    clonable_attributes = ['request_headers', 'request_head', 'request_log', 'request_body']
 
     # Info about loaded extensions
     extensions = []
@@ -150,7 +151,6 @@ class Grab(object):
         """
 
         self.response = Response()
-        self.request_headers = None
         self.trigger_extensions('reset')
 
     def clone(self):
@@ -271,7 +271,7 @@ class Grab(object):
         # This is not what typical user waits.
         self.old_config = deepcopy(self.config) 
         self.config['post'] = None
-        self.config['payload'] = None
+        self.config['multipart_post'] = None
         self.config['method'] = None
 
         self.prepare_response()
@@ -415,6 +415,16 @@ class Grab(object):
 
         if isinstance(items, dict):
             items = items.items()
+        return urllib.urlencode(self.normalize_tuples(items))
+
+    def normalize_tuples(self, items):
+        """
+        Convert second value in each tuple into byte strings.
+
+        That functions prepare data for passing into pycurl library.
+        Pycurl can not handle unicode or None values.
+        """
+
         def process(item):
             key, value = item
             if isinstance(value, unicode):
@@ -422,4 +432,4 @@ class Grab(object):
             elif value is None:
                 value = ''
             return key, value
-        return urllib.urlencode(map(process, items))
+        return map(process, items)

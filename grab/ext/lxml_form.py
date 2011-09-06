@@ -110,8 +110,12 @@ class Extension(object):
             post.update(extra_post)
 
         if self.form.method == 'POST':
-            #print '\n'.join('%s: %s' % x for x in post.iteritems())
-            self.setup(post=post, url=action_url)
+            if 'multipart' in self.form.get('enctype', ''):
+                self.setup(multipart_post=post.items())
+            else:
+                self.setup(post=post)
+            self.setup(url=action_url)
+
         else:
             url = action_url.split('?')[0] + '?' + self.urlencode(post.items())
             self.setup(url=url)

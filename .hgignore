@@ -7,3 +7,4 @@ dist/
 docs/_build
 pypi.sh
 test2.py
+log.html

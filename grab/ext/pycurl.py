@@ -43,12 +43,18 @@ class Extension(object):
                          'dump_cookies', 'load_cookies', 'clear_cookies']
     transport = True
 
+    # TODO: why not just self?
     def extra_init(self, grab):
         grab.curl = pycurl.Curl()
 
+    # TODO: why not just self?
     def extra_reset(self, grab):
         grab.response_head_chunks = []
         grab.response_body_chunks = []
+        grab.request_headers = ''
+        grab.request_head = ''
+        grab.request_log = ''
+        grab.request_body = ''
 
     def head_processor(self, chunk):
         """
@@ -73,13 +79,28 @@ class Extension(object):
     def debug_processor(self, _type, text):
         """
         Parse request headers and save to ``self.request_headers``
+
+        0: CURLINFO_TEXT
+        1: CURLINFO_HEADER_IN
+        2: CURLINFO_HEADER_OUT
+        3: CURLINFO_DATA_IN
+        4: CURLINFO_DATA_OUT
+        5: CURLINFO_unrecognized_type
         """
 
         if _type == pycurl.INFOTYPE_HEADER_OUT:
+            self.request_head += text
             lines = text.splitlines()
-            self.request_head = lines[0] 
             text = '\n'.join(lines[1:])
             self.request_headers = dict(email.message_from_string(text))
+
+        if _type == pycurl.INFOTYPE_DATA_OUT:
+            self.request_body += text
+
+        if _type == pycurl.INFOTYPE_TEXT:
+            if self.request_log is None:
+                self.request_log = ''
+            self.request_log += text
 
     def process_config(self):
         """
@@ -111,21 +132,21 @@ class Extension(object):
         if method:
             method = method.upper()
         else:
-            if self.config['payload'] or self.config['post']:
+            if self.config['post'] or self.config['multipart_post']:
                 method = 'POST'
             else:
                 method = 'GET'
 
         if method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
-            if self.config['payload']:
-                self.curl.setopt(pycurl.POSTFIELDS, self.config['payload'])
+            if self.config['multipart_post']:
+                self.curl.setopt(pycurl.HTTPPOST, self.config['multipart_post'])
             elif self.config['post']:
                 post_data = self.urlencode(self.config['post'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
         elif method == 'PUT':
             self.curl.setopt(pycurl.PUT, 1)
-            self.curl.setopt(pycurl.READFUNCTION, StringIO(self.config['payload']).read) 
+            self.curl.setopt(pycurl.READFUNCTION, StringIO(self.config['post']).read) 
         elif method == 'DELETE':
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
         elif method == 'HEAD':
