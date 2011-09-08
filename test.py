@@ -181,18 +181,24 @@ class LXMLExtensionTest(unittest.TestCase):
         self.assertEqual('num-2', self.g.xpath(u'//*[text() = "item #2"]').get('id'))
         self.assertRaises(DataNotFound,
             lambda: self.g.xpath('//em[@id="baz"]'))
+        self.assertEqual(None, self.g.xpath('//zzz', default=None))
+        self.assertEqual('foo', self.g.xpath('//zzz', default='foo'))
 
     def test_xpath_text(self):
         self.assertEqual(u'пче ла', self.g.xpath_text('//*[@id="bee"]'))
         self.assertEqual(u'пче ла му ха item #100 2 item #2', self.g.xpath_text('/html/body'))
         self.assertRaises(DataNotFound,
             lambda: self.g.xpath_text('//code'))
+        self.assertEqual(u'bee', self.g.xpath('//*[@id="bee"]/@id'))
+        self.assertRaises(DataNotFound,
+            lambda: self.g.xpath_text('//*[@id="bee2"]/@id'))
 
     def test_xpath_number(self):
         self.assertEqual('100', self.g.xpath_number('//li'))
         self.assertEqual('1002', self.g.xpath_number('//li', ignore_spaces=True))
         self.assertRaises(DataNotFound,
             lambda: self.g.xpath_number('//liza'))
+        self.assertEqual('foo', self.g.xpath_number('//zzz', default='foo'))
 
     def test_xpath_list(self):
         self.assertEqual(['num-1', 'num-2'],
@@ -203,18 +209,21 @@ class LXMLExtensionTest(unittest.TestCase):
         self.assertEqual('num-2', self.g.css('#num-2').get('id'))
         self.assertRaises(DataNotFound,
             lambda: self.g.css('em#baz'))
+        self.assertEqual('foo', self.g.css('zzz', default='foo'))
 
     def test_css_text(self):
         self.assertEqual(u'пче ла', self.g.css_text('#bee'))
         self.assertEqual(u'пче ла му ха item #100 2 item #2', self.g.css_text('html body'))
         self.assertRaises(DataNotFound,
             lambda: self.g.css_text('code'))
+        self.assertEqual('foo', self.g.css_text('zzz', default='foo'))
 
     def test_css_number(self):
         self.assertEqual('100', self.g.css_number('li'))
         self.assertEqual('1002', self.g.css_number('li', ignore_spaces=True))
         self.assertRaises(DataNotFound,
             lambda: self.g.css_number('liza'))
+        self.assertEqual('foo', self.g.css_number('zzz', default='foo'))
 
     def test_css_list(self):
         self.assertEqual(['num-1', 'num-2'],

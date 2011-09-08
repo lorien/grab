@@ -12,6 +12,8 @@ from grab import DataNotFound
 REX_NUMBER = re.compile(r'\d+')
 REX_SPACE = re.compile(r'\s', re.U)
 
+NULL = object()
+
 class Extension(object):
     export_attributes = ['tree', 'follow_link',
                          'get_node_text', 'find_node_number',
@@ -73,7 +75,7 @@ class Extension(object):
     def find_node_number(self, node, ignore_spaces=False):
         return self.find_number(self.get_node_text(node), ignore_spaces=ignore_spaces)
 
-    def xpath(self, path, filter=None):
+    def xpath(self, path, default=NULL, filter=None):
         """
         Get first element which matches the given xpath or raise DataNotFound.
         """
@@ -81,7 +83,10 @@ class Extension(object):
         try:
             return self.xpath_list(path, filter)[0]
         except IndexError:
-            raise DataNotFound('Xpath not found: %s' % path)
+            if default is not NULL:
+                return default
+            else:
+                raise DataNotFound('Xpath not found: %s' % path)
 
     def xpath_list(self, path, filter=None):
         """
@@ -94,21 +99,39 @@ class Extension(object):
         else:
             return items 
 
-    def xpath_text(self, path, filter=None):
+    def xpath_text(self, path, default=NULL, filter=None):
         """
         Get normalized text of node which matches the given xpath.
         """
 
-        return self.get_node_text(self.xpath(path, filter=filter))
+        try:
+            elem = self.xpath(path, filter=filter)
+        except IndexError:
+            if default is NULL:
+                raise
+            else:
+                return default
+        else:
+            if isinstance(elem, basestring):
+                return self.normalize_space(elem)
+            else:
+                return self.get_node_text(elem)
 
-    def xpath_number(self, path, filter=None, ignore_spaces=False):
+    def xpath_number(self, path, default=NULL, filter=None, ignore_spaces=False):
         """
         Find number in normalized text of node which matches the given xpath.
         """
 
-        return self.find_number(self.xpath_text(path, filter=filter), ignore_spaces=ignore_spaces)
+        try:
+            return self.find_number(self.xpath_text(path, filter=filter),
+                                    ignore_spaces=ignore_spaces)
+        except IndexError:
+            if default is NULL:
+                raise
+            else:
+                return default
 
-    def css(self, path):
+    def css(self, path, default=NULL):
         """
         Get first element which matches the given css path or raise DataNotFound.
         """
@@ -116,7 +139,10 @@ class Extension(object):
         try:
             return self.css_list(path)[0]
         except IndexError:
-            raise DataNotFound('CSS path not found: %s' % path)
+            if default is NULL:
+                raise DataNotFound('CSS path not found: %s' % path)
+            else:
+                return default
 
     def css_list(self, path):
         """
@@ -125,16 +151,28 @@ class Extension(object):
 
         return self.tree.cssselect(path)
 
-    def css_text(self, path):
+    def css_text(self, path, default=NULL):
         """
         Get normalized text of node which matches the css path.
         """
 
-        return self.get_node_text(self.css(path))
+        try:
+            return self.get_node_text(self.css(path))
+        except IndexError:
+            if default is NULL:
+                raise
+            else:
+                return default
 
-    def css_number(self, path, ignore_spaces=False):
+    def css_number(self, path, default=NULL, ignore_spaces=False):
         """
         Find number in normalized text of node which matches the given css path.
         """
 
-        return self.find_number(self.css_text(path), ignore_spaces=ignore_spaces)
+        try:
+            return self.find_number(self.css_text(path), ignore_spaces=ignore_spaces)
+        except IndexError:
+            if default is NULL:
+                raise
+            else:
+                return default
