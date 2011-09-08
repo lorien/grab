@@ -433,3 +433,22 @@ class Grab(object):
                 value = ''
             return key, value
         return map(process, items)
+
+    def fake_response(self, content):
+        # Trigger reset
+        # It will reset request state and also create new
+        # uninitialized response object
+        self.reset()
+
+        # Set the response body
+        self.response.body = content
+
+        # And fill other properties with reasonable empty values
+        self.headers = {}
+        self.status = ''
+        self.response.head = ''
+        self.response.parse()
+        self.response.cookies = {}
+        self.response.code = 200
+        self.response.time = 0
+        self.response.url = ''
