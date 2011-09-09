@@ -229,6 +229,12 @@ class LXMLExtensionTest(unittest.TestCase):
         self.assertEqual(['num-1', 'num-2'],
             [x.get('id') for x in self.g.css_list('li')])
 
+    def test_strip_tags(self):
+        self.assertEqual('foo', self.g.strip_tags('<b>foo</b>'))
+        self.assertEqual('foo bar', self.g.strip_tags('<b>foo</b> <i>bar'))
+        self.assertEqual('foo bar', self.g.strip_tags('<b>foo</b><i>bar'))
+        self.assertEqual('', self.g.strip_tags('<b> <div>'))
+
 
 class TestFakeServer(TestCase):
     def setUp(self):

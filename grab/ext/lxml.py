@@ -18,7 +18,7 @@ class Extension(object):
     export_attributes = ['tree', 'follow_link',
                          'get_node_text', 'find_node_number',
                          'xpath', 'xpath_text', 'xpath_number', 'xpath_list',
-                         'css', 'css_text', 'css_number', 'css_list']
+                         'css', 'css_text', 'css_number', 'css_list', 'strip_tags']
 
     def extra_reset(self, grab):
         grab._lxml_tree = None
@@ -176,3 +176,10 @@ class Extension(object):
                 raise
             else:
                 return default
+
+    def strip_tags(self, content):
+        """
+        Strip tags from the HTML content.
+        """
+
+        return self.get_node_text(fromstring(content))
