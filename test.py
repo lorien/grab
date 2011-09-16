@@ -274,23 +274,20 @@ class TestHtmlForms(TestCase):
 
     def test_formselect(self):
         # test choose_form method (lxml_form)
-        bad_input = ['foo', 'bar']
         
         # raise errors
         self.assertRaises(IndexError, lambda: self.g.choose_form(10))
-        self.assertRaises(KeyError, lambda: self.g.choose_form('bad_id'))
-        self.assertRaises(Exception, lambda: self.g.choose_form(bad_input))
-        self.assertRaises(DataNotFound, lambda: self.g.choose_form('fake_form'))
+        self.assertRaises(KeyError, lambda: self.g.choose_form(id='bad_id'))
+        self.assertRaises(DataNotFound, lambda: self.g.choose_form(id='fake_form'))
         
         # check results
         self.g.choose_form(0)
-        print self.g._lxml_form.get('id')
         self.assertEqual('form', self.g._lxml_form.tag)
         self.assertEqual('search_form', self.g._lxml_form.get('id'))
         # reset current form
         self.g._lxml_form = None
 
-        self.g.choose_form('common_form')
+        self.g.choose_form(id='common_form')
         self.assertEqual('form', self.g._lxml_form.tag)
         self.assertEqual('common_form', self.g._lxml_form.get('id'))
         # reset current form

@@ -15,22 +15,22 @@ class Extension(object):
     def extra_reset(self, grab):
         grab._lxml_form = None
 
-    def choose_form(self, index):
+    def choose_form(self, number=None, id=None):
         """
         Select current form.
-        There is 2 options :
-        if index is integer it select form by number (on page)
-        if index is string it trying to choose form by id
+        There is options :
+        number - select form by numer started from 0 (0 is first form etc)
+        id - select form by id attribute (<form id="form_id">)
         """
 
-        if isinstance(index, int):
-            self._lxml_form = self.tree.forms[index]
-        elif isinstance(index, str):
-            form = self.tree.get_element_by_id(index)
+        if id is not None:
+            form = self.tree.get_element_by_id(id)
             if form.tag == 'form':
                 self._lxml_form = form
             else:
-                raise DataNotFound("There is no form with id: %s" % index)
+                raise DataNotFound("There is no form element with id: %s" % id)
+        elif number is not None:
+            self._lxml_form = self.tree.forms[number]
         else:
             raise Exception("Wrong input: %s" % str(index))
                 
