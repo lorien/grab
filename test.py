@@ -75,6 +75,35 @@ HTML = u"""
     </ul>
 """.encode('cp1251')
 
+FORMS = u"""
+<head>
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+    <div id="header">
+        <form id="search_form" method="GET">
+            <input id="search_box" name="query" value="" />
+            <input type="submit" value="submit" class="submit_btn" name="submit" />
+        </form>
+    </div>
+    <div id="content">
+        <FORM id="common_form" method="POST">
+          <input id="some_value" name="some_value" value="" />
+          <select id="gender" name="gender">
+              <option value="1">Female</option>
+              <option value="2">Male</option>
+           </select>
+           <input type="submit" value="submit" class="submit_btn" name="submit" />
+        </FORM>
+        <h1 id="fake_form">Big header</h1>
+        <form name="dummy">
+           <input type="submit" value="submit" class="submit_btn" name="submit" />
+        </form>
+    </div>
+</body>
+""".encode('utf-8')
+
 class TextExtensionTest(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
@@ -234,6 +263,38 @@ class LXMLExtensionTest(unittest.TestCase):
         self.assertEqual('foo bar', self.g.strip_tags('<b>foo</b> <i>bar'))
         self.assertEqual('foo bar', self.g.strip_tags('<b>foo</b><i>bar'))
         self.assertEqual('', self.g.strip_tags('<b> <div>'))
+
+
+class TestHtmlForms(TestCase):
+    def setUp(self):
+        # Create fake grab instance with fake response
+        self.g = Grab()
+        self.g.response.body = FORMS
+        self.g.response.charset = 'utf-8'
+
+    def test_formselect(self):
+        # test choose_form method (lxml_form)
+        bad_input = ['foo', 'bar']
+        
+        # raise errors
+        self.assertRaises(IndexError, lambda: self.g.choose_form(10))
+        self.assertRaises(KeyError, lambda: self.g.choose_form('bad_id'))
+        self.assertRaises(Exception, lambda: self.g.choose_form(bad_input))
+        self.assertRaises(DataNotFound, lambda: self.g.choose_form('fake_form'))
+        
+        # check results
+        self.g.choose_form(0)
+        print self.g._lxml_form.get('id')
+        self.assertEqual('form', self.g._lxml_form.tag)
+        self.assertEqual('search_form', self.g._lxml_form.get('id'))
+        # reset current form
+        self.g._lxml_form = None
+
+        self.g.choose_form('common_form')
+        self.assertEqual('form', self.g._lxml_form.tag)
+        self.assertEqual('common_form', self.g._lxml_form.get('id'))
+        # reset current form
+        self.g._lxml_form = None
 
 
 class TestFakeServer(TestCase):

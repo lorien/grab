@@ -18,10 +18,22 @@ class Extension(object):
     def choose_form(self, index):
         """
         Select current form.
+        There is 2 options :
+        if index is integer it select form by number (on page)
+        if index is string it trying to choose form by id
         """
 
-        self._lxml_form = self.tree.forms[index]
-
+        if isinstance(index, int):
+            self._lxml_form = self.tree.forms[index]
+        elif isinstance(index, str):
+            form = self.tree.get_element_by_id(index)
+            if form.tag == 'form':
+                self._lxml_form = form
+            else:
+                raise DataNotFound("There is no form with id: %s" % index)
+        else:
+            raise Exception("Wrong input: %s" % str(index))
+                
     @property
     def form(self):
         """
