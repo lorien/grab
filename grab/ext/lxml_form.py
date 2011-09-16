@@ -3,7 +3,7 @@
 # License: BSD
 from __future__ import absolute_import
 from lxml.html import fromstring
-from grab import DataNotFound
+from grab import DataNotFound, GrabMisuseError
 from urlparse import urljoin
 
 class Extension(object):
@@ -32,7 +32,7 @@ class Extension(object):
         elif number is not None:
             self._lxml_form = self.tree.forms[number]
         else:
-            raise Exception("Wrong input: %s" % str(index))
+            raise GrabMisuseError
                 
     @property
     def form(self):

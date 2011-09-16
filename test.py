@@ -279,6 +279,7 @@ class TestHtmlForms(TestCase):
         self.assertRaises(IndexError, lambda: self.g.choose_form(10))
         self.assertRaises(KeyError, lambda: self.g.choose_form(id='bad_id'))
         self.assertRaises(DataNotFound, lambda: self.g.choose_form(id='fake_form'))
+        self.assertRaises(GrabMisuseError, lambda: self.g.choose_form())
         
         # check results
         self.g.choose_form(0)
