@@ -63,7 +63,7 @@ class Extension(object):
         
         if not processed:
             # We need to remember origina values of file fields
-            # Because lxml will convert FileContent object to string
+            # Because lxml will convert UploadContent/UploadFile object to string
             if getattr(elem, 'type', '').lower() == 'file':
                 self._file_fields[name] = value
             elem.value = value

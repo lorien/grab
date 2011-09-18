@@ -8,7 +8,7 @@ import logging
 import urllib
 from StringIO import StringIO
 
-from grab.grab import GrabError, GrabMisuseError, FileContent
+from grab.grab import GrabError, GrabMisuseError, UploadContent, UploadFile
 
 logger = logging.getLogger('grab')
 
@@ -40,8 +40,7 @@ except ImportError:
 class Extension(object):
     export_attributes = ['head_processor', 'body_processor', 'debug_processor',
                          'process_config', 'extract_cookies', 'prepare_response',
-                         'dump_cookies', 'load_cookies', 'clear_cookies',
-                         'normalize_multipart_items']
+                         'dump_cookies', 'load_cookies', 'clear_cookies']
     transport = True
 
     # TODO: why not just self?
@@ -144,7 +143,7 @@ class Extension(object):
                 if isinstance(self.config['multipart_post'], dict):
                     raise GrabMisuseError('multipart_post should be tuple or list, not dict')
                 #import pdb; pdb.set_trace()
-                post_items = self.normalize_multipart_items(self.config['multipart_post'])
+                post_items = self.normalize_tuples(self.config['multipart_post'])
                 self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif self.config['post']:
                 post_data = self.urlencode(self.config['post'])
@@ -294,14 +293,3 @@ class Extension(object):
         self.curl.setopt(pycurl.COOKIELIST, 'ALL')
         self.config['cookies'] = {}
         self.response.cookies = None
-
-    def normalize_multipart_items(self, items):
-        result = []
-        for key, obj in items:
-            if isinstance(obj, FileContent):
-                result.append((key, (pycurl.FORM_CONTENTS, obj.raw_value)))
-            else:
-                if obj is None:
-                    obj = ''
-                result.append((key, obj))
-        return result

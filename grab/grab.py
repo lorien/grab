@@ -27,7 +27,7 @@ import user_agent
 from response import Response
 
 __all__ = ('Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseError',
-           'FileContent')
+           'UploadContent', 'UploadFile')
 
 GLOBAL_STATE = {'request_counter': 0}
 DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
@@ -266,7 +266,7 @@ class Grab(object):
             if isinstance(post, dict):
                 post = post.items()
             if post:
-                post = self.normalize_multipart_items(post)
+                post = self.normalize_tuples(post)
                 items = sorted(post, key=lambda x: x[0])
                 items = [(x[0], str(x[1])[:150]) for x in items]
                 rows = '\n'.join('%-25s: %s' % x for x in items)
@@ -424,6 +424,7 @@ class Grab(object):
             items = items.items()
         return urllib.urlencode(self.normalize_tuples(items))
 
+    # TODO: Change that stupid name
     def normalize_tuples(self, items):
         """
         Convert second value in each tuple into byte strings.
@@ -434,7 +435,9 @@ class Grab(object):
 
         def process(item):
             key, value = item
-            if isinstance(value, unicode):
+            if isinstance(value, (UploadContent, UploadFile)):
+                value = value.field_tuple()
+            elif isinstance(value, unicode):
                 value = value.encode(self.response.charset)
             elif value is None:
                 value = ''
@@ -461,8 +464,23 @@ class Grab(object):
         self.response.url = ''
 
 
-class FileContent(str):
+class UploadContent(str):
     def __new__(cls, value):
         obj = str.__new__(cls, 'xxx')
         obj.raw_value = value
         return obj
+
+    def field_tuple(self):
+        import pycurl
+        return (pycurl.FORM_CONTENTS, self.raw_value)
+
+
+class UploadFile(str):
+    def __new__(cls, path):
+        obj = str.__new__(cls, 'xxx')
+        obj.path = path
+        return obj
+
+    def field_tuple(self):
+        import pycurl
+        return (pycurl.FORM_FILE, self.path)
