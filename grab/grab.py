@@ -26,7 +26,8 @@ from html import make_unicode, find_refresh_url
 import user_agent
 from response import Response
 
-__all__ = ['Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseError']
+__all__ = ('Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseError',
+           'UploadContent', 'UploadFile')
 
 GLOBAL_STATE = {'request_counter': 0}
 DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
@@ -261,8 +262,13 @@ class Grab(object):
                 break
 
         if self.config['debug_post']:
-            if self.config['post']:
-                items = sorted(self.config['post'].items(), key=lambda x: x[0])
+            post = self.config['post'] or self.config['multipart_post']
+            if isinstance(post, dict):
+                post = post.items()
+            if post:
+                post = self.normalize_tuples(post)
+                items = sorted(post, key=lambda x: x[0])
+                items = [(x[0], str(x[1])[:150]) for x in items]
                 rows = '\n'.join('%-25s: %s' % x for x in items)
                 logger.debug('POST request:\n%s\n' % rows)
 
@@ -385,6 +391,7 @@ class Grab(object):
             'Accept-Language': 'en-us;q=0.%d,en,ru;q=0.%d' % (randint(5, 9), randint(1, 4)),
             'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.%d' % randint(5, 7),
             'Keep-Alive': '300',
+            'Expect': '',
         }
 
     def increase_request_counter(self):
@@ -417,6 +424,7 @@ class Grab(object):
             items = items.items()
         return urllib.urlencode(self.normalize_tuples(items))
 
+    # TODO: Change that stupid name
     def normalize_tuples(self, items):
         """
         Convert second value in each tuple into byte strings.
@@ -427,7 +435,9 @@ class Grab(object):
 
         def process(item):
             key, value = item
-            if isinstance(value, unicode):
+            if isinstance(value, (UploadContent, UploadFile)):
+                value = value.field_tuple()
+            elif isinstance(value, unicode):
                 value = value.encode(self.response.charset)
             elif value is None:
                 value = ''
@@ -452,3 +462,25 @@ class Grab(object):
         self.response.code = 200
         self.response.time = 0
         self.response.url = ''
+
+
+class UploadContent(str):
+    def __new__(cls, value):
+        obj = str.__new__(cls, 'xxx')
+        obj.raw_value = value
+        return obj
+
+    def field_tuple(self):
+        import pycurl
+        return (pycurl.FORM_CONTENTS, self.raw_value)
+
+
+class UploadFile(str):
+    def __new__(cls, path):
+        obj = str.__new__(cls, 'xxx')
+        obj.path = path
+        return obj
+
+    def field_tuple(self):
+        import pycurl
+        return (pycurl.FORM_FILE, self.path)

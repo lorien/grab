@@ -8,7 +8,7 @@ import time
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 import urllib
 
-from grab import Grab, GrabMisuseError, DataNotFound
+from grab import Grab, GrabMisuseError, DataNotFound, FileContent
 
 # The port on which the fake http server listens requests
 FAKE_SERVER_PORT = 9876
@@ -90,6 +90,7 @@ FORMS = u"""
     <div id="content">
         <FORM id="common_form" method="POST">
           <input id="some_value" name="some_value" value="" />
+          <input id="some_value" name="image" type="file" value="" />
           <select id="gender" name="gender">
               <option value="1">Female</option>
               <option value="2">Male</option>
@@ -325,6 +326,19 @@ class TestGrab(TestCase):
         g = Grab()
         self.assertRaises(GrabMisuseError,
             lambda: g.setup(save_the_word=True))
+
+
+class TestFileContent(TestCase):
+    def setUp(self):
+        # Create fake grab instance with fake response
+        self.g = Grab()
+        self.g.response.body = FORMS
+        self.g.response.charset = 'utf-8'
+
+    def test(self):
+        fc = FileContent('a')
+        self.assertEqual(fc, 'xxx')
+        self.g.set_input('image', fc)
 
 if __name__ == '__main__':
     unittest.main()

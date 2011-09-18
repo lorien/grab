@@ -14,6 +14,7 @@ class Extension(object):
         
     def extra_reset(self, grab):
         grab._lxml_form = None
+        grab._file_fields = {}
 
     def choose_form(self, number=None, id=None):
         """
@@ -61,6 +62,10 @@ class Extension(object):
                 processed = True
         
         if not processed:
+            # We need to remember origina values of file fields
+            # Because lxml will convert UploadContent/UploadFile object to string
+            if getattr(elem, 'type', '').lower() == 'file':
+                self._file_fields[name] = value
             elem.value = value
 
     def set_input_by_id(self, _id, value):
@@ -123,6 +128,8 @@ class Extension(object):
 
         if self.form.method == 'POST':
             if 'multipart' in self.form.get('enctype', ''):
+                for key, obj in self._file_fields.items():
+                    post[key] = obj
                 self.setup(multipart_post=post.items())
             else:
                 self.setup(post=post)

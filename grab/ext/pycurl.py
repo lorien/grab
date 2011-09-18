@@ -8,7 +8,7 @@ import logging
 import urllib
 from StringIO import StringIO
 
-from grab.grab import GrabError
+from grab.grab import GrabError, GrabMisuseError, UploadContent, UploadFile
 
 logger = logging.getLogger('grab')
 
@@ -140,7 +140,11 @@ class Extension(object):
         if method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
             if self.config['multipart_post']:
-                self.curl.setopt(pycurl.HTTPPOST, self.config['multipart_post'])
+                if isinstance(self.config['multipart_post'], dict):
+                    raise GrabMisuseError('multipart_post should be tuple or list, not dict')
+                #import pdb; pdb.set_trace()
+                post_items = self.normalize_tuples(self.config['multipart_post'])
+                self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif self.config['post']:
                 post_data = self.urlencode(self.config['post'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
