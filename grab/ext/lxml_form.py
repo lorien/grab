@@ -148,11 +148,13 @@ class Extension(object):
         for elem in self.form.inputs:
             if elem.tag == 'select':
                 if not fields[elem.name]:
-                    fields[elem.name] = elem.value_options[-1]
+                    if len(elem.value_options):
+                        fields[elem.name] = elem.value_options[-1]
             if getattr(elem, 'type', None) == 'radio':
                 if not fields[elem.name]:
                     fields[elem.name] = elem.get('value')
             if getattr(elem, 'type', None) == 'checkbox':
                 if not elem.checked:
-                    del fields[elem.name]
+                    if elem.name is not None:
+                        del fields[elem.name]
         return fields
