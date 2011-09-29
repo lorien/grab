@@ -8,7 +8,7 @@ import time
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 import urllib
 
-from grab import Grab, GrabMisuseError, DataNotFound, FileContent
+from grab import Grab, GrabMisuseError, DataNotFound, UploadContent
 
 # The port on which the fake http server listens requests
 FAKE_SERVER_PORT = 9876
@@ -328,7 +328,7 @@ class TestGrab(TestCase):
             lambda: g.setup(save_the_word=True))
 
 
-class TestFileContent(TestCase):
+class TestUploadContent(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
         self.g = Grab()
@@ -336,7 +336,7 @@ class TestFileContent(TestCase):
         self.g.response.charset = 'utf-8'
 
     def test(self):
-        fc = FileContent('a')
+        fc = UploadContent('a')
         self.assertEqual(fc, 'xxx')
         self.g.set_input('image', fc)
 
