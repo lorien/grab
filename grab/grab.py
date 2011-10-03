@@ -405,7 +405,13 @@ class Grab(object):
             else:
                 tname = '-%s' % tname
             fname = os.path.join(self.config['log_dir'], '%02d%s.log' % (self.request_counter, tname))
-            open(fname, 'w').write(self.response.head)
+            with open(fname, 'w') as out:
+                if self.config['debug']:
+                    out.write('Request:\n')
+                    out.write(self.request_head)
+                    out.write('\n')
+                out.write('Response:\n')
+                out.write(self.response.head)
 
             fext = 'html'
             #dirs = self.response_url().split('//')[1].strip().split('/')
