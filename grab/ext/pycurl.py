@@ -7,6 +7,7 @@ import pycurl
 import logging
 import urllib
 from StringIO import StringIO
+import threading
 
 from grab.grab import GrabError, GrabMisuseError, UploadContent, UploadFile
 
@@ -40,7 +41,8 @@ except ImportError:
 class Extension(object):
     export_attributes = ['head_processor', 'body_processor', 'debug_processor',
                          'process_config', 'extract_cookies', 'prepare_response',
-                         'dump_cookies', 'load_cookies', 'clear_cookies']
+                         'dump_cookies', 'load_cookies', 'clear_cookies',
+                         'reset_curl_instance']
     transport = True
 
     # TODO: why not just self?
@@ -220,7 +222,13 @@ class Extension(object):
         else:
             proxy_info = ''
 
-        logger.debug('[%02d] %s %s%s' % (self.request_counter, method, self.config['url'], proxy_info))
+        tname = threading.currentThread().getName().lower()
+        if tname == 'mainthread':
+            tname = ''
+        else:
+            tname = '-%s' % tname
+
+        logger.debug('[%02d%s] %s %s%s' % (self.request_counter, tname, method, self.config['url'], proxy_info))
 
         if self.config['encoding']:
             self.curl.setopt(pycurl.ENCODING, self.config['encoding'])
@@ -293,3 +301,14 @@ class Extension(object):
         self.curl.setopt(pycurl.COOKIELIST, 'ALL')
         self.config['cookies'] = {}
         self.response.cookies = None
+
+    def reset_curl_instance(self):
+        """
+        Completely recreate curl instance from scratch.
+        
+        I add this method because I am not sure that
+        ``clear_cookies`` method works fine and I should be sure
+        I can reset all cokies.
+        """
+
+        self.curl = pycurl.Curl()
