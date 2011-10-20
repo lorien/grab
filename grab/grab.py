@@ -265,12 +265,13 @@ class Grab(object):
             post = self.config['post'] or self.config['multipart_post']
             if isinstance(post, dict):
                 post = post.items()
-            if post:
+            if post and not isinstance(post, basestring):
                 post = self.normalize_tuples(post)
                 items = sorted(post, key=lambda x: x[0])
                 items = [(x[0], str(x[1])[:150]) for x in items]
-                rows = '\n'.join('%-25s: %s' % x for x in items)
-                logger.debug('POST request:\n%s\n' % rows)
+                post = '\n'.join('%-25s: %s' % x for x in items)
+            if post:
+                logger.debug('POST request:\n%s\n' % post)
 
         # It's important to delete old POST data after request is performed.
         # If POST data remains when next request will try to use them again!
@@ -426,6 +427,9 @@ class Grab(object):
         Smart urlencode which know how to process unicode strings and None values.
         """
 
+        if isinstance(items, basestring):
+            return items
+                    
         if isinstance(items, dict):
             items = items.items()
         return urllib.urlencode(self.normalize_tuples(items))
