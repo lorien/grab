@@ -8,7 +8,7 @@ Exceptions:
 Exception
 -> GrabError
 ---> GrabNetworkError <- IOError 
----> DataNotFound
+---> DataNotFound <- IndexError
 """
 
 import logging
@@ -22,7 +22,7 @@ from copy import deepcopy
 import time
 import re
 
-from html import make_unicode, find_refresh_url
+from html import find_refresh_url
 import user_agent
 from response import Response
 
