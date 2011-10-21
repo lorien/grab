@@ -265,11 +265,14 @@ class Grab(object):
             post = self.config['post'] or self.config['multipart_post']
             if isinstance(post, dict):
                 post = post.items()
-            if post and not isinstance(post, basestring):
-                post = self.normalize_tuples(post)
-                items = sorted(post, key=lambda x: x[0])
-                items = [(x[0], str(x[1])[:150]) for x in items]
-                post = '\n'.join('%-25s: %s' % x for x in items)
+            if post:
+                if isinstance(post, basestring):
+                    post = post[:150] + '...'
+                else:
+                    post = self.normalize_http_values(post)
+                    items = sorted(post, key=lambda x: x[0])
+                    items = [(x[0], str(x[1])[:150]) for x in items]
+                    post = '\n'.join('%-25s: %s' % x for x in items)
             if post:
                 logger.debug('POST request:\n%s\n' % post)
 
@@ -424,23 +427,28 @@ class Grab(object):
 
     def urlencode(self, items):
         """
-        Smart urlencode which know how to process unicode strings and None values.
+        Convert sequence of items into bytestring which could be submitted
+        in POST or GET request.
+
+        ``items`` could dict or tuple or list.
         """
 
-        if isinstance(items, basestring):
-            return items
-                    
         if isinstance(items, dict):
             items = items.items()
-        return urllib.urlencode(self.normalize_tuples(items))
+        return urllib.urlencode(self.normalize_http_values(items))
 
-    # TODO: Change that stupid name
-    def normalize_tuples(self, items):
+    def normalize_http_values(self, items):
         """
-        Convert second value in each tuple into byte strings.
+        Accept sequence of (key, value) paris and convert each
+        value into bytestring.
 
-        That functions prepare data for passing into pycurl library.
-        Pycurl can not handle unicode or None values.
+        Unicode is converted into bytestring using charset of previous response
+        (or utf-8, if no requests were performed)
+
+        None is converted into empty string. 
+
+        Instances of ``UploadContent`` or ``UploadFile`` is converted
+        into special pycurl objects.
         """
 
         def process(item):
@@ -448,11 +456,21 @@ class Grab(object):
             if isinstance(value, (UploadContent, UploadFile)):
                 value = value.field_tuple()
             elif isinstance(value, unicode):
-                value = value.encode(self.response.charset)
+                value = self.normalize_unicode(value)
             elif value is None:
                 value = ''
             return key, value
         return map(process, items)
+
+    def normalize_unicode(self, value):
+        """
+        Convert unicode into byte-string using charset of previous response
+        (or utf-8, if not requests were performed)
+        """
+
+        if not isinstance(value, unicode):
+            raise GrabMisuseError('normalize_unicode method accepts only unicode values')
+        return value.encode(self.response.charset)
 
     def fake_response(self, content):
         # Trigger reset

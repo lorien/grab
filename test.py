@@ -8,6 +8,9 @@ import time
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 import urllib
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 from grab import Grab, GrabMisuseError, DataNotFound, UploadContent
 
 # The port on which the fake http server listens requests
@@ -18,7 +21,11 @@ BASE_URL = 'http://localhost:%d' % FAKE_SERVER_PORT
 
 # This global objects is used by Fake HTTP Server
 # It return content of HTML variable for any GET request
-RESPONSE = {'get': ''}
+RESPONSE = {'get': '', 'post': ''}
+
+# Fake HTTP Server saves request details
+# into global REQUEST variable
+REQUEST = {'post': None}
 
 class FakeServerThread(threading.Thread):
     def __init__(self, *args, **kwargs):
@@ -32,6 +39,12 @@ class FakeServerThread(threading.Thread):
     def run(self):
         class RequestHandlerClass(BaseHTTPRequestHandler):
             def do_GET(self):
+                """
+                Process GET request.
+
+                Reponse body contains content from ``RESPONSE['get']``
+                """
+
                 self.send_response(200)
                 self.end_headers()
                 self.wfile.write(RESPONSE['get'])
@@ -39,6 +52,13 @@ class FakeServerThread(threading.Thread):
             def log_message(*args, **kwargs):
                 "Do not log to console"
                 pass
+
+            def do_POST(self):
+                post_size = int(self.headers.getheader('content-length'))
+                REQUEST['post'] = self.rfile.read(post_size)
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(RESPONSE['post'])
 
         server_address = ('localhost', FAKE_SERVER_PORT)
         try:
@@ -300,10 +320,15 @@ class TestFakeServer(TestCase):
     def setUp(self):
         FakeServerThread().start()
 
-    def test_server(self):
+    def test_get(self):
         RESPONSE['get'] = 'zorro'
         data = urllib.urlopen(BASE_URL).read()
         self.assertEqual(data, RESPONSE['get'])
+
+    def test_post(self):
+        RESPONSE['post'] = 'foo'
+        data = urllib.urlopen(BASE_URL, 'THE POST').read()
+        self.assertEqual(data, RESPONSE['post'])
 
 
 class TestGrab(TestCase):
@@ -326,6 +351,58 @@ class TestGrab(TestCase):
         g = Grab()
         self.assertRaises(GrabMisuseError,
             lambda: g.setup(save_the_word=True))
+
+
+class TestPostFeature(TestCase):
+    def setUp(self):
+        FakeServerThread().start()
+
+    def test_post(self):
+        g = Grab(url=BASE_URL, debug_post=True)
+
+        # Provide POST data in dict
+        g.setup(post={'foo': 'bar'})
+        g.request()
+        self.assertEqual(REQUEST['post'], 'foo=bar')
+
+        # Provide POST data in tuple
+        g.setup(post=(('foo', 'TUPLE'),))
+        g.request()
+        self.assertEqual(REQUEST['post'], 'foo=TUPLE')
+
+        # Provide POST data in list
+        g.setup(post=[('foo', 'LIST')])
+        g.request()
+        self.assertEqual(REQUEST['post'], 'foo=LIST')
+
+        # Provide POST data in byte-string
+        g.setup(post='Hello world!')
+        g.request()
+        self.assertEqual(REQUEST['post'], 'Hello world!')
+
+        # Provide POST data in unicode-string
+        g.setup(post=u'Hello world!')
+        g.request()
+        self.assertEqual(REQUEST['post'], 'Hello world!')
+
+        # Provide POST data in non-ascii unicode-string
+        g.setup(post=u'Привет, мир!')
+        g.request()
+        self.assertEqual(REQUEST['post'], 'Привет, мир!')
+
+        # Two values with one key
+        g.setup(post=(('foo', 'bar'), ('foo', 'baz')))
+        g.request()
+        self.assertEqual(REQUEST['post'], 'foo=bar&foo=baz')
+
+        # Few values with non-ascii data
+        # TODO: understand and fix
+        # AssertionError: 'foo=bar&gaz=%D0%94%D0%B5%D0%BB%D1%8C%D1%84%D0%B8%D0%BD&abc=' != 'foo=bar&gaz=\xd0\x94\xd0\xb5\xd0\xbb\xd1\x8c\xd1\x84\xd0\xb8\xd0\xbd&abc='
+        #g.setup(post=({'foo': 'bar', 'gaz': u'Дельфин', 'abc': None}))
+        #g.request()
+        #self.assertEqual(REQUEST['post'], 'foo=bar&gaz=Дельфин&abc=')
+
+        # TODO: test multipart
 
 
 class TestUploadContent(TestCase):

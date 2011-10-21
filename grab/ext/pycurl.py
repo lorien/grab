@@ -148,7 +148,16 @@ class Extension(object):
                 post_items = self.normalize_tuples(self.config['multipart_post'])
                 self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif self.config['post']:
-                post_data = self.urlencode(self.config['post'])
+                if isinstance(self.config['post'], basestring):
+                    # bytes-string should be posted as-is
+                    # unicode should be converted into byte-string
+                    if isinstance(self.config['post'], unicode):
+                        post_data = self.normalize_unicode(self.config['post'])
+                    else:
+                        post_data = self.config['post']
+                else:
+                    # dict, tuple, list should be serialized into byte-string
+                    post_data = self.urlencode(self.config['post'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
         elif method == 'PUT':
             self.curl.setopt(pycurl.PUT, 1)
