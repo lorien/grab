@@ -409,7 +409,21 @@ class TestPostFeature(TestCase):
         #g.request()
         #self.assertEqual(REQUEST['post'], 'foo=bar&gaz=Дельфин&abc=')
 
-        # TODO: test multipart
+        # Multipart data could not be dict or string
+        g.setup(multipart_post={'foo': 'bar'})
+        self.assertRaises(GrabMisuseError, lambda: g.request())
+        g.setup(multipart_post='asdf')
+        self.assertRaises(GrabMisuseError, lambda: g.request())
+
+        # tuple with one pair
+        g.setup(multipart_post=(('foo', 'bar'),))
+        g.request()
+        self.assertTrue('name="foo"' in REQUEST['post'])
+
+        # tuple with two pairs
+        g.setup(multipart_post=(('foo', 'bar'), ('foo', 'baz')))
+        g.request()
+        self.assertTrue('name="foo"' in REQUEST['post'])
 
 
 class TestUploadContent(TestCase):

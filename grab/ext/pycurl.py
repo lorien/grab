@@ -142,10 +142,9 @@ class Extension(object):
         if method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
             if self.config['multipart_post']:
-                if isinstance(self.config['multipart_post'], dict):
+                if not isinstance(self.config['multipart_post'], (list, tuple)):
                     raise GrabMisuseError('multipart_post should be tuple or list, not dict')
-                #import pdb; pdb.set_trace()
-                post_items = self.normalize_tuples(self.config['multipart_post'])
+                post_items = self.normalize_http_values(self.config['multipart_post'])
                 self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif self.config['post']:
                 if isinstance(self.config['post'], basestring):
