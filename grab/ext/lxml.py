@@ -18,7 +18,8 @@ class Extension(object):
     export_attributes = ['tree', 'follow_link',
                          'get_node_text', 'find_node_number',
                          'xpath', 'xpath_text', 'xpath_number', 'xpath_list',
-                         'css', 'css_text', 'css_number', 'css_list', 'strip_tags']
+                         'css', 'css_text', 'css_number', 'css_list', 'strip_tags',
+                         'assert_css', 'assert_xpath']
 
     def extra_reset(self, grab):
         grab._lxml_tree = None
@@ -183,3 +184,17 @@ class Extension(object):
         """
 
         return self.get_node_text(fromstring(content))
+
+    def assert_css(self, path):
+        """
+        If css path is not found then raise `DataNotFound` exception.
+        """
+
+        self.css(path)
+
+    def assert_xpath(self, path):
+        """
+        If xpath path is not found then raise `DataNotFound` exception.
+        """
+
+        self.xpath(path)
