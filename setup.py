@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'grab',
-    version = '0.3.2',
+    version = '0.3.3',
     description = 'Pycurl wrapper',
     url = 'http://bitbucket.org/lorien/grab/',
     author = 'Grigoriy Petukhov',
