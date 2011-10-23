@@ -10,7 +10,8 @@ RE_SPACE = re.compile(r'\s+', re.U)
 
 class Extension(object):
     export_attributes = ['search', 'search_rex', 'assert_substring', 'assert_rex',
-                         'find_number', 'drop_space', 'normalize_space']
+                         'find_number', 'drop_space', 'normalize_space',
+                         'assert_substrings']
         
     def search(self, anchor, byte=False):
         """
@@ -61,6 +62,19 @@ class Extension(object):
 
         if not self.search(anchor, byte=byte): 
             raise DataNotFound('Substring not found: %s' % anchor)
+
+    def assert_substrings(self, anchors, byte=False):
+        """
+        If no `anchors` were found then raise `DataNotFound` exception.
+        """
+
+        found = False
+        for anchor in anchors:
+            if self.search(anchor, byte=byte): 
+                found = True
+                break
+        if not found:
+            raise DataNotFound('Substrings not found: %s' % ', '.join(anchors))
 
     def assert_rex(self, rex, byte=False):
         """

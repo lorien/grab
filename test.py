@@ -170,6 +170,13 @@ class TextExtensionTest(TestCase):
         self.assertRaises(DataNotFound,
             lambda: self.g.assert_substring(u'фыва2'))
 
+    def test_assert_substrings(self):
+        self.g.assert_substrings((u'фыва',))
+        self.g.assert_substrings((u'фывы нет', u'фыва'))
+        self.g.assert_substrings((u'фыва'.encode('cp1251'), 'где ты фыва?'), byte=True)
+        self.assertRaises(DataNotFound,
+            lambda: self.g.assert_substrings((u'фыва, вернись', u'фыва-а-а-а')))
+
     def test_assert_rex(self):
         self.g.assert_rex(re.compile(u'фыва'))
         self.g.assert_rex(re.compile(u'фыва'.encode('cp1251')), byte=True)
