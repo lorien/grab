@@ -22,6 +22,7 @@ from copy import deepcopy
 import time
 import re
 
+from proxylist import ProxyList
 from html import find_refresh_url
 import user_agent
 from response import Response
@@ -103,7 +104,8 @@ class Grab(object):
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
-    clonable_attributes = ['request_headers', 'request_head', 'request_log', 'request_body']
+    clonable_attributes = ('request_headers', 'request_head', 'request_log', 'request_body',
+                           'proxylist')
 
     # Info about loaded extensions
     extensions = []
@@ -139,6 +141,7 @@ class Grab(object):
         self.default_headers = self.common_headers()
         self.trigger_extensions('init')
         self.reset()
+        self.proxylist = None
         if kwargs:
             self.setup(**kwargs)
         self.clone_counter = 0
@@ -340,6 +343,50 @@ class Grab(object):
         logger.debug('Sleeping for %f seconds' % sleep_time)
         time.sleep(sleep_time)
 
+    def fake_response(self, content):
+        # Trigger reset
+        # It will reset request state and also create new
+        # uninitialized response object
+        self.reset()
+
+        # Set the response body
+        self.response.body = content
+
+        # And fill other properties with reasonable empty values
+        self.headers = {}
+        self.status = ''
+        self.response.head = ''
+        self.response.parse()
+        self.response.cookies = {}
+        self.response.code = 200
+        self.response.time = 0
+        self.response.url = ''
+
+    def setup_proxylist(self, proxy_file, proxy_type, read_timeout=None):
+        """
+        Setup location of files with proxy servers
+
+        ``proxy_file`` - file which contains list of proxy servers
+        Each server could be a line of one of following formats:
+        * server:port
+        * server:port:username:password
+
+        ``proxy_type`` - type of proxy servers from proxy file.
+        For now all proxies should be of one type
+        """
+
+        self.proxylist = ProxyList(proxy_file, proxy_type,
+                                   read_timeout=read_timeout)
+
+    def change_proxy(self):
+        """
+        Set random proxy from proxylist.
+        """
+
+        server, userpwd = self.proxylist.get_random()
+        self.setup(proxy=server, proxy_userpwd=userpwd,
+                   proxy_type=self.proxylist.proxy_type)
+
     """
     Private methods
     """
@@ -471,25 +518,6 @@ class Grab(object):
         if not isinstance(value, unicode):
             raise GrabMisuseError('normalize_unicode method accepts only unicode values')
         return value.encode(self.response.charset)
-
-    def fake_response(self, content):
-        # Trigger reset
-        # It will reset request state and also create new
-        # uninitialized response object
-        self.reset()
-
-        # Set the response body
-        self.response.body = content
-
-        # And fill other properties with reasonable empty values
-        self.headers = {}
-        self.status = ''
-        self.response.head = ''
-        self.response.parse()
-        self.response.cookies = {}
-        self.response.code = 200
-        self.response.time = 0
-        self.response.url = ''
 
 
 class UploadContent(str):

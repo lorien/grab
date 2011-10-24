@@ -25,7 +25,7 @@ RESPONSE = {'get': '', 'post': ''}
 
 # Fake HTTP Server saves request details
 # into global REQUEST variable
-REQUEST = {'post': None}
+REQUEST = {'get': None, 'post': None, 'headers': None}
 
 class FakeServerThread(threading.Thread):
     def __init__(self, *args, **kwargs):
@@ -37,6 +37,7 @@ class FakeServerThread(threading.Thread):
         time.sleep(0.1)
 
     def run(self):
+        # TODO: reset REQUEST before each get/post request
         class RequestHandlerClass(BaseHTTPRequestHandler):
             def do_GET(self):
                 """
@@ -48,6 +49,7 @@ class FakeServerThread(threading.Thread):
                 self.send_response(200)
                 self.end_headers()
                 self.wfile.write(RESPONSE['get'])
+                REQUEST['headers'] = self.headers
 
             def log_message(*args, **kwargs):
                 "Do not log to console"
@@ -56,6 +58,7 @@ class FakeServerThread(threading.Thread):
             def do_POST(self):
                 post_size = int(self.headers.getheader('content-length'))
                 REQUEST['post'] = self.rfile.read(post_size)
+                REQUEST['headers'] = self.headers
                 self.send_response(200)
                 self.end_headers()
                 self.wfile.write(RESPONSE['post'])
@@ -424,6 +427,30 @@ class TestPostFeature(TestCase):
         g.setup(multipart_post=(('foo', 'bar'), ('foo', 'baz')))
         g.request()
         self.assertTrue('name="foo"' in REQUEST['post'])
+
+class TestProxy(TestCase):
+    def setUp(self):
+        FakeServerThread().start()
+
+    def test_proxy(self):
+        g = Grab()
+        proxy = 'localhost:%d' % FAKE_SERVER_PORT 
+        g.setup(proxy=proxy, proxy_type='http')
+        RESPONSE['get'] = '123'
+        g.go('http://yandex.ru')
+        self.assertEqual('123', g.response.body)
+        self.assertEqual('yandex.ru', REQUEST['headers']['host'])
+
+    def test_proxylist(self):
+        g = Grab()
+        proxy = 'localhost:%d' % FAKE_SERVER_PORT 
+        open('/tmp/__proxy.txt', 'w').write(proxy)
+        g.setup_proxylist('/tmp/__proxy.txt', 'http')
+        RESPONSE['get'] = '123'
+        g.change_proxy()
+        g.go('http://yandex.ru')
+        self.assertEqual('123', g.response.body)
+        self.assertEqual('yandex.ru', REQUEST['headers']['host'])
 
 
 class TestUploadContent(TestCase):
