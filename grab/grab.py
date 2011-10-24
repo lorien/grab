@@ -303,7 +303,7 @@ class Grab(object):
 
         # TODO: check max redirect count
         if self.config['follow_refresh']:
-            url = find_refresh_url(self.response.body)
+            url = find_refresh_url(self.response.unicode_body())
             if url:
                 return self.request(url=url)
 

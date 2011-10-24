@@ -43,8 +43,9 @@ def find_refresh_url(html):
 
     # We should decode quote values to correctly find
     # the url value
-    html = html.replace('&#39;', '\'')
-    html = html.replace('&#34;', '"').replace('&quot;', '"')
+    #html = html.replace('&#39;', '\'')
+    #html = html.replace('&#34;', '"').replace('&quot;', '"')
+    html = decode_entities(html)
 
     RE_REFRESH_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']*Refresh[^>]+', re.I)
     RE_REFRESH_URL = re.compile(r'url=["\']*([^\'"> ]+)', re.I)
