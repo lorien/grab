@@ -244,6 +244,9 @@ class Extension(object):
         if self.config['userpwd']:
             self.curl.setopt(pycurl.USERPWD, self.config['userpwd'])
 
+        if self.config['charset']:
+            self.charset = self.config['charset']
+
     def extract_cookies(self):
         """
         Extract cookies.

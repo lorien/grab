@@ -69,14 +69,12 @@ def default_config():
         #payload = None,
         method = None,
         headers = {},
-        charset = 'utf-8',
         user_agent = choice(user_agent.variants),
         reuse_cookies = True,
         reuse_referer = True,
         cookies = {},
         cookiefile = None,
         referer = None,
-        guess_encodings = ['windows-1251', 'koi8-r', 'utf-8'],
         log_file = None,
         log_dir = False,
         follow_refresh = False,
@@ -92,6 +90,7 @@ def default_config():
         hammer_mode = False,
         hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
         lowercased_tree = False,
+        charset = None,
     )
 
 VALID_CONFIG_KEYS = default_config().keys()
@@ -105,7 +104,7 @@ class Grab(object):
     # Attributes which should be processed when clone
     # of Grab instance is creating
     clonable_attributes = ('request_headers', 'request_head', 'request_log', 'request_body',
-                           'proxylist')
+                           'proxylist', 'charset')
 
     # Info about loaded extensions
     extensions = []
@@ -142,6 +141,7 @@ class Grab(object):
         self.trigger_extensions('init')
         self.reset()
         self.proxylist = None
+        self.charset = 'utf-8'
         if kwargs:
             self.setup(**kwargs)
         self.clone_counter = 0
@@ -236,6 +236,8 @@ class Grab(object):
             connect_timeout, total_timeout = hammer_timeouts.pop(0)
             self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
 
+        self.charset = self.response.charset
+
         while True:
             try:
                 # Reset the state setted by prevous request
@@ -273,7 +275,7 @@ class Grab(object):
                 if isinstance(post, basestring):
                     post = post[:150] + '...'
                 else:
-                    post = self.normalize_http_values(post)
+                    post = self.normalize_http_values(post, charset='utf-8')
                     items = sorted(post, key=lambda x: x[0])
                     items = [(x[0], str(x[1])[:150]) for x in items]
                     post = '\n'.join('%-25s: %s' % x for x in items)
@@ -533,24 +535,35 @@ class Grab(object):
 
         def process(item):
             key, value = item
+
+            # normalize value
             if isinstance(value, (UploadContent, UploadFile)):
                 value = value.field_tuple()
             elif isinstance(value, unicode):
-                value = self.normalize_unicode(value)
+                value = self.normalize_unicode(value, charset=charset)
             elif value is None:
                 value = ''
+
+            # normalize key
+            if isinstance(key, unicode):
+                key = self.normalize_unicode(key, charset=charset)
+
             return key, value
+
         return map(process, items)
 
-    def normalize_unicode(self, value):
+    def normalize_unicode(self, value, charset=None):
         """
-        Convert unicode into byte-string using charset of previous response
-        (or utf-8, if not requests were performed)
+        Convert unicode into byte-string using detected charset (default or from
+        previous response)
+
+        By default, charset from previous response is used to encode unicode into
+        byte-string but you can enforce charset with ``charset`` option
         """
 
         if not isinstance(value, unicode):
             raise GrabMisuseError('normalize_unicode method accepts only unicode values')
-        return value.encode(self.response.charset)
+        return value.encode(self.charset if charset is None else charset)
 
 
 class UploadContent(str):
