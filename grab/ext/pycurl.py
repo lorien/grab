@@ -197,7 +197,7 @@ class Extension(object):
         # Using this option multiple times will only make the latest string override the previous ones. 
 
         if self.config['cookies']:
-            self.curl.setopt(pycurl.COOKIE, self.urlencode(self.config['cookies']))
+            self.curl.setopt(pycurl.COOKIE, self.encode_cookies(self.config['cookies']))
 
         if self.config['cookiefile']:
             self.load_cookies(self.config['cookiefile'])

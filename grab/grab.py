@@ -179,7 +179,8 @@ class Grab(object):
         # of new pycurl instance - we know where to get them from:
         # cookies are always processed in Response instance
         cookies = self.config['cookies']
-        cookies.update(self.response.cookies)
+        if self.response.cookies:
+            cookies.update(self.response.cookies)
         g.setup(cookies=cookies)
         g.response = self.response.copy()
         for key in self.clonable_attributes:
@@ -484,7 +485,33 @@ class Grab(object):
             items = items.items()
         return urllib.urlencode(self.normalize_http_values(items))
 
-    def normalize_http_values(self, items):
+
+    def encode_cookies(self, items):
+        """
+        Serialize dict or sequence of two-element items into string suitable
+        for sending in Cookie http header.
+        """
+
+        def encode(val):
+            """
+            URL-encode special characters in the text.
+
+            In cookie value only ",", " ", "\t" and ";" should be encoded
+            """
+
+            return val.replace(' ', '%20').replace('\t', '%09')\
+                      .replace(';', '%3B').replace(',', '%2C')
+
+        if isinstance(items, dict):
+            items = items.items()
+        items = self.normalize_http_values(items)
+        tokens = []
+        for key, value in items:
+            tokens.append('%s=%s' % (encode(key), encode(value)))
+        return '; '.join(tokens)
+
+
+    def normalize_http_values(self, items, charset=None):
         """
         Accept sequence of (key, value) paris and convert each
         value into bytestring.
