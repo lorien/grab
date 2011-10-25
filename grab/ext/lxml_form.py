@@ -91,7 +91,7 @@ class Extension(object):
 
         return self.set_input(elem.get('name'), value)
 
-    def submit(self, submit_control=None, make_request=True, url=None, extra_post=None):
+    def submit(self, submit_name=None, submit_control=None, make_request=True, url=None, extra_post=None):
         """
         Submit form. Take care about all fields which was not set explicitly.
         """
@@ -112,9 +112,13 @@ class Extension(object):
         if submit_control is None:
             if submit_controls:
                 submit_control = submit_controls[0]
+
         if submit_control is not None:
+            submit_name = submit_control.name
+
+        if submit_name is not None:
             for elem in submit_controls:
-                if elem.name != submit_control.name:
+                if elem.name != submit_name:
                     if elem.name in post:
                         del post[elem.name]
 
