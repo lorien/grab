@@ -363,7 +363,8 @@ class Grab(object):
         self.response.time = 0
         self.response.url = ''
 
-    def setup_proxylist(self, proxy_file, proxy_type, read_timeout=None):
+    def setup_proxylist(self, proxy_file, proxy_type, read_timeout=None,
+                        autoinit=True):
         """
         Setup location of files with proxy servers
 
@@ -374,10 +375,15 @@ class Grab(object):
 
         ``proxy_type`` - type of proxy servers from proxy file.
         For now all proxies should be of one type
+
+        ``auto_init`` - if True then ``change_proxy`` method will be automatically
+        called
         """
 
         self.proxylist = ProxyList(proxy_file, proxy_type,
                                    read_timeout=read_timeout)
+        if autoinit:
+            self.change_proxy()
 
     def change_proxy(self):
         """
