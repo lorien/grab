@@ -58,7 +58,8 @@ class Extension(object):
         if self.config['nohead']:
             return 0
         self.response_head_chunks.append(chunk)
-        return len(chunk)
+        # Returning None implies that all bytes were written
+        return None
 
     def body_processor(self, chunk):
         """
@@ -68,7 +69,8 @@ class Extension(object):
         if self.config['nobody']:
             return 0
         self.response_body_chunks.append(chunk)
-        return len(chunk)
+        # Returning None implies that all bytes were written
+        return None
 
     def debug_processor(self, _type, text):
         """

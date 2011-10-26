@@ -372,6 +372,16 @@ class TestGrab(TestCase):
         self.assertRaises(GrabMisuseError,
             lambda: g.setup(save_the_word=True))
 
+    def test_nobody(self):
+        g = Grab()
+        g.setup(nobody=True)
+        g.go(BASE_URL)
+        self.assertTrue(g.response.body == '')
+
+        g.setup(nobody=False)
+        g.go(BASE_URL)
+        self.assertFalse(g.response.body == '')
+
 
 class TestPostFeature(TestCase):
     def setUp(self):

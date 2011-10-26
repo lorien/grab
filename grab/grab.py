@@ -18,7 +18,7 @@ from random import randint, choice
 from copy import copy
 import threading
 from urlparse import urljoin
-from copy import deepcopy
+#from copy import deepcopy
 import time
 import re
 
@@ -196,7 +196,13 @@ class Grab(ext.pycurl.Extension, ext.lxml.Extension,
         """
 
         g = Grab()
-        g.config = deepcopy(self.config)
+
+        #g.config = deepcopy(self.config)
+        g.config = copy(self.config)
+        # Apply ``copy`` function to mutable config values
+        for key in ('post', 'multipart_post', 'headers', 'cookies', 'hammer_timeouts'):
+            g.config[key] = copy(self.config[key])
+
         # Important for pycurl transport
         # By default pycurl use own implementation 
         # of cookies. So when we create new Grab instance
@@ -322,7 +328,10 @@ class Grab(ext.pycurl.Extension, ext.lxml.Extension,
         # It's important to delete old POST data after request is performed.
         # If POST data remains when next request will try to use them again!
         # This is not what typical user waits.
-        self.old_config = deepcopy(self.config) 
+
+        # Disabled, see comments to repeat_request method
+        #self.old_config = deepcopy(self.config) 
+
         self.config['post'] = None
         self.config['multipart_post'] = None
         self.config['method'] = None
@@ -355,15 +364,17 @@ class Grab(ext.pycurl.Extension, ext.lxml.Extension,
 
         return self.response
 
-    def repeat_request(self):
-        """
-        Make the same network request again.
+    # Disabled due to perfomance issue
+    # Who needs this method?
+    #def repeat_request(self):
+        #"""
+        #Make the same network request again.
 
-        All cookies, POST data, headers will be sent again.
-        """
+        #All cookies, POST data, headers will be sent again.
+        #"""
 
-        self.config = deepcopy(self.old_config)
-        self.request()
+        #self.config = deepcopy(self.old_config)
+        #self.request()
 
     def sleep(self, limit1=1, limit2=None):
         """

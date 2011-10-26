@@ -27,6 +27,8 @@ def main():
         url = 'http://load.local/28k.html'
         g = Grab()
         g.go(url)
+        g2 = g.clone()
+        #gg.css_text('title')
         #urllib.urlopen(url).read()
 
 if __name__ == '__main__':

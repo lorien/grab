@@ -6,13 +6,16 @@ import re
 from htmlentitydefs import name2codepoint
 import logging
 
+RE_REFRESH_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']*Refresh[^>]+', re.I)
+RE_REFRESH_URL = re.compile(r'url=["\']*([^\'"> ]+)', re.I)
+RE_ENTITY = re.compile(r'(&[a-z]+;)')
+RE_NUM_ENTITY = re.compile(r'(&#\d+;)')
+
 def decode_entities(text):
     """
     Convert HTML entities to their unicode analogs.
     """
 
-    re_entity = re.compile(r'(&[a-z]+;)')
-    re_num_entity = re.compile(r'(&#\d+;)')
 
     def process_entity(match):
         entity = match.group(1)
@@ -31,8 +34,8 @@ def decode_entities(text):
         except ValueError:
             return entity
 
-    text = re_num_entity.sub(process_num_entity, text)
-    text = re_entity.sub(process_entity, text)
+    text = RE_NUM_ENTITY.sub(process_num_entity, text)
+    text = RE_ENTITY.sub(process_entity, text)
     return text
 
 
@@ -46,9 +49,6 @@ def find_refresh_url(html):
     #html = html.replace('&#39;', '\'')
     #html = html.replace('&#34;', '"').replace('&quot;', '"')
     html = decode_entities(html)
-
-    RE_REFRESH_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']*Refresh[^>]+', re.I)
-    RE_REFRESH_URL = re.compile(r'url=["\']*([^\'"> ]+)', re.I)
 
     match = RE_REFRESH_TAG.search(html)
     if match:
