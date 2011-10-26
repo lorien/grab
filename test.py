@@ -12,6 +12,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 from grab import Grab, GrabMisuseError, DataNotFound, UploadContent
+from grab.multi import multi_fetch
 
 # The port on which the fake http server listens requests
 FAKE_SERVER_PORT = 9876
@@ -473,6 +474,28 @@ class TestUploadContent(TestCase):
         fc = UploadContent('a')
         self.assertEqual(fc, 'xxx')
         self.g.set_input('image', fc)
+
+
+class TestMultiFetch(TestCase):
+    def setUp(self):
+        FakeServerThread().start()
+
+    def test_multi_fetch(self):
+        def _fetch(task_count, thread_count):
+            urls = [BASE_URL] * task_count
+            count = 0
+            RESPONSE['get'] = 'zorro'
+            for res in multi_fetch(urls, thread_count):
+                count += 1
+                self.assertEqual(res['ok'], True)
+                self.assertEqual(res['grab'].response.body, 'zorro')
+            self.assertEqual(count, task_count)
+        _fetch(1, 1)
+        _fetch(1, 10)
+        _fetch(3, 1)
+        _fetch(3, 2)
+        _fetch(10, 5)
+        _fetch(0, 5)
 
 if __name__ == '__main__':
     unittest.main()

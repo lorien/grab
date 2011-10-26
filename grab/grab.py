@@ -214,39 +214,38 @@ class Grab(object):
 
         return self.request(url=url, **kwargs)
 
+    def prepare_request(self, **kwargs):
+        """
+        Configure all things to make real network request.
+        This method is called before doing real request via
+        tranposrt extension.
+        """
+
+        # Reset the state setted by prevous request
+        self.reset()
+        self.increase_request_counter()
+        if kwargs:
+            self.setup(**kwargs)
+        self.process_config()
+
     def request(self, **kwargs):
         """
         Perform network request.
 
         You can specify grab settings in ``**kwargs``.
-
-        Any keywrod argument will be passed to ``self.config`` except:
-
-        * controller - it should be callable which will be called at the end
-        of request. You can control the results of request with controller 
-        function and, for example, do the same request again in case of some error.
+        Any keyword argument will be passed to ``self.config``.
 
         Returns: ``Response`` objects.
         """
-
-        controller = kwargs.pop('controller', None)
 
         if self.config['hammer_mode']:
             hammer_timeouts = list(self.config['hammer_timeouts'])
             connect_timeout, total_timeout = hammer_timeouts.pop(0)
             self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
 
-        self.charset = self.response.charset
-
         while True:
             try:
-                # Reset the state setted by prevous request
-                self.reset()
-                self.increase_request_counter()
-                if kwargs:
-                    self.setup(**kwargs)
-                self.process_config()
-
+                self.prepare_request(**kwargs)
                 self.transport_extension.request(self)
             except GrabError, ex:
                 # In hammer mode try to use next timeouts
@@ -266,6 +265,13 @@ class Grab(object):
             else:
                 # Break the infinite loop in case of success response
                 break
+
+        return self.process_request_result()
+
+    def process_request_result(self):
+        """
+        Process result of real request performed via transport extension.
+        """
 
         if self.config['debug_post']:
             post = self.config['post'] or self.config['multipart_post']
@@ -292,6 +298,9 @@ class Grab(object):
 
         self.prepare_response()
 
+        # Set working charset to encode POST data of next requests
+        self.charset = self.response.charset
+
         # TODO: raise GrabWarning if self.config['http_warnings']
         #if 400 <= self.response_code:
             #raise IOError('Response code is %s: ' % self.response_code)
@@ -312,9 +321,6 @@ class Grab(object):
             url = find_refresh_url(self.response.unicode_body())
             if url:
                 return self.request(url=url)
-
-        if controller:
-            controller(self)
 
         return self.response
 
