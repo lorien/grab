@@ -16,24 +16,35 @@ class Extension(object):
         grab._lxml_form = None
         grab._file_fields = {}
 
-    def choose_form(self, number=None, id=None):
+    def choose_form(self, number=None, id=None, name=None):
         """
-        Select current form.
-        There is options :
-        number - select form by numer started from 0 (0 is first form etc)
-        id - select form by id attribute (<form id="form_id">)
+        Select default form.
+        
+        Methods like set_input, set_input_by_id work with default form.
+        
+        Arguments:
+        * number - select form by numer
+        * id - select form by id attribute (<form id="form_id">)
+        * name - select form by name attribute (<form name="form_name">)
         """
 
         if id is not None:
-            form = self.tree.get_element_by_id(id)
-            if form.tag == 'form':
-                self._lxml_form = form
-            else:
-                raise DataNotFound("There is no form element with id: %s" % id)
+            try:
+                self._lxml_form = self.css('form[id="%s"]' % id)
+            except IndexError:
+                raise DataNotFound("There is no form with id: %s" % id)
+        elif name is not None:
+            try:
+                self._lxml_form = self.css('form[name="%s"]' % name)
+            except IndexError:
+                raise DataNotFound("There is no form with name: %s" % name)
         elif number is not None:
-            self._lxml_form = self.tree.forms[number]
+            try:
+                self._lxml_form = self.tree.forms[number]
+            except IndexError:
+                raise DataNotFound("There is no form with number: %s" % number)
         else:
-            raise GrabMisuseError
+            raise GrabMisuseError('choose_form methods requires one of (number, id, name) arguments')
                 
     @property
     def form(self):

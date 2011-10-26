@@ -303,12 +303,14 @@ class TestHtmlForms(TestCase):
         self.g.response.body = FORMS
         self.g.response.charset = 'utf-8'
 
-    def test_formselect(self):
-        # test choose_form method (lxml_form)
+    def test_choose_form(self):
+        """
+        Test ``choose_form`` method
+        """
         
         # raise errors
-        self.assertRaises(IndexError, lambda: self.g.choose_form(10))
-        self.assertRaises(KeyError, lambda: self.g.choose_form(id='bad_id'))
+        self.assertRaises(DataNotFound, lambda: self.g.choose_form(10))
+        self.assertRaises(DataNotFound, lambda: self.g.choose_form(id='bad_id'))
         self.assertRaises(DataNotFound, lambda: self.g.choose_form(id='fake_form'))
         self.assertRaises(GrabMisuseError, lambda: self.g.choose_form())
         
@@ -316,14 +318,21 @@ class TestHtmlForms(TestCase):
         self.g.choose_form(0)
         self.assertEqual('form', self.g._lxml_form.tag)
         self.assertEqual('search_form', self.g._lxml_form.get('id'))
+
         # reset current form
         self.g._lxml_form = None
 
         self.g.choose_form(id='common_form')
         self.assertEqual('form', self.g._lxml_form.tag)
         self.assertEqual('common_form', self.g._lxml_form.get('id'))
+
         # reset current form
         self.g._lxml_form = None
+
+        self.g.choose_form(name='dummy')
+        self.assertEqual('form', self.g._lxml_form.tag)
+        self.assertEqual('dummy', self.g._lxml_form.get('name'))
+
 
 
 class TestFakeServer(TestCase):
