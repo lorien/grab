@@ -1,18 +1,16 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-from grab import DataNotFound, GrabError, GrabMisuseError
+from __future__ import absolute_import
 import re
+
+from ..grab import DataNotFound, GrabError, GrabMisuseError
 
 RE_NUMBER = re.compile(r'\d+')
 RE_NUMBER_WITH_SPACES = re.compile(r'\d[\s\d]*', re.U)
 RE_SPACE = re.compile(r'\s+', re.U)
 
 class Extension(object):
-    export_attributes = ['search', 'search_rex', 'assert_substring', 'assert_rex',
-                         'find_number', 'drop_space', 'normalize_space',
-                         'assert_substrings']
-        
     def search(self, anchor, byte=False):
         """
         Search the substring in response body.

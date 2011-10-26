@@ -3,18 +3,14 @@
 # License: BSD
 from __future__ import absolute_import
 from lxml.html import fromstring
-from grab import DataNotFound, GrabMisuseError
 from urlparse import urljoin
 
+from ..grab import DataNotFound, GrabMisuseError
+
 class Extension(object):
-    export_attributes = ['choose_form', 'form', 'set_input',
-                         'set_input_by_id', 'submit', 'form_fields',
-                         'set_input_by_number',
-                         ]
-        
-    def extra_reset(self, grab):
-        grab._lxml_form = None
-        grab._file_fields = {}
+    def extra_reset(self):
+        self._lxml_form = None
+        self._file_fields = {}
 
     def choose_form(self, number=None, id=None, name=None):
         """

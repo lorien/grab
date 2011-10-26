@@ -31,8 +31,6 @@ __all__ = ('Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseE
            'UploadContent', 'UploadFile')
 
 GLOBAL_STATE = {'request_counter': 0}
-DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
-                      'grab.ext.django', 'grab.ext.text']
 logger = logging.getLogger('grab')
 
 class GrabError(Exception):
@@ -56,6 +54,35 @@ class GrabMisuseError(GrabError):
     """
     Indicates incorrect usage of grab API.
     """
+
+class UploadContent(str):
+    """
+    TODO: docstring
+    """
+
+    def __new__(cls, value):
+        obj = str.__new__(cls, 'xxx')
+        obj.raw_value = value
+        return obj
+
+    def field_tuple(self):
+        import pycurl
+        return (pycurl.FORM_CONTENTS, self.raw_value)
+
+
+class UploadFile(str):
+    """
+    TODO: docstring
+    """
+
+    def __new__(cls, path):
+        obj = str.__new__(cls, 'xxx')
+        obj.path = path
+        return obj
+
+    def field_tuple(self):
+        import pycurl
+        return (pycurl.FORM_FILE, self.path)
 
 
 def default_config():
@@ -96,8 +123,29 @@ def default_config():
 VALID_CONFIG_KEYS = default_config().keys()
 
 
+#DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
+                      #'grab.ext.django', 'grab.ext.text']
 
-class Grab(object):
+import ext.pycurl
+import ext.lxml
+import ext.lxml_form
+import ext.django
+import ext.text
+
+class GrabInterface(object):
+    def process_config(self):
+        raise NotImplementedError
+
+    def extract_cookies(self):
+        raise NotImplementedError
+
+    def prepare_response(self):
+        raise NotImplementedError
+
+class Grab(ext.pycurl.Extension, ext.lxml.Extension,
+           ext.lxml_form.Extension, ext.django.Extension,
+           ext.text.Extension, GrabInterface):
+
     # Shortcut to grab.GrabError
     Error = GrabError
 
@@ -107,36 +155,19 @@ class Grab(object):
                            'proxylist', 'charset')
 
     # Info about loaded extensions
-    extensions = []
-    transport_extension = None
+    #extensions = []
+    #transport_extension = None
 
     """
     Public methods
     """
 
-    def __init__(self, extensions=DEFAULT_EXTENSIONS, extra_extensions=None, **kwargs):
+    def __init__(self, **kwargs):
         """
-        By default grab instance is initiated with some extensions. You can
-        override list of extension in ``extensions`` attribute or specify additional
-        extensions in ``extra_extensions`` attribute. All other named arguments will
-        be treated as settings.
+        Create Grab instance
         """
 
-        if extra_extensions:
-            extensions = extensions + extra_extensions
-        for mod_path in extensions:
-            # Can't win in the fight with relative imports...
-            # Doing simple hack
-            if mod_path.startswith('grab.'):
-                mod_path = mod_path[5:]
-            mod = __import__(mod_path, globals(), locals(), ['foo'])
-            self.load_extension(mod.Extension)
         self.config = default_config()
-        for ext in self.extensions:
-            try:
-                self.config.update(ext.extra_default_config())
-            except AttributeError:
-                pass
         self.default_headers = self.common_headers()
         self.trigger_extensions('init')
         self.reset()
@@ -246,7 +277,7 @@ class Grab(object):
         while True:
             try:
                 self.prepare_request(**kwargs)
-                self.transport_extension.request(self)
+                self.transport_request()
             except GrabError, ex:
                 # In hammer mode try to use next timeouts
                 if self.config['hammer_mode'] and ex[0] == 28:
@@ -420,28 +451,17 @@ class Grab(object):
 
 
     def trigger_extensions(self, event):
-        for ext in self.extensions:
-            try:
-                getattr(ext, 'extra_%s' % event)(self)
-            except AttributeError:
-                pass
+        for cls in self.__class__.mro()[1:]:
+            if hasattr(cls, 'extra_%s' % event):
+                getattr(cls, 'extra_%s' % event)(self)
 
-    def process_config(self):
-        raise NotImplemented('process_config method should be redefined by transport extension')
-
-    def extract_cookies(self):
-       raise NotImplemented('extract_cookies method should be redefined by transport extension')
-
-    def prepare_response(self):
-       raise NotImplemented('prepare_response method should be redefined by transport extension')
-
-    def load_extension(self, ext_class):
-        for attr in ext_class.export_attributes:
-            self.add_to_class(attr, ext_class.__dict__[attr])
-        ext = ext_class()
-        self.extensions.append(ext)
-        if getattr(ext, 'transport', None):
-            self.transport_extension = ext
+    #def load_extension(self, ext_class):
+        #for attr in ext_class.export_attributes:
+            #self.add_to_class(attr, ext_class.__dict__[attr])
+        #ext = ext_class()
+        #self.extensions.append(ext)
+        #if getattr(ext, 'transport', None):
+            #self.transport_extension = ext
 
     @classmethod
     def add_to_class(cls, name, obj):
@@ -570,25 +590,3 @@ class Grab(object):
         if not isinstance(value, unicode):
             raise GrabMisuseError('normalize_unicode method accepts only unicode values')
         return value.encode(self.charset if charset is None else charset)
-
-
-class UploadContent(str):
-    def __new__(cls, value):
-        obj = str.__new__(cls, 'xxx')
-        obj.raw_value = value
-        return obj
-
-    def field_tuple(self):
-        import pycurl
-        return (pycurl.FORM_CONTENTS, self.raw_value)
-
-
-class UploadFile(str):
-    def __new__(cls, path):
-        obj = str.__new__(cls, 'xxx')
-        obj.path = path
-        return obj
-
-    def field_tuple(self):
-        import pycurl
-        return (pycurl.FORM_FILE, self.path)

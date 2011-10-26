@@ -7,7 +7,7 @@ from lxml.cssselect import CSSSelector
 from urlparse import urljoin
 import re
 
-from grab import DataNotFound
+from ..grab import DataNotFound
 
 REX_NUMBER = re.compile(r'\d+')
 REX_SPACE = re.compile(r'\s', re.U)
@@ -15,14 +15,8 @@ REX_SPACE = re.compile(r'\s', re.U)
 NULL = object()
 
 class Extension(object):
-    export_attributes = ['tree', 'follow_link',
-                         'get_node_text', 'find_node_number',
-                         'xpath', 'xpath_text', 'xpath_number', 'xpath_list',
-                         'css', 'css_text', 'css_number', 'css_list', 'strip_tags',
-                         'assert_css', 'assert_xpath']
-
-    def extra_reset(self, grab):
-        grab._lxml_tree = None
+    def extra_reset(self):
+        self._lxml_tree = None
 
     @property
     def tree(self):

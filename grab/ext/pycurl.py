@@ -9,7 +9,7 @@ import urllib
 from StringIO import StringIO
 import threading
 
-from grab.grab import GrabError, GrabMisuseError, UploadContent, UploadFile
+from ..grab import GrabError, GrabMisuseError, UploadContent, UploadFile
 
 logger = logging.getLogger('grab')
 
@@ -39,24 +39,16 @@ except ImportError:
 
 
 class Extension(object):
-    export_attributes = ['head_processor', 'body_processor', 'debug_processor',
-                         'process_config', 'extract_cookies', 'prepare_response',
-                         'dump_cookies', 'load_cookies', 'clear_cookies',
-                         'reset_curl_instance']
-    transport = True
+    def extra_init(self):
+        self.curl = pycurl.Curl()
 
-    # TODO: why not just self?
-    def extra_init(self, grab):
-        grab.curl = pycurl.Curl()
-
-    # TODO: why not just self?
-    def extra_reset(self, grab):
-        grab.response_head_chunks = []
-        grab.response_body_chunks = []
-        grab.request_headers = ''
-        grab.request_head = ''
-        grab.request_log = ''
-        grab.request_body = ''
+    def extra_reset(self):
+        self.response_head_chunks = []
+        self.response_body_chunks = []
+        self.request_headers = ''
+        self.request_head = ''
+        self.request_log = ''
+        self.request_body = ''
 
     def head_processor(self, chunk):
         """
@@ -261,9 +253,9 @@ class Extension(object):
         return cookies
 
 
-    def request(self, grab):
+    def transport_request(self):
         try:
-            grab.curl.perform()
+            self.curl.perform()
         except pycurl.error, ex:
             # CURLE_WRITE_ERROR
             # An error occurred when writing received data to a local file, or

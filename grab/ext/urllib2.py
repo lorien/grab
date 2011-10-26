@@ -7,22 +7,19 @@ import urllib2
 import cookielib
 import socket
 
-from grab.grab import GrabError
+from ..grab import GrabError
 
 logger = logging.getLogger('grab')
 
 class Extension(object):
-    export_attributes = ['process_config', 'extract_cookies', 'prepare_response']
-    transport = True
-
-    def extra_init(self, grab):
+    def extra_init(self):
         cj = cookielib.CookieJar()
-        grab._opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj),
-                                           urllib2.HTTPSHandler())
-        #grab._referer = None
+        self._opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj),
+                                            urllib2.HTTPSHandler())
+        #self._referer = None
         #self.headers = headers.random_request()
 
-    def extra_reset(self, grab):
+    def extra_reset(self):
         self._post_data = None
 
     def process_config(self):
@@ -159,23 +156,12 @@ class Extension(object):
 
         return {}
 
-    def request(self, grab):
+    def request(self):
         try:
-            grab._resp = grab._opener.open(grab.req)
-            grab._resp_body = grab._resp.read()
+            self._resp = self._opener.open(self.req)
+            self._resp_body = self._resp.read()
         except urllib2.URLError:
             raise GrabError(ex[0], ex[1])
-        #try:
-            #grab.curl.perform()
-        #except pycurl.error, ex:
-            ## CURLE_WRITE_ERROR
-            ## An error occurred when writing received data to a local file, or
-            ## an error was returned to libcurl from a write callback.
-            ## This is expected error and we should ignore it
-            #if 23 == ex[0]:
-                #pass
-            #else:
-                #raise GrabError(ex[0], ex[1])
 
     def prepare_response(self):
         self.response.body = self._resp_body

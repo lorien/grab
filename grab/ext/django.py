@@ -5,8 +5,6 @@ from __future__ import absolute_import
 from urlparse import urlsplit
 
 class Extension(object):
-    export_attributes = ['django_file']
-        
     def django_file(self, name=None):
         """
         Build from response content the django ContentFile instance.
