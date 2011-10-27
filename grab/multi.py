@@ -6,7 +6,7 @@ import pycurl
 import logging
 from grab import Grab
 
-def multi_fetch(generator, thread_number):
+def multi_fetch(generator, thread_number, **kwargs):
     """
     Download documents asynchroniously.
 
@@ -24,7 +24,7 @@ def multi_fetch(generator, thread_number):
 
     # Create curl instances
     for x in xrange(thread_number):
-        g = Grab()
+        g = Grab(**kwargs)
         g.curl.grab = g
         m.handles.append(g.curl)
 
