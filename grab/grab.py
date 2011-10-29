@@ -246,8 +246,7 @@ class Grab(ext.pycurl.Extension, ext.lxml.Extension,
 
         if 'url' in kwargs:
             if self.config.get('url'):
-                url = urljoin(self.config['url'], kwargs['url'])
-                kwargs['url'] = url
+                kwargs['url'] = self.make_url_absolute(kwargs['url'])
         self.config.update(kwargs)
 
     def go(self, url, **kwargs):
@@ -260,6 +259,15 @@ class Grab(ext.pycurl.Extension, ext.lxml.Extension,
         """
 
         return self.request(url=url, **kwargs)
+
+    def download(self, url, location, **kwargs):
+        """
+        Fetch document located at ``url`` and save to to ``location``.
+        """
+
+        response = self.go(url, **kwargs)
+        open(location, 'w').write(response.body)
+        return len(response.body)
 
     def prepare_request(self, **kwargs):
         """
@@ -614,3 +622,13 @@ class Grab(ext.pycurl.Extension, ext.lxml.Extension,
         if not isinstance(value, unicode):
             raise GrabMisuseError('normalize_unicode method accepts only unicode values')
         return value.encode(self.charset if charset is None else charset, 'ignore')
+
+    def make_url_absolute(self, url):
+        """
+        Make url absolute using previous request url as base url.
+        """
+
+        if self.config['url']:
+            return urljoin(self.config['url'], url)
+        else:
+            return url
