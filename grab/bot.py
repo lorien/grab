@@ -28,6 +28,7 @@ class Bot(object):
         self.limit = limit
         self.counters = defaultdict(int)
         self.grab_config = {}
+        self.proxylist_config = None
 
     def load_tasks(self, path, task_name='initial', limit=None):
         count = 0
@@ -68,7 +69,7 @@ class Bot(object):
                         else:
                             if isinstance(result, types.GeneratorType):
                                 for item in result:
-                                    self.process_result(result)
+                                    self.process_result(item)
                             else:
                                 self.process_result(result)
     
@@ -80,7 +81,7 @@ class Bot(object):
             if not hasattr(self, handler_name):
                 handler_name = 'content_default'
             try:
-                getattr(self, handler_name)(result) 
+                getattr(self, handler_name)(result['item']) 
             except Exception, ex:
                 # TODO: what to do with that error?
                 logging.error('', exc_info=ex)
@@ -135,6 +136,9 @@ class Bot(object):
                     else:
                         # Set up curl instance via Grab interface
                         grab = Grab(**self.grab_config)
+                        if self.proxylist_config:
+                            args, kwargs = self.proxylist_config
+                            grab.setup_proxylist(*args, **kwargs)
                         curl.grab = grab
                         curl.grab.curl = curl
                         curl.grab.setup(url=task['url'])
@@ -188,3 +192,6 @@ class Bot(object):
     def inc_count(self, key, step=1):
         self.counters[key] += step
         return self.counters[key]
+
+    def setup_proxylist(self, *args, **kwargs):
+        self.proxylist_config = (args, kwargs)
