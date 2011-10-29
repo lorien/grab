@@ -613,4 +613,4 @@ class Grab(ext.pycurl.Extension, ext.lxml.Extension,
 
         if not isinstance(value, unicode):
             raise GrabMisuseError('normalize_unicode method accepts only unicode values')
-        return value.encode(self.charset if charset is None else charset)
+        return value.encode(self.charset if charset is None else charset, 'ignore')

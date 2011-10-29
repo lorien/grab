@@ -80,7 +80,14 @@ class Response(object):
                     charset = self.headers['Content-Type'][(pos + 8):]
 
         if charset:
-            self.charset = charset
+            # Check that python know such charset
+            try:
+                u'x'.encode(charset)
+            except LookupError:
+                logging.error('Unknown charset found: %s' % charset)
+                self.charset = 'utf-8'
+            else:
+                self.charset = charset
 
     def unicode_body(self, ignore_errors=True):
         if ignore_errors:
