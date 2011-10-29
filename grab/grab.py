@@ -348,6 +348,12 @@ class Grab(ext.pycurl.Extension, ext.lxml.Extension,
 
         self.prepare_response()
 
+        # Copy cookies from resposne into config
+        # for future requests
+        for name, value in self.response.cookies.items():
+            if not name in self.config['cookies']:
+                self.config['cookies'][name] = value
+
         # Set working charset to encode POST data of next requests
         self.charset = self.response.charset
 
