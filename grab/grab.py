@@ -30,7 +30,17 @@ from response import Response
 __all__ = ('Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseError',
            'UploadContent', 'UploadFile')
 
+# This counter will used in enumerating network queries.
+# Its value will be displayed in logging messages and also used
+# in names of dumps
+# I use mutable module variable to allow different
+# instances of Grab maintain single counter
+# This could be helpful in debuggin when your script
+# creates multiple Grab instances - in case of shared counter
+# grab instances do not overwrite dump logs
+REQUEST_COUNTER_LOCK = threading.Lock()
 GLOBAL_STATE = {'request_counter': 0}
+
 logger = logging.getLogger('grab')
 
 class GrabError(Exception):
@@ -260,7 +270,7 @@ class Grab(ext.pycurl.Extension, ext.lxml.Extension,
 
         # Reset the state setted by prevous request
         self.reset()
-        self.increase_request_counter()
+        self.request_counter = self.get_request_counter()
         if kwargs:
             self.setup(**kwargs)
         self.process_config()
@@ -448,19 +458,6 @@ class Grab(ext.pycurl.Extension, ext.lxml.Extension,
     Private methods
     """
 
-    @property
-    def request_counter(self):
-        # This counter will used in enumerating network queries.
-        # Its value will be displayed in logging messages and also used
-        # in names of dumps
-        # I use mutable module variable to allow different
-        # instances of Grab maintain single counter
-        # This could be helpful in debuggin when your script
-        # creates multiple Grab instances - in case of shared counter
-        # grab instances do not overwrite dump logs
-        return GLOBAL_STATE['request_counter']
-
-
     def trigger_extensions(self, event):
         for cls in self.__class__.mro()[1:]:
             if hasattr(cls, 'extra_%s' % event):
@@ -491,8 +488,18 @@ class Grab(ext.pycurl.Extension, ext.lxml.Extension,
             'Expect': '',
         }
 
-    def increase_request_counter(self):
+    def get_request_counter(self):
+        """
+        Increase global request counter and return new value
+        which will be used as request number for current request.
+        """
+
+        # TODO: do not use lock in main thread
+        REQUEST_COUNTER_LOCK.acquire()
         GLOBAL_STATE['request_counter'] += 1
+        counter = GLOBAL_STATE['request_counter']
+        REQUEST_COUNTER_LOCK.release()
+        return counter
 
     def save_dumps(self):
         if self.config['log_dir']:
