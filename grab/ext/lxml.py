@@ -25,9 +25,13 @@ class Extension(object):
         """
 
         if self._lxml_tree is None:
-            body = self.response.unicode_body()
+            body = self.response.unicode_body().strip()
             if self.config['lowercased_tree']:
                 body = body.lower()
+            if not body:
+                # Generate minimal empty content
+                # which will not break lxml parser
+                body = '<html></html>'
             self._lxml_tree = fromstring(body)
         return self._lxml_tree
 
