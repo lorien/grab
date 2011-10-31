@@ -9,7 +9,7 @@ import urllib
 from StringIO import StringIO
 import threading
 
-from ..grab import GrabError, GrabMisuseError, UploadContent, UploadFile
+from ..base import GrabError, GrabMisuseError, UploadContent, UploadFile
 
 logger = logging.getLogger('grab')
 
@@ -46,7 +46,7 @@ except ImportError:
     pass
 
 
-class Extension(object):
+class CurlTransportExtension(object):
     def extra_init(self):
         self.curl = pycurl.Curl()
 
@@ -331,3 +331,8 @@ class Extension(object):
         """
 
         self.curl = pycurl.Curl()
+
+
+from ..base import BaseGrab
+class GrabCurl(CurlTransportExtension, BaseGrab):
+    pass

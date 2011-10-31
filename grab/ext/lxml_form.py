@@ -5,7 +5,7 @@ from __future__ import absolute_import
 from lxml.html import fromstring
 from urlparse import urljoin
 
-from ..grab import DataNotFound, GrabMisuseError
+from ..base import DataNotFound, GrabMisuseError
 
 class Extension(object):
     def extra_reset(self):

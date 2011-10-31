@@ -7,7 +7,7 @@ import urllib2
 import cookielib
 import socket
 
-from ..grab import GrabError
+from ..base import GrabError
 
 logger = logging.getLogger('grab')
 

@@ -7,7 +7,7 @@ from lxml.cssselect import CSSSelector
 from urlparse import urljoin
 import re
 
-from ..grab import DataNotFound, GrabMisuseError
+from ..base import DataNotFound, GrabMisuseError
 
 REX_NUMBER = re.compile(r'\d+')
 REX_SPACE = re.compile(r'\s', re.U)

@@ -4,7 +4,7 @@
 from __future__ import absolute_import
 import re
 
-from ..grab import DataNotFound, GrabError, GrabMisuseError
+from ..base import DataNotFound, GrabError, GrabMisuseError
 
 RE_NUMBER = re.compile(r'\d+')
 RE_NUMBER_WITH_SPACES = re.compile(r'\d[\s\d]*', re.U)

@@ -27,6 +27,8 @@ from html import find_refresh_url
 import user_agent
 from response import Response
 
+from error import GrabError, GrabNetworkError, GrabMisuseError, DataNotFound
+
 __all__ = ('Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseError',
            'UploadContent', 'UploadFile')
 
@@ -43,28 +45,6 @@ GLOBAL_STATE = {'request_counter': 0}
 
 logger = logging.getLogger('grab')
 
-class GrabError(Exception):
-    """
-    All custom Grab exception should be children of that class.
-    """
-
-class GrabNetworkError(IOError, GrabError):
-    """
-    Wrapper about pycurl error.
-    """
-
-
-class DataNotFound(IndexError, GrabError):
-    """
-    Indictes that required data is not found.
-    """
-
-
-class GrabMisuseError(GrabError):
-    """
-    Indicates incorrect usage of grab API.
-    """
-
 class UploadContent(str):
     """
     TODO: docstring
@@ -76,6 +56,7 @@ class UploadContent(str):
         return obj
 
     def field_tuple(self):
+        # TODO: move to transport extension
         import pycurl
         return (pycurl.FORM_CONTENTS, self.raw_value)
 
@@ -91,6 +72,7 @@ class UploadFile(str):
         return obj
 
     def field_tuple(self):
+        # move to transport extension
         import pycurl
         return (pycurl.FORM_FILE, self.path)
 
@@ -136,7 +118,6 @@ VALID_CONFIG_KEYS = default_config().keys()
 #DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
                       #'grab.ext.django', 'grab.ext.text']
 
-import ext.pycurl
 import ext.lxml
 import ext.lxml_form
 import ext.django
@@ -152,7 +133,8 @@ class GrabInterface(object):
     def prepare_response(self):
         raise NotImplementedError
 
-class Grab(ext.pycurl.Extension, ext.lxml.Extension,
+
+class BaseGrab(ext.lxml.Extension,
            ext.lxml_form.Extension, ext.django.Extension,
            ext.text.Extension, GrabInterface):
 
@@ -205,7 +187,7 @@ class Grab(ext.pycurl.Extension, ext.lxml.Extension,
         Cloned instance will have the same state: cookies, referer, response data
         """
 
-        g = Grab()
+        g = self.__class__()
 
         #g.config = deepcopy(self.config)
         g.config = copy(self.config)
