@@ -22,8 +22,16 @@ logger = logging.getLogger('grab')
 # http://curl.haxx.se/mail/lib-2010-03/0114.html
 
 #CURLOPT_NOSIGNAL
-#Pass a long. If it is 1, libcurl will not use any functions that install signal handlers or any functions that cause signals to be sent to the process. This option is mainly here to allow multi-threaded unix applications to still set/use all timeout options etc, without risking getting signals. (Added in 7.10)
-#If this option is set and libcurl has been built with the standard name resolver, timeouts will not occur while the name resolve takes place. Consider building libcurl with c-ares support to enable asynchronous DNS lookups, which enables nice timeouts for name resolves without signals.
+#Pass a long. If it is 1, libcurl will not use any functions that install
+# signal handlers or any functions that cause signals to be sent to the
+# process. This option is mainly here to allow multi-threaded unix applications
+# to still set/use all timeout options etc, without risking getting signals.
+# (Added in 7.10)
+
+#If this option is set and libcurl has been built with the standard name
+# resolver, timeouts will not occur while the name resolve takes place.
+# Consider building libcurl with c-ares support to enable asynchronous DNS 
+# lookups, which enables nice timeouts for name resolves without signals.
 
 try:
     import signal
@@ -171,11 +179,17 @@ class Extension(object):
 
 
         # CURLOPT_COOKIELIST
-        # Pass a char * to a cookie string. Cookie can be either in Netscape / Mozilla format or just regular HTTP-style header (Set-Cookie: ...) format.
-        # If cURL cookie engine was not enabled it will enable its cookie engine.
-        # Passing a magic string "ALL" will erase all cookies known by cURL. (Added in 7.14.1)
-        # Passing the special string "SESS" will only erase all session cookies known by cURL. (Added in 7.15.4)
-        # Passing the special string "FLUSH" will write all cookies known by cURL to the file specified by CURLOPT_COOKIEJAR. (Added in 7.17.1)
+        # Pass a char * to a cookie string. Cookie can be either in
+        # Netscape / Mozilla format or just regular HTTP-style
+        # header (Set-Cookie: ...) format.
+        # If cURL cookie engine was not enabled it will enable its cookie
+        # engine.
+        # Passing a magic string "ALL" will erase all cookies known by cURL.
+        # (Added in 7.14.1)
+        # Passing the special string "SESS" will only erase all session
+        # cookies known by cURL. (Added in 7.15.4)
+        # Passing the special string "FLUSH" will write all cookies known by
+        # cURL to the file specified by CURLOPT_COOKIEJAR. (Added in 7.17.1)
 
         if self.config['reuse_cookies']:
             # Setting empty string will activate curl cookie engine
