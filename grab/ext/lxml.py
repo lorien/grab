@@ -7,7 +7,7 @@ from lxml.cssselect import CSSSelector
 from urlparse import urljoin
 import re
 
-from ..grab import DataNotFound
+from ..grab import DataNotFound, GrabMisuseError
 
 REX_NUMBER = re.compile(r'\d+')
 REX_SPACE = re.compile(r'\s', re.U)
@@ -35,9 +35,48 @@ class Extension(object):
             self._lxml_tree = fromstring(body)
         return self._lxml_tree
 
+    def find_link(self, href_pattern, make_absolute=True):
+        """
+        Find link in response body which href value matches ``href_pattern``.
+
+        Returns found url or None.
+        """
+
+        if make_absolute:
+            self.tree.make_links_absolute(self.response.url)
+
+        if isinstance(href_pattern, unicode):
+            raise GrabMisuseError('find_link method accepts only '\
+                                  'byte-string argument')
+        for elem, attr, link, pos in self.tree.iterlinks():
+            if elem.tag == 'a' and href_pattern in link:
+                return link
+        return None
+
+    def find_link_rex(self, rex, make_absolute=True):
+        """
+        Find link matched the given regular expression in response body.
+
+        Returns found url or None.
+        """
+
+        if make_absolute:
+            self.tree.make_links_absolute(self.response.url)
+
+        for elem, attr, link, pos in self.tree.iterlinks():
+            if elem.tag == 'a':
+                match = rex.search(link)
+                if match:
+                    # That does not work for string object
+                    # link.match = match
+                    return link
+        return None
+
     def follow_link(self, anchor=None, href=None):
         """
         Find link and follow it.
+
+        # TODO: refactor this shit
         """
 
         if anchor is None and href is None:
@@ -196,3 +235,17 @@ class Extension(object):
         """
 
         self.xpath(path)
+
+    def css_exists(self, path):
+        """
+        Return True if at least one element with specified css path exists.
+        """
+
+        return len(self.css_list(path)) > 0
+
+    def xpath_exists(self, path):
+        """
+        Return True if at least one element with specified xpath path exists.
+        """
+
+        return len(self.xpath_list(path)) > 0
