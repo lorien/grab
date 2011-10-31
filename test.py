@@ -13,6 +13,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 from grab import Grab, GrabMisuseError, DataNotFound, UploadContent
 from grab.multi import multi_fetch
+from grab.spider import Spider, Task, Data
 
 # The port on which the fake http server listens requests
 FAKE_SERVER_PORT = 9876
@@ -296,6 +297,14 @@ class LXMLExtensionTest(unittest.TestCase):
         self.assertEqual('foo bar', self.g.strip_tags('<b>foo</b><i>bar'))
         self.assertEqual('', self.g.strip_tags('<b> <div>'))
 
+    def test_css_exists(self):
+        self.assertTrue(self.g.css_exists('li#num-1'))
+        self.assertFalse(self.g.css_exists('li#num-3'))
+
+    def test_xpath_exists(self):
+        self.assertTrue(self.g.xpath_exists('//li[@id="num-1"]'))
+        self.assertFalse(self.g.xpath_exists('//li[@id="num-3"]'))
+
 
 class TestHtmlForms(TestCase):
     def setUp(self):
@@ -506,6 +515,26 @@ class TestMultiFetch(TestCase):
         _fetch(3, 2)
         _fetch(10, 5)
         _fetch(0, 5)
+
+
+class TestSpider(TestCase):
+
+    class SimpleSpider(Spider):
+        def task_baz(self, grab, task):
+            return Data('foo', grab.response.body)
+
+        def data_foo(self, item):
+            self.SAVED_ITEM = item
+           
+    def setUp(self):
+        FakeServerThread().start()
+
+    def test_spider(self):
+        RESPONSE['get'] = 'Hello spider!'
+        sp = self.SimpleSpider()
+        sp.taskq.put(Task('baz', BASE_URL))
+        sp.run()
+        self.assertEqual('Hello spider!', sp.SAVED_ITEM)
 
 if __name__ == '__main__':
     unittest.main()
