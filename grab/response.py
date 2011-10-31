@@ -5,9 +5,10 @@ import re
 from copy import copy
 import logging
 
-RE_XML_DECLARATION = re.compile(r'^<\?xml[^>]+\?>', re.I)
+RE_XML_DECLARATION = re.compile(r'^[\r\n\t]*<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(r'encoding\s*=\s*["\']([^"\']+)["\']')
-RE_META_CHARSET = re.compile(r'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)', re.I)
+RE_META_CHARSET = re.compile(r'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)',
+                             re.I)
 COPY_KEYS = ['status', 'code', 'head', 'body', 'time',
              'url', 'charset']
 
@@ -42,7 +43,8 @@ class Response(object):
                         name, value = line.split(':', 1)
                         self.headers[name.strip()] = value.strip()
                     except ValueError, ex:
-                        logging.error('Invalid header line: %s' % line, exc_info=ex)
+                        logging.error('Invalid header line: %s' % line,
+                                      exc_info=ex)
 
         self.detect_charset()
 
