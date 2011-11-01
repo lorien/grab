@@ -8,6 +8,7 @@ import logging
 import urllib
 from StringIO import StringIO
 import threading
+import random
 
 from ..base import GrabError, GrabMisuseError, UploadContent, UploadFile
 
@@ -122,7 +123,15 @@ class CurlTransportExtension(object):
         self.curl.setopt(pycurl.NOSIGNAL, 1)
         self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
         self.curl.setopt(pycurl.HEADERFUNCTION, self.head_processor)
-        self.curl.setopt(pycurl.USERAGENT, self.config['user_agent'])
+
+        # User-Agent
+        if self.config['user_agent'] is None:
+            if self.config['user_agent_file'] is not None:
+                lines = open(self.config['user_agent_file']).read().splitlines()
+                self.config['user_agent'] = random.choice(lines)
+
+        if self.config['user_agent'] is not None:
+            self.curl.setopt(pycurl.USERAGENT, self.config['user_agent'])
 
         if self.config['debug']:
             self.curl.setopt(pycurl.VERBOSE, 1)

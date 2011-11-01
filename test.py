@@ -392,6 +392,37 @@ class TestGrab(TestCase):
         g.go(BASE_URL)
         self.assertFalse(g.response.body == '')
 
+    def test_useragent(self):
+        g = Grab()
+        g.setup(user_agent='')
+        g.go(BASE_URL)
+        self.assertFalse('user-agent' in REQUEST['headers'])
+
+        g.setup(user_agent='foo')
+        g.go(BASE_URL)
+        self.assertEqual(REQUEST['headers']['user-agent'], 'foo')
+
+        path = '/tmp/__ua.txt'
+        open(path, 'w').write('GOD')
+        g.setup(user_agent=None, user_agent_file=path)
+        g.go(BASE_URL)
+        self.assertEqual(REQUEST['headers']['user-agent'], 'GOD')
+
+        path = '/tmp/__ua.txt'
+        open(path, 'w').write('GOD1\nGOD2')
+        g.setup(user_agent=None, user_agent_file=path)
+        g.go(BASE_URL)
+        self.assertTrue(REQUEST['headers']['user-agent'] in ('GOD1', 'GOD2'))
+        ua = g.config['user_agent']
+
+        # User-agent should not change
+        g.go(BASE_URL)
+        self.assertEqual(REQUEST['headers']['user-agent'], ua)
+
+        # User-agent should not change
+        g.go(BASE_URL)
+        self.assertEqual(REQUEST['headers']['user-agent'], ua)
+
 
 class TestPostFeature(TestCase):
     def setUp(self):
@@ -445,18 +476,18 @@ class TestPostFeature(TestCase):
         # Multipart data could not be dict or string
         g.setup(multipart_post={'foo': 'bar'})
         self.assertRaises(GrabMisuseError, lambda: g.request())
-        #g.setup(multipart_post='asdf')
-        #self.assertRaises(GrabMisuseError, lambda: g.request())
+        g.setup(multipart_post='asdf')
+        self.assertRaises(GrabMisuseError, lambda: g.request())
 
-        ## tuple with one pair
-        #g.setup(multipart_post=(('foo', 'bar'),))
-        #g.request()
-        #self.assertTrue('name="foo"' in REQUEST['post'])
+        # tuple with one pair
+        g.setup(multipart_post=(('foo', 'bar'),))
+        g.request()
+        self.assertTrue('name="foo"' in REQUEST['post'])
 
-        ## tuple with two pairs
-        #g.setup(multipart_post=(('foo', 'bar'), ('foo', 'baz')))
-        #g.request()
-        #self.assertTrue('name="foo"' in REQUEST['post'])
+        # tuple with two pairs
+        g.setup(multipart_post=(('foo', 'bar'), ('foo', 'baz')))
+        g.request()
+        self.assertTrue('name="foo"' in REQUEST['post'])
 
 class TestProxy(TestCase):
     def setUp(self):

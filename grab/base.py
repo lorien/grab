@@ -24,13 +24,14 @@ import re
 
 from proxylist import ProxyList
 from html import find_refresh_url
-import user_agent
 from response import Response
 
 from error import GrabError, GrabNetworkError, GrabMisuseError, DataNotFound
 
 __all__ = ('Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseError',
            'UploadContent', 'UploadFile')
+
+PACKAGE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
@@ -88,7 +89,8 @@ def default_config():
         #payload = None,
         method = None,
         headers = {},
-        user_agent = choice(user_agent.variants),
+        user_agent = None,
+        user_agent_file = None,
         reuse_cookies = True,
         reuse_referer = True,
         cookies = {},

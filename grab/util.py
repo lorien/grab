@@ -1,6 +1,7 @@
 """
 Miscelanius utilities which are helpful sometime.
 """
+import logging
 
 def unique_file(path):
     """
