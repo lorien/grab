@@ -411,6 +411,7 @@ class TestGrab(TestCase):
         g = Grab()
         g.go(BASE_URL)
         self.assertTrue(len(REQUEST['headers']) > 0)
+        self.assertFalse('PycURL' in REQUEST['headers']['user-agent'])
 
         # Simple case: setup user agent manually
         g.setup(user_agent='foo')
