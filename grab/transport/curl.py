@@ -130,8 +130,13 @@ class CurlTransportExtension(object):
                 lines = open(self.config['user_agent_file']).read().splitlines()
                 self.config['user_agent'] = random.choice(lines)
 
-        if self.config['user_agent'] is not None:
-            self.curl.setopt(pycurl.USERAGENT, self.config['user_agent'])
+        # If value is None then set empty string
+        # None is not acceptable because in such case
+        # pycurl will set its default user agent "PycURL/x.xx.x"
+        if not self.config['user_agent']:
+            self.config['user_agent'] = ''
+
+        self.curl.setopt(pycurl.USERAGENT, self.config['user_agent'])
 
         if self.config['debug']:
             self.curl.setopt(pycurl.VERBOSE, 1)

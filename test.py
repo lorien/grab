@@ -394,20 +394,37 @@ class TestGrab(TestCase):
 
     def test_useragent(self):
         g = Grab()
+
+        # Empty string disable default pycurl user-agent
         g.setup(user_agent='')
         g.go(BASE_URL)
-        self.assertFalse('user-agent' in REQUEST['headers'])
+        self.assertEqual(REQUEST['headers'].get('user-agent', ''), '')
 
+        # Null value activates default random user-agent
+        g = Grab()
+        g.setup(user_agent=None)
+        g.go(BASE_URL)
+        self.assertTrue(len(REQUEST['headers']) > 0)
+        self.assertFalse('PycURL' in REQUEST['headers']['user-agent'])
+
+        # By default user_agent is None, hence random user agent is loaded
+        g = Grab()
+        g.go(BASE_URL)
+        self.assertTrue(len(REQUEST['headers']) > 0)
+
+        # Simple case: setup user agent manually
         g.setup(user_agent='foo')
         g.go(BASE_URL)
         self.assertEqual(REQUEST['headers']['user-agent'], 'foo')
-
+        
+        # user agent from file should be loaded
         path = '/tmp/__ua.txt'
         open(path, 'w').write('GOD')
         g.setup(user_agent=None, user_agent_file=path)
         g.go(BASE_URL)
         self.assertEqual(REQUEST['headers']['user-agent'], 'GOD')
 
+        # random user agent from file should be loaded
         path = '/tmp/__ua.txt'
         open(path, 'w').write('GOD1\nGOD2')
         g.setup(user_agent=None, user_agent_file=path)

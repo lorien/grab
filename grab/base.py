@@ -90,7 +90,7 @@ def default_config():
         method = None,
         headers = {},
         user_agent = None,
-        user_agent_file = None,
+        user_agent_file = os.path.join(PACKAGE_DIR, 'user_agent.txt'),
         reuse_cookies = True,
         reuse_referer = True,
         cookies = {},
