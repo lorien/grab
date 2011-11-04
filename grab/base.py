@@ -114,9 +114,6 @@ def default_config():
         charset = None,
     )
 
-VALID_CONFIG_KEYS = default_config().keys()
-
-
 #DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
                       #'grab.ext.django', 'grab.ext.text']
 
@@ -226,7 +223,7 @@ class BaseGrab(ext.lxml.Extension,
         """
 
         for key in kwargs:
-            if not key in VALID_CONFIG_KEYS:
+            if not key in self.config.keys():
                 raise GrabMisuseError('Unknown option: %s' % key)
 
         if 'url' in kwargs:
