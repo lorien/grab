@@ -22,11 +22,8 @@ class SplinterTransportExtension(object):
         self.config['firefox_profile'] = DEFAULT_FIREFOX_PROFILE
         self.config['xserver_display'] = 7
 
-    def extra_init(self):
-        from splinter.browser import Browser
-
-        os.environ['DISPLAY'] = ':%s.0' % self.config['xserver_display']
-        self.browser = Browser('firefox', profile=self.config['firefox_profile'])
+    #def extra_init(self):
+        #pass
 
     #def extra_reset(self):
         #self.response_head_chunks = []
@@ -88,6 +85,14 @@ class SplinterTransportExtension(object):
         """
         Setup curl instance with values from ``self.config``.
         """
+
+        from splinter.browser import Browser
+
+        display = ':%s.0' % self.config['xserver_display']
+        logging.debug('Setting DISPLAY env to %s' % display)
+        os.environ['DISPLAY'] = display
+
+        self.browser = Browser('firefox', profile=self.config['firefox_profile'])
 
         #url = self.config['url']
         if isinstance(self.config['url'], unicode):
@@ -298,6 +303,7 @@ class SplinterTransportExtension(object):
         #self.response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         #self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         #self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
+        self.browser.quit()
 
     #def load_cookies(self, path):
         #"""

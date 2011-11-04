@@ -370,6 +370,7 @@ class TestGrab(TestCase):
 
         RESPONSE['get'] = 'the cat'
         g = Grab()
+        #g.setup(xserver_display=0)
         g.go(BASE_URL)
         self.assertEqual('<HTML><HEAD/><BODY><PRE>the cat</PRE></BODY></HTML>', g.response.body)
 
