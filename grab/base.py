@@ -162,6 +162,7 @@ class BaseGrab(ext.lxml.Extension,
         """
 
         self.config = default_config()
+        self.trigger_extensions('config')
         self.default_headers = self.common_headers()
         self.trigger_extensions('init')
         self.reset()

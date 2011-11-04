@@ -27,6 +27,8 @@ class Task(object):
                                     'Task should be not None')
         self.url = url
         self.grab = grab
+        if self.grab:
+            self.url = grab.config['url']
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -65,6 +67,7 @@ class Spider(object):
         self.grab_config = {}
         self.proxylist_config = None
         self.items = {}
+        self.history = set()
 
     def load_tasks(self, path, task_name='initial', limit=None):
         count = 0
@@ -126,7 +129,7 @@ class Spider(object):
         """
 
         if isinstance(result, Task):
-            self.taskq.put(result)
+            self.add_task(result)
         elif isinstance(result, Data):
             handler_name = 'data_%s' % result.name
             try:
@@ -143,6 +146,21 @@ class Spider(object):
             pass
         else:
             raise Exception('Unknown result type: %s' % result)
+
+    def add_task(self, task):
+        """
+        Add new task to task queue.
+
+        Check that task is new. Only new tasks are added to queue.
+        """
+
+        thash = (task.name, task.url)
+        if not thash in self.history:
+            self.taskq.put(task)
+            self.history.add(thash)
+        else:
+            logging.debug('Task %s -> %s already processed' % (task.name, task.url))
+            self.add_item('dup-task', '%s|%s' % (task.name, task.url))
 
     def data_default(self, item):
         """
@@ -190,7 +208,8 @@ class Spider(object):
                     if task.grab:
                         grab = task.grab
                         # Do it for consistency
-                        task.url = grab.config['url']
+                        # Moved to Task class
+                        #task.url = grab.config['url']
                     else:
                         # Set up curl instance via Grab interface
                         grab = Grab(**self.grab_config)
