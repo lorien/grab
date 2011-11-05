@@ -1,0 +1,160 @@
+"""
+Google parser.
+
+Generic search algorithm:
+
+    With some query:
+        For page in 1...9999:
+            Build url for given query and page
+            Request the url
+            If captcha found:
+                Solve captcha or change proxy or do something else
+            If last page found:
+                Stop parsing
+
+
+Module contents:
+
+* CaptchaError
+* ParsingError
+* build_search_url
+* parse_index_size
+* is_last_page
+* parse_search_results
+
+"""
+import urllib
+import logging
+
+class CaptchaError(Exception):
+    """
+    Raised when google fucks you with captcha.
+    """
+
+
+class ParsingError(Exception):
+    """
+    Raised when some unexpected HTML is found.
+    """
+
+
+def build_search_url(query, page=1, per_page=None):
+    """
+    Build google search url with specified query and pagination options.
+    """
+
+    if per_page is None:
+        per_page = 10
+    if isinstance(query, unicode):
+        query = query.encode('utf-8')
+    start = per_page * (page - 1)
+    url = 'http://google.com/search?hl=en&q=%s&start=%s' % (
+        urllib.quote(query), start)
+    if per_page != 10:
+        url += '&num=%d' % per_page
+    return url
+
+
+def parse_index_size(grab):
+    """
+    Extract number of results from grab instance which
+    has received google search results.
+    """
+
+    text = None
+    if grab.search(u'did not match any documents'):
+        return 0
+    if len(grab.css_list('#resultStats')):
+        text = grab.css_text('#resultStats')
+    if len(grab.xpath_list('//div[@id="subform_ctrl"]/div[2]')):
+        text = grab.xpath_text('//div[@id="subform_ctrl"]/div[2]')
+    if text is None:
+        logging.error('Unknown google page format')
+        return 0
+    text = text.replace(',', '').replace('.', '')
+    if 'about' in text:
+        number = grab.find_number(text.split('about')[1])
+        return int(number)
+    elif 'of' in text:
+        number = grab.find_number(text.split('of')[1])
+        return int(number)
+    else:
+        number = grab.find_number(text)
+        return int(number)
+
+
+#def search(query, grab=None, limit=None, per_page=None):
+
+    #if not grab:
+        #grab = Grab()
+    #stop = False
+    #count = 0
+
+    #grab.clear_cookies()
+    #if grab.proxylist:
+        #grab.change_proxy()
+
+    #for page in xrange(1, 9999):
+        #if stop:
+            #break
+        #url = build_search_url(query, page, per_page=per_page)
+        #index_size = None
+        #grab = google_request(url, grab=grab)
+
+        #count = 0
+        #for item in parse_search_results(grab):
+            #yield item # {url, title, index_size}
+            #count += 1
+
+        #if not count:
+            #stop = True
+
+        #if is_last_page(grab):
+            #logging.debug('Last page found')
+            #stop = True
+
+        #if limit is not None and count >= limit:
+            #logging.debug('Limit %d reached' % limit)
+            #stop = True
+
+        #grab.sleep(3, 5)
+
+
+def is_last_page(grab):
+    """
+    Detect if the fetched page is last page of search results.
+    """
+
+    # If next link does not exists then this is last page
+    return not grab.xpath_exists('//span[text()="Next"]')
+
+
+def parse_search_results(grab, parse_index_size=False):
+    """
+    Parse google search results page content.
+    """
+
+    if grab.search(u'did not match any documents'):
+
+        # No results found for given query
+        logging.debug('No results')
+
+    elif grab.search(u'please type the characters below'):
+
+        # Captcha!!!
+        raise CaptchaError('Captcha found')
+
+    elif len(grab.css_list('#ires h3')):
+
+        # Something was found
+        if parse_index_size:
+            index_size = parse_index_size(grab)
+        else:
+            index_size = None
+
+        # Yield found results
+        for elem in grab.css_list('h3.r a'):
+            yield {'url': elem.get('href'), 'title': grab.get_node_text(elem),
+                   'index_size': index_size}
+    else:
+        raise ParsingError('Could not identify google page format')
