@@ -1,4 +1,4 @@
-from Queue import Queue, Empty
+from Queue import PriorityQueue, Empty
 import pycurl
 from grab import Grab
 import logging
@@ -20,13 +20,14 @@ class Task(object):
     Task for spider.
     """
 
-    def __init__(self, name, url=None, grab=None, **kwargs):
+    def __init__(self, name, url=None, grab=None, priority=100, **kwargs):
         self.name = name
         if url is None and grab is None:
             raise SpiderMisuseError('Either url of grab option of '\
                                     'Task should be not None')
         self.url = url
         self.grab = grab
+        self.priority = priority
         if self.grab:
             self.url = grab.config['url']
         for key, value in kwargs.items():
@@ -56,25 +57,30 @@ class Spider(object):
     """
 
     def __init__(self, initial_urls=None, thread_number=3,
-                 initial_task_name='initial', request_limit=None):
-        self.taskq = Queue()
+                 initial_task_name='initial', request_limit=None,
+                 initial_priority=100, hammer_mode=False,
+                 ignore_dup_limit=5):
+        self.taskq = PriorityQueue()
         if initial_urls:
             for url in initial_urls:
-                self.taskq.put(Task(initial_task_name, url))
+                self.taskq.put((initial_priority, Task(initial_task_name, url)))
         self.thread_number = thread_number
         self.request_limit = request_limit
         self.counters = defaultdict(int)
         self.grab_config = {}
         self.proxylist_config = None
         self.items = {}
-        self.history = set()
+        self.history = {}
+        self.ignore_dup_limit = ignore_dup_limit
+        self.hammer_mode = hammer_mode
 
-    def load_tasks(self, path, task_name='initial', limit=None):
+    def load_tasks(self, path, task_name='initial', task_priority=100,
+                   limit=None):
         count = 0
         for line in open(path):
             url = line.strip()
             if url:
-                self.taskq.put(Task(task_name, url))
+                self.taskq.put((task_priority, Task(task_name, url)))
                 count += 1
                 if limit is not None and count >= limit:
                     logging.debug('load_tasks limit reached')
@@ -114,15 +120,27 @@ class Spider(object):
                         try:
                             result = handler(res['grab'], res['task'])
                         except Exception, ex:
-                            self.task_error_handler(res['task'], ex)
+                            self.error_handler(handler_name, ex, res['task'])
                         else:
                             if isinstance(result, types.GeneratorType):
                                 for item in result:
-                                    self.process_result(item)
+                                    self.process_result(item, res['task'])
                             else:
-                                self.process_result(result)
+                                self.process_result(result, res['task'])
+                    else:
+                        if self.hammer_mode:
+                            task = res['task']
+                            task.grab = res['grab_original']
+                            task.ignore_dup = True
+                            result = self.add_task(task)
+                            if not result:
+                                self.add_item('hammer-mode-too-many-errors',
+                                              res['task'].url)
+                        else:
+                            self.add_item('net-error-%s' % res['emsg'][:20], res['task'].url)
+                        # TODO: allow to write error handlers
     
-    def process_result(self, result):
+    def process_result(self, result, task):
         """
         Process result returned from task handler. 
         Result could be None, Task instance or Data instance.
@@ -139,9 +157,7 @@ class Spider(object):
             try:
                 handler(result.item)
             except Exception, ex:
-                self.count_exception(ex)
-                logging.error('Error in %s handler' % handler_name,
-                              exc_info=ex)
+                self.error_handler(handler_name, ex, task)
         elif result is None:
             pass
         else:
@@ -154,13 +170,24 @@ class Spider(object):
         Check that task is new. Only new tasks are added to queue.
         """
 
+        # TODO: disable history
         thash = (task.name, task.url)
         if not thash in self.history:
-            self.taskq.put(task)
-            self.history.add(thash)
+            self.taskq.put((task.priority, task))
+            self.history[thash] = 1
+            return True
+        elif task.get('ignore_dup'):
+            if self.history[thash] == self.ignore_dup_limit:
+                logging.debug('Task %s -> %s ignore dup limit reached' % (task.name, task.url))
+                return False
+            else:
+                self.taskq.put((task.priority, task))
+                self.history[thash] += 1
+                return True
         else:
             logging.debug('Task %s -> %s already processed' % (task.name, task.url))
             self.add_item('dup-task', '%s|%s' % (task.name, task.url))
+            return False
 
     def data_default(self, item):
         """
@@ -195,7 +222,7 @@ class Spider(object):
                 if not freelist:
                     break
                 try:
-                    task = self.taskq.get(True, 0.1)
+                    priority, task = self.taskq.get(True, 0.1)
                 except Empty:
                     # If All handlers are free and no tasks in queue
                     # yield None signal
@@ -207,9 +234,6 @@ class Spider(object):
 
                     if task.grab:
                         grab = task.grab
-                        # Do it for consistency
-                        # Moved to Task class
-                        #task.url = grab.config['url']
                     else:
                         # Set up curl instance via Grab interface
                         grab = Grab(**self.grab_config)
@@ -220,6 +244,7 @@ class Spider(object):
 
                     curl.grab = grab
                     curl.grab.curl = curl
+                    curl.grab_original = grab.clone()
                     curl.grab.prepare_request()
                     curl.task = task
                     # Add configured curl instance to multi-curl processor
@@ -265,6 +290,7 @@ class Spider(object):
         task = curl.task
         # Note: curl.grab == task.grab if task.grab is not None
         grab = curl.grab
+        grab_original = curl.grab_original
 
         url = task.url or grab.config['url']
         grab.process_request_result()
@@ -274,7 +300,8 @@ class Spider(object):
         curl.grab = None
         curl.task = None
 
-        return {'ok': ok, 'grab': grab, 'task': task,
+        return {'ok': ok, 'grab': grab, 'grab_original': grab_original,
+                'task': task,
                 'ecode': ecode, 'emsg': emsg}
 
     def shutdown(self):
@@ -349,10 +376,10 @@ class Spider(object):
             path = os.path.join(dir_path, '%s.txt' % key)
             self.save_list(key, path)
 
-    def task_error_handler(self, task, ex):
+    def error_handler(self, func_name, ex, task):
         self.inc_count('error-%s' % ex.__class__.__name__.lower())
         self.add_item('fatal', '%s|%s|%s' % (ex.__class__.__name__,
                                              unicode(ex), task.url))
-        logging.error('Error in %s handler' % 'task_%s' % task.name,
+        logging.error('Error in %s function' % func_name,
                       exc_info=ex)
 
