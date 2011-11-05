@@ -143,7 +143,7 @@ class BaseGrab(ext.lxml.Extension,
     # Attributes which should be processed when clone
     # of Grab instance is creating
     clonable_attributes = ('request_headers', 'request_head', 'request_log', 'request_body',
-                           'proxylist', 'charset')
+                           'proxylist', 'proxylist_auto_change', 'charset')
 
     # Info about loaded extensions
     #extensions = []
@@ -164,6 +164,7 @@ class BaseGrab(ext.lxml.Extension,
         self.trigger_extensions('init')
         self.reset()
         self.proxylist = None
+        self.proxylist_auto_change = False
         self.charset = 'utf-8'
         if kwargs:
             self.setup(**kwargs)
@@ -261,6 +262,8 @@ class BaseGrab(ext.lxml.Extension,
         # Reset the state setted by prevous request
         self.reset()
         self.request_counter = self.get_request_counter()
+        if self.proxylist_auto_change:
+            self.change_proxy()
         if kwargs:
             self.setup(**kwargs)
         self.process_config()
@@ -420,7 +423,7 @@ class BaseGrab(ext.lxml.Extension,
         self.response.url = ''
 
     def setup_proxylist(self, proxy_file, proxy_type, read_timeout=None,
-                        autoinit=True):
+                        auto_init=True, auto_change=False):
         """
         Setup location of files with proxy servers
 
@@ -438,8 +441,9 @@ class BaseGrab(ext.lxml.Extension,
 
         self.proxylist = ProxyList(proxy_file, proxy_type,
                                    read_timeout=read_timeout)
-        if autoinit:
+        if auto_init:
             self.change_proxy()
+        self.proxylist_auto_change = auto_change
 
     def change_proxy(self):
         """
