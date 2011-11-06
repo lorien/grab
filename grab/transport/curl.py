@@ -84,7 +84,7 @@ class CurlTransportExtension(object):
         self.response_body_chunks.append(chunk)
         if self.config['body_maxsize'] is not None:
             if self.response_body_bytes_read > self.config['body_maxsize']:
-                logging.debug('Response body max size limite reached: %s' %
+                logging.debug('Response body max size limit reached: %s' %
                               self.config['body_maxsize'])
                 return 0
 
