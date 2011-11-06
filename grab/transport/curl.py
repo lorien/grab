@@ -54,6 +54,7 @@ class CurlTransportExtension(object):
     def extra_reset(self):
         self.response_head_chunks = []
         self.response_body_chunks = []
+        self.response_body_bytes_read = 0
         self.request_headers = ''
         self.request_head = ''
         self.request_log = ''
@@ -64,8 +65,8 @@ class CurlTransportExtension(object):
         Process head of response.
         """
 
-        if self.config['nohead']:
-            return 0
+        #if self.config['nohead']:
+            #return 0
         self.response_head_chunks.append(chunk)
         # Returning None implies that all bytes were written
         return None
@@ -77,7 +78,16 @@ class CurlTransportExtension(object):
 
         if self.config['nobody']:
             return 0
+
+        bytes_read = len(chunk)
+        self.response_body_bytes_read += bytes_read
         self.response_body_chunks.append(chunk)
+        if self.config['body_maxsize'] is not None:
+            if self.response_body_bytes_read > self.config['body_maxsize']:
+                logging.debug('Response body max size limite reached: %s' %
+                              self.config['body_maxsize'])
+                return 0
+
         # Returning None implies that all bytes were written
         return None
 

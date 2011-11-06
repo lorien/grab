@@ -36,15 +36,6 @@ class Task(object):
             setattr(self, key, value)
         self.network_try_count = network_try_count
         self.task_try_count = task_try_count
-        signal.signal(signal.SIGUSR1, self.sigusr1_handler)
-
-    def sigusr1_handler(self, signal, frame):
-        """
-        Catches SIGUSR1 signal and dumps current state
-        to temporary file
-        """
-
-        open('/tmp/spider.state', 'w').write(self.render_stats())
 
     def get(self, key):
         """
@@ -97,6 +88,16 @@ class Spider(object):
         self.task_try_limit = task_try_limit
         self.network_try_limit = network_try_limit
         self.generate_tasks()
+        signal.signal(signal.SIGUSR1, self.sigusr1_handler)
+
+    def sigusr1_handler(self, signal, frame):
+        """
+        Catches SIGUSR1 signal and dumps current state
+        to temporary file
+        """
+
+        open('/tmp/spider.state', 'w').write(self.render_stats())
+
 
     def load_tasks(self, path, task_name='initial', task_priority=100,
                    limit=None):
@@ -384,12 +385,14 @@ class Spider(object):
     def render_stats(self):
         out = []
         out.append('Counters:')
-        items = sorted(self.counters.items(), key=lambda x: x[1], reverse=True)
-        out.append('  %s' % ', '.join('%s: %s' % x for x in items))
+        # Sort counters by its names
+        items = sorted(self.counters.items(), key=lambda x: x[0], reverse=True)
+        out.append('  %s\n' % '\n  '.join('%s: %s' % x for x in items))
         out.append('Lists:')
+        # Sort lists by number of items
         items = [(x, len(y)) for x, y in self.items.items()]
         items = sorted(items, key=lambda x: x[1], reverse=True)
-        out.append('  %s' % ', '.join('%s: %s' % x for x in items))
+        out.append('  %s\n' % '\n  '.join('%s: %s' % x for x in items))
 
         if not hasattr(self, 'total_time'):
             self.total_time = time.time() - self.start_time
