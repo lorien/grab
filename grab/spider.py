@@ -6,6 +6,7 @@ import types
 from collections import defaultdict
 import os
 import time
+import signal
 
 class SpiderError(Exception):
     "Base class for Spider exceptions"
@@ -20,7 +21,8 @@ class Task(object):
     Task for spider.
     """
 
-    def __init__(self, name, url=None, grab=None, priority=100, **kwargs):
+    def __init__(self, name, url=None, grab=None, priority=100,
+                 network_try_count=0, task_try_count=0, **kwargs):
         self.name = name
         if url is None and grab is None:
             raise SpiderMisuseError('Either url of grab option of '\
@@ -32,6 +34,17 @@ class Task(object):
             self.url = grab.config['url']
         for key, value in kwargs.items():
             setattr(self, key, value)
+        self.network_try_count = network_try_count
+        self.task_try_count = task_try_count
+        signal.signal(signal.SIGUSR1, self.sigusr1_handler)
+
+    def sigusr1_handler(self, signal, frame):
+        """
+        Catches SIGUSR1 signal and dumps current state
+        to temporary file
+        """
+
+        open('/tmp/spider.state', 'w').write(self.render_stats())
 
     def get(self, key):
         """
@@ -56,23 +69,34 @@ class Spider(object):
     Asynchronious scraping framework.
     """
 
-    def __init__(self, initial_urls=None, thread_number=3,
-                 initial_task_name='initial', request_limit=None,
-                 initial_priority=100, hammer_mode=False,
-                 ignore_dup_limit=5):
+    def __init__(self, thread_number=3, request_limit=None,
+                 network_try_limit=10, task_try_limit=10):
+        """
+        Arguments:
+        * thread-number - Number of concurrent network streams
+        * request_limit - Limit number of all network requests
+            Useful for debugging
+        * network_try_limit - How many times try to send request
+            again if network error was occuried, use 0 to disable
+        * network_try_limit - Limit of tries to execute some task
+            this is not the same as network_try_limit
+            network try limit limits the number of tries which
+            are performed automaticall in case of network timeout
+            of some other physical error
+            but task_try_limit limits the number of attempts which
+            are scheduled manually in the spider business logic
+        """
+
         self.taskq = PriorityQueue()
-        if initial_urls:
-            for url in initial_urls:
-                self.taskq.put((initial_priority, Task(initial_task_name, url)))
         self.thread_number = thread_number
         self.request_limit = request_limit
         self.counters = defaultdict(int)
         self.grab_config = {}
         self.proxylist_config = None
         self.items = {}
-        self.history = {}
-        self.ignore_dup_limit = ignore_dup_limit
-        self.hammer_mode = hammer_mode
+        self.task_try_limit = task_try_limit
+        self.network_try_limit = network_try_limit
+        self.generate_tasks()
 
     def load_tasks(self, path, task_name='initial', task_priority=100,
                    limit=None):
@@ -93,6 +117,14 @@ class Spider(object):
         self.start_time = time.time()
         for res in self.fetch():
 
+            # Increase request counter
+            self.inc_count('request')
+
+            #if self.counters['request'] and not self.counters['request'] % 100:
+                #import guppy; x = guppy.hpy().heap(); import pdb; pdb.set_trace()
+
+            self.generate_tasks()
+
             if (self.request_limit is not None and
                 self.counters['request'] >= self.request_limit):
                 logging.debug('Request limit is reached: %s' %\
@@ -100,9 +132,6 @@ class Spider(object):
                 break
 
             if res is None:
-                logging.debug('Job done!')
-                self.total_time = time.time() - self.start_time
-                self.shutdown()
                 break
             else:
                 # Increase task counters
@@ -128,17 +157,19 @@ class Spider(object):
                             else:
                                 self.process_result(result, res['task'])
                     else:
-                        if self.hammer_mode:
+                        if self.network_try_limit:
                             task = res['task']
                             task.grab = res['grab_original']
-                            task.ignore_dup = True
                             result = self.add_task(task)
                             if not result:
-                                self.add_item('hammer-mode-too-many-errors',
+                                self.add_item('too-many-network-tries',
                                               res['task'].url)
-                        else:
-                            self.add_item('net-error-%s' % res['emsg'][:20], res['task'].url)
+                        self.add_item('network-error-%s' % res['emsg'][:20],
+                                      res['task'].url)
                         # TODO: allow to write error handlers
+
+        # This code is executed when main cycles is breaked
+        self.shutdown()
     
     def process_result(self, result, task):
         """
@@ -167,27 +198,18 @@ class Spider(object):
         """
         Add new task to task queue.
 
-        Check that task is new. Only new tasks are added to queue.
+        Stop the task which was executed too many times.
         """
 
-        # TODO: disable history
-        thash = (task.name, task.url)
-        if not thash in self.history:
-            self.taskq.put((task.priority, task))
-            self.history[thash] = 1
-            return True
-        elif task.get('ignore_dup'):
-            if self.history[thash] == self.ignore_dup_limit:
-                logging.debug('Task %s -> %s ignore dup limit reached' % (task.name, task.url))
-                return False
-            else:
-                self.taskq.put((task.priority, task))
-                self.history[thash] += 1
-                return True
-        else:
-            logging.debug('Task %s -> %s already processed' % (task.name, task.url))
-            self.add_item('dup-task', '%s|%s' % (task.name, task.url))
+        if task.task_try_count >= self.task_try_limit:
+            logging.debug('Task tries ended: %s / %s' % (task.name, task.url))
             return False
+        elif task.network_try_count >= self.network_try_limit:
+            logging.debug('Network tries ended: %s / %s' % (task.name, task.url))
+            return False
+        else:
+            self.taskq.put((task.priority, task))
+            return True
 
     def data_default(self, item):
         """
@@ -232,6 +254,10 @@ class Spider(object):
                 else:
                     curl = freelist.pop()
 
+                    task.network_try_count += 1
+                    if task.task_try_count == 0:
+                        task.task_try_count = 1
+
                     if task.grab:
                         grab = task.grab
                     else:
@@ -249,9 +275,6 @@ class Spider(object):
                     curl.task = task
                     # Add configured curl instance to multi-curl processor
                     m.add_handle(curl)
-
-                    # Increase request counter
-                    self.inc_count('request')
 
             while True:
                 status, active_objects = m.perform()
@@ -310,6 +333,9 @@ class Spider(object):
         after parsing has been done.
         """
 
+        logging.debug('Job done!')
+        self.total_time = time.time() - self.start_time
+
     def inc_count(self, key, step=1):
         """
         You can call multiply time this method in process of parsing.
@@ -364,6 +390,9 @@ class Spider(object):
         items = [(x, len(y)) for x, y in self.items.items()]
         items = sorted(items, key=lambda x: x[1], reverse=True)
         out.append('  %s' % ', '.join('%s: %s' % x for x in items))
+
+        if not hasattr(self, 'total_time'):
+            self.total_time = time.time() - self.start_time
         out.append('Time: %.2f sec' % self.total_time)
         return '\n'.join(out)
 
@@ -382,4 +411,14 @@ class Spider(object):
                                              unicode(ex), task.url))
         logging.error('Error in %s function' % func_name,
                       exc_info=ex)
+
+    def generate_tasks(self):
+        """
+        Create new tasks.
+
+        This method is called on each step of main run cycle and
+        at Spider initialization.
+        """
+
+        pass
 

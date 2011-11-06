@@ -582,7 +582,7 @@ class TestSpider(TestCase):
     def test_spider(self):
         RESPONSE['get'] = 'Hello spider!'
         sp = self.SimpleSpider()
-        sp.taskq.put(Task('baz', BASE_URL))
+        sp.add_task(Task('baz', BASE_URL))
         sp.run()
         self.assertEqual('Hello spider!', sp.SAVED_ITEM)
 
