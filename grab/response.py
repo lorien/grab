@@ -106,3 +106,10 @@ class Response(object):
         obj.headers = copy(self.headers)
         obj.cookies = copy(self.cookies)
         return obj
+
+    def save(self, path):
+        """
+        Save response content to file.
+        """
+
+        open(path, 'w').write(self.body)
