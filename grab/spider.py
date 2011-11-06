@@ -165,8 +165,7 @@ class Spider(object):
                             if not result:
                                 self.add_item('too-many-network-tries',
                                               res['task'].url)
-                        self.add_item('network-error-%s' % res['emsg'][:20],
-                                      res['task'].url)
+                        self.inc_count('network-error-%s' % res['emsg'][:20])
                         # TODO: allow to write error handlers
 
         # This code is executed when main cycles is breaked
@@ -179,7 +178,8 @@ class Spider(object):
         """
 
         if isinstance(result, Task):
-            self.add_task(result)
+            if not self.add_task(result):
+                self.add_item('wtf-error-task-not-added', task.url)
         elif isinstance(result, Data):
             handler_name = 'data_%s' % result.name
             try:
@@ -218,7 +218,7 @@ class Spider(object):
         no handler defined.
         """
 
-        logging.debug('Content %s receieved' % item)
+        raise Exception('No content handler for %s item', item)
 
     def fetch(self):
         """
