@@ -157,15 +157,17 @@ class Extension(object):
     def form_fields(self):
         fields = dict(self.form.fields)
         for elem in self.form.inputs:
-            if elem.tag == 'select':
-                if not fields[elem.name]:
-                    if len(elem.value_options):
-                        fields[elem.name] = elem.value_options[-1]
-            if getattr(elem, 'type', None) == 'radio':
-                if not fields[elem.name]:
-                    fields[elem.name] = elem.get('value')
-            if getattr(elem, 'type', None) == 'checkbox':
-                if not elem.checked:
-                    if elem.name is not None:
-                        del fields[elem.name]
+            # Ignore elements without name
+            if elem.get('name'):
+                if elem.tag == 'select':
+                    if not fields[elem.name]:
+                        if len(elem.value_options):
+                            fields[elem.name] = elem.value_options[-1]
+                if getattr(elem, 'type', None) == 'radio':
+                    if not fields[elem.name]:
+                        fields[elem.name] = elem.get('value')
+                if getattr(elem, 'type', None) == 'checkbox':
+                    if not elem.checked:
+                        if elem.name is not None:
+                            del fields[elem.name]
         return fields
