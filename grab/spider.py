@@ -32,10 +32,10 @@ class Task(object):
         self.priority = priority
         if self.grab:
             self.url = grab.config['url']
-        for key, value in kwargs.items():
-            setattr(self, key, value)
         self.network_try_count = network_try_count
         self.task_try_count = task_try_count
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def get(self, key):
         """
@@ -43,6 +43,30 @@ class Task(object):
         does not exist.
         """
         return getattr(self, key, None)
+
+    def clone(self, **kwargs):
+        """
+        Clone Task instance.
+
+        Reset network_try_count, increase task_try_count.
+        Also reset grab property
+        TODO: maybe do not reset grab
+        """
+
+        task = Task(self.name, self.url)
+
+        for key, value in self.__dict__.items():
+            if key != 'grab':
+                setattr(task, key, getattr(self, key))
+
+        task.network_try_count = 0
+        task.task_try_count += 1
+        task.grab = None
+
+        for key, value in kwargs.items():
+            setattr(task, key, value)
+
+        return task
 
 
 class Data(object):
@@ -87,7 +111,7 @@ class Spider(object):
         self.items = {}
         self.task_try_limit = task_try_limit
         self.network_try_limit = network_try_limit
-        self.generate_tasks()
+        self.generate_tasks(init=True)
         signal.signal(signal.SIGUSR1, self.sigusr1_handler)
 
     def sigusr1_handler(self, signal, frame):
@@ -124,7 +148,7 @@ class Spider(object):
             #if self.counters['request'] and not self.counters['request'] % 100:
                 #import guppy; x = guppy.hpy().heap(); import pdb; pdb.set_trace()
 
-            self.generate_tasks()
+            self.generate_tasks(init=False)
 
             if (self.request_limit is not None and
                 self.counters['request'] >= self.request_limit):
@@ -337,7 +361,7 @@ class Spider(object):
         logging.debug('Job done!')
         self.total_time = time.time() - self.start_time
 
-    def inc_count(self, key, step=1):
+    def inc_count(self, key, step=1, display=False):
         """
         You can call multiply time this method in process of parsing.
 
@@ -350,6 +374,8 @@ class Spider(object):
         """
 
         self.counters[key] += step
+        if display:
+            logging.debug(key)
         return self.counters[key]
 
     def setup_proxylist(self, *args, **kwargs):
@@ -360,7 +386,7 @@ class Spider(object):
 
         self.proxylist_config = (args, kwargs)
 
-    def add_item(self, list_name, item):
+    def add_item(self, list_name, item, display=False):
         """
         You can call multiply time this method in process of parsing.
 
@@ -374,6 +400,8 @@ class Spider(object):
 
         lst = self.items.setdefault(list_name, set())
         lst.add(item)
+        if display:
+            logging.debug(list_name)
 
     def save_list(self, list_name, path):
         """
@@ -387,15 +415,16 @@ class Spider(object):
         out.append('Counters:')
         # Sort counters by its names
         items = sorted(self.counters.items(), key=lambda x: x[0], reverse=True)
-        out.append('  %s\n' % '\n  '.join('%s: %s' % x for x in items))
-        out.append('Lists:')
+        out.append('  %s' % '\n  '.join('%s: %s' % x for x in items))
+        out.append('\nLists:')
         # Sort lists by number of items
         items = [(x, len(y)) for x, y in self.items.items()]
         items = sorted(items, key=lambda x: x[1], reverse=True)
-        out.append('  %s\n' % '\n  '.join('%s: %s' % x for x in items))
+        out.append('  %s' % '\n  '.join('%s: %s' % x for x in items))
 
         if not hasattr(self, 'total_time'):
             self.total_time = time.time() - self.start_time
+        out.append('Threads: %d' % self.thread_number)
         out.append('Time: %.2f sec' % self.total_time)
         return '\n'.join(out)
 
@@ -415,13 +444,14 @@ class Spider(object):
         logging.error('Error in %s function' % func_name,
                       exc_info=ex)
 
-    def generate_tasks(self):
+    def generate_tasks(self, init):
         """
         Create new tasks.
 
         This method is called on each step of main run cycle and
         at Spider initialization.
+
+        initi is True only for call on Spider initialization stage
         """
 
         pass
-

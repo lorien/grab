@@ -25,6 +25,11 @@ Module contents:
 """
 import urllib
 import logging
+import re
+import base64
+from grab.html import decode_entities
+
+ANONYMIZER_ARG = re.compile(r'q=([^&"]+)')
 
 class CaptchaError(Exception):
     """
@@ -35,6 +40,12 @@ class CaptchaError(Exception):
 class ParsingError(Exception):
     """
     Raised when some unexpected HTML is found.
+    """
+
+
+class AnonymizerNetworkError(Exception):
+    """
+    Raised in case of standard anonymizer error.
     """
 
 
@@ -129,7 +140,7 @@ def is_last_page(grab):
     return not grab.xpath_exists('//span[text()="Next"]')
 
 
-def parse_search_results(grab, parse_index_size=False):
+def parse_search_results(grab, parse_index_size=False, anonymizer=False):
     """
     Parse google search results page content.
     """
@@ -144,6 +155,11 @@ def parse_search_results(grab, parse_index_size=False):
         # Captcha!!!
         raise CaptchaError('Captcha found')
 
+    elif anonymizer and grab.search(u'URL Error (0)'):
+
+        # Common anonymizer error
+        raise AnonymizerNetworkError('URL Error (0)')
+
     elif len(grab.css_list('#ires h3')):
 
         # Something was found
@@ -154,7 +170,18 @@ def parse_search_results(grab, parse_index_size=False):
 
         # Yield found results
         for elem in grab.css_list('h3.r a'):
-            yield {'url': elem.get('href'), 'title': grab.get_node_text(elem),
-                   'index_size': index_size}
+            url = elem.get('href')
+            if anonymizer:
+                match = ANONYMIZER_ARG.search(url)
+                if match:
+                    token = urllib.unquote(match.group(1))
+                    url = decode_entities(base64.b64decode(token))
+                else:
+                    url = None
+                    logging.error('Could not parse url encoded by anonymizer')
+
+            if url:
+                yield {'url': url, 'title': grab.get_node_text(elem),
+                       'index_size': index_size}
     else:
         raise ParsingError('Could not identify google page format')
