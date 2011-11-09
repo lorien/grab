@@ -120,20 +120,22 @@ class Spider(object):
         to temporary file
         """
 
-        open('/tmp/spider.state', 'w').write(self.render_stats())
+        with open('/tmp/spider.state', 'w') as out:
+            out.write(self.render_stats())
 
 
     def load_tasks(self, path, task_name='initial', task_priority=100,
                    limit=None):
         count = 0
-        for line in open(path):
-            url = line.strip()
-            if url:
-                self.taskq.put((task_priority, Task(task_name, url)))
-                count += 1
-                if limit is not None and count >= limit:
-                    logging.debug('load_tasks limit reached')
-                    break
+        with open(path) as inf:
+            for line in inf:
+                url = line.strip()
+                if url:
+                    self.taskq.put((task_priority, Task(task_name, url)))
+                    count += 1
+                    if limit is not None and count >= limit:
+                        logging.debug('load_tasks limit reached')
+                        break
 
     def setup_grab(self, **kwargs):
         self.grab_config = kwargs
@@ -408,7 +410,8 @@ class Spider(object):
         Save items from list to the file.
         """
 
-        open(path, 'w').write('\n'.join(self.items.get(list_name, [])))
+        with open(path, 'w') as out:
+            out.write('\n'.join(self.items.get(list_name, [])))
 
     def render_stats(self):
         out = []

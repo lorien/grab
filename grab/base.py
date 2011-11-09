@@ -250,7 +250,8 @@ class BaseGrab(ext.lxml.Extension,
         """
 
         response = self.go(url, **kwargs)
-        open(location, 'w').write(response.body)
+        with open(location, 'w') as out:
+            out.write(response.body)
         return len(response.body)
 
     def prepare_request(self, **kwargs):
@@ -356,7 +357,8 @@ class BaseGrab(ext.lxml.Extension,
             #raise IOError('Response code is %s: ' % self.response_code)
 
         if self.config['log_file']:
-            open(self.config['log_file'], 'w').write(self.response.body)
+            with open(self.config['log_file'], 'w') as out:
+                out.write(self.response.body)
 
         self.save_dumps()
 
@@ -524,7 +526,8 @@ class BaseGrab(ext.lxml.Extension,
                 #fext = dirs[-1].split('.')[-1]
                 
             fname = os.path.join(self.config['log_dir'], '%02d%s.%s' % (self.request_counter, tname, fext))
-            open(fname, 'w').write(self.response.body)
+            with open(fname, 'w') as out:
+                out.write(self.response.body)
 
     def urlencode(self, items):
         """

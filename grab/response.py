@@ -112,4 +112,5 @@ class Response(object):
         Save response content to file.
         """
 
-        open(path, 'w').write(self.body)
+        with open(path, 'w') as out:
+            out.write(self.body)

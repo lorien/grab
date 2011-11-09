@@ -137,7 +137,8 @@ class CurlTransportExtension(object):
         # User-Agent
         if self.config['user_agent'] is None:
             if self.config['user_agent_file'] is not None:
-                lines = open(self.config['user_agent_file']).read().splitlines()
+                with open(self.config['user_agent_file']) as inf:
+                    lines = inf.read().splitlines()
                 self.config['user_agent'] = random.choice(lines)
 
         # If value is None then set empty string
@@ -333,7 +334,8 @@ class CurlTransportExtension(object):
         # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
         """
 
-        open(path, 'w').write('\n'.join(self.curl.getinfo(pycurl.INFO_COOKIELIST)))
+        with open(path, 'w') as out:
+            out.write('\n'.join(self.curl.getinfo(pycurl.INFO_COOKIELIST)))
 
     def clear_cookies(self):
         """

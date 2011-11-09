@@ -11,10 +11,12 @@ def unique_file(path):
 
     lines = set()
     count = 0
-    for line in open(path):
-        lines.add(line)
-        count += 1
+    with open(path) as inf:
+        for line in inf:
+            lines.add(line)
+            count += 1
     logging.debug('Read %d lines from %s, unique: %d' % (count, path,
                                                          len(lines)))
-    open(path, 'w').write(''.join(lines))
+    with open(path, 'w') as out:
+        out.write(''.join(lines))
     return len(lines)
