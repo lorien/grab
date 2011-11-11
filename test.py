@@ -24,7 +24,7 @@ BASE_URL = 'http://localhost:%d' % FAKE_SERVER_PORT
 
 # This global objects is used by Fake HTTP Server
 # It return content of HTML variable for any GET request
-RESPONSE = {'get': '', 'post': ''}
+RESPONSE = {'get': '', 'post': '', 'cookies': None}
 
 # Fake HTTP Server saves request details
 # into global REQUEST variable
@@ -50,6 +50,9 @@ class FakeServerThread(threading.Thread):
                 """
 
                 self.send_response(200)
+                if RESPONSE['cookies']:
+                    for name, value in RESPONSE['cookies'].items():
+                        self.send_header('Set-Cookie', '%s=%s' % (name, value))
                 self.end_headers()
                 self.wfile.write(RESPONSE['get'])
                 REQUEST['headers'] = self.headers
@@ -606,6 +609,37 @@ class TestSpider(TestCase):
         sp.add_task(Task('baz', BASE_URL))
         sp.run()
         self.assertEqual('Hello spider!', sp.SAVED_ITEM)
+
+
+class TestCookies(TestCase):
+    def setUp(self):
+        FakeServerThread().start()
+
+    def test_cookies_parsing(self):
+        g = Grab()
+        RESPONSE['cookies'] = {'foo': 'bar', '1': '2'}
+        g.go(BASE_URL)
+        self.assertEqual(g.response.cookies['foo'], 'bar')
+
+    def test_session(self):
+        g = Grab()
+        g.setup(reuse_cookies=True)
+        RESPONSE['cookies'] = {'foo': 'bar'}
+        g.go(BASE_URL)
+        self.assertEqual(g.response.cookies['foo'], 'bar')
+        g.go(BASE_URL)
+        self.assertEqual(REQUEST['headers']['Cookie'], 'foo=bar')
+        g.go(BASE_URL)
+        self.assertEqual(REQUEST['headers']['Cookie'], 'foo=bar')
+
+        g = Grab()
+        g.setup(reuse_cookies=False)
+        RESPONSE['cookies'] = {'foo': 'baz'}
+        g.go(BASE_URL)
+        self.assertEqual(g.response.cookies['foo'], 'baz')
+        g.go(BASE_URL)
+        print REQUEST['headers']
+        self.assertTrue('Cookie' not in REQUEST['headers'])
 
 if __name__ == '__main__':
     Grab = GrabPycurl

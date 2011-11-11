@@ -4,13 +4,15 @@ The Response class is the result of network request maden with Grab instance.
 import re
 from copy import copy
 import logging
+from mimetools import Message
+from StringIO import StringIO
+from cookielib import CookieJar
+from urllib2 import Request
 
 RE_XML_DECLARATION = re.compile(r'^[\r\n\t]*<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(r'encoding\s*=\s*["\']([^"\']+)["\']')
 RE_META_CHARSET = re.compile(r'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)',
                              re.I)
-COPY_KEYS = ['status', 'code', 'head', 'body', 'time',
-             'url', 'charset']
 
 class Response(object):
     """
@@ -25,31 +27,59 @@ class Response(object):
         self.headers =None
         self.time = None
         self.url = None
-        self.cookies = None
+        self.cookies = {}
+        self.cookiejar = None
         self.charset = 'utf-8'
 
     def parse(self):
         """
+        Parse headers and cookies.
+
         This method is called after Grab instance performes network request.
         """
-        self.headers = {}
+
+        # Extract only valid lines which contain ":" character
+        valid_lines = []
         for line in self.head.split('\n'):
             line = line.rstrip('\r')
             if line:
                 if line.startswith('HTTP'):
                     self.status = line
                 else:
-                    try:
-                        name, value = line.split(':', 1)
-                        self.headers[name.strip()] = value.strip()
-                    except ValueError, ex:
-                        logging.error('Invalid header line: %s' % line,
-                                      exc_info=ex)
+                    if ':' in line:
+                        valid_lines.append(line)
+
+        self.headers = Message(StringIO('\n'.join(valid_lines)))
+        self.cookiejar = CookieJar()
+        self.cookiejar.extract_cookies(self, Request(self.url))
+        for cookie in self.cookiejar:
+            self.cookies[cookie.name] = cookie.value
 
         self.detect_charset()
 
+    def info(self):
+        """
+        This method need for using Response instance in
+        ``Cookiejar.extract_cookies`` method.
+        """
+
+        return self.headers
+
 
     def detect_charset(self):
+        """
+        Detect charset of the response.
+
+        Try following methods:
+        * meta[name="Http-Equiv"]
+        * XML declaration
+        * HTTP Content-Type header
+
+        Ignore unknown charsets.
+
+        Use utf-8 as fallback charset.
+        """
+
         charset = None
 
         # Try to extract charset from http-equiv meta tag
@@ -92,6 +122,10 @@ class Response(object):
                 self.charset = charset
 
     def unicode_body(self, ignore_errors=True):
+        """
+        Return response body as unicode string.
+        """
+
         if ignore_errors:
             errors = 'ignore'
         else:
@@ -100,16 +134,26 @@ class Response(object):
         return RE_XML_DECLARATION.sub('', ubody)
 
     def copy(self):
+        """
+        Clone the Response object.
+        """
+
         obj = Response()
-        for key in COPY_KEYS:
+
+        copy_keys = ('status', 'code', 'head', 'body', 'time',
+                     'url', 'charset')
+        for key in copy_keys:
             setattr(obj, key, getattr(self, key))
+
         obj.headers = copy(self.headers)
         obj.cookies = copy(self.cookies)
+        obj.cookiejar = copy(self.cookiejar)
+
         return obj
 
     def save(self, path):
         """
-        Save response content to file.
+        Save response body to file.
         """
 
         with open(path, 'w') as out:

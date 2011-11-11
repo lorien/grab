@@ -216,11 +216,11 @@ class CurlTransportExtension(object):
         # Passing the special string "FLUSH" will write all cookies known by
         # cURL to the file specified by CURLOPT_COOKIEJAR. (Added in 7.17.1)
 
-        if self.config['reuse_cookies']:
-            # Setting empty string will activate curl cookie engine
-            self.curl.setopt(pycurl.COOKIELIST, '')
-        else:
-            self.curl.setopt(pycurl.COOKIELIST, 'ALL')
+        #if self.config['reuse_cookies']:
+            ## Setting empty string will activate curl cookie engine
+            #self.curl.setopt(pycurl.COOKIELIST, '')
+        #else:
+            #self.curl.setopt(pycurl.COOKIELIST, 'ALL')
 
 
         # CURLOPT_COOKIE
@@ -280,20 +280,6 @@ class CurlTransportExtension(object):
         if self.config['charset']:
             self.charset = self.config['charset']
 
-    def extract_cookies(self):
-        """
-        Extract cookies.
-        """
-
-        # Example of line:
-        # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
-        cookies = {}
-        for line in self.curl.getinfo(pycurl.INFO_COOKIELIST):
-            chunks = line.split('\t')
-            cookies[chunks[-2]] = chunks[-1]
-        return cookies
-
-
     def transport_request(self):
         try:
             self.curl.perform()
@@ -310,12 +296,12 @@ class CurlTransportExtension(object):
     def prepare_response(self):
         self.response.head = ''.join(self.response_head_chunks)
         self.response.body = ''.join(self.response_body_chunks)
-        self.response.parse()
-        self.response.cookies = self.extract_cookies()
         self.response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
+        self.response.parse()
 
+    # TODO: move to base
     def load_cookies(self, path):
         """
         Load cookies from the file.
@@ -326,6 +312,7 @@ class CurlTransportExtension(object):
         self.curl.setopt(pycurl.COOKIEFILE, path)
 
 
+    # TODO: move to base
     def dump_cookies(self, path):
         """
         Dump all cookies to file.
@@ -337,6 +324,7 @@ class CurlTransportExtension(object):
         with open(path, 'w') as out:
             out.write('\n'.join(self.curl.getinfo(pycurl.INFO_COOKIELIST)))
 
+    # TODO: move to base
     def clear_cookies(self):
         """
         Clear all cookies.
@@ -347,6 +335,7 @@ class CurlTransportExtension(object):
         self.config['cookies'] = {}
         self.response.cookies = None
 
+    # TODO: Drop
     def reset_curl_instance(self):
         """
         Completely recreate curl instance from scratch.

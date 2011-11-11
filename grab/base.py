@@ -197,22 +197,10 @@ class BaseGrab(ext.lxml.Extension,
         for key in ('post', 'multipart_post', 'headers', 'cookies', 'hammer_timeouts'):
             g.config[key] = copy(self.config[key])
 
-        # Important for pycurl transport
-        # By default pycurl use own implementation 
-        # of cookies. So when we create new Grab instance
-        # and hence new pycurl instance and configure it
-        # with ``config`` of old Grab instance then new
-        # pycurl instance does not know
-        # anything about cookies (because info about them
-        # does not contains in config - it contains in some
-        # internal structure of old pycurl instance).
-        # What is why we explicitly configure cookies
-        # of new pycurl instance - we know where to get them from:
-        # cookies are always processed in Response instance
-        cookies = self.config['cookies']
-        if self.response.cookies:
-            cookies.update(self.response.cookies)
-        g.setup(cookies=cookies)
+        #cookies = self.config['cookies']
+        #if self.response.cookies:
+            #cookies.update(self.response.cookies)
+        #g.setup(cookies=cookies)
         g.response = self.response.copy()
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
@@ -343,10 +331,12 @@ class BaseGrab(ext.lxml.Extension,
 
         self.prepare_response()
 
-        # Copy cookies from resposne into config
-        # for future requests
-        for name, value in self.response.cookies.items():
-            if not name in self.config['cookies']:
+        if self.config['reuse_cookies']:
+            # Copy cookies from response into config
+            # for future requests
+            for name, value in self.response.cookies.items():
+                #if not name in self.config['cookies']:
+                    #self.config['cookies'][name] = value
                 self.config['cookies'][name] = value
 
         # Set working charset to encode POST data of next requests
