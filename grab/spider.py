@@ -7,6 +7,7 @@ from collections import defaultdict
 import os
 import time
 import signal
+import json
 
 class SpiderError(Exception):
     "Base class for Spider exceptions"
@@ -113,6 +114,13 @@ class Spider(object):
         self.network_try_limit = network_try_limit
         self.generate_tasks(init=True)
         signal.signal(signal.SIGUSR1, self.sigusr1_handler)
+        self.prepare()
+
+    def prepare(self):
+        """
+        You can do additional spider customizatin here
+        before it has started working.
+        """
 
     def sigusr1_handler(self, signal, frame):
         """
@@ -144,6 +152,9 @@ class Spider(object):
         self.start_time = time.time()
         for res in self.fetch():
 
+            if res is None:
+                break
+
             # Increase request counter
             self.inc_count('request')
 
@@ -153,46 +164,47 @@ class Spider(object):
             self.generate_tasks(init=False)
 
             if (self.request_limit is not None and
-                self.counters['request'] >= self.request_limit):
+                self.counters['request'] > self.request_limit):
                 logging.debug('Request limit is reached: %s' %\
                               self.request_limit)
                 break
 
-            if res is None:
-                break
-            else:
-                # Increase task counters
-                self.inc_count('task')
-                self.inc_count('task-%s' % res['task'].name)
+            # Increase task counters
+            self.inc_count('task')
+            self.inc_count('task-%s' % res['task'].name)
 
-                handler_name = 'task_%s' % res['task'].name
-                try:
-                    handler = getattr(self, handler_name)
-                except AttributeError:
-                    raise Exception('Task handler does not exist: %s' %\
-                                    handler_name)
-                else:
-                    if res['ok']:
-                        try:
-                            result = handler(res['grab'], res['task'])
-                        except Exception, ex:
-                            self.error_handler(handler_name, ex, res['task'])
-                        else:
-                            if isinstance(result, types.GeneratorType):
-                                for item in result:
-                                    self.process_result(item, res['task'])
-                            else:
-                                self.process_result(result, res['task'])
+            if (res['task'].network_try_count == 1 and
+                res['task'].task_try_count == 1):
+                self.inc_count('task-%s-initial' % res['task'].name)
+
+            handler_name = 'task_%s' % res['task'].name
+            try:
+                handler = getattr(self, handler_name)
+            except AttributeError:
+                raise Exception('Task handler does not exist: %s' %\
+                                handler_name)
+            else:
+                if res['ok']:
+                    try:
+                        result = handler(res['grab'], res['task'])
+                    except Exception, ex:
+                        self.error_handler(handler_name, ex, res['task'])
                     else:
-                        if self.network_try_limit:
-                            task = res['task']
-                            task.grab = res['grab_original']
-                            result = self.add_task(task)
-                            if not result:
-                                self.add_item('too-many-network-tries',
-                                              res['task'].url)
-                        self.inc_count('network-error-%s' % res['emsg'][:20])
-                        # TODO: allow to write error handlers
+                        if isinstance(result, types.GeneratorType):
+                            for item in result:
+                                self.process_result(item, res['task'])
+                        else:
+                            self.process_result(result, res['task'])
+                else:
+                    if self.network_try_limit:
+                        task = res['task']
+                        task.grab = res['grab_original']
+                        result = self.add_task(task)
+                        if not result:
+                            self.add_item('too-many-network-tries',
+                                          res['task'].url)
+                    self.inc_count('network-error-%s' % res['emsg'][:20])
+                    # TODO: allow to write error handlers
 
         # This code is executed when main cycles is breaked
         self.shutdown()
@@ -267,9 +279,11 @@ class Spider(object):
         # You can break it only from outside code which
         # iterates over result of this method
         while True:
-            while True:
-                if not freelist:
-                    break
+            #while True:
+                #if not freelist:
+                    #break
+            while len(freelist):
+
                 try:
                     priority, task = self.taskq.get(True, 0.1)
                 except Empty:
@@ -279,6 +293,9 @@ class Spider(object):
                         yield None
                     break
                 else:
+                    if not self._preprocess_task(task):
+                        continue
+
                     curl = freelist.pop()
 
                     task.network_try_count += 1
@@ -290,10 +307,11 @@ class Spider(object):
                     else:
                         # Set up curl instance via Grab interface
                         grab = Grab(**self.grab_config)
-                        if self.proxylist_config:
-                            args, kwargs = self.proxylist_config
-                            grab.setup_proxylist(*args, **kwargs)
                         grab.setup(url=task.url)
+
+                    if self.proxylist_config:
+                        args, kwargs = self.proxylist_config
+                        grab.setup_proxylist(*args, **kwargs)
 
                     curl.grab = grab
                     curl.grab.curl = curl
@@ -363,7 +381,7 @@ class Spider(object):
         logging.debug('Job done!')
         self.total_time = time.time() - self.start_time
 
-    def inc_count(self, key, step=1, display=False):
+    def inc_count(self, key, display=False, count=1):
         """
         You can call multiply time this method in process of parsing.
 
@@ -375,7 +393,7 @@ class Spider(object):
         print 'Total: %(total)s, captcha: %(captcha)s' % spider_obj.counters
         """
 
-        self.counters[key] += step
+        self.counters[key] += count
         if display:
             logging.debug(key)
         return self.counters[key]
@@ -400,8 +418,8 @@ class Spider(object):
         spider_instance.items['foo']
         """
 
-        lst = self.items.setdefault(list_name, set())
-        lst.add(item)
+        lst = self.items.setdefault(list_name, [])
+        lst.append(item)
         if display:
             logging.debug(list_name)
 
@@ -411,7 +429,13 @@ class Spider(object):
         """
 
         with open(path, 'w') as out:
-            out.write('\n'.join(self.items.get(list_name, [])))
+            lines = []
+            for item in self.items.get(list_name, []):
+                if isinstance(item, basestring):
+                    lines.append(item)
+                else:
+                    lines.append(json.dumps(item))
+            out.write('\n'.join(lines))
 
     def render_stats(self):
         out = []
@@ -458,3 +482,24 @@ class Spider(object):
         """
 
         pass
+
+    def _preprocess_task(self, task):
+        """
+        Run custom task preprocessor which could change task
+        properties or cancel it.
+
+        This method is called *before* network request.
+
+        Return True to continue process the task or False to cancel the task.
+        """
+
+        handler_name = 'preprocess_%s' % task.name
+        handler = getattr(self, handler_name, None)
+        if handler:
+            try:
+                return handler(task)
+            except Exception, ex:
+                self.error_handler(handler_name, ex, task)
+                return False
+        else:
+            return task
