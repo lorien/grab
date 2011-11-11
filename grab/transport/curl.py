@@ -2,7 +2,7 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 from __future__ import absolute_import
-import email
+import mimetools
 import pycurl
 import logging
 import urllib
@@ -107,7 +107,7 @@ class CurlTransportExtension(object):
             self.request_head += text
             lines = text.splitlines()
             text = '\n'.join(lines[1:])
-            self.request_headers = dict(email.message_from_string(text))
+            self.request_headers = mimetools.Message(StringIO(text))
 
         if _type == pycurl.INFOTYPE_DATA_OUT:
             self.request_body += text
@@ -323,29 +323,6 @@ class CurlTransportExtension(object):
 
         with open(path, 'w') as out:
             out.write('\n'.join(self.curl.getinfo(pycurl.INFO_COOKIELIST)))
-
-    # TODO: move to base
-    def clear_cookies(self):
-        """
-        Clear all cookies.
-        """
-
-        # Write tests
-        self.curl.setopt(pycurl.COOKIELIST, 'ALL')
-        self.config['cookies'] = {}
-        self.response.cookies = None
-
-    # TODO: Drop
-    def reset_curl_instance(self):
-        """
-        Completely recreate curl instance from scratch.
-        
-        I add this method because I am not sure that
-        ``clear_cookies`` method works fine and I should be sure
-        I can reset all cokies.
-        """
-
-        self.curl = pycurl.Curl()
 
 
 from ..base import BaseGrab

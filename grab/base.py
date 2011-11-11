@@ -612,3 +612,10 @@ class BaseGrab(ext.lxml.Extension,
             return urljoin(self.config['url'], url)
         else:
             return url
+
+    def clear_cookies(self):
+        """
+        Clear all cookies.
+        """
+
+        self.config['cookies'] = {}

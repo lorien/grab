@@ -638,7 +638,15 @@ class TestCookies(TestCase):
         g.go(BASE_URL)
         self.assertEqual(g.response.cookies['foo'], 'baz')
         g.go(BASE_URL)
-        print REQUEST['headers']
+        self.assertTrue('Cookie' not in REQUEST['headers'])
+
+        g = Grab()
+        g.setup(reuse_cookies=True)
+        RESPONSE['cookies'] = {'foo': 'bar'}
+        g.go(BASE_URL)
+        self.assertEqual(g.response.cookies['foo'], 'bar')
+        g.clear_cookies()
+        g.go(BASE_URL)
         self.assertTrue('Cookie' not in REQUEST['headers'])
 
 if __name__ == '__main__':
