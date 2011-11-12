@@ -23,14 +23,20 @@ What is Grab?
 
 Grab is site scraping framework.
 
-Basic grab functions:
- * Construction and submittion HTTP request
- * Processing HTTP response
- * Parsing and filling HTML forms
- * Working with HTML DOM tree via XPath API
-
-See :ref:`tutorial` for understanding main concepts of the Grab
-
+Grab features:
+ * Simple API
+ * Session suppport (automated cookie processing)
+ * Building HTTP request of any type
+ * Multipart POST
+ * Automated form processing
+ * Selecting HTML elements via XPath/CSS queries
+ * Multiple tries
+ * Ability to choose network layer: curl, urllib, selenium
+ * Utilities to work with proxy list
+ * Support for proxy of any type (SOCKS proxy is available only in curl transport)
+ * multicurl support
+ * Framework to develop well-structured site scrapers
+ * Verbose methods to debug HTTP requests
 
 Documenation sections
 ---------------------
@@ -38,7 +44,6 @@ Documenation sections
 .. toctree::
     :maxdepth: 2
 
-    api
     configuration
 
 
@@ -48,4 +53,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

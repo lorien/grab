@@ -104,6 +104,7 @@ def default_config():
         body_maxsize = None,
         debug = False,
         debug_post = False,
+        # ???
         encoding = 'gzip',
         userpwd = None,
         # Timeouts

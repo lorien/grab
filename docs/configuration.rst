@@ -3,19 +3,34 @@
 Grab Configuration
 ==================
 
-You can configure grab using ``setup`` method::
+You can configure grab instance in few ways.
+
+Pass options to constructor::
+
+    g = Grab(opt1=val1, opt2=val2)
+
+Pass options to ``setup`` method::
 
     g = Grab()
     g.setup(opt1=val1, opt2=val2)
 
-You can pass configuration to constructor::
-
-    g = Grab(opt1=val1, opt2=val2)
-
-You can pass configuration to ``request`` method::
+Pass options to ``request`` method::
 
     g = Grab()
     g.request(opt1=val1, opt2=val2)
+    # or
+    g.go(url, opt1=val1, opt2=val2)
+
+Pass options to ``go`` method::
+
+    g = Grab()
+    g.go(url, opt2=val2)
+
+Note that ``go`` method requires URL as 
+first argument.
+
+All options are optional but you can't make any real requests
+untill you setup at least "url" option.
 
 
 Available options
@@ -25,7 +40,8 @@ Available options
     URL of requested document.
 
     You can use relative url - it will be joined with the absolute url of previously
-    requested document. Special symbols in URL should be properly quoted.
+    requested document. You are responsible for quoting unsafe symbols in the
+    URL.
 
 **timeout**
     Max. time to work with remote document. Default is 15.
@@ -36,11 +52,9 @@ Available options
 **user_agent**
     Value of User-Agent HTTP header. Default is random choice from set of real-world user agents.
 
-    See "grab.user_agents" module.
-
-**debug**
-    True value enable debug mode which save request headers and make them available
-    via ``request_header`` attribute of grab instance.
+**user_agent_file**
+    Path to file which contains User-Agent strings. Grab instance will be configured
+    with random user agent from that file.
 
 **method**
     Set the http method. By default POST method is used if ``post`` or ``payload``
@@ -49,21 +63,27 @@ Available options
     You can specify POST, PUT, DELETE or GET.
 
 **post**
-    Sequence of two-value tuples or dictionary.
+    Sequence of two-value tuples or dictionary or string.
 
-    If value is unicode then it is converted to byte string using value of 
-    ``charset`` option.
+    In case of sequence or dictionary all values are processed in this way:
+    * instance of ``UploadFile`` class converted into spercial internal curl object
+    * unicode is converted into bytestring
+    * ``None`` is converted into empty string
 
-**payload**
-    Raw value to send in POST or PUT request.
+    If option value is a string then it is submitted as is.
+
+**multipart_post**
+    Sequence of two-value tuples.
+
+    Similar to post option but send "multipart/form-data" request. 
 
 **headers**
     Extra http headers. The value of this option will be merged with
     default headers which are Accept, Accept-Language, Accept-Charset and Keep-Alive.
 
 **reuse_cookies**
-    If true then remember cookies and request them in next requests.
-    If false then clear cookies before each request.
+    If True then remember cookies and request them in next requests.
+    If False then clear cookies before each request.
     Default: True
 
 **cookies**
