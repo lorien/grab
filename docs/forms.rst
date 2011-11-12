@@ -16,4 +16,5 @@ Work with forms
     .. automethod:: set_input
     .. automethod:: set_input_by_id
     .. automethod:: set_input_by_number
+    .. automethod:: submit
 

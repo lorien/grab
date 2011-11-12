@@ -142,16 +142,57 @@ class Extension(object):
     # Remove set_input_by_number
     # New method: set_input_by(id=None, number=None, xpath=None)
 
-    def submit(self, submit_name=None, submit_control=None, make_request=True, url=None, extra_post=None):
+    def submit(self, submit_name=None, submit_control=None, make_request=True,
+               url=None, extra_post=None):
         """
-        Submit form. Take care about all fields which was not set explicitly.
+        Submit default form.
+
+        :param submit_name: name of buton which should be "clicked" to
+            submit form
+        :param submit_control: button element from lxml DOM tree
+            which should be "clicked" to submit form
+        :param make_request: if `False` then grab instance will be
+            configured with form post data but request will not be
+            performed
+        :param url: explicitly specifi form action url
+        :param extra_post: additional form data which will override
+            data automatically extracted from the form.
+
+        Following input elements are automatically processed:
+
+        * input[type="hidden"] - default value
+        * select: value of last option
+        * radio - ???
+        * checkbox - ???
+
+        Multipart forms are corectly recognized by grab library.
+
+        Example::
+
+            # Assume that we going to some page with some form
+            g.go('some url')
+            # Fill some fields
+            g.set_input('username', 'bob')
+            g.set_input('pwd', '123')
+            # Submit the form
+            g.submit()
+            
+            # or we can just fill the form
+            # and do manu submition
+            g.set_input('foo', 'bar')
+            g.submit(make_request=False)
+            g.request()
+
+            # for multipart forms we can specify files
+            from grab import UploadFile
+            g.set_input('img', UploadFile('/path/to/image.png'))
+            g.submit()
         """
 
         # TODO: process self.form.inputs
         # Do not used self.form.fields
         # because it does not contains empty fields
         # and also contains data for unchecked checkboxes and etc
-
 
         post = self.form_fields()
         submit_controls = []
@@ -199,6 +240,12 @@ class Extension(object):
             return None
 
     def form_fields(self):
+        """
+        Return fields of default form.
+
+        Fill some fields with reasonable values.
+        """
+
         fields = dict(self.form.fields)
         for elem in self.form.inputs:
             # Ignore elements without name
