@@ -216,13 +216,6 @@ class CurlTransportExtension(object):
         # Passing the special string "FLUSH" will write all cookies known by
         # cURL to the file specified by CURLOPT_COOKIEJAR. (Added in 7.17.1)
 
-        #if self.config['reuse_cookies']:
-            ## Setting empty string will activate curl cookie engine
-            #self.curl.setopt(pycurl.COOKIELIST, '')
-        #else:
-            #self.curl.setopt(pycurl.COOKIELIST, 'ALL')
-
-
         # CURLOPT_COOKIE
         # Pass a pointer to a zero terminated string as parameter. It will be used to set a cookie in the http request. The format of the string should be NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie should contain.
         # If you need to set multiple cookies, you need to set them all using a single option and thus you need to concatenate them all in one single string. Set multiple cookies in one string like this: "name1=content1; name2=content2;" etc.
@@ -230,7 +223,17 @@ class CurlTransportExtension(object):
         # Using this option multiple times will only make the latest string override the previous ones. 
 
         if self.config['cookies']:
-            self.curl.setopt(pycurl.COOKIE, self.encode_cookies(self.config['cookies']))
+            cline = self.encode_cookies(self.config['cookies'],
+                                        multiline=True)
+            self.curl.setopt(pycurl.COOKIELIST, 'ALL')
+            self.curl.setopt(pycurl.COOKIELIST, cline)
+
+        if self.config['reuse_cookies'] and not self.config['cookies']:
+            # Setting empty string will activate curl cookie engine
+            self.curl.setopt(pycurl.COOKIELIST, '')
+
+        if not self.config['reuse_cookies'] and not self.config['cookies']:
+            self.curl.setopt(pycurl.COOKIELIST, 'ALL')
 
         if self.config['cookiefile']:
             self.load_cookies(self.config['cookiefile'])
@@ -323,6 +326,17 @@ class CurlTransportExtension(object):
 
         with open(path, 'w') as out:
             out.write('\n'.join(self.curl.getinfo(pycurl.INFO_COOKIELIST)))
+
+    def clear_cookies(self):
+        """
+        Clear all cookies.
+
+        Custom version of BaseCurl.clear_cookies which do additional action:
+        reset cookies in curl instance.
+        """
+
+        self.config['cookies'] = {}
+        self.curl.setopt(pycurl.COOKIELIST, 'ALL')
 
 
 from ..base import BaseGrab

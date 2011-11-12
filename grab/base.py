@@ -533,7 +533,7 @@ class BaseGrab(ext.lxml.Extension,
         return urllib.urlencode(self.normalize_http_values(items))
 
 
-    def encode_cookies(self, items):
+    def encode_cookies(self, items, multiline=False):
         """
         Serialize dict or sequence of two-element items into string suitable
         for sending in Cookie http header.
@@ -555,7 +555,10 @@ class BaseGrab(ext.lxml.Extension,
         tokens = []
         for key, value in items:
             tokens.append('%s=%s' % (encode(key), encode(value)))
-        return '; '.join(tokens)
+        if not multiline:
+            return '; '.join(tokens)
+        else:
+            return '\n'.join(['Set-Cookie: %s' %x for x in tokens])
 
 
     def normalize_http_values(self, items, charset=None):

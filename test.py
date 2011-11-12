@@ -24,7 +24,9 @@ BASE_URL = 'http://localhost:%d' % FAKE_SERVER_PORT
 
 # This global objects is used by Fake HTTP Server
 # It return content of HTML variable for any GET request
-RESPONSE = {'get': '', 'post': '', 'cookies': None}
+RESPONSE = {'get': '', 'post': '', 'cookies': None,
+            'once_code': None}
+RESPONSE_ONCE_HEADERS = []
 
 # Fake HTTP Server saves request details
 # into global REQUEST variable
@@ -49,13 +51,20 @@ class FakeServerThread(threading.Thread):
                 Reponse body contains content from ``RESPONSE['get']``
                 """
 
-                self.send_response(200)
+                if RESPONSE['once_code']:
+                    self.send_response(RESPONSE['once_code'])
+                    RESPONSE['once_code'] = None
+                else:
+                    self.send_response(200)
                 if RESPONSE['cookies']:
                     for name, value in RESPONSE['cookies'].items():
                         self.send_header('Set-Cookie', '%s=%s' % (name, value))
+                while RESPONSE_ONCE_HEADERS:
+                    self.send_header(*RESPONSE_ONCE_HEADERS.pop())
                 self.end_headers()
                 self.wfile.write(RESPONSE['get'])
                 REQUEST['headers'] = self.headers
+                print '<-- (GET)'
 
             def log_message(*args, **kwargs):
                 "Do not log to console"
@@ -65,7 +74,14 @@ class FakeServerThread(threading.Thread):
                 post_size = int(self.headers.getheader('content-length'))
                 REQUEST['post'] = self.rfile.read(post_size)
                 REQUEST['headers'] = self.headers
-                self.send_response(200)
+
+                if RESPONSE['once_code']:
+                    self.send_response(RESPONSE['once_code'])
+                    RESPONSE['once_code'] = None
+                else:
+                    self.send_response(200)
+                while RESPONSE_ONCE_HEADERS:
+                    self.send_header(*RESPONSE_ONCE_HEADERS.pop())
                 self.end_headers()
                 self.wfile.write(RESPONSE['post'])
 
@@ -648,6 +664,21 @@ class TestCookies(TestCase):
         g.clear_cookies()
         g.go(BASE_URL)
         self.assertTrue('Cookie' not in REQUEST['headers'])
+
+    def test_redirect_session(self):
+        g = Grab()
+        RESPONSE['cookies'] = {'foo': 'bar'}
+        g.go(BASE_URL)
+        self.assertEqual(g.response.cookies['foo'], 'bar')
+
+        # Setup one-time redirect
+        g = Grab(debug=True)
+        RESPONSE_ONCE_HEADERS.append(('Location', BASE_URL))
+        RESPONSE_ONCE_HEADERS.append(('Set-Cookie', 'foo=bar'))
+        RESPONSE['once_code'] = 302
+        g.go(BASE_URL)
+        self.assertEqual(REQUEST['headers']['Cookie'], 'foo=bar')
+
 
 if __name__ == '__main__':
     Grab = GrabPycurl
