@@ -227,13 +227,13 @@ class CurlTransportExtension(object):
                                         multiline=True)
             self.curl.setopt(pycurl.COOKIELIST, 'ALL')
             self.curl.setopt(pycurl.COOKIELIST, cline)
-
-        if self.config['reuse_cookies'] and not self.config['cookies']:
-            # Setting empty string will activate curl cookie engine
+        else:
+            # Turn on cookies engine anyway
+            # To correctly support cookies in 302-redirects
             self.curl.setopt(pycurl.COOKIELIST, '')
 
-        if not self.config['reuse_cookies'] and not self.config['cookies']:
-            self.curl.setopt(pycurl.COOKIELIST, 'ALL')
+        #if not self.config['reuse_cookies'] and not self.config['cookies']:
+            #self.curl.setopt(pycurl.COOKIELIST, 'ALL')
 
         if self.config['cookiefile']:
             self.load_cookies(self.config['cookiefile'])
@@ -303,6 +303,11 @@ class CurlTransportExtension(object):
         self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
         self.response.parse()
+        self.response.cookies = self.extract_cookies()
+
+        # We do not need anymore cookies stored in the
+        # curl instance so drop them
+        self.curl.setopt(pycurl.COOKIELIST, 'ALL')
 
     # TODO: move to base
     def load_cookies(self, path):
@@ -337,6 +342,21 @@ class CurlTransportExtension(object):
 
         self.config['cookies'] = {}
         self.curl.setopt(pycurl.COOKIELIST, 'ALL')
+
+    def extract_cookies(self):
+        """
+        Extract cookies.
+        """
+
+        # Example of line:
+        # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
+        cookies = {}
+        for line in self.curl.getinfo(pycurl.INFO_COOKIELIST):
+            print 'LINE', line
+            chunks = line.split('\t')
+            cookies[chunks[-2]] = chunks[-1]
+        return cookies
+
 
 
 from ..base import BaseGrab

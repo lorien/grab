@@ -50,10 +50,10 @@ class Response(object):
                         valid_lines.append(line)
 
         self.headers = Message(StringIO('\n'.join(valid_lines)))
-        self.cookiejar = CookieJar()
-        self.cookiejar.extract_cookies(self, Request(self.url))
-        for cookie in self.cookiejar:
-            self.cookies[cookie.name] = cookie.value
+        #self.cookiejar = CookieJar()
+        #self.cookiejar.extract_cookies(self, Request(self.url))
+        #for cookie in self.cookiejar:
+            #self.cookies[cookie.name] = cookie.value
 
         self.detect_charset()
 
