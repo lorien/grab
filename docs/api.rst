@@ -1,19 +1,13 @@
 .. _api:
 
-=================
 Interface of Grab
 =================
 
-Grab is a set of core methods which could be extended by extensions.
-By default grab instance initiated with three extensions: `grab.ext.pycurl`,
-`grab.ext.lxml` and `grab.ext.lxml_form`. Some of grab extensions are called
-`transports`. These extensions provide network functionality: setting up network library,
-sending and receiving data. By default grab use `grab.ext.pycurl` extension. Also
-`grab.ext.urllib` transport is available, but for now it does not support all grab features.
+Grab, extensions, transports, blah-blah
 
-.. module:: grab.grab
+.. module:: grab.base
 
-.. class:: Grab()
+.. class:: BaseGrab
 
     .. automethod:: __init__
 

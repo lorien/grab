@@ -1,8 +1,7 @@
 .. _configuration:
 
-=============
-Configuration
-=============
+Grab Configuration
+==================
 
 You can configure grab using ``setup`` method::
 
@@ -19,9 +18,8 @@ You can pass configuration to ``request`` method::
     g.request(opt1=val1, opt2=val2)
 
 
-=================
 Available options
-=================
+-----------------
 
 **url**
     URL of requested document.

@@ -3,14 +3,25 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-============================
-Grab |version| Documentation
-============================
+Welcome to Grab
+===============
 
-What is Grab
-============
+This if official documentation of Grab package. I do not have much time
+to write documentation so the best way to learn Grab is to look on his
+source code.
 
-Grab is the tool which simplifies writing sitescrapers.
+
+Links
+-----
+
+* Bitbucket repo: http://bitbucket.org/lorien/grab
+* Google group: http://groups.google.com/group/python-grab
+
+
+What is Grab?
+-------------
+
+Grab is site scraping framework.
 
 Basic grab functions:
  * Construction and submittion HTTP request
@@ -22,18 +33,17 @@ See :ref:`tutorial` for understanding main concepts of the Grab
 
 
 Documenation sections
-=====================
+---------------------
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
-    examples
     api
     configuration
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
