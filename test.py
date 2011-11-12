@@ -637,6 +637,15 @@ class TestCookies(TestCase):
         g.go(BASE_URL)
         self.assertEqual(g.response.cookies['foo'], 'bar')
 
+    def test_multiple_cookies(self):
+        g = Grab()
+        RESPONSE['cookies'] = {}
+        g.setup(cookies={'foo': '1', 'bar': '2'})
+        g.go(BASE_URL)
+        self.assertEqual(
+            set(REQUEST['headers']['Cookie'].split('; ')),
+            set(['foo=1', 'bar=2']))
+
     def test_session(self):
         g = Grab()
         g.setup(reuse_cookies=True)
@@ -673,6 +682,7 @@ class TestCookies(TestCase):
 
         # Setup one-time redirect
         g = Grab(debug=True)
+        RESPONSE['cookies'] = {}
         RESPONSE_ONCE_HEADERS.append(('Location', BASE_URL))
         RESPONSE_ONCE_HEADERS.append(('Set-Cookie', 'foo=bar'))
         RESPONSE['once_code'] = 302

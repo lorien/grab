@@ -223,10 +223,10 @@ class CurlTransportExtension(object):
         # Using this option multiple times will only make the latest string override the previous ones. 
 
         if self.config['cookies']:
-            cline = self.encode_cookies(self.config['cookies'],
-                                        multiline=True)
+            items = self.encode_cookies(self.config['cookies'], join=False)
             self.curl.setopt(pycurl.COOKIELIST, 'ALL')
-            self.curl.setopt(pycurl.COOKIELIST, cline)
+            for item in items:
+                self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s' % item)
         else:
             # Turn on cookies engine anyway
             # To correctly support cookies in 302-redirects
@@ -352,7 +352,6 @@ class CurlTransportExtension(object):
         # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
         cookies = {}
         for line in self.curl.getinfo(pycurl.INFO_COOKIELIST):
-            print 'LINE', line
             chunks = line.split('\t')
             cookies[chunks[-2]] = chunks[-1]
         return cookies
