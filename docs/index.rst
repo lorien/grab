@@ -45,6 +45,7 @@ Documenation sections
     :maxdepth: 2
 
     configuration
+    forms
 
 
 Indices and tables

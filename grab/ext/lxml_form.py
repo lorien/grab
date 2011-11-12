@@ -14,14 +14,27 @@ class Extension(object):
 
     def choose_form(self, number=None, id=None, name=None):
         """
-        Select default form.
+        Set the default form.
         
-        Methods like set_input, set_input_by_id work with default form.
-        
-        Arguments:
-        * number - select form by numer
-        * id - select form by id attribute (<form id="form_id">)
-        * name - select form by name attribute (<form name="form_name">)
+        :param number: number of form (starting from zero)
+        :param id: value of "id" atrribute
+        :param name: value of "name" attribute
+        :raises: :class:`DataNotFound` if form not found
+        :raises: :class:`GrabMisuseError` if method is called without parameters
+
+        Selected form will be available via `form` atribute of `Grab`
+        instance. All form methods will work with defalt form.
+
+        Examples::
+
+            # Select second form
+            g.select_form(1)
+
+            # Select by id
+            g.select_form(id="register")
+
+            # Select by name
+            g.select_form(name="signup")
         """
 
         if id is not None:
@@ -45,8 +58,22 @@ class Extension(object):
     @property
     def form(self):
         """
-        Get the current form or select the biggest one if no form
-        was choosed explicitly.
+        This attribute points to default form.
+
+        If form was not selected manually then select the form
+        which has the biggest number of input elements.
+
+        The form value is just an `lxml.html` form element.
+
+        Example::
+
+            g.go('some URL')
+            # Choose form automatically
+            print g.form
+
+            # And now choose form manually
+            g.choose_form(1)
+            print g.form
         """
 
         if self._lxml_form is None:
@@ -57,7 +84,19 @@ class Extension(object):
 
     def set_input(self, name, value):
         """
-        Set the value of form element with name ``name``.
+        Set the value of form element by its `name` attribute.
+
+        :param name: name of element
+        :param value: value which should be set to element
+
+        To check/uncheck the checkbox pass boolean value.
+
+        Example::
+
+            g.set_input('sex', 'male')
+
+            # Check the checkbox
+            g.set_input('accept', True)
         """
 
         elem = self.form.inputs[name]
@@ -77,26 +116,31 @@ class Extension(object):
 
     def set_input_by_id(self, _id, value):
         """
-        Set the value of form element with id ``_id``
+        Set the value of form element by its `id` attribute.
+
+        :param _id: id of element
+        :param value: value which should be set to element
         """
 
         name = self.tree.xpath('//*[@id="%s"]' % _id)[0].get('name')
         return self.set_input(name, value)
 
-    def set_input_by_number(self, number, value, xpath=None):
+    def set_input_by_number(self, number, value):
         """
-        Set the value of element of current form.
+        Set the value of form element by its number in the form
 
-        Args:
-            number: the number of element
+        :param number: number of element
+        :param value: value which should be set to element
         """
 
-        if xpath:
-            elem = self.form.xpath('.//' + xpath)[number]
-        else:
-            elem = self.form.xpath('.//input[@type="text"]')[number]
-
+        elem = self.form.xpath('.//input[@type="text"]')[number]
         return self.set_input(elem.get('name'), value)
+
+
+    # TODO:
+    # Remove set_input_by_id
+    # Remove set_input_by_number
+    # New method: set_input_by(id=None, number=None, xpath=None)
 
     def submit(self, submit_name=None, submit_control=None, make_request=True, url=None, extra_post=None):
         """
