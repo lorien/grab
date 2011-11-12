@@ -240,7 +240,7 @@ class Spider(object):
         Stop the task which was executed too many times.
         """
 
-        if task.task_try_count >= self.task_try_limit:
+        if task.task_try_count > self.task_try_limit:
             logging.debug('Task tries ended: %s / %s' % (task.name, task.url))
             return False
         elif task.network_try_count >= self.network_try_limit:
