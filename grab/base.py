@@ -102,7 +102,6 @@ def default_config():
         #nohead = False,
         nobody = False,
         body_maxsize = None,
-        debug = False,
         debug_post = False,
         # ???
         encoding = 'gzip',
@@ -504,10 +503,9 @@ class BaseGrab(ext.lxml.Extension,
                 tname = '-%s' % tname
             fname = os.path.join(self.config['log_dir'], '%02d%s.log' % (self.request_counter, tname))
             with open(fname, 'w') as out:
-                if self.config['debug']:
-                    out.write('Request:\n')
-                    out.write(self.request_head)
-                    out.write('\n')
+                out.write('Request:\n')
+                out.write(self.request_head)
+                out.write('\n')
                 out.write('Response:\n')
                 out.write(self.response.head)
 

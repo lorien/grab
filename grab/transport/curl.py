@@ -149,9 +149,8 @@ class CurlTransportExtension(object):
 
         self.curl.setopt(pycurl.USERAGENT, self.config['user_agent'])
 
-        if self.config['debug']:
-            self.curl.setopt(pycurl.VERBOSE, 1)
-            self.curl.setopt(pycurl.DEBUGFUNCTION, self.debug_processor)
+        self.curl.setopt(pycurl.VERBOSE, 1)
+        self.curl.setopt(pycurl.DEBUGFUNCTION, self.debug_processor)
 
         # Ignore SSL errors
         self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)

@@ -681,7 +681,7 @@ class TestCookies(TestCase):
         self.assertEqual(g.response.cookies['foo'], 'bar')
 
         # Setup one-time redirect
-        g = Grab(debug=True)
+        g = Grab()
         RESPONSE['cookies'] = {}
         RESPONSE_ONCE_HEADERS.append(('Location', BASE_URL))
         RESPONSE_ONCE_HEADERS.append(('Set-Cookie', 'foo=bar'))
