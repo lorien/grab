@@ -123,6 +123,7 @@ import ext.lxml
 import ext.lxml_form
 import ext.django
 import ext.text
+import ext.pquery
 
 class GrabInterface(object):
     def process_config(self):
@@ -135,7 +136,7 @@ class GrabInterface(object):
         raise NotImplementedError
 
 
-class BaseGrab(ext.lxml.Extension,
+class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
            ext.lxml_form.Extension, ext.django.Extension,
            ext.text.Extension, GrabInterface):
 
