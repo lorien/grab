@@ -85,6 +85,11 @@ class Spider(object):
     Asynchronious scraping framework.
     """
 
+    # You can define here some urls and initial tasks
+    # with name "initial" will be created from these
+    # urls
+    initial_urls = None
+
     def __init__(self, thread_number=3, request_limit=None,
                  network_try_limit=10, task_try_limit=10):
         """
@@ -148,8 +153,22 @@ class Spider(object):
     def setup_grab(self, **kwargs):
         self.grab_config = kwargs
 
+    def load_initial_urls(self):
+        """
+        Create initial tasks from `self.initial_urls`.
+
+        Tasks are created with name "initial".
+        """
+
+        if self.initial_urls:
+            for url in self.initial_urls:
+                self.add_task(Task('initial', url=url))
+
     def run(self):
         self.start_time = time.time()
+
+        self.load_initial_urls()
+
         for res in self.fetch():
 
             if res is None:
