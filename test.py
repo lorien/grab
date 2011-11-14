@@ -143,7 +143,7 @@ FORMS = u"""
            <input type="submit" value="submit" class="submit_btn" name="submit" />
         </FORM>
         <h1 id="fake_form">Big header</h1>
-        <form name="dummy">
+        <form name="dummy" action="/dummy">
            <input type="submit" value="submit" class="submit_btn" name="submit" />
         </form>
     </div>
@@ -360,6 +360,13 @@ class TestHtmlForms(TestCase):
         self.g._lxml_form = None
 
         self.g.choose_form(name='dummy')
+        self.assertEqual('form', self.g._lxml_form.tag)
+        self.assertEqual('dummy', self.g._lxml_form.get('name'))
+
+        # reset current form
+        self.g._lxml_form = None
+
+        self.g.choose_form(xpath='//form[contains(@action, "/dummy")]')
         self.assertEqual('form', self.g._lxml_form.tag)
         self.assertEqual('dummy', self.g._lxml_form.get('name'))
 

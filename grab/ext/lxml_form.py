@@ -12,13 +12,14 @@ class Extension(object):
         self._lxml_form = None
         self._file_fields = {}
 
-    def choose_form(self, number=None, id=None, name=None):
+    def choose_form(self, number=None, id=None, name=None, xpath=None):
         """
         Set the default form.
         
         :param number: number of form (starting from zero)
         :param id: value of "id" atrribute
         :param name: value of "name" attribute
+        :param xpath: XPath query
         :raises: :class:`DataNotFound` if form not found
         :raises: :class:`GrabMisuseError` if method is called without parameters
 
@@ -35,6 +36,9 @@ class Extension(object):
 
             # Select by name
             g.select_form(name="signup")
+
+            # Select by xpath
+            g.select_form(xpath='//form[contains(@action, "/submit")]')
         """
 
         if id is not None:
@@ -46,14 +50,20 @@ class Extension(object):
             try:
                 self._lxml_form = self.css('form[name="%s"]' % name)
             except IndexError:
-                raise DataNotFound("There is no form with name: %s" % name)
+                raise DataNotFound('There is no form with name: %s' % name)
         elif number is not None:
             try:
                 self._lxml_form = self.tree.forms[number]
             except IndexError:
-                raise DataNotFound("There is no form with number: %s" % number)
+                raise DataNotFound('There is no form with number: %s' % number)
+        elif xpath is not None:
+            try:
+                self._lxml_form = self.xpath(xpath)
+            except IndexError:
+                raise DataNotFound('Could not find form with xpath: %s' % xpath)
         else:
-            raise GrabMisuseError('choose_form methods requires one of (number, id, name) arguments')
+            raise GrabMisuseError('choose_form methods requires one of '
+                                  '[number, id, name, xpath] arguments')
                 
     @property
     def form(self):
