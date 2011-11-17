@@ -467,6 +467,16 @@ class TestGrab(TestCase):
         g.go(BASE_URL)
         self.assertEqual(REQUEST['headers']['user-agent'], ua)
 
+    def test_find_content_blocks(self):
+        porno = u'порно ' * 100
+        redis = u'редис ' * 100
+        RESPONSE['get'] = ('<div>%s</div><p>%s' % (porno, redis)).encode('utf-8')
+        g = Grab()
+        g.go(BASE_URL)
+        blocks = list(g.find_content_blocks())
+        self.assertEqual(blocks[0], porno.strip())
+        self.assertEqual(blocks[1], redis.strip())
+
 
 class TestPostFeature(TestCase):
     def setUp(self):

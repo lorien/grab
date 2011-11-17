@@ -2,10 +2,11 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 from __future__ import absolute_import
-from lxml.html import fromstring
+from lxml.html import fromstring, tostring
 from lxml.cssselect import CSSSelector
 from urlparse import urljoin
 import re
+from lxml.etree import strip_tags, strip_elements, Comment
 
 from ..base import DataNotFound, GrabMisuseError
 
@@ -26,6 +27,9 @@ class Extension(object):
 
         if self._lxml_tree is None:
             body = self.response.unicode_body().strip()
+            #if self.config['tidy']:
+                #from tidylib import tidy_document
+                #body, errors = tidy_document(body)
             if self.config['lowercased_tree']:
                 body = body.lower()
             if not body:
@@ -249,3 +253,56 @@ class Extension(object):
         """
 
         return len(self.xpath_list(path)) > 0
+
+    def find_content_blocks(self):
+        """
+        Iterate over content blocks (russian version)
+        """
+
+        # Completely remove content of following tags
+        nondata_tags = ['head', 'style', 'script', Comment]
+        strip_elements(self.tree, *nondata_tags)
+
+        # Remove links
+        strip_elements(self.tree, 'a')
+
+        # Drop inlines tags
+        inline_tags = ('br', 'hr', 'p', 'b', 'i', 'strong', 'em', 'a',
+                       'span', 'font')
+        strip_tags(self.tree, *inline_tags)
+
+        # Cut of images
+        media_tags = ('img',)
+        strip_tags(self.tree, *media_tags)
+
+        body = tostring(self.tree, encoding='unicode')
+
+        # Normalize spaces
+        body = REX_SPACE.sub(' ', body).strip()
+
+        # Find text blocks
+        block_rex = re.compile(r'[^<>]+')
+
+        for match in block_rex.finditer(body):
+            block = match.group(0)
+            if len(block) > 100:
+                ratio = self._trash_ratio(block)
+                if ratio < 0.05:
+                    yield block.strip()
+
+    def _trash_ratio(self, text):
+        """
+        Return ratio of non-common symbols.
+        """
+
+        trash_count = 0
+        for char in text:
+            if char in list(u'.\'"+-!?()[]{}*+@#$%^&_=|/\\'):
+                trash_count += 1
+        return trash_count / float(len(text))
+
+
+
+
+if __name__ == '__main__':
+    main()

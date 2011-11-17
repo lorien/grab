@@ -113,6 +113,7 @@ def default_config():
         hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
         lowercased_tree = False,
         charset = None,
+        #tidy = False,
     )
 
 #DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
