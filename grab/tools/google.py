@@ -49,7 +49,7 @@ class AnonymizerNetworkError(Exception):
     """
 
 
-def build_search_url(query, page=1, per_page=None):
+def build_search_url(query, page=1, per_page=None, lang='en', filter=True):
     """
     Build google search url with specified query and pagination options.
     """
@@ -59,10 +59,12 @@ def build_search_url(query, page=1, per_page=None):
     if isinstance(query, unicode):
         query = query.encode('utf-8')
     start = per_page * (page - 1)
-    url = 'http://google.com/search?hl=en&q=%s&start=%s' % (
-        urllib.quote(query), start)
+    url = 'http://google.com/search?hl=%s&q=%s&start=%s' % (
+        lang, urllib.quote(query), start)
     if per_page != 10:
         url += '&num=%d' % per_page
+    if not filter:
+        url += '&filter=0'
     return url
 
 
@@ -136,8 +138,18 @@ def is_last_page(grab):
     Detect if the fetched page is last page of search results.
     """
 
-    # If next link does not exists then this is last page
-    return not grab.xpath_exists('//span[text()="Next"]')
+    # <td class="b" style="text-align:left"><a href="/search?q=punbb&amp;num=100&amp;hl=ru&amp;prmd=ivns&amp;ei=67DBTs3TJMfpOfrhkcsB&amp;start=100&amp;sa=N" style="text-align:left"><span class="csb ch" style="background-position:-96px 0;width:71px"></span><span style="display:block;margin-left:53px">{NEXT MESSAGE}</span></a></td>
+
+    try:
+        next_link_text = grab.xpath_list('//span[contains(@class, "csb ") and '\
+                                         'contains(@class, " ch")]/..')[-1]\
+                             .text_content().strip()
+    except IndexError:
+        logging.debug('No results found')
+        return True
+    else:
+        return not len(next_link_text)
+
 
 
 def parse_search_results(grab, parse_index_size=False, anonymizer=False):
@@ -145,12 +157,8 @@ def parse_search_results(grab, parse_index_size=False, anonymizer=False):
     Parse google search results page content.
     """
 
-    if grab.search(u'did not match any documents'):
-
-        # No results found for given query
-        logging.debug('No results')
-
-    elif grab.search(u'please type the characters below'):
+    #elif grab.search(u'please type the characters below'):
+    if grab.search(u'src="/sorry/image'):
 
         # Captcha!!!
         raise CaptchaError('Captcha found')
@@ -160,28 +168,32 @@ def parse_search_results(grab, parse_index_size=False, anonymizer=False):
         # Common anonymizer error
         raise AnonymizerNetworkError('URL Error (0)')
 
-    elif len(grab.css_list('#ires h3')):
+    elif grab.css_exists('#ires'):
+        if len(grab.css_list('#ires h3')):
 
-        # Something was found
-        if parse_index_size:
-            index_size = parse_index_size(grab)
+            # Something was found
+            if parse_index_size:
+                index_size = parse_index_size(grab)
+            else:
+                index_size = None
+
+            # Yield found results
+            for elem in grab.css_list('h3.r a'):
+                url = elem.get('href')
+                if anonymizer:
+                    match = ANONYMIZER_ARG.search(url)
+                    if match:
+                        token = urllib.unquote(match.group(1))
+                        url = decode_entities(base64.b64decode(token))
+                    else:
+                        url = None
+                        logging.error('Could not parse url encoded by anonymizer')
+
+                if url:
+                    yield {'url': url, 'title': grab.get_node_text(elem),
+                           'index_size': index_size}
         else:
-            index_size = None
-
-        # Yield found results
-        for elem in grab.css_list('h3.r a'):
-            url = elem.get('href')
-            if anonymizer:
-                match = ANONYMIZER_ARG.search(url)
-                if match:
-                    token = urllib.unquote(match.group(1))
-                    url = decode_entities(base64.b64decode(token))
-                else:
-                    url = None
-                    logging.error('Could not parse url encoded by anonymizer')
-
-            if url:
-                yield {'url': url, 'title': grab.get_node_text(elem),
-                       'index_size': index_size}
+            pass
+            #return []
     else:
         raise ParsingError('Could not identify google page format')

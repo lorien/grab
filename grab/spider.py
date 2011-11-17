@@ -206,14 +206,13 @@ class Spider(object):
                 if res['ok']:
                     try:
                         result = handler(res['grab'], res['task'])
-                    except Exception, ex:
-                        self.error_handler(handler_name, ex, res['task'])
-                    else:
                         if isinstance(result, types.GeneratorType):
                             for item in result:
                                 self.process_result(item, res['task'])
                         else:
                             self.process_result(result, res['task'])
+                    except Exception, ex:
+                        self.error_handler(handler_name, ex, res['task'])
                 else:
                     if self.network_try_limit:
                         task = res['task']
@@ -223,6 +222,7 @@ class Spider(object):
                             self.add_item('too-many-network-tries',
                                           res['task'].url)
                     self.inc_count('network-error-%s' % res['emsg'][:20])
+                    logging.error(res['emsg'])
                     # TODO: allow to write error handlers
 
         # This code is executed when main cycles is breaked
@@ -398,7 +398,6 @@ class Spider(object):
         """
 
         logging.debug('Job done!')
-        self.total_time = time.time() - self.start_time
 
     def inc_count(self, key, display=False, count=1):
         """
@@ -468,10 +467,10 @@ class Spider(object):
         items = sorted(items, key=lambda x: x[1], reverse=True)
         out.append('  %s' % '\n  '.join('%s: %s' % x for x in items))
 
-        if not hasattr(self, 'total_time'):
-            self.total_time = time.time() - self.start_time
+        total_time = time.time() - self.start_time
+        out.append('Queue size: %d' % self.taskq.qsize())
         out.append('Threads: %d' % self.thread_number)
-        out.append('Time: %.2f sec' % self.total_time)
+        out.append('Time: %.2f sec' % total_time)
         return '\n'.join(out)
 
     def save_all_lists(self, dir_path):

@@ -49,7 +49,6 @@ class Extension(object):
             raise GrabMisuseError('find_link method accepts only '\
                                   'byte-string argument')
         for elem, attr, link, pos in self.tree.iterlinks():
-            print link
             if elem.tag == 'a' and href_pattern in link:
                 return link
         return None
