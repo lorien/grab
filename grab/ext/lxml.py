@@ -254,7 +254,7 @@ class Extension(object):
 
         return len(self.xpath_list(path)) > 0
 
-    def find_content_blocks(self):
+    def find_content_blocks(self, min_length=None):
         """
         Iterate over content blocks (russian version)
         """
@@ -283,12 +283,16 @@ class Extension(object):
         # Find text blocks
         block_rex = re.compile(r'[^<>]+')
 
+        blocks = []
         for match in block_rex.finditer(body):
             block = match.group(0)
             if len(block) > 100:
                 ratio = self._trash_ratio(block)
                 if ratio < 0.05:
-                    yield block.strip()
+                    block = block.strip()
+                    if min_length is None or len(block) >= min_length:
+                        blocks.append(block)
+        return blocks
 
     def _trash_ratio(self, text):
         """
