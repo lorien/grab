@@ -118,7 +118,11 @@ class Spider(object):
         self.task_try_limit = task_try_limit
         self.network_try_limit = network_try_limit
         self.generate_tasks(init=True)
-        signal.signal(signal.SIGUSR1, self.sigusr1_handler)
+        try:
+            signal.signal(signal.SIGUSR1, self.sigusr1_handler)
+        except AttributeError:
+            pass
+        self.debug_error = debug_error
         self.prepare()
 
     def prepare(self):
