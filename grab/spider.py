@@ -91,7 +91,8 @@ class Spider(object):
     initial_urls = None
 
     def __init__(self, thread_number=3, request_limit=None,
-                 network_try_limit=10, task_try_limit=10):
+                 network_try_limit=10, task_try_limit=10,
+                 debug_error=False):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -492,6 +493,11 @@ class Spider(object):
                                              unicode(ex), task.url))
         logging.error('Error in %s function' % func_name,
                       exc_info=ex)
+        if self.debug_error:
+            import sys, traceback,  pdb
+            type, value, tb = sys.exc_info()
+            traceback.print_exc()
+            pdb.post_mortem(tb)
 
     def generate_tasks(self, init):
         """
