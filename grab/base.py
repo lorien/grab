@@ -299,7 +299,7 @@ class BaseGrab(ext.lxml.Extension,
 
         return self.process_request_result()
 
-    def process_request_result(self):
+    def process_request_result(self, prepare_response_func=None):
         """
         Process result of real request performed via transport extension.
         """
@@ -330,7 +330,10 @@ class BaseGrab(ext.lxml.Extension,
         self.config['multipart_post'] = None
         self.config['method'] = None
 
-        self.prepare_response()
+        if prepare_response_func:
+            prepare_response_func(self)
+        else:
+            self.prepare_response()
 
         if self.config['reuse_cookies']:
             # Copy cookies from response into config

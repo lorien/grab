@@ -92,7 +92,9 @@ class Spider(object):
 
     def __init__(self, thread_number=3, request_limit=None,
                  network_try_limit=10, task_try_limit=10,
-                 debug_error=False):
+                 debug_error=False, use_cache=False,
+                 mongo_dbname='grab',
+                 log_taskname=False):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -124,7 +126,16 @@ class Spider(object):
         except AttributeError:
             pass
         self.debug_error = debug_error
+        self.use_cache = use_cache
+        self.mongo_dbname = mongo_dbname
+        if use_cache:
+            self.setup_cache()
+        self.log_taskname = log_taskname
         self.prepare()
+
+    def setup_cache(self):
+        import pymongo
+        self.mongo = pymongo.Connection()[self.mongo_dbname]
 
     def prepare(self):
         """
@@ -179,19 +190,7 @@ class Spider(object):
             if res is None:
                 break
 
-            # Increase request counter
-            self.inc_count('request')
-
-            #if self.counters['request'] and not self.counters['request'] % 100:
-                #import guppy; x = guppy.hpy().heap(); import pdb; pdb.set_trace()
-
             self.generate_tasks(init=False)
-
-            if (self.request_limit is not None and
-                self.counters['request'] > self.request_limit):
-                logging.debug('Request limit is reached: %s' %\
-                              self.request_limit)
-                break
 
             # Increase task counters
             self.inc_count('task')
@@ -200,6 +199,10 @@ class Spider(object):
             if (res['task'].network_try_count == 1 and
                 res['task'].task_try_count == 1):
                 self.inc_count('task-%s-initial' % res['task'].name)
+
+            if self.log_taskname:
+                logging.debug('TASK: %s - %s' % (res['task'].name,
+                                                 'OK' if res['ok'] else 'FAIL'))
 
             handler_name = 'task_%s' % res['task'].name
             try:
@@ -297,62 +300,108 @@ class Spider(object):
             m.handles.append(curl)
 
         freelist = m.handles[:]
-        num_processed = 0
 
         # This is infinite cycle
         # You can break it only from outside code which
         # iterates over result of this method
         while True:
-            #while True:
-                #if not freelist:
-                    #break
+
+            cached_request = None
+
             while len(freelist):
 
-                try:
-                    priority, task = self.taskq.get(True, 0.1)
-                except Empty:
-                    # If All handlers are free and no tasks in queue
-                    # yield None signal
+                # Increase request counter
+                if (self.request_limit is not None and
+                    self.counters['request'] >= self.request_limit):
+                    logging.debug('Request limit is reached: %s' %\
+                                  self.request_limit)
                     if len(freelist) == self.thread_number:
                         yield None
-                    break
-                else:
-                    if not self._preprocess_task(task):
-                        continue
-
-                    curl = freelist.pop()
-
-                    task.network_try_count += 1
-                    if task.task_try_count == 0:
-                        task.task_try_count = 1
-
-                    if task.grab:
-                        grab = task.grab
                     else:
-                        # Set up curl instance via Grab interface
-                        grab = Grab(**self.grab_config)
-                        grab.setup(url=task.url)
+                        break
+                else:
+                    try:
+                        priority, task = self.taskq.get(True, 0.1)
+                    except Empty:
+                        # If All handlers are free and no tasks in queue
+                        # yield None signal
+                        if len(freelist) == self.thread_number:
+                            yield None
+                        else:
+                            break
+                    else:
+                        if not self._preprocess_task(task):
+                            continue
 
-                    if self.proxylist_config:
-                        args, kwargs = self.proxylist_config
-                        grab.setup_proxylist(*args, **kwargs)
+                        task.network_try_count += 1
+                        if task.task_try_count == 0:
+                            task.task_try_count = 1
 
-                    curl.grab = grab
-                    curl.grab.curl = curl
-                    curl.grab_original = grab.clone()
-                    curl.grab.prepare_request()
-                    curl.task = task
-                    # Add configured curl instance to multi-curl processor
-                    m.add_handle(curl)
+                        if task.grab:
+                            grab = task.grab
+                        else:
+                            # Set up curl instance via Grab interface
+                            grab = Grab(**self.grab_config)
+                            grab.setup(url=task.url)
 
-            while True:
-                status, active_objects = m.perform()
-                if status != pycurl.E_CALL_MULTI_PERFORM:
-                    break
+                        if self.use_cache:
+                            if grab.detect_request_method() == 'GET':
+                                url = grab.config['url']
+                                cache_item = self.mongo.cache.find_one({'_id': url})
+                                if cache_item:
+                                    logging.debug('From cache: %s' % url)
+                                    cached_request = (grab, grab.clone(),
+                                                      task, cache_item)
+                                    grab.prepare_request()
+                                    self.inc_count('request-cache')
+                                    # break from prepre-request cycle
+                                    # and go to process-response code
+                                    break
+
+                        self.inc_count('request-network')
+                        if self.proxylist_config:
+                            args, kwargs = self.proxylist_config
+                            grab.setup_proxylist(*args, **kwargs)
+
+                        curl = freelist.pop()
+                        curl.grab = grab
+                        curl.grab.curl = curl
+                        curl.grab_original = grab.clone()
+                        curl.grab.prepare_request()
+                        curl.task = task
+                        # Add configured curl instance to multi-curl processor
+                        m.add_handle(curl)
+
+
+            # If there were done network requests
+            if len(freelist) != self.thread_number:
+                while True:
+                    status, active_objects = m.perform()
+                    if status != pycurl.E_CALL_MULTI_PERFORM:
+                        break
+
+            if cached_request:
+                grab, grab_original, task, cache_item = cached_request
+                url = task.url# or grab.config['url']
+                grab.fake_response(cache_item['body'])
+
+                def custom_prepare_response(g):
+                    g.response.head = cache_item['head'].encode('utf-8')
+                    g.response.body = cache_item['body'].encode('utf-8')
+                    g.response.code = cache_item['response_code']
+                    g.response.time = 0
+                    g.response.url = cache_item['url']
+                    g.response.parse('utf-8')
+                    g.response.cookies = g.extract_cookies()
+
+                grab.process_request_result(custom_prepare_response)
+
+                yield {'ok': True, 'grab': grab, 'grab_original': grab_original,
+                       'task': task, 'ecode': None, 'emsg': None}
+                self.inc_count('request')
 
             while True:
                 queued_messages, ok_list, fail_list = m.info_read()
-                response_count = 0
 
                 results = []
                 for curl in ok_list:
@@ -366,9 +415,8 @@ class Spider(object):
                     m.remove_handle(curl)
                     freelist.append(curl)
                     yield res
-                    response_count += 1
+                    self.inc_count('request')
 
-                num_processed += response_count
                 if not queued_messages:
                     break
 
@@ -384,13 +432,26 @@ class Spider(object):
         grab = curl.grab
         grab_original = curl.grab_original
 
-        url = task.url or grab.config['url']
+        url = task.url# or grab.config['url']
         grab.process_request_result()
 
         # Break links, free resources
         curl.grab.curl = None
         curl.grab = None
         curl.task = None
+
+        if ok and self.use_cache and grab.request_method == 'GET':
+            item = {
+                '_id': task.url,
+                'url': task.url,
+                'body': grab.response.unicode_body(),#.encode('utf-8'),
+                'head': grab.response.head,
+                'response_code': grab.response.code,
+                'cookies': grab.response.cookies,
+            }
+            if 'class' in task.url:
+                import pdb; pdb.set_trace()
+            self.mongo.cache.save(item)
 
         return {'ok': ok, 'grab': grab, 'grab_original': grab_original,
                 'task': task,
@@ -494,10 +555,11 @@ class Spider(object):
         logging.error('Error in %s function' % func_name,
                       exc_info=ex)
         if self.debug_error:
-            import sys, traceback,  pdb
-            type, value, tb = sys.exc_info()
-            traceback.print_exc()
-            pdb.post_mortem(tb)
+            #import sys, traceback,  pdb
+            #type, value, tb = sys.exc_info()
+            #traceback.print_exc()
+            #pdb.post_mortem(tb)
+            import pdb; pdb.set_trace()
 
     def generate_tasks(self, init):
         """

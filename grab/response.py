@@ -31,7 +31,7 @@ class Response(object):
         self.cookiejar = None
         self.charset = 'utf-8'
 
-    def parse(self):
+    def parse(self, charset=None):
         """
         Parse headers and cookies.
 
@@ -55,7 +55,10 @@ class Response(object):
         #for cookie in self.cookiejar:
             #self.cookies[cookie.name] = cookie.value
 
-        self.detect_charset()
+        if charset is None:
+            self.detect_charset()
+        else:
+            self.charset = charset
 
     def info(self):
         """
