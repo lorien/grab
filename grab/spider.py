@@ -211,7 +211,8 @@ class Spider(object):
                 raise Exception('Task handler does not exist: %s' %\
                                 handler_name)
             else:
-                if res['ok']:
+                if res['ok'] and (res['grab'].response.code < 400 or
+                                  res['grab'].response.code == 404):
                     try:
                         result = handler(res['grab'], res['task'])
                         if isinstance(result, types.GeneratorType):
@@ -229,6 +230,8 @@ class Spider(object):
                         if not result:
                             self.add_item('too-many-network-tries',
                                           res['task'].url)
+                    if res['ok']:
+                        res['emsg'] = 'HTTP %s' % res['grab'].response.code
                     self.inc_count('network-error-%s' % res['emsg'][:20])
                     logging.error(res['emsg'])
                     # TODO: allow to write error handlers
@@ -441,17 +444,22 @@ class Spider(object):
         curl.task = None
 
         if ok and self.use_cache and grab.request_method == 'GET':
-            item = {
-                '_id': task.url,
-                'url': task.url,
-                'body': grab.response.unicode_body(),#.encode('utf-8'),
-                'head': grab.response.head,
-                'response_code': grab.response.code,
-                'cookies': grab.response.cookies,
-            }
-            if 'class' in task.url:
-                import pdb; pdb.set_trace()
-            self.mongo.cache.save(item)
+            if grab.response.code < 400 or grab.response.code == 404:
+                item = {
+                    '_id': task.url,
+                    'url': task.url,
+                    'body': grab.response.unicode_body(),#.encode('utf-8'),
+                    'head': grab.response.head,
+                    'response_code': grab.response.code,
+                    'cookies': grab.response.cookies,
+                }
+                try:
+                    self.mongo.cache.save(item, safe=True)
+                except Exception, ex:
+                    if 'document too large' in unicode(ex):
+                        pass
+                    else:
+                        raise
 
         return {'ok': ok, 'grab': grab, 'grab_original': grab_original,
                 'task': task,
