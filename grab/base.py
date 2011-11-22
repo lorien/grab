@@ -622,3 +622,21 @@ class BaseGrab(ext.lxml.Extension,
         """
 
         self.config['cookies'] = {}
+
+    def detect_request_method(self):
+        """
+        Analize request config and find which
+        request method will be used.
+
+        Returns request method in upper case
+        """
+
+        method = self.config['method']
+        if method:
+            method = method.upper()
+        else:
+            if self.config['post'] or self.config['multipart_post']:
+                method = 'POST'
+            else:
+                method = 'GET'
+        return method

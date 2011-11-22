@@ -59,6 +59,7 @@ class CurlTransportExtension(object):
         self.request_head = ''
         self.request_log = ''
         self.request_body = ''
+        self.request_method = None
 
     def head_processor(self, chunk):
         """
@@ -156,16 +157,9 @@ class CurlTransportExtension(object):
         self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)
         self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)
 
-        method = self.config['method']
-        if method:
-            method = method.upper()
-        else:
-            if self.config['post'] or self.config['multipart_post']:
-                method = 'POST'
-            else:
-                method = 'GET'
+        self.request_method = self.detect_request_method()
 
-        if method == 'POST':
+        if self.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
             if self.config['multipart_post']:
                 if not isinstance(self.config['multipart_post'], (list, tuple)):
@@ -184,12 +178,12 @@ class CurlTransportExtension(object):
                     # dict, tuple, list should be serialized into byte-string
                     post_data = self.urlencode(self.config['post'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
-        elif method == 'PUT':
+        elif self.request_method == 'PUT':
             self.curl.setopt(pycurl.PUT, 1)
             self.curl.setopt(pycurl.READFUNCTION, StringIO(self.config['post']).read) 
-        elif method == 'DELETE':
+        elif self.request_method == 'DELETE':
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
-        elif method == 'HEAD':
+        elif self.request_method == 'HEAD':
             self.curl.setopt(pycurl.NOBODY, 1)
         else:
             self.curl.setopt(pycurl.HTTPGET, 1)
@@ -271,7 +265,8 @@ class CurlTransportExtension(object):
         else:
             tname = '-%s' % tname
 
-        logger.debug('[%02d%s] %s %s%s' % (self.request_counter, tname, method, self.config['url'], proxy_info))
+        logger.debug('[%02d%s] %s %s%s' % (self.request_counter, tname,
+                     self.request_method, self.config['url'], proxy_info))
 
         if self.config['encoding']:
             self.curl.setopt(pycurl.ENCODING, self.config['encoding'])
