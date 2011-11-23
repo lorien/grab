@@ -302,7 +302,8 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
                 # Break the infinite loop in case of success response
                 break
 
-        return self.process_request_result()
+        self.process_request_result()
+        return self.response
 
     def process_request_result(self, prepare_response_func=None):
         """
@@ -373,7 +374,7 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
             if url:
                 return self.request(url=url)
 
-        return self.response
+        return None
 
     # Disabled due to perfomance issue
     # Who needs this method?

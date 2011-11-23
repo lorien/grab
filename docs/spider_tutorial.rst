@@ -3,9 +3,13 @@
 Spider Tutorial
 ===============
 
+UNDER CONSTRUCTION
+
 In this lesson we will do some real things. Let's write the
 bot which creates new account on bitbucket.org server and upload
-avatar image::
+avatar image
+
+This code should be rewritten with Spider interface::
 
     # First, import required things
     from grab import Grab, UploadFile

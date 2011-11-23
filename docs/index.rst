@@ -11,15 +11,16 @@ Grab is python framework for writing site scrapers. Grab provides two interfaces
  * the Grab interface for building HTTP request and processing response
  * the Spider interface for writing asynchronous site scrapers
 
-Spider interface uses multicurl (the asynchronous pycurl interface). If you need to
-do big number of concurrent requests then you should consider to use Spider. In
-case of Grab interface you should write yourself the code which organizes the
-concurrent network streams. In case of Spider it is already done in Spider module.
-Anyway you should learn the Grab interface, because you will use it to construct
-requests and to process results even in Spider based scrapers.
+Grab interface is very simple and it is ideal for small scripts, for single-thread
+scripts or for network hacking via python console.
+
+Spider interface is powered by multicurl (the asynchronous pycurl interface).
+If you need to do big number of concurrent requests then you should consider 
+to use Spider.
+
 
 Documentation
--------------
+=============
 
 .. toctree::
     :hidden:
@@ -28,6 +29,7 @@ Documentation
     grab_tutorial
     spider_tutorial
     extensions/overview
+    configuration
 
 :doc:`overview`
     List of features implemented in Grab
@@ -41,30 +43,23 @@ Documentation
 :doc:`extensions/overview`
     Overview of grab functionality splitted by so-called extensions. 
 
+:doc:`configuration`
+    Configuring Grab instance. Configuring network request options.
+
 Grab links
-----------
+==========
 
 * Grab source code repository on bitbucket: http://bitbucket.org/lorien/grab
 * Grab mailing list: http://groups.google.com/group/python-grab
 
 
 Similar projects
-----------------
+================
 
 * Scrapy - mature scraping solution: http://scrapy.org
 * Mechanize - one of the oldest python scraping framework:
 * Requests - easy interface to standard urllib library:
 * Httplib2
-
-
-Documenation sections
----------------------
-
-.. toctree::
-    :maxdepth: 2
-
-    configuration
-    forms
 
 
 Indices and tables

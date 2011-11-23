@@ -3,6 +3,8 @@
 Grab Tutorial
 =============
 
+UNDER CONSTRUCTION
+
 In this lesson we will do some real things. Let's write the
 bot which creates new account on bitbucket.org server and upload
 avatar image::
