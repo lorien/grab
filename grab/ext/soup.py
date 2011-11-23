@@ -2,29 +2,21 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 """
-Deprecated extension. Maybe it does not work.
+Interface to BeatifulSoup.
 """
-import re
 from BeautifulSoup import BeautifulSoup
 
-SCRIPT_TAG = re.compile(r'(<script[^>]*>).+?(</script>)', re.I|re.S)
+class BeautifulSoupExtension(object):
+    """
+    This extension provides ``soup`` attribute which allows
+    you to work with response DOM tree via BeautifulSoup interface.
+    """
 
-class Extendsion(object):
     def extra_reset(self):
         self._soup = None
-
-    #def extra_default_config(self):
-        #return {
-            #'soup_remove_scripts': True,
-        #}
 
     @property
     def soup(self):
         if not self._soup:
-            # Do some magick to make BeautifulSoup happy
-            #if False:#self.config['soup_remove_scripts']:
-                #data = SCRIPT_TAG.sub(r'\1\2', self.response.body)
-            #else:
-            data = self.response.body
-            self._soup = BeautifulSoup(data)
+            self._soup = BeautifulSoup(self.response.body)
         return self._soup

@@ -10,7 +10,7 @@ RE_NUMBER = re.compile(r'\d+')
 RE_NUMBER_WITH_SPACES = re.compile(r'\d[\s\d]*', re.U)
 RE_SPACE = re.compile(r'\s+', re.U)
 
-class Extension(object):
+class TextExtension(object):
     def search(self, anchor, byte=False):
         """
         Search the substring in response body.

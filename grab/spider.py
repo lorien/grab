@@ -93,7 +93,8 @@ class Spider(object):
     def __init__(self, thread_number=3, request_limit=None,
                  network_try_limit=10, task_try_limit=10,
                  debug_error=False, use_cache=False,
-                 mongo_dbname='grab',
+                 #mongo_dbname='grab',
+                 cache_path='var/cache.tch',
                  log_taskname=False):
         """
         Arguments:
@@ -127,15 +128,19 @@ class Spider(object):
             pass
         self.debug_error = debug_error
         self.use_cache = use_cache
-        self.mongo_dbname = mongo_dbname
+        #self.mongo_dbname = mongo_dbname
+        self.cache_path = cache_path
         if use_cache:
             self.setup_cache()
         self.log_taskname = log_taskname
         self.prepare()
 
     def setup_cache(self):
-        import pymongo
-        self.mongo = pymongo.Connection()[self.mongo_dbname]
+        #import pymongo
+        #self.mongo = pymongo.Connection()[self.mongo_dbname]
+        from tcdb import hdb 
+        self.cache = hdb.HDB()
+        self.cache.open(self.cache_path)
 
     def prepare(self):
         """
@@ -350,8 +355,9 @@ class Spider(object):
                         if self.use_cache:
                             if grab.detect_request_method() == 'GET':
                                 url = grab.config['url']
-                                cache_item = self.mongo.cache.find_one({'_id': url})
-                                if cache_item:
+                                #cache_item = self.mongo.cache.find_one({'_id': url})
+                                if url in self.cache:
+                                    cache_item = self.cache[url] 
                                     logging.debug('From cache: %s' % url)
                                     cached_request = (grab, grab.clone(),
                                                       task, cache_item)
@@ -446,7 +452,7 @@ class Spider(object):
         if ok and self.use_cache and grab.request_method == 'GET':
             if grab.response.code < 400 or grab.response.code == 404:
                 item = {
-                    '_id': task.url,
+                    #'_id': task.url,
                     'url': task.url,
                     'body': grab.response.unicode_body(),#.encode('utf-8'),
                     'head': grab.response.head,
@@ -454,7 +460,8 @@ class Spider(object):
                     'cookies': grab.response.cookies,
                 }
                 try:
-                    self.mongo.cache.save(item, safe=True)
+                    #self.mongo.cache.save(item, safe=True)
+                    self.cache[task.url] = item
                 except Exception, ex:
                     if 'document too large' in unicode(ex):
                         pass

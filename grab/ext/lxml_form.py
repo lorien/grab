@@ -7,7 +7,7 @@ from urlparse import urljoin
 
 from ..base import DataNotFound, GrabMisuseError
 
-class Extension(object):
+class LXMLFormExtension(object):
     def extra_reset(self):
         self._lxml_form = None
         self._file_fields = {}

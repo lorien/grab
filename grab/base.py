@@ -18,7 +18,6 @@ from random import randint, choice
 from copy import copy
 import threading
 from urlparse import urljoin
-#from copy import deepcopy
 import time
 import re
 
@@ -27,6 +26,11 @@ from html import find_refresh_url
 from response import Response
 
 from error import GrabError, GrabNetworkError, GrabMisuseError, DataNotFound
+from ext.lxml import LXMLExtension
+from ext.lxml_form import LXMLFormExtension
+from ext.django import DjangoExtension
+from ext.text import TextExtension
+
 
 __all__ = ('Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseError',
            'UploadContent', 'UploadFile')
@@ -116,15 +120,20 @@ def default_config():
         #tidy = False,
     )
 
-#DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
-                      #'grab.ext.django', 'grab.ext.text']
-
-import ext.lxml
-import ext.lxml_form
-import ext.django
-import ext.text
-
 class GrabInterface(object):
+    """
+    The methods of this class should be
+    implemented by the so-called transport class
+
+    Any Grab class should inhertis from the transport class.
+    
+    By default, then you do::
+    
+        from grab import Grab
+
+    You use ``the grab.transport.curl.CurlTransport``.
+    """
+
     def process_config(self):
         raise NotImplementedError
 
@@ -135,12 +144,8 @@ class GrabInterface(object):
         raise NotImplementedError
 
 
-class BaseGrab(ext.lxml.Extension,
-           ext.lxml_form.Extension, ext.django.Extension,
-           ext.text.Extension, GrabInterface):
-
-    # Shortcut to grab.GrabError
-    Error = GrabError
+class BaseGrab(LXMLExtension, LXMLFormExtension, DjangoExtension,
+               TextExtension, GrabInterface):
 
     # Attributes which should be processed when clone
     # of Grab instance is creating

@@ -9,13 +9,11 @@ import re
 from lxml.etree import strip_tags, strip_elements, Comment
 
 from ..base import DataNotFound, GrabMisuseError
-
-REX_NUMBER = re.compile(r'\d+')
-REX_SPACE = re.compile(r'\s', re.U)
+from .text import RE_SPACE
 
 NULL = object()
 
-class Extension(object):
+class LXMLExtension(object):
     def extra_reset(self):
         self._lxml_tree = None
 
@@ -278,7 +276,7 @@ class Extension(object):
         body = tostring(self.tree, encoding='unicode')
 
         # Normalize spaces
-        body = REX_SPACE.sub(' ', body).strip()
+        body = RE_SPACE.sub(' ', body).strip()
 
         # Find text blocks
         block_rex = re.compile(r'[^<>]+')
