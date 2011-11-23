@@ -2,13 +2,9 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 from __future__ import absolute_import
-import re
 
 from ..base import DataNotFound, GrabError, GrabMisuseError
-
-RE_NUMBER = re.compile(r'\d+')
-RE_NUMBER_WITH_SPACES = re.compile(r'\d[\s\d]*', re.U)
-RE_SPACE = re.compile(r'\s+', re.U)
+from ..tools import text as text_tools
 
 class TextExtension(object):
     def search(self, anchor, byte=False):
@@ -84,38 +80,28 @@ class TextExtension(object):
 
     def find_number(self, text, ignore_spaces=False):
         """
-        Find the group of digits.
+        Find the number in the `text`.
 
-        If `ignore_spaces` is True then search for group of digits which
-        could be delimited with spaces.
-
-        If no digits were found raise `DataNotFound` exception.
+        :param text: unicode or byte-string text
+        :param ignore_spacess: if True then groups of digits delimited
+            by spaces are considered as one number
+        :raises: :class:`DataNotFound` if number was not found.
         """
 
-        if ignore_spaces:
-            match = RE_NUMBER_WITH_SPACES.search(text)
-        else:
-            match = RE_NUMBER.search(text)
-        if match:
-            if ignore_spaces:
-                return self.drop_space(match.group(0))
-            else:
-                return match.group(0)
-        else:
-            raise DataNotFound
+        return text_tools.find_number(text, ignore_spaces=ignore_spaces)
 
     def drop_space(self, text):
         """
         Drop all space-chars in the `text`.
         """
 
-        return RE_SPACE.sub('', text)
+        return text_tools.drop_space(text)
 
     def normalize_space(self, text):
         """
-        Replace sequence of space-chars with one space char.
+        Replace multiple adjacent space-chars with one space char.
 
-        Drop leading and trimming space-chars.
+        Also drop leading and trailing space-chars.
         """
 
-        return RE_SPACE.sub(' ', text).strip()
+        return text_tools.normalize_space(text)
