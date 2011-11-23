@@ -33,8 +33,7 @@ class TextExtensionTest(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
         self.g = Grab()
-        self.g.response.body = HTML
-        self.g.response.charset = 'cp1251'
+        self.g.fake_response(HTML, charset='cp1251')
 
     def test_search(self):
         self.assertTrue(self.g.search(u'фыва'.encode('cp1251'), byte=True))
@@ -87,18 +86,18 @@ class TextExtensionTest(TestCase):
         self.assertRaises(DataNotFound,
             lambda: self.g.assert_rex(re.compile(u'фыва2')))
 
-    def test_find_number(self):
-        self.assertEqual('2', self.g.find_number('2'))
-        self.assertEqual('2', self.g.find_number('foo 2 4 bar'))
-        self.assertEqual('24', self.g.find_number('foo 2 4 bar', ignore_spaces=True))
-        self.assertEqual('24', self.g.find_number(u'бешеный 2 4 барсук', ignore_spaces=True))
-        self.assertRaises(DataNotFound,
-            lambda: self.g.find_number('foo'))
-        self.assertRaises(DataNotFound,
-            lambda: self.g.find_number(u'фыва'))
+    #def test_find_number(self):
+        #self.assertEqual('2', self.g.find_number('2'))
+        #self.assertEqual('2', self.g.find_number('foo 2 4 bar'))
+        #self.assertEqual('24', self.g.find_number('foo 2 4 bar', ignore_spaces=True))
+        #self.assertEqual('24', self.g.find_number(u'бешеный 2 4 барсук', ignore_spaces=True))
+        #self.assertRaises(DataNotFound,
+            #lambda: self.g.find_number('foo'))
+        #self.assertRaises(DataNotFound,
+            #lambda: self.g.find_number(u'фыва'))
 
-    def test_drop_space(self):
-        self.assertEqual('', self.g.drop_space(' '))
-        self.assertEqual('f', self.g.drop_space(' f '))
-        self.assertEqual('fb', self.g.drop_space(' f b '))
-        self.assertEqual(u'триглаза', self.g.drop_space(u' тр и гла' + '\t' + '\n' + u' за '))
+    #def test_drop_space(self):
+        #self.assertEqual('', self.g.drop_space(' '))
+        #self.assertEqual('f', self.g.drop_space(' f '))
+        #self.assertEqual('fb', self.g.drop_space(' f b '))
+        #self.assertEqual(u'триглаза', self.g.drop_space(u' тр и гла' + '\t' + '\n' + u' за '))

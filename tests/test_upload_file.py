@@ -37,8 +37,7 @@ class TestUploadContent(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
         self.g = Grab()
-        self.g.response.body = FORMS
-        self.g.response.charset = 'utf-8'
+        self.g.fake_response(FORMS, charset='utf-8')
 
     def test(self):
         fc = UploadContent('a')

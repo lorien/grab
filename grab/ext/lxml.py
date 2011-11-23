@@ -9,7 +9,7 @@ import re
 from lxml.etree import strip_tags, strip_elements, Comment
 
 from ..base import DataNotFound, GrabMisuseError
-from ..tools.text import normalize_space
+from ..tools.text import normalize_space, find_number
 
 NULL = object()
 
@@ -110,10 +110,10 @@ class LXMLExtension(object):
         raise DataNotFound('Cannot find link ANCHOR=%s, HREF=%s' % (anchor, href))
 
     def get_node_text(self, node):
-        return self.normalize_space(' '.join(node.xpath('./descendant-or-self::*[name() != "script" and name() != "style"]/text()[normalize-space()]')))
+        return normalize_space(' '.join(node.xpath('./descendant-or-self::*[name() != "script" and name() != "style"]/text()[normalize-space()]')))
 
     def find_node_number(self, node, ignore_spaces=False):
-        return self.find_number(self.get_node_text(node), ignore_spaces=ignore_spaces)
+        return find_number(self.get_node_text(node), ignore_spaces=ignore_spaces)
 
     def xpath(self, path, default=NULL, filter=None):
         """
@@ -153,7 +153,7 @@ class LXMLExtension(object):
                 return default
         else:
             if isinstance(elem, basestring):
-                return self.normalize_space(elem)
+                return normalize_space(elem)
             else:
                 return self.get_node_text(elem)
 
@@ -163,7 +163,7 @@ class LXMLExtension(object):
         """
 
         try:
-            return self.find_number(self.xpath_text(path, filter=filter),
+            return find_number(self.xpath_text(path, filter=filter),
                                     ignore_spaces=ignore_spaces)
         except IndexError:
             if default is NULL:
@@ -210,7 +210,7 @@ class LXMLExtension(object):
         """
 
         try:
-            return self.find_number(self.css_text(path), ignore_spaces=ignore_spaces)
+            return find_number(self.css_text(path), ignore_spaces=ignore_spaces)
         except IndexError:
             if default is NULL:
                 raise

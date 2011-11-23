@@ -406,7 +406,7 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
         logger.debug('Sleeping for %f seconds' % sleep_time)
         time.sleep(sleep_time)
 
-    def fake_response(self, content):
+    def fake_response(self, content, **kwargs):
         # Trigger reset
         # It will reset request state and also create new
         # uninitialized response object
@@ -419,11 +419,17 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
         self.headers = {}
         self.status = ''
         self.response.head = ''
-        self.response.parse()
+        if 'charset' in kwargs:
+            self.response.parse(charset=kwargs['charset'])
+        else:
+            self.response.parse()
         self.response.cookies = {}
         self.response.code = 200
         self.response.time = 0
         self.response.url = ''
+
+        for key, value in kwargs.items():
+            setattr(self.response, key, value)
 
     def setup_proxylist(self, proxy_file, proxy_type, read_timeout=None,
                         auto_init=True, auto_change=False):

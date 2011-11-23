@@ -11,10 +11,11 @@ class TextExtension(object):
         """
         Search the substring in response body.
 
-        If `byte` argument is False, then `anchor` should be the
-        unicode string, and search will be performed in `response.unicode_body()`
-        If `byte` argument is True, then `anchor` should be the
-        bytestring and search will be performed in `resonse.body`
+        :param anchor: string to search
+        :param byte: if False then `anchor` should be the
+            unicode string, and search will be performed in `response.unicode_body()`
+            else `anchor` should be the byte-string and
+            search will be performed in `resonse.body`
         
         If substring is found return True else False.
         """
@@ -35,8 +36,8 @@ class TextExtension(object):
         """
         Search the regular expression in response body.
 
-        If `byte` arguments is False then search is performed in `response.unicode_body()`
-        else the rex is searched in `response.body`.
+        :param byte: if False then search is performed in `response.unicode_body()`
+            else the rex is searched in `response.body`.
 
         Note: if you use default non-byte mode than do not forget to build your
         regular expression with re.U flag.
@@ -77,31 +78,3 @@ class TextExtension(object):
 
         if not self.search_rex(rex, byte=byte): 
             raise DataNotFound('Regexp not found')
-
-    def find_number(self, text, ignore_spaces=False):
-        """
-        Find the number in the `text`.
-
-        :param text: unicode or byte-string text
-        :param ignore_spacess: if True then groups of digits delimited
-            by spaces are considered as one number
-        :raises: :class:`DataNotFound` if number was not found.
-        """
-
-        return text_tools.find_number(text, ignore_spaces=ignore_spaces)
-
-    def drop_space(self, text):
-        """
-        Drop all space-chars in the `text`.
-        """
-
-        return text_tools.drop_space(text)
-
-    def normalize_space(self, text):
-        """
-        Replace multiple adjacent space-chars with one space char.
-
-        Also drop leading and trailing space-chars.
-        """
-
-        return text_tools.normalize_space(text)

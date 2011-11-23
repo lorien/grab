@@ -132,8 +132,8 @@ class FormExtension(object):
         :param value: value which should be set to element
         """
 
-        name = self.tree.xpath('//*[@id="%s"]' % _id)[0].get('name')
-        return self.set_input(name, value)
+        elem = self.tree.xpath('//*[@id="%s"]' % _id)[0]
+        return self.set_input(elem.get('name'), value)
 
     def set_input_by_number(self, number, value):
         """

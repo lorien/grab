@@ -20,6 +20,3 @@ Standard Grab Extensions
 
 :doc:`form`
     Automated form processing
-
-.. #:doc:`text`
-.. #    Tools to search and modify the text of response

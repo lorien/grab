@@ -32,8 +32,7 @@ class LXMLExtensionTest(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
         self.g = Grab()
-        self.g.response.body = HTML
-        self.g.response.charset = 'cp1251'
+        self.g.fake_response(HTML, charset='cp1251')
 
         from lxml.html import fromstring
         self.lxml_tree = fromstring(self.g.response.body)

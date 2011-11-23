@@ -29,6 +29,8 @@ Documentation
     grab_tutorial
     spider_tutorial
     extensions/overview
+    extensions/form
+    extensions/text
     configuration
 
 :doc:`overview`
@@ -42,6 +44,12 @@ Documentation
 
 :doc:`extensions/overview`
     Overview of grab functionality splitted by so-called extensions. 
+
+    :doc:`extensions/form`
+        Automated form processing
+
+    :doc:`extensions/text`
+        Utilities to process text of response
 
 :doc:`configuration`
     Configuring Grab instance. Configuring network request options.
