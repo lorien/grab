@@ -1,11 +1,11 @@
-.. _forms:
+.. _extensions_form:
 
-Work with forms
-===============
+Grab Form Extension
+===================
 
-.. module:: grab.ext.lxml_form
+.. module:: grab.ext.form
 
-.. autoclass:: Extension
+.. autoclass:: FormExtension
 
     To start working with form you should select it
 
@@ -17,4 +17,3 @@ Work with forms
     .. automethod:: set_input_by_id
     .. automethod:: set_input_by_number
     .. automethod:: submit
-

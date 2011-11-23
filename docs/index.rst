@@ -21,12 +21,13 @@ requests and to process results even in Spider based scrapers.
 Documentation
 -------------
 
-.. toctree:
+.. toctree::
     :hidden:
 
     overview
     grab_tutorial
     spider_tutorial
+    extensions/overview
 
 :doc:`overview`
     List of features implemented in Grab
@@ -36,6 +37,9 @@ Documentation
 
 :doc:`spider_tutorial`
     Rewriting the solution from previous tutorial with help of Spider framework
+
+:doc:`extensions/overview`
+    Overview of grab functionality splitted by so-called extensions. 
 
 Grab links
 ----------
