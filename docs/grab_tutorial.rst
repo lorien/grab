@@ -1,4 +1,4 @@
-.. _grab-quickstart:
+.. _grab_tutorial:
 
 Grab Tutorial
 =============
