@@ -27,7 +27,7 @@ from response import Response
 
 from error import GrabError, GrabNetworkError, GrabMisuseError, DataNotFound
 from ext.lxml import LXMLExtension
-from ext.lxml_form import LXMLFormExtension
+from ext.form import FormExtension
 from ext.django import DjangoExtension
 from ext.text import TextExtension
 
@@ -144,7 +144,7 @@ class GrabInterface(object):
         raise NotImplementedError
 
 
-class BaseGrab(LXMLExtension, LXMLFormExtension, DjangoExtension,
+class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
                TextExtension, GrabInterface):
 
     # Attributes which should be processed when clone
