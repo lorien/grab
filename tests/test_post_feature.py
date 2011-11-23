@@ -45,6 +45,11 @@ class TestPostFeature(TestCase):
         g.setup(post=(('foo', 'bar'), ('foo', 'baz')))
         g.request()
         self.assertEqual(REQUEST['post'], 'foo=bar&foo=baz')
+        
+        # Dict
+        g.setup(multipart_post={'foo': 'bar'})
+        g.request()
+        self.assertTrue('name="foo"' in REQUEST['post'])
 
         # Few values with non-ascii data
         # TODO: understand and fix
@@ -53,9 +58,7 @@ class TestPostFeature(TestCase):
         #g.request()
         #self.assertEqual(REQUEST['post'], 'foo=bar&gaz=Дельфин&abc=')
 
-        # Multipart data could not be dict or string
-        g.setup(multipart_post={'foo': 'bar'})
-        self.assertRaises(GrabMisuseError, lambda: g.request())
+        # Multipart data could not be string
         g.setup(multipart_post='asdf')
         self.assertRaises(GrabMisuseError, lambda: g.request())
 

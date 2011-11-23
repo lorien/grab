@@ -571,7 +571,7 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
 
     def normalize_http_values(self, items, charset=None):
         """
-        Accept sequence of (key, value) paris and convert each
+        Accept sequence of (key, value) paris or dict and convert each
         value into bytestring.
 
         Unicode is converted into bytestring using charset of previous response
@@ -582,6 +582,9 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
         Instances of ``UploadContent`` or ``UploadFile`` is converted
         into special pycurl objects.
         """
+
+        if isinstance(items, dict):
+            items = items.items()
 
         def process(item):
             key, value = item

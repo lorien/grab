@@ -162,8 +162,8 @@ class CurlTransportExtension(object):
         if self.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
             if self.config['multipart_post']:
-                if not isinstance(self.config['multipart_post'], (list, tuple)):
-                    raise GrabMisuseError('multipart_post should be tuple or list, not dict')
+                if isinstance(self.config['multipart_post'], basestring):
+                    raise GrabMisuseError('multipart_post option could not be a string')
                 post_items = self.normalize_http_values(self.config['multipart_post'])
                 self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif self.config['post']:
