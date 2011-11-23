@@ -1,7 +1,7 @@
-.. _extension:
+.. _extensions_overview:
 
 Grab Extensions System
-=====================
+======================
 
 Initially all Grab source code was in one file. Then it became clear
 that Grab features should be splitted over several files to keep
@@ -14,9 +14,8 @@ Standard Grab Extensions
 ------------------------
 
 .. toctree::
-    :hidden:
 
     form
-
-:doc:`form`
-    Automated form processing
+    text
+    lxml
+    django

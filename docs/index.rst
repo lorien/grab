@@ -28,6 +28,7 @@ Documentation
     overview
     grab_tutorial
     spider_tutorial
+    base_interface
     extensions/overview
     extensions/form
     extensions/text
@@ -44,6 +45,9 @@ Documentation
 
 :doc:`spider_tutorial`
     Rewriting the solution from previous tutorial with help of Spider framework
+
+:doc:`base_interface`
+    Base Grab interface. The core functions.
 
 :doc:`extensions/overview`
     Overview of grab functionality splitted by so-called extensions. 

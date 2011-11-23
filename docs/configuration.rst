@@ -5,32 +5,37 @@ Grab Configuration
 
 You can configure grab instance in few ways.
 
-Pass options to constructor::
+All options are optional but you can't make any real requests
+untill you setup at least "url" option.
+
+1. Pass options to constructor::
 
     g = Grab(opt1=val1, opt2=val2)
 
-Pass options to ``setup`` method::
+2. Pass options to ``setup`` method::
 
     g = Grab()
     g.setup(opt1=val1, opt2=val2)
 
-Pass options to ``request`` method::
+3. Pass options to ``request`` method::
 
     g = Grab()
     g.request(opt1=val1, opt2=val2)
     # or
     g.go(url, opt1=val1, opt2=val2)
 
-Pass options to ``go`` method::
+4. Pass options to ``go`` method. Note that ``go`` method requires URL as first argument::
 
     g = Grab()
     g.go(url, opt2=val2)
 
-Note that ``go`` method requires URL as 
-first argument.
 
-All options are optional but you can't make any real requests
-untill you setup at least "url" option.
+5. Pass options in `extra_post` argument of ``submit`` function::
+
+    g = Grab()
+    g.set_input('username', 'foo')
+    g.submit(extra_post={'password': 'bar'})
+
 
 
 Available options

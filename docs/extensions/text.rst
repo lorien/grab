@@ -1,4 +1,4 @@
-.. _extensions_form:
+.. _extensions_text:
 
 Working with text content of response
 =====================================
@@ -37,6 +37,9 @@ Some examples::
 
     # Raise exception if no numbers in document
     grab.assert_rex(re.compile('\d'))
+
+Text Extension API
+------------------
 
 .. module:: grab.ext.text
 

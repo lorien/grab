@@ -1,4 +1,4 @@
-.. overview:
+.. _overview:
 
 Grab features
 =============

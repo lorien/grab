@@ -407,6 +407,14 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
         time.sleep(sleep_time)
 
     def fake_response(self, content, **kwargs):
+        """
+        Setup `response` object without real network requests.
+
+        Useful for testing and debuging.
+
+        All ``**kwargs`` will be passed to `Response` constructor.
+        """
+
         # Trigger reset
         # It will reset request state and also create new
         # uninitialized response object

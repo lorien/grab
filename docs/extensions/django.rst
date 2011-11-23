@@ -23,7 +23,7 @@ See example::
 
 
 Django Extension API
-====================
+--------------------
 
 .. module:: grab.ext.django
 

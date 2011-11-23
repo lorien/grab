@@ -28,7 +28,7 @@ input element is just a `lxml.etree.ElementTree` object.
 To learn more about form processing in lxml read this: URL TO LXML DOCUMENTATION
 
 Form Extension API
-==================
+------------------
 
 .. module:: grab.ext.form
 
