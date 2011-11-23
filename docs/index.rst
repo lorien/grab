@@ -6,37 +6,52 @@
 Welcome to Grab
 ===============
 
-This if official documentation of Grab package. I do not have much time
-to write documentation so the best way to learn Grab is to look on his
-source code.
+Grab is python framework for writing site scrapers. Grab provides two interfaces:
 
+ * the Grab interface for building HTTP request and processing response
+ * the Spider interface for writing asynchronous site scrapers
 
-Links
------
+Spider interface uses multicurl (the asynchronous pycurl interface). If you need to
+do big number of concurrent requests then you should consider to use Spider. In
+case of Grab interface you should write yourself the code which organizes the
+concurrent network streams. In case of Spider it is already done in Spider module.
+Anyway you should learn the Grab interface, because you will use it to construct
+requests and to process results even in Spider based scrapers.
 
-* Bitbucket repo: http://bitbucket.org/lorien/grab
-* Google group: http://groups.google.com/group/python-grab
-
-
-What is Grab?
+Documentation
 -------------
 
-Grab is site scraping framework.
+.. toctree:
+    :hidden:
 
-Grab features:
- * Simple API
- * Session suppport (automated cookie processing)
- * Building HTTP request of any type
- * Multipart POST
- * Automated form processing
- * Selecting HTML elements via XPath/CSS queries
- * Multiple tries
- * Ability to choose network layer: curl, urllib, selenium
- * Utilities to work with proxy list
- * Support for proxy of any type (SOCKS proxy is available only in curl transport)
- * multicurl support
- * Framework to develop well-structured site scrapers
- * Verbose methods to debug HTTP requests
+    overview
+    grab_tutorial
+    spider_tutorial
+
+:doc:`overview`
+    List of features implemented in Grab
+
+:doc:`grab_tutorial`
+    Short lesson how to use Grab
+
+:doc:`spider_tutorial`
+    Rewriting the solution from previous tutorial with help of Spider framework
+
+Grab links
+----------
+
+* Grab source code repository on bitbucket: http://bitbucket.org/lorien/grab
+* Grab mailing list: http://groups.google.com/group/python-grab
+
+
+Similar projects
+----------------
+
+* Scrapy - mature scraping solution: http://scrapy.org
+* Mechanize - one of the oldest python scraping framework:
+* Requests - easy interface to standard urllib library:
+* Httplib2
+
 
 Documenation sections
 ---------------------
