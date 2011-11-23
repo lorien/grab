@@ -18,6 +18,7 @@ TEST_CASE_LIST = (
     'tests.test_spider',
     'tests.test_cookies',
     'tests.test_text_tools',
+    'tests.test_lxml_tools',
 )
 
 def main():

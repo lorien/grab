@@ -49,17 +49,6 @@ class LXMLExtensionTest(TestCase):
         names = set(x.tag for x in self.lxml_tree.xpath('//div[@id="bee"]//*[name() != "script" and name() != "style"]'))
         self.assertEqual(set(['em', 'div', 'strong']), names)
 
-    def test_get_node_text(self):
-        elem = self.lxml_tree.xpath('//div[@id="bee"]')[0]
-        self.assertEqual(self.g.get_node_text(elem), u'пче ла')
-        elem = self.lxml_tree.xpath('//div[@id="fly"]')[0]
-        self.assertEqual(self.g.get_node_text(elem), u'му ха')
-
-    def test_find_node_number(self):
-        node = self.lxml_tree.xpath('//li[@id="num-1"]')[0]
-        self.assertEqual('100', self.g.find_node_number(node))
-        self.assertEqual('1002', self.g.find_node_number(node, ignore_spaces=True))
-
     def test_xpath(self):
         self.assertEqual('bee-em', self.g.xpath('//em').get('id'))
         self.assertEqual('num-2', self.g.xpath(u'//*[text() = "item #2"]').get('id'))

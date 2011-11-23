@@ -10,6 +10,7 @@ from lxml.etree import strip_tags, strip_elements, Comment
 
 from ..base import DataNotFound, GrabMisuseError
 from ..tools.text import normalize_space, find_number
+from ..tools.lxml_tools import get_node_text
 
 NULL = object()
 
@@ -109,12 +110,6 @@ class LXMLExtension(object):
                     return self.request(url=item[2])
         raise DataNotFound('Cannot find link ANCHOR=%s, HREF=%s' % (anchor, href))
 
-    def get_node_text(self, node):
-        return normalize_space(' '.join(node.xpath('./descendant-or-self::*[name() != "script" and name() != "style"]/text()[normalize-space()]')))
-
-    def find_node_number(self, node, ignore_spaces=False):
-        return find_number(self.get_node_text(node), ignore_spaces=ignore_spaces)
-
     def xpath(self, path, default=NULL, filter=None):
         """
         Get first element which matches the given xpath or raise DataNotFound.
@@ -155,7 +150,7 @@ class LXMLExtension(object):
             if isinstance(elem, basestring):
                 return normalize_space(elem)
             else:
-                return self.get_node_text(elem)
+                return get_node_text(elem)
 
     def xpath_number(self, path, default=NULL, filter=None, ignore_spaces=False):
         """
@@ -197,7 +192,7 @@ class LXMLExtension(object):
         """
 
         try:
-            return self.get_node_text(self.css(path))
+            return get_node_text(self.css(path))
         except IndexError:
             if default is NULL:
                 raise
@@ -222,7 +217,7 @@ class LXMLExtension(object):
         Strip tags from the HTML content.
         """
 
-        return self.get_node_text(fromstring(content))
+        return get_node_text(fromstring(content))
 
     def assert_css(self, path):
         """
@@ -302,8 +297,6 @@ class LXMLExtension(object):
             if char in list(u'.\'"+-!?()[]{}*+@#$%^&_=|/\\'):
                 trash_count += 1
         return trash_count / float(len(text))
-
-
 
 
 if __name__ == '__main__':

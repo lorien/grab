@@ -31,6 +31,8 @@ Documentation
     extensions/overview
     extensions/form
     extensions/text
+    extensions/django
+    extensions/lxml
     configuration
 
 :doc:`overview`
@@ -50,6 +52,12 @@ Documentation
 
     :doc:`extensions/text`
         Utilities to process text of response
+
+    :doc:`extensions/django`
+        Provides quick way to save response content into FileField of any django model.
+
+    :doc:`extensions/lxml`
+        Extracting information from response with XPATH and CSS queries.
 
 :doc:`configuration`
     Configuring Grab instance. Configuring network request options.

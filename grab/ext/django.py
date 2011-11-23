@@ -7,7 +7,10 @@ from urlparse import urlsplit
 class DjangoExtension(object):
     def django_file(self, name=None):
         """
-        Build from response content the django ContentFile instance.
+        Convert content of response into django `ContentFile` object.
+
+        :param name: specify name of file, otherwise the last segment in
+        URL path will be used as filename.
         """
        
         from django.core.files.base import ContentFile
