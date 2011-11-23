@@ -22,7 +22,7 @@ import time
 import re
 
 from proxylist import ProxyList
-from html import find_refresh_url
+from tools.html import find_refresh_url
 from response import Response
 
 from error import GrabError, GrabNetworkError, GrabMisuseError, DataNotFound

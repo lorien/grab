@@ -11,9 +11,19 @@ RE_REFRESH_URL = re.compile(r'url=["\']*([^\'"> ]+)', re.I)
 RE_ENTITY = re.compile(r'(&[a-z]+;)')
 RE_NUM_ENTITY = re.compile(r'(&#\d+;)')
 
-def decode_entities(text):
+def decode_entities(html):
     """
-    Convert HTML entities to their unicode analogs.
+    Convert all HTML entities into their unicode
+    representations.
+
+    This functions processes following entities:
+     * &XXX;
+     * &#XXX;
+
+    Example::
+
+        >>> print html.decode_entities('&rarr;ABC&nbsp;&#82;&copy;')
+        →ABC R©
     """
 
 
@@ -34,9 +44,9 @@ def decode_entities(text):
         except ValueError:
             return entity
 
-    text = RE_NUM_ENTITY.sub(process_num_entity, text)
-    text = RE_ENTITY.sub(process_entity, text)
-    return text
+    html = RE_NUM_ENTITY.sub(process_num_entity, html)
+    html = RE_ENTITY.sub(process_entity, html)
+    return html
 
 
 def find_refresh_url(html):

@@ -34,6 +34,7 @@ Documentation
     extensions/django
     extensions/lxml
     configuration
+    tools/html
 
 :doc:`overview`
     List of features implemented in Grab
@@ -61,6 +62,12 @@ Documentation
 
 :doc:`configuration`
     Configuring Grab instance. Configuring network request options.
+
+Extra cool things
+
+    :doc:`tools/html`
+        HTML processing utilities
+        
 
 Grab links
 ==========
