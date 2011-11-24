@@ -27,7 +27,9 @@ import urllib
 import logging
 import re
 import base64
-from grab.html import decode_entities
+
+from grab.tools.html import decode_entities
+from grab.tools.lxml import get_node_text
 
 ANONYMIZER_ARG = re.compile(r'q=([^&"]+)')
 
@@ -190,7 +192,7 @@ def parse_search_results(grab, parse_index_size=False, anonymizer=False):
                         logging.error('Could not parse url encoded by anonymizer')
 
                 if url:
-                    yield {'url': url, 'title': grab.get_node_text(elem),
+                    yield {'url': url, 'title': get_node_text(elem),
                            'index_size': index_size}
         else:
             pass
