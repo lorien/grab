@@ -270,5 +270,6 @@ class FormExtension(object):
                 if getattr(elem, 'type', None) == 'checkbox':
                     if not elem.checked:
                         if elem.name is not None:
-                            del fields[elem.name]
+                            if elem.name in fields:
+                                del fields[elem.name]
         return fields
