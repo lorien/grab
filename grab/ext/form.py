@@ -29,16 +29,16 @@ class FormExtension(object):
         Examples::
 
             # Select second form
-            g.select_form(1)
+            g.choose_form(1)
 
             # Select by id
-            g.select_form(id="register")
+            g.choose_form(id="register")
 
             # Select by name
-            g.select_form(name="signup")
+            g.choose_form(name="signup")
 
             # Select by xpath
-            g.select_form(xpath='//form[contains(@action, "/submit")]')
+            g.choose_form(xpath='//form[contains(@action, "/submit")]')
         """
 
         if id is not None:
