@@ -25,7 +25,7 @@ Documentation
 .. toctree::
     :hidden:
 
-    overview
+    features
     grab_tutorial
     spider_tutorial
     base_interface
@@ -37,7 +37,7 @@ Documentation
     configuration
     tools/html
 
-:doc:`overview`
+:doc:`features`
     List of features implemented in Grab
 
 :doc:`grab_tutorial`
