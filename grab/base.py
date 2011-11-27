@@ -320,8 +320,14 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
                 else:
                     post = self.normalize_http_values(post, charset='utf-8')
                     items = sorted(post, key=lambda x: x[0])
-                    items = [(x[0], str(x[1])[:150]) for x in items]
-                    post = '\n'.join('%-25s: %s' % x for x in items)
+                    new_items = []
+                    for key, value in items:
+                        if len(value) > 150:
+                            value = value[:150] + '...'
+                        else:
+                            value = value
+                        new_items.append((key, value))
+                    post = '\n'.join('%-25s: %s' % x for x in new_items)
             if post:
                 logger.debug('POST request:\n%s\n' % post)
 
