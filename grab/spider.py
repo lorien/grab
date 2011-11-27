@@ -8,6 +8,11 @@ import os
 import time
 import signal
 import json
+import cPickle as pickle
+#from guppy import hpy
+#hp = hpy()
+#hp.setrelheap()
+import anydbm
 
 class SpiderError(Exception):
     "Base class for Spider exceptions"
@@ -93,9 +98,10 @@ class Spider(object):
     def __init__(self, thread_number=3, request_limit=None,
                  network_try_limit=10, task_try_limit=10,
                  debug_error=False, use_cache=False,
-                 #mongo_dbname='grab',
-                 cache_path='var/cache.tch',
-                 log_taskname=False):
+                 cache_db = None,
+                 cache_path='var/cache.db',
+                 log_taskname=False,
+                 use_pympler=False):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -130,17 +136,29 @@ class Spider(object):
         self.use_cache = use_cache
         #self.mongo_dbname = mongo_dbname
         self.cache_path = cache_path
+        self.cache_db = cache_db
         if use_cache:
             self.setup_cache()
         self.log_taskname = log_taskname
         self.prepare()
+        self.use_pympler = use_pympler
+
+        #if self.use_pympler:
+            #from pympler import tracker
+            #self.tracker = tracker.SummaryTracker()
+            #self.tracker.print_diff()
 
     def setup_cache(self):
-        #import pymongo
-        #self.mongo = pymongo.Connection()[self.mongo_dbname]
-        from tcdb import hdb 
-        self.cache = hdb.HDB()
-        self.cache.open(self.cache_path)
+        import pymongo
+        if not self.cache_db:
+            raise Exception('You should configure cache_db option')
+        self.cache = pymongo.Connection()[self.cache_db]['cache']
+        #from tcdb import hdb 
+        #import tc
+        #self.cache = hdb.HDB()
+        #self.cache = tc.HDB()
+        #self.cache.open(self.cache_path, tc.HDBOWRITER | tc.HDBOCREAT | tc.HDBOTRUNC)
+        #self.cache = anydbm.open(self.cache_path, 'c')
 
     def prepare(self):
         """
@@ -191,6 +209,13 @@ class Spider(object):
         self.load_initial_urls()
 
         for res in self.fetch():
+
+            #if self.counters['request'] and not self.counters['request'] % 5000:
+                ##self.tracker.print_diff()
+                #print hp.heap()
+                #import pdb; pdb.set_trace()
+                ##hp.setrelheap()
+                ##raw_input('Press any key to continue')
 
             if res is None:
                 break
@@ -355,14 +380,16 @@ class Spider(object):
                         if self.use_cache:
                             if grab.detect_request_method() == 'GET':
                                 url = grab.config['url']
-                                #cache_item = self.mongo.cache.find_one({'_id': url})
-                                if url in self.cache:
-                                    cache_item = self.cache[url] 
+                                cache_item = self.cache.find_one({'_id': url})
+                                if cache_item:
+                                #if url in self.cache:
+                                    #cache_item = pickle.loads(self.cache[url])
                                     logging.debug('From cache: %s' % url)
                                     cached_request = (grab, grab.clone(),
                                                       task, cache_item)
                                     grab.prepare_request()
                                     self.inc_count('request-cache')
+
                                     # break from prepre-request cycle
                                     # and go to process-response code
                                     break
@@ -452,21 +479,21 @@ class Spider(object):
         if ok and self.use_cache and grab.request_method == 'GET':
             if grab.response.code < 400 or grab.response.code == 404:
                 item = {
-                    #'_id': task.url,
+                    '_id': task.url,
                     'url': task.url,
-                    'body': grab.response.unicode_body(),#.encode('utf-8'),
+                    'body': grab.response.unicode_body().encode('utf-8'),
                     'head': grab.response.head,
                     'response_code': grab.response.code,
                     'cookies': grab.response.cookies,
                 }
                 try:
                     #self.mongo.cache.save(item, safe=True)
-                    self.cache[task.url] = item
+                    self.cache.save(item, safe=True)
                 except Exception, ex:
                     if 'document too large' in unicode(ex):
                         pass
                     else:
-                        raise
+                        import pdb; pdb.set_trace()
 
         return {'ok': ok, 'grab': grab, 'grab_original': grab_original,
                 'task': task,
@@ -479,6 +506,7 @@ class Spider(object):
         """
 
         logging.debug('Job done!')
+        #self.tracker.stats.print_summary()
 
     def inc_count(self, key, display=False, count=1):
         """

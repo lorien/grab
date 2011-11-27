@@ -267,7 +267,7 @@ class LXMLExtension(object):
         media_tags = ('img',)
         strip_tags(self.tree, *media_tags)
 
-        body = tostring(self.tree, encoding='unicode')
+        body = tostring(self.tree, encoding='utf-8').decode('utf-8')
 
         # Normalize spaces
         body = normalize_space(body)
