@@ -3,7 +3,6 @@
 # License: BSD
 from __future__ import absolute_import
 from lxml.html import fromstring, tostring
-from lxml.cssselect import CSSSelector
 from urlparse import urljoin
 import re
 from lxml.etree import strip_tags, strip_elements, Comment

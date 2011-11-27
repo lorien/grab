@@ -3,7 +3,7 @@ Functions to process content of lxml nodes.
 """
 from text import normalize_space, find_number
 
-def get_node_text( node):
+def get_node_text(node):
     """
     Extract text content of the `node` and all its descendants.
 

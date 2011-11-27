@@ -199,10 +199,8 @@ class FormExtension(object):
             g.submit()
         """
 
-        # TODO: process self.form.inputs
-        # Do not used self.form.fields
-        # because it does not contains empty fields
-        # and also contains data for unchecked checkboxes and etc
+        # TODO: add .x and .y items
+        # if submit element is image
 
         post = self.form_fields()
         submit_controls = []
