@@ -8,11 +8,6 @@ import os
 import time
 import signal
 import json
-import cPickle as pickle
-#from guppy import hpy
-#hp = hpy()
-#hp.setrelheap()
-import anydbm
 
 class SpiderError(Exception):
     "Base class for Spider exceptions"
@@ -98,10 +93,9 @@ class Spider(object):
     def __init__(self, thread_number=3, request_limit=None,
                  network_try_limit=10, task_try_limit=10,
                  debug_error=False, use_cache=False,
-                 cache_db = None,
-                 cache_path='var/cache.db',
-                 log_taskname=False,
-                 use_pympler=False):
+                 #mongo_dbname='grab',
+                 cache_path='var/cache.tch',
+                 log_taskname=False):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -127,10 +121,7 @@ class Spider(object):
         self.items = {}
         self.task_try_limit = task_try_limit
         self.network_try_limit = network_try_limit
-        #self.generate_tasks(init=True)
-        self.task_generator_object = self.task_generator()
-        self.task_generator_enabled = True
-        self.process_task_generator()
+        self.generate_tasks(init=True)
         try:
             signal.signal(signal.SIGUSR1, self.sigusr1_handler)
         except AttributeError:
@@ -139,29 +130,17 @@ class Spider(object):
         self.use_cache = use_cache
         #self.mongo_dbname = mongo_dbname
         self.cache_path = cache_path
-        self.cache_db = cache_db
         if use_cache:
             self.setup_cache()
         self.log_taskname = log_taskname
         self.prepare()
-        self.use_pympler = use_pympler
-
-        #if self.use_pympler:
-            #from pympler import tracker
-            #self.tracker = tracker.SummaryTracker()
-            #self.tracker.print_diff()
 
     def setup_cache(self):
-        import pymongo
-        if not self.cache_db:
-            raise Exception('You should configure cache_db option')
-        self.cache = pymongo.Connection()[self.cache_db]['cache']
-        #from tcdb import hdb 
-        #import tc
-        #self.cache = hdb.HDB()
-        #self.cache = tc.HDB()
-        #self.cache.open(self.cache_path, tc.HDBOWRITER | tc.HDBOCREAT | tc.HDBOTRUNC)
-        #self.cache = anydbm.open(self.cache_path, 'c')
+        #import pymongo
+        #self.mongo = pymongo.Connection()[self.mongo_dbname]
+        from tcdb import hdb 
+        self.cache = hdb.HDB()
+        self.cache.open(self.cache_path)
 
     def prepare(self):
         """
@@ -208,33 +187,20 @@ class Spider(object):
 
     def run(self):
         self.start_time = time.time()
-
         self.load_initial_urls()
 
         for res in self.fetch():
-
-            #if self.counters['request'] and not self.counters['request'] % 5000:
-                ##self.tracker.print_diff()
-                #print hp.heap()
-                #import pdb; pdb.set_trace()
-                ##hp.setrelheap()
-                ##raw_input('Press any key to continue')
-
             if res is None:
                 break
 
-            #self.generate_tasks(init=False)
-            if self.task_generator_enabled:
-                self.process_task_generator()
+            self.generate_tasks(init=False)
 
             # Increase task counters
             self.inc_count('task')
             self.inc_count('task-%s' % res['task'].name)
-
             if (res['task'].network_try_count == 1 and
                 res['task'].task_try_count == 1):
                 self.inc_count('task-%s-initial' % res['task'].name)
-
             if self.log_taskname:
                 logging.debug('TASK: %s - %s' % (res['task'].name,
                                                  'OK' if res['ok'] else 'FAIL'))
@@ -246,33 +212,37 @@ class Spider(object):
                 raise Exception('Task handler does not exist: %s' %\
                                 handler_name)
             else:
-                if res['ok'] and (res['grab'].response.code < 400 or
-                                  res['grab'].response.code == 404):
-                    try:
-                        result = handler(res['grab'], res['task'])
-                        if isinstance(result, types.GeneratorType):
-                            for item in result:
-                                self.process_result(item, res['task'])
-                        else:
-                            self.process_result(result, res['task'])
-                    except Exception, ex:
-                        self.error_handler(handler_name, ex, res['task'])
-                else:
-                    if self.network_try_limit:
-                        task = res['task']
-                        task.grab = res['grab_original']
-                        result = self.add_task(task)
-                        if not result:
-                            self.add_item('too-many-network-tries',
-                                          res['task'].url)
-                    if res['ok']:
-                        res['emsg'] = 'HTTP %s' % res['grab'].response.code
-                    self.inc_count('network-error-%s' % res['emsg'][:20])
-                    logging.error(res['emsg'])
-                    # TODO: allow to write error handlers
+                self.execute_response_handler(res, handler)
 
         # This code is executed when main cycles is breaked
         self.shutdown()
+
+    def execute_response_handler(self, res, handler):
+        if res['ok'] and (res['grab'].response.code < 400 or
+                          res['grab'].response.code == 404):
+            try:
+                result = handler(res['grab'], res['task'])
+                if isinstance(result, types.GeneratorType):
+                    for item in result:
+                        self.process_result(item, res['task'])
+                else:
+                    self.process_result(result, res['task'])
+            except Exception, ex:
+                self.error_handler(handler_name, ex, res['task'])
+        else:
+            # Log the error
+            if res['ok']:
+                res['emsg'] = 'HTTP %s' % res['grab'].response.code
+            self.inc_count('network-error-%s' % res['emsg'][:20])
+            logging.error(res['emsg'])
+
+            # Try to repeat the same network query
+            if self.network_try_limit > 0:
+                task = res['task']
+                task.grab = res['grab_original']
+                self.add_task(task)
+            # TODO: allow to write error handlers
+
     
     def process_result(self, result, task):
         """
@@ -305,15 +275,7 @@ class Spider(object):
         Stop the task which was executed too many times.
         """
 
-        if task.task_try_count > self.task_try_limit:
-            logging.debug('Task tries ended: %s / %s' % (task.name, task.url))
-            return False
-        elif task.network_try_count >= self.network_try_limit:
-            logging.debug('Network tries ended: %s / %s' % (task.name, task.url))
-            return False
-        else:
-            self.taskq.put((task.priority, task))
-            return True
+        self.taskq.put((task.priority, task))
 
     def data_default(self, item):
         """
@@ -375,7 +337,18 @@ class Spider(object):
                         if task.task_try_count == 0:
                             task.task_try_count = 1
 
-                        #import pdb; pdb.set_trace()
+                        if task.task_try_count > self.task_try_limit:
+                            logging.debug('Task tries ended: %s / %s' % (
+                                          task.name, task.url))
+                            self.add_item('too-many-task-tries', task.url)
+                            continue
+                        
+                        if task.network_try_count > self.network_try_limit:
+                            logging.debug('Network tries ended: %s / %s' % (
+                                          task.name, task.url))
+                            self.add_item('too-many-network-tries', task.url)
+                            continue
+
                         if task.grab:
                             grab = task.grab
                         else:
@@ -386,16 +359,14 @@ class Spider(object):
                         if self.use_cache:
                             if grab.detect_request_method() == 'GET':
                                 url = grab.config['url']
-                                cache_item = self.cache.find_one({'_id': url})
-                                if cache_item:
-                                #if url in self.cache:
-                                    #cache_item = pickle.loads(self.cache[url])
+                                #cache_item = self.mongo.cache.find_one({'_id': url})
+                                if url in self.cache:
+                                    cache_item = self.cache[url] 
                                     logging.debug('From cache: %s' % url)
                                     cached_request = (grab, grab.clone(),
                                                       task, cache_item)
                                     grab.prepare_request()
                                     self.inc_count('request-cache')
-
                                     # break from prepre-request cycle
                                     # and go to process-response code
                                     break
@@ -485,21 +456,21 @@ class Spider(object):
         if ok and self.use_cache and grab.request_method == 'GET':
             if grab.response.code < 400 or grab.response.code == 404:
                 item = {
-                    '_id': task.url,
+                    #'_id': task.url,
                     'url': task.url,
-                    'body': grab.response.unicode_body().encode('utf-8'),
+                    'body': grab.response.unicode_body(),#.encode('utf-8'),
                     'head': grab.response.head,
                     'response_code': grab.response.code,
                     'cookies': grab.response.cookies,
                 }
                 try:
                     #self.mongo.cache.save(item, safe=True)
-                    self.cache.save(item, safe=True)
+                    self.cache[task.url] = item
                 except Exception, ex:
                     if 'document too large' in unicode(ex):
                         pass
                     else:
-                        import pdb; pdb.set_trace()
+                        raise
 
         return {'ok': ok, 'grab': grab, 'grab_original': grab_original,
                 'task': task,
@@ -512,7 +483,6 @@ class Spider(object):
         """
 
         logging.debug('Job done!')
-        #self.tracker.stats.print_summary()
 
     def inc_count(self, key, display=False, count=1):
         """
@@ -610,33 +580,17 @@ class Spider(object):
             #pdb.post_mortem(tb)
             import pdb; pdb.set_trace()
 
-    # TODO: remove
-    #def generate_tasks(self, init):
-        #"""
-        #Create new tasks.
-
-        #This method is called on each step of main run cycle and
-        #at Spider initialization.
-
-        #initi is True only for call on Spider initialization stage
-        #"""
-
-        #pass
-
-    def task_generator(self):
+    def generate_tasks(self, init):
         """
-        You can override this method to load new tasks smoothly.
+        Create new tasks.
 
-        It will be used each time as number of tasks
-        in task queue is less then number of threads multiplied on 1.5
-        This allows you to not overload all free memory if total number of
-        tasks is big.
+        This method is called on each step of main run cycle and
+        at Spider initialization.
+
+        initi is True only for call on Spider initialization stage
         """
 
-        if False:
-            # Some magic to make this function generator
-            yield ':-)'
-        return
+        pass
 
     def _preprocess_task(self, task):
         """
@@ -658,23 +612,3 @@ class Spider(object):
                 return False
         else:
             return task
-
-    def process_task_generator(self):
-        """
-        Load new tasks from `self.task_generator_object`
-        Create new tasks.
-
-        If task queue size is less than some value
-        then load new tasks from tasks file.
-        """
-
-        qsize = self.taskq.qsize()
-        new_count = 0
-        min_limit = int(self.thread_number * 1.5)
-        if qsize < min_limit:
-            try:
-                for x in xrange(min_limit - qsize):
-                    self.add_task(self.task_generator_object.next())
-                    new_count += 1
-            except StopIteration:
-                self.task_generator_enabled = False
