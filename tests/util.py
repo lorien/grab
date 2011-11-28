@@ -18,6 +18,8 @@ RESPONSE_ONCE_HEADERS = []
 # into global REQUEST variable
 REQUEST = {'get': None, 'post': None, 'headers': None}
 
+SLEEP = {'get': 0, 'post': 0}
+
 class FakeServerThread(threading.Thread):
     def __init__(self, *args, **kwargs):
         super(FakeServerThread, self).__init__(*args, **kwargs)
@@ -37,6 +39,7 @@ class FakeServerThread(threading.Thread):
                 Reponse body contains content from ``RESPONSE['get']``
                 """
 
+                time.sleep(SLEEP['get'])
                 if RESPONSE['once_code']:
                     self.send_response(RESPONSE['once_code'])
                     RESPONSE['once_code'] = None
@@ -57,6 +60,7 @@ class FakeServerThread(threading.Thread):
                 pass
 
             def do_POST(self):
+                time.sleep(SLEEP['post'])
                 post_size = int(self.headers.getheader('content-length'))
                 REQUEST['post'] = self.rfile.read(post_size)
                 REQUEST['headers'] = self.headers

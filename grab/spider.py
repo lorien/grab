@@ -127,7 +127,10 @@ class Spider(object):
         self.items = {}
         self.task_try_limit = task_try_limit
         self.network_try_limit = network_try_limit
-        self.generate_tasks(init=True)
+        #self.generate_tasks(init=True)
+        self.task_generator_object = self.task_generator()
+        self.task_generator_enabled = True
+        self.process_task_generator()
         try:
             signal.signal(signal.SIGUSR1, self.sigusr1_handler)
         except AttributeError:
@@ -220,7 +223,9 @@ class Spider(object):
             if res is None:
                 break
 
-            self.generate_tasks(init=False)
+            #self.generate_tasks(init=False)
+            if self.task_generator_enabled:
+                self.process_task_generator()
 
             # Increase task counters
             self.inc_count('task')
@@ -370,6 +375,7 @@ class Spider(object):
                         if task.task_try_count == 0:
                             task.task_try_count = 1
 
+                        #import pdb; pdb.set_trace()
                         if task.grab:
                             grab = task.grab
                         else:
@@ -604,17 +610,33 @@ class Spider(object):
             #pdb.post_mortem(tb)
             import pdb; pdb.set_trace()
 
-    def generate_tasks(self, init):
+    # TODO: remove
+    #def generate_tasks(self, init):
+        #"""
+        #Create new tasks.
+
+        #This method is called on each step of main run cycle and
+        #at Spider initialization.
+
+        #initi is True only for call on Spider initialization stage
+        #"""
+
+        #pass
+
+    def task_generator(self):
         """
-        Create new tasks.
+        You can override this method to load new tasks smoothly.
 
-        This method is called on each step of main run cycle and
-        at Spider initialization.
-
-        initi is True only for call on Spider initialization stage
+        It will be used each time as number of tasks
+        in task queue is less then number of threads multiplied on 1.5
+        This allows you to not overload all free memory if total number of
+        tasks is big.
         """
 
-        pass
+        if False:
+            # Some magic to make this function generator
+            yield ':-)'
+        return
 
     def _preprocess_task(self, task):
         """
@@ -636,3 +658,23 @@ class Spider(object):
                 return False
         else:
             return task
+
+    def process_task_generator(self):
+        """
+        Load new tasks from `self.task_generator_object`
+        Create new tasks.
+
+        If task queue size is less than some value
+        then load new tasks from tasks file.
+        """
+
+        qsize = self.taskq.qsize()
+        new_count = 0
+        min_limit = int(self.thread_number * 1.5)
+        if qsize < min_limit:
+            try:
+                for x in xrange(min_limit - qsize):
+                    self.add_task(self.task_generator_object.next())
+                    new_count += 1
+            except StopIteration:
+                self.task_generator_enabled = False
