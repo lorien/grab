@@ -269,6 +269,9 @@ class CurlTransportExtension(object):
                      self.request_method, self.config['url'], proxy_info))
 
         if self.config['encoding']:
+            if 'gzip' in self.config['encoding'] and not 'zlib' in pycurl.version:
+                raise GrabMisuseError('You can not use gzip encoding because '\
+                                      'pycurl was built without zlib support')
             self.curl.setopt(pycurl.ENCODING, self.config['encoding'])
 
         if self.config['userpwd']:
