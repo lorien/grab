@@ -10,6 +10,7 @@ RE_REFRESH_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']*Refresh[^>]+', re
 RE_REFRESH_URL = re.compile(r'url=["\']*([^\'"> ]+)', re.I)
 RE_ENTITY = re.compile(r'(&[a-z]+;)')
 RE_NUM_ENTITY = re.compile(r'(&#\d+;)')
+RE_BASE_URL = re.compile(r'<base[^>]+href\s*=["\']*([^\'"> ]+)', re.I)
 
 def decode_entities(html):
     """
@@ -66,3 +67,17 @@ def find_refresh_url(html):
         if match:
             return match.group(1)
     return None
+
+
+def find_base_url(html):
+    """
+    Find url of <base> tag.
+    """
+
+    html = decode_entities(html)
+
+    match = RE_BASE_URL.search(html)
+    if match:
+        return match.group(1)
+    else:
+        return None

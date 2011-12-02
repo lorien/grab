@@ -22,7 +22,7 @@ import time
 import re
 
 from proxylist import ProxyList
-from tools.html import find_refresh_url
+from tools.html import find_refresh_url, find_base_url
 from response import Response
 
 from error import GrabError, GrabNetworkError, GrabMisuseError, DataNotFound
@@ -638,12 +638,16 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
             raise GrabMisuseError('normalize_unicode method accepts only unicode values')
         return value.encode(self.charset if charset is None else charset, 'ignore')
 
-    def make_url_absolute(self, url):
+    def make_url_absolute(self, url, resolve_base=False):
         """
         Make url absolute using previous request url as base url.
         """
 
         if self.config['url']:
+            if resolve_base:
+                base_url = find_base_url(self.response.unicode_body())
+                if base_url:
+                    return urljoin(base_url, url)
             return urljoin(self.config['url'], url)
         else:
             return url

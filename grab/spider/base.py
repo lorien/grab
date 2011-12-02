@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from Queue import PriorityQueue, Empty
 import pycurl
 from grab import Grab
@@ -9,80 +10,23 @@ import time
 import signal
 import json
 import cPickle as pickle
-#from guppy import hpy
-#hp = hpy()
-#hp.setrelheap()
 import anydbm
+import multiprocessing
+import zlib
+from pymongo.binary import Binary
 
-class SpiderError(Exception):
-    "Base class for Spider exceptions"
+from .error import SpiderError, SpiderMisuseError
+from .task import Task
+from .data import Data
+from . import setup_pickle
 
-
-class SpiderMisuseError(SpiderError):
-    "Improper usage of Spider framework"
-
-
-class Task(object):
-    """
-    Task for spider.
-    """
-
-    def __init__(self, name, url=None, grab=None, priority=100,
-                 network_try_count=0, task_try_count=0, **kwargs):
-        self.name = name
-        if url is None and grab is None:
-            raise SpiderMisuseError('Either url of grab option of '\
-                                    'Task should be not None')
-        self.url = url
-        self.grab = grab
-        self.priority = priority
-        if self.grab:
-            self.url = grab.config['url']
-        self.network_try_count = network_try_count
-        self.task_try_count = task_try_count
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-    def get(self, key):
-        """
-        Return value of attribute or None if such attribute
-        does not exist.
-        """
-        return getattr(self, key, None)
-
-    def clone(self, **kwargs):
-        """
-        Clone Task instance.
-
-        Reset network_try_count, increase task_try_count.
-        Also reset grab property
-        TODO: maybe do not reset grab
-        """
-
-        task = Task(self.name, self.url)
-
-        for key, value in self.__dict__.items():
-            if key != 'grab':
-                setattr(task, key, getattr(self, key))
-
-        task.network_try_count = 0
-        task.task_try_count += 1
-        task.grab = None
-
-        for key, value in kwargs.items():
-            setattr(task, key, value)
-
-        return task
-
-
-class Data(object):
-    """
-    Task handlers return result wrapped in the Data class.
-    """
-
-    def __init__(self, name, item):
-        self.name = name
-        self.item = item
+def execute_handler(handler, handler_name, res_count, queue,
+                    grab, task):
+    try:
+        res = handler(grab, task)
+        queue.put((res_count, handler_name, res))
+    except Exception, ex:
+        return {'error': ex}
 
 
 class Spider(object):
@@ -97,11 +41,13 @@ class Spider(object):
 
     def __init__(self, thread_number=3, request_limit=None,
                  network_try_limit=10, task_try_limit=10,
-                 debug_error=False, use_cache=False,
+                 debug_error=False,
+                 use_cache=False,
+                 use_cache_compression=False,
                  cache_db = None,
-                 cache_path='var/cache.db',
                  log_taskname=False,
-                 use_pympler=False):
+                 distributed_mode=False,
+                 handlers=None):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -116,6 +62,11 @@ class Spider(object):
             of some other physical error
             but task_try_limit limits the number of attempts which
             are scheduled manually in the spider business logic
+        * distributed_mode - if True then multiprocessing module
+            will be used to share task handlers among available CPU cores
+            If True then you should specifiy the `handlers` arguments which
+            should be a module which contains task handler as top level
+            functions
         """
 
         self.taskq = PriorityQueue()
@@ -136,31 +87,23 @@ class Spider(object):
             pass
         self.debug_error = debug_error
         self.use_cache = use_cache
-        #self.mongo_dbname = mongo_dbname
-        self.cache_path = cache_path
         self.cache_db = cache_db
+        self.use_cache_compression = use_cache_compression
         if use_cache:
             self.setup_cache()
         self.log_taskname = log_taskname
         self.prepare()
-        self.use_pympler = use_pympler
-
-        #if self.use_pympler:
-            #from pympler import tracker
-            #self.tracker = tracker.SummaryTracker()
-            #self.tracker.print_diff()
+        self.distributed_mode = distributed_mode
+        if handlers:
+            self.handlers = handlers
+        else:
+            self.handlers = self
 
     def setup_cache(self):
         import pymongo
         if not self.cache_db:
             raise Exception('You should configure cache_db option')
         self.cache = pymongo.Connection()[self.cache_db]['cache']
-        #from tcdb import hdb 
-        #import tc
-        #self.cache = hdb.HDB()
-        #self.cache = tc.HDB()
-        #self.cache.open(self.cache_path, tc.HDBOWRITER | tc.HDBOCREAT | tc.HDBOTRUNC)
-        #self.cache = anydbm.open(self.cache_path, 'c')
 
     def prepare(self):
         """
@@ -209,7 +152,15 @@ class Spider(object):
         self.start_time = time.time()
         self.load_initial_urls()
 
-        for res in self.fetch():
+        # new
+        if self.distributed_mode:
+            pool = multiprocessing.Pool()
+            manager = multiprocessing.Manager()
+            queue = manager.Queue()
+            mapping = {}
+            multi_requests = []
+
+        for res_count, res in enumerate(self.fetch()):
             if res is None:
                 break
 
@@ -228,17 +179,84 @@ class Spider(object):
 
             handler_name = 'task_%s' % res['task'].name
             try:
-                handler = getattr(self, handler_name)
+                handler = getattr(self.handlers, handler_name)
             except AttributeError:
                 raise Exception('Task handler does not exist: %s' %\
                                 handler_name)
             else:
-                self.execute_response_handler(res, handler, handler_name)
+                if self.distributed_mode:
+                    self.execute_response_handler_async(
+                        res, handler, handler_name, mapping,
+                        res_count, multi_requests, queue, pool)
+                else:
+                    self.execute_response_handler_sync(res, handler, handler_name)
+
+            if self.distributed_mode:
+                try:
+                    res_count, handler_name, task_result = queue.get(False)
+                except Empty:
+                    pass
+                else:
+                    res = mapping[res_count]
+                    if isinstance(task_result, dict) and 'error' in task_result:
+                        self.error_handler(handler_name, task_result['error'],
+                                           res['task'])
+                    else:
+                        self.process_result(task_result, res['task'])
+                    #import pdb; pdb.set_trace()
+                    #res['grab']._lxml_tree = tree
+                    #print tree.xpath('//h1')
+                    #self.execute_response_handler(res, handler, handler_name)
+                    del mapping[res_count]
+                multi_requests = [x for x in multi_requests if not x.ready()]
+
+        #if self.distributed_mode:
+        # new
+        #while True:
+            #try:
+                #res_count, tree = queue.get(True, 0.1)
+            #except Empty:
+                #multi_requests = [x for x in multi_requests if not x.ready()]
+                #if not len(multi_requests):
+                    #break
+            #else:
+                #res = mapping[res_count]
+                ##res['grab']._lxml_tree = tree
+                #self.execute_response_handler(res, handler, handler_name)
+                #del mapping[res_count]
+
 
         # This code is executed when main cycles is breaked
         self.shutdown()
 
-    def execute_response_handler(self, res, handler, handler_name):
+
+    def execute_response_handler_async(self, res, handler, handler_name,
+                                       mapping, res_count, multi_requests,
+                                       queue, pool):
+        if res['ok'] and (res['grab'].response.code < 400 or
+                          res['grab'].response.code == 404):
+            mapping[res_count] = res
+            res['grab'].curl = None
+            res['grab_original'].curl = None
+            multi_request = pool.apply_async(
+                execute_handler, (handler, handler_name, res_count,
+                                  queue, res['grab'], res['task']))
+            multi_requests.append(multi_request)
+        else:
+            # Log the error
+            if res['ok']:
+                res['emsg'] = 'HTTP %s' % res['grab'].response.code
+            self.inc_count('network-error-%s' % res['emsg'][:20])
+            logging.error(res['emsg'])
+
+            # Try to repeat the same network query
+            if self.network_try_limit > 0:
+                task = res['task']
+                task.grab = res['grab_original']
+                self.add_task(task)
+            # TODO: allow to write error handlers
+
+    def execute_response_handler_sync(self, res, handler, handler_name):
         if res['ok'] and (res['grab'].response.code < 400 or
                           res['grab'].response.code == 404):
             try:
@@ -392,7 +410,7 @@ class Spider(object):
                                 if cache_item:
                                 #if url in self.cache:
                                     #cache_item = pickle.loads(self.cache[url])
-                                    #logging.debug('From cache: %s' % url)
+                                    logging.debug('From cache: %s' % url)
                                     cached_request = (grab, grab.clone(),
                                                       task, cache_item)
                                     grab.prepare_request()
@@ -429,9 +447,13 @@ class Spider(object):
                 url = task.url# or grab.config['url']
                 grab.fake_response(cache_item['body'])
 
+                if self.use_cache_compression:
+                    body = zlib.decompress(cache_item['body']) 
+                else:
+                    body = cache_item['body'].encode('utf-8')
                 def custom_prepare_response(g):
                     g.response.head = cache_item['head'].encode('utf-8')
-                    g.response.body = cache_item['body'].encode('utf-8')
+                    g.response.body = body
                     g.response.code = cache_item['response_code']
                     g.response.time = 0
                     g.response.url = cache_item['url']
@@ -486,14 +508,20 @@ class Spider(object):
 
         if ok and self.use_cache and grab.request_method == 'GET' and not task.get('disable_cache'):
             if grab.response.code < 400 or grab.response.code == 404:
+                utf_body = grab.response.unicode_body().encode('utf-8')
+                if self.use_cache_compression:
+                    body = Binary(zlib.compress(utf_body))
+                else:
+                    body = utf_body
                 item = {
                     '_id': task.url,
                     'url': task.url,
-                    'body': grab.response.unicode_body().encode('utf-8'),
+                    'body': body,
                     'head': grab.response.head,
                     'response_code': grab.response.code,
                     'cookies': grab.response.cookies,
                 }
+                #import pdb; pdb.set_trace()
                 try:
                     #self.mongo.cache.save(item, safe=True)
                     self.cache.save(item, safe=True)
@@ -680,3 +708,4 @@ class Spider(object):
                     new_count += 1
             except StopIteration:
                 self.task_generator_enabled = False
+

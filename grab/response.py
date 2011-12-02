@@ -30,6 +30,7 @@ class Response(object):
         self.cookies = {}
         self.cookiejar = None
         self.charset = 'utf-8'
+        self._unicode_body = None
 
     def parse(self, charset=None):
         """
@@ -59,6 +60,8 @@ class Response(object):
             self.detect_charset()
         else:
             self.charset = charset
+
+        self._unicode_body = None
 
     def info(self):
         """
@@ -129,12 +132,14 @@ class Response(object):
         Return response body as unicode string.
         """
 
-        if ignore_errors:
-            errors = 'ignore'
-        else:
-            errors = 'strict'
-        ubody = self.body.decode(self.charset, errors)
-        return RE_XML_DECLARATION.sub('', ubody)
+        if not self._unicode_body:
+            if ignore_errors:
+                errors = 'ignore'
+            else:
+                errors = 'strict'
+            ubody = self.body.decode(self.charset, errors)
+            self._unicode_body = RE_XML_DECLARATION.sub('', ubody)
+        return self._unicode_body
 
     def copy(self):
         """
@@ -144,7 +149,7 @@ class Response(object):
         obj = Response()
 
         copy_keys = ('status', 'code', 'head', 'body', 'time',
-                     'url', 'charset')
+                     'url', 'charset', '_unicode_body')
         for key in copy_keys:
             setattr(obj, key, getattr(self, key))
 

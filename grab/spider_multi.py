@@ -1,4 +1,4 @@
-# MIND HELL
+1/0
 from Queue import PriorityQueue, Empty
 import pycurl
 from grab import Grab
@@ -14,161 +14,19 @@ import cPickle as pickle
 #hp = hpy()
 #hp.setrelheap()
 import anydbm
-
-def h2(grab, task):
-    try:
-        print task.url
-        album = {}
-        try:
-            album['title'] = grab.css_text('h1.title')
-        except IndexError:
-            return
-        album['_id'] = getid(task.url)
-        album['url'] = grab.css('h3.corrections a').get('href').replace('/corrections', '')
-
-        try:
-            artist_url = grab.xpath(
-                '//h3[contains(text(), "Artist")]/following-sibling::p/a').get('href')
-        except IndexError:
-            # Ignore album without specific artist
-            return
-        album['artist'] = getid(artist_url)
-
-        try:
-            album['release_date'] = grab.xpath_text(
-                '//h3[contains(text(), "Release Date")]/following-sibling::p')
-        except IndexError:
-            album['release_date'] = ''
-        #db.album.save(album)
-
-        tracks = []
-        for elem in grab.css_list('#trlink'):
-            track = {}
-            try:
-                link = elem.xpath('./td[5]/a')[0]
-                track['_id'] = getid(link.get('href'))
-                track['title'] = link.text_content()
-            except IndexError, ex:
-                continue
-            track['time'] = elem.xpath('./td[7]')[0].text_content()
-            track['number'] = elem.xpath('./td[3]')[0].text_content()
-            track['album'] = album['_id']
-            #db.track.save(track)
-            tracks.append(track)
-
-        return Data('album', {'album': album, 'tracks': tracks})
-    except Exception, ex:
-        self.add_item('album-fatal-error', task.url)
-
-def execute_response_handler_async(qu, res, handler, handler_name):
-    try:
-        qu.put(h2(res['grab'], res['task']))
-    except Exception, ex:
-        try:
-            qu.put({'error': (handler_name, ex, res['task'])})
-        except Exception, ex:
-            print ex
-        #self.error_handler(handler_name, ex, res['task'])
-
-# MULTI IMPORTS
-from multiprocessing import Manager, Pool
 import multiprocessing
-import time
-import random
 from Queue import Empty
-from grab import Grab
-import logging
+from lxml.html import fromstring
 
-def _pickle_method(method):
-    func_name = method.im_func.__name__
-    obj = method.im_self
-    cls = method.im_class
-    return _unpickle_method, (func_name, obj, cls)
+def execute_handler(handler, handler_name, res_count, queue,
+                    grab, task):
+    try:
+        res = handler(grab, task)
+        queue.put((res_count, handler_name, res))
+    except Exception, ex:
+        return {'error': ex}
 
-def _unpickle_method(func_name, obj, cls):
-    for cls in cls.mro():
-        try:
-            func = cls.__dict__[func_name]
-        except KeyError:
-            pass
-        else:
-            break
-    return func.__get__(obj, cls)
-
-import copy_reg
-import types
-copy_reg.pickle(types.MethodType, _pickle_method, _unpickle_method)
-
-class SpiderError(Exception):
-    "Base class for Spider exceptions"
-
-
-class SpiderMisuseError(SpiderError):
-    "Improper usage of Spider framework"
-
-
-class Task(object):
-    """
-    Task for spider.
-    """
-
-    def __init__(self, name, url=None, grab=None, priority=100,
-                 network_try_count=0, task_try_count=0, **kwargs):
-        self.name = name
-        if url is None and grab is None:
-            raise SpiderMisuseError('Either url of grab option of '\
-                                    'Task should be not None')
-        self.url = url
-        self.grab = grab
-        self.priority = priority
-        if self.grab:
-            self.url = grab.config['url']
-        self.network_try_count = network_try_count
-        self.task_try_count = task_try_count
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-    def get(self, key):
-        """
-        Return value of attribute or None if such attribute
-        does not exist.
-        """
-        return getattr(self, key, None)
-
-    def clone(self, **kwargs):
-        """
-        Clone Task instance.
-
-        Reset network_try_count, increase task_try_count.
-        Also reset grab property
-        TODO: maybe do not reset grab
-        """
-
-        task = Task(self.name, self.url)
-
-        for key, value in self.__dict__.items():
-            if key != 'grab':
-                setattr(task, key, getattr(self, key))
-
-        task.network_try_count = 0
-        task.task_try_count += 1
-        task.grab = None
-
-        for key, value in kwargs.items():
-            setattr(task, key, value)
-
-        return task
-
-
-class Data(object):
-    """
-    Task handlers return result wrapped in the Data class.
-    """
-
-    def __init__(self, name, item):
-        self.name = name
-        self.item = item
-
+from spider import SpiderError, SpiderMisuseError, Task, Data
 
 class Spider(object):
     """
@@ -186,7 +44,8 @@ class Spider(object):
                  cache_db = None,
                  cache_path='var/cache.db',
                  log_taskname=False,
-                 use_pympler=False):
+                 use_pympler=False,
+                 module=None):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -228,7 +87,7 @@ class Spider(object):
             self.setup_cache()
         self.log_taskname = log_taskname
         self.prepare()
-        self.use_pympler = use_pympler
+        self.module = module
 
         #if self.use_pympler:
             #from pympler import tracker
@@ -294,12 +153,14 @@ class Spider(object):
         self.start_time = time.time()
         self.load_initial_urls()
 
-        pool = Pool(4)
-        manager = Manager()
-        qu = manager.Queue()
-        results = []
+        # new
+        pool = multiprocessing.Pool(1)
+        manager = multiprocessing.Manager()
+        queue = manager.Queue()
+        mapping = {}
+        multi_requests = []
 
-        for res in self.fetch():
+        for res_count, res in enumerate(self.fetch()):
             if res is None:
                 break
 
@@ -318,68 +179,100 @@ class Spider(object):
 
             handler_name = 'task_%s' % res['task'].name
             try:
-                handler = getattr(self, handler_name)
+                handler = getattr(self.module, handler_name)
             except AttributeError:
                 raise Exception('Task handler does not exist: %s' %\
                                 handler_name)
             else:
-                #self.execute_response_handler(res, handler, handler_name)
+                # new
+
                 if res['ok'] and (res['grab'].response.code < 400 or
                                   res['grab'].response.code == 404):
+                    mapping[res_count] = res
                     res['grab'].curl = None
                     res['grab_original'].curl = None
-                    result = pool.apply_async(execute_response_handler_async,
-                                              [qu, res, None, handler_name])
-                    results.append(result)
-
-            while True:
-                try:
-                    r = qu.get(True, 0.1)
-                except Empty:
-                    break
+                    multi_request = pool.apply_async(
+                        execute_handler, (handler, handler_name, res_count,
+                                          queue, res['grab'], res['task']))
+                    multi_requests.append(multi_request)
                 else:
-                    if isinstance(r, dict) and 'error' in r:
-                        print self.error_handler(*r['error'])
-                    else:
-                        print self.process_result(r, res['task'])
-                    #process_response_handler_async(r)
+                    # Log the error
+                    if res['ok']:
+                        res['emsg'] = 'HTTP %s' % res['grab'].response.code
+                    self.inc_count('network-error-%s' % res['emsg'][:20])
+                    logging.error(res['emsg'])
+
+                    # Try to repeat the same network query
+                    if self.network_try_limit > 0:
+                        task = res['task']
+                        task.grab = res['grab_original']
+                        self.add_task(task)
+                    # TODO: allow to write error handlers
+
+
+                #self.execute_response_handler(res, handler, handler_name)
+
+            try:
+                res_count, handler_name, task_result = queue.get(False)
+            except Empty:
+                pass
+            else:
+                res = mapping[res_count]
+                if isinstance(task_result, dict) and 'error' in task_result:
+                    self.error_handler(handler_name, task_result['error'],
+                                       res['task'])
+                else:
+                    self.process_result(task_result, res['task'])
+                #import pdb; pdb.set_trace()
+                #res['grab']._lxml_tree = tree
+                #print tree.xpath('//h1')
+                #self.execute_response_handler(res, handler, handler_name)
+                del mapping[res_count]
+            multi_requests = [x for x in multi_requests if not x.ready()]
+
+        # new
+        #while True:
+            #try:
+                #res_count, tree = queue.get(True, 0.1)
+            #except Empty:
+                #multi_requests = [x for x in multi_requests if not x.ready()]
+                #if not len(multi_requests):
+                    #break
+            #else:
+                #res = mapping[res_count]
+                ##res['grab']._lxml_tree = tree
+                #self.execute_response_handler(res, handler, handler_name)
+                #del mapping[res_count]
+
 
         # This code is executed when main cycles is breaked
         self.shutdown()
 
-    @staticmethod
-    def execute_response_handler_async(self, res, handler, handler_name):
-        try:
-            return handler(res['grab'], res['task'])
-        except Exception, ex:
-            return {'error': (handler_name, ex, res['task'])}
-            #self.error_handler(handler_name, ex, res['task'])
+    def execute_response_handler(self, res, handler, handler_name):
+        if res['ok'] and (res['grab'].response.code < 400 or
+                          res['grab'].response.code == 404):
+            try:
+                result = handler(res['grab'], res['task'])
+                if isinstance(result, types.GeneratorType):
+                    for item in result:
+                        self.process_result(item, res['task'])
+                else:
+                    self.process_result(result, res['task'])
+            except Exception, ex:
+                self.error_handler(handler_name, ex, res['task'])
+        else:
+            # Log the error
+            if res['ok']:
+                res['emsg'] = 'HTTP %s' % res['grab'].response.code
+            self.inc_count('network-error-%s' % res['emsg'][:20])
+            logging.error(res['emsg'])
 
-    #def execute_response_handler(self, res, handler, handler_name):
-        #if res['ok'] and (res['grab'].response.code < 400 or
-                          #res['grab'].response.code == 404):
-            #try:
-                #result = handler(res['grab'], res['task'])
-                #if isinstance(result, types.GeneratorType):
-                    #for item in result:
-                        #self.process_result(item, res['task'])
-                #else:
-                    #self.process_result(result, res['task'])
-            #except Exception, ex:
-                #self.error_handler(handler_name, ex, res['task'])
-        #else:
-            ## Log the error
-            #if res['ok']:
-                #res['emsg'] = 'HTTP %s' % res['grab'].response.code
-            #self.inc_count('network-error-%s' % res['emsg'][:20])
-            #logging.error(res['emsg'])
-
-            ## Try to repeat the same network query
-            #if self.network_try_limit > 0:
-                #task = res['task']
-                #task.grab = res['grab_original']
-                #self.add_task(task)
-            ## TODO: allow to write error handlers
+            # Try to repeat the same network query
+            if self.network_try_limit > 0:
+                task = res['task']
+                task.grab = res['grab_original']
+                self.add_task(task)
+            # TODO: allow to write error handlers
     
     def process_result(self, result, task):
         """
@@ -797,3 +690,4 @@ class Spider(object):
                     new_count += 1
             except StopIteration:
                 self.task_generator_enabled = False
+
