@@ -1,6 +1,7 @@
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 import threading
 import time
+import os.path
 
 # The port on which the fake http server listens requests
 FAKE_SERVER_PORT = 9876
@@ -19,6 +20,17 @@ RESPONSE_ONCE_HEADERS = []
 REQUEST = {'get': None, 'post': None, 'headers': None}
 
 SLEEP = {'get': 0, 'post': 0}
+
+TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+TMP_DIR = os.path.join(TEST_DIR, 'tmp')
+
+def prepare_temp_dir():
+    if not os.path.exists(TMP_DIR):
+        os.mkdir(TMP_DIR)
+    else:
+        for fname in os.listdir(TMP_DIR):
+            os.unlink(os.path.join(TMP_DIR, fname))
+    return TMP_DIR
 
 class FakeServerThread(threading.Thread):
     def __init__(self, *args, **kwargs):

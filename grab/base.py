@@ -545,8 +545,7 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
                 #fext = dirs[-1].split('.')[-1]
                 
             fname = os.path.join(self.config['log_dir'], '%02d%s.%s' % (self.request_counter, tname, fext))
-            with open(fname, 'w') as out:
-                out.write(self.response.body)
+            self.response.save(out)
 
     def urlencode(self, items):
         """

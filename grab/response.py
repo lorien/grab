@@ -164,5 +164,5 @@ class Response(object):
         Save response body to file.
         """
 
-        with open(path, 'w') as out:
+        with open(path, 'wb') as out:
             out.write(self.body)
