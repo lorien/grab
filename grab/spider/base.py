@@ -14,6 +14,7 @@ import anydbm
 import multiprocessing
 import zlib
 from pymongo.binary import Binary
+from hashlib import sha1
 
 from .error import SpiderError, SpiderMisuseError
 from .task import Task
@@ -46,6 +47,7 @@ class Spider(object):
                  use_cache_compression=False,
                  cache_db = None,
                  log_taskname=False,
+                 cache_key_hash=True,
                  distributed_mode=False,
                  handlers=None):
         """
@@ -98,6 +100,7 @@ class Spider(object):
             self.handlers = handlers
         else:
             self.handlers = self
+        self.cache_key_hash = self.cache_key_hash
 
     def setup_cache(self):
         import pymongo
@@ -406,7 +409,11 @@ class Spider(object):
                         if self.use_cache and not task.get('disable_cache'):
                             if grab.detect_request_method() == 'GET':
                                 url = grab.config['url']
-                                cache_item = self.cache.find_one({'_id': url})
+                                if self.cache_key_hash:
+                                    url_hash = sha1(url).hexdigest()
+                                else:
+                                    url_hash = url
+                                cache_item = self.cache.find_one({'_id': url_hash})
                                 if cache_item:
                                 #if url in self.cache:
                                     #cache_item = pickle.loads(self.cache[url])
@@ -514,7 +521,7 @@ class Spider(object):
                 else:
                     body = utf_body
                 item = {
-                    '_id': task.url,
+                    '_id': sha1(task.url).hexdigest() if self.cache_key_hash else task.url,
                     'url': task.url,
                     'body': body,
                     'head': grab.response.head,
