@@ -100,7 +100,7 @@ class Spider(object):
             self.handlers = handlers
         else:
             self.handlers = self
-        self.cache_key_hash = self.cache_key_hash
+        self.cache_key_hash = cache_key_hash
 
     def setup_cache(self):
         import pymongo
