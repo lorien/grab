@@ -4,7 +4,7 @@ The Response class is the result of network request maden with Grab instance.
 import re
 from copy import copy
 import logging
-from mimetools import Message
+import email
 from StringIO import StringIO
 from cookielib import CookieJar
 from urllib2 import Request
@@ -50,7 +50,7 @@ class Response(object):
                     if ':' in line:
                         valid_lines.append(line)
 
-        self.headers = Message(StringIO('\n'.join(valid_lines)))
+        self.headers = email.message_from_string('\n'.join(valid_lines))
         #self.cookiejar = CookieJar()
         #self.cookiejar.extract_cookies(self, Request(self.url))
         #for cookie in self.cookiejar:

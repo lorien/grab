@@ -2,7 +2,7 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 from __future__ import absolute_import
-import mimetools
+import email
 import pycurl
 import logging
 import urllib
@@ -108,7 +108,7 @@ class CurlTransportExtension(object):
             self.request_head += text
             lines = text.splitlines()
             text = '\n'.join(lines[1:])
-            self.request_headers = mimetools.Message(StringIO(text))
+            self.request_headers = email.message_from_string(text)
 
         if _type == pycurl.INFOTYPE_DATA_OUT:
             self.request_body += text
