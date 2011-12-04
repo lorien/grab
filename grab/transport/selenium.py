@@ -15,11 +15,9 @@ from ..base import (GrabError, GrabMisuseError, UploadContent, UploadFile,
                     PACKAGE_DIR)
 
 logger = logging.getLogger('grab')
-DEFAULT_FIREFOX_PROFILE = os.path.join(PACKAGE_DIR, 'firefox_profile')
 
-class SplinterTransportExtension(object):
+class SeleniumTransportExtension(object):
     def extra_config(self):
-        self.config['firefox_profile'] = DEFAULT_FIREFOX_PROFILE
         self.config['xserver_display'] = 7
 
     #def extra_init(self):
@@ -86,13 +84,13 @@ class SplinterTransportExtension(object):
         Setup curl instance with values from ``self.config``.
         """
 
-        from splinter.browser import Browser
+        from selenium import webdriver
 
         display = ':%s.0' % self.config['xserver_display']
         logging.debug('Setting DISPLAY env to %s' % display)
         os.environ['DISPLAY'] = display
 
-        self.browser = Browser('firefox', profile=self.config['firefox_profile'])
+        self.browser = webdriver.Firefox()
 
         #url = self.config['url']
         if isinstance(self.config['url'], unicode):
@@ -266,19 +264,18 @@ class SplinterTransportExtension(object):
             #cookies[chunks[-2]] = chunks[-1]
         #return cookies
         cookies = {}
-        for item in self.browser.driver.get_cookies():
+        for item in self.browser.get_cookies():
             cookies[item['name']] = item['value']
         return cookies
 
 
 
     def transport_request(self):
-        from splinter.request_handler.status_code import HttpResponseError
-
         try:
-            self.browser.visit(self.config['url'])
-        except HttpResponseError, ex:
-            raise GrabError(ex.status_code, ex.reason)
+            self.browser.get(self.config['url'])
+        except Exception, ex:
+            logging.error('', exc_info=ex)
+            raise GrabError(999, 'Error =8-[ ]')
         #try:
             #self.curl.perform()
         #except pycurl.error, ex:
@@ -296,9 +293,9 @@ class SplinterTransportExtension(object):
         #self.response.body = ''.join(self.response_body_chunks)
         #self.response.parse()
         self.response.head = ''
-        self.response.body = self.browser.html.encode('utf-8')
-        self.response.url = self.browser.url
-        self.response.code = self.browser.status_code
+        self.response.body = self.browser.page_source#.encode('utf-8')
+        self.response.url = self.browser.current_url
+        self.response.code = 200# TODO: fix, self.browser.status_code
         self.response.cookies = self.extract_cookies()
         #self.response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         #self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
@@ -348,5 +345,5 @@ class SplinterTransportExtension(object):
 
 
 from ..base import BaseGrab
-class GrabSplinter(SplinterTransportExtension, BaseGrab):
+class GrabSelenium(SeleniumTransportExtension, BaseGrab):
     pass
