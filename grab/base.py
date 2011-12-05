@@ -160,7 +160,7 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
     Public methods
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, response_body=None, **kwargs):
         """
         Create Grab instance
         """
@@ -176,6 +176,8 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
         if kwargs:
             self.setup(**kwargs)
         self.clone_counter = 0
+        if response_body is not None:
+            self.fake_response(response_body)
 
     def reset(self):
         """
@@ -624,7 +626,9 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
 
             return key, value
 
-        return map(process, items)
+        items =  map(process, items)
+        items = sorted(items, key=lambda x: x[0])
+        return items
 
     def normalize_unicode(self, value, charset=None):
         """
