@@ -409,8 +409,9 @@ class Spider(object):
                         if self.use_cache and not task.get('disable_cache'):
                             if grab.detect_request_method() == 'GET':
                                 url = grab.config['url']
+                                utf_url = url.encode('utf-8') if isinstance(url, unicode) else url
                                 if self.cache_key_hash:
-                                    url_hash = sha1(url).hexdigest()
+                                    url_hash = sha1(utf_url).hexdigest()
                                 else:
                                     url_hash = url
                                 cache_item = self.cache.find_one({'_id': url_hash})
@@ -520,8 +521,10 @@ class Spider(object):
                     body = Binary(zlib.compress(utf_body))
                 else:
                     body = utf_body
+
+                utf_url = task.url.encode('utf-8') if isinstance(task.url, unicode) else task.url
                 item = {
-                    '_id': sha1(task.url).hexdigest() if self.cache_key_hash else task.url,
+                    '_id': sha1(utf_url).hexdigest() if self.cache_key_hash else task.url,
                     'url': task.url,
                     'body': body,
                     'head': grab.response.head,
