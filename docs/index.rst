@@ -16,7 +16,8 @@ scripts or for network hacking via python console.
 
 Spider interface is powered by multicurl (the asynchronous pycurl interface).
 If you need to do big number of concurrent requests then you should consider 
-to use Spider.
+to use Spider. Spider interface is very experimentail and unstable, you should not
+use it.
 
 
 Documentation
@@ -27,7 +28,6 @@ Documentation
 
     features
     grab_tutorial
-    spider_tutorial
     base_interface
     extensions/overview
     extensions/form
@@ -42,9 +42,6 @@ Documentation
 
 :doc:`grab_tutorial`
     Short lesson how to use Grab
-
-:doc:`spider_tutorial`
-    Rewriting the solution from previous tutorial with help of Spider framework
 
 :doc:`base_interface`
     Base Grab interface. The core functions.
