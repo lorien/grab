@@ -2,7 +2,8 @@
 from unittest import TestCase
 
 from grab import Grab, GrabMisuseError
-from util import FakeServerThread, BASE_URL, RESPONSE, REQUEST
+from util import (FakeServerThread, BASE_URL, RESPONSE, REQUEST,
+                  ignore_transport)
 
 class TestGrab(TestCase):
     def setUp(self):
@@ -24,16 +25,6 @@ class TestGrab(TestCase):
         g = Grab()
         self.assertRaises(GrabMisuseError,
             lambda: g.setup(save_the_word=True))
-
-    def test_nobody(self):
-        g = Grab()
-        g.setup(nobody=True)
-        g.go(BASE_URL)
-        self.assertTrue(g.response.body == '')
-
-        g.setup(nobody=False)
-        g.go(BASE_URL)
-        self.assertFalse(g.response.body == '')
 
     def test_useragent(self):
         g = Grab()
@@ -83,6 +74,26 @@ class TestGrab(TestCase):
         # User-agent should not change
         g.go(BASE_URL)
         self.assertEqual(REQUEST['headers']['user-agent'], ua)
+
+    def test_clone(self):
+        g = Grab()
+        RESPONSE['get'] = 'Blood'
+        g.go(BASE_URL)
+        self.assertEqual(g.response.body, 'Blood')
+        g2 = Grab()
+        self.assertEqual(g2.response.body, None)
+        g2 = g.clone()
+        self.assertEqual(g.response.body, 'Blood')
+    
+    def test_adopt(self):
+        g = Grab()
+        RESPONSE['get'] = 'Blood'
+        g.go(BASE_URL)
+        g2 = Grab()
+        self.assertEqual(g2.config['url'], None)
+        g2.adopt(g)
+        self.assertEqual(g2.response.body, 'Blood')
+        self.assertEqual(g2.config['url'], BASE_URL)
 
     def test_find_content_blocks(self):
         porno = u'порно ' * 100

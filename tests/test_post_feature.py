@@ -2,7 +2,7 @@
 from unittest import TestCase
 
 from grab import Grab, GrabMisuseError
-from util import FakeServerThread, BASE_URL, REQUEST
+from util import FakeServerThread, BASE_URL, REQUEST, ignore_transport
 
 class TestPostFeature(TestCase):
     def setUp(self):
@@ -45,6 +45,10 @@ class TestPostFeature(TestCase):
         g.setup(post=(('foo', 'bar'), ('foo', 'baz')))
         g.request()
         self.assertEqual(REQUEST['post'], 'foo=bar&foo=baz')
+
+    @ignore_transport('GrabRequests')
+    def test_multipart_post(self):
+        g = Grab(url=BASE_URL, debug_post=True)
         
         # Dict
         g.setup(multipart_post={'foo': 'bar'})

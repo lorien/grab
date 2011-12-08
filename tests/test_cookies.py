@@ -1,5 +1,6 @@
 # coding: utf-8
 from unittest import TestCase
+import string
 
 from grab import Grab, GrabMisuseError
 from util import (FakeServerThread, BASE_URL, RESPONSE, REQUEST,
@@ -21,7 +22,7 @@ class TestCookies(TestCase):
         g.setup(cookies={'foo': '1', 'bar': '2'})
         g.go(BASE_URL)
         self.assertEqual(
-            set(REQUEST['headers']['Cookie'].split('; ')),
+            set(map(string.strip, REQUEST['headers']['Cookie'].split('; '))),
             set(['foo=1', 'bar=2']))
 
     def test_session(self):

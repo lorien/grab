@@ -10,7 +10,8 @@ from StringIO import StringIO
 import threading
 import random
 
-from ..base import GrabError, GrabMisuseError, UploadContent, UploadFile
+from ..base import (GrabError, GrabMisuseError, UploadContent, UploadFile,
+                    GrabTimeoutError, GrabNetworkError)
 
 logger = logging.getLogger('grab')
 
@@ -157,8 +158,6 @@ class CurlTransportExtension(object):
         self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)
         self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)
 
-        self.request_method = self.detect_request_method()
-
         if self.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
             if self.config['multipart_post']:
@@ -249,25 +248,6 @@ class CurlTransportExtension(object):
             ptype = getattr(pycurl, 'PROXYTYPE_%s' % self.config['proxy_type'].upper())
             self.curl.setopt(pycurl.PROXYTYPE, ptype)
 
-        if self.config['proxy']:
-            if self.config['proxy_userpwd']:
-                auth = ' with authorization'
-            else:
-                auth = ''
-            proxy_info = ' via %s proxy of type %s%s' % (
-                self.config['proxy'], self.config['proxy_type'], auth)
-        else:
-            proxy_info = ''
-
-        tname = threading.currentThread().getName().lower()
-        if tname == 'mainthread':
-            tname = ''
-        else:
-            tname = '-%s' % tname
-
-        logger.debug('[%02d%s] %s %s%s' % (self.request_counter, tname,
-                     self.request_method, self.config['url'], proxy_info))
-
         if self.config['encoding']:
             if 'gzip' in self.config['encoding'] and not 'zlib' in pycurl.version:
                 raise GrabMisuseError('You can not use gzip encoding because '\
@@ -291,7 +271,10 @@ class CurlTransportExtension(object):
             if 23 == ex[0]:
                 pass
             else:
-                raise GrabError(ex[0], ex[1])
+                if ex[0] == 28:
+                    raise GrabTimeoutError(ex[0], ex[1])
+                else:
+                    raise GrabNetworkError(ex[0], ex[1])
 
     def prepare_response(self):
         self.response.head = ''.join(self.response_head_chunks)

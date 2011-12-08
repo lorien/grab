@@ -1,6 +1,8 @@
 # coding: utf-8
 from unittest import TestCase
 from grab import Grab, DataNotFound, GrabMisuseError
+from util import (FakeServerThread, BASE_URL, RESPONSE, REQUEST,
+                  ignore_transport)
 
 FORMS = u"""
 <head>
@@ -32,11 +34,19 @@ FORMS = u"""
 </body>
 """.encode('utf-8')
 
+POST_FORM = """
+<form method="post" action="%s">
+    <input type="text" name="secret" value="123"/>
+    <input type="text" name="name" />
+</form>
+""" % BASE_URL
+
 class TestHtmlForms(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
         self.g = Grab()
         self.g.fake_response(FORMS)
+        FakeServerThread().start()
 
     def test_choose_form(self):
         """
@@ -74,3 +84,11 @@ class TestHtmlForms(TestCase):
         self.g.choose_form(xpath='//form[contains(@action, "/dummy")]')
         self.assertEqual('form', self.g._lxml_form.tag)
         self.assertEqual('dummy', self.g._lxml_form.get('name'))
+
+    def test_submit(self):
+        g = Grab()
+        RESPONSE['get'] = POST_FORM
+        g.go(BASE_URL)
+        g.set_input('name', 'Alex')
+        g.submit()
+        self.assertEqual(REQUEST['post'], 'name=Alex&secret=123')

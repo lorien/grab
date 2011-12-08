@@ -3,6 +3,8 @@ import threading
 import time
 import os.path
 
+import grab
+
 # The port on which the fake http server listens requests
 FAKE_SERVER_PORT = 9876
 
@@ -94,3 +96,20 @@ class FakeServerThread(threading.Thread):
         except IOError:
             # Do nothing if server alrady is running
             pass
+
+def ignore_transport(transport):
+    """
+    If test function is wrapped into this decorator then
+    it does not do testing if test is performed for
+    specified transport
+    """
+
+    def wrapper(func):
+        def test_method(*args, **kwargs):
+            cls = getattr(grab, transport)
+            if grab.Grab == cls:
+                return
+            else:
+                func(*args, **kwargs)
+        return test_method
+    return wrapper

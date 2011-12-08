@@ -46,26 +46,26 @@ class TextExtensionTest(TestCase):
         self.assertRaises(GrabMisuseError,
             lambda: self.g.search('фыва'))
 
-    def test_search_rex(self):
+    def test_rex(self):
         # Search unicode rex in unicode body - default case
-        rex = re.compile(u'фыва', re.U)
-        self.assertEqual(u'фыва', self.g.search_rex(rex).group(0))
+        rex = re.compile(u'(фыва)', re.U)
+        self.assertEqual(u'фыва', self.g.rex(rex).group(1))
 
         # Search non-unicode rex in byte-string body
-        rex = re.compile(u'фыва'.encode('cp1251'))
-        self.assertEqual(u'фыва'.encode('cp1251'), self.g.search_rex(rex, byte=True).group(0))
+        rex = re.compile(u'(фыва)'.encode('cp1251'))
+        self.assertEqual(u'фыва'.encode('cp1251'), self.g.rex(rex, byte=True).group(1))
 
-        # Search for non-unicode rex in unicode body shuld fail
-        rex = re.compile('фыва')
-        self.assertEqual(None, self.g.search_rex(rex))
+        ## Search for non-unicode rex in unicode body shuld fail
+        rex = re.compile('(фыва)')
+        self.assertRaises(DataNotFound, lambda: self.g.rex(rex))
 
-        # Search for unicode rex in byte-string body shuld fail
+        ## Search for unicode rex in byte-string body shuld fail
         rex = re.compile(u'фыва', re.U)
-        self.assertEqual(None, self.g.search_rex(rex, byte=True))
+        self.assertRaises(DataNotFound, lambda: self.g.rex(rex, byte=True))
 
-        # Search for unexesting fragment
-        rex = re.compile(u'фыва2', re.U)
-        self.assertEqual(None, self.g.search_rex(rex))
+        ## Search for unexesting fragment
+        rex = re.compile(u'(фыва2)', re.U)
+        self.assertRaises(DataNotFound, lambda: self.g.rex(rex))
 
     def test_assert_substring(self):
         self.g.assert_substring(u'фыва')

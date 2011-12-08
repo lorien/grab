@@ -25,11 +25,13 @@ from proxylist import ProxyList
 from tools.html import find_refresh_url, find_base_url
 from response import Response
 
-from error import GrabError, GrabNetworkError, GrabMisuseError, DataNotFound
+from error import (GrabError, GrabNetworkError, GrabMisuseError, DataNotFound,
+                   GrabTimeoutError)
 from ext.lxml import LXMLExtension
 from ext.form import FormExtension
 from ext.django import DjangoExtension
 from ext.text import TextExtension
+from ext.rex import RegexpExtension
 
 
 __all__ = ('Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseError',
@@ -145,12 +147,16 @@ class GrabInterface(object):
 
 
 class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
-               TextExtension, GrabInterface):
+               TextExtension, RegexpExtension, GrabInterface):
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
     clonable_attributes = ('request_headers', 'request_head', 'request_log', 'request_body',
                            'proxylist', 'proxylist_auto_change', 'charset')
+
+    # Complex config items which points to mutable objects
+    mutable_config_keys = ('post', 'multipart_post', 'headers', 'cookies',
+                           'hammer_timeouts')
 
     # Info about loaded extensions
     #extensions = []
@@ -169,6 +175,7 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
         self.trigger_extensions('config')
         self.default_headers = self.common_headers()
         self.trigger_extensions('init')
+        self._request_prepared = False
         self.reset()
         self.proxylist = None
         self.proxylist_auto_change = False
@@ -199,21 +206,34 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
 
         g = self.__class__()
 
-        #g.config = deepcopy(self.config)
         g.config = copy(self.config)
         # Apply ``copy`` function to mutable config values
-        for key in ('post', 'multipart_post', 'headers', 'cookies', 'hammer_timeouts'):
+        for key in self.mutable_config_keys:
             g.config[key] = copy(self.config[key])
 
-        #cookies = self.config['cookies']
-        #if self.response.cookies:
-            #cookies.update(self.response.cookies)
-        #g.setup(cookies=cookies)
         g.response = self.response.copy()
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
         g.clone_counter = self.clone_counter + 1
         return g
+
+    def adopt(self, g):
+        """
+        Copy the state of another `Grab` instance.
+
+        Use case: create backup of current state to the cloned instance and
+        then restore the state from it.
+        """
+
+        self.config = copy(g.config)
+        # Apply ``copy`` function to mutable config values
+        for key in self.mutable_config_keys:
+            self.config[key] = copy(g.config[key])
+
+        self.response = g.response.copy()
+        for key in self.clonable_attributes:
+            setattr(self, key, getattr(g, key))
+        self.clone_counter = g.clone_counter + 1
 
     def setup(self, **kwargs):
         """
@@ -258,13 +278,39 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
         """
 
         # Reset the state setted by prevous request
-        self.reset()
-        self.request_counter = self.get_request_counter()
-        if self.proxylist_auto_change:
-            self.change_proxy()
-        if kwargs:
-            self.setup(**kwargs)
-        self.process_config()
+        if not self._request_prepared:
+            self.reset()
+            self.request_counter = self.get_request_counter()
+            if self.proxylist_auto_change:
+                self.change_proxy()
+            if kwargs:
+                self.setup(**kwargs)
+            self.request_method = self.detect_request_method()
+            self.process_config()
+            self._request_prepared = True
+
+    def log_request(self):
+        """
+        Send request details to logging system.
+        """
+
+        tname = threading.currentThread().getName().lower()
+        if tname == 'mainthread':
+            tname = ''
+        else:
+            tname = '-%s' % tname
+
+        if self.config['proxy']:
+            if self.config['proxy_userpwd']:
+                auth = ' with authorization'
+            else:
+                auth = ''
+            proxy_info = ' via %s proxy of type %s%s' % (
+                self.config['proxy'], self.config['proxy_type'], auth)
+        else:
+            proxy_info = ''
+        logger.debug('[%02d%s] %s %s%s' % (self.request_counter, tname,
+                     self.request_method, self.config['url'], proxy_info))
 
     def request(self, **kwargs):
         """
@@ -284,10 +330,11 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
         while True:
             try:
                 self.prepare_request(**kwargs)
+                self.log_request()
                 self.transport_request()
             except GrabError, ex:
                 # In hammer mode try to use next timeouts
-                if self.config['hammer_mode'] and ex[0] == 28:
+                if self.config['hammer_mode'] and isinstance(ex, GrabTimeoutError):
                     # If not more timeouts
                     # then raise an error
                     if not hammer_timeouts:
@@ -382,6 +429,7 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
             if url:
                 return self.request(url=url)
 
+        self._request_prepared = False
         return None
 
     # Disabled due to perfomance issue

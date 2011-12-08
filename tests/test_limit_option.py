@@ -2,12 +2,13 @@
 from unittest import TestCase
 
 from grab import Grab
-from util import FakeServerThread, BASE_URL, RESPONSE
+from util import FakeServerThread, BASE_URL, RESPONSE, ignore_transport
 
 class TestContentLimit(TestCase):
     def setUp(self):
         FakeServerThread().start()
 
+    @ignore_transport('GrabRequests')
     def test_nobody(self):
         g = Grab()
         g.setup(nobody=True)
@@ -16,6 +17,7 @@ class TestContentLimit(TestCase):
         self.assertEqual('', g.response.body)
         self.assertTrue(len(g.response.head) > 0)
 
+    @ignore_transport('GrabRequests')
     def test_body_maxsize(self):
         g = Grab()
         g.setup(body_maxsize=100)

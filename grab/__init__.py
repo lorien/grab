@@ -1,5 +1,6 @@
 from base import (GrabError, DataNotFound, GrabNetworkError,
-                  GrabMisuseError, UploadContent, UploadFile)
+                  GrabMisuseError, UploadContent, UploadFile,
+                  GrabTimeoutError)
 from transport.curl import GrabCurl
 #from transport.urllib import GrabUrllib
 from transport.selenium import GrabSelenium
