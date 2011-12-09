@@ -423,13 +423,14 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
         if self.config['reuse_referer']:
             self.config['referer'] = self.response.url
 
+        self._request_prepared = False
+
         # TODO: check max redirect count
         if self.config['follow_refresh']:
             url = find_refresh_url(self.response.unicode_body())
             if url:
                 return self.request(url=url)
 
-        self._request_prepared = False
         return None
 
     # Disabled due to perfomance issue

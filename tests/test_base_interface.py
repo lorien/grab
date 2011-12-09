@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from grab import Grab, GrabMisuseError
 from util import (FakeServerThread, BASE_URL, RESPONSE, REQUEST,
-                  ignore_transport)
+                  RESPONSE_ONCE, ignore_transport)
 
 class TestGrab(TestCase):
     def setUp(self):
@@ -104,3 +104,20 @@ class TestGrab(TestCase):
         blocks = list(g.find_content_blocks())
         self.assertEqual(blocks[0], porno.strip())
         self.assertEqual(blocks[1], redis.strip())
+
+    def test_meta_refresh_redirect(self):
+        # By default meta-redirect is off
+        url = BASE_URL + '/foo'
+        RESPONSE_ONCE['get'] = '<meta http-equiv="refresh" content="5; url=%s">' % url
+        g = Grab()
+        g.go(BASE_URL)
+        self.assertEqual(REQUEST['path'], '/')
+        self.assertEqual(g.response.url, BASE_URL)
+
+        # Now test meta-auto-redirect
+        RESPONSE_ONCE['get'] = '<meta http-equiv="refresh" content="5; url=%s">' % url
+        g = Grab()
+        g.setup(follow_refresh=True)
+        g.go(BASE_URL)
+        self.assertEqual(REQUEST['path'], '/foo')
+        self.assertEqual(g.response.url, BASE_URL + '/foo')

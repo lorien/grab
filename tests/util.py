@@ -15,11 +15,13 @@ BASE_URL = 'http://localhost:%d' % FAKE_SERVER_PORT
 # It return content of HTML variable for any GET request
 RESPONSE = {'get': '', 'post': '', 'cookies': None,
             'once_code': None}
+RESPONSE_ONCE = {'get': None, 'post': None}
 RESPONSE_ONCE_HEADERS = []
 
 # Fake HTTP Server saves request details
 # into global REQUEST variable
-REQUEST = {'get': None, 'post': None, 'headers': None}
+REQUEST = {'get': None, 'post': None, 'headers': None,
+           'path': None}
 
 SLEEP = {'get': 0, 'post': 0}
 
@@ -65,8 +67,13 @@ class FakeServerThread(threading.Thread):
                 while RESPONSE_ONCE_HEADERS:
                     self.send_header(*RESPONSE_ONCE_HEADERS.pop())
                 self.end_headers()
-                self.wfile.write(RESPONSE['get'])
+                if RESPONSE_ONCE['get'] is not None:
+                    self.wfile.write(RESPONSE_ONCE['get'])
+                    RESPONSE_ONCE['get'] = None
+                else:
+                    self.wfile.write(RESPONSE['get'])
                 REQUEST['headers'] = self.headers
+                REQUEST['path'] = self.path
                 print '<-- (GET)'
 
             def log_message(*args, **kwargs):
@@ -78,6 +85,7 @@ class FakeServerThread(threading.Thread):
                 post_size = int(self.headers.getheader('content-length'))
                 REQUEST['post'] = self.rfile.read(post_size)
                 REQUEST['headers'] = self.headers
+                REQUEST['path'] = self.path
 
                 if RESPONSE['once_code']:
                     self.send_response(RESPONSE['once_code'])
@@ -87,7 +95,11 @@ class FakeServerThread(threading.Thread):
                 while RESPONSE_ONCE_HEADERS:
                     self.send_header(*RESPONSE_ONCE_HEADERS.pop())
                 self.end_headers()
-                self.wfile.write(RESPONSE['post'])
+                if RESPONSE_ONCE['post'] is not None:
+                    self.wfile.write(RESPONSE_ONCE['post'])
+                    RESPONSE_ONCE['post'] = None
+                else:
+                    self.wfile.write(RESPONSE['post'])
 
         server_address = ('localhost', FAKE_SERVER_PORT)
         try:
