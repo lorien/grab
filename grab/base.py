@@ -117,9 +117,14 @@ def default_config():
         connect_timeout = 10,
         hammer_mode = False,
         hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
+        # Convert document body to lower case before bulding LXML tree
+        # It does not affect `response.body`
         lowercased_tree = False,
         charset = None,
         #tidy = False,
+        # Strip null bytes from document body before building lXML tree
+        # It does not affect `response.body`
+        strip_null_bytes = True,
     )
 
 class GrabInterface(object):

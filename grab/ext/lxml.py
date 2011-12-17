@@ -12,6 +12,7 @@ from ..tools.text import normalize_space, find_number
 from ..tools.lxml_tools import get_node_text
 
 NULL = object()
+NULL_BYTE = chr(0)
 
 class LXMLExtension(object):
     def extra_reset(self):
@@ -30,6 +31,8 @@ class LXMLExtension(object):
                 #body, errors = tidy_document(body)
             if self.config['lowercased_tree']:
                 body = body.lower()
+            if self.config['strip_null_bytes']:
+                body = body.replace(NULL_BYTE, '')
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser
