@@ -21,12 +21,12 @@ class Task(object):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def get(self, key):
+    def get(self, key, default=None):
         """
         Return value of attribute or None if such attribute
         does not exist.
         """
-        return getattr(self, key, None)
+        return getattr(self, key, default)
 
     def clone(self, **kwargs):
         """

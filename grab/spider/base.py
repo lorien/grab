@@ -418,10 +418,11 @@ class Spider(object):
                                 if cache_item:
                                 #if url in self.cache:
                                     #cache_item = pickle.loads(self.cache[url])
-                                    logging.debug('From cache: %s' % url)
+                                    #logging.debug('From cache: %s' % url)
                                     cached_request = (grab, grab.clone(),
                                                       task, cache_item)
                                     grab.prepare_request()
+                                    grab.log_request('CACHED')
                                     self.inc_count('request-cache')
 
                                     # break from prepre-request cycle
@@ -438,6 +439,7 @@ class Spider(object):
                         curl.grab.curl = curl
                         curl.grab_original = grab.clone()
                         curl.grab.prepare_request()
+                        curl.grab.log_request()
                         curl.task = task
                         # Add configured curl instance to multi-curl processor
                         m.add_handle(curl)

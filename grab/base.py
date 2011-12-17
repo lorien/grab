@@ -294,7 +294,7 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
             self.process_config()
             self._request_prepared = True
 
-    def log_request(self):
+    def log_request(self, extra=''):
         """
         Send request details to logging system.
         """
@@ -314,8 +314,10 @@ class BaseGrab(LXMLExtension, FormExtension, DjangoExtension,
                 self.config['proxy'], self.config['proxy_type'], auth)
         else:
             proxy_info = ''
-        logger.debug('[%02d%s] %s %s%s' % (self.request_counter, tname,
-                     self.request_method, self.config['url'], proxy_info))
+        if extra:
+            extra = '[%s] ' % extra
+        logger.debug('[%02d%s] %s%s %s%s' % (self.request_counter, tname,
+                     extra, self.request_method, self.config['url'], proxy_info))
 
     def request(self, **kwargs):
         """
