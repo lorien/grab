@@ -2,10 +2,11 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 from __future__ import absolute_import
-from lxml.html import fromstring, tostring
 from urlparse import urljoin
 import re
 from lxml.etree import strip_tags, strip_elements, Comment
+from lxml.html import fromstring, tostring
+from lxml.etree import fromstring as xml_fromstring
 
 from ..base import DataNotFound, GrabMisuseError
 from ..tools.text import normalize_space, find_number
@@ -17,6 +18,7 @@ NULL_BYTE = chr(0)
 class LXMLExtension(object):
     def extra_reset(self):
         self._lxml_tree = None
+        self._strict_lxml_tree = None
 
     @property
     def tree(self):
@@ -39,6 +41,12 @@ class LXMLExtension(object):
                 body = '<html></html>'
             self._lxml_tree = fromstring(body)
         return self._lxml_tree
+
+    @property
+    def xml_tree(self):
+        if self._strict_lxml_tree is None:
+            self._strict_lxml_tree = xml_fromstring(self.response.body)
+        return self._strict_lxml_tree
 
     def find_link(self, href_pattern, make_absolute=True):
         """
