@@ -85,7 +85,7 @@ class Spider(object):
         self.process_task_generator()
         try:
             signal.signal(signal.SIGUSR1, self.sigusr1_handler)
-        except AttributeError:
+        except (ValueError, AttributeError):
             pass
         self.debug_error = debug_error
         self.use_cache = use_cache
@@ -403,7 +403,7 @@ class Spider(object):
                             grab = task.grab
                         else:
                             # Set up curl instance via Grab interface
-                            grab = Grab(**self.grab_config)
+                            grab = self.create_grab_instance()
                             grab.setup(url=task.url)
 
                         if self.use_cache and not task.get('disable_cache'):
@@ -721,3 +721,5 @@ class Spider(object):
             except StopIteration:
                 self.task_generator_enabled = False
 
+    def create_grab_instance(self):
+        return Grab(**self.grab_config)
