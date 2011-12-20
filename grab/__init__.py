@@ -8,5 +8,5 @@ from transport.requests import GrabRequests
 
 Grab = GrabCurl
 
-version_info = (0, 3, 17)
+version_info = (0, 3, 18)
 __version__ = '.'.join(map(str, version_info))
