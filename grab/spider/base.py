@@ -540,8 +540,8 @@ class Spider(object):
                 except Exception, ex:
                     if 'document too large' in unicode(ex):
                         pass
-                    else:
-                        import pdb; pdb.set_trace()
+                    #else:
+                        #import pdb; pdb.set_trace()
 
         return {'ok': ok, 'grab': grab, 'grab_original': grab_original,
                 'task': task,

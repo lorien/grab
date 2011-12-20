@@ -109,8 +109,8 @@ def default_config():
         nobody = False,
         body_maxsize = None,
         debug_post = False,
-        # ???
-        encoding = 'gzip',
+        # TODO: manually set Content-Encoding header and unzip the content
+        encoding = '', # disabled due to issues in pycurl, gzip',
         userpwd = None,
         # Timeouts
         timeout = 15,
