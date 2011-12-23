@@ -725,3 +725,17 @@ class Spider(object):
 
     def create_grab_instance(self):
         return Grab(**self.grab_config)
+
+    def next_page_task(self, grab, task, xpath):
+        """
+        Return new `Task` object if link that mathes the given `xpath`
+        was found.
+
+        This method is used by `grab.spider.shortcuts.paginate` helper.
+        """
+        nav = grab.xpath(xpath, None)
+        if nav is not None:
+            url = grab.make_url_absolute(nav.get('href'))
+            page = task.get('page', 1) + 1
+            task2 = task.clone(task_try_count=0, url=url, page=page)
+            return task2
