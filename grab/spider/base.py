@@ -16,7 +16,7 @@ import zlib
 from pymongo.binary import Binary
 from hashlib import sha1
 
-from .error import SpiderError, SpiderMisuseError
+from .error import SpiderError, SpiderMisuseError, FatalError
 from .task import Task
 from .data import Data
 from . import setup_pickle
@@ -651,6 +651,8 @@ class Spider(object):
             #traceback.print_exc()
             #pdb.post_mortem(tb)
             import pdb; pdb.set_trace()
+        if isinstance(ex, FatalError):
+            raise
 
     # TODO: remove
     #def generate_tasks(self, init):
