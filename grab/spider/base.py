@@ -516,7 +516,7 @@ class Spider(object):
         curl.grab = None
         curl.task = None
 
-        if ok and self.use_cache and grab.request_method == 'GET' and not task.get('disable_cache'):
+        if ok and self.use_cache and grab.request_method == 'GET':# and not task.get('disable_cache'):
             if grab.response.code < 400 or grab.response.code == 404:
                 utf_body = grab.response.unicode_body().encode('utf-8')
                 if self.use_cache_compression:
