@@ -21,6 +21,8 @@ from .task import Task
 from .data import Data
 from . import setup_pickle
 
+CURL_OBJECT = pycurl.Curl()
+
 def execute_handler(handler, handler_name, res_count, queue,
                     grab, task):
     try:
@@ -419,6 +421,16 @@ class Spider(object):
                                 #if url in self.cache:
                                     #cache_item = pickle.loads(self.cache[url])
                                     #logging.debug('From cache: %s' % url)
+
+                                    # `curl` attribute should not be None
+                                    # If it is None (which could be if the fire Task
+                                    # objects with grab objects which was recevied in
+                                    # as input argument of response handler function)
+                                    # then `prepare_request` method will failed
+                                    # because it asssumes that Grab instance
+                                    # has valid `curl` attribute
+                                    if grab.curl is None:
+                                        grab.curl = CURL_OBJECT
                                     cached_request = (grab, grab.clone(),
                                                       task, cache_item)
                                     grab.prepare_request()
@@ -737,5 +749,7 @@ class Spider(object):
         if nav is not None:
             url = grab.make_url_absolute(nav.get('href'))
             page = task.get('page', 1) + 1
-            task2 = task.clone(task_try_count=0, url=url, page=page)
+            grab2 = grab.clone()
+            grab2.setup(url=url)
+            task2 = task.clone(task_try_count=0, grab=grab2, page=page)
             return task2
