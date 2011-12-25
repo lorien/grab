@@ -3,7 +3,6 @@
 # License: BSD
 from __future__ import absolute_import
 import email
-import pycurl
 import logging
 import urllib
 from StringIO import StringIO
@@ -50,6 +49,8 @@ except ImportError:
 
 class CurlTransportExtension(object):
     def extra_init(self):
+        import pycurl
+
         self.curl = pycurl.Curl()
 
     def extra_reset(self):
@@ -104,6 +105,7 @@ class CurlTransportExtension(object):
         4: CURLINFO_DATA_OUT
         5: CURLINFO_unrecognized_type
         """
+        import pycurl
 
         if _type == pycurl.INFOTYPE_HEADER_OUT:
             self.request_head += text
@@ -123,6 +125,7 @@ class CurlTransportExtension(object):
         """
         Setup curl instance with values from ``self.config``.
         """
+        import pycurl
 
         url = self.config['url']
         if isinstance(url, unicode):
@@ -261,6 +264,8 @@ class CurlTransportExtension(object):
             self.charset = self.config['charset']
 
     def transport_request(self):
+        import pycurl
+
         try:
             self.curl.perform()
         except pycurl.error, ex:
@@ -277,6 +282,8 @@ class CurlTransportExtension(object):
                     raise GrabNetworkError(ex[0], ex[1])
 
     def prepare_response(self):
+        import pycurl
+
         self.response.head = ''.join(self.response_head_chunks)
         self.response.body = ''.join(self.response_body_chunks)
         self.response.code = self.curl.getinfo(pycurl.HTTP_CODE)
@@ -296,6 +303,7 @@ class CurlTransportExtension(object):
 
         The cookie data may be in Netscape / Mozilla cookie data format or just regular HTTP-style headers dumped to a file.
         """
+        import pycurl
 
         self.curl.setopt(pycurl.COOKIEFILE, path)
 
@@ -308,6 +316,7 @@ class CurlTransportExtension(object):
         Each cookie is dumped in the format:
         # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
         """
+        import pycurl
 
         with open(path, 'w') as out:
             out.write('\n'.join(self.curl.getinfo(pycurl.INFO_COOKIELIST)))
@@ -319,6 +328,7 @@ class CurlTransportExtension(object):
         Custom version of BaseCurl.clear_cookies which do additional action:
         reset cookies in curl instance.
         """
+        import pycurl
 
         self.config['cookies'] = {}
         self.curl.setopt(pycurl.COOKIELIST, 'ALL')
@@ -327,6 +337,7 @@ class CurlTransportExtension(object):
         """
         Extract cookies.
         """
+        import pycurl
 
         # Example of line:
         # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten

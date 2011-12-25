@@ -2,7 +2,6 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 from __future__ import absolute_import
-from lxml.html import fromstring
 from urlparse import urljoin
 
 from ..base import DataNotFound, GrabMisuseError
