@@ -18,15 +18,22 @@ from random import randint, choice
 from copy import copy
 import threading
 from urlparse import urljoin
-#from copy import deepcopy
 import time
 import re
 
 from proxylist import ProxyList
-from html import find_refresh_url
+from tools.html import find_refresh_url, find_base_url
 from response import Response
 
-from error import GrabError, GrabNetworkError, GrabMisuseError, DataNotFound
+from error import (GrabError, GrabNetworkError, GrabMisuseError, DataNotFound,
+                   GrabTimeoutError)
+from ext.lxml import LXMLExtension
+from ext.form import FormExtension
+from ext.django import DjangoExtension
+from ext.text import TextExtension
+from ext.rex import RegexpExtension
+from ext.pquery import PyqueryExtension
+
 
 __all__ = ('Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseError',
            'UploadContent', 'UploadFile')
@@ -102,9 +109,8 @@ def default_config():
         #nohead = False,
         nobody = False,
         body_maxsize = None,
-        debug = False,
         debug_post = False,
-        # ???
+        # TODO: manually set Content-Encoding header and unzip the content
         encoding = 'gzip',
         userpwd = None,
         # Timeouts
@@ -112,20 +118,30 @@ def default_config():
         connect_timeout = 10,
         hammer_mode = False,
         hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
+        # Convert document body to lower case before bulding LXML tree
+        # It does not affect `response.body`
         lowercased_tree = False,
         charset = None,
+        #tidy = False,
+        # Strip null bytes from document body before building lXML tree
+        # It does not affect `response.body`
+        strip_null_bytes = True,
     )
 
-#DEFAULT_EXTENSIONS = ['grab.ext.pycurl', 'grab.ext.lxml', 'grab.ext.lxml_form',
-                      #'grab.ext.django', 'grab.ext.text']
-
-import ext.lxml
-import ext.lxml_form
-import ext.django
-import ext.text
-import ext.pquery
-
 class GrabInterface(object):
+    """
+    The methods of this class should be
+    implemented by the so-called transport class
+
+    Any Grab class should inhertis from the transport class.
+    
+    By default, then you do::
+    
+        from grab import Grab
+
+    You use ``the grab.transport.curl.CurlTransport``.
+    """
+
     def process_config(self):
         raise NotImplementedError
 
@@ -136,17 +152,18 @@ class GrabInterface(object):
         raise NotImplementedError
 
 
-class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
-           ext.lxml_form.Extension, ext.django.Extension,
-           ext.text.Extension, GrabInterface):
-
-    # Shortcut to grab.GrabError
-    Error = GrabError
+class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
+               DjangoExtension,
+               TextExtension, RegexpExtension, GrabInterface):
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
     clonable_attributes = ('request_headers', 'request_head', 'request_log', 'request_body',
                            'proxylist', 'proxylist_auto_change', 'charset')
+
+    # Complex config items which points to mutable objects
+    mutable_config_keys = ('post', 'multipart_post', 'headers', 'cookies',
+                           'hammer_timeouts')
 
     # Info about loaded extensions
     #extensions = []
@@ -156,7 +173,7 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
     Public methods
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, response_body=None, **kwargs):
         """
         Create Grab instance
         """
@@ -165,6 +182,7 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
         self.trigger_extensions('config')
         self.default_headers = self.common_headers()
         self.trigger_extensions('init')
+        self._request_prepared = False
         self.reset()
         self.proxylist = None
         self.proxylist_auto_change = False
@@ -172,6 +190,8 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
         if kwargs:
             self.setup(**kwargs)
         self.clone_counter = 0
+        if response_body is not None:
+            self.fake_response(response_body)
 
     def reset(self):
         """
@@ -193,21 +213,34 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
 
         g = self.__class__()
 
-        #g.config = deepcopy(self.config)
         g.config = copy(self.config)
         # Apply ``copy`` function to mutable config values
-        for key in ('post', 'multipart_post', 'headers', 'cookies', 'hammer_timeouts'):
+        for key in self.mutable_config_keys:
             g.config[key] = copy(self.config[key])
 
-        #cookies = self.config['cookies']
-        #if self.response.cookies:
-            #cookies.update(self.response.cookies)
-        #g.setup(cookies=cookies)
         g.response = self.response.copy()
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
         g.clone_counter = self.clone_counter + 1
         return g
+
+    def adopt(self, g):
+        """
+        Copy the state of another `Grab` instance.
+
+        Use case: create backup of current state to the cloned instance and
+        then restore the state from it.
+        """
+
+        self.config = copy(g.config)
+        # Apply ``copy`` function to mutable config values
+        for key in self.mutable_config_keys:
+            self.config[key] = copy(g.config[key])
+
+        self.response = g.response.copy()
+        for key in self.clonable_attributes:
+            setattr(self, key, getattr(g, key))
+        self.clone_counter = g.clone_counter + 1
 
     def setup(self, **kwargs):
         """
@@ -252,13 +285,41 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
         """
 
         # Reset the state setted by prevous request
-        self.reset()
-        self.request_counter = self.get_request_counter()
-        if self.proxylist_auto_change:
-            self.change_proxy()
-        if kwargs:
-            self.setup(**kwargs)
-        self.process_config()
+        if not self._request_prepared:
+            self.reset()
+            self.request_counter = self.get_request_counter()
+            if self.proxylist_auto_change:
+                self.change_proxy()
+            if kwargs:
+                self.setup(**kwargs)
+            self.request_method = self.detect_request_method()
+            self.process_config()
+            self._request_prepared = True
+
+    def log_request(self, extra=''):
+        """
+        Send request details to logging system.
+        """
+
+        tname = threading.currentThread().getName().lower()
+        if tname == 'mainthread':
+            tname = ''
+        else:
+            tname = '-%s' % tname
+
+        if self.config['proxy']:
+            if self.config['proxy_userpwd']:
+                auth = ' with authorization'
+            else:
+                auth = ''
+            proxy_info = ' via %s proxy of type %s%s' % (
+                self.config['proxy'], self.config['proxy_type'], auth)
+        else:
+            proxy_info = ''
+        if extra:
+            extra = '[%s] ' % extra
+        logger.debug('[%02d%s] %s%s %s%s' % (self.request_counter, tname,
+                     extra, self.request_method, self.config['url'], proxy_info))
 
     def request(self, **kwargs):
         """
@@ -278,10 +339,11 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
         while True:
             try:
                 self.prepare_request(**kwargs)
+                self.log_request()
                 self.transport_request()
             except GrabError, ex:
                 # In hammer mode try to use next timeouts
-                if self.config['hammer_mode'] and ex[0] == 28:
+                if self.config['hammer_mode'] and isinstance(ex, GrabTimeoutError):
                     # If not more timeouts
                     # then raise an error
                     if not hammer_timeouts:
@@ -298,9 +360,10 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
                 # Break the infinite loop in case of success response
                 break
 
-        return self.process_request_result()
+        self.process_request_result()
+        return self.response
 
-    def process_request_result(self):
+    def process_request_result(self, prepare_response_func=None):
         """
         Process result of real request performed via transport extension.
         """
@@ -315,8 +378,14 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
                 else:
                     post = self.normalize_http_values(post, charset='utf-8')
                     items = sorted(post, key=lambda x: x[0])
-                    items = [(x[0], str(x[1])[:150]) for x in items]
-                    post = '\n'.join('%-25s: %s' % x for x in items)
+                    new_items = []
+                    for key, value in items:
+                        if len(value) > 150:
+                            value = value[:150] + '...'
+                        else:
+                            value = value
+                        new_items.append((key, value))
+                    post = '\n'.join('%-25s: %s' % x for x in new_items)
             if post:
                 logger.debug('POST request:\n%s\n' % post)
 
@@ -331,7 +400,10 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
         self.config['multipart_post'] = None
         self.config['method'] = None
 
-        self.prepare_response()
+        if prepare_response_func:
+            prepare_response_func(self)
+        else:
+            self.prepare_response()
 
         if self.config['reuse_cookies']:
             # Copy cookies from response into config
@@ -360,13 +432,15 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
         if self.config['reuse_referer']:
             self.config['referer'] = self.response.url
 
+        self._request_prepared = False
+
         # TODO: check max redirect count
         if self.config['follow_refresh']:
             url = find_refresh_url(self.response.unicode_body())
             if url:
                 return self.request(url=url)
 
-        return self.response
+        return None
 
     # Disabled due to perfomance issue
     # Who needs this method?
@@ -398,7 +472,15 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
         logger.debug('Sleeping for %f seconds' % sleep_time)
         time.sleep(sleep_time)
 
-    def fake_response(self, content):
+    def fake_response(self, content, **kwargs):
+        """
+        Setup `response` object without real network requests.
+
+        Useful for testing and debuging.
+
+        All ``**kwargs`` will be passed to `Response` constructor.
+        """
+
         # Trigger reset
         # It will reset request state and also create new
         # uninitialized response object
@@ -411,11 +493,17 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
         self.headers = {}
         self.status = ''
         self.response.head = ''
-        self.response.parse()
+        if 'charset' in kwargs:
+            self.response.parse(charset=kwargs['charset'])
+        else:
+            self.response.parse()
         self.response.cookies = {}
         self.response.code = 200
         self.response.time = 0
         self.response.url = ''
+
+        for key, value in kwargs.items():
+            setattr(self.response, key, value)
 
     def setup_proxylist(self, proxy_file, proxy_type, read_timeout=None,
                         auto_init=True, auto_change=False):
@@ -503,12 +591,12 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
                 tname = ''
             else:
                 tname = '-%s' % tname
-            fname = os.path.join(self.config['log_dir'], '%02d%s.log' % (self.request_counter, tname))
+            fname = os.path.join(self.config['log_dir'], '%02d%s.log' % (
+                self.request_counter, tname))
             with open(fname, 'w') as out:
-                if self.config['debug']:
-                    out.write('Request:\n')
-                    out.write(self.request_head)
-                    out.write('\n')
+                out.write('Request:\n')
+                out.write(self.request_head)
+                out.write('\n')
                 out.write('Response:\n')
                 out.write(self.response.head)
 
@@ -517,9 +605,9 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
             #if len(dirs) > 1:
                 #fext = dirs[-1].split('.')[-1]
                 
-            fname = os.path.join(self.config['log_dir'], '%02d%s.%s' % (self.request_counter, tname, fext))
-            with open(fname, 'w') as out:
-                out.write(self.response.body)
+            fname = os.path.join(self.config['log_dir'], '%02d%s.%s' % (
+                self.request_counter, tname, fext))
+            self.response.save(fname)
 
     def urlencode(self, items):
         """
@@ -534,7 +622,7 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
         return urllib.urlencode(self.normalize_http_values(items))
 
 
-    def encode_cookies(self, items):
+    def encode_cookies(self, items, join=True):
         """
         Serialize dict or sequence of two-element items into string suitable
         for sending in Cookie http header.
@@ -556,12 +644,15 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
         tokens = []
         for key, value in items:
             tokens.append('%s=%s' % (encode(key), encode(value)))
-        return '; '.join(tokens)
+        if join:
+            return '; '.join(tokens)
+        else:
+            return tokens
 
 
     def normalize_http_values(self, items, charset=None):
         """
-        Accept sequence of (key, value) paris and convert each
+        Accept sequence of (key, value) paris or dict and convert each
         value into bytestring.
 
         Unicode is converted into bytestring using charset of previous response
@@ -572,6 +663,9 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
         Instances of ``UploadContent`` or ``UploadFile`` is converted
         into special pycurl objects.
         """
+
+        if isinstance(items, dict):
+            items = items.items()
 
         def process(item):
             key, value = item
@@ -590,7 +684,9 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
 
             return key, value
 
-        return map(process, items)
+        items =  map(process, items)
+        items = sorted(items, key=lambda x: x[0])
+        return items
 
     def normalize_unicode(self, value, charset=None):
         """
@@ -605,12 +701,16 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
             raise GrabMisuseError('normalize_unicode method accepts only unicode values')
         return value.encode(self.charset if charset is None else charset, 'ignore')
 
-    def make_url_absolute(self, url):
+    def make_url_absolute(self, url, resolve_base=False):
         """
         Make url absolute using previous request url as base url.
         """
 
         if self.config['url']:
+            if resolve_base:
+                base_url = find_base_url(self.response.unicode_body())
+                if base_url:
+                    return urljoin(base_url, url)
             return urljoin(self.config['url'], url)
         else:
             return url
@@ -621,3 +721,21 @@ class BaseGrab(ext.lxml.Extension, ext.pquery.Extension,
         """
 
         self.config['cookies'] = {}
+
+    def detect_request_method(self):
+        """
+        Analize request config and find which
+        request method will be used.
+
+        Returns request method in upper case
+        """
+
+        method = self.config['method']
+        if method:
+            method = method.upper()
+        else:
+            if self.config['post'] or self.config['multipart_post']:
+                method = 'POST'
+            else:
+                method = 'GET'
+        return method

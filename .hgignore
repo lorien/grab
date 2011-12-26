@@ -9,3 +9,4 @@ pypi.sh
 test2.py
 log.html
 prof
+tests/tmp

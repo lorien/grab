@@ -2,38 +2,51 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 from __future__ import absolute_import
-from lxml.html import fromstring
-from lxml.cssselect import CSSSelector
 from urlparse import urljoin
 import re
 
 from ..base import DataNotFound, GrabMisuseError
-
-REX_NUMBER = re.compile(r'\d+')
-REX_SPACE = re.compile(r'\s', re.U)
+from ..tools.text import normalize_space, find_number
+from ..tools.lxml_tools import get_node_text
 
 NULL = object()
+NULL_BYTE = chr(0)
 
-class Extension(object):
+class LXMLExtension(object):
     def extra_reset(self):
         self._lxml_tree = None
+        self._strict_lxml_tree = None
 
     @property
     def tree(self):
         """
         Return lxml ElementTree tree of the document.
         """
+        from lxml.html import fromstring
 
         if self._lxml_tree is None:
             body = self.response.unicode_body().strip()
+            #if self.config['tidy']:
+                #from tidylib import tidy_document
+                #body, errors = tidy_document(body)
             if self.config['lowercased_tree']:
                 body = body.lower()
+            if self.config['strip_null_bytes']:
+                body = body.replace(NULL_BYTE, '')
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser
                 body = '<html></html>'
             self._lxml_tree = fromstring(body)
         return self._lxml_tree
+
+    @property
+    def xml_tree(self):
+        from lxml.etree import fromstring
+
+        if self._strict_lxml_tree is None:
+            self._strict_lxml_tree = fromstring(self.response.body)
+        return self._strict_lxml_tree
 
     def find_link(self, href_pattern, make_absolute=True):
         """
@@ -49,7 +62,6 @@ class Extension(object):
             raise GrabMisuseError('find_link method accepts only '\
                                   'byte-string argument')
         for elem, attr, link, pos in self.tree.iterlinks():
-            print link
             if elem.tag == 'a' and href_pattern in link:
                 return link
         return None
@@ -108,12 +120,6 @@ class Extension(object):
                     return self.request(url=item[2])
         raise DataNotFound('Cannot find link ANCHOR=%s, HREF=%s' % (anchor, href))
 
-    def get_node_text(self, node):
-        return self.normalize_space(' '.join(node.xpath('./descendant-or-self::*[name() != "script" and name() != "style"]/text()[normalize-space()]')))
-
-    def find_node_number(self, node, ignore_spaces=False):
-        return self.find_number(self.get_node_text(node), ignore_spaces=ignore_spaces)
-
     def xpath(self, path, default=NULL, filter=None):
         """
         Get first element which matches the given xpath or raise DataNotFound.
@@ -152,9 +158,9 @@ class Extension(object):
                 return default
         else:
             if isinstance(elem, basestring):
-                return self.normalize_space(elem)
+                return normalize_space(elem)
             else:
-                return self.get_node_text(elem)
+                return get_node_text(elem)
 
     def xpath_number(self, path, default=NULL, filter=None, ignore_spaces=False):
         """
@@ -162,7 +168,7 @@ class Extension(object):
         """
 
         try:
-            return self.find_number(self.xpath_text(path, filter=filter),
+            return find_number(self.xpath_text(path, filter=filter),
                                     ignore_spaces=ignore_spaces)
         except IndexError:
             if default is NULL:
@@ -196,7 +202,7 @@ class Extension(object):
         """
 
         try:
-            return self.get_node_text(self.css(path))
+            return get_node_text(self.css(path))
         except IndexError:
             if default is NULL:
                 raise
@@ -209,7 +215,7 @@ class Extension(object):
         """
 
         try:
-            return self.find_number(self.css_text(path), ignore_spaces=ignore_spaces)
+            return find_number(self.css_text(path), ignore_spaces=ignore_spaces)
         except IndexError:
             if default is NULL:
                 raise
@@ -220,8 +226,9 @@ class Extension(object):
         """
         Strip tags from the HTML content.
         """
+        from lxml.html import fromstring
 
-        return self.get_node_text(fromstring(content))
+        return get_node_text(fromstring(content))
 
     def assert_css(self, path):
         """
@@ -250,3 +257,60 @@ class Extension(object):
         """
 
         return len(self.xpath_list(path)) > 0
+
+    def find_content_blocks(self, min_length=None):
+        """
+        Iterate over content blocks (russian version)
+        """
+        from lxml.html import tostring
+        from lxml.etree import strip_tags, strip_elements, Comment
+
+        # Completely remove content of following tags
+        nondata_tags = ['head', 'style', 'script', Comment]
+        strip_elements(self.tree, *nondata_tags)
+
+        # Remove links
+        strip_elements(self.tree, 'a')
+
+        # Drop inlines tags
+        inline_tags = ('br', 'hr', 'p', 'b', 'i', 'strong', 'em', 'a',
+                       'span', 'font')
+        strip_tags(self.tree, *inline_tags)
+
+        # Cut of images
+        media_tags = ('img',)
+        strip_tags(self.tree, *media_tags)
+
+        body = tostring(self.tree, encoding='utf-8').decode('utf-8')
+
+        # Normalize spaces
+        body = normalize_space(body)
+
+        # Find text blocks
+        block_rex = re.compile(r'[^<>]+')
+
+        blocks = []
+        for match in block_rex.finditer(body):
+            block = match.group(0)
+            if len(block) > 100:
+                ratio = self._trash_ratio(block)
+                if ratio < 0.05:
+                    block = block.strip()
+                    if min_length is None or len(block) >= min_length:
+                        blocks.append(block)
+        return blocks
+
+    def _trash_ratio(self, text):
+        """
+        Return ratio of non-common symbols.
+        """
+
+        trash_count = 0
+        for char in text:
+            if char in list(u'.\'"+-!?()[]{}*+@#$%^&_=|/\\'):
+                trash_count += 1
+        return trash_count / float(len(text))
+
+
+if __name__ == '__main__':
+    main()

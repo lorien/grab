@@ -6,46 +6,84 @@
 Welcome to Grab
 ===============
 
-This if official documentation of Grab package. I do not have much time
-to write documentation so the best way to learn Grab is to look on his
-source code.
+Grab is python framework for writing site scrapers. Grab provides two interfaces:
+
+ * the Grab interface for building HTTP request and processing response
+ * the Spider interface for writing asynchronous site scrapers
+
+Grab interface is very simple and it is ideal for small scripts, for single-thread
+scripts or for network hacking via python console.
+
+Spider interface is powered by multicurl (the asynchronous pycurl interface).
+If you need to do big number of concurrent requests then you should consider 
+to use Spider. Spider interface is very experimentail and unstable, you should not
+use it.
 
 
-Links
------
-
-* Bitbucket repo: http://bitbucket.org/lorien/grab
-* Google group: http://groups.google.com/group/python-grab
-
-
-What is Grab?
--------------
-
-Grab is site scraping framework.
-
-Grab features:
- * Simple API
- * Session suppport (automated cookie processing)
- * Building HTTP request of any type
- * Multipart POST
- * Automated form processing
- * Selecting HTML elements via XPath/CSS queries
- * Multiple tries
- * Ability to choose network layer: curl, urllib, selenium
- * Utilities to work with proxy list
- * Support for proxy of any type (SOCKS proxy is available only in curl transport)
- * multicurl support
- * Framework to develop well-structured site scrapers
- * Verbose methods to debug HTTP requests
-
-Documenation sections
----------------------
+Documentation
+=============
 
 .. toctree::
-    :maxdepth: 2
+    :hidden:
 
+    features
+    grab_tutorial
+    base_interface
+    extensions/overview
+    extensions/form
+    extensions/text
+    extensions/django
+    extensions/lxml
     configuration
-    forms
+    tools/html
+
+:doc:`features`
+    List of features implemented in Grab
+
+:doc:`grab_tutorial`
+    Short lesson how to use Grab
+
+:doc:`base_interface`
+    Base Grab interface. The core functions.
+
+:doc:`extensions/overview`
+    Overview of grab functionality splitted by so-called extensions. 
+
+    :doc:`extensions/form`
+        Automated form processing
+
+    :doc:`extensions/text`
+        Utilities to process text of response
+
+    :doc:`extensions/django`
+        Provides quick way to save response content into FileField of any django model.
+
+    :doc:`extensions/lxml`
+        Extracting information from response with XPATH and CSS queries.
+
+:doc:`configuration`
+    Configuring Grab instance. Configuring network request options.
+
+Extra cool things
+
+    :doc:`tools/html`
+        HTML processing utilities
+        
+
+Grab links
+==========
+
+* Grab source code repository on bitbucket: http://bitbucket.org/lorien/grab
+* Grab mailing list: http://groups.google.com/group/python-grab
+
+
+Similar projects
+================
+
+* Scrapy - mature scraping solution: http://scrapy.org
+* Mechanize - one of the oldest python scraping framework:
+* Requests - easy interface to standard urllib library:
+* Httplib2
 
 
 Indices and tables

@@ -19,13 +19,16 @@ class RequestsTransportExtension(object):
 
         self.session = requests.session()
 
-    #def extra_reset(self):
+    def extra_reset(self):
         #self.response_head_chunks = []
         #self.response_body_chunks = []
-        #self.request_headers = ''
-        #self.request_head = ''
-        #self.request_log = ''
-        #self.request_body = ''
+        #self.response_body_bytes_read = 0
+        self.request_headers = ''
+        self.request_head = ''
+        self.request_log = ''
+        self.request_body = ''
+        self.request_method = None
+        self.requests_config = None
 
     #def head_processor(self, chunk):
         #"""
@@ -79,9 +82,15 @@ class RequestsTransportExtension(object):
         """
         Setup curl instance with values from ``self.config``.
         """
+        
+        # Accumulate all request options into `self.requests_config`
+        self.requests_config = {'headers': {}, 'payload': None,
+                                'cookies': None, 'proxy': None}
 
         if isinstance(self.config['url'], unicode):
             self.config['url'] = self.config['url'].encode('utf-8')
+
+        self.requests_config['url'] = self.config['url']
 
         #self.curl.setopt(pycurl.URL, url)
         #self.curl.setopt(pycurl.FOLLOWLOCATION, 1)
@@ -92,19 +101,21 @@ class RequestsTransportExtension(object):
         #self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
         #self.curl.setopt(pycurl.HEADERFUNCTION, self.head_processor)
 
-        ## User-Agent
-        #if self.config['user_agent'] is None:
-            #if self.config['user_agent_file'] is not None:
-                #lines = open(self.config['user_agent_file']).read().splitlines()
-                #self.config['user_agent'] = random.choice(lines)
+        # User-Agent
+        # TODO: move to base class
+        if self.config['user_agent'] is None:
+            if self.config['user_agent_file'] is not None:
+                lines = open(self.config['user_agent_file']).read().splitlines()
+                self.config['user_agent'] = random.choice(lines)
 
-        ## If value is None then set empty string
-        ## None is not acceptable because in such case
-        ## pycurl will set its default user agent "PycURL/x.xx.x"
-        #if not self.config['user_agent']:
-            #self.config['user_agent'] = ''
-
-        #self.curl.setopt(pycurl.USERAGENT, self.config['user_agent'])
+        # If value is None then set empty string
+        # None is not acceptable because in such case
+        # pycurl will set its default user agent "PycURL/x.xx.x"
+        # For consistency we send empty User-Agent in case of None value
+        # in all other transports too
+        if not self.config['user_agent']:
+            self.config['user_agent'] = ''
+        self.requests_config['headers']['User-Agent'] = self.config['user_agent']
 
         #if self.config['debug']:
             #self.curl.setopt(pycurl.VERBOSE, 1)
@@ -114,83 +125,60 @@ class RequestsTransportExtension(object):
         #self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)
         #self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)
 
-        #method = self.config['method']
-        #if method:
-            #method = method.upper()
-        #else:
-            #if self.config['post'] or self.config['multipart_post']:
-                #method = 'POST'
-            #else:
-                #method = 'GET'
+        self.requests_config['method'] = self.request_method.lower()
 
-        #if method == 'POST':
-            #self.curl.setopt(pycurl.POST, 1)
-            #if self.config['multipart_post']:
-                #if not isinstance(self.config['multipart_post'], (list, tuple)):
-                    #raise GrabMisuseError('multipart_post should be tuple or list, not dict')
+        if self.request_method == 'POST' or self.request_method == 'PUT':
+            if self.config['multipart_post']:
+                raise NotImplementedError
+                #if isinstance(self.config['multipart_post'], basestring):
+                    #raise GrabMisuseError('multipart_post option could not be a string')
                 #post_items = self.normalize_http_values(self.config['multipart_post'])
                 #self.curl.setopt(pycurl.HTTPPOST, post_items) 
-            #elif self.config['post']:
-                #if isinstance(self.config['post'], basestring):
-                    ## bytes-string should be posted as-is
-                    ## unicode should be converted into byte-string
-                    #if isinstance(self.config['post'], unicode):
-                        #post_data = self.normalize_unicode(self.config['post'])
-                    #else:
-                        #post_data = self.config['post']
-                #else:
-                    ## dict, tuple, list should be serialized into byte-string
-                    #post_data = self.urlencode(self.config['post'])
+            elif self.config['post']:
+                if isinstance(self.config['post'], basestring):
+                    # bytes-string should be posted as-is
+                    # unicode should be converted into byte-string
+                    if isinstance(self.config['post'], unicode):
+                        post_data = self.normalize_unicode(self.config['post'])
+                    else:
+                        post_data = self.config['post']
+                else:
+                    # dict, tuple, list should be serialized into byte-string
+                    post_data = self.urlencode(self.config['post'])
+                self.requests_config['payload'] = post_data
                 #self.curl.setopt(pycurl.POSTFIELDS, post_data)
-        #elif method == 'PUT':
+        #elif self.request_method == 'PUT':
             #self.curl.setopt(pycurl.PUT, 1)
             #self.curl.setopt(pycurl.READFUNCTION, StringIO(self.config['post']).read) 
-        #elif method == 'DELETE':
+        elif self.request_method == 'DELETE':
+            pass
             #self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
-        #elif method == 'HEAD':
+        elif self.request_method == 'HEAD':
+            pass
             #self.curl.setopt(pycurl.NOBODY, 1)
-        #else:
+        else:
+            pass
             #self.curl.setopt(pycurl.HTTPGET, 1)
+
         
-        #headers = self.default_headers
-        #if self.config['headers']:
-            #headers.update(self.config['headers'])
+        headers = self.default_headers
+        if self.config['headers']:
+            headers.update(self.config['headers'])
         #header_tuples = [str('%s: %s' % x) for x\
                          #in headers.iteritems()]
         #self.curl.setopt(pycurl.HTTPHEADER, header_tuples)
+        self.requests_config['headers'].update(headers)
 
+        if self.config['cookies']:
+            items = self.normalize_http_values(self.config['cookies'])
+            self.requests_config['cookies'] = dict(items)
 
-        ## CURLOPT_COOKIELIST
-        ## Pass a char * to a cookie string. Cookie can be either in
-        ## Netscape / Mozilla format or just regular HTTP-style
-        ## header (Set-Cookie: ...) format.
-        ## If cURL cookie engine was not enabled it will enable its cookie
-        ## engine.
-        ## Passing a magic string "ALL" will erase all cookies known by cURL.
-        ## (Added in 7.14.1)
-        ## Passing the special string "SESS" will only erase all session
-        ## cookies known by cURL. (Added in 7.15.4)
-        ## Passing the special string "FLUSH" will write all cookies known by
-        ## cURL to the file specified by CURLOPT_COOKIEJAR. (Added in 7.17.1)
-
-        #if self.config['reuse_cookies']:
-            ## Setting empty string will activate curl cookie engine
-            #self.curl.setopt(pycurl.COOKIELIST, '')
-        #else:
+        #if not self.config['reuse_cookies'] and not self.config['cookies']:
             #self.curl.setopt(pycurl.COOKIELIST, 'ALL')
 
+        if self.config['cookiefile']:
+            self.load_cookies(self.config['cookiefile'])
 
-        ## CURLOPT_COOKIE
-        ## Pass a pointer to a zero terminated string as parameter. It will be used to set a cookie in the http request. The format of the string should be NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie should contain.
-        ## If you need to set multiple cookies, you need to set them all using a single option and thus you need to concatenate them all in one single string. Set multiple cookies in one string like this: "name1=content1; name2=content2;" etc.
-        ## Note that this option sets the cookie header explictly in the outgoing request(s). If multiple requests are done due to authentication, followed redirections or similar, they will all get this cookie passed on.
-        ## Using this option multiple times will only make the latest string override the previous ones. 
-
-        #if self.config['cookies']:
-            #self.curl.setopt(pycurl.COOKIE, self.encode_cookies(self.config['cookies']))
-
-        #if self.config['cookiefile']:
-            #self.load_cookies(self.config['cookiefile'])
 
         #if self.config['referer']:
             #self.curl.setopt(pycurl.REFERER, str(self.config['referer']))
@@ -203,30 +191,15 @@ class RequestsTransportExtension(object):
         #if self.config['proxy_userpwd']:
             #self.curl.setopt(pycurl.PROXYUSERPWD, self.config['proxy_userpwd'])
 
-        ## PROXYTYPE
-        ## Pass a long with this option to set type of the proxy. Available options for this are CURLPROXY_HTTP, CURLPROXY_HTTP_1_0 (added in 7.19.4), CURLPROXY_SOCKS4 (added in 7.15.2), CURLPROXY_SOCKS5, CURLPROXY_SOCKS4A (added in 7.18.0) and CURLPROXY_SOCKS5_HOSTNAME (added in 7.18.0). The HTTP type is default. (Added in 7.10) 
+        if self.config['proxy']:
+            self.requests_config['proxy'] = self.config['proxy']
 
-        #if self.config['proxy_type']:
-            #ptype = getattr(pycurl, 'PROXYTYPE_%s' % self.config['proxy_type'].upper())
-            #self.curl.setopt(pycurl.PROXYTYPE, ptype)
+        if self.config['proxy_userpwd']:
+            raise GrabMisuseError('requests transport does not support proxy authentication')
 
-        #if self.config['proxy']:
-            #if self.config['proxy_userpwd']:
-                #auth = ' with authorization'
-            #else:
-                #auth = ''
-            #proxy_info = ' via %s proxy of type %s%s' % (
-                #self.config['proxy'], self.config['proxy_type'], auth)
-        #else:
-            #proxy_info = ''
-
-        #tname = threading.currentThread().getName().lower()
-        #if tname == 'mainthread':
-            #tname = ''
-        #else:
-            #tname = '-%s' % tname
-
-        #logger.debug('[%02d%s] %s %s%s' % (self.request_counter, tname, method, self.config['url'], proxy_info))
+        if self.config['proxy_type']:
+            if self.config['proxy_type'] != 'http':
+                raise GrabMisuseError('requests transport supports only proxies of http type')
 
         #if self.config['encoding']:
             #self.curl.setopt(pycurl.ENCODING, self.config['encoding'])
@@ -252,8 +225,20 @@ class RequestsTransportExtension(object):
 
 
     def transport_request(self):
+        import requests
         try:
-            self._requests_response = self.session.get(self.config['url'])
+            cfg = self.requests_config
+            func = getattr(requests, cfg['method'])
+            kwargs = {}
+            if cfg['payload'] is not None:
+                kwargs['data'] = cfg['payload']
+            if cfg['cookies'] is not None:
+                kwargs['cookies'] = cfg['cookies']
+            if cfg['proxy'] is not None:
+                kwargs['proxies'] = {'http': cfg['proxy'],
+                                     'https': cfg['proxy']}
+            self._requests_response = func(
+                cfg['url'], headers=cfg['headers'], **kwargs)
         except Exception, ex:
             raise GrabError(0, unicode(ex))
 

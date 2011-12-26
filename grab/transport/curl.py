@@ -2,15 +2,15 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 from __future__ import absolute_import
-import mimetools
-import pycurl
+import email
 import logging
 import urllib
 from StringIO import StringIO
 import threading
 import random
 
-from ..base import GrabError, GrabMisuseError, UploadContent, UploadFile
+from ..base import (GrabError, GrabMisuseError, UploadContent, UploadFile,
+                    GrabTimeoutError, GrabNetworkError)
 
 logger = logging.getLogger('grab')
 
@@ -49,6 +49,8 @@ except ImportError:
 
 class CurlTransportExtension(object):
     def extra_init(self):
+        import pycurl
+
         self.curl = pycurl.Curl()
 
     def extra_reset(self):
@@ -59,6 +61,7 @@ class CurlTransportExtension(object):
         self.request_head = ''
         self.request_log = ''
         self.request_body = ''
+        self.request_method = None
 
     def head_processor(self, chunk):
         """
@@ -102,12 +105,13 @@ class CurlTransportExtension(object):
         4: CURLINFO_DATA_OUT
         5: CURLINFO_unrecognized_type
         """
+        import pycurl
 
         if _type == pycurl.INFOTYPE_HEADER_OUT:
             self.request_head += text
             lines = text.splitlines()
             text = '\n'.join(lines[1:])
-            self.request_headers = mimetools.Message(StringIO(text))
+            self.request_headers = email.message_from_string(text)
 
         if _type == pycurl.INFOTYPE_DATA_OUT:
             self.request_body += text
@@ -121,6 +125,7 @@ class CurlTransportExtension(object):
         """
         Setup curl instance with values from ``self.config``.
         """
+        import pycurl
 
         url = self.config['url']
         if isinstance(url, unicode):
@@ -149,28 +154,18 @@ class CurlTransportExtension(object):
 
         self.curl.setopt(pycurl.USERAGENT, self.config['user_agent'])
 
-        if self.config['debug']:
-            self.curl.setopt(pycurl.VERBOSE, 1)
-            self.curl.setopt(pycurl.DEBUGFUNCTION, self.debug_processor)
+        self.curl.setopt(pycurl.VERBOSE, 1)
+        self.curl.setopt(pycurl.DEBUGFUNCTION, self.debug_processor)
 
         # Ignore SSL errors
         self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)
         self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)
 
-        method = self.config['method']
-        if method:
-            method = method.upper()
-        else:
-            if self.config['post'] or self.config['multipart_post']:
-                method = 'POST'
-            else:
-                method = 'GET'
-
-        if method == 'POST':
+        if self.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
             if self.config['multipart_post']:
-                if not isinstance(self.config['multipart_post'], (list, tuple)):
-                    raise GrabMisuseError('multipart_post should be tuple or list, not dict')
+                if isinstance(self.config['multipart_post'], basestring):
+                    raise GrabMisuseError('multipart_post option could not be a string')
                 post_items = self.normalize_http_values(self.config['multipart_post'])
                 self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif self.config['post']:
@@ -185,12 +180,12 @@ class CurlTransportExtension(object):
                     # dict, tuple, list should be serialized into byte-string
                     post_data = self.urlencode(self.config['post'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
-        elif method == 'PUT':
+        elif self.request_method == 'PUT':
             self.curl.setopt(pycurl.PUT, 1)
             self.curl.setopt(pycurl.READFUNCTION, StringIO(self.config['post']).read) 
-        elif method == 'DELETE':
+        elif self.request_method == 'DELETE':
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
-        elif method == 'HEAD':
+        elif self.request_method == 'HEAD':
             self.curl.setopt(pycurl.NOBODY, 1)
         else:
             self.curl.setopt(pycurl.HTTPGET, 1)
@@ -216,13 +211,6 @@ class CurlTransportExtension(object):
         # Passing the special string "FLUSH" will write all cookies known by
         # cURL to the file specified by CURLOPT_COOKIEJAR. (Added in 7.17.1)
 
-        #if self.config['reuse_cookies']:
-            ## Setting empty string will activate curl cookie engine
-            #self.curl.setopt(pycurl.COOKIELIST, '')
-        #else:
-            #self.curl.setopt(pycurl.COOKIELIST, 'ALL')
-
-
         # CURLOPT_COOKIE
         # Pass a pointer to a zero terminated string as parameter. It will be used to set a cookie in the http request. The format of the string should be NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie should contain.
         # If you need to set multiple cookies, you need to set them all using a single option and thus you need to concatenate them all in one single string. Set multiple cookies in one string like this: "name1=content1; name2=content2;" etc.
@@ -230,7 +218,17 @@ class CurlTransportExtension(object):
         # Using this option multiple times will only make the latest string override the previous ones. 
 
         if self.config['cookies']:
-            self.curl.setopt(pycurl.COOKIE, self.encode_cookies(self.config['cookies']))
+            items = self.encode_cookies(self.config['cookies'], join=False)
+            self.curl.setopt(pycurl.COOKIELIST, 'ALL')
+            for item in items:
+                self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s' % item)
+        else:
+            # Turn on cookies engine anyway
+            # To correctly support cookies in 302-redirects
+            self.curl.setopt(pycurl.COOKIELIST, '')
+
+        #if not self.config['reuse_cookies'] and not self.config['cookies']:
+            #self.curl.setopt(pycurl.COOKIELIST, 'ALL')
 
         if self.config['cookiefile']:
             self.load_cookies(self.config['cookiefile'])
@@ -253,25 +251,10 @@ class CurlTransportExtension(object):
             ptype = getattr(pycurl, 'PROXYTYPE_%s' % self.config['proxy_type'].upper())
             self.curl.setopt(pycurl.PROXYTYPE, ptype)
 
-        if self.config['proxy']:
-            if self.config['proxy_userpwd']:
-                auth = ' with authorization'
-            else:
-                auth = ''
-            proxy_info = ' via %s proxy of type %s%s' % (
-                self.config['proxy'], self.config['proxy_type'], auth)
-        else:
-            proxy_info = ''
-
-        tname = threading.currentThread().getName().lower()
-        if tname == 'mainthread':
-            tname = ''
-        else:
-            tname = '-%s' % tname
-
-        logger.debug('[%02d%s] %s %s%s' % (self.request_counter, tname, method, self.config['url'], proxy_info))
-
         if self.config['encoding']:
+            if 'gzip' in self.config['encoding'] and not 'zlib' in pycurl.version:
+                raise GrabMisuseError('You can not use gzip encoding because '\
+                                      'pycurl was built without zlib support')
             self.curl.setopt(pycurl.ENCODING, self.config['encoding'])
 
         if self.config['userpwd']:
@@ -281,6 +264,8 @@ class CurlTransportExtension(object):
             self.charset = self.config['charset']
 
     def transport_request(self):
+        import pycurl
+
         try:
             self.curl.perform()
         except pycurl.error, ex:
@@ -291,15 +276,25 @@ class CurlTransportExtension(object):
             if 23 == ex[0]:
                 pass
             else:
-                raise GrabError(ex[0], ex[1])
+                if ex[0] == 28:
+                    raise GrabTimeoutError(ex[0], ex[1])
+                else:
+                    raise GrabNetworkError(ex[0], ex[1])
 
     def prepare_response(self):
+        import pycurl
+
         self.response.head = ''.join(self.response_head_chunks)
         self.response.body = ''.join(self.response_body_chunks)
         self.response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
         self.response.parse()
+        self.response.cookies = self.extract_cookies()
+
+        # We do not need anymore cookies stored in the
+        # curl instance so drop them
+        self.curl.setopt(pycurl.COOKIELIST, 'ALL')
 
     # TODO: move to base
     def load_cookies(self, path):
@@ -308,6 +303,7 @@ class CurlTransportExtension(object):
 
         The cookie data may be in Netscape / Mozilla cookie data format or just regular HTTP-style headers dumped to a file.
         """
+        import pycurl
 
         self.curl.setopt(pycurl.COOKIEFILE, path)
 
@@ -320,9 +316,37 @@ class CurlTransportExtension(object):
         Each cookie is dumped in the format:
         # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
         """
+        import pycurl
 
         with open(path, 'w') as out:
             out.write('\n'.join(self.curl.getinfo(pycurl.INFO_COOKIELIST)))
+
+    def clear_cookies(self):
+        """
+        Clear all cookies.
+
+        Custom version of BaseCurl.clear_cookies which do additional action:
+        reset cookies in curl instance.
+        """
+        import pycurl
+
+        self.config['cookies'] = {}
+        self.curl.setopt(pycurl.COOKIELIST, 'ALL')
+
+    def extract_cookies(self):
+        """
+        Extract cookies.
+        """
+        import pycurl
+
+        # Example of line:
+        # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
+        cookies = {}
+        for line in self.curl.getinfo(pycurl.INFO_COOKIELIST):
+            chunks = line.split('\t')
+            cookies[chunks[-2]] = chunks[-1]
+        return cookies
+
 
 
 from ..base import BaseGrab

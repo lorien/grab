@@ -19,6 +19,7 @@ import itertools
 from random import choice
 from datetime import datetime, timedelta
 import re
+import logging
 
 READ_TIMEOUT = 60 * 10
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')

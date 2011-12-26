@@ -23,3 +23,9 @@ class GrabMisuseError(GrabError):
     """
     Indicates incorrect usage of grab API.
     """
+
+
+class GrabTimeoutError(GrabNetworkError):
+    """
+    Raised when time is outed for request.
+    """

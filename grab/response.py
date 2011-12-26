@@ -4,7 +4,7 @@ The Response class is the result of network request maden with Grab instance.
 import re
 from copy import copy
 import logging
-from mimetools import Message
+import email
 from StringIO import StringIO
 from cookielib import CookieJar
 from urllib2 import Request
@@ -30,8 +30,9 @@ class Response(object):
         self.cookies = {}
         self.cookiejar = None
         self.charset = 'utf-8'
+        self._unicode_body = None
 
-    def parse(self):
+    def parse(self, charset=None):
         """
         Parse headers and cookies.
 
@@ -49,13 +50,18 @@ class Response(object):
                     if ':' in line:
                         valid_lines.append(line)
 
-        self.headers = Message(StringIO('\n'.join(valid_lines)))
-        self.cookiejar = CookieJar()
-        self.cookiejar.extract_cookies(self, Request(self.url))
-        for cookie in self.cookiejar:
-            self.cookies[cookie.name] = cookie.value
+        self.headers = email.message_from_string('\n'.join(valid_lines))
+        #self.cookiejar = CookieJar()
+        #self.cookiejar.extract_cookies(self, Request(self.url))
+        #for cookie in self.cookiejar:
+            #self.cookies[cookie.name] = cookie.value
 
-        self.detect_charset()
+        if charset is None:
+            self.detect_charset()
+        else:
+            self.charset = charset
+
+        self._unicode_body = None
 
     def info(self):
         """
@@ -126,12 +132,14 @@ class Response(object):
         Return response body as unicode string.
         """
 
-        if ignore_errors:
-            errors = 'ignore'
-        else:
-            errors = 'strict'
-        ubody = self.body.decode(self.charset, errors)
-        return RE_XML_DECLARATION.sub('', ubody)
+        if not self._unicode_body:
+            if ignore_errors:
+                errors = 'ignore'
+            else:
+                errors = 'strict'
+            ubody = self.body.decode(self.charset, errors)
+            self._unicode_body = RE_XML_DECLARATION.sub('', ubody)
+        return self._unicode_body
 
     def copy(self):
         """
@@ -141,7 +149,7 @@ class Response(object):
         obj = Response()
 
         copy_keys = ('status', 'code', 'head', 'body', 'time',
-                     'url', 'charset')
+                     'url', 'charset', '_unicode_body')
         for key in copy_keys:
             setattr(obj, key, getattr(self, key))
 
@@ -156,5 +164,5 @@ class Response(object):
         Save response body to file.
         """
 
-        with open(path, 'w') as out:
+        with open(path, 'wb') as out:
             out.write(self.body)

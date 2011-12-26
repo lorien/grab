@@ -1,8 +1,11 @@
 from setuptools import setup, find_packages
+import re
+
+version = __import__('grab').__version__
 
 setup(
     name = 'grab',
-    version = '0.3.11',
+    version = version,
     description = 'Pycurl wrapper',
     url = 'http://bitbucket.org/lorien/grab/',
     author = 'Grigoriy Petukhov',
