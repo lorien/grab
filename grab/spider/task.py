@@ -53,5 +53,8 @@ class Task(object):
 
         for key, value in kwargs.items():
             setattr(task, key, value)
+            
+        if 'grab' in kwargs:
+            task.url = kwargs['grab'].config['url']
 
         return task
