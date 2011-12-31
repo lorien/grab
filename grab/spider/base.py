@@ -13,8 +13,14 @@ import cPickle as pickle
 import anydbm
 import multiprocessing
 import zlib
-from pymongo.binary import Binary
 from hashlib import sha1
+try:
+    import pymongo
+    import pymongo.binary
+except ImportError:
+    PYMONGO_IMPORTED = False
+else:
+    PYMONGO_IMPORTED = True
 
 from .error import SpiderError, SpiderMisuseError, FatalError
 from .task import Task
@@ -106,9 +112,10 @@ class Spider(object):
         self.should_stop = False
 
     def setup_cache(self):
-        import pymongo
         if not self.cache_db:
             raise Exception('You should configure cache_db option')
+        if not PYMONGO_IMPORTED:
+            raise Exception('pymongo required to use cache feature')
         self.cache = pymongo.Connection()[self.cache_db]['cache']
 
     def prepare(self):
@@ -532,7 +539,7 @@ class Spider(object):
             if grab.response.code < 400 or grab.response.code == 404:
                 utf_body = grab.response.unicode_body().encode('utf-8')
                 if self.use_cache_compression:
-                    body = Binary(zlib.compress(utf_body))
+                    body = pymongo.binary.Binary(zlib.compress(utf_body))
                 else:
                     body = utf_body
 
