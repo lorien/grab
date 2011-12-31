@@ -103,6 +103,7 @@ class Spider(object):
         else:
             self.handlers = self
         self.cache_key_hash = cache_key_hash
+        self.should_stop = False
 
     def setup_cache(self):
         import pymongo
@@ -167,6 +168,9 @@ class Spider(object):
 
         for res_count, res in enumerate(self.fetch()):
             if res is None:
+                break
+
+            if self.should_stop:
                 break
 
             if self.task_generator_enabled:
@@ -411,12 +415,8 @@ class Spider(object):
                         if self.use_cache and not task.get('disable_cache'):
                             if grab.detect_request_method() == 'GET':
                                 url = grab.config['url']
-                                utf_url = url.encode('utf-8') if isinstance(url, unicode) else url
-                                if self.cache_key_hash:
-                                    url_hash = sha1(utf_url).hexdigest()
-                                else:
-                                    url_hash = url
-                                cache_item = self.cache.find_one({'_id': url_hash})
+                                _hash = self.build_cache_hash(url)
+                                cache_item = self.cache.find_one({'_id': _hash})
                                 if cache_item:
                                 #if url in self.cache:
                                     #cache_item = pickle.loads(self.cache[url])
@@ -536,9 +536,9 @@ class Spider(object):
                 else:
                     body = utf_body
 
-                utf_url = task.url.encode('utf-8') if isinstance(task.url, unicode) else task.url
+                _hash = self.build_cache_hash(task.url)
                 item = {
-                    '_id': sha1(utf_url).hexdigest() if self.cache_key_hash else task.url,
+                    '_id': _hash,
                     'url': task.url,
                     'body': body,
                     'head': grab.response.head,
@@ -753,3 +753,18 @@ class Spider(object):
             grab2.setup(url=url)
             task2 = task.clone(task_try_count=0, grab=grab2, page=page)
             return task2
+
+
+    def build_cache_hash(self, url):
+        utf_url = url.encode('utf-8') if isinstance(url, unicode) else url
+        if self.cache_key_hash:
+            return sha1(utf_url).hexdigest()
+        else:
+            return utf_url
+
+    def remove_cache_item(self, url):
+        _hash = self.build_cache_hash(url)
+        self.cache.remove({'_id': _hash})
+
+    def stop(self):
+        self.should_stop = True
