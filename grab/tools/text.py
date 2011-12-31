@@ -3,8 +3,6 @@ Text parsing and processing utilities.
 """
 import re
 
-from ..base import DataNotFound
-
 RE_NUMBER = re.compile(r'\d+')
 RE_NUMBER_WITH_SPACES = re.compile(r'\d[\s\d]*', re.U)
 RE_SPACE = re.compile(r'\s+', re.U)
@@ -18,6 +16,9 @@ def find_number(text, ignore_spaces=False):
         by spaces are considered as one number
     :raises: :class:`DataNotFound` if number was not found.
     """
+    # tmp hack
+    # to avoid import error
+    from ..base import DataNotFound
 
     if ignore_spaces:
         match = RE_NUMBER_WITH_SPACES.search(text)

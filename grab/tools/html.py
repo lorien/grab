@@ -6,6 +6,9 @@ import re
 from htmlentitydefs import name2codepoint
 import logging
 
+from text import normalize_space
+
+RE_TAG = re.compile(r'<[^>]+>')
 RE_REFRESH_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']*Refresh[^>]+', re.I)
 RE_REFRESH_URL = re.compile(r'url=["\']*([^\'"> ]+)', re.I)
 RE_ENTITY = re.compile(r'(&[a-z]+;)')
@@ -81,3 +84,10 @@ def find_base_url(html):
         return match.group(1)
     else:
         return None
+
+def strip_tags(html, normalize_space=True):
+    text = RE_TAG.sub(' ', html)
+    if normalize_space:
+        return normalize_space(text)
+    else:
+        return text
