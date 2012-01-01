@@ -57,7 +57,8 @@ class Spider(object):
                  log_taskname=False,
                  cache_key_hash=True,
                  distributed_mode=False,
-                 handlers=None):
+                 handlers=None,
+                 request_pause=0):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -77,6 +78,10 @@ class Spider(object):
             If True then you should specifiy the `handlers` arguments which
             should be a module which contains task handler as top level
             functions
+        * request_pause - amount of time on which the main `run` cycle should
+            pause the activity of spider. By default it is equal to zero. You
+            can use this option to slow down the spider speed (also you can use
+            `thread_number` option). The value of `request_pause` could be float.
         """
 
         self.taskq = PriorityQueue()
@@ -110,6 +115,7 @@ class Spider(object):
             self.handlers = self
         self.cache_key_hash = cache_key_hash
         self.should_stop = False
+        self.request_pause = request_pause
 
     def setup_cache(self):
         if not self.cache_db:
@@ -174,6 +180,9 @@ class Spider(object):
             multi_requests = []
 
         for res_count, res in enumerate(self.fetch()):
+            if res_count > 0 and self.request_pause > 0:
+                time.sleep(self.request_pause)
+
             if res is None:
                 break
 
