@@ -21,6 +21,7 @@ except ImportError:
     PYMONGO_IMPORTED = False
 else:
     PYMONGO_IMPORTED = True
+import inspect
 
 from .error import SpiderError, SpiderMisuseError, FatalError
 from .task import Task
@@ -168,91 +169,96 @@ class Spider(object):
                 self.add_task(Task('initial', url=url))
 
     def run(self):
-        self.start_time = time.time()
-        self.load_initial_urls()
+        try:
+            self.start_time = time.time()
+            self.load_initial_urls()
 
-        # new
-        if self.distributed_mode:
-            pool = multiprocessing.Pool()
-            manager = multiprocessing.Manager()
-            queue = manager.Queue()
-            mapping = {}
-            multi_requests = []
-
-        for res_count, res in enumerate(self.fetch()):
-            if res_count > 0 and self.request_pause > 0:
-                time.sleep(self.request_pause)
-
-            if res is None:
-                break
-
-            if self.should_stop:
-                break
-
-            if self.task_generator_enabled:
-                self.process_task_generator()
-
-            # Increase task counters
-            self.inc_count('task')
-            self.inc_count('task-%s' % res['task'].name)
-            if (res['task'].network_try_count == 1 and
-                res['task'].task_try_count == 1):
-                self.inc_count('task-%s-initial' % res['task'].name)
-            if self.log_taskname:
-                logging.debug('TASK: %s - %s' % (res['task'].name,
-                                                 'OK' if res['ok'] else 'FAIL'))
-
-            handler_name = 'task_%s' % res['task'].name
-            try:
-                handler = getattr(self.handlers, handler_name)
-            except AttributeError:
-                raise Exception('Task handler does not exist: %s' %\
-                                handler_name)
-            else:
-                if self.distributed_mode:
-                    self.execute_response_handler_async(
-                        res, handler, handler_name, mapping,
-                        res_count, multi_requests, queue, pool)
-                else:
-                    self.execute_response_handler_sync(res, handler, handler_name)
-
+            # new
             if self.distributed_mode:
+                pool = multiprocessing.Pool()
+                manager = multiprocessing.Manager()
+                queue = manager.Queue()
+                mapping = {}
+                multi_requests = []
+
+            for res_count, res in enumerate(self.fetch()):
+                if res_count > 0 and self.request_pause > 0:
+                    time.sleep(self.request_pause)
+
+                if res is None:
+                    break
+
+                if self.should_stop:
+                    break
+
+                if self.task_generator_enabled:
+                    self.process_task_generator()
+
+                # Increase task counters
+                self.inc_count('task')
+                self.inc_count('task-%s' % res['task'].name)
+                if (res['task'].network_try_count == 1 and
+                    res['task'].task_try_count == 1):
+                    self.inc_count('task-%s-initial' % res['task'].name)
+                if self.log_taskname:
+                    logging.debug('TASK: %s - %s' % (res['task'].name,
+                                                     'OK' if res['ok'] else 'FAIL'))
+
+                handler_name = 'task_%s' % res['task'].name
                 try:
-                    res_count, handler_name, task_result = queue.get(False)
-                except Empty:
-                    pass
+                    handler = getattr(self.handlers, handler_name)
+                except AttributeError:
+                    raise Exception('Task handler does not exist: %s' %\
+                                    handler_name)
                 else:
-                    res = mapping[res_count]
-                    if isinstance(task_result, dict) and 'error' in task_result:
-                        self.error_handler(handler_name, task_result['error'],
-                                           res['task'])
+                    if self.distributed_mode:
+                        self.execute_response_handler_async(
+                            res, handler, handler_name, mapping,
+                            res_count, multi_requests, queue, pool)
                     else:
-                        self.process_result(task_result, res['task'])
-                    #import pdb; pdb.set_trace()
-                    #res['grab']._lxml_tree = tree
-                    #print tree.xpath('//h1')
+                        self.execute_response_handler_sync(res, handler, handler_name)
+
+                if self.distributed_mode:
+                    try:
+                        res_count, handler_name, task_result = queue.get(False)
+                    except Empty:
+                        pass
+                    else:
+                        res = mapping[res_count]
+                        if isinstance(task_result, dict) and 'error' in task_result:
+                            self.error_handler(handler_name, task_result['error'],
+                                               res['task'])
+                        else:
+                            self.process_result(task_result, res['task'])
+                        #import pdb; pdb.set_trace()
+                        #res['grab']._lxml_tree = tree
+                        #print tree.xpath('//h1')
+                        #self.execute_response_handler(res, handler, handler_name)
+                        del mapping[res_count]
+                    multi_requests = [x for x in multi_requests if not x.ready()]
+
+            #if self.distributed_mode:
+            # new
+            #while True:
+                #try:
+                    #res_count, tree = queue.get(True, 0.1)
+                #except Empty:
+                    #multi_requests = [x for x in multi_requests if not x.ready()]
+                    #if not len(multi_requests):
+                        #break
+                #else:
+                    #res = mapping[res_count]
+                    ##res['grab']._lxml_tree = tree
                     #self.execute_response_handler(res, handler, handler_name)
-                    del mapping[res_count]
-                multi_requests = [x for x in multi_requests if not x.ready()]
-
-        #if self.distributed_mode:
-        # new
-        #while True:
-            #try:
-                #res_count, tree = queue.get(True, 0.1)
-            #except Empty:
-                #multi_requests = [x for x in multi_requests if not x.ready()]
-                #if not len(multi_requests):
-                    #break
-            #else:
-                #res = mapping[res_count]
-                ##res['grab']._lxml_tree = tree
-                #self.execute_response_handler(res, handler, handler_name)
-                #del mapping[res_count]
+                    #del mapping[res_count]
 
 
-        # This code is executed when main cycles is breaked
-        self.shutdown()
+        except KeyboardInterrupt:
+            print '\nGot ^C signal. Stopping.'
+            print self.render_stats()
+        finally:
+            # This code is executed when main cycles is breaked
+            self.shutdown()
 
 
     def execute_response_handler_async(self, res, handler, handler_name,
@@ -784,3 +790,38 @@ class Spider(object):
 
     def stop(self):
         self.should_stop = True
+
+    @classmethod
+    def init_with_config(cls, modname):
+        """
+        This method create spider instance and configure it
+        with options found in given config module.
+        
+        Args:
+            :modname string: name of module with settings
+        """
+
+        # Load key, value dict from config module
+        config = __import__(modname, fromlist=[''])
+        config_dict = {}
+        for key in dir(config):
+            config_dict[key.lower()] = getattr(config, key)
+
+        # Find names of arguments of __init__ method
+        arg_names = inspect.getargspec(getattr(cls, '__init__'))[0]
+        arg_names = [x.lower() for x in arg_names]
+
+        # Find __init__ arguments in config module
+        kwargs = {}
+        for name in arg_names:
+            if name in config_dict:
+                kwargs[name] = config_dict[name]
+
+        # Create Spider instance
+        obj = cls(**kwargs)
+
+        # Configure proxy list
+        if 'proxylist' in config_dict:
+            obj.setup_proxylist(**config_dict['proxylist'])
+
+        return obj
