@@ -611,7 +611,7 @@ class Spider(object):
                     'body': body,
                     'head': grab.response.head,
                     'response_code': grab.response.code,
-                    'cookies': grab.response.cookies,
+                    'cookies': None,#grab.response.cookies,
                 }
                 #import pdb; pdb.set_trace()
                 try:
