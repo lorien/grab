@@ -22,21 +22,38 @@ except ImportError:
 else:
     PYMONGO_IMPORTED = True
 import inspect
+import traceback
 
 from .error import SpiderError, SpiderMisuseError, FatalError
 from .task import Task
 from .data import Data
-from . import setup_pickle
 
 CURL_OBJECT = pycurl.Curl()
 
-def execute_handler(handler, handler_name, res_count, queue,
+def execute_handler(path, handler_name, res_count, queue,
                     grab, task):
     try:
-        res = handler(grab, task)
-        queue.put((res_count, handler_name, res))
+        mod_path, cls_name = path.rsplit('.', 1)
+        mod = __import__(mod_path, fromlist=[''])
+        cls = getattr(mod, cls_name)
+        bot = cls(container_mode=True)
+        handler = getattr(bot, handler_name)
+        try:
+            result = handler(grab, task)
+            if isinstance(result, types.GeneratorType):
+                items = list(result)
+            else:
+                items = [result]
+            items += bot.distributed_task_buffer
+                #if len(items) > 1:
+                    #raise Exception('Multiple yield from handler is not supported yet in distributed mode')
+            queue.put((res_count, handler_name, items))
+        except Exception, ex:
+            #logging.error(ex)
+            tb = traceback.format_exc()
+            queue.put((res_count, handler_name, [{'error': ex, 'traceback': tb}]))
     except Exception, ex:
-        return {'error': ex}
+        logging.error('', exc_info=ex)
 
 
 class Spider(object):
@@ -57,9 +74,11 @@ class Spider(object):
                  cache_db = None,
                  log_taskname=False,
                  cache_key_hash=True,
+                 request_pause=0,
+                 container_mode=False,
                  distributed_mode=False,
-                 handlers=None,
-                 request_pause=0):
+                 distributed_path=None,
+                 ):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -76,15 +95,19 @@ class Spider(object):
             are scheduled manually in the spider business logic
         * distributed_mode - if True then multiprocessing module
             will be used to share task handlers among available CPU cores
-            If True then you should specifiy the `handlers` arguments which
-            should be a module which contains task handler as top level
-            functions
         * request_pause - amount of time on which the main `run` cycle should
             pause the activity of spider. By default it is equal to zero. You
             can use this option to slow down the spider speed (also you can use
             `thread_number` option). The value of `request_pause` could be float.
+        * container_mode - used for distributed mode then we have to call method
+            in remote process which receives name of spider class and name of method.
+        * distributed_path - path to the spider class in format "mod.mod.ClassName"
         """
 
+        self.container_mode = container_mode
+        self.distributed_task_buffer = []
+        if container_mode:
+            return
         self.taskq = PriorityQueue()
         self.thread_number = thread_number
         self.request_limit = request_limit
@@ -110,13 +133,10 @@ class Spider(object):
         self.log_taskname = log_taskname
         self.prepare()
         self.distributed_mode = distributed_mode
-        if handlers:
-            self.handlers = handlers
-        else:
-            self.handlers = self
         self.cache_key_hash = cache_key_hash
         self.should_stop = False
         self.request_pause = request_pause
+        self.distributed_path = distributed_path
 
     def setup_cache(self):
         if not self.cache_db:
@@ -129,6 +149,11 @@ class Spider(object):
         """
         You can do additional spider customizatin here
         before it has started working.
+        """
+
+    def container_prepare(self):
+        """
+        Executed in container-mode on instance creating phase.
         """
 
     def sigusr1_handler(self, signal, frame):
@@ -185,58 +210,68 @@ class Spider(object):
                 if res_count > 0 and self.request_pause > 0:
                     time.sleep(self.request_pause)
 
-                if res is None:
+                if res is None and not self.distributed_mode:
                     break
 
-                if self.should_stop:
-                    break
+                if res:
+                    if self.should_stop:
+                        break
 
-                if self.task_generator_enabled:
-                    self.process_task_generator()
+                    if self.task_generator_enabled:
+                        self.process_task_generator()
 
-                # Increase task counters
-                self.inc_count('task')
-                self.inc_count('task-%s' % res['task'].name)
-                if (res['task'].network_try_count == 1 and
-                    res['task'].task_try_count == 1):
-                    self.inc_count('task-%s-initial' % res['task'].name)
-                if self.log_taskname:
-                    logging.debug('TASK: %s - %s' % (res['task'].name,
-                                                     'OK' if res['ok'] else 'FAIL'))
+                    # Increase task counters
+                    self.inc_count('task')
+                    self.inc_count('task-%s' % res['task'].name)
+                    if (res['task'].network_try_count == 1 and
+                        res['task'].task_try_count == 1):
+                        self.inc_count('task-%s-initial' % res['task'].name)
+                    if self.log_taskname:
+                        logging.debug('TASK: %s - %s' % (res['task'].name,
+                                                         'OK' if res['ok'] else 'FAIL'))
 
-                handler_name = 'task_%s' % res['task'].name
-                try:
-                    handler = getattr(self.handlers, handler_name)
-                except AttributeError:
-                    raise Exception('Task handler does not exist: %s' %\
-                                    handler_name)
-                else:
-                    if self.distributed_mode:
-                        self.execute_response_handler_async(
-                            res, handler, handler_name, mapping,
-                            res_count, multi_requests, queue, pool)
+                    handler_name = 'task_%s' % res['task'].name
+                    try:
+                        handler = getattr(self, handler_name)
+                    except AttributeError:
+                        raise Exception('Task handler does not exist: %s' %\
+                                        handler_name)
                     else:
-                        self.execute_response_handler_sync(res, handler, handler_name)
+                        if self.distributed_mode:
+                            self.execute_response_handler_async(
+                                res, self.distributed_path, handler_name, mapping,
+                                res_count, multi_requests, queue, pool)
+                        else:
+                            self.execute_response_handler_sync(res, handler, handler_name)
 
                 if self.distributed_mode:
                     try:
-                        res_count, handler_name, task_result = queue.get(False)
+                        res_count, handler_name, task_results = queue.get(False)
                     except Empty:
-                        pass
+                        if res is None:
+                            break
                     else:
                         res = mapping[res_count]
-                        if isinstance(task_result, dict) and 'error' in task_result:
-                            self.error_handler(handler_name, task_result['error'],
-                                               res['task'])
-                        else:
-                            self.process_result(task_result, res['task'])
-                        #import pdb; pdb.set_trace()
-                        #res['grab']._lxml_tree = tree
-                        #print tree.xpath('//h1')
-                        #self.execute_response_handler(res, handler, handler_name)
+                        for task_result in task_results:
+                            #if task_result == 'traceback':
+                                #import pdb; pdb.set_trace()
+                            if isinstance(task_result, dict) and 'error' in task_result:
+                                self.error_handler(handler_name,
+                                                   task_result['error'],
+                                                   res['task'],
+                                                   error_tb=task_result['traceback'])
+                            else:
+                                self.process_result(task_result, res['task'])
+                            #import pdb; pdb.set_trace()
+                            #res['grab']._lxml_tree = tree
+                            #print tree.xpath('//h1')
+                            #self.execute_response_handler(res, handler, handler_name)
                         del mapping[res_count]
                     multi_requests = [x for x in multi_requests if not x.ready()]
 
+            # It is nonsense if that code should work because
+            # we already is out of main loop so
+            # if handler returns new Task then it will not be processed
             #if self.distributed_mode:
             # new
             #while True:
@@ -261,7 +296,7 @@ class Spider(object):
             self.shutdown()
 
 
-    def execute_response_handler_async(self, res, handler, handler_name,
+    def execute_response_handler_async(self, res, path, handler_name,
                                        mapping, res_count, multi_requests,
                                        queue, pool):
         if res['ok'] and (res['grab'].response.code < 400 or
@@ -270,7 +305,7 @@ class Spider(object):
             res['grab'].curl = None
             res['grab_original'].curl = None
             multi_request = pool.apply_async(
-                execute_handler, (handler, handler_name, res_count,
+                execute_handler, (path, handler_name, res_count,
                                   queue, res['grab'], res['task']))
             multi_requests.append(multi_request)
         else:
@@ -335,6 +370,7 @@ class Spider(object):
         elif result is None:
             pass
         else:
+            #import pdb; pdb.set_trace()
             raise Exception('Unknown result type: %s' % result)
 
     def add_task(self, task):
@@ -344,15 +380,25 @@ class Spider(object):
         Stop the task which was executed too many times.
         """
 
-        if task.task_try_count > self.task_try_limit:
-            logging.debug('Task tries ended: %s / %s' % (task.name, task.url))
-            return False
-        elif task.network_try_count >= self.network_try_limit:
-            logging.debug('Network tries ended: %s / %s' % (task.name, task.url))
-            return False
+        if self.container_mode:
+            self.distributed_task_buffer.append(task)
         else:
-            self.taskq.put((task.priority, task))
-            return True
+            if task.task_try_count > self.task_try_limit:
+                logging.debug('Task tries ended: %s / %s' % (task.name, task.url))
+                return False
+            elif task.network_try_count >= self.network_try_limit:
+                logging.debug('Network tries ended: %s / %s' % (task.name, task.url))
+                return False
+            else:
+                #prep = getattr(self, 'task_%s_preprocessor' % task.name, None)
+                #ok = True
+                #if prep:
+                    #ok = prep(task)
+                #if ok:
+                    #self.taskq.put((task.priority, task))
+                #return ok
+                self.taskq.put((task.priority, task))
+                return True
 
     def data_default(self, item):
         """
@@ -673,12 +719,17 @@ class Spider(object):
             path = os.path.join(dir_path, '%s.txt' % key)
             self.save_list(key, path)
 
-    def error_handler(self, func_name, ex, task):
+    def error_handler(self, func_name, ex, task, error_tb=None):
         self.inc_count('error-%s' % ex.__class__.__name__.lower())
         self.add_item('fatal', '%s|%s|%s' % (ex.__class__.__name__,
                                              unicode(ex), task.url))
-        logging.error('Error in %s function' % func_name,
-                      exc_info=ex)
+        if error_tb:
+            logging.error('Error in %s function' % func_name)
+            if error_tb:
+                logging.error(error_tb)
+        else:
+            logging.error('Error in %s function' % func_name,
+                          exc_info=ex)
         if self.debug_error:
             #import sys, traceback,  pdb
             #type, value, tb = sys.exc_info()
@@ -789,6 +840,10 @@ class Spider(object):
         self.cache.remove({'_id': _hash})
 
     def stop(self):
+        """
+        Stop main loop.
+        """
+
         self.should_stop = True
 
     @classmethod
