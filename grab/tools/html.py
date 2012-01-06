@@ -6,7 +6,7 @@ import re
 from htmlentitydefs import name2codepoint
 import logging
 
-from text import normalize_space
+from text import normalize_space as normalize_space_func
 
 RE_TAG = re.compile(r'<[^>]+>')
 RE_REFRESH_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']*Refresh[^>]+', re.I)
@@ -88,6 +88,6 @@ def find_base_url(html):
 def strip_tags(html, normalize_space=True):
     text = RE_TAG.sub(' ', html)
     if normalize_space:
-        return normalize_space(text)
+        return normalize_space_func(text)
     else:
         return text
