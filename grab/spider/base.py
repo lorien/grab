@@ -23,6 +23,7 @@ else:
     PYMONGO_IMPORTED = True
 import inspect
 import traceback
+from urlparse import urljoin
 
 from .error import SpiderError, SpiderMisuseError, FatalError
 from .task import Task
@@ -65,6 +66,10 @@ class Spider(object):
     # with name "initial" will be created from these
     # urls
     initial_urls = None
+    # Base url which is used in follow_links method to resolve relative url
+    # In future it will used as base url for resolving relative urls
+    # in all places
+    base_url = None
 
     def __init__(self, thread_number=3, request_limit=None,
                  network_try_limit=10, task_try_limit=10,
@@ -880,3 +885,22 @@ class Spider(object):
             obj.setup_proxylist(**config_dict['proxylist'])
 
         return obj
+
+    def follow_links(self, grab, xpath, task_name, task=None):
+        """
+        Args:
+            :xpath: xpath expression which calculates list of URLS
+
+        Example::
+
+            self.follow_links('//div[@class="topic"]/a/@href', 'topic')
+        """
+
+        urls = []
+        for url in grab.xpath_list(xpath):
+            if not url.startswith('http') and self.base_url is None:
+                raise SpiderError('You should define `base_url` attribute to resolve relative urls')
+            url = urljoin(self.base_url, url)
+            if not url in urls:
+                urls.append(url)
+                self.add_task(Task(task_name, url=url))
