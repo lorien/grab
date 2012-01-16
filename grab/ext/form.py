@@ -151,15 +151,13 @@ class FormExtension(object):
     # Remove set_input_by_number
     # New method: set_input_by(id=None, number=None, xpath=None)
 
-    def submit(self, submit_name=None, submit_control=None, make_request=True,
+    def submit(self, submit_name=None, make_request=True,
                url=None, extra_post=None):
         """
         Submit default form.
 
         :param submit_name: name of buton which should be "clicked" to
             submit form
-        :param submit_control: button element from lxml DOM tree
-            which should be "clicked" to submit form
         :param make_request: if `False` then grab instance will be
             configured with form post data but request will not be
             performed
@@ -202,24 +200,31 @@ class FormExtension(object):
         # if submit element is image
 
         post = self.form_fields()
-        submit_controls = []
+        submit_control = None
+
+        # Build list of submit buttons which have a name
+        submit_controls = {}
         for elem in self.form.inputs:
-            if elem.tag == 'input' and elem.type == 'submit':
-                submit_controls.append(elem)
+            if (elem.tag == 'input' and elem.type == 'submit' and
+                elem.get('name') is not None):
+                submit_controls[elem.name] = elem
 
-        # Submit only one element of submit type
-        if submit_control is None:
-            if submit_controls:
-                submit_control = submit_controls[0]
+        # All this code need only for one reason:
+        # to not send multiple submit keys in form data
+        # in real life only this key is submitted whose button
+        # was pressed
+        if len(submit_controls):
+            # If name of submit control is not given then
+            # use the name of first submit control
+            if submit_name is None or not submit_name in submit_controls:
+                controls = sorted(submit_controls.values(), key=lambda x: x.name)
+                submit_name = controls[0].name
 
-        if submit_control is not None:
-            submit_name = submit_control.name
-
-        if submit_name is not None:
-            for elem in submit_controls:
-                if elem.name != submit_name:
-                    if elem.name in post:
-                        del post[elem.name]
+            # Form data should contain only one submit control
+            for name in submit_controls:
+                if name != submit_name:
+                    if name in post:
+                        del post[name]
 
         if url:
             action_url = urljoin(self.response.url, url)

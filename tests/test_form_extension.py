@@ -29,6 +29,7 @@ FORMS = u"""
         <h1 id="fake_form">Big header</h1>
         <form name="dummy" action="/dummy">
            <input type="submit" value="submit" class="submit_btn" name="submit" />
+           <input type="submit" value="submit2" class="submit_btn" name="submit" />
         </form>
     </div>
 </body>
@@ -40,6 +41,14 @@ POST_FORM = """
     <input type="text" name="name" />
 </form>
 """ % BASE_URL
+
+MULTIPLE_SUBMIT_FORM = """
+<form method="post">
+    <input type="text" name="secret" value="123"/>
+    <input type="submit" name="submit1" value="submit1" />
+    <input type="submit" name="submit2" value="submit2" />
+</form>
+"""
 
 class TestHtmlForms(TestCase):
     def setUp(self):
@@ -92,3 +101,21 @@ class TestHtmlForms(TestCase):
         g.set_input('name', 'Alex')
         g.submit()
         self.assertEqual(REQUEST['post'], 'name=Alex&secret=123')
+
+        # Default submit control
+        RESPONSE['get'] = MULTIPLE_SUBMIT_FORM
+        g.go(BASE_URL)
+        g.submit()
+        self.assertEqual(REQUEST['post'], 'secret=123&submit1=submit1')
+
+        # Selected submit control
+        RESPONSE['get'] = MULTIPLE_SUBMIT_FORM
+        g.go(BASE_URL)
+        g.submit(submit_name='submit2')
+        self.assertEqual(REQUEST['post'], 'secret=123&submit2=submit2')
+
+        # Default submit control if submit control name is invalid
+        RESPONSE['get'] = MULTIPLE_SUBMIT_FORM
+        g.go(BASE_URL)
+        g.submit(submit_name='submit3')
+        self.assertEqual(REQUEST['post'], 'secret=123&submit1=submit1')
