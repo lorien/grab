@@ -69,7 +69,7 @@ class Spider(object):
     # Base url which is used in follow_links method to resolve relative url
     # In future it will used as base url for resolving relative urls
     # in all places
-    base_url = None
+    #base_url = None
 
     def __init__(self, thread_number=3, request_limit=None,
                  network_try_limit=10, task_try_limit=10,
@@ -898,9 +898,9 @@ class Spider(object):
 
         urls = []
         for url in grab.xpath_list(xpath):
-            if not url.startswith('http') and self.base_url is None:
-                raise SpiderError('You should define `base_url` attribute to resolve relative urls')
-            url = urljoin(self.base_url, url)
+            #if not url.startswith('http') and self.base_url is None:
+            #    raise SpiderError('You should define `base_url` attribute to resolve relative urls')
+            url = urljoin(grab.config['url'], url)
             if not url in urls:
                 urls.append(url)
                 self.add_task(Task(task_name, url=url))
