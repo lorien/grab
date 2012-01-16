@@ -5,6 +5,7 @@ from transport.curl import GrabCurl
 #from transport.urllib import GrabUrllib
 from transport.selenium import GrabSelenium
 from transport.requests import GrabRequests
+from tools.logs import default_logging
 
 Grab = GrabCurl
 
