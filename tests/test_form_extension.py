@@ -39,6 +39,7 @@ POST_FORM = """
 <form method="post" action="%s">
     <input type="text" name="secret" value="123"/>
     <input type="text" name="name" />
+    <input type="text" disabled value="some_text" name="disabled_text" />
 </form>
 """ % BASE_URL
 

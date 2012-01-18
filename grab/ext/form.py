@@ -261,17 +261,25 @@ class FormExtension(object):
         fields = dict(self.form.fields)
         for elem in self.form.inputs:
             # Ignore elements without name
-            if elem.get('name'):
-                if elem.tag == 'select':
-                    if not fields[elem.name]:
-                        if len(elem.value_options):
-                            fields[elem.name] = elem.value_options[-1]
-                if getattr(elem, 'type', None) == 'radio':
-                    if not fields[elem.name]:
-                        fields[elem.name] = elem.get('value')
-                if getattr(elem, 'type', None) == 'checkbox':
-                    if not elem.checked:
-                        if elem.name is not None:
-                            if elem.name in fields:
-                                del fields[elem.name]
+            if not elem.get('name'):
+                continue
+
+            # Do not submit disabled fields
+            # http://www.w3.org/TR/html4/interact/forms.html#h-17.12
+            if elem.get('disabled'):
+                del fields[elem.name]
+                continue
+
+            if elem.tag == 'select':
+                if not fields[elem.name]:
+                    if len(elem.value_options):
+                        fields[elem.name] = elem.value_options[-1]
+            if getattr(elem, 'type', None) == 'radio':
+                if not fields[elem.name]:
+                    fields[elem.name] = elem.get('value')
+            if getattr(elem, 'type', None) == 'checkbox':
+                if not elem.checked:
+                    if elem.name is not None:
+                        if elem.name in fields:
+                            del fields[elem.name]
         return fields
