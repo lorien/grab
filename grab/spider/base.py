@@ -903,4 +903,6 @@ class Spider(object):
             url = urljoin(grab.config['url'], url)
             if not url in urls:
                 urls.append(url)
-                self.add_task(Task(task_name, url=url))
+                g2 = grab.clone()
+                g2.setup(url=url)
+                self.add_task(Task(task_name, grab=g2))
