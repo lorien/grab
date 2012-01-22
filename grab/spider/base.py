@@ -542,17 +542,16 @@ class Spider(object):
                 url = task.url# or grab.config['url']
                 grab.fake_response(cache_item['body'])
 
+                body = cache_item['body']
                 if self.use_cache_compression:
-                    body = zlib.decompress(cache_item['body']) 
-                else:
-                    body = cache_item['body'].encode('utf-8')
+                    body = zlib.decompress(body)
                 def custom_prepare_response(g):
-                    g.response.head = cache_item['head'].encode('utf-8')
+                    g.response.head = cache_item['head']
                     g.response.body = body
                     g.response.code = cache_item['response_code']
                     g.response.time = 0
                     g.response.url = cache_item['url']
-                    g.response.parse('utf-8')
+                    g.response.parse()
                     g.response.cookies = g.extract_cookies()
 
                 grab.process_request_result(custom_prepare_response)
@@ -603,18 +602,16 @@ class Spider(object):
 
         if ok and self.use_cache and grab.request_method == 'GET':# and not task.get('disable_cache'):
             if grab.response.code < 400 or grab.response.code == 404:
-                utf_body = grab.response.unicode_body().encode('utf-8')
+                body = grab.response.body
                 if self.use_cache_compression:
-                    body = pymongo.binary.Binary(zlib.compress(utf_body))
-                else:
-                    body = utf_body
+                    body = zlib.compress(body)
 
                 _hash = self.build_cache_hash(task.url)
                 item = {
                     '_id': _hash,
                     'url': task.url,
-                    'body': body,
-                    'head': grab.response.head,
+                    'body': pymongo.binary.Binary(body),
+                    'head': pymongo.binary.Binary(grab.response.head),
                     'response_code': grab.response.code,
                     'cookies': None,#grab.response.cookies,
                 }
