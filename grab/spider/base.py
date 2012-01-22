@@ -813,7 +813,7 @@ class Spider(object):
     def create_grab_instance(self):
         return Grab(**self.grab_config)
 
-    def next_page_task(self, grab, task, xpath):
+    def next_page_task(self, grab, task, xpath, **kwargs):
         """
         Return new `Task` object if link that mathes the given `xpath`
         was found.
@@ -826,7 +826,7 @@ class Spider(object):
             page = task.get('page', 1) + 1
             grab2 = grab.clone()
             grab2.setup(url=url)
-            task2 = task.clone(task_try_count=0, grab=grab2, page=page)
+            task2 = task.clone(task_try_count=0, grab=grab2, page=page, **kwargs)
             return task2
 
 
