@@ -478,7 +478,6 @@ class Spider(object):
                             self.add_item('too-many-network-tries', task.url)
                             continue
 
-                        #import pdb; pdb.set_trace()
                         if task.grab:
                             grab = task.grab
                         else:
@@ -486,7 +485,9 @@ class Spider(object):
                             grab = self.create_grab_instance()
                             grab.setup(url=task.url)
 
-                        if self.use_cache and not task.get('disable_cache'):
+                        if (self.use_cache
+                            and not task.get('refresh_cache')
+                            and not task.get('disable_cache')):
                             if grab.detect_request_method() == 'GET':
                                 url = grab.config['url']
                                 _hash = self.build_cache_hash(url)
@@ -601,7 +602,7 @@ class Spider(object):
         curl.grab = None
         curl.task = None
 
-        if ok and self.use_cache and grab.request_method == 'GET':# and not task.get('disable_cache'):
+        if ok and self.use_cache and grab.request_method == 'GET' and not task.get('disable_cache'):
             if grab.response.code < 400 or grab.response.code == 404:
                 body = grab.response.body
                 if self.use_cache_compression:
