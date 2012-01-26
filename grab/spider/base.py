@@ -122,9 +122,6 @@ class Spider(object):
         self.items = {}
         self.task_try_limit = task_try_limit
         self.network_try_limit = network_try_limit
-        self.task_generator_object = self.task_generator()
-        self.task_generator_enabled = True
-        self.process_task_generator()
         try:
             signal.signal(signal.SIGUSR1, self.sigusr1_handler)
         except (ValueError, AttributeError):
@@ -142,6 +139,10 @@ class Spider(object):
         self.should_stop = False
         self.request_pause = request_pause
         self.distributed_path = distributed_path
+        # Init task generator
+        self.task_generator_object = self.task_generator()
+        self.task_generator_enabled = True
+        self.process_task_generator()
 
     def setup_cache(self):
         if not self.cache_db:
