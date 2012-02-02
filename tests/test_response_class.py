@@ -12,17 +12,16 @@ Hello world
 
 IMG_FILE = os.path.join(TEST_DIR, 'files', 'yandex.png')
 
-class TestHtmlForms(TestCase):
+class TestResponse(TestCase):
     def setUp(self):
         FakeServerThread().start()
         self.temp_dir = prepare_temp_dir()
 
-    def test_response_save(self):
+    def test_save(self):
         """
         Test `Response.save` method.
         """
         
-        # raise errors
         img_data = open(IMG_FILE, 'rb').read()
         temp_file = os.path.join(self.temp_dir, 'file.bin')
         RESPONSE['get'] = img_data
@@ -31,3 +30,17 @@ class TestHtmlForms(TestCase):
         g.go(BASE_URL)
         g.response.save(temp_file)
         self.assertEqual(open(temp_file, 'rb').read(), img_data)
+
+    def test_save_hash(self):
+        """
+        Test `Response.save_hash` method.
+        """
+        
+        img_data = open(IMG_FILE, 'rb').read()
+        RESPONSE['get'] = img_data
+
+        g = Grab()
+        g.go(BASE_URL)
+        path = g.response.save_hash(BASE_URL, self.temp_dir)
+        test_data = open(os.path.join(self.temp_dir, path), 'rb').read()
+        self.assertEqual(test_data, img_data)

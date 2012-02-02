@@ -1,7 +1,8 @@
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 import threading
 import time
-import os.path
+import os
+import shutil
 
 import grab
 
@@ -32,8 +33,11 @@ def prepare_temp_dir():
     if not os.path.exists(TMP_DIR):
         os.mkdir(TMP_DIR)
     else:
-        for fname in os.listdir(TMP_DIR):
-            os.unlink(os.path.join(TMP_DIR, fname))
+        for root, dirs, files in os.walk(TMP_DIR):
+            for fname in files:
+                os.unlink(os.path.join(root, fname))
+            for _dir in dirs:
+                shutil.rmtree(os.path.join(root, _dir))
     return TMP_DIR
 
 class FakeServerThread(threading.Thread):

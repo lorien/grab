@@ -8,6 +8,8 @@ import email
 from StringIO import StringIO
 from cookielib import CookieJar
 from urllib2 import Request
+from hashlib import sha1
+import os
 
 RE_XML_DECLARATION = re.compile(r'^[\r\n\t]*<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(r'encoding\s*=\s*["\']([^"\']+)["\']')
@@ -166,3 +168,47 @@ class Response(object):
 
         with open(path, 'wb') as out:
             out.write(self.body)
+
+    def save_hash(self, location, basedir, ext=None):
+        """
+        Save response body into file with special path
+        builded from hash. That allows to lower number of files
+        per directory.
+
+        Args:
+            :param location: URL of file or something else. It is
+                used to build the SHA1 hash.
+            :param basedir: base directory to save the file. Note that
+                file will not be saved directly to this directory but to
+                some sub-directory of `basedir`
+            :param ext: extension which should be appended to file name. The
+            dot is inserted automatically between filename and extension.
+
+        Returns path to saved file relative to `basedir`.
+
+        Example::
+
+            >>> url = 'http://yandex.ru/logo.png'
+            >>> g.go(url)
+            >>> g.response.save_hash(url, 'some_dir', ext='png')
+            'e8/dc/f2918108788296df1facadc975d32b361a6a.png'
+            # the file was saved to $PWD/some_dir/e8/dc/...
+
+        TODO: replace `basedir` with two options: root and save_to. And
+        returns save_to + path
+        """
+
+        _hash = sha1(location).hexdigest()
+        a, b, tail = _hash[:2], _hash[2:4], _hash[4:]
+        if ext is not None:
+            tail = '%s.%s' % (tail, ext)
+        rel_path = '%s/%s/%s' % (a, b, tail)
+        path = os.path.join(basedir, rel_path)
+        path_dir, path_fname = os.path.split(path)
+        try:
+            os.makedirs(path_dir)
+        except OSError:
+            pass
+        with open(path, 'wb') as out:
+            out.write(self.body)
+        return rel_path
