@@ -273,7 +273,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         response = self.go(url, **kwargs)
-        with open(location, 'w') as out:
+        with open(location, 'wb') as out:
             out.write(response.body)
         return len(response.body)
 
