@@ -26,3 +26,5 @@ class TextExtensionTest(TestCase):
         self.assertEqual('f', normalize_space(' f '))
         self.assertEqual('f b', normalize_space(' f b '))
         self.assertEqual(u'тр и гла за', normalize_space(u' тр и гла' + '\t' + '\n' + u' за '))
+        self.assertEqual(u'тр_и_гла_за', normalize_space(u' тр и гла' + '\t' + '\n' + u' за ', replace='_'))
+        self.assertEqual(u'трABCиABCглаABCза', normalize_space(u' тр и гла' + '\t' + '\n' + u' за ', replace='ABC'))

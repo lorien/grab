@@ -39,11 +39,11 @@ def drop_space(text):
 
     return RE_SPACE.sub('', text)
 
-def normalize_space(text):
+def normalize_space(text, replace=' '):
     """
     Replace sequence of space-chars with one space char.
 
     Also drop leading and trailing space-chars.
     """
 
-    return RE_SPACE.sub(' ', text).strip()
+    return RE_SPACE.sub(replace, text.strip()).strip()
