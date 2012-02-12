@@ -145,6 +145,17 @@ class FormExtension(object):
         elem = self.form.xpath('.//input[@type="text"]')[number]
         return self.set_input(elem.get('name'), value)
 
+    def set_input_by_xpath(self, xpath, value):
+        """
+        Set the value of form element by xpath
+
+        :param xpath: xpath path
+        :param value: value which should be set to element
+        """
+
+        elem = self.tree.xpath(xpath)[0]
+        return self.set_input(elem.get('name'), value)
+
 
     # TODO:
     # Remove set_input_by_id

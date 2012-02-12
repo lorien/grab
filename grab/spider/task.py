@@ -47,6 +47,8 @@ class Task(object):
             `get` method which allows to use default value if attrubute does not exist.
         """
 
+        # TODO: raise MisuseError if task name is "generator"
+
         self.name = name
         if url is None and grab is None:
             raise SpiderMisuseError('Either url of grab option of '\

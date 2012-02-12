@@ -3,31 +3,32 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Grab
-===============
+Документация по библиотеке Grab
+===============================
 
-Grab is python framework for writing site scrapers. Grab provides two interfaces:
+Grab - библиотека для работы с сетевыми документами. Основные области использования Grab:
 
- * the Grab interface for building HTTP request and processing response
- * the Spider interface for writing asynchronous site scrapers
+ * извлечение данных с веб-сайтов (site scraping)
+ * работа с сетевыми API
+ * автоматизация работы с веб-сайтами, например, регистратор профилей на каком-либо сайте
 
-Grab interface is very simple and it is ideal for small scripts, for single-thread
-scripts or for network hacking via python console.
+Grab состоит из двух частей:
+ 
+ * Главный интерфейс Grab для создания сетевого запроса и работы с его результатом. Этот 
+   интерфейс удобно использовать в простых скриптах, где не нужна большая многопоточность,
+   или непосредственно в python-консоли.
+ * Интерфейс Spider, позволяющий разрабатывать асинхронные парсеры. Этот интерфейс позволяет,
+   во-первых, более строго описать логику парсера, во-вторых, разрабатывать парсеры с большим
+   числом сетевых потоков.
 
-Spider interface is powered by multicurl (the asynchronous pycurl interface).
-If you need to do big number of concurrent requests then you should consider 
-to use Spider. Spider interface is very experimentail and unstable, you should not
-use it.
-
-
-Documentation
-=============
+Разделы документации
+--------------------
 
 .. toctree::
     :hidden:
 
-    features
     grab_tutorial
+    grab_customization
     base_interface
     extensions/overview
     extensions/form
@@ -37,11 +38,11 @@ Documentation
     configuration
     tools/html
 
-:doc:`features`
-    List of features implemented in Grab
-
 :doc:`grab_tutorial`
-    Short lesson how to use Grab
+    Введение в Grab
+
+:doc:`grab_customization`
+    Создание и конфигурация Grab объекта.
 
 :doc:`base_interface`
     Base Grab interface. The core functions.
@@ -52,7 +53,7 @@ Documentation
     :doc:`extensions/form`
         Automated form processing
 
-    :doc:`extensions/text`
+    mdoc:`extensions/text`
         Utilities to process text of response
 
     :doc:`extensions/django`

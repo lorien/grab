@@ -91,3 +91,15 @@ def strip_tags(html, normalize_space=True):
         return normalize_space_func(text)
     else:
         return text
+
+
+def escape(html):
+    """
+    Returns the given HTML with ampersands, quotes and angle brackets encoded.
+    """
+
+    return html.replace('&', '&amp;')\
+               .replace('<', '&lt;')\
+               .replace('>', '&gt;')\
+               .replace('"', '&quot;')\
+               .replace("'", '&#39;')
