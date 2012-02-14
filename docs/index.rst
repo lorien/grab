@@ -27,9 +27,12 @@ Grab состоит из двух частей:
 .. toctree::
     :hidden:
 
-    grab_tutorial
-    grab_customization
-    base_interface
+    grab/tutorial
+    grab/customization
+    grab/debugging
+    grab/options
+    grab/request
+
     extensions/overview
     extensions/form
     extensions/text
@@ -38,42 +41,27 @@ Grab состоит из двух частей:
     configuration
     tools/html
 
-:doc:`grab_tutorial`
-    Введение в Grab
+* Руководство пользователя
+    * :doc:`grab/tutorial`
+    * :doc:`grab/customization`
+    * :doc:`grab/debugging`
+    * :doc:`grab/options`
+    * :doc:`grab/request`
 
-:doc:`grab_customization`
-    Создание и конфигурация Grab объекта.
+    * :doc:`extensions/overview`
+    * :doc:`tools/html`
 
-:doc:`base_interface`
-    Base Grab interface. The core functions.
-
-:doc:`extensions/overview`
-    Overview of grab functionality splitted by so-called extensions. 
-
-    :doc:`extensions/form`
-        Automated form processing
-
-    mdoc:`extensions/text`
-        Utilities to process text of response
-
-    :doc:`extensions/django`
-        Provides quick way to save response content into FileField of any django model.
-
-    :doc:`extensions/lxml`
-        Extracting information from response with XPATH and CSS queries.
-
-:doc:`configuration`
-    Configuring Grab instance. Configuring network request options.
-
-Extra cool things
-
-    :doc:`tools/html`
-        HTML processing utilities
-        
+* API
+    * :doc:`api/grab`
+    * :doc:`extensions/form`
+    * :doc:`extensions/text`
+    * :doc:`extensions/django`
+    * :doc:`extensions/lxml`
 
 Grab links
 ==========
 
+* Official site: http://grablib.org
 * Grab source code repository on bitbucket: http://bitbucket.org/lorien/grab
 * Grab mailing list: http://groups.google.com/group/python-grab
 

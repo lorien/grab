@@ -87,14 +87,25 @@ class UploadFile(str):
 
 def default_config():
     return dict(
+        # Common
         url = None,
+
+        # Debugging
+        log_file = None,
+        log_dir = False,
+        debug_post = False,
+
+        # Proxy
         proxy = None,
         proxy_type = None,
         proxy_userpwd = None,
+
+        # Method, Post
+        method = None,
         post = None,
         multipart_post = None,
-        #payload = None,
-        method = None,
+
+        # Other
         headers = {},
         user_agent = None,
         user_agent_file = os.path.join(PACKAGE_DIR, 'user_agent.txt'),
@@ -103,13 +114,10 @@ def default_config():
         cookies = {},
         cookiefile = None,
         referer = None,
-        log_file = None,
-        log_dir = False,
         follow_refresh = False,
         #nohead = False,
         nobody = False,
         body_maxsize = None,
-        debug_post = False,
         # TODO: manually set Content-Encoding header and unzip the content
         encoding = 'gzip',
         userpwd = None,
