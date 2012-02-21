@@ -725,8 +725,12 @@ class Spider(object):
 
     def error_handler(self, func_name, ex, task, error_tb=None):
         self.inc_count('error-%s' % ex.__class__.__name__.lower())
+        try:
+            ex_str = unicode(ex, 'utf-8', 'ignore')
+        except TypeError:
+            ex_str = str(ex)
         self.add_item('fatal', '%s|%s|%s' % (ex.__class__.__name__,
-                                             unicode(ex), task.url))
+                                             ex_str, task.url))
         if error_tb:
             logging.error('Error in %s function' % func_name)
             if error_tb:

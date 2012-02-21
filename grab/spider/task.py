@@ -53,6 +53,9 @@ class Task(object):
         if url is None and grab is None:
             raise SpiderMisuseError('Either url of grab option of '\
                                     'Task should be not None')
+        # TODO: move priority assigning to Spider class
+        # to allow control of calculating strategy
+        # random priority is not always fun
         if priority is None:
             priority = randint(80, 100)
         self.url = url
