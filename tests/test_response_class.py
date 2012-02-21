@@ -44,3 +44,10 @@ class TestResponse(TestCase):
         path = g.response.save_hash(BASE_URL, self.temp_dir)
         test_data = open(os.path.join(self.temp_dir, path), 'rb').read()
         self.assertEqual(test_data, img_data)
+
+    def test_custom_charset(self):
+        RESPONSE['get'] = u'<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf8;charset=cp1251" /></head><body><h1>крокодил</h1></body></html>'.encode('utf-8')
+        g = Grab()
+        g.setup(charset='utf-8')
+        g.go(BASE_URL)
+        self.assertTrue(u'крокодил' in g.response.unicode_body())

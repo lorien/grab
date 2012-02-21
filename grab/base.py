@@ -194,6 +194,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         self.reset()
         self.proxylist = None
         self.proxylist_auto_change = False
+        # ??? config['charset']
         self.charset = 'utf-8'
         if kwargs:
             self.setup(**kwargs)

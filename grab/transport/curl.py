@@ -289,7 +289,12 @@ class CurlTransportExtension(object):
         self.response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
-        self.response.parse()
+
+        if self.config['charset'] is not None:
+            self.response.parse(charset=self.config['charset'])
+        else:
+            self.response.parse()
+
         self.response.cookies = self.extract_cookies()
 
         # We do not need anymore cookies stored in the
