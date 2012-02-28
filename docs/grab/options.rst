@@ -3,46 +3,49 @@
 Полный список настроек
 ======================
 
-О том как изменять настройки, читайте в `grab/customization`_
+О том как изменять настройки, читайте в :ref:`grab_customization`.
 
 Настройки
 ---------
 
 **url**
-    URL of requested document.
-
-    You can use relative url - it will be joined with the absolute url of previously
-    requested document. You are responsible for quoting unsafe symbols in the
-    URL.
+    Сетевой запрашиваемого документа. Можно использовать относительный адрес, в таком
+    случае полный адрес будет получен путём соединения с полным адресом предыдущего
+    сетевого запроса. Grab ожидает адрес в корректном формате. Это ваша обязанность -
+    преобразовать все нестдартные символы в escape-последовательности (`RFC 2396 <http://www.ietf.org/rfc/rfc2396.txt>`_).
 
 **timeout**
-    Max. time to work with remote document. Default is 15.
+    Максимальное время, отведённое на получение документа. По-умолчанию, 15 секунд.
 
 **connect_timeout**
-    Max. time to wait for the start of response of remote document. Default is 10.
+    Максимальное время, отведённое на ожидание начала получения данных от сервера.
+    По-умолчанию, 10 секунд.
 
 **user_agent**
-    Value of User-Agent HTTP header. Default is random choice from set of real-world user agents.
+    Содержимое HTTP-заголовка `User-Agent`. По-умолчанию, случайный выбор из множества
+    реальных `User-Agent` значений, заложенных в Grab.
 
 **user_agent_file**
-    Path to file which contains User-Agent strings. Grab instance will be configured
-    with random user agent from that file.
+    Путь к текстовому файлу с `User-Agent` строками. При указании этой опции, будет
+    выбран случайный вариант из указанного файла.
 
 **method**
-    Set the http method. By default POST method is used if ``post`` or ``payload``
-    options were configured. In any other case the default method is GET.
+    Выбор метода HTTP-запроса. По-умолчанию, используется `GET` метод. Если заданы
+    непустые опции `post` или `multipart_post`, то используется `POST` метод.
 
-    You can specify POST, PUT, DELETE or GET.
+    Возможные варианты: `GET`, `POST`, `PUT`, `DELETE`.
 
 **post**
-    Sequence of two-value tuples or dictionary or string.
+    Указание данных для отправки `POST` методом.
+    Значением опции может быть словарь или последовательность двузначных последовательной
+    или просто строка.
+    
+    В случае словаря или последовательности, каждое значение обрабатывается по следующему алгоритму:
+    * объекты класса `UploadFile` преобразовываются во внутреннее представление библиотеки pycurl
+    * unicode-строки преобразовываются в байтовые строки
+    * `None`-значения преобразовываются в пустые строки
 
-    In case of sequence or dictionary all values are processed in this way:
-    * instance of ``UploadFile`` class converted into spercial internal curl object
-    * unicode is converted into bytestring
-    * ``None`` is converted into empty string
-
-    If option value is a string then it is submitted as is.
+    Если значением `post` опции является строка, то она передаётся в сетевой запрос без изменений.
 
 **multipart_post**
     Sequence of two-value tuples.

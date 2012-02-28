@@ -1,4 +1,4 @@
-.. _grab/customization:
+.. _grab_customization:
 
 Настройка Grab-объекта
 ======================
