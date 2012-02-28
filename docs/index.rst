@@ -21,62 +21,59 @@ Grab состоит из двух частей:
    во-первых, более строго описать логику парсера, во-вторых, разрабатывать парсеры с большим
    числом сетевых потоков.
 
+Grab сайты
+----------
+
+* Официальный сайт: http://grablib.org
+* Репозиторий на bitbucket: http://bitbucket.org/lorien/grab
+* Группа рассылки: http://groups.google.com/group/python-grab
+
+
+
 Разделы документации
 --------------------
 
+Руководство пользователя
+~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. toctree::
-    :hidden:
+    :maxdepth: 2
 
     grab/tutorial
     grab/customization
     grab/debugging
     grab/options
     grab/request
+    grab/under_the_hood
 
-    extensions/overview
-    extensions/form
-    extensions/text
-    extensions/django
-    extensions/lxml
-    configuration
-    tools/html
+API
+~~~
 
-* Руководство пользователя
-    * :doc:`grab/tutorial`
-    * :doc:`grab/customization`
-    * :doc:`grab/debugging`
-    * :doc:`grab/options`
-    * :doc:`grab/request`
+Вся нижеследующая информация сгенерирована из комментариев в исходном коде.
+Поэтому она на английском языке.
 
-    * :doc:`extensions/overview`
-    * :doc:`tools/html`
+.. toctree::
+    :maxdepth: 2
 
-* API
-    * :doc:`api/grab`
-    * :doc:`extensions/form`
-    * :doc:`extensions/text`
-    * :doc:`extensions/django`
-    * :doc:`extensions/lxml`
-
-Grab links
-==========
-
-* Official site: http://grablib.org
-* Grab source code repository on bitbucket: http://bitbucket.org/lorien/grab
-* Grab mailing list: http://groups.google.com/group/python-grab
+    api/grab
+    api/ext_form
+    api/ext_django
+    api/ext_text
+    api/ext_lxml
+    api/tools_html
 
 
-Similar projects
-================
+Похожие проекты
+----------------
 
-* Scrapy - mature scraping solution: http://scrapy.org
-* Mechanize - one of the oldest python scraping framework:
-* Requests - easy interface to standard urllib library:
-* Httplib2
+* `urllib <http://docs.python.org/library/urllib.html>`_ and `urllib2 <http://docs.python.org/library/urllib2.html>`_ - для суровых python-хакеров
+* `Scrapy <http://scrapy.org>`_ - пожалуй, самый известный python фреймворк для парсинга сайтов
+* `Mechanize <http://wwwsearch.sourceforge.net/mechanize/>`_ - одна из самых старых python-библиотек парсинга сайтов
+* `Requests <http://docs.python-requests.org>`_ - простой интерфейс к стандартной urllib библиотеке
 
 
-Indices and tables
-------------------
+Всякая фигня
+------------
 
 * :ref:`genindex`
 * :ref:`modindex`

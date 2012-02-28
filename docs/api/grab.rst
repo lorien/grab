@@ -1,4 +1,4 @@
-.. _api/grab:
+.. _api_grab:
 
 Base Grab API (public methods)
 ------------------------------

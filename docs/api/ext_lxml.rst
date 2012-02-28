@@ -1,14 +1,7 @@
 .. _extensions_lxml:
 
-Extracting information from response with XPATH and CSS queries
-===============================================================
-
-Actually, all these methods are just a wrapers to `xpath` and `cssselect`
-methods of `lxml.etree.Element` nodes.
-
-
-LXML Extension API
-------------------
+XPATH/CSS Extension
+===================
 
 .. module:: grab.ext.lxml
 

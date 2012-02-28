@@ -1,10 +1,7 @@
 .. tools_html:
 
-HTML Utilities
-==============
-
-HTML Tools API
-==============
+HTML tools
+==========
 
 .. module:: grab.tools.html
 
