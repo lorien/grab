@@ -6,6 +6,8 @@ from urlparse import urljoin
 
 from ..base import DataNotFound, GrabMisuseError
 
+# TODO: refactor this hell
+
 class FormExtension(object):
     def extra_reset(self):
         self._lxml_form = None
@@ -108,6 +110,8 @@ class FormExtension(object):
             g.set_input('accept', True)
         """
 
+        if self._lxml_form is None:
+            self.choose_form_by_element('.//*[@name="%s"]' % name)
         elem = self.form.inputs[name]
 
         processed = False
@@ -131,7 +135,10 @@ class FormExtension(object):
         :param value: value which should be set to element
         """
 
-        elem = self.tree.xpath('//*[@id="%s"]' % _id)[0]
+        xpath = './/*[@id="%s"]' % _id
+        if self._lxml_form is None:
+            self.choose_form_by_element(xpath)
+        elem = self.form.xpath(xpath)[0]
         return self.set_input(elem.get('name'), value)
 
     def set_input_by_number(self, number, value):
@@ -154,6 +161,17 @@ class FormExtension(object):
         """
 
         elem = self.tree.xpath(xpath)[0]
+
+        if self._lxml_form is None:
+            # Explicitly set the default form 
+            # which contains found element
+            parent = elem
+            while True:
+                parent = parent.getparent()
+                if parent.tag == 'form':
+                    self._lxml_form = parent
+                    break
+
         return self.set_input(elem.get('name'), value)
 
 
@@ -294,3 +312,12 @@ class FormExtension(object):
                         if elem.name in fields:
                             del fields[elem.name]
         return fields
+
+    def choose_form_by_element(self, xpath):
+        forms = self.tree.xpath('//form')
+        found_form = None
+        for form in forms:
+            if len(form.xpath(xpath)):
+                found_form = form
+                break
+        self._lxml_form = found_form if found_form is not None else forms[0]

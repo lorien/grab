@@ -18,7 +18,7 @@ FORMS = u"""
     </div>
     <div id="content">
         <FORM id="common_form" method="POST">
-          <input id="some_value" name="some_value" value="" />
+          <input type="text" id="some_value" name="some_value" value="" />
           <input id="some_value" name="image" type="file" value="" />
           <select id="gender" name="gender">
               <option value="1">Female</option>
@@ -120,3 +120,26 @@ class TestHtmlForms(TestCase):
         g.go(BASE_URL)
         g.submit(submit_name='submit3')
         self.assertEqual(REQUEST['post'], 'secret=123&submit1=submit1')
+
+    def test_set_methods(self):
+        g = Grab()
+        RESPONSE['get'] = FORMS
+        g.go(BASE_URL)
+
+        self.assertEqual(g._lxml_form, None)
+
+        g.set_input('gender', '1')
+        self.assertEqual('common_form', g._lxml_form.get('id'))
+
+        self.assertRaises(KeyError, lambda: g.set_input('query', 'asdf'))
+
+        g._lxml_form = None
+        g.set_input_by_id('search_box', 'asdf')
+        self.assertEqual('search_form', g._lxml_form.get('id'))
+
+        g.choose_form(xpath='//form[@id="common_form"]')
+        g.set_input_by_number(0, 'asdf')
+
+        g._lxml_form = None
+        g.set_input_by_xpath('//*[@name="gender"]', '2')
+        self.assertEqual('common_form', g._lxml_form.get('id'))
