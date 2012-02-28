@@ -169,7 +169,7 @@ class Response(object):
         with open(path, 'wb') as out:
             out.write(self.body)
 
-    def save_hash(self, location, basedir, ext=None):
+    def save_hash(self, location, basedir, ext=None, skip_existing=False):
         """
         Save response body into file with special path
         builded from hash. That allows to lower number of files
@@ -182,7 +182,9 @@ class Response(object):
                 file will not be saved directly to this directory but to
                 some sub-directory of `basedir`
             :param ext: extension which should be appended to file name. The
-            dot is inserted automatically between filename and extension.
+                dot is inserted automatically between filename and extension.
+            :param skip_existing: if True then do not download file if its hash
+                file already exists
 
         Returns path to saved file relative to `basedir`.
 
@@ -204,11 +206,12 @@ class Response(object):
             tail = '%s.%s' % (tail, ext)
         rel_path = '%s/%s/%s' % (a, b, tail)
         path = os.path.join(basedir, rel_path)
-        path_dir, path_fname = os.path.split(path)
-        try:
-            os.makedirs(path_dir)
-        except OSError:
-            pass
-        with open(path, 'wb') as out:
-            out.write(self.body)
+        if not os.path.exists(path):
+            path_dir, path_fname = os.path.split(path)
+            try:
+                os.makedirs(path_dir)
+            except OSError:
+                pass
+            with open(path, 'wb') as out:
+                out.write(self.body)
         return rel_path
