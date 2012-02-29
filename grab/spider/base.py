@@ -24,12 +24,15 @@ else:
 import inspect
 import traceback
 from urlparse import urljoin
+from random import randint
 
 from .error import SpiderError, SpiderMisuseError, FatalError
 from .task import Task
 from .data import Data
 
 CURL_OBJECT = pycurl.Curl()
+DEFAULT_TASK_PRIORITY = 100
+RANDOM_TASK_PRIORITY_RANGE = (80, 100)
 
 def execute_handler(path, handler_name, res_count, queue,
                     grab, task):
@@ -69,7 +72,7 @@ class Spider(object):
     # Base url which is used in follow_links method to resolve relative url
     # In future it will used as base url for resolving relative urls
     # in all places
-    #base_url = None
+    base_url = None
 
     def __init__(self, thread_number=3, request_limit=None,
                  network_try_limit=10, task_try_limit=10,
@@ -83,6 +86,7 @@ class Spider(object):
                  container_mode=False,
                  distributed_mode=False,
                  distributed_path=None,
+                 priority_mode='random',
                  ):
         """
         Arguments:
@@ -107,6 +111,7 @@ class Spider(object):
         * container_mode - used for distributed mode then we have to call method
             in remote process which receives name of spider class and name of method.
         * distributed_path - path to the spider class in format "mod.mod.ClassName"
+        * priority_mode - could be "random" or "const"
         """
 
         self.container_mode = container_mode
@@ -122,6 +127,10 @@ class Spider(object):
         self.items = {}
         self.task_try_limit = task_try_limit
         self.network_try_limit = network_try_limit
+        if priority_mode not in ['random', 'const']:
+            raise SpiderMisuseError('Value of priority_mode option should be "random" or "const"')
+        else:
+            self.priority_mode = priority_mode
         try:
             signal.signal(signal.SIGUSR1, self.sigusr1_handler)
         except (ValueError, AttributeError):
@@ -386,6 +395,11 @@ class Spider(object):
         Stop the task which was executed too many times.
         """
 
+        if task.priority is None:
+            if self.priority_mode == 'const':
+                task.priority = DEFAULT_TASK_PRIORITY
+            else:
+                task.priority = randint(*RANDOM_TASK_PRIORITY_RANGE)
         if self.container_mode:
             self.distributed_task_buffer.append(task)
         else:

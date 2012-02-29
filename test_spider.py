@@ -7,7 +7,8 @@ import logging
 
 TEST_CASE_LIST = (
     'tests.test_spider',
-    'tests.test_distributed_spider',
+    #'tests.test_distributed_spider',
+    'tests.test_spider_task',
 )
 
 def main():
