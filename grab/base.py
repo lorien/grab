@@ -514,8 +514,9 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         for key, value in kwargs.items():
             setattr(self.response, key, value)
 
-    def setup_proxylist(self, proxy_file, proxy_type, read_timeout=None,
-                        auto_init=True, auto_change=False):
+    def setup_proxylist(self, proxy_file=None, proxy_type='http', read_timeout=None,
+                        auto_init=True, auto_change=False,
+                        server_list=None):
         """
         Setup location of files with proxy servers
 
@@ -531,8 +532,8 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         called
         """
 
-        self.proxylist = ProxyList(proxy_file, proxy_type,
-                                   read_timeout=read_timeout)
+        self.proxylist = ProxyList(proxy_file=proxy_file, proxy_type=proxy_type,
+                                   server_list=server_list, read_timeout=read_timeout)
         if auto_init:
             self.change_proxy()
         self.proxylist_auto_change = auto_change
