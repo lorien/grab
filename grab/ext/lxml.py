@@ -4,8 +4,9 @@
 from __future__ import absolute_import
 from urlparse import urljoin
 import re
+import time
 
-from ..base import DataNotFound, GrabMisuseError
+from ..base import DataNotFound, GrabMisuseError, GLOBAL_STATE
 from ..tools.text import normalize_space, find_number
 from ..tools.lxml_tools import get_node_text
 
@@ -37,7 +38,9 @@ class LXMLExtension(object):
                 # Generate minimal empty content
                 # which will not break lxml parser
                 body = '<html></html>'
+            start = time.time()
             self._lxml_tree = fromstring(body)
+            GLOBAL_STATE['dom_build_time'] += (time.time() - start)
         return self._lxml_tree
 
     @property

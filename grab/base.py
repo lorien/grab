@@ -27,6 +27,22 @@ from response import Response
 
 from error import (GrabError, GrabNetworkError, GrabMisuseError, DataNotFound,
                    GrabTimeoutError)
+
+# This counter will used in enumerating network queries.
+# Its value will be displayed in logging messages and also used
+# in names of dumps
+# I use mutable module variable to allow different
+# instances of Grab maintain single counter
+# This could be helpful in debuggin when your script
+# creates multiple Grab instances - in case of shared counter
+# grab instances do not overwrite dump logs
+REQUEST_COUNTER_LOCK = threading.Lock()
+GLOBAL_STATE = {
+    'request_counter': 0,
+    'dom_build_time': 0,
+}
+
+# Some extensions need GLOBAL_STATE variable
 from ext.lxml import LXMLExtension
 from ext.form import FormExtension
 from ext.django import DjangoExtension
@@ -40,16 +56,6 @@ __all__ = ('Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseE
 
 PACKAGE_DIR = os.path.dirname(os.path.realpath(__file__))
 
-# This counter will used in enumerating network queries.
-# Its value will be displayed in logging messages and also used
-# in names of dumps
-# I use mutable module variable to allow different
-# instances of Grab maintain single counter
-# This could be helpful in debuggin when your script
-# creates multiple Grab instances - in case of shared counter
-# grab instances do not overwrite dump logs
-REQUEST_COUNTER_LOCK = threading.Lock()
-GLOBAL_STATE = {'request_counter': 0}
 
 logger = logging.getLogger('grab')
 

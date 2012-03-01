@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from Queue import PriorityQueue, Empty
 import pycurl
 from grab import Grab
+from grab.base import GLOBAL_STATE
 import logging
 import types
 from collections import defaultdict
@@ -734,6 +735,7 @@ class Spider(object):
         total_time = time.time() - self.start_time
         out.append('Queue size: %d' % self.taskq.qsize())
         out.append('Threads: %d' % self.thread_number)
+        out.append('DOM build time: %.3f' % GLOBAL_STATE['dom_build_time'])
         out.append('Time: %.2f sec' % total_time)
         return '\n'.join(out)
 
