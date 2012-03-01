@@ -1,124 +1,239 @@
 .. _configuration:
 
+======================
 Полный список настроек
 ======================
 
 О том как изменять настройки, читайте в :ref:`grab_customization`.
 
 Настройки
----------
+=========
 
-**url**
-    Сетевой запрашиваемого документа. Можно использовать относительный адрес, в таком
-    случае полный адрес будет получен путём соединения с полным адресом предыдущего
-    сетевого запроса. Grab ожидает адрес в корректном формате. Это ваша обязанность -
-    преобразовать все нестдартные символы в escape-последовательности (`RFC 2396 <http://www.ietf.org/rfc/rfc2396.txt>`_).
+url
+---
 
-**timeout**
-    Максимальное время, отведённое на получение документа. По-умолчанию, 15 секунд.
+Сетевой запрашиваемого документа. Можно использовать относительный адрес, в таком
+случае полный адрес будет получен путём соединения с полным адресом предыдущего
+сетевого запроса. Grab ожидает адрес в корректном формате. Это ваша обязанность -
+преобразовать все нестдартные символы в escape-последовательности (`RFC 2396 <http://www.ietf.org/rfc/rfc2396.txt>`_).
 
-**connect_timeout**
-    Максимальное время, отведённое на ожидание начала получения данных от сервера.
-    По-умолчанию, 10 секунд.
+:Type: string
+:Default: None
 
-**user_agent**
-    Содержимое HTTP-заголовка `User-Agent`. По-умолчанию, случайный выбор из множества
-    реальных `User-Agent` значений, заложенных в Grab.
+timeout
+-------
 
-**user_agent_file**
-    Путь к текстовому файлу с `User-Agent` строками. При указании этой опции, будет
-    выбран случайный вариант из указанного файла.
+Максимальное время, отведённое на получение документа.
 
-**method**
-    Выбор метода HTTP-запроса. По-умолчанию, используется `GET` метод. Если заданы
-    непустые опции `post` или `multipart_post`, то используется `POST` метод.
+:Type: int
+:Default: 15
 
-    Возможные варианты: `GET`, `POST`, `PUT`, `DELETE`.
+connect_timeout
+---------------
 
-**post**
-    Указание данных для отправки `POST` методом.
-    Значением опции может быть словарь или последовательность двузначных последовательной
-    или просто строка.
-    
-    В случае словаря или последовательности, каждое значение обрабатывается по следующему алгоритму:
-    * объекты класса `UploadFile` преобразовываются во внутреннее представление библиотеки pycurl
-    * unicode-строки преобразовываются в байтовые строки
-    * `None`-значения преобразовываются в пустые строки
+Максимальное время, отведённое на ожидание начала получения данных от сервера.
 
-    Если значением `post` опции является строка, то она передаётся в сетевой запрос без изменений.
+:Type: int
+:Default: 10
 
-**multipart_post**
-    Sequence of two-value tuples.
+user_agent
+----------
 
-    Similar to post option but send "multipart/form-data" request. 
+Содержимое HTTP-заголовка `User-Agent`. По-умолчанию, случайный выбор из множества
+реальных `User-Agent` значений, заложенных в Grab.
 
-**headers**
-    Extra http headers. The value of this option will be merged with
-    default headers which are Accept, Accept-Language, Accept-Charset and Keep-Alive.
+:Type: string
+:Default: см. выше
 
-**reuse_cookies**
-    If True then remember cookies and request them in next requests.
-    If False then clear cookies before each request.
-    Default: True
+user_agent_file
+---------------
 
-**cookies**
-    Explicitly specify cookies to send in the request. If ``reuse_cookies`` option
-    is enabled then value of ``cookies`` will be merged with remembered cookies.
+Путь к текстовому файлу с `User-Agent` строками. При указании этой опции, будет
+выбран случайный вариант из указанного файла.
 
-**referer**
-    Set Referrer header.
-    
-    Default: URL of previous request.
+:Type: string
+:Default: None
 
-**reuse_referer**:
-    Set Referer header to the URL of previous request.
+method
+------
 
-    Default: True
+Выбор метода HTTP-запроса. По-умолчанию, используется `GET` метод. Если заданы
+непустые опции `post` или `multipart_post`, то используется `POST` метод.
+Возможные варианты: `GET`, `POST`, `PUT`, `DELETE`.
 
-**proxy**
-    Proxy address in format "server:port"
+:Type: string
+:Default: "GET"
 
-**proxy_userpwd**
-    Access credentials in format "username:password"
+post
+----
 
-**proxy_type**
-    Type of proxy. Available values: http, socks4, socks5
+Данные для отправки запроса методом `POST`.
+Значением опции может быть словарь или последовательность пар значений  или просто строка.
+В случае словаря или последовательности, каждое значение обрабатывается по следующему алгоритму:
+* объекты класса `UploadFile` преобразовываются во внутреннее представление библиотеки pycurl
+* unicode-строки преобразовываются в байтовые строки
+* `None`-значения преобразовываются в пустые строки
 
-**encoding**
-    WTF? What is charset and what is encoding options?
+Если значением `post` опции является строка, то она передаётся в сетевой запрос без изменений.
 
-**charset**
-    Charset of remote document. Charset value will be used in encoding request data and
-    in parsing of response data.
+:Type: sequence or dict or string
+:Default: None
 
-**guess_encodings**
-    List of charsets which will be tried to build the unicode version of the response document.
+multipart_post
+--------------
 
-**log_file**
-    File to log the response body.
+Данные для отправки запроса методом `Post`.
+Значением опции может быть словарь или последовательность пар значений.
+Данные запроса будут отформатированы в соотвествии с методом "multipart/form-data".
 
-    Default: None
+:Type: sequence or dict
+:Default: None
 
-**log_dir**
-    Directory to save response bodies. Each response is saved in two documents. XX.log contains
-    HTTP headers of the response. XX.html contains the body of response. XX is a number. Each request
-    has a number. First request hasnumber 1, second request has number 2 and so on. You can see number
-    of requests in the console output if you setup your script to display logging messages of DEBUG level.
+headers
+-------
 
-**follow_refresh**
-    Follow the url in <meta refresh> tag.
+Дополнительные HTTP-заголовки. Значение этой опции будут склеено с заголовками,
+которые Grab отправляет по-умолчанию: Accept, Accept-Language, Accept-Charset
+и Keep-Alive.
 
-**nohead**
-    Do not process HTTP headers of the response. This mean that processing of response will
-    be broken as soon as possible.
+:Type: dict
+:Default: None
 
-**nohead**
-    Do not process body of request. That works for request of any kind, not only for PUT.
-    This makes sense if you want to reduce traffic usage.
+reuse_cookies
+-------------
 
-**debug_post**
-    Output to console the content of POST requests.
+Если `True`, то кукисы из ответа сервера будут запомнены и отосланы в последующем
+запросе на сервер. Если `False` то кукисы из ответа сервера запоминаться не будут.
 
-**cookiefile**
-    Before each request load cookies from this file. After each request save received cookies to 
-    this file. Cookies in this file could be in Netscape/Mozilla format or just at HTTP-headers dump.
+:Type: bool
+:Default: True
+
+cookies
+-------
+
+Кукисы для отправки на сервер. Если включена также опция `reuse_cookies`, то
+кукисы из опции `cookies` будут склеены с кукисами, запомненными из ответов
+сервера.
+
+:Type: dict
+:Default: None
+
+referer
+-------
+
+Указание `Referer` заголовка. По-умолчанию, Grab сам формирует этот заголовок
+из адреса предыдущего запроса.
+
+:Type: string
+:Default: см. выше
+
+reuse_referer
+-------------
+
+Если `True`, то использовать адрес предыдущего запроса для формирования заголовка
+`Refeer`.
+
+:Type: bool
+:Default: False
+
+proxy
+-----
+
+Адрес прокси-сервера в формате "server:port".
+
+:Type: string
+:Default: None
+
+proxy_userpwd
+-------------
+
+Данные авторизации прокси-сервера в формате "usernae:password".
+
+:Type: string
+:Default: None
+
+proxy_type
+----------
+
+Тип прокси-сервера. Возможные значения: "http", "socks4" и "socks5".
+
+:Type: string
+:Default: "http"
+
+encoding
+--------
+
+Метод сжатия трафика. По-умолчанию, значение этой опции равно "gzip".
+С некоторыми серверами возможны проблемы в работе pycurl, когда gzip включен.
+В случае проблем передайте в качестве значения опции пустую строку,
+чтобы выключить сжатие.
+
+:Type: string
+:Default: "gzip"
+
+charset
+-------
+
+Указание кодировки документа. По-умолчанию, кодировка определяется автоматически.
+Если определение кодировки проходит неправильно, вы можете явно указать нужную кодировку.
+Значение кодировки будет использовано для приведения содержимого документ в unicode-вид,
+а также для кодирования строковых не-ascii значений в `POST` данных.
+
+:Type: string
+:Default: None
+
+log_file
+--------
+
+Файл для сохранения полученного с сервера документа. Каждый новый запрос будет
+перезатить сохранённый ранее документ.
+
+:Type: string
+:Default: None
+
+log_dir
+-------
+
+Директория для сохранения ответов сервера. Каждый ответ сохраняется в двух файлах:
+* XX.log содержит HTTP-заголовки запроса и ответа
+* XX.html содержите тело ответа
+XX - это номер запроса.
+Смотрите подробности в :ref:`grab_debugging`.
+
+:Type: string
+:Default: None
+
+follow_refresh
+--------------
+
+Автоматический переход по адресам в <meta http-equiv="refresh"> тэгах.
+
+:Type: bool
+:Default: False
+
+nohead
+------
+
+Разрыв соединения с сервером после отправки запроса. Как только сервер начнёт отвечать,
+соединение будет разорвано.
+
+:Type: bool
+:Default: False
+
+nobody
+------
+
+Игнорирование тела ответа сервера. Если опция включена, то соединение сервером будет
+разорвано после получения всех HTTP-заголовков ответа. Эта опция действует для любого метода:
+GET, POST и т.д.
+
+:Type: bool
+:Default: False
+
+debug_post
+----------
+
+Вывод через logging-систему содержимого POST-запросов.
+
+:Type: bool
+:Default: False
