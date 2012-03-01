@@ -9,6 +9,8 @@
 Настройки
 =========
 
+.. _option_url:
+
 url
 ---
 
@@ -20,6 +22,8 @@ url
 :Type: string
 :Default: None
 
+.. _option_timeout:
+
 timeout
 -------
 
@@ -28,6 +32,8 @@ timeout
 :Type: int
 :Default: 15
 
+.. _option_connect_timeout:
+
 connect_timeout
 ---------------
 
@@ -35,6 +41,8 @@ connect_timeout
 
 :Type: int
 :Default: 10
+
+.. _option_user_agent:
 
 user_agent
 ----------
@@ -45,6 +53,8 @@ user_agent
 :Type: string
 :Default: см. выше
 
+.. _option_user_agent_file:
+
 user_agent_file
 ---------------
 
@@ -53,6 +63,8 @@ user_agent_file
 
 :Type: string
 :Default: None
+
+.. _option_method:
 
 method
 ------
@@ -63,6 +75,8 @@ method
 
 :Type: string
 :Default: "GET"
+
+.. _option_post:
 
 post
 ----
@@ -79,6 +93,8 @@ post
 :Type: sequence or dict or string
 :Default: None
 
+.. _option_multipart_post:
+
 multipart_post
 --------------
 
@@ -89,15 +105,18 @@ multipart_post
 :Type: sequence or dict
 :Default: None
 
+.. _option_headers:
+
 headers
 -------
 
 Дополнительные HTTP-заголовки. Значение этой опции будут склеено с заголовками,
-которые Grab отправляет по-умолчанию: Accept, Accept-Language, Accept-Charset
-и Keep-Alive.
+которые Grab отправляет по-умолчанию. Смотрите подробности в :ref:`request_headers`.
 
 :Type: dict
 :Default: None
+
+.. _option_reuse_cookies:
 
 reuse_cookies
 -------------
@@ -107,6 +126,8 @@ reuse_cookies
 
 :Type: bool
 :Default: True
+
+.. _option_cookies:
 
 cookies
 -------
@@ -118,6 +139,8 @@ cookies
 :Type: dict
 :Default: None
 
+.. _option_referer:
+
 referer
 -------
 
@@ -126,6 +149,8 @@ referer
 
 :Type: string
 :Default: см. выше
+
+.. _option_reuse_referer:
 
 reuse_referer
 -------------
@@ -136,6 +161,8 @@ reuse_referer
 :Type: bool
 :Default: False
 
+.. _option_proxy:
+
 proxy
 -----
 
@@ -144,13 +171,17 @@ proxy
 :Type: string
 :Default: None
 
+.. _option_proxy_userpwd:
+
 proxy_userpwd
 -------------
 
-Данные авторизации прокси-сервера в формате "usernae:password".
+Данные авторизации прокси-сервера в формате "username:password".
 
 :Type: string
 :Default: None
+
+.. _option_proxy_type:
 
 proxy_type
 ----------
@@ -158,7 +189,9 @@ proxy_type
 Тип прокси-сервера. Возможные значения: "http", "socks4" и "socks5".
 
 :Type: string
-:Default: "http"
+:Default: None
+
+.. _option_encoding:
 
 encoding
 --------
@@ -171,6 +204,8 @@ encoding
 :Type: string
 :Default: "gzip"
 
+.. _option_charset:
+
 charset
 -------
 
@@ -182,6 +217,8 @@ charset
 :Type: string
 :Default: None
 
+.. _option_log_file:
+
 log_file
 --------
 
@@ -190,6 +227,8 @@ log_file
 
 :Type: string
 :Default: None
+
+.. _option_log_dir:
 
 log_dir
 -------
@@ -203,6 +242,8 @@ XX - это номер запроса.
 :Type: string
 :Default: None
 
+.. _option_follow_refresh:
+
 follow_refresh
 --------------
 
@@ -211,14 +252,7 @@ follow_refresh
 :Type: bool
 :Default: False
 
-nohead
-------
-
-Разрыв соединения с сервером после отправки запроса. Как только сервер начнёт отвечать,
-соединение будет разорвано.
-
-:Type: bool
-:Default: False
+.. _option_nobody:
 
 nobody
 ------
@@ -229,6 +263,8 @@ GET, POST и т.д.
 
 :Type: bool
 :Default: False
+
+.. _option_debug_post:
 
 debug_post
 ----------

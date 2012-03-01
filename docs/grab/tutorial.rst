@@ -43,11 +43,11 @@
    
 Вот так можно найти информацию в теле ответа по XPATH::
 
-   print g.xpath('//div[@id="error"]')[0].text_content()
+   print g.xpath('//div[@id="error"]').text_content()
    
 А так можно пробежаться по элементам::
 
-   for elem in g.xpath('//h3'):
+   for elem in g.xpath_list('//h3'):
        print elem.text
        
 Об этих и многих других фишках читайте в подробной документации.

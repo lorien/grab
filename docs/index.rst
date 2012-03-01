@@ -44,6 +44,7 @@ Grab сайты
     grab/debugging
     grab/options
     grab/request
+    grab/proxy
     grab/under_the_hood
 
 API

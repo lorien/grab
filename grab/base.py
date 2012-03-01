@@ -111,27 +111,38 @@ def default_config():
         post = None,
         multipart_post = None,
 
-        # Other
+        # Headers, User-Agent, Referer
         headers = {},
         user_agent = None,
         user_agent_file = os.path.join(PACKAGE_DIR, 'user_agent.txt'),
-        reuse_cookies = True,
-        reuse_referer = True,
-        cookies = {},
-        cookiefile = None,
         referer = None,
-        follow_refresh = False,
-        #nohead = False,
+        reuse_referer = True,
+
+        # Cookies
+        cookies = {},
+        reuse_cookies = True,
+
+        # ???
+        cookiefile = None,
+
+        # Response processing
         nobody = False,
         body_maxsize = None,
         # TODO: manually set Content-Encoding header and unzip the content
         encoding = 'gzip',
-        userpwd = None,
+
         # Timeouts
         timeout = 15,
         connect_timeout = 10,
         hammer_mode = False,
         hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
+
+        # Authentication
+        userpwd = None,
+
+        # Other
+        follow_refresh = False,
+        #nohead = False,
         # Convert document body to lower case before bulding LXML tree
         # It does not affect `response.body`
         lowercased_tree = False,
