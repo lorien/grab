@@ -1,12 +1,15 @@
 from unittest import TestCase
 
 import grab.spider.base
+from grab import Grab
 from grab.spider import Spider, Task, Data, SpiderMisuseError
 from util import FakeServerThread, BASE_URL, RESPONSE, SLEEP
 
 class TestSpider(TestCase):
 
     class SimpleSpider(Spider):
+        base_url = 'http://google.com'
+
         def task_baz(self, grab, task):
             return Data('foo', grab.response.body)
 
@@ -51,4 +54,16 @@ class TestSpider(TestCase):
         self.assertRaises(SpiderMisuseError,
                           lambda: self.SimpleSpider(priority_mode='foo'))
 
+    def test_task_url(self):
+        bot = self.SimpleSpider()
+        task = Task('baz', url='xxx')
+        self.assertEqual('xxx', task.url)
+        bot.add_task(task)
+        self.assertEqual('http://google.com/xxx', task.url)
+        self.assertEqual(None, task.grab)
 
+        g = Grab(url='yyy')
+        task = Task('baz', grab=g)
+        bot.add_task(task)
+        self.assertEqual('http://google.com/yyy', task.url)
+        self.assertEqual('http://google.com/yyy', task.grab.config['url'])

@@ -68,10 +68,13 @@ class Spider(object):
     # You can define here some urls and initial tasks
     # with name "initial" will be created from these
     # urls
+    # If the logic of generating initial tasks is complex
+    # then consider to use `task_generator` method instead of
+    # `initial_urls` attribute
     initial_urls = None
-    # Base url which is used in follow_links method to resolve relative url
-    # In future it will used as base url for resolving relative urls
-    # in all places
+
+    # The base url which is used to resolve all relative urls
+    # The resolving takes place in `add_task` method
     base_url = None
 
     def __init__(self, thread_number=3, request_limit=None,
@@ -400,6 +403,12 @@ class Spider(object):
                 task.priority = DEFAULT_TASK_PRIORITY
             else:
                 task.priority = randint(*RANDOM_TASK_PRIORITY_RANGE)
+
+        if not task.url.startswith('http'):
+            task.url = urljoin(self.base_url, task.url)
+        if task.grab and not task.grab.config['url'].startswith('http'):
+            task.grab.config['url'] = urljoin(self.base_url, task.grab.config['url'])
+
         if self.container_mode:
             self.distributed_task_buffer.append(task)
         else:
