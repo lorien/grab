@@ -53,15 +53,34 @@ API
 Вся нижеследующая информация сгенерирована из комментариев в исходном коде.
 Поэтому она на английском языке.
 
+Базовый интерфейс:
+
 .. toctree::
     :maxdepth: 2
 
-    api/grab
+    api/base
+
+Расширения:
+
+.. toctree::
+    :maxdepth: 2
+
     api/ext_form
-    api/ext_django
     api/ext_text
     api/ext_lxml
+    api/ext_django
+    api/ext_soup
+    api/ext_rex
+    api/ext_pquery
+
+Утилиты:
+
+.. toctree::
+    :maxdepth: 2
+
     api/tools_html
+    
+
 
 
 Похожие проекты

@@ -8,6 +8,10 @@ class PyqueryExtension(object):
 
     @property
     def pyquery(self):
+        """
+        Returns pyquery handler.
+        """
+
         if not self._pyquery:
             from pyquery import PyQuery
 

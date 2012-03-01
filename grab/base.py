@@ -641,6 +641,9 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         Convert sequence of items into bytestring which could be submitted
         in POST or GET request.
 
+        It differs from ``urllib.urlencode`` in that it can process unicode
+        and some special values.
+
         ``items`` could dict or tuple or list.
         """
 
