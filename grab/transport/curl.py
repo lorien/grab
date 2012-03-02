@@ -131,7 +131,7 @@ class CurlTransportExtension(object):
         if isinstance(url, unicode):
             url = url.encode('utf-8')
         self.curl.setopt(pycurl.URL, url)
-        self.curl.setopt(pycurl.FOLLOWLOCATION, 1)
+        self.curl.setopt(pycurl.FOLLOWLOCATION, 1 if self.config['follow_location'] else 0)
         self.curl.setopt(pycurl.MAXREDIRS, 5)
         self.curl.setopt(pycurl.CONNECTTIMEOUT, self.config['connect_timeout'])
         self.curl.setopt(pycurl.TIMEOUT, self.config['timeout'])

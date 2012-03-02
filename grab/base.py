@@ -130,26 +130,29 @@ def default_config():
         hammer_mode = False,
         hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
 
-        # TODO: documentation for following things
         # Response processing
         nobody = False,
         body_maxsize = None,
 
-        # TODO: manually set Content-Encoding header and unzip the content
+        # Content compression
         encoding = 'gzip',
 
+        # Редиректы
+        follow_refresh = False,
+        follow_location = True,
 
         # Authentication
         userpwd = None,
 
-        # Other
-        follow_refresh = False,
-        #nohead = False,
+        # TODO: documentation for following things
+
+        # Charset
+        charset = None,
+
         # Convert document body to lower case before bulding LXML tree
         # It does not affect `response.body`
         lowercased_tree = False,
-        charset = None,
-        #tidy = False,
+
         # Strip null bytes from document body before building lXML tree
         # It does not affect `response.body`
         strip_null_bytes = True,
