@@ -7,9 +7,16 @@ class GrabError(Exception):
     All custom Grab exception should be children of that class.
     """
 
+
 class GrabNetworkError(IOError, GrabError):
     """
-    Wrapper about pycurl error.
+    Raises in case of network error.
+    """
+
+
+class GrabTimeoutError(GrabNetworkError):
+    """
+    Raises when configured time is outed for the request.
     """
 
 
@@ -22,10 +29,4 @@ class DataNotFound(IndexError, GrabError):
 class GrabMisuseError(GrabError):
     """
     Indicates incorrect usage of grab API.
-    """
-
-
-class GrabTimeoutError(GrabNetworkError):
-    """
-    Raised when time is outed for request.
     """

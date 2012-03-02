@@ -122,21 +122,22 @@ def default_config():
         # Cookies
         cookies = {},
         reuse_cookies = True,
-
-        # ???
         cookiefile = None,
-
-        # Response processing
-        nobody = False,
-        body_maxsize = None,
-        # TODO: manually set Content-Encoding header and unzip the content
-        encoding = 'gzip',
 
         # Timeouts
         timeout = 15,
         connect_timeout = 10,
         hammer_mode = False,
         hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
+
+        # TODO: documentation for following things
+        # Response processing
+        nobody = False,
+        body_maxsize = None,
+
+        # TODO: manually set Content-Encoding header and unzip the content
+        encoding = 'gzip',
+
 
         # Authentication
         userpwd = None,

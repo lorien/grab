@@ -44,6 +44,8 @@ Grab сайты
     grab/debugging
     grab/options
     grab/request
+    grab/cookies
+    grab/errors
     grab/proxy
     grab/under_the_hood
 
@@ -72,6 +74,7 @@ API
     api/ext_soup
     api/ext_rex
     api/ext_pquery
+    api/error
 
 Утилиты:
 

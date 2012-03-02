@@ -139,6 +139,15 @@ cookies
 :Type: dict
 :Default: None
 
+.. _option_cookiefile:
+
+cookiefile
+----------
+
+Перед каждым запросом Grab будет считывать кукисы из этого файла и объединять с теми, что он уже помнит. После каждого запроса, Grab будет сохранять все кукисы в указанный файл.
+
+Формат данных в файле: JSON-сериализованный словарь.
+
 .. _option_referer:
 
 referer
@@ -273,3 +282,17 @@ debug_post
 
 :Type: bool
 :Default: False
+
+.. _option_hammer_mode:
+
+hammer_mode
+-----------
+
+Режим повторных запросов. Смотрите подробности в :ref:`hammer_mode`.
+
+.. _option_hammer_timeouts:
+
+hammer_timeouts
+---------------
+
+Настройка таймаутов для режима повторных запросов.

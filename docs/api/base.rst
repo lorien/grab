@@ -21,8 +21,10 @@ Base Grab API
     .. automethod:: change_proxy
     .. automethod:: urlencode
     .. automethod:: make_url_absolute
-    .. automethod:: clear_cookies
     .. automethod:: detect_request_method
+    .. automethod:: clear_cookies
+    .. automethod:: load_cookies
+    .. automethod:: dump_cookies
 
 
 .. autoclass:: UploadContent
