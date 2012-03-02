@@ -144,8 +144,6 @@ def default_config():
         # Authentication
         userpwd = None,
 
-        # TODO: documentation for following things
-
         # Charset
         charset = None,
 

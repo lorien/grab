@@ -50,6 +50,7 @@ Grab сайты
     grab/cookies
     grab/errors
     grab/proxy
+    grab/response
     grab/under_the_hood
 
 API
@@ -78,6 +79,7 @@ API
     api/ext_rex
     api/ext_pquery
     api/error
+    api/response
 
 Утилиты:
 

@@ -6,7 +6,7 @@ from copy import copy
 import logging
 import email
 from StringIO import StringIO
-from cookielib import CookieJar
+#from cookielib import CookieJar
 from urllib2 import Request
 from hashlib import sha1
 import os
@@ -30,7 +30,7 @@ class Response(object):
         self.time = None
         self.url = None
         self.cookies = {}
-        self.cookiejar = None
+        #self.cookiejar = None
         self.charset = 'utf-8'
         self._unicode_body = None
 
@@ -157,7 +157,7 @@ class Response(object):
 
         obj.headers = copy(self.headers)
         obj.cookies = copy(self.cookies)
-        obj.cookiejar = copy(self.cookiejar)
+        #obj.cookiejar = copy(self.cookiejar)
 
         return obj
 
@@ -175,18 +175,17 @@ class Response(object):
         builded from hash. That allows to lower number of files
         per directory.
 
-        Args:
-            :param location: URL of file or something else. It is
-                used to build the SHA1 hash.
-            :param basedir: base directory to save the file. Note that
-                file will not be saved directly to this directory but to
-                some sub-directory of `basedir`
-            :param ext: extension which should be appended to file name. The
-                dot is inserted automatically between filename and extension.
-            :param skip_existing: if True then do not download file if its hash
-                file already exists
-
-        Returns path to saved file relative to `basedir`.
+        :param location: URL of file or something else. It is
+            used to build the SHA1 hash.
+        :param basedir: base directory to save the file. Note that
+            file will not be saved directly to this directory but to
+            some sub-directory of `basedir`
+        :param ext: extension which should be appended to file name. The
+            dot is inserted automatically between filename and extension.
+        :param skip_existing: if True then do not download file if its hash
+            file already exists
+        :type skip_existing: bool
+        :returns: path to saved file relative to `basedir`
 
         Example::
 
