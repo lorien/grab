@@ -217,7 +217,14 @@ class CurlTransportExtension(object):
         # Note that this option sets the cookie header explictly in the outgoing request(s). If multiple requests are done due to authentication, followed redirections or similar, they will all get this cookie passed on.
         # Using this option multiple times will only make the latest string override the previous ones. 
 
+        # `cookiefile` option shoul be processed before `cookies` option
+        # because `load_cookies` updates `cookies` option
+        if self.config['cookiefile']:
+            self.load_cookies(self.config['cookiefile'])
+
         if self.config['cookies']:
+            if not isinstance(self.config['cookies'], dict):
+                raise GrabMisuseError('cookies option shuld be a dict')
             items = self.encode_cookies(self.config['cookies'], join=False)
             self.curl.setopt(pycurl.COOKIELIST, 'ALL')
             for item in items:
@@ -226,12 +233,6 @@ class CurlTransportExtension(object):
             # Turn on cookies engine anyway
             # To correctly support cookies in 302-redirects
             self.curl.setopt(pycurl.COOKIELIST, '')
-
-        #if not self.config['reuse_cookies'] and not self.config['cookies']:
-            #self.curl.setopt(pycurl.COOKIELIST, 'ALL')
-
-        if self.config['cookiefile']:
-            self.load_cookies(self.config['cookiefile'])
 
         if self.config['referer']:
             self.curl.setopt(pycurl.REFERER, str(self.config['referer']))
@@ -299,43 +300,6 @@ class CurlTransportExtension(object):
 
         # We do not need anymore cookies stored in the
         # curl instance so drop them
-        self.curl.setopt(pycurl.COOKIELIST, 'ALL')
-
-    # TODO: move to base
-    def load_cookies(self, path):
-        """
-        Load cookies from the file.
-
-        The cookie data may be in Netscape / Mozilla cookie data format or just regular HTTP-style headers dumped to a file.
-        """
-        import pycurl
-
-        self.curl.setopt(pycurl.COOKIEFILE, path)
-
-
-    # TODO: move to base
-    def dump_cookies(self, path):
-        """
-        Dump all cookies to file.
-
-        Each cookie is dumped in the format:
-        # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
-        """
-        import pycurl
-
-        with open(path, 'w') as out:
-            out.write('\n'.join(self.curl.getinfo(pycurl.INFO_COOKIELIST)))
-
-    def clear_cookies(self):
-        """
-        Clear all cookies.
-
-        Custom version of BaseCurl.clear_cookies which do additional action:
-        reset cookies in curl instance.
-        """
-        import pycurl
-
-        self.config['cookies'] = {}
         self.curl.setopt(pycurl.COOKIELIST, 'ALL')
 
     def extract_cookies(self):

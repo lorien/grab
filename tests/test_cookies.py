@@ -1,10 +1,11 @@
 # coding: utf-8
 from unittest import TestCase
 import string
+import json
 
 from grab import Grab, GrabMisuseError
 from util import (FakeServerThread, BASE_URL, RESPONSE, REQUEST,
-                  RESPONSE_ONCE_HEADERS)
+                  RESPONSE_ONCE_HEADERS, TMP_FILE)
 
 class TestCookies(TestCase):
     def setUp(self):
@@ -67,3 +68,47 @@ class TestCookies(TestCase):
         RESPONSE['once_code'] = 302
         g.go(BASE_URL)
         self.assertEqual(REQUEST['headers']['Cookie'], 'foo=bar')
+
+    def test_load_dump(self):
+        g = Grab()
+        cookies = {'foo': 'bar', 'spam': 'ham'}
+        g.setup(cookies=cookies)
+        g.dump_cookies(TMP_FILE)
+        self.assertEqual(set(cookies.items()), set(json.load(open(TMP_FILE)).items()))
+
+        # Test non-ascii
+        g = Grab()
+        cookies = {'foo': 'bar', 'spam': u'бегемот'}
+        g.setup(cookies=cookies)
+        g.dump_cookies(TMP_FILE)
+        self.assertEqual(set(cookies.items()), set(json.load(open(TMP_FILE)).items()))
+
+        # Test load cookies
+        g = Grab()
+        cookies = {'foo': 'bar', 'spam': u'бегемот'}
+        json.dump(cookies, open(TMP_FILE, 'w'))
+        g.load_cookies(TMP_FILE)
+        self.assertEqual(set(g.config['cookies'].items()), set(cookies.items()))
+
+    def test_cookiefile(self):
+        cookies = {'spam': 'ham'}
+        json.dump(cookies, open(TMP_FILE, 'w'))
+
+        # One cookie are sent in server reponse
+        # Another cookies is passed via the `cookiefile` option
+        RESPONSE['cookies'] = {'godzilla': 'monkey'}
+        g = Grab()
+        g.setup(cookiefile=TMP_FILE)
+        g.go(BASE_URL)
+        self.assertEqual(REQUEST['headers']['Cookie'], 'spam=ham')
+
+        # This is correct reslt of combining two cookies
+        MERGED_COOKIES = {'godzilla': 'monkey', 'spam': 'ham'}
+
+        # g.config should contains merged cookies
+        self.assertEqual(set(MERGED_COOKIES.items()),
+                         set(g.config['cookies'].items()))
+
+        # `cookiefile` file should contains merged cookies
+        self.assertEqual(set(MERGED_COOKIES.items()),
+                         set(json.load(open(TMP_FILE)).items()))

@@ -3,6 +3,7 @@ import threading
 import time
 import os
 import shutil
+import tempfile
 
 import grab
 
@@ -27,18 +28,25 @@ REQUEST = {'get': None, 'post': None, 'headers': None,
 SLEEP = {'get': 0, 'post': 0}
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
-TMP_DIR = os.path.join(TEST_DIR, 'tmp')
 
-def prepare_temp_dir():
-    if not os.path.exists(TMP_DIR):
-        os.mkdir(TMP_DIR)
-    else:
-        for root, dirs, files in os.walk(TMP_DIR):
-            for fname in files:
-                os.unlink(os.path.join(root, fname))
-            for _dir in dirs:
-                shutil.rmtree(os.path.join(root, _dir))
-    return TMP_DIR
+def prepare_test_environment():
+    global TMP_DIR, TMP_FILE
+
+    TMP_DIR = tempfile.mkdtemp()
+    TMP_FILE = os.path.join(TMP_DIR, '__temp')
+
+
+def clear_test_environment():
+    remove_directory(TMP_DIR)
+
+
+def remove_directory(path):
+    for root, dirs, files in os.walk(path):
+        for fname in files:
+            os.unlink(os.path.join(root, fname))
+        for _dir in dirs:
+            shutil.rmtree(os.path.join(root, _dir))
+
 
 class FakeServerThread(threading.Thread):
     def __init__(self, *args, **kwargs):

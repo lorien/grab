@@ -5,6 +5,8 @@ import sys
 from optparse import OptionParser
 import logging
 
+from tests.util import prepare_test_environment, clear_test_environment
+
 TEST_CASE_LIST = (
     'tests.test_text_extension',
     'tests.test_lxml_extension',
@@ -29,6 +31,8 @@ def main():
                       default='GrabCurl')
     opts, args = parser.parse_args()
 
+    prepare_test_environment()
+
     import grab
     transport = getattr(grab, opts.transport)
     grab.Grab = transport
@@ -40,6 +44,8 @@ def main():
         suite = loader.loadTestsFromNames(TEST_CASE_LIST)
     runner = unittest.TextTestRunner()
     runner.run(suite)
+
+    clear_test_environment()
 
 
 if __name__ == '__main__':

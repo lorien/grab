@@ -3,7 +3,7 @@ from unittest import TestCase
 from grab import Grab, DataNotFound, GrabMisuseError
 import os.path
 
-from tests.util import (FakeServerThread, prepare_temp_dir, TEST_DIR,
+from tests.util import (FakeServerThread, TEST_DIR, TMP_DIR,
                         RESPONSE, BASE_URL)
 
 HTML = """
@@ -15,7 +15,6 @@ IMG_FILE = os.path.join(TEST_DIR, 'files', 'yandex.png')
 class TestResponse(TestCase):
     def setUp(self):
         FakeServerThread().start()
-        self.temp_dir = prepare_temp_dir()
 
     def test_save(self):
         """
@@ -23,7 +22,7 @@ class TestResponse(TestCase):
         """
         
         img_data = open(IMG_FILE, 'rb').read()
-        temp_file = os.path.join(self.temp_dir, 'file.bin')
+        temp_file = os.path.join(TMP_DIR, 'file.bin')
         RESPONSE['get'] = img_data
 
         g = Grab()
@@ -41,8 +40,8 @@ class TestResponse(TestCase):
 
         g = Grab()
         g.go(BASE_URL)
-        path = g.response.save_hash(BASE_URL, self.temp_dir)
-        test_data = open(os.path.join(self.temp_dir, path), 'rb').read()
+        path = g.response.save_hash(BASE_URL, TMP_DIR)
+        test_data = open(os.path.join(TMP_DIR, path), 'rb').read()
         self.assertEqual(test_data, img_data)
 
     def test_custom_charset(self):

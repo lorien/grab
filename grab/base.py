@@ -20,6 +20,7 @@ import threading
 from urlparse import urljoin
 import time
 import re
+import json
 
 from proxylist import ProxyList
 from tools.html import find_refresh_url, find_base_url
@@ -745,13 +746,6 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         else:
             return url
 
-    def clear_cookies(self):
-        """
-        Clear all cookies.
-        """
-
-        self.config['cookies'] = {}
-
     def detect_request_method(self):
         """
         Analize request config and find which
@@ -769,3 +763,31 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
             else:
                 method = 'GET'
         return method
+
+    def clear_cookies(self):
+        """
+        Clear all remembered cookies.
+        """
+
+        self.config['cookies'] = {}
+
+    def load_cookies(self, path):
+        """
+        Load cookies from the file.
+
+        Content of file should be a JSON-serialized dict of keys and values.
+        """
+
+        with open(path) as inf:
+            cookies = json.loads(inf.read())
+        self.config['cookies'].update(cookies)
+
+    def dump_cookies(self, path):
+        """
+        Dump all cookies to file.
+
+        Cookies are dumped as JSON-serialized dict of keys and values.
+        """
+
+        with open(path, 'w') as out:
+            out.write(json.dumps(self.config['cookies']))
