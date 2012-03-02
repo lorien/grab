@@ -296,13 +296,13 @@ class CurlTransportExtension(object):
         else:
             self.response.parse()
 
-        self.response.cookies = self.extract_cookies()
+        self.response.cookies = self._extract_cookies()
 
         # We do not need anymore cookies stored in the
         # curl instance so drop them
         self.curl.setopt(pycurl.COOKIELIST, 'ALL')
 
-    def extract_cookies(self):
+    def _extract_cookies(self):
         """
         Extract cookies.
         """

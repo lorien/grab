@@ -780,7 +780,11 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         with open(path) as inf:
-            cookies = json.loads(inf.read())
+            data = inf.read()
+            if data:
+                cookies = json.loads(data)
+            else:
+                cookies = {}
         self.config['cookies'].update(cookies)
 
     def dump_cookies(self, path):

@@ -91,13 +91,19 @@ class TestCookies(TestCase):
         self.assertEqual(set(g.config['cookies'].items()), set(cookies.items()))
 
     def test_cookiefile(self):
+        g = Grab()
+
+        # Empty file should not raise Exception
+        open(TMP_FILE, 'w').write('')
+        g.setup(cookiefile=TMP_FILE)
+        g.go(BASE_URL)
+
         cookies = {'spam': 'ham'}
         json.dump(cookies, open(TMP_FILE, 'w'))
 
         # One cookie are sent in server reponse
         # Another cookies is passed via the `cookiefile` option
         RESPONSE['cookies'] = {'godzilla': 'monkey'}
-        g = Grab()
         g.setup(cookiefile=TMP_FILE)
         g.go(BASE_URL)
         self.assertEqual(REQUEST['headers']['Cookie'], 'spam=ham')
