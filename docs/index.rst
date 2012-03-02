@@ -43,7 +43,10 @@ Grab сайты
     grab/customization
     grab/debugging
     grab/options
-    grab/request
+    grab/http_headers
+    grab/http_methods
+    grab/misc
+    grab/charset
     grab/cookies
     grab/errors
     grab/proxy
