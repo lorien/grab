@@ -21,7 +21,7 @@ class LXMLExtension(object):
     @property
     def tree(self):
         """
-        Return lxml ElementTree tree of the document.
+        Return DOM-tree of the document calculated with `lxml.html.fromstring` function.
         """
         from lxml.html import fromstring
 
@@ -45,6 +45,9 @@ class LXMLExtension(object):
 
     @property
     def xml_tree(self):
+        """
+        Return DOM-tree of the document calculated with `lxml.etree.fromstring` function.
+        """
         from lxml.etree import fromstring
 
         if self._strict_lxml_tree is None:

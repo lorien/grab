@@ -7,4 +7,3 @@ Form Processing Extension
 
 .. autoclass:: FormExtension
     :members:
-

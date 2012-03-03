@@ -27,8 +27,6 @@ Base Grab API
     .. automethod:: dump_cookies
 
 
-.. autoclass:: UploadContent
-
-.. autoclass:: UploadContent
+.. autoclass:: UploadFile
 
 .. autoclass:: GrabInterface

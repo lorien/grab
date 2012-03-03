@@ -332,7 +332,7 @@ userpwd
 :Default: None
 
 
-.. _option_lowercased_tree
+.. _option_lowercased_tree:
 
 lowercased_tree
 ---------------
@@ -342,7 +342,7 @@ lowercased_tree
 :type: bool
 :Default: False
 
-.. _option_strip_null_bytes
+.. _option_strip_null_bytes:
 
 strip_null_bytes
 ----------------

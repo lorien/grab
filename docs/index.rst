@@ -52,6 +52,8 @@ Grab сайты
     grab/proxy
     grab/response
     grab/under_the_hood
+    grab/forms
+    grab/dom
 
 API
 ~~~
@@ -65,6 +67,8 @@ API
     :maxdepth: 2
 
     api/base
+    api/error
+    api/response
 
 Расширения:
 
@@ -78,8 +82,6 @@ API
     api/ext_soup
     api/ext_rex
     api/ext_pquery
-    api/error
-    api/response
 
 Утилиты:
 

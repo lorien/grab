@@ -31,11 +31,6 @@ POST-запрос
 Отправка файлов
 ===============
 
-Чтобы отправить файл используйте специальный класс :ref:`~grab.base.UploadFile`, а также опцию :ref:`option_post_multipart`::
+Чтобы отправить файл используйте специальный класс :class:`~grab.base.UploadFile`, а также опцию :ref:`option_multipart_post`::
 
     g.setup(multipart_post={'foo': bar', 'image': UploadFile('/tmp/image.gif')})
-
-Вы также можете использовать :ref:`~grab.base.UploadFile` в `set_input` методах.  В случае использования метода `submit` для отправки формы, нужная опция (`post` или `multipart_post`) выбирается автоматически::
-
-    g.set_input('file', UploadFile('/path/to/file'))
-    g.submit()
