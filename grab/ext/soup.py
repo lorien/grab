@@ -4,7 +4,6 @@
 """
 Interface to BeatifulSoup.
 """
-from BeautifulSoup import BeautifulSoup
 
 class BeautifulSoupExtension(object):
     """
@@ -17,6 +16,12 @@ class BeautifulSoupExtension(object):
 
     @property
     def soup(self):
+        """
+        Return BeautifulSoup descriptor.
+        """
+
+        from BeautifulSoup import BeautifulSoup
+
         if not self._soup:
             self._soup = BeautifulSoup(self.response.body)
         return self._soup

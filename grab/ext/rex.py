@@ -13,11 +13,23 @@ NULL = object()
 
 class RegexpExtension(object):
     def rex_text(self, regexp, flags=0, byte=False, default=NULL):
-        match = self.rex(regexp, flags=flags, byte=byte, default=default)
+        """
+        Search regular expression in response body and return content of first
+        matching group.
+
+        :param byte: if False then search is performed in `response.unicode_body()`
+            else the rex is searched in `response.body`.
+        """
+
         try:
+            match = self.rex(regexp, flags=flags, byte=byte)
+        except DataNotFound:
+            if default is NULL:
+                raise DataNotFound('Regexp not found')
+            else:
+                return default
+        else:
             return normalize_space(decode_entities(match.group(1)))
-        except AttributeError:
-            raise DataNotFound('Regexp not found')
 
     def rex(self, regexp, flags=0, byte=False, default=NULL):
         """
@@ -58,3 +70,10 @@ class RegexpExtension(object):
             return rex_cache(regexp, flags)
         else:
             return regexp
+
+    def assert_rex(self, rex, byte=False):
+        """
+        If `rex` expression is not found then raise `DataNotFound` exception.
+        """
+
+        self.rex(rex, byte=byte)

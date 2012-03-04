@@ -3,6 +3,8 @@ from unittest import TestCase
 from grab import Grab, DataNotFound, GrabMisuseError
 import re
 
+# TODO: split on two tests: text extension and rex extension
+
 HTML = u"""
 <head>
     <title>фыва</title>
@@ -11,6 +13,7 @@ HTML = u"""
 <body>
     <div id="bee">
         <div class="wrapper">
+            # russian LA
             <strong id="bee-strong">пче</strong><em id="bee-em">ла</em>
         </div>
         <script type="text/javascript">
@@ -21,6 +24,7 @@ HTML = u"""
         </style>
     </div>
     <div id="fly">
+        # russian XA
         <strong id="fly-strong">му\n</strong><em id="fly-em">ха</em>
     </div>
     <ul id="num">
@@ -85,6 +89,9 @@ class TextExtensionTest(TestCase):
         self.g.assert_rex(re.compile(u'фыва'.encode('cp1251')), byte=True)
         self.assertRaises(DataNotFound,
             lambda: self.g.assert_rex(re.compile(u'фыва2')))
+
+    def test_assert_rex_text(self):
+        self.assertEqual(u'ха', self.g.rex_text('<em id="fly-em">([^<]+)'))
 
     #def test_find_number(self):
         #self.assertEqual('2', self.g.find_number('2'))
