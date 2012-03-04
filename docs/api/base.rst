@@ -2,8 +2,9 @@
 
 .. module:: grab.base
 
-Base Grab API
--------------
+==============================
+grab.base: API базового класса
+==============================
 
 .. autoclass:: BaseGrab
 

@@ -1,7 +1,8 @@
 .. _extensions_django:
 
-Django FileField Extension
-==========================
+===========================================
+grab.ext.django: Django FileField Extension
+===========================================
 
 .. module:: grab.ext.django
 

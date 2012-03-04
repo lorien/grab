@@ -1,7 +1,8 @@
 .. _extensions_soup:
 
-BeautifulSoup Extension
-=======================
+======================================
+grab.ext.soup: BeautifulSoup Extension
+======================================
 
 .. module:: grab.ext.soup
 
