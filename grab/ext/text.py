@@ -56,32 +56,3 @@ class TextExtension(object):
                 break
         if not found:
             raise DataNotFound('Substrings not found: %s' % ', '.join(anchors))
-
-
-    def search_rex(self, rex, byte=False):
-        """
-        Search the regular expression in response body.
-
-        :param byte: if False then search is performed in `response.unicode_body()`
-            else the rex is searched in `response.body`.
-
-        Note: if you use default non-byte mode than do not forget to build your
-        regular expression with re.U flag.
-
-        Returns found match or None
-        """
-
-        logging.error('This method is deprecated. Use `rex` method instead')
-        if byte:
-            return rex.search(self.response.body) or None
-        else:
-            return rex.search(self.response.unicode_body()) or None
-
-
-    def assert_rex(self, rex, byte=False):
-        """
-        If `rex` expression is not found then raise `DataNotFound` exception.
-        """
-
-        logging.error('This method is deprecated. Use `rex` method instead')
-        self.rex(rex, byte=byte)
