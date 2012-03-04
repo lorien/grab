@@ -16,9 +16,101 @@ from ..base import (GrabError, GrabMisuseError, UploadContent, UploadFile,
 
 logger = logging.getLogger('grab')
 
+
+"""
+dir(self.browser)
+
+['__class__',
+ '__delattr__',
+ '__dict__',
+ '__doc__',
+ '__format__',
+ '__getattribute__',
+ '__hash__',
+ '__init__',
+ '__module__',
+ '__new__',
+ '__reduce__',
+ '__reduce_ex__',
+ '__repr__',
+ '__setattr__',
+ '__sizeof__',
+ '__str__',
+ '__subclasshook__',
+ '__weakref__',
+ '_unwrap_value',
+ '_wrap_value',
+ 'add_cookie',
+ 'back',
+ 'binary',
+ 'capabilities',
+ 'close',
+ 'command_executor',
+ 'create_web_element',
+ 'current_url',
+ 'current_window_handle',
+ 'delete_all_cookies',
+ 'delete_cookie',
+ 'desired_capabilities',
+ 'error_handler',
+ 'execute',
+ 'execute_async_script',
+ 'execute_script',
+ 'find_element',
+ 'find_element_by_class_name',
+ 'find_element_by_css_selector',
+ 'find_element_by_id',
+ 'find_element_by_link_text',
+ 'find_element_by_name',
+ 'find_element_by_partial_link_text',
+ 'find_element_by_tag_name',
+ 'find_element_by_xpath',
+ 'find_elements',
+ 'find_elements_by_class_name',
+ 'find_elements_by_css_selector',
+ 'find_elements_by_id',
+ 'find_elements_by_link_text',
+ 'find_elements_by_name',
+ 'find_elements_by_partial_link_text',
+ 'find_elements_by_tag_name',
+ 'find_elements_by_xpath',
+ 'firefox_profile',
+ 'forward',
+ 'get',
+ 'get_cookie',
+ 'get_cookies',
+ 'get_screenshot_as_base64',
+ 'get_screenshot_as_file',
+ 'get_window_position',
+ 'get_window_size',
+ 'implicitly_wait',
+ 'name',
+ 'orientation',
+ 'page_source',
+ 'profile',
+ 'quit',
+ 'refresh',
+ 'save_screenshot',
+ 'session_id',
+ 'set_script_timeout',
+ 'set_window_position',
+ 'set_window_size',
+ 'start_client',
+ 'start_session',
+ 'stop_client',
+ 'switch_to_active_element',
+ 'switch_to_alert',
+ 'switch_to_default_content',
+ 'switch_to_frame',
+ 'switch_to_window',
+ 'title',
+ 'window_handles']
+"""
+
+
 class SeleniumTransportExtension(object):
     def extra_config(self):
-        self.config['xserver_display'] = 7
+        self.config['xserver_display'] = 0
 
     #def extra_init(self):
         #pass
@@ -293,13 +385,17 @@ class SeleniumTransportExtension(object):
         #self.response.body = ''.join(self.response_body_chunks)
         #self.response.parse()
         self.response.head = ''
-        self.response.body = self.browser.page_source#.encode('utf-8')
+        self.response._unicode_body = self.browser.page_source#.encode('utf-8')
+        self.response.body = self.browser.page_source.encode('utf-8')
+        self.response.charset = 'utf-8'
+        #import pdb; pdb.set_trace()
         self.response.url = self.browser.current_url
         self.response.code = 200# TODO: fix, self.browser.status_code
         self.response.cookies = self.extract_cookies()
         #self.response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         #self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         #self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
+        #import pdb; pdb.set_trace()
         self.browser.quit()
 
     #def load_cookies(self, path):

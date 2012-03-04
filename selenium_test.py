@@ -81,11 +81,12 @@ class TestGrab(TestCase):
     def test_basic(self):
         html = 'the cat'
 
-        RESPONSE['get'] = 'the cat'
+        RESPONSE['get'] = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body>крокодил</body></html>'
         g = Grab()
         g.setup(xserver_display=0)
         g.go(BASE_URL)
-        self.assertEqual('<HTML><HEAD/><BODY><PRE>the cat</PRE></BODY></HTML>', g.response.body)
+        expected_body = '<HTML><HEAD><META content="text/html; charset=utf-8" http-equiv="Content-Type"/></HEAD><BODY>крокодил</BODY></HTML>'
+        self.assertEqual(expected_body, g.response.body)
 
 
 if __name__ == '__main__':
