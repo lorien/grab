@@ -54,6 +54,8 @@ Grab сайты
     grab/under_the_hood
     grab/forms
     grab/dom
+    grab/text_search
+    grab/other_extensions
 
 API
 ~~~

@@ -6,4 +6,5 @@ BeautifulSoup Extension
 .. module:: grab.ext.soup
 
 .. autoclass:: BeautifulSoupExtension
-    :members:
+
+    .. autoattribute:: soup

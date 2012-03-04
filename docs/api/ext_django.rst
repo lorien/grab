@@ -6,4 +6,5 @@ Django FileField Extension
 .. module:: grab.ext.django
 
 .. autoclass:: DjangoExtension
-    :members:
+
+    .. automethod:: django_file
