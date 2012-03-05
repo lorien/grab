@@ -40,6 +40,7 @@ Grab сайты
     :maxdepth: 2
 
     grab/tutorial
+    grab/installation
     grab/customization
     grab/debugging
     grab/options
