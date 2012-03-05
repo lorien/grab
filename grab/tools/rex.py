@@ -26,15 +26,11 @@ def rex_cache(rex, flags=0):
         return obj
 
 
-def rex_text(body, regexp, flags=0, default=NULL):
-    match = rex(body, regexp, flags=flags, default=default)
-    try:
-        return normalize_space(decode_entities(match.group(1)))
-    except AttributeError:
-        raise DataNotFound('Regexp not found')
-   
-
 def rex(body, regexp, flags=0, byte=False, default=NULL):
+    """
+    Search `regexp` expression in `body` text.
+    """
+
     regexp = normalize_regexp(regexp, flags)
     match =  regexp.search(body)
     if match:
@@ -44,6 +40,18 @@ def rex(body, regexp, flags=0, byte=False, default=NULL):
             raise DataNotFound('Could not find regexp: %s' % regexp)
         else:
             return default
+
+
+def rex_text(body, regexp, flags=0, default=NULL):
+    """
+    Search `regexp` expression in `body` text and then strip tags in found result.
+    """
+
+    match = rex(body, regexp, flags=flags, default=default)
+    try:
+        return normalize_space(decode_entities(match.group(1)))
+    except AttributeError:
+        raise DataNotFound('Regexp not found')
 
 
 def normalize_regexp(regexp, flags=0):
@@ -69,7 +77,7 @@ def rex_list(body, rex, flags=0):
 
 def rex_text_list(body, rex, flags=0):
     """
-    Return found matches.
+    Return found matches with stripped tags.
     """
 
     items = []

@@ -37,12 +37,11 @@ def make_work(callback, tasks, limit, ignore_exceptions=True,
     """
     Run up to "limit" threads, do tasks and yield results.
 
-    Arguments:
-        callback - the function that will process single task
-        tasks - the sequence or iterator or queue of tasks, each task
-            in turn is sequence of arguments, if task is just signle argument
-            it should be wrapped into list or tuple
-        limit - the maximum number of threads
+    :param callback:  the function that will process single task
+    :param tasks:  the sequence or iterator or queue of tasks, each task
+        in turn is sequence of arguments, if task is just signle argument
+        it should be wrapped into list or tuple
+    :param limit: the maximum number of threads
     """
     
     # If tasks is number convert it to the list of number

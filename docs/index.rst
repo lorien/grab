@@ -57,6 +57,7 @@ Grab сайты
     grab/text_search
     grab/other_extensions
     grab/transport
+    grab/tools
 
 API
 ~~~
@@ -91,6 +92,7 @@ API
     :maxdepth: 2
 
     api/tools_html
+    api/tools
     
 
 
