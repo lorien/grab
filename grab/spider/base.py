@@ -91,6 +91,7 @@ class Spider(object):
                  distributed_mode=False,
                  distributed_path=None,
                  priority_mode='random',
+                 meta=None,
                  ):
         """
         Arguments:
@@ -116,8 +117,13 @@ class Spider(object):
             in remote process which receives name of spider class and name of method.
         * distributed_path - path to the spider class in format "mod.mod.ClassName"
         * priority_mode - could be "random" or "const"
+        * meta - arbitrary user data
         """
 
+        if meta:
+            self.meta = meta
+        else:
+            self.meta = {}
         self.container_mode = container_mode
         self.distributed_task_buffer = []
         if container_mode:
