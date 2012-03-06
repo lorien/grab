@@ -1,16 +1,16 @@
-What is grab?
-=============
+====
+Grab
+====
 
-Grab is python library which simplifies writing the web scrapers. In short,
-grab provides solid interface to use pycurl and lxml together.
+Grab is python site scraping framework. Grab provides interface to pycurl and lxml libraries.
 
 
 Documentation
 =============
 
-Documentation (a bit outdated): http://packages.python.org/grab/
+Documentation (Russian): http://grablib.org/docs/
 
-Awesome article (in russian): http://habrahabr.ru/blogs/python/127584/
+Documentation (English): not yet ready, please use google translate
 
 Please submit all questions to google group: http://groups.google.com/group/python-grab/
 
