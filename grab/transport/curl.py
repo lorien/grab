@@ -11,6 +11,8 @@ import random
 
 from ..base import (GrabError, GrabMisuseError, UploadContent, UploadFile,
                     GrabTimeoutError, GrabNetworkError)
+from ..tools.http import encode_cookies, urlencode, normalize_unicode,\
+                         normalize_http_values
 
 logger = logging.getLogger('grab')
 
@@ -166,19 +168,20 @@ class CurlTransportExtension(object):
             if self.config['multipart_post']:
                 if isinstance(self.config['multipart_post'], basestring):
                     raise GrabMisuseError('multipart_post option could not be a string')
-                post_items = self.normalize_http_values(self.config['multipart_post'])
+                post_items = normalize_http_values(self.config['multipart_post'],
+                                                   charset=self.charset)
                 self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif self.config['post']:
                 if isinstance(self.config['post'], basestring):
                     # bytes-string should be posted as-is
                     # unicode should be converted into byte-string
                     if isinstance(self.config['post'], unicode):
-                        post_data = self.normalize_unicode(self.config['post'])
+                        post_data = normalize_unicode(self.config['post'])
                     else:
                         post_data = self.config['post']
                 else:
                     # dict, tuple, list should be serialized into byte-string
-                    post_data = self.urlencode(self.config['post'])
+                    post_data = urlencode(self.config['post'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
         elif self.request_method == 'PUT':
             self.curl.setopt(pycurl.PUT, 1)
@@ -225,7 +228,7 @@ class CurlTransportExtension(object):
         if self.config['cookies']:
             if not isinstance(self.config['cookies'], dict):
                 raise GrabMisuseError('cookies option shuld be a dict')
-            items = self.encode_cookies(self.config['cookies'], join=False)
+            items = encode_cookies(self.config['cookies'], join=False)
             self.curl.setopt(pycurl.COOKIELIST, 'ALL')
             for item in items:
                 self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s' % item)

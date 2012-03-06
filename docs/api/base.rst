@@ -20,7 +20,6 @@ grab.base: API базового класса
     .. automethod:: fake_response
     .. automethod:: setup_proxylist
     .. automethod:: change_proxy
-    .. automethod:: urlencode
     .. automethod:: make_url_absolute
     .. automethod:: detect_request_method
     .. automethod:: clear_cookies

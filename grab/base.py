@@ -28,6 +28,8 @@ from response import Response
 
 from error import (GrabError, GrabNetworkError, GrabMisuseError, DataNotFound,
                    GrabTimeoutError)
+from upload import UploadContent, UploadFile
+from tools.http import normalize_http_values
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
@@ -59,38 +61,6 @@ PACKAGE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 logger = logging.getLogger('grab')
-
-class UploadContent(str):
-    """
-    TODO: docstring
-    """
-
-    def __new__(cls, value):
-        obj = str.__new__(cls, 'xxx')
-        obj.raw_value = value
-        return obj
-
-    def field_tuple(self):
-        # TODO: move to transport extension
-        import pycurl
-        return (pycurl.FORM_CONTENTS, self.raw_value)
-
-
-class UploadFile(str):
-    """
-    TODO: docstring
-    """
-
-    def __new__(cls, path):
-        obj = str.__new__(cls, 'xxx')
-        obj.path = path
-        return obj
-
-    def field_tuple(self):
-        # move to transport extension
-        import pycurl
-        return (pycurl.FORM_FILE, self.path)
-
 
 def default_config():
     return dict(
@@ -405,7 +375,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
                 if isinstance(post, basestring):
                     post = post[:150] + '...'
                 else:
-                    post = self.normalize_http_values(post, charset='utf-8')
+                    post = normalize_http_values(post, charset='utf-8')
                     items = sorted(post, key=lambda x: x[0])
                     new_items = []
                     for key, value in items:
@@ -638,101 +608,6 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
             fname = os.path.join(self.config['log_dir'], '%02d%s.%s' % (
                 self.request_counter, tname, fext))
             self.response.save(fname)
-
-    def urlencode(self, items):
-        """
-        Convert sequence of items into bytestring which could be submitted
-        in POST or GET request.
-
-        It differs from ``urllib.urlencode`` in that it can process unicode
-        and some special values.
-
-        ``items`` could dict or tuple or list.
-        """
-
-        if isinstance(items, dict):
-            items = items.items()
-        return urllib.urlencode(self.normalize_http_values(items))
-
-
-    def encode_cookies(self, items, join=True):
-        """
-        Serialize dict or sequence of two-element items into string suitable
-        for sending in Cookie http header.
-        """
-
-        def encode(val):
-            """
-            URL-encode special characters in the text.
-
-            In cookie value only ",", " ", "\t" and ";" should be encoded
-            """
-
-            return val.replace(' ', '%20').replace('\t', '%09')\
-                      .replace(';', '%3B').replace(',', '%2C')
-
-        if isinstance(items, dict):
-            items = items.items()
-        items = self.normalize_http_values(items)
-        tokens = []
-        for key, value in items:
-            tokens.append('%s=%s' % (encode(key), encode(value)))
-        if join:
-            return '; '.join(tokens)
-        else:
-            return tokens
-
-
-    def normalize_http_values(self, items, charset=None):
-        """
-        Accept sequence of (key, value) paris or dict and convert each
-        value into bytestring.
-
-        Unicode is converted into bytestring using charset of previous response
-        (or utf-8, if no requests were performed)
-
-        None is converted into empty string. 
-
-        Instances of ``UploadContent`` or ``UploadFile`` is converted
-        into special pycurl objects.
-        """
-
-        if isinstance(items, dict):
-            items = items.items()
-
-        def process(item):
-            key, value = item
-
-            # normalize value
-            if isinstance(value, (UploadContent, UploadFile)):
-                value = value.field_tuple()
-            elif isinstance(value, unicode):
-                value = self.normalize_unicode(value, charset=charset)
-            elif value is None:
-                value = ''
-
-            # normalize key
-            if isinstance(key, unicode):
-                key = self.normalize_unicode(key, charset=charset)
-
-            return key, value
-
-        items =  map(process, items)
-        items = sorted(items, key=lambda x: x[0])
-        return items
-
-    def normalize_unicode(self, value, charset=None):
-        """
-        Convert unicode into byte-string using detected charset (default or from
-        previous response)
-
-        By default, charset from previous response is used to encode unicode into
-        byte-string but you can enforce charset with ``charset`` option
-        """
-
-        if not isinstance(value, unicode):
-            raise GrabMisuseError('normalize_unicode method accepts only unicode values')
-        return value.encode(self.charset if charset is None else charset, 'ignore')
 
     def make_url_absolute(self, url, resolve_base=False):
         """

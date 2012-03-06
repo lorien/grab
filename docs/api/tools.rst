@@ -57,3 +57,9 @@ grab.tools.text
 
 .. automodule:: grab.tools.text
     :members:
+
+grab.tools.http
+===============
+
+.. automodule:: grab.tools.http
+    :members:

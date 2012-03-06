@@ -132,7 +132,8 @@ class RequestsTransportExtension(object):
                 raise NotImplementedError
                 #if isinstance(self.config['multipart_post'], basestring):
                     #raise GrabMisuseError('multipart_post option could not be a string')
-                #post_items = self.normalize_http_values(self.config['multipart_post'])
+                #post_items = self.normalize_http_values(self.config['multipart_post'],
+                                                         #charset=self.charset)
                 #self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif self.config['post']:
                 if isinstance(self.config['post'], basestring):
