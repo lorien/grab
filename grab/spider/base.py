@@ -584,7 +584,7 @@ class Spider(object):
                     g.response.time = 0
                     g.response.url = cache_item['url']
                     g.response.parse()
-                    g.response.cookies = g.extract_cookies()
+                    g.response.cookies = g._extract_cookies()
 
                 grab.process_request_result(custom_prepare_response)
 

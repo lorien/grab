@@ -143,7 +143,7 @@ class GrabInterface(object):
     def process_config(self):
         raise NotImplementedError
 
-    def extract_cookies(self):
+    def _extract_cookies(self):
         raise NotImplementedError
 
     def prepare_response(self):

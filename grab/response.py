@@ -55,7 +55,7 @@ class Response(object):
 
         self.headers = email.message_from_string('\n'.join(valid_lines))
         #self.cookiejar = CookieJar()
-        #self.cookiejar.extract_cookies(self, Request(self.url))
+        #self.cookiejar._extract_cookies(self, Request(self.url))
         #for cookie in self.cookiejar:
             #self.cookies[cookie.name] = cookie.value
 

@@ -149,7 +149,7 @@ class Extension(object):
         logger.debug('[%02d] %s %s%s' % (self.request_counter, method, self.config['url'], proxy_info))
         self.req = req
 
-    def extract_cookies(self):
+    def _extract_cookies(self):
         """
         Extract cookies.
         """
@@ -169,7 +169,7 @@ class Extension(object):
         #self.response.head = ''.join(self.response_head_chunks)
         #self.response.body = ''.join(self.response_body_chunks)
         #self.response.parse()
-        #self.response.cookies = self.extract_cookies()
+        #self.response.cookies = self._extract_cookies()
         #self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         self.response.code = self._resp.code
         self.response.url = self._resp.geturl()

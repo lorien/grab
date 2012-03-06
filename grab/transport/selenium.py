@@ -343,7 +343,7 @@ class SeleniumTransportExtension(object):
         #if self.config['charset']:
             #self.charset = self.config['charset']
 
-    def extract_cookies(self):
+    def _extract_cookies(self):
         """
         Extract cookies.
         """
@@ -391,7 +391,7 @@ class SeleniumTransportExtension(object):
         #import pdb; pdb.set_trace()
         self.response.url = self.browser.current_url
         self.response.code = 200# TODO: fix, self.browser.status_code
-        self.response.cookies = self.extract_cookies()
+        self.response.cookies = self._extract_cookies()
         #self.response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         #self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         #self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)

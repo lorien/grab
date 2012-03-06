@@ -211,7 +211,7 @@ class RequestsTransportExtension(object):
         #if self.config['charset']:
             #self.charset = self.config['charset']
 
-    #def extract_cookies(self):
+    #def _extract_cookies(self):
         #"""
         #Extract cookies.
         #"""
@@ -247,7 +247,7 @@ class RequestsTransportExtension(object):
         #self.response.head = ''.join(self.response_head_chunks)
         #self.response.body = ''.join(self.response_body_chunks)
         #self.response.parse()
-        #self.response.cookies = self.extract_cookies()
+        #self.response.cookies = self._extract_cookies()
         #self.response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         #self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         #self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
