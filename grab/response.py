@@ -10,6 +10,7 @@ from StringIO import StringIO
 from urllib2 import Request
 from hashlib import sha1
 import os
+import json
 
 RE_XML_DECLARATION = re.compile(r'^[\r\n\t]*<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(r'encoding\s*=\s*["\']([^"\']+)["\']')
@@ -214,3 +215,11 @@ class Response(object):
             with open(path, 'wb') as out:
                 out.write(self.body)
         return rel_path
+
+    @property
+    def json(self):
+        """
+        Return response body deserialized into JSON object.
+        """
+
+        return json.loads(self.body)
