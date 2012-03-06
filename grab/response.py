@@ -130,7 +130,7 @@ class Response(object):
             else:
                 self.charset = charset
 
-    def unicode_body(self, ignore_errors=True):
+    def unicode_body(self, ignore_errors=True, strip_xml_declaration=False):
         """
         Return response body as unicode string.
         """
@@ -141,7 +141,9 @@ class Response(object):
             else:
                 errors = 'strict'
             ubody = self.body.decode(self.charset, errors)
-            self._unicode_body = RE_XML_DECLARATION.sub('', ubody)
+            if strip_xml_declaration:
+                ubody = RE_XML_DECLARATION.sub('', ubody)
+            self._unicode_body = ubody
         return self._unicode_body
 
     def copy(self):

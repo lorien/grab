@@ -26,7 +26,8 @@ class LXMLExtension(object):
         from lxml.html import fromstring
 
         if self._lxml_tree is None:
-            body = self.response.unicode_body().strip()
+            body = self.response.unicode_body(
+                strip_xml_declaration=self.config['strip_xml_declaration']).strip()
             #if self.config['tidy']:
                 #from tidylib import tidy_document
                 #body, errors = tidy_document(body)

@@ -124,6 +124,9 @@ def default_config():
         # Strip null bytes from document body before building lXML tree
         # It does not affect `response.body`
         strip_null_bytes = True,
+
+        # Strip XML declaration before building unicode body
+        strip_xml_declaration = False,
     )
 
 class GrabInterface(object):
