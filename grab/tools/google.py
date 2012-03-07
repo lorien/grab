@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 Google parser.
 
@@ -29,7 +30,8 @@ import re
 import base64
 
 from grab.tools.html import decode_entities
-from grab.tools.lxml import get_node_text
+from grab.tools.lxml_tools import get_node_text
+from grab.tools.http import urlencode
 
 ANONYMIZER_ARG = re.compile(r'q=([^&"]+)')
 
@@ -50,10 +52,17 @@ class AnonymizerNetworkError(Exception):
     Raised in case of standard anonymizer error.
     """
 
-
-def build_search_url(query, page=1, per_page=None, lang='en', filter=True):
+def build_search_url(query, page=1, per_page=None, lang='en', filter=True, **kwargs):
     """
     Build google search url with specified query and pagination options.
+
+    :param per_page: 10, 20, 30, 50, 100
+    kwargs:
+        tbs=qdr:h
+        tbs=qdr:d
+        tbs=qdr:w
+        tbs=qdr:m
+        tbs=qdr:y
     """
 
     if per_page is None:
@@ -67,6 +76,8 @@ def build_search_url(query, page=1, per_page=None, lang='en', filter=True):
         url += '&num=%d' % per_page
     if not filter:
         url += '&filter=0'
+    if kwargs:
+        url += '&' + urlencode(kwargs)
     return url
 
 
@@ -154,7 +165,8 @@ def is_last_page(grab):
 
 
 
-def parse_search_results(grab, parse_index_size=False, anonymizer=False):
+def parse_search_results(grab, parse_index_size=False, anonymizer=False,
+                         strict_query=False):
     """
     Parse google search results page content.
     """
@@ -171,31 +183,45 @@ def parse_search_results(grab, parse_index_size=False, anonymizer=False):
         raise AnonymizerNetworkError('URL Error (0)')
 
     elif grab.css_exists('#ires'):
-        if len(grab.css_list('#ires h3')):
-
-            # Something was found
-            if parse_index_size:
-                index_size = parse_index_size(grab)
-            else:
-                index_size = None
-
-            # Yield found results
-            for elem in grab.css_list('h3.r a'):
-                url = elem.get('href')
-                if anonymizer:
-                    match = ANONYMIZER_ARG.search(url)
-                    if match:
-                        token = urllib.unquote(match.group(1))
-                        url = decode_entities(base64.b64decode(token))
-                    else:
-                        url = None
-                        logging.error('Could not parse url encoded by anonymizer')
-
-                if url:
-                    yield {'url': url, 'title': get_node_text(elem),
-                           'index_size': index_size}
-        else:
+        if (strict_query and (
+            grab.search(u'Нет результатов для') or grab.search(u'No results found for'))):
             pass
-            #return []
+            logging.debug('Query modified')
+        else:
+            if len(grab.css_list('#ires h3')):
+
+                # Something was found
+                if parse_index_size:
+                    index_size = parse_index_size(grab)
+                else:
+                    index_size = None
+
+                # Yield found results
+                for elem in grab.css_list('h3.r a'):
+                    url = elem.get('href')
+                    if url.startswith('/url?'):
+                        url = url.split('?q=')[1].split('&')[0]
+                        url = urllib.unquote_plus(url)
+                    if anonymizer:
+                        match = ANONYMIZER_ARG.search(url)
+                        if match:
+                            token = urllib.unquote(match.group(1))
+                            url = decode_entities(base64.b64decode(token))
+                        else:
+                            url = None
+                            logging.error('Could not parse url encoded by anonymizer')
+
+                    snippet = get_node_text(
+                        elem.getparent().getparent().xpath('div[@class="s"]')[0])
+                    if url:
+                        yield {'url': url, 'title': get_node_text(elem),
+                                'index_size': index_size, 'snippet': snippet}
+            else:
+                pass
+                #return []
+    elif grab.css_exists('#res'):
+        # Could be search results here?
+        # or just message "nothing was found"?
+        pass
     else:
         raise ParsingError('Could not identify google page format')
