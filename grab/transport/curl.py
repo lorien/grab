@@ -235,7 +235,7 @@ class CurlTransportExtension(object):
         else:
             # Turn on cookies engine anyway
             # To correctly support cookies in 302-redirects
-            self.curl.setopt(pycurl.COOKIELIST, '')
+            self.curl.setopt(pycurl.COOKIEFILE, '')
 
         if self.config['referer']:
             self.curl.setopt(pycurl.REFERER, str(self.config['referer']))
