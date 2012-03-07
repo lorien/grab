@@ -88,6 +88,7 @@ def default_config():
         user_agent_file = os.path.join(PACKAGE_DIR, 'user_agent.txt'),
         referer = None,
         reuse_referer = True,
+        auto_referer = True,
 
         # Cookies
         cookies = {},

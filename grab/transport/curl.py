@@ -8,6 +8,7 @@ import urllib
 from StringIO import StringIO
 import threading
 import random
+from urlparse import urlsplit, urlunsplit
 
 from ..base import (GrabError, GrabMisuseError, UploadContent, UploadFile,
                     GrabTimeoutError, GrabNetworkError)
@@ -129,10 +130,11 @@ class CurlTransportExtension(object):
         """
         import pycurl
 
-        url = self.config['url']
-        if isinstance(url, unicode):
-            url = url.encode('utf-8')
-        self.curl.setopt(pycurl.URL, url)
+        request_url = self.config['url']
+        if isinstance(request_url, unicode):
+            request_url = request_url.encode('utf-8')
+        self.curl.setopt(pycurl.URL, request_url)
+
         self.curl.setopt(pycurl.FOLLOWLOCATION, 1 if self.config['follow_location'] else 0)
         self.curl.setopt(pycurl.MAXREDIRS, 5)
         self.curl.setopt(pycurl.CONNECTTIMEOUT, self.config['connect_timeout'])
@@ -236,6 +238,11 @@ class CurlTransportExtension(object):
             # Turn on cookies engine anyway
             # To correctly support cookies in 302-redirects
             self.curl.setopt(pycurl.COOKIEFILE, '')
+
+        if self.config['auto_referer'] and self.config['referer'] is None:
+            urlinfo = urlsplit(request_url)
+            # build scheme + netloc
+            self.config['referer'] = '%s://%s' % (urlinfo.scheme, urlinfo.hostname)
 
         if self.config['referer']:
             self.curl.setopt(pycurl.REFERER, str(self.config['referer']))
