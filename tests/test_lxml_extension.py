@@ -58,8 +58,9 @@ class LXMLExtensionTest(TestCase):
         self.assertEqual('foo', self.g.xpath('//zzz', default='foo'))
 
     def test_xpath_text(self):
-        self.assertEqual(u'пче ла', self.g.xpath_text('//*[@id="bee"]'))
-        self.assertEqual(u'пче ла му ха item #100 2 item #2', self.g.xpath_text('/html/body'))
+        self.assertEqual(u'пче ла', self.g.xpath_text('//*[@id="bee"]', smart=True))
+        self.assertEqual(u'пчела mozilla = 777; body { color: green; }', self.g.xpath_text('//*[@id="bee"]', smart=False))
+        self.assertEqual(u'пче ла му ха item #100 2 item #2', self.g.xpath_text('/html/body', smart=True))
         self.assertRaises(DataNotFound,
             lambda: self.g.xpath_text('//code'))
         self.assertEqual(u'bee', self.g.xpath('//*[@id="bee"]/@id'))
@@ -85,8 +86,8 @@ class LXMLExtensionTest(TestCase):
         self.assertEqual('foo', self.g.css('zzz', default='foo'))
 
     def test_css_text(self):
-        self.assertEqual(u'пче ла', self.g.css_text('#bee'))
-        self.assertEqual(u'пче ла му ха item #100 2 item #2', self.g.css_text('html body'))
+        self.assertEqual(u'пче ла', self.g.css_text('#bee', smart=True))
+        self.assertEqual(u'пче ла му ха item #100 2 item #2', self.g.css_text('html body', smart=True))
         self.assertRaises(DataNotFound,
             lambda: self.g.css_text('code'))
         self.assertEqual('foo', self.g.css_text('zzz', default='foo'))

@@ -151,7 +151,7 @@ class LXMLExtension(object):
         else:
             return items 
 
-    def xpath_text(self, path, default=NULL, filter=None):
+    def xpath_text(self, path, default=NULL, filter=None, smart=False):
         """
         Get normalized text of node which matches the given xpath.
         """
@@ -167,15 +167,16 @@ class LXMLExtension(object):
             if isinstance(elem, basestring):
                 return normalize_space(elem)
             else:
-                return get_node_text(elem)
+                return get_node_text(elem, smart=smart)
 
-    def xpath_number(self, path, default=NULL, filter=None, ignore_spaces=False):
+    def xpath_number(self, path, default=NULL, filter=None, ignore_spaces=False,
+                     smart=False):
         """
         Find number in normalized text of node which matches the given xpath.
         """
 
         try:
-            return find_number(self.xpath_text(path, filter=filter),
+            return find_number(self.xpath_text(path, filter=filter, smart=smart),
                                     ignore_spaces=ignore_spaces)
         except IndexError:
             if default is NULL:
@@ -203,26 +204,26 @@ class LXMLExtension(object):
 
         return self.tree.cssselect(path)
 
-    def css_text(self, path, default=NULL):
+    def css_text(self, path, default=NULL, smart=False):
         """
         Get normalized text of node which matches the css path.
         """
 
         try:
-            return get_node_text(self.css(path))
+            return get_node_text(self.css(path), smart=smart)
         except IndexError:
             if default is NULL:
                 raise
             else:
                 return default
 
-    def css_number(self, path, default=NULL, ignore_spaces=False):
+    def css_number(self, path, default=NULL, ignore_spaces=False, smart=False):
         """
         Find number in normalized text of node which matches the given css path.
         """
 
         try:
-            return find_number(self.css_text(path), ignore_spaces=ignore_spaces)
+            return find_number(self.css_text(path, smart=smart), ignore_spaces=ignore_spaces)
         except IndexError:
             if default is NULL:
                 raise
