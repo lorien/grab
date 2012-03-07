@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from urlparse import urljoin
 
 from ..base import DataNotFound, GrabMisuseError
+from ..tools.http import urlencode
 
 # TODO: refactor this hell
 
@@ -273,7 +274,7 @@ class FormExtension(object):
             self.setup(url=action_url)
 
         else:
-            url = action_url.split('?')[0] + '?' + self.urlencode(post.items())
+            url = action_url.split('?')[0] + '?' + urlencode(post.items())
             self.setup(url=url)
         if make_request:
             return self.request()
