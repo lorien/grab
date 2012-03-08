@@ -35,7 +35,8 @@ class LXMLToolsTest(TestCase):
 
     def test_get_node_text(self):
         elem = self.lxml_tree.xpath('//div[@id="bee"]')[0]
-        self.assertEqual(get_node_text(elem), u'пче ла')
+        self.assertEqual(get_node_text(elem), u'пчела mozilla = 777; body { color: green; }')
+        self.assertEqual(get_node_text(elem, smart=True), u'пче ла')
         elem = self.lxml_tree.xpath('//div[@id="fly"]')[0]
         self.assertEqual(get_node_text(elem), u'му ха')
 

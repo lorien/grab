@@ -7,7 +7,7 @@ import re
 import time
 
 from ..base import DataNotFound, GrabMisuseError, GLOBAL_STATE
-from ..tools.text import normalize_space, find_number
+from ..tools.text import normalize_space as normalize_space_func, find_number
 from ..tools.lxml_tools import get_node_text
 
 NULL = object()
@@ -151,7 +151,8 @@ class LXMLExtension(object):
         else:
             return items 
 
-    def xpath_text(self, path, default=NULL, filter=None, smart=False):
+    def xpath_text(self, path, default=NULL, filter=None, smart=False,
+                   normalize_space=True):
         """
         Get normalized text of node which matches the given xpath.
         """
@@ -165,9 +166,9 @@ class LXMLExtension(object):
                 return default
         else:
             if isinstance(elem, basestring):
-                return normalize_space(elem)
+                return normalize_space_func(elem)
             else:
-                return get_node_text(elem, smart=smart)
+                return get_node_text(elem, smart=smart, normalize_space=normalize_space)
 
     def xpath_number(self, path, default=NULL, filter=None, ignore_spaces=False,
                      smart=False):
@@ -204,13 +205,14 @@ class LXMLExtension(object):
 
         return self.tree.cssselect(path)
 
-    def css_text(self, path, default=NULL, smart=False):
+    def css_text(self, path, default=NULL, smart=False, normalize_space=True):
         """
         Get normalized text of node which matches the css path.
         """
 
         try:
-            return get_node_text(self.css(path), smart=smart)
+            return get_node_text(self.css(path), smart=smart,
+                                 normalize_space=normalize_space)
         except IndexError:
             if default is NULL:
                 raise
@@ -230,13 +232,13 @@ class LXMLExtension(object):
             else:
                 return default
 
-    def strip_tags(self, content):
+    def strip_tags(self, content, smart=False):
         """
         Strip tags from the HTML content.
         """
         from lxml.html import fromstring
 
-        return get_node_text(fromstring(content))
+        return get_node_text(fromstring(content), smart=smart)
 
     def assert_css(self, path):
         """
@@ -292,7 +294,7 @@ class LXMLExtension(object):
         body = tostring(self.tree, encoding='utf-8').decode('utf-8')
 
         # Normalize spaces
-        body = normalize_space(body)
+        body = normalize_space_func(body)
 
         # Find text blocks
         block_rex = re.compile(r'[^<>]+')

@@ -106,7 +106,8 @@ class LXMLExtensionTest(TestCase):
     def test_strip_tags(self):
         self.assertEqual('foo', self.g.strip_tags('<b>foo</b>'))
         self.assertEqual('foo bar', self.g.strip_tags('<b>foo</b> <i>bar'))
-        self.assertEqual('foo bar', self.g.strip_tags('<b>foo</b><i>bar'))
+        self.assertEqual('foobar', self.g.strip_tags('<b>foo</b><i>bar'))
+        self.assertEqual('foo bar', self.g.strip_tags('<b>foo</b><i>bar', smart=True))
         self.assertEqual('', self.g.strip_tags('<b> <div>'))
 
     def test_css_exists(self):

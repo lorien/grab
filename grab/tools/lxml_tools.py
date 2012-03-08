@@ -1,9 +1,9 @@
 """
 Functions to process content of lxml nodes.
 """
-from text import normalize_space, find_number
+from text import normalize_space as normalize_space_func, find_number
 
-def get_node_text(node, smart=True):
+def get_node_text(node, smart=False, normalize_space=True):
     """
     Extract text content of the `node` and all its descendants.
 
@@ -15,11 +15,14 @@ def get_node_text(node, smart=True):
     """
 
     if smart:
-        return normalize_space(' '.join(node.xpath(
+        value = ' '.join(node.xpath(
             './descendant-or-self::*[name() != "script" and '\
-            'name() != "style"]/text()[normalize-space()]')))
+            'name() != "style"]/text()[normalize-space()]'))
     else:
-        return normalize_space(node.text_content())
+        value = node.text_content()
+    if normalize_space:
+        value = normalize_space_func(value)
+    return value
 
 def find_node_number(node, ignore_spaces=False):
     """
