@@ -139,6 +139,7 @@ class CurlTransportExtension(object):
         self.curl.setopt(pycurl.MAXREDIRS, 5)
         self.curl.setopt(pycurl.CONNECTTIMEOUT, self.config['connect_timeout'])
         self.curl.setopt(pycurl.TIMEOUT, self.config['timeout'])
+
         self.curl.setopt(pycurl.NOSIGNAL, 1)
         self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
         self.curl.setopt(pycurl.HEADERFUNCTION, self.head_processor)

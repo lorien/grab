@@ -339,12 +339,14 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
             connect_timeout, total_timeout = hammer_timeouts.pop(0)
             self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
 
+
         while True:
             try:
                 self.prepare_request(**kwargs)
                 self.log_request()
                 self.transport_request()
             except GrabError, ex:
+
                 # In hammer mode try to use next timeouts
                 if self.config['hammer_mode'] and isinstance(ex, GrabTimeoutError):
                     # If not more timeouts
@@ -355,6 +357,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
                         connect_timeout, total_timeout = hammer_timeouts.pop(0)
                         self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
                         logger.debug('Trying another timeouts. Connect: %d sec., total: %d sec.' % (connect_timeout, total_timeout))
+                        self._request_prepared = False
                 # If we are not in hammer mode
                 # Then just raise an error
                 else:
