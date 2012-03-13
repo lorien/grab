@@ -587,7 +587,10 @@ class Spider(object):
                     g.response.body = body
                     g.response.code = cache_item['response_code']
                     g.response.time = 0
-                    g.response.url = cache_item['url']
+                    if 'response_url' in cache_item:
+                        g.response.url = cache_item['response_url']
+                    else:
+                        g.response.url = cache_item['url']
                     g.response.parse()
                     g.response.cookies = g._extract_cookies()
 
@@ -631,6 +634,7 @@ class Spider(object):
 
         url = task.url# or grab.config['url']
         grab.process_request_result()
+        response_url = grab.response.url
 
         # Break links, free resources
         curl.grab.curl = None
@@ -648,6 +652,7 @@ class Spider(object):
                 item = {
                     '_id': _hash,
                     'url': task.url,
+                    'response_url': response_url,
                     'body': pymongo.binary.Binary(body),
                     'head': pymongo.binary.Binary(grab.response.head),
                     'response_code': grab.response.code,
