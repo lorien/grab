@@ -1,6 +1,6 @@
 import logging
 
-def default_logging(grab_log='/tmp/grab.log'):
+def default_logging(grab_log='/tmp/grab.log', level=logging.DEBUG, mode='a'):
     """
     Customize logging output to display all log messages
     except grab network logs.
@@ -8,9 +8,9 @@ def default_logging(grab_log='/tmp/grab.log'):
     Redirect grab network logs into file.
     """
 
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=level)
     glog = logging.getLogger('grab')
     glog.propagate = False
     if grab_log:
-        hdl = logging.FileHandler(grab_log, 'w')
+        hdl = logging.FileHandler(grab_log, mode)
         glog.addHandler(hdl)
