@@ -10,6 +10,7 @@ class Task(object):
     def __init__(self, name, url=None, grab=None, priority=None,
                  network_try_count=0, task_try_count=0, 
                  disable_cache=False, refresh_cache=False,
+                 valid_status=[],
                  **kwargs):
         """
         Create `Task` object.
@@ -41,6 +42,7 @@ class Task(object):
                 fetched from the Network and it will not be saved to cache.
             :param refresh_cache: if `True` the document will be fetched from the Network
                 and saved to cache.
+            :param valid_status: extra status codes which counts as valid
 
             Any non-standard named arguments passed to `Task` constructor will be saved as
             attributes of the object. You can get their values later as attributes or with
@@ -64,6 +66,7 @@ class Task(object):
         self.task_try_count = task_try_count
         self.disable_cache = disable_cache
         self.refresh_cache = refresh_cache
+        self.valid_status = valid_status
         for key, value in kwargs.items():
             setattr(self, key, value)
 

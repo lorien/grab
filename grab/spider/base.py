@@ -325,7 +325,8 @@ class Spider(object):
                                        mapping, res_count, multi_requests,
                                        queue, pool):
         if res['ok'] and (res['grab'].response.code < 400 or
-                          res['grab'].response.code == 404):
+                          res['grab'].response.code == 404 or
+                          res['grab'].response.code in res['task'].valid_status):
             mapping[res_count] = res
             res['grab'].curl = None
             res['grab_original'].curl = None
@@ -349,7 +350,8 @@ class Spider(object):
 
     def execute_response_handler_sync(self, res, handler, handler_name):
         if res['ok'] and (res['grab'].response.code < 400 or
-                          res['grab'].response.code == 404):
+                          res['grab'].response.code == 404 or
+                          res['grab'].response.code in res['task'].valid_status):
             try:
                 result = handler(res['grab'], res['task'])
                 if isinstance(result, types.GeneratorType):
@@ -542,7 +544,7 @@ class Spider(object):
                                     grab.log_request('CACHED')
                                     self.inc_count('request-cache')
 
-                                    # break from prepre-request cycle
+                                    # break from prepare-request cycle
                                     # and go to process-response code
                                     break
 
@@ -633,7 +635,8 @@ class Spider(object):
         curl.task = None
 
         if ok and self.use_cache and grab.request_method == 'GET' and not task.get('disable_cache'):
-            if grab.response.code < 400 or grab.response.code == 404:
+            if (grab.response.code < 400 or grab.response.code == 404 or
+                grab.response.code in task.valid_status):
                 body = grab.response.body
                 if self.use_cache_compression:
                     body = zlib.compress(body)
