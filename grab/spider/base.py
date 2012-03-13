@@ -620,7 +620,7 @@ class Spider(object):
                 if not queued_messages:
                     break
 
-            m.select(0.5)
+            m.select(0.01)
 
     def process_multicurl_response(self, ok, curl, ecode=None, emsg=None):
         """
