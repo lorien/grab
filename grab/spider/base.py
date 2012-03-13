@@ -414,7 +414,10 @@ class Spider(object):
                 task.priority = randint(*RANDOM_TASK_PRIORITY_RANGE)
 
         if not task.url.startswith('http'):
-            task.url = urljoin(self.base_url, task.url)
+            if self.base_url is None:
+                raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified')
+            else:
+                task.url = urljoin(self.base_url, task.url)
         if task.grab and not task.grab.config['url'].startswith('http'):
             task.grab.config['url'] = urljoin(self.base_url, task.grab.config['url'])
 
