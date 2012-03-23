@@ -866,23 +866,6 @@ class Spider(object):
     def create_grab_instance(self):
         return Grab(**self.grab_config)
 
-    def next_page_task(self, grab, task, xpath, **kwargs):
-        """
-        Return new `Task` object if link that mathes the given `xpath`
-        was found.
-
-        This method is used by `grab.spider.shortcuts.paginate` helper.
-        """
-        nav = grab.xpath(xpath, None)
-        if nav is not None:
-            url = grab.make_url_absolute(nav.get('href'))
-            page = task.get('page', 1) + 1
-            grab2 = grab.clone()
-            grab2.setup(url=url)
-            task2 = task.clone(task_try_count=0, grab=grab2, page=page, **kwargs)
-            return task2
-
-
     def build_cache_hash(self, url):
         utf_url = url.encode('utf-8') if isinstance(url, unicode) else url
         if self.cache_key_hash:
@@ -956,3 +939,56 @@ class Spider(object):
                 g2 = grab.clone()
                 g2.setup(url=url)
                 self.add_task(Task(task_name, grab=g2))
+
+
+    def process_object_image(self, task_name, collection, obj, image_field, image_url,
+                             base_dir, ext='jpg', skip_existing=True):
+        path = os.path.join(base_dir, hash_path(image_url, ext=ext))
+        if os.path.exists(path) and skip_existing:
+            collection.update({'_id': obj['_id']},
+                              {'$set': {'%s_path' % image_field: path,
+                                        '%s_url' % image_field: url}})
+        else:
+            self.add_task(Task(task_name, url=image_url, obj=obj, disable_cache=True,
+                               image_field=image_field,
+                               collection=collection, base_dir=base_dir, ext=ext))
+
+
+    def generic_task_image(self, grab, task):
+        relpath = grab.response.save_hash(task.url, task.base_dir, ext=task.ext)
+        path = os.path.join(task.base_dir, relpath)
+        task.collection.update({'_id': task.obj['_id']},
+                              {'$set': {'%s_path' % task.image_field: path,
+                                        '%s_url' % task.image_field: task.url}})
+
+    def next_page_task(self, grab, task, xpath, **kwargs):
+        """
+        Return new `Task` object if link that mathes the given `xpath`
+        was found.
+
+        This method is used by `grab.spider.shortcuts.paginate` helper.
+        """
+
+        logging.debug('This method is deprecated. Use process_next_page method instead.')
+        nav = grab.xpath(xpath, None)
+        if nav is not None:
+            url = grab.make_url_absolute(nav.get('href'))
+            page = task.get('page', 1) + 1
+            grab2 = grab.clone()
+            grab2.setup(url=url)
+            task2 = task.clone(task_try_count=0, grab=grab2, page=page, **kwargs)
+            return task2
+
+
+    def process_next_page(self, grab, task, xpath, **kwargs):
+        try:
+            next_url = grab.xpath_text(xpath)
+        except IndexError:
+            pass
+        else:
+            url = grab.make_url_absolute(next_url)
+            page = task.get('page', 1) + 1
+            grab2 = grab.clone()
+            grab2.setup(url=url)
+            task2 = task.clone(task_try_count=0, grab=grab2, page=page, **kwargs)
+            self.add_task(task2)
