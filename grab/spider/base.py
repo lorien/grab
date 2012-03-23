@@ -777,9 +777,12 @@ class Spider(object):
                           exc_info=ex)
 
         try:
-            ex_str = unicode(ex, 'utf-8', 'ignore')
+            ex_str = unicode(ex)
         except TypeError:
-            ex_str = str(ex)
+            try:
+                ex_str = unicode(ex, 'utf-8', 'ignore')
+            except TypeError:
+                ex_str = str(ex)
         self.add_item('fatal', '%s|%s|%s' % (ex.__class__.__name__,
                                              ex_str, task.url))
         if self.debug_error:
