@@ -8,9 +8,10 @@ import email
 from StringIO import StringIO
 #from cookielib import CookieJar
 from urllib2 import Request
-from hashlib import sha1
 import os
 import json
+
+from tools.files import hash_path
 
 RE_XML_DECLARATION = re.compile(r'^[\r\n\t]*<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(r'encoding\s*=\s*["\']([^"\']+)["\']')
@@ -202,11 +203,7 @@ class Response(object):
         returns save_to + path
         """
 
-        _hash = sha1(location).hexdigest()
-        a, b, tail = _hash[:2], _hash[2:4], _hash[4:]
-        if ext is not None:
-            tail = '%s.%s' % (tail, ext)
-        rel_path = '%s/%s/%s' % (a, b, tail)
+        rel_path = hash_path(location, ext=ext)
         path = os.path.join(basedir, rel_path)
         if not os.path.exists(path):
             path_dir, path_fname = os.path.split(path)

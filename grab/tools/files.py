@@ -3,6 +3,7 @@ Miscelanius utilities which are helpful sometime.
 """
 import logging
 from urlparse import urlsplit
+from hashlib import sha1
 
 def unique_file(path):
     """
@@ -43,3 +44,11 @@ def unique_host(path):
     with open(path, 'w') as out:
         out.write(''.join(lines))
     return len(lines)
+
+def hash_path(url, ext=None):
+    _hash = sha1(url).hexdigest()
+    a, b, tail = _hash[:2], _hash[2:4], _hash[4:]
+    if ext is not None:
+        tail = '%s.%s' % (tail, ext)
+    rel_path = '%s/%s/%s' % (a, b, tail)
+    return rel_path
