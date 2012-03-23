@@ -352,6 +352,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
                     # If not more timeouts
                     # then raise an error
                     if not hammer_timeouts:
+                        self._request_prepared = False
                         raise
                     else:
                         connect_timeout, total_timeout = hammer_timeouts.pop(0)
@@ -361,6 +362,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
                 # If we are not in hammer mode
                 # Then just raise an error
                 else:
+                    self._request_prepared = False
                     raise
             else:
                 # Break the infinite loop in case of success response
