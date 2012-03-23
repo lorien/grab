@@ -30,6 +30,7 @@ from random import randint
 from .error import SpiderError, SpiderMisuseError, FatalError
 from .task import Task
 from .data import Data
+from ..tools.files import hash_path
 
 CURL_OBJECT = pycurl.Curl()
 DEFAULT_TASK_PRIORITY = 100

@@ -30,3 +30,24 @@ def find_node_number(node, ignore_spaces=False):
     """
 
     return find_number(get_node_text(node), ignore_spaces=ignore_spaces)
+
+
+def truncate_tail(node, xpath):
+    """
+    Find sub-node by its xpath and remove it and all adjacent nodes following
+    after found node.
+    """
+
+    subnode = node.xpath(xpath)[0]
+    for item in subnode.xpath('following-sibling::*'):
+        item.getparent().remove(item)
+    subnode.getparent().remove(subnode)
+
+
+def drop_node(node, xpath):
+    """
+    Find sub-node by its xpath and remove it.
+    """
+
+    for item in node.xpath(xpath):
+        item.getparent().remove(item)
