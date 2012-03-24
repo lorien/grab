@@ -10,6 +10,7 @@ import threading
 import random
 
 from ..base import GrabError, GrabMisuseError, UploadContent, UploadFile
+from ..tools.http import urlencode, normalize_http_values, normalize_unicode
 
 logger = logging.getLogger('grab')
 
@@ -132,20 +133,20 @@ class RequestsTransportExtension(object):
                 raise NotImplementedError
                 #if isinstance(self.config['multipart_post'], basestring):
                     #raise GrabMisuseError('multipart_post option could not be a string')
-                #post_items = self.normalize_http_values(self.config['multipart_post'],
-                                                         #charset=self.charset)
+                #post_items = normalize_http_values(self.config['multipart_post'],
+                                                    #charset=self.charset)
                 #self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif self.config['post']:
                 if isinstance(self.config['post'], basestring):
                     # bytes-string should be posted as-is
                     # unicode should be converted into byte-string
                     if isinstance(self.config['post'], unicode):
-                        post_data = self.normalize_unicode(self.config['post'])
+                        post_data = normalize_unicode(self.config['post'])
                     else:
                         post_data = self.config['post']
                 else:
                     # dict, tuple, list should be serialized into byte-string
-                    post_data = self.urlencode(self.config['post'])
+                    post_data = urlencode(self.config['post'])
                 self.requests_config['payload'] = post_data
                 #self.curl.setopt(pycurl.POSTFIELDS, post_data)
         #elif self.request_method == 'PUT':
@@ -170,16 +171,17 @@ class RequestsTransportExtension(object):
         #self.curl.setopt(pycurl.HTTPHEADER, header_tuples)
         self.requests_config['headers'].update(headers)
 
+        # `cookiefile` option shoul be processed before `cookies` option
+        # because `load_cookies` updates `cookies` option
+        if self.config['cookiefile']:
+            self.load_cookies(self.config['cookiefile'])
+
         if self.config['cookies']:
-            items = self.normalize_http_values(self.config['cookies'])
+            items = normalize_http_values(self.config['cookies'])
             self.requests_config['cookies'] = dict(items)
 
         #if not self.config['reuse_cookies'] and not self.config['cookies']:
             #self.curl.setopt(pycurl.COOKIELIST, 'ALL')
-
-        if self.config['cookiefile']:
-            self.load_cookies(self.config['cookiefile'])
-
 
         #if self.config['referer']:
             #self.curl.setopt(pycurl.REFERER, str(self.config['referer']))
