@@ -1,6 +1,9 @@
 """
 Functions to process content of lxml nodes.
 """
+from StringIO import StringIO
+import lxml.html
+
 from text import normalize_space as normalize_space_func, find_number
 
 def get_node_text(node, smart=False, normalize_space=True):
@@ -51,3 +54,29 @@ def drop_node(node, xpath):
 
     for item in node.xpath(xpath):
         item.getparent().remove(item)
+
+
+def parse_html(html):
+    """
+    Parse html into ElementTree node.
+    """
+
+    return lxml.html.parse(StringIO(html),
+                           lxml.html.HTMLParser(encoding='utf-8'))
+
+
+def render_html(node, encoding='utf-8'):
+    return lxml.html.tostring(node, encoding=encoding)
+
+
+def truncate_html(html, limit, encoding='utf-8'):
+    """
+    Truncate html data to specified length and then fix broken tags.
+    """
+
+    if isinstance(html, basestring):
+        html = html.decode('utf-8')
+    truncated_html = html[:limit]
+    elem = parse_html(truncated_html)
+    fixed_html = render_html(elem, encoding=encoding)
+    return fixed_html
