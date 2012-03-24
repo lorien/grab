@@ -948,7 +948,7 @@ class Spider(object):
         if os.path.exists(path) and skip_existing:
             collection.update({'_id': obj['_id']},
                               {'$set': {'%s_path' % image_field: path,
-                                        '%s_url' % image_field: url}})
+                                        '%s_url' % image_field: image_url}})
         else:
             self.add_task(Task(task_name, url=image_url, obj=obj, disable_cache=True,
                                image_field=image_field,
@@ -985,7 +985,7 @@ class Spider(object):
         try:
             next_url = grab.xpath_text(xpath)
         except IndexError:
-            pass
+            return False
         else:
             url = grab.make_url_absolute(next_url)
             page = task.get('page', 1) + 1
@@ -993,3 +993,4 @@ class Spider(object):
             grab2.setup(url=url)
             task2 = task.clone(task_try_count=0, grab=grab2, page=page, **kwargs)
             self.add_task(task2)
+            return True
