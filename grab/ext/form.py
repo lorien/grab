@@ -122,7 +122,7 @@ class FormExtension(object):
                 processed = True
         
         if not processed:
-            # We need to remember origina values of file fields
+            # We need to remember original values of file fields
             # Because lxml will convert UploadContent/UploadFile object to string
             if getattr(elem, 'type', '').lower() == 'file':
                 self._file_fields[name] = value
@@ -192,8 +192,8 @@ class FormExtension(object):
             configured with form post data but request will not be
             performed
         :param url: explicitly specifi form action url
-        :param extra_post: additional form data which will override
-            data automatically extracted from the form.
+        :param extra_post: (dict or list of pairs) additional form data which
+            will override data automatically extracted from the form.
 
         Following input elements are automatically processed:
 
@@ -261,21 +261,44 @@ class FormExtension(object):
         else:
             action_url = urljoin(self.response.url, self.form.action)
 
-        if extra_post:
-            post.update(extra_post)
 
+        # Values from `extra_post` should override values in form
+        # `extra_post` allows multiple value of one key
+
+        # Process saved values of file fields
         if self.form.method == 'POST':
             if 'multipart' in self.form.get('enctype', ''):
                 for key, obj in self._file_fields.items():
                     post[key] = obj
-                self.setup(multipart_post=post.items())
+
+        post_items = post.items()
+        del post
+
+        if extra_post:
+            if isinstance(extra_post, dict):
+                extra_post_items = extra_post.items()
             else:
-                self.setup(post=post)
+                extra_post_items = extra_post
+
+            # Drip existing post items with such key
+            keys_to_drop = set([x for x, y in extra_post_items])
+            for key in keys_to_drop:
+                post_items = [(x, y) for x, y in post_items if x != key]
+
+            for key, value in extra_post_items:
+                post_items.append((key, value))
+
+        if self.form.method == 'POST':
+            if 'multipart' in self.form.get('enctype', ''):
+                self.setup(multipart_post=post_items)
+            else:
+                self.setup(post=post_items)
             self.setup(url=action_url)
 
         else:
-            url = action_url.split('?')[0] + '?' + urlencode(post.items())
+            url = action_url.split('?')[0] + '?' + urlencode(post_items)
             self.setup(url=url)
+
         if make_request:
             return self.request()
         else:
@@ -301,17 +324,20 @@ class FormExtension(object):
                 continue
 
             if elem.tag == 'select':
-                if not fields[elem.name]:
+                if fields[elem.name] is None:
                     if len(elem.value_options):
                         fields[elem.name] = elem.value_options[-1]
+
             if getattr(elem, 'type', None) == 'radio':
-                if not fields[elem.name]:
+                if fields[elem.name] is None:
                     fields[elem.name] = elem.get('value')
+
             if getattr(elem, 'type', None) == 'checkbox':
                 if not elem.checked:
                     if elem.name is not None:
                         if elem.name in fields:
                             del fields[elem.name]
+
         return fields
 
     def choose_form_by_element(self, xpath):
