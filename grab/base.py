@@ -207,11 +207,13 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         self.response = Response()
         self.trigger_extensions('reset')
 
-    def clone(self):
+    def clone(self, **kwargs):
         """
         Create clone of Grab instance.
 
         Cloned instance will have the same state: cookies, referer, response data
+
+        :param **kwargs: overrides settings of cloned grab instance
         """
 
         g = self.__class__()
@@ -225,6 +227,10 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
         g.clone_counter = self.clone_counter + 1
+
+        if kwargs:
+            g.setup(**kwargs)
+
         return g
 
     def adopt(self, g):
