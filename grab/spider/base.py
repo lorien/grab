@@ -927,8 +927,9 @@ class Spider(object):
 
         Example::
 
-            self.follow_links('//div[@class="topic"]/a/@href', 'topic')
+            self.follow_links(grab, '//div[@class="topic"]/a/@href', 'topic')
         """
+        logging.debug('This method is deprecated. Use process_links method instead.')
 
         urls = []
         for url in grab.xpath_list(xpath):
@@ -980,8 +981,19 @@ class Spider(object):
             task2 = task.clone(task_try_count=0, grab=grab2, page=page, **kwargs)
             return task2
 
-
     def process_next_page(self, grab, task, xpath, **kwargs):
+        """
+        Generate task for next page.
+
+        :param grab: Grab instance
+        :param task: Task object which should be assigned to next page url
+        :param xpath: xpath expression which calculates list of URLS
+        :param **kwargs: extra settings for new task object
+
+        Example::
+
+            self.follow_links(grab, 'topic', '//div[@class="topic"]/a/@href')
+        """
         try:
             next_url = grab.xpath_text(xpath)
         except IndexError:
@@ -994,3 +1006,25 @@ class Spider(object):
             task2 = task.clone(task_try_count=0, grab=grab2, page=page, **kwargs)
             self.add_task(task2)
             return True
+
+    def process_links(self, grab, task_name, xpath, limit=None, **kwargs):
+        """
+        :param grab: Grab instance
+        :param xpath: xpath expression which calculates list of URLS
+        :param task_name: name of task to generate
+
+        Example::
+
+            self.follow_links(grab, 'topic', '//div[@class="topic"]/a/@href')
+        """
+        urls = set()
+        count = 0
+        for url in grab.xpath_list(xpath):
+            url = grab.make_url_absolute(url)
+            if not url in urls:
+                urls.add(url)
+                g2 = grab.clone(url=url)
+                self.add_task(Task(task_name, grab=g2))
+                count += 1
+                if limit is not None and count >= limit:
+                    break
