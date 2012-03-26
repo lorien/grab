@@ -4,7 +4,7 @@ import random
 
 from .error import CaptchaError
 
-import settings
+#import settings
 
 RE_SCRIPT = re.compile(r'<script[^>]+recaptcha\.net[^>]+>', re.S)
 RE_SCRIPT2 = re.compile(r'<script[^>]+google\.com/recaptcha/api/challenge[^>]+>', re.S)
