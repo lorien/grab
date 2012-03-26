@@ -56,13 +56,13 @@ def drop_node(node, xpath):
         item.getparent().remove(item)
 
 
-def parse_html(html):
+def parse_html(html, encoding='utf-8'):
     """
     Parse html into ElementTree node.
     """
 
-    return lxml.html.parse(StringIO(html),
-                           lxml.html.HTMLParser(encoding='utf-8'))
+    parser = lxml.html.HTMLParser(encoding=encoding)
+    return lxml.html.fragment_fromstring(html, parser=parser)
 
 
 def render_html(node, encoding='utf-8'):
@@ -74,9 +74,9 @@ def truncate_html(html, limit, encoding='utf-8'):
     Truncate html data to specified length and then fix broken tags.
     """
 
-    if isinstance(html, basestring):
-        html = html.decode('utf-8')
+    if not isinstance(html, unicode):
+        html = html.decode(encoding)
     truncated_html = html[:limit]
-    elem = parse_html(truncated_html)
+    elem = parse_html(truncated_html, encoding=encoding)
     fixed_html = render_html(elem, encoding=encoding)
     return fixed_html
