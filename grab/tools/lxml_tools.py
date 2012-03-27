@@ -62,7 +62,7 @@ def parse_html(html, encoding='utf-8'):
     """
 
     parser = lxml.html.HTMLParser(encoding=encoding)
-    return lxml.html.fragment_fromstring(html, parser=parser)
+    return lxml.html.fromstring(html, parser=parser)
 
 
 def render_html(node, encoding='utf-8'):
