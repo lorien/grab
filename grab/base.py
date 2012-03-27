@@ -451,7 +451,8 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
 
         # TODO: check max redirect count
         if self.config['follow_refresh']:
-            url = find_refresh_url(self.response.unicode_body())
+            url = find_refresh_url(self.response.unicode_body(
+                strip_xml_declaration=self.config['strip_xml_declaration']))
             if url:
                 return self.request(url=url)
 
