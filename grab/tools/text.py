@@ -32,12 +32,14 @@ def find_number(text, ignore_spaces=False):
     else:
         raise DataNotFound
 
+
 def drop_space(text):
     """
     Drop all space-chars in the `text`.
     """
 
     return RE_SPACE.sub('', text)
+
 
 def normalize_space(text, replace=' '):
     """
