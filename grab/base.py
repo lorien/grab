@@ -46,6 +46,7 @@ GLOBAL_STATE = {
 }
 
 # Some extensions need GLOBAL_STATE variable
+# what's why they go after GLOBAL_STATE definition
 from ext.lxml import LXMLExtension
 from ext.form import FormExtension
 from ext.django import DjangoExtension
@@ -155,8 +156,8 @@ class GrabInterface(object):
 
 
 class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
-               DjangoExtension,
-               TextExtension, RegexpExtension, GrabInterface):
+               DjangoExtension, TextExtension, RegexpExtension, 
+               GrabInterface):
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
