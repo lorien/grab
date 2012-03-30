@@ -166,10 +166,17 @@ class Response(object):
 
         return obj
 
-    def save(self, path):
+    def save(self, path, create_dirs=False):
         """
         Save response body to file.
         """
+
+        path_dir, path_fname = os.path.split(path)
+        if not os.path.exists(path_dir):
+            try:
+                os.makedirs(path_dir)
+            except OSError:
+                pass
 
         with open(path, 'wb') as out:
             out.write(self.body)
