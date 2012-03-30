@@ -2,7 +2,6 @@
 Functions to process content of lxml nodes.
 """
 from StringIO import StringIO
-import lxml.html
 
 from text import normalize_space as normalize_space_func, find_number
 
@@ -60,12 +59,15 @@ def parse_html(html, encoding='utf-8'):
     """
     Parse html into ElementTree node.
     """
+    import lxml.html
 
     parser = lxml.html.HTMLParser(encoding=encoding)
     return lxml.html.fromstring(html, parser=parser)
 
 
 def render_html(node, encoding='utf-8'):
+    import lxml.html
+
     return lxml.html.tostring(node, encoding=encoding)
 
 
