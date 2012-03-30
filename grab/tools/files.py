@@ -45,10 +45,15 @@ def unique_host(path):
         out.write(''.join(lines))
     return len(lines)
 
-def hash_path(url, ext=None):
+
+def hash_path(url, ext='jpg'):
     _hash = sha1(url).hexdigest()
     a, b, tail = _hash[:2], _hash[2:4], _hash[4:]
     if ext is not None:
         tail = '%s.%s' % (tail, ext)
     rel_path = '%s/%s/%s' % (a, b, tail)
     return rel_path
+
+
+def hashed_path(url, ext='jpg'):
+    return hash_path(url, ext=ext)
