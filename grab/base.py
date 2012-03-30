@@ -128,7 +128,7 @@ def default_config():
         strip_null_bytes = True,
 
         # Strip XML declaration before building unicode body
-        strip_xml_declaration = False,
+        strip_xml_declaration = True,
     )
 
 class GrabInterface(object):
