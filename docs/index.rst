@@ -60,6 +60,36 @@ Grab сайты
     grab/transport
     grab/tools
 
+
+Spider
+~~~~~~
+
+Асинхронный модуль для разработки сложных парсеров.
+
+.. toctree::
+    :maxdepth: 2
+
+    spider/tutorial
+
+* Задания и функции-обработчики
+ * yield
+ * initial_urls
+ * task_generator
+ * self.add_task
+
+* Система кэширования в mongodb
+* Функция повторного выполнения заданий
+* Утилиты:
+ * process_links
+ * process_next_page
+ * inc_count/add_item/save_list/render_stats/save_all_lists
+ * process_object_image
+* Работа с прокси
+* Обработка сетевых ошибок и исключений
+    
+
+
+
 API
 ~~~
 
