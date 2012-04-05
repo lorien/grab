@@ -51,9 +51,9 @@ def random_birthday(start_year=1960, end_year=1990):
 
     date_obj = date(randint(start_year, end_year), randint(1, 12), randint(1, 28))
     return {
-        'day': str(day.day),
-        'month': str(day.month),
-        'year': str(day.year),
+        'day': str(date_obj.day),
+        'month': str(date_obj.month),
+        'year': str(date_obj.year),
         'date': date_obj,
     }
 

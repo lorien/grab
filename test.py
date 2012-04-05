@@ -21,6 +21,7 @@ TEST_CASE_LIST = (
     'tests.test_text_tools',
     'tests.test_lxml_tools',
     'tests.test_response_class',
+    'tests.test_tools_account',
 )
 
 def main():
