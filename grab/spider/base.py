@@ -427,9 +427,25 @@ class Spider(object):
         else:
             if task.task_try_count > self.task_try_limit:
                 logging.debug('Task tries ended: %s / %s' % (task.name, task.url))
+
+                try:
+                    fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
+                except AttributeError:
+                    pass
+                else:
+                    fallback_handler(task)
+
                 return False
             elif task.network_try_count >= self.network_try_limit:
                 logging.debug('Network tries ended: %s / %s' % (task.name, task.url))
+
+                try:
+                    fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
+                except AttributeError:
+                    pass
+                else:
+                    fallback_handler(task)
+
                 return False
             else:
                 #prep = getattr(self, 'task_%s_preprocessor' % task.name, None)
@@ -502,16 +518,35 @@ class Spider(object):
                         if task.task_try_count == 0:
                             task.task_try_count = 1
 
+                        # WTF?
+                        # See same block on  :428 lines :)
+
                         if task.task_try_count > self.task_try_limit:
                             logging.debug('Task tries ended: %s / %s' % (
                                           task.name, task.url))
                             self.add_item('too-many-task-tries', task.url)
+
+                            try:
+                                fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
+                            except AtributeError:
+                                pass
+                            else:
+                                fallback_handler(task)
+
                             continue
                         
                         if task.network_try_count > self.network_try_limit:
                             logging.debug('Network tries ended: %s / %s' % (
                                           task.name, task.url))
                             self.add_item('too-many-network-tries', task.url)
+
+                            try:
+                                fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
+                            except AttributeError:
+                                pass
+                            else:
+                                fallback_handler(task)
+
                             continue
 
                         if task.grab:
