@@ -588,7 +588,7 @@ class Spider(object):
                                     break
 
                         self.inc_count('request-network')
-                        if self.proxylist_config:
+                        if task.use_proxylist and self.proxylist_config:
                             args, kwargs = self.proxylist_config
                             grab.setup_proxylist(*args, **kwargs)
 
