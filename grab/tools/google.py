@@ -30,10 +30,8 @@ import re
 import base64
 
 from grab.tools.html import decode_entities
-from grab.tools.lxml_tools import get_node_text
+from grab.tools.lxml_tools import get_node_text, drop_node, render_html
 from grab.tools.http import urlencode
-
-ANONYMIZER_ARG = re.compile(r'q=([^&"]+)')
 
 class CaptchaError(Exception):
     """
@@ -46,11 +44,6 @@ class ParsingError(Exception):
     Raised when some unexpected HTML is found.
     """
 
-
-class AnonymizerNetworkError(Exception):
-    """
-    Raised in case of standard anonymizer error.
-    """
 
 def build_search_url(query, page=1, per_page=None, lang='en', filter=True, **kwargs):
     """
@@ -165,8 +158,7 @@ def is_last_page(grab):
 
 
 
-def parse_search_results(grab, parse_index_size=False, anonymizer=False,
-                         strict_query=False):
+def parse_search_results(grab, parse_index_size=False, strict_query=False):
     """
     Parse google search results page content.
     """
@@ -176,11 +168,6 @@ def parse_search_results(grab, parse_index_size=False, anonymizer=False,
 
         # Captcha!!!
         raise CaptchaError('Captcha found')
-
-    elif anonymizer and grab.search(u'URL Error (0)'):
-
-        # Common anonymizer error
-        raise AnonymizerNetworkError('URL Error (0)')
 
     elif grab.css_exists('#ires'):
         if (strict_query and (
@@ -197,25 +184,56 @@ def parse_search_results(grab, parse_index_size=False, anonymizer=False,
                     index_size = None
 
                 # Yield found results
-                for elem in grab.css_list('h3.r a'):
-                    url = elem.get('href')
+                for elem in grab.xpath_list('//*[h3[@class="r"]/a]'):
+                    title_elem = elem.xpath('h3/a')[0]
+
+                    # url
+                    url = title_elem.get('href')
                     if url.startswith('/url?'):
                         url = url.split('?q=')[1].split('&')[0]
                         url = urllib.unquote_plus(url)
-                    if anonymizer:
-                        match = ANONYMIZER_ARG.search(url)
-                        if match:
-                            token = urllib.unquote(match.group(1))
-                            url = decode_entities(base64.b64decode(token))
-                        else:
-                            url = None
-                            logging.error('Could not parse url encoded by anonymizer')
 
-                    snippet = get_node_text(
-                        elem.getparent().getparent().xpath('div[@class="s"]')[0])
+                    # title
+                    title = get_node_text(title_elem)
+
+                    # snippet
+                    # Google could offer two type of snippet format: simple and extended
+                    # It depends on user agent
+                    # For <IE8, Opera, <FF3 you probably get simple format
+                    try:
+                        snippet_node = elem.xpath('div[@class="s"]')[0]
+                    except IndexError, ex:
+                        # Probably it is video or some other result
+                        # Such result type is not supported yet
+                        continue
+
+                    try:
+                        subnode = snippet_node.xpath('span[@class="st"]')[0]
+                        snippet = get_node_text(subnode, smart=False)
+                        extended_result = True
+                    except IndexError:
+                        drop_node(snippet_node, 'div')
+                        drop_node(snippet_node, 'span[@class="f"]')
+                        snippet = get_node_text(snippet_node, smart=False)
+                        extended_result = False
+
+                    # filetype
+                    try:
+                        filetype = elem.xpath('.//span[contains(@class, "xsm")]'\
+                                              '/text()')[0].lower().strip('[]')
+                    except IndexError:
+                        filetype = None
+
+                    #if 'File Format':
                     if url:
-                        yield {'url': url, 'title': get_node_text(elem),
-                                'index_size': index_size, 'snippet': snippet}
+                        yield {
+                            'url': url,
+                            'title': title,
+                            'snippet': snippet,
+                            'filetype': filetype,
+                            'index_size': index_size,
+                            'extended': extended_result,
+                        }
             else:
                 pass
                 #return []
