@@ -21,11 +21,29 @@ from datetime import datetime, timedelta
 import re
 import logging
 
-from error import GrabMisuseError
+from error import GrabError, GrabMisuseError
 
 READ_TIMEOUT = 60 * 10
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
 RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')
+
+def parse_proxyline(line):
+    """
+    Extract proxy details from the text line.
+    """
+
+    line = line.strip()
+    match = RE_SIMPLE_PROXY.search(line)
+    if match:
+        host, port = match.groups()
+        return host, port, None, None
+    else:
+        match = RE_AUTH_PROXY.search(line)
+        host, port, user, pwd = match.groups()
+        if match:
+            return host, port, user, pwd
+    raise GrabError('Invalid proxy line: %s' % line)
+
 
 class ProxyList(object):
     """
@@ -118,18 +136,11 @@ class ProxyList(object):
         for line in lines:
             line = line.strip().replace(' ', '')
             if line:
-                match = RE_SIMPLE_PROXY.search(line)
-                if match:
-                    host, port = match.groups()
-                    server_port = '%s:%s' % (host, port)
-                    servers.append((server_port, None))
+                host, port, user, pwd = parse_proxyline(line)
+                server_port = '%s:%s' % (host, port)
+                if user:
+                    user_pwd = '%s:%s' % (user, pwd)
                 else:
-                    match = RE_AUTH_PROXY.search(line)
-                    if match:
-                        host, port, user, pwd = match.groups()
-                        server_port = '%s:%s' % (host, port)
-                        user_pwd = '%s:%s' % (user, pwd)
-                        servers.append((server_port, user_pwd))
-                if not match:
-                    logging.error('Invalid proxy line: %s' % line)
+                    user_pwd = None
+                servers.append((server_port, user_pwd))
         self._servers = servers

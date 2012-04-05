@@ -22,7 +22,7 @@ import time
 import re
 import json
 
-from proxylist import ProxyList
+from proxylist import ProxyList, parse_proxyline
 from tools.html import find_refresh_url, find_base_url
 from response import Response
 
@@ -689,3 +689,11 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
 
         with open(path, 'w') as out:
             out.write(json.dumps(self.config['cookies']))
+
+    def setup_with_proxyline(self, line, proxy_type='http'):
+        host, port, user, pwd = parse_proxyline(line)
+        server_port = '%s:%s' % (host, port)
+        self.setup(proxy=server_port, proxy_type=proxy_type)
+        if user:
+            userpwd = '%s:%s' % (user, pwd)
+            self.setup(proxy_userpwd=userpwd)
