@@ -101,5 +101,6 @@ class Task(object):
             
         if 'grab' in kwargs:
             task.url = kwargs['grab'].config['url']
+            task.grab = kwargs['grab']
 
         return task
