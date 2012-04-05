@@ -1028,3 +1028,6 @@ class Spider(object):
                 count += 1
                 if limit is not None and count >= limit:
                     break
+    
+    def dump_title(self, grab):
+        print grab.xpath_text('//title', 'N/A')
