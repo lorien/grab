@@ -1024,7 +1024,7 @@ class Spider(object):
             if not url in urls:
                 urls.add(url)
                 g2 = grab.clone(url=url)
-                self.add_task(Task(task_name, grab=g2))
+                self.add_task(Task(task_name, grab=g2, **kwargs))
                 count += 1
                 if limit is not None and count >= limit:
                     break
