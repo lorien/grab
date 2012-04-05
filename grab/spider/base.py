@@ -855,7 +855,7 @@ class Spider(object):
 
         qsize = self.taskq.qsize()
         new_count = 0
-        min_limit = int(self.thread_number * 1.5)
+        min_limit = int(self.thread_number * 2)
         if qsize < min_limit:
             try:
                 for x in xrange(min_limit - qsize):
