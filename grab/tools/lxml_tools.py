@@ -66,6 +66,9 @@ def parse_html(html, encoding='utf-8'):
 
 
 def render_html(node, encoding='utf-8'):
+    """
+    Render Element node.
+    """
     import lxml.html
 
     return lxml.html.tostring(node, encoding=encoding)
@@ -82,3 +85,24 @@ def truncate_html(html, limit, encoding='utf-8'):
     elem = parse_html(truncated_html, encoding=encoding)
     fixed_html = render_html(elem, encoding=encoding)
     return fixed_html
+
+
+def clone_node(elem):
+    """
+    Create clone of Element node.
+
+    The resulted clone is not connected ot original DOM tree.
+    """
+
+    return parse_html(render_html(elem))
+
+
+def disable_links(elem):
+    """
+    Replace all links with span tags and drop href atrributes.
+    """
+
+    for node in elem.xpath('.//a'):
+        node.tag = 'span'
+        if 'href' in node.attrib:
+            del node.attrib['href']
