@@ -280,6 +280,9 @@ class CurlTransportExtension(object):
             # An error occurred when writing received data to a local file, or
             # an error was returned to libcurl from a write callback.
             # This is expected error and we should ignore it
+            #
+            # TODO: maybe is should be ignored only in case of using
+            # nobody and body_maxsize options
             if 23 == ex[0]:
                 pass
             else:

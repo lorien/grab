@@ -647,7 +647,16 @@ class Spider(object):
                 for curl in ok_list:
                     results.append((True, curl, None, None))
                 for curl, ecode, emsg in fail_list:
-                    results.append((False, curl, ecode, emsg))
+                    # Do not treat 23 error code as failed
+                    # It just means that some callback explicitly 
+                    # breaked response processing, e.g. nobody option
+                    # Maybe this leads to some unexpected errors :)
+                    if ecode == 23:
+                        ecode = None
+                        emsge = None
+                        results.append((True, curl, None, None))
+                    else:
+                        results.append((False, curl, ecode, emsg))
 
                 for ok, curl, ecode, emsg in results:
                     res = self.process_multicurl_response(ok, curl,
