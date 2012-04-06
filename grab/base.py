@@ -61,7 +61,7 @@ __all__ = ('Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseE
 PACKAGE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-logger = logging.getLogger('grab')
+logger = logging.getLogger('grab.base')
 
 def default_config():
     return dict(
@@ -327,8 +327,10 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
             proxy_info = ''
         if extra:
             extra = '[%s] ' % extra
-        logger.debug('[%02d%s] %s%s %s%s' % (self.request_counter, tname,
-                     extra, self.request_method, self.config['url'], proxy_info))
+        logger.debug('[%02d%s] %s%s %s%s' % (
+            self.request_counter, tname,
+            extra, self.request_method,
+            self.config['url'], proxy_info))
 
     def request(self, **kwargs):
         """

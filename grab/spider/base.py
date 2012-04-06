@@ -36,6 +36,8 @@ CURL_OBJECT = pycurl.Curl()
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (80, 100)
 
+logger = logging.getLogger('grab.spider.base')
+
 def execute_handler(path, handler_name, res_count, queue,
                     grab, task):
     try:
@@ -55,11 +57,11 @@ def execute_handler(path, handler_name, res_count, queue,
                     #raise Exception('Multiple yield from handler is not supported yet in distributed mode')
             queue.put((res_count, handler_name, items))
         except Exception, ex:
-            #logging.error(ex)
+            #logger.error(ex)
             tb = traceback.format_exc()
             queue.put((res_count, handler_name, [{'error': ex, 'traceback': tb}]))
     except Exception, ex:
-        logging.error('', exc_info=ex)
+        logger.error('', exc_info=ex)
 
 
 class Spider(object):
@@ -202,7 +204,7 @@ class Spider(object):
                     self.taskq.put((task_priority, Task(task_name, url)))
                     count += 1
                     if limit is not None and count >= limit:
-                        logging.debug('load_tasks limit reached')
+                        logger.debug('load_tasks limit reached')
                         break
 
     def setup_grab(self, **kwargs):
@@ -253,8 +255,8 @@ class Spider(object):
                         res['task'].task_try_count == 1):
                         self.inc_count('task-%s-initial' % res['task'].name)
                     if self.log_taskname:
-                        logging.debug('TASK: %s - %s' % (res['task'].name,
-                                                         'OK' if res['ok'] else 'FAIL'))
+                        logger.error('TASK: %s - %s' % (res['task'].name,
+                                                        'OK' if res['ok'] else 'FAIL'))
 
                     handler_name = 'task_%s' % res['task'].name
                     try:
@@ -340,7 +342,7 @@ class Spider(object):
             if res['ok']:
                 res['emsg'] = 'HTTP %s' % res['grab'].response.code
             self.inc_count('network-error-%s' % res['emsg'][:20])
-            logging.error(res['emsg'])
+            logger.error(res['emsg'])
 
             # Try to repeat the same network query
             if self.network_try_limit > 0:
@@ -365,9 +367,11 @@ class Spider(object):
         else:
             # Log the error
             if res['ok']:
-                res['emsg'] = 'HTTP %s' % res['grab'].response.code
+                msg = res['emsg'] = 'HTTP %s' % res['grab'].response.code
+            else:
+                msg = res['emsg']
             self.inc_count('network-error-%s' % res['emsg'][:20])
-            logging.error(res['emsg'])
+            logger.error(msg)
 
             # Try to repeat the same network query
             if self.network_try_limit > 0:
@@ -426,7 +430,7 @@ class Spider(object):
             self.distributed_task_buffer.append(task)
         else:
             if task.task_try_count > self.task_try_limit:
-                logging.debug('Task tries ended: %s / %s' % (task.name, task.url))
+                logger.debug('Task tries ended: %s / %s' % (task.name, task.url))
 
                 try:
                     fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
@@ -437,7 +441,7 @@ class Spider(object):
 
                 return False
             elif task.network_try_count >= self.network_try_limit:
-                logging.debug('Network tries ended: %s / %s' % (task.name, task.url))
+                logger.debug('Network tries ended: %s / %s' % (task.name, task.url))
 
                 try:
                     fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
@@ -494,7 +498,7 @@ class Spider(object):
                 # Increase request counter
                 if (self.request_limit is not None and
                     self.counters['request'] >= self.request_limit):
-                    logging.debug('Request limit is reached: %s' %\
+                    logger.debug('Request limit is reached: %s' %\
                                   self.request_limit)
                     if len(freelist) == self.thread_number:
                         yield None
@@ -522,7 +526,7 @@ class Spider(object):
                         # See same block on  :428 lines :)
 
                         if task.task_try_count > self.task_try_limit:
-                            logging.debug('Task tries ended: %s / %s' % (
+                            logger.debug('Task tries ended: %s / %s' % (
                                           task.name, task.url))
                             self.add_item('too-many-task-tries', task.url)
 
@@ -536,7 +540,7 @@ class Spider(object):
                             continue
                         
                         if task.network_try_count > self.network_try_limit:
-                            logging.debug('Network tries ended: %s / %s' % (
+                            logger.debug('Network tries ended: %s / %s' % (
                                           task.name, task.url))
                             self.add_item('too-many-network-tries', task.url)
 
@@ -566,7 +570,7 @@ class Spider(object):
                                 if cache_item:
                                 #if url in self.cache:
                                     #cache_item = pickle.loads(self.cache[url])
-                                    #logging.debug('From cache: %s' % url)
+                                    #logger.debug('From cache: %s' % url)
 
                                     # `curl` attribute should not be None
                                     # If it is None (which could be if the fire Task
@@ -714,7 +718,7 @@ class Spider(object):
         after parsing has been done.
         """
 
-        logging.debug('Job done!')
+        logger.debug('Job done!')
         #self.tracker.stats.print_summary()
 
     def inc_count(self, key, display=False, count=1):
@@ -731,7 +735,7 @@ class Spider(object):
 
         self.counters[key] += count
         if display:
-            logging.debug(key)
+            logger.debug(key)
         return self.counters[key]
 
     def setup_proxylist(self, *args, **kwargs):
@@ -757,7 +761,7 @@ class Spider(object):
         lst = self.items.setdefault(list_name, [])
         lst.append(item)
         if display:
-            logging.debug(list_name)
+            logger.debug(list_name)
 
     def save_list(self, list_name, path):
         """
@@ -805,11 +809,11 @@ class Spider(object):
         self.inc_count('error-%s' % ex.__class__.__name__.lower())
 
         if error_tb:
-            logging.error('Error in %s function' % func_name)
+            logger.error('Error in %s function' % func_name)
             if error_tb:
-                logging.error(error_tb)
+                logger.error(error_tb)
         else:
-            logging.error('Error in %s function' % func_name,
+            logger.error('Error in %s function' % func_name,
                           exc_info=ex)
 
         try:
@@ -964,7 +968,7 @@ class Spider(object):
 
             self.follow_links(grab, '//div[@class="topic"]/a/@href', 'topic')
         """
-        logging.debug('This method is deprecated. Use process_links method instead.')
+        logger.error('This method is deprecated. Use process_links method instead.')
 
         urls = []
         for url in grab.xpath_list(xpath):
@@ -1006,7 +1010,7 @@ class Spider(object):
         This method is used by `grab.spider.shortcuts.paginate` helper.
         """
 
-        logging.debug('This method is deprecated. Use process_next_page method instead.')
+        logger.error('This method is deprecated. Use process_next_page method instead.')
         nav = grab.xpath(xpath, None)
         if nav is not None:
             url = grab.make_url_absolute(nav.get('href'))

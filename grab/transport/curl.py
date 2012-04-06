@@ -15,7 +15,7 @@ from ..base import (GrabError, GrabMisuseError, UploadContent, UploadFile,
 from ..tools.http import encode_cookies, urlencode, normalize_unicode,\
                          normalize_http_values
 
-logger = logging.getLogger('grab')
+logger = logging.getLogger('grab.transport.curl')
 
 # @lorien: I do not understand these signals. Maybe you?
 
@@ -90,8 +90,8 @@ class CurlTransportExtension(object):
         self.response_body_chunks.append(chunk)
         if self.config['body_maxsize'] is not None:
             if self.response_body_bytes_read > self.config['body_maxsize']:
-                logging.debug('Response body max size limit reached: %s' %
-                              self.config['body_maxsize'])
+                logger.debug('Response body max size limit reached: %s' %
+                             self.config['body_maxsize'])
                 return 0
 
         # Returning None implies that all bytes were written
