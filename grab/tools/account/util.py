@@ -121,7 +121,7 @@ def get_random_avatar(folder):
     return os.path.join(folder, avatar)
 
 
-class Account(object):
+class AccountData(object):
     def random_fname(self, *args, **kwargs):
         self.fname = random_fname(*args, **kwargs)
         return self.fname
