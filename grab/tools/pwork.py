@@ -68,10 +68,13 @@ def make_work(callback, tasks, limit, ignore_exceptions=True,
     # until tasks iterator ends
     # Do it in separate thread
     def task_processor(task_iter, task_queue, limit):
-        for task in task_iter:
-            taskq.put(task)
-        for x in xrange(limit):
-            taskq.put(STOP)
+        try:
+            for task in task_iter:
+                taskq.put(task)
+        finally:
+            for x in xrange(limit):
+                taskq.put(STOP)
+
     processor = Process(target=task_processor, args=[tasks, taskq, limit])
     processor.daemon = True
     processor.start()
