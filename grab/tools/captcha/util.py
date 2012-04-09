@@ -23,7 +23,7 @@ class CaptchaSolver(object):
             logging.error('Warning: maybe you forgot to make the clone of Grab instance')
 
         if url:
-            logging.debug('Fetching captcha')
+            logging.debug('Downloading captcha')
             g.request(url=url)
             data = g.response.body
 

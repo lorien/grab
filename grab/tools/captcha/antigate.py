@@ -9,10 +9,9 @@ from .contrib.poster.streaminghttp import register_openers
 from .error import CaptchaError
 
 register_openers()
-logger = logging.getLogger('tools.captcha.antigate')
+logger = logging.getLogger('grab.tools.captcha.antigate')
 
 def send_captcha(key, fobj):
-    logger.debug('Sending captcha')
     items = []
     items.append(MultipartParam(name='key', value=key))
     items.append(MultipartParam(name='method', value='post'))
@@ -28,17 +27,15 @@ def send_captcha(key, fobj):
             return int(chunks[1])
         else:
             msg = chunks[0]
-            logger.debug(msg)
             raise CaptchaError(msg)
     else:
         msg = '%s %s' % (res.code, res.msg)
-        logger.debug(msg)
         raise CaptchaError(msg)
     print res.info()
     return res.read()
 
 def get_solution(key, captcha_id):
-    logger.debug('Fetching solution for captcha %s' % captcha_id)
+    #logger.debug('Getting solution for captcha %s' % captcha_id)
     params = {'key': key, 'action': 'get', 'id': captcha_id}
     url = 'http://antigate.com/res.php?%s' % urllib.urlencode(params)
     data = urllib.urlopen(url).read()
@@ -51,30 +48,36 @@ def get_solution(key, captcha_id):
 
 
 def solve_captcha(key, data):
+    if key is None:
+        raise Exception('antigate key could not None')
+
     fobj = StringIO(data)
-    while True:
+
+    captcha_id = None
+    for x in xrange(30):
         try:
             captcha_id = send_captcha(key, fobj)
-        except CaptchaError, ex:
+        except CaptchaError as ex:
             if ex.args[0] == 'ERROR_NO_SLOT_AVAILABLE':
-                logger.debug('No slot available')
-                pass
+                logger.debug('No antigate slot available')
+                time.sleep(1)
             else:
                 raise
         else:
             break
+            
+    if captcha_id is None:
+        raise CaptchaError('No antigate slot available')
 
-    while True:
+    logger.debug('Getting solution for captcha#%d' % captcha_id)
+    for x in xrange(20):
         try:
             return get_solution(key, captcha_id)
         except CaptchaError, ex:
             if ex.args[0] == 'CAPCHA_NOT_READY':
-                logger.debug('Waiting for captcha solution')
+                #logger.debug('Waiting for captcha solution')
                 time.sleep(3)
             else:
-                logger.debug(ex)
                 raise
 
-
-def test_logging():
-    logger.debug('asdf')
+    raise CaptchaError('No antigate slot available')
