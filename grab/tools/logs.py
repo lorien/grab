@@ -1,6 +1,7 @@
 import logging
 
-def default_logging(grab_log='/tmp/grab.log', level=logging.DEBUG, mode='a'):
+def default_logging(grab_log='/tmp/grab.log', level=logging.DEBUG, mode='a',
+                    network_log='/tmp/grab.network.log'):
     """
     Customize logging output to display all log messages
     except grab network logs.
@@ -9,8 +10,14 @@ def default_logging(grab_log='/tmp/grab.log', level=logging.DEBUG, mode='a'):
     """
 
     logging.basicConfig(level=level)
-    glog = logging.getLogger('grab')
-    glog.propagate = False
+
+    network_logger = logging.getLogger('grab.network')
+    network_logger.propagate = False
+    if network_log:
+        hdl = logging.FileHandler(network_log, mode)
+        network_logger.addHandler(hdl)
+
+    grab_logger = logging.getLogger('grab')
     if grab_log:
         hdl = logging.FileHandler(grab_log, mode)
-        glog.addHandler(hdl)
+        grab_logger.addHandler(hdl)

@@ -63,6 +63,11 @@ PACKAGE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 logger = logging.getLogger('grab.base')
 
+# Logger to handle network activity
+# It is separate logger to allow you easily
+# control network logging separately from other grab logs
+logger_network = logging.getLogger('grab.network')
+
 def default_config():
     return dict(
         # Common
@@ -327,7 +332,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
             proxy_info = ''
         if extra:
             extra = '[%s] ' % extra
-        logger.debug('[%02d%s] %s%s %s%s' % (
+        logger_network.debug('[%02d%s] %s%s %s%s' % (
             self.request_counter, tname,
             extra, self.request_method,
             self.config['url'], proxy_info))
@@ -365,7 +370,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
                     else:
                         connect_timeout, total_timeout = hammer_timeouts.pop(0)
                         self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
-                        logger.debug('Trying another timeouts. Connect: %d sec., total: %d sec.' % (connect_timeout, total_timeout))
+                        logger_network.debug('Trying another timeouts. Connect: %d sec., total: %d sec.' % (connect_timeout, total_timeout))
                         self._request_prepared = False
                 # If we are not in hammer mode
                 # Then just raise an error
@@ -403,7 +408,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
                         new_items.append((key, value))
                     post = '\n'.join('%-25s: %s' % x for x in new_items)
             if post:
-                logger.debug('POST request:\n%s\n' % post)
+                logger_network.debug('POST request:\n%s\n' % post)
 
         # It's important to delete old POST data after request is performed.
         # If POST data remains when next request will try to use them again!
