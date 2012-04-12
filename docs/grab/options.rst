@@ -168,7 +168,7 @@ reuse_referer
 `Refeer`.
 
 :Type: bool
-:Default: False
+:Default: True
 
 .. _option_proxy:
 
