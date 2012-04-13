@@ -8,20 +8,20 @@ import logging
 from test.util import prepare_test_environment, clear_test_environment
 
 TEST_CASE_LIST = (
-    'test.test_text_extension',
-    'test.test_lxml_extension',
-    'test.test_form_extension',
-    'test.test_fake_server',
-    'test.test_base_interface',
-    'test.test_post_feature',
-    'test.test_proxy_feature',
-    'test.test_upload_file',
-    'test.test_limit_option',
-    'test.test_cookies',
-    'test.test_text_tools',
-    'test.test_lxml_tools',
-    'test.test_response_class',
-    'test.test_tools_account',
+    'test.text_extension',
+    'test.lxml_extension',
+    'test.form_extension',
+    'test.fake_server',
+    'test.base_interface',
+    'test.post_feature',
+    'test.proxy_feature',
+    'test.upload_file',
+    'test.limit_option',
+    'test.cookies',
+    'test.text_tools',
+    'test.lxml_tools',
+    'test.response_class',
+    'test.tools_account',
 )
 
 def main():
