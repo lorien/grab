@@ -16,7 +16,7 @@ BASE_URL = 'http://localhost:%d' % FAKE_SERVER_PORT
 # This global objects is used by Fake HTTP Server
 # It return content of HTML variable for any GET request
 RESPONSE = {'get': '', 'post': '', 'cookies': None,
-            'once_code': None}
+            'once_code': None, 'get_callback': None}
 RESPONSE_ONCE = {'get': None, 'post': None}
 RESPONSE_ONCE_HEADERS = []
 
@@ -67,26 +67,35 @@ class FakeServerThread(threading.Thread):
                 Reponse body contains content from ``RESPONSE['get']``
                 """
 
+                print '<-- (GET)'
                 time.sleep(SLEEP['get'])
-                if RESPONSE['once_code']:
-                    self.send_response(RESPONSE['once_code'])
-                    RESPONSE['once_code'] = None
-                else:
-                    self.send_response(200)
-                if RESPONSE['cookies']:
-                    for name, value in RESPONSE['cookies'].items():
-                        self.send_header('Set-Cookie', '%s=%s' % (name, value))
-                while RESPONSE_ONCE_HEADERS:
-                    self.send_header(*RESPONSE_ONCE_HEADERS.pop())
-                self.end_headers()
-                if RESPONSE_ONCE['get'] is not None:
-                    self.wfile.write(RESPONSE_ONCE['get'])
-                    RESPONSE_ONCE['get'] = None
-                else:
-                    self.wfile.write(RESPONSE['get'])
+
                 REQUEST['headers'] = self.headers
                 REQUEST['path'] = self.path
-                print '<-- (GET)'
+
+                if RESPONSE['get_callback'] is not None:
+                    RESPONSE['get_callback'](self)
+                else:
+                    if RESPONSE['once_code']:
+                        self.send_response(RESPONSE['once_code'])
+                        RESPONSE['once_code'] = None
+                    else:
+                        self.send_response(200)
+
+                    if RESPONSE['cookies']:
+                        for name, value in RESPONSE['cookies'].items():
+                            self.send_header('Set-Cookie', '%s=%s' % (name, value))
+
+                    while RESPONSE_ONCE_HEADERS:
+                        self.send_header(*RESPONSE_ONCE_HEADERS.pop())
+
+                    self.end_headers()
+
+                    if RESPONSE_ONCE['get'] is not None:
+                        self.wfile.write(RESPONSE_ONCE['get'])
+                        RESPONSE_ONCE['get'] = None
+                    else:
+                        self.wfile.write(RESPONSE['get'])
 
             def log_message(*args, **kwargs):
                 "Do not log to console"

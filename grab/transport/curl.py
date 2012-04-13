@@ -136,7 +136,7 @@ class CurlTransportExtension(object):
         self.curl.setopt(pycurl.URL, request_url)
 
         self.curl.setopt(pycurl.FOLLOWLOCATION, 1 if self.config['follow_location'] else 0)
-        self.curl.setopt(pycurl.MAXREDIRS, 5)
+        self.curl.setopt(pycurl.MAXREDIRS, self.config['redirect_limit'])
         self.curl.setopt(pycurl.CONNECTTIMEOUT, self.config['connect_timeout'])
         self.curl.setopt(pycurl.TIMEOUT, self.config['timeout'])
 

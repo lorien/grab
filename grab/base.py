@@ -116,6 +116,7 @@ def default_config():
         # Редиректы
         follow_refresh = False,
         follow_location = True,
+        redirect_limit = 5,
 
         # Authentication
         userpwd = None,

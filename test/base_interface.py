@@ -121,3 +121,48 @@ class TestGrab(TestCase):
         g.go(BASE_URL)
         self.assertEqual(REQUEST['path'], '/foo')
         self.assertEqual(g.response.url, BASE_URL + '/foo')
+
+    def test_redirect_limit(self):
+
+        class Scope(object):
+            counter = None
+
+            def callback(self, server):
+                if self.counter:
+                    server.send_response(301)
+                    server.send_header('Location', BASE_URL)
+                    server.end_headers()
+                else:
+                    server.send_response(200)
+                    server.end_headers()
+                self.counter -= 1
+
+        scope = Scope()
+        scope.counter = 10
+        g = Grab()
+        g.setup(redirect_limit=5)
+
+        RESPONSE['get_callback'] = scope.callback
+
+        try:
+            try:
+                g.go(BASE_URL)
+            except Exception, ex:
+                pass
+            self.assert_(ex is not None)
+            self.assertEqual(ex.errno, 47)
+
+            scope.counter = 10
+            g.setup(redirect_limit=20)
+
+            try:
+                g.go(BASE_URL)
+            except Exception, ex:
+                pass
+            else:
+                ex = None
+            self.assert_(ex is None)
+
+        finally:
+            # Clean up test environment
+            RESPONSE['get_callback'] = None
