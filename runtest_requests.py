@@ -13,7 +13,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 from grab import GrabMisuseError, DataNotFound, UploadContent
 from grab import Grab as GrabPycurl, GrabRequests
-from grab.multi import multi_fetch
 from grab.spider import Spider, Task, Data
 
 # The port on which the fake http server listens requests

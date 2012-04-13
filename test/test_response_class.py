@@ -1,10 +1,11 @@
 # coding: utf-8
+from __future__ import absolute_import
 from unittest import TestCase
 from grab import Grab, DataNotFound, GrabMisuseError
 import os.path
 
-from tests.util import (FakeServerThread, TEST_DIR, TMP_DIR,
-                        RESPONSE, BASE_URL)
+from .util import (FakeServerThread, TEST_DIR, TMP_DIR,
+                   RESPONSE, BASE_URL)
 
 HTML = """
 Hello world

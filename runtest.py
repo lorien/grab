@@ -5,23 +5,23 @@ import sys
 from optparse import OptionParser
 import logging
 
-from tests.util import prepare_test_environment, clear_test_environment
+from test.util import prepare_test_environment, clear_test_environment
 
 TEST_CASE_LIST = (
-    'tests.test_text_extension',
-    'tests.test_lxml_extension',
-    'tests.test_form_extension',
-    'tests.test_fake_server',
-    'tests.test_base_interface',
-    'tests.test_post_feature',
-    'tests.test_proxy_feature',
-    'tests.test_upload_file',
-    'tests.test_limit_option',
-    'tests.test_cookies',
-    'tests.test_text_tools',
-    'tests.test_lxml_tools',
-    'tests.test_response_class',
-    'tests.test_tools_account',
+    'test.test_text_extension',
+    'test.test_lxml_extension',
+    'test.test_form_extension',
+    'test.test_fake_server',
+    'test.test_base_interface',
+    'test.test_post_feature',
+    'test.test_proxy_feature',
+    'test.test_upload_file',
+    'test.test_limit_option',
+    'test.test_cookies',
+    'test.test_text_tools',
+    'test.test_lxml_tools',
+    'test.test_response_class',
+    'test.test_tools_account',
 )
 
 def main():
