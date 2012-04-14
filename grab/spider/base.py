@@ -36,7 +36,7 @@ from .data import Data
 from .pattern import SpiderPattern
 from .stat  import SpiderStat
 from .transport.multicurl import MulticurlTransport
-#from .transport.threadpool import ThreadPoolTransport
+from .transport.threadpool import ThreadPoolTransport
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (80, 100)
@@ -367,7 +367,7 @@ class Spider(SpiderPattern, SpiderStat):
 
         """ 
 
-        transport = MulticurlTransport(self.thread_number)
+        transport = ThreadPoolTransport(self.thread_number)
 
         # This is infinite cycle
         # You can break it only from outside code which
@@ -380,8 +380,6 @@ class Spider(SpiderPattern, SpiderStat):
 
             # while transport is ready for new requests
             while transport.ready_for_task():
-            #while len(freelist):
-
                 # If request number limit is reached
                 # then do not add new tasks and yield None (which will stop all)
                 # when length of freelist (number of free workers)
@@ -394,6 +392,7 @@ class Spider(SpiderPattern, SpiderStat):
                         if not transport.active_task_number():
                             yield None
                         else:
+                            print 'break'
                             break
                 else:
                     try:

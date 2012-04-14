@@ -49,5 +49,5 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     db.cache.remove()
     bot = TestSpider(use_cache=True, cache_db='spider_test',
-                     thread_number=4)
+                     thread_number=4)#, request_limit=2)
     bot.run()
