@@ -38,32 +38,6 @@ RANDOM_TASK_PRIORITY_RANGE = (80, 100)
 
 logger = logging.getLogger('grab.spider.base')
 
-def execute_handler(path, handler_name, res_count, queue,
-                    grab, task):
-    try:
-        mod_path, cls_name = path.rsplit('.', 1)
-        mod = __import__(mod_path, fromlist=[''])
-        cls = getattr(mod, cls_name)
-        bot = cls(container_mode=True)
-        handler = getattr(bot, handler_name)
-        try:
-            result = handler(grab, task)
-            if isinstance(result, types.GeneratorType):
-                items = list(result)
-            else:
-                items = [result]
-            items += bot.distributed_task_buffer
-                #if len(items) > 1:
-                    #raise Exception('Multiple yield from handler is not supported yet in distributed mode')
-            queue.put((res_count, handler_name, items))
-        except Exception, ex:
-            #logger.error(ex)
-            tb = traceback.format_exc()
-            queue.put((res_count, handler_name, [{'error': ex, 'traceback': tb}]))
-    except Exception, ex:
-        logger.error('', exc_info=ex)
-
-
 class Spider(object):
     """
     Asynchronious scraping framework.
@@ -90,9 +64,6 @@ class Spider(object):
                  log_taskname=False,
                  cache_key_hash=True,
                  request_pause=0,
-                 container_mode=False,
-                 distributed_mode=False,
-                 distributed_path=None,
                  priority_mode='random',
                  meta=None,
                  ):
@@ -110,15 +81,10 @@ class Spider(object):
             of some other physical error
             but task_try_limit limits the number of attempts which
             are scheduled manually in the spider business logic
-        * distributed_mode - if True then multiprocessing module
-            will be used to share task handlers among available CPU cores
         * request_pause - amount of time on which the main `run` cycle should
             pause the activity of spider. By default it is equal to zero. You
             can use this option to slow down the spider speed (also you can use
             `thread_number` option). The value of `request_pause` could be float.
-        * container_mode - used for distributed mode then we have to call method
-            in remote process which receives name of spider class and name of method.
-        * distributed_path - path to the spider class in format "mod.mod.ClassName"
         * priority_mode - could be "random" or "const"
         * meta - arbitrary user data
         """
@@ -127,10 +93,6 @@ class Spider(object):
             self.meta = meta
         else:
             self.meta = {}
-        self.container_mode = container_mode
-        self.distributed_task_buffer = []
-        if container_mode:
-            return
         self.taskq = PriorityQueue()
         self.thread_number = thread_number
         self.request_limit = request_limit
@@ -156,11 +118,9 @@ class Spider(object):
             self.setup_cache()
         self.log_taskname = log_taskname
         self.prepare()
-        self.distributed_mode = distributed_mode
         self.cache_key_hash = cache_key_hash
         self.should_stop = False
         self.request_pause = request_pause
-        self.distributed_path = distributed_path
         # Init task generator
         self.task_generator_object = self.task_generator()
         self.task_generator_enabled = True
@@ -226,19 +186,11 @@ class Spider(object):
             self.start_time = time.time()
             self.load_initial_urls()
 
-            # new
-            if self.distributed_mode:
-                pool = multiprocessing.Pool()
-                manager = multiprocessing.Manager()
-                queue = manager.Queue()
-                mapping = {}
-                multi_requests = []
-
             for res_count, res in enumerate(self.fetch()):
                 if res_count > 0 and self.request_pause > 0:
                     time.sleep(self.request_pause)
 
-                if res is None and not self.distributed_mode:
+                if res is None:
                     break
 
                 if res:
@@ -265,56 +217,7 @@ class Spider(object):
                         raise Exception('Task handler does not exist: %s' %\
                                         handler_name)
                     else:
-                        if self.distributed_mode:
-                            self.execute_response_handler_async(
-                                res, self.distributed_path, handler_name, mapping,
-                                res_count, multi_requests, queue, pool)
-                        else:
-                            self.execute_response_handler_sync(res, handler, handler_name)
-
-                if self.distributed_mode:
-                    try:
-                        res_count, handler_name, task_results = queue.get(False)
-                    except Empty:
-                        if res is None:
-                            break
-                    else:
-                        res = mapping[res_count]
-                        for task_result in task_results:
-                            #if task_result == 'traceback':
-                                #import pdb; pdb.set_trace()
-                            if isinstance(task_result, dict) and 'error' in task_result:
-                                self.error_handler(handler_name,
-                                                   task_result['error'],
-                                                   res['task'],
-                                                   error_tb=task_result['traceback'])
-                            else:
-                                self.process_result(task_result, res['task'])
-                            #import pdb; pdb.set_trace()
-                            #res['grab']._lxml_tree = tree
-                            #print tree.xpath('//h1')
-                            #self.execute_response_handler(res, handler, handler_name)
-                        del mapping[res_count]
-                    multi_requests = [x for x in multi_requests if not x.ready()]
-
-            # It is nonsense if that code should work because
-            # we already is out of main loop so
-            # if handler returns new Task then it will not be processed
-            #if self.distributed_mode:
-            # new
-            #while True:
-                #try:
-                    #res_count, tree = queue.get(True, 0.1)
-                #except Empty:
-                    #multi_requests = [x for x in multi_requests if not x.ready()]
-                    #if not len(multi_requests):
-                        #break
-                #else:
-                    #res = mapping[res_count]
-                    ##res['grab']._lxml_tree = tree
-                    #self.execute_response_handler(res, handler, handler_name)
-                    #del mapping[res_count]
-
+                        self.execute_response_handler_sync(res, handler, handler_name)
 
         except KeyboardInterrupt:
             print '\nGot ^C signal. Stopping.'
@@ -322,34 +225,6 @@ class Spider(object):
         finally:
             # This code is executed when main cycles is breaked
             self.shutdown()
-
-
-    def execute_response_handler_async(self, res, path, handler_name,
-                                       mapping, res_count, multi_requests,
-                                       queue, pool):
-        if res['ok'] and (res['grab'].response.code < 400 or
-                          res['grab'].response.code == 404 or
-                          res['grab'].response.code in res['task'].valid_status):
-            mapping[res_count] = res
-            res['grab'].curl = None
-            res['grab_original'].curl = None
-            multi_request = pool.apply_async(
-                execute_handler, (path, handler_name, res_count,
-                                  queue, res['grab'], res['task']))
-            multi_requests.append(multi_request)
-        else:
-            # Log the error
-            if res['ok']:
-                res['emsg'] = 'HTTP %s' % res['grab'].response.code
-            self.inc_count('network-error-%s' % res['emsg'][:20])
-            logger.error(res['emsg'])
-
-            # Try to repeat the same network query
-            if self.network_try_limit > 0:
-                task = res['task']
-                task.grab = res['grab_original']
-                self.add_task(task)
-            # TODO: allow to write error handlers
 
     def execute_response_handler_sync(self, res, handler, handler_name):
         if res['ok'] and (res['grab'].response.code < 400 or
@@ -426,41 +301,38 @@ class Spider(object):
         if task.grab and not task.grab.config['url'].startswith('http'):
             task.grab.config['url'] = urljoin(self.base_url, task.grab.config['url'])
 
-        if self.container_mode:
-            self.distributed_task_buffer.append(task)
-        else:
-            if task.task_try_count > self.task_try_limit:
-                logger.debug('Task tries ended: %s / %s' % (task.name, task.url))
+        if task.task_try_count > self.task_try_limit:
+            logger.debug('Task tries ended: %s / %s' % (task.name, task.url))
 
-                try:
-                    fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
-                except AttributeError:
-                    pass
-                else:
-                    fallback_handler(task)
-
-                return False
-            elif task.network_try_count >= self.network_try_limit:
-                logger.debug('Network tries ended: %s / %s' % (task.name, task.url))
-
-                try:
-                    fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
-                except AttributeError:
-                    pass
-                else:
-                    fallback_handler(task)
-
-                return False
+            try:
+                fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
+            except AttributeError:
+                pass
             else:
-                #prep = getattr(self, 'task_%s_preprocessor' % task.name, None)
-                #ok = True
-                #if prep:
-                    #ok = prep(task)
-                #if ok:
-                    #self.taskq.put((task.priority, task))
-                #return ok
-                self.taskq.put((task.priority, task))
-                return True
+                fallback_handler(task)
+
+            return False
+        elif task.network_try_count >= self.network_try_limit:
+            logger.debug('Network tries ended: %s / %s' % (task.name, task.url))
+
+            try:
+                fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
+            except AttributeError:
+                pass
+            else:
+                fallback_handler(task)
+
+            return False
+        else:
+            #prep = getattr(self, 'task_%s_preprocessor' % task.name, None)
+            #ok = True
+            #if prep:
+                #ok = prep(task)
+            #if ok:
+                #self.taskq.put((task.priority, task))
+            #return ok
+            self.taskq.put((task.priority, task))
+            return True
 
     def data_default(self, item):
         """
@@ -475,6 +347,8 @@ class Spider(object):
         Download urls via multicurl.
         
         Get new tasks from queue.
+
+        TODO: REFACTOR IT!
         """ 
         m = pycurl.CurlMulti()
         m.handles = []
@@ -489,21 +363,27 @@ class Spider(object):
         # This is infinite cycle
         # You can break it only from outside code which
         # iterates over result of this method
+        # This cyle is breaked from inside only
+        # if self.request_limit is reached
         while True:
 
             cached_request = None
 
             while len(freelist):
 
-                # Increase request counter
-                if (self.request_limit is not None and
-                    self.counters['request'] >= self.request_limit):
-                    logger.debug('Request limit is reached: %s' %\
-                                  self.request_limit)
-                    if len(freelist) == self.thread_number:
-                        yield None
-                    else:
-                        break
+                # If request number limit is reached
+                # then do not add new tasks and yield None (which will stop all)
+                # when length of freelist (number of free workers)
+                # will become equal to number of threads (total number of workers)
+                # Worker is just a network stream
+                if self.request_limit is not None:
+                    if self.counters['request'] >= self.request_limit:
+                        logger.debug('Request limit is reached: %s' %
+                                     self.request_limit)
+                        if len(freelist) == self.thread_number:
+                            yield None
+                        else:
+                            break
                 else:
                     try:
                         priority, task = self.taskq.get(True, 0.1)

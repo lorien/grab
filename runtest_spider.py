@@ -6,9 +6,9 @@ from optparse import OptionParser
 import logging
 
 TEST_CASE_LIST = (
-    'tests.test_spider',
+    'test.spider',
     #'tests.test_distributed_spider',
-    'tests.test_spider_task',
+    'test.spider_task',
 )
 
 def main():
