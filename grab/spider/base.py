@@ -59,11 +59,10 @@ class Spider(SpiderPattern, SpiderStat):
     def __init__(self, thread_number=3, request_limit=None,
                  network_try_limit=10, task_try_limit=10,
                  debug_error=False,
-                 use_cache=False,
-                 use_cache_compression=False,
+                 use_cache=None,
+                 use_cache_compression=None,
                  cache_db = None,
                  log_taskname=False,
-                 cache_key_hash=True,
                  request_pause=0,
                  priority_mode='random',
                  meta=None,
@@ -90,6 +89,15 @@ class Spider(SpiderPattern, SpiderStat):
         * meta - arbitrary user data
         """
 
+        if use_cache is not None:
+            logger.error('use_cache argument is depricated. Use setup_cache method.')
+            use_cache = False
+        if use_cache_compression is not None:
+            logger.error('use_cache_compression argument is depricated. Use setup_cache method.')
+            use_cache_compression = False
+        if cache_db is not None:
+            logger.error('cache_db argument is depricated. Use setup_cache method.')
+
         if meta:
             self.meta = meta
         else:
@@ -112,14 +120,16 @@ class Spider(SpiderPattern, SpiderStat):
         except (ValueError, AttributeError):
             pass
         self.debug_error = debug_error
-        self.use_cache = use_cache
-        self.cache_db = cache_db
-        self.use_cache_compression = use_cache_compression
+
+        # Initial cache-subsystem values
+        self.cache_enabled = False
+        self.cache = None
         if use_cache:
-            self.setup_cache()
+            self.setup_cache(backend='mongo', database=cache_db,
+                             use_compression=use_cache_compression)
+
         self.log_taskname = log_taskname
         self.prepare()
-        self.cache_key_hash = cache_key_hash
         self.should_stop = False
         self.request_pause = request_pause
         # Init task generator
@@ -127,12 +137,13 @@ class Spider(SpiderPattern, SpiderStat):
         self.task_generator_enabled = True
         self.process_task_generator()
 
-    def setup_cache(self):
-        if not self.cache_db:
-            raise Exception('You should configure cache_db option')
-        if not PYMONGO_IMPORTED:
-            raise Exception('pymongo required to use cache feature')
-        self.cache = pymongo.Connection()[self.cache_db]['cache']
+    def setup_cache(self, backend='mongo', database=None, use_compression=True, **kwargs):
+        if database is None:
+            yield SpiderMisuseError('setup_cache method requires database option')
+        self.cache_enabled = True
+        mod = __import__('grab.spider.cache_backend.%s' % backend,
+                         globals(), locals(), ['foo'])
+        self.cache = mod.CacheBackend(database=database, use_compression=use_compression)
 
     def prepare(self):
         """
@@ -420,14 +431,12 @@ class Spider(SpiderPattern, SpiderStat):
 
                         # TODO:
                         # Design: ask cache layer for cached result
-                        if (self.use_cache
+                        if (self.cache_enabled
                             and not task.get('refresh_cache', False)
                             and not task.get('disable_cache', False)
                             and grab.detect_request_method() == 'GET'):
 
-                            url = grab.config['url']
-                            _hash = self.build_cache_hash(url)
-                            cache_item = self.cache.find_one({'_id': _hash})
+                            cache_item = self.cache.get_item(grab.config['url'])
                             if cache_item:
                                 # `curl` attribute should not be None
                                 # If it is None (which could be if we fire Task
@@ -490,30 +499,7 @@ class Spider(SpiderPattern, SpiderStat):
             if cached_request:
                 # GRAB CLONE ISSUE
                 grab, grab_original, task, cache_item = cached_request
-                url = task.url# or grab.config['url']
-                grab.fake_response(cache_item['body'])
-
-                body = cache_item['body']
-                if self.use_cache_compression:
-                    body = zlib.decompress(body)
-
-                # TODO:
-                # Design: call method of cache layoer which
-                # configures grab instance with cache item
-
-                def custom_prepare_response(g):
-                    g.response.head = cache_item['head']
-                    g.response.body = body
-                    g.response.code = cache_item['response_code']
-                    g.response.time = 0
-                    if 'response_url' in cache_item:
-                        g.response.url = cache_item['response_url']
-                    else:
-                        g.response.url = cache_item['url']
-                    g.response.parse()
-                    g.response.cookies = g._extract_cookies()
-
-                grab.process_request_result(custom_prepare_response)
+                self.cache.load_response(grab, cache_item)
 
                 # GRAB CLONE ISSUE
                 yield {'ok': True, 'grab': grab, 'grab_original': grab_original,
@@ -565,9 +551,7 @@ class Spider(SpiderPattern, SpiderStat):
         grab = curl.grab
         grab_original = curl.grab_original
 
-        url = task.url# or grab.config['url']
         grab.process_request_result()
-        response_url = grab.response.url
 
         # Break links, free resources
         curl.grab.curl = None
@@ -576,29 +560,9 @@ class Spider(SpiderPattern, SpiderStat):
 
         # TODO:
         # Design: ask cache layer to save the result
-        if ok and self.use_cache and grab.request_method == 'GET' and not task.get('disable_cache'):
+        if ok and self.cache_enabled and grab.request_method == 'GET' and not task.get('disable_cache'):
             if self.valid_response_code(grab.response.code, task):
-                body = grab.response.body
-                if self.use_cache_compression:
-                    body = zlib.compress(body)
-
-                _hash = self.build_cache_hash(task.url)
-                item = {
-                    '_id': _hash,
-                    'url': task.url,
-                    'response_url': response_url,
-                    'body': pymongo.binary.Binary(body),
-                    'head': pymongo.binary.Binary(grab.response.head),
-                    'response_code': grab.response.code,
-                    'cookies': None,#grab.response.cookies,
-                }
-                try:
-                    self.cache.save(item, safe=True)
-                except Exception, ex:
-                    if 'document too large' in unicode(ex):
-                        pass
-                    #else:
-                        #import pdb; pdb.set_trace()
+                self.cache.save_response(task.url, grab)
 
         return {'ok': ok, 'grab': grab, 'grab_original': grab_original,
                 'task': task,
@@ -710,17 +674,6 @@ class Spider(SpiderPattern, SpiderStat):
 
     def create_grab_instance(self):
         return Grab(**self.grab_config)
-
-    def build_cache_hash(self, url):
-        utf_url = url.encode('utf-8') if isinstance(url, unicode) else url
-        if self.cache_key_hash:
-            return sha1(utf_url).hexdigest()
-        else:
-            return utf_url
-
-    def remove_cache_item(self, url):
-        _hash = self.build_cache_hash(url)
-        self.cache.remove({'_id': _hash})
 
     def stop(self):
         """

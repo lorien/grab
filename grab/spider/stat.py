@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger('grab.spider.stat')
+
 class SpiderStat(object):
     """
     This base-class defines methods to use for
