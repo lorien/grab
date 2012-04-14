@@ -653,6 +653,9 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         request method will be used.
 
         Returns request method in upper case
+        
+        This method needs simetime when process_config method
+        was not executed yet.
         """
 
         method = self.config['method']

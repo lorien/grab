@@ -164,42 +164,47 @@ class Spider(SpiderPattern, SpiderStat):
                 self.add_task(Task('initial', url=url))
 
     def run(self):
+        """
+        Main work cycle.
+        """
+
         try:
             self.start_time = time.time()
             self.load_initial_urls()
 
-            for res_count, res in enumerate(self.fetch()):
+            for res_count, res in enumerate(self.get_next_response()):
                 if res_count > 0 and self.request_pause > 0:
                     time.sleep(self.request_pause)
 
                 if res is None:
                     break
 
-                if res:
-                    if self.should_stop:
-                        break
+                if self.should_stop:
+                    break
 
-                    if self.task_generator_enabled:
-                        self.process_task_generator()
+                if self.task_generator_enabled:
+                    self.process_task_generator()
 
-                    # Increase task counters
-                    self.inc_count('task')
-                    self.inc_count('task-%s' % res['task'].name)
-                    if (res['task'].network_try_count == 1 and
-                        res['task'].task_try_count == 1):
-                        self.inc_count('task-%s-initial' % res['task'].name)
-                    if self.log_taskname:
-                        logger.error('TASK: %s - %s' % (res['task'].name,
-                                                        'OK' if res['ok'] else 'FAIL'))
+                # Increase task counters
+                self.inc_count('task')
+                self.inc_count('task-%s' % res['task'].name)
+                if (res['task'].network_try_count == 1 and
+                    res['task'].task_try_count == 1):
+                    self.inc_count('task-%s-initial' % res['task'].name)
 
-                    handler_name = 'task_%s' % res['task'].name
-                    try:
-                        handler = getattr(self, handler_name)
-                    except AttributeError:
-                        raise Exception('Task handler does not exist: %s' %\
-                                        handler_name)
-                    else:
-                        self.execute_response_handler_sync(res, handler, handler_name)
+                # Log task name
+                if self.log_taskname:
+                    status = 'OK' if res['ok'] else 'FAIL'
+                    logger.error('TASK: %s - %s' % (res['task'].name, status))
+
+                # Process the response
+                handler_name = 'task_%s' % res['task'].name
+                try:
+                    handler = getattr(self, handler_name)
+                except AttributeError:
+                    raise SpiderError('Task handler does not exist: %s' % handler_name)
+                else:
+                    self.process_response(res, handler)
 
         except KeyboardInterrupt:
             print '\nGot ^C signal. Stopping.'
@@ -208,19 +213,32 @@ class Spider(SpiderPattern, SpiderStat):
             # This code is executed when main cycles is breaked
             self.shutdown()
 
-    def execute_response_handler_sync(self, res, handler, handler_name):
-        if res['ok'] and (res['grab'].response.code < 400 or
-                          res['grab'].response.code == 404 or
-                          res['grab'].response.code in res['task'].valid_status):
+    def valid_response_code(self, code, task):
+        """
+        Answer the question: if the response could be handled via
+        usual task handler or the task faield and should be processed as error.
+        """
+
+        return (code < 400 or code == 404 or
+                code in task.valid_status)
+
+    def process_response(self, res, handler):
+        """
+        Run the handler associated with the task for which the response
+        was received.
+        """
+
+        if res['ok'] and self.valid_response_code(res['grab'].response.code,
+                                                  res['task']):
             try:
                 result = handler(res['grab'], res['task'])
                 if isinstance(result, types.GeneratorType):
                     for item in result:
-                        self.process_result(item, res['task'])
+                        self.process_handler_result(item, res['task'])
                 else:
-                    self.process_result(result, res['task'])
+                    self.process_handler_result(result, res['task'])
             except Exception, ex:
-                self.error_handler(handler_name, ex, res['task'])
+                self.process_handler_error(handler.__name__, ex, res['task'])
         else:
             # Log the error
             if res['ok']:
@@ -233,40 +251,43 @@ class Spider(SpiderPattern, SpiderStat):
             # Try to repeat the same network query
             if self.network_try_limit > 0:
                 task = res['task']
+                # GRAB CLONE ISSUE
                 task.grab = res['grab_original']
                 self.add_task(task)
             # TODO: allow to write error handlers
     
-    def process_result(self, result, task):
+    def process_handler_result(self, result, task):
         """
-        Process result returned from task handler. 
-        Result could be None, Task instance or Data instance.
+        Process result produced by task handler.
+        Result could be:
+        * None
+        * Task instance
+        * Data instance.
         """
 
         if isinstance(result, Task):
             if not self.add_task(result):
-                self.add_item('wtf-error-task-not-added', task.url)
+                self.add_item('task-could-not-be-added', task.url)
         elif isinstance(result, Data):
             handler_name = 'data_%s' % result.name
             try:
                 handler = getattr(self, handler_name)
             except AttributeError:
-                handler = self.data_default
+                raise SpiderError('No content handler for %s item', item)
             try:
                 handler(result.item)
             except Exception, ex:
-                self.error_handler(handler_name, ex, task)
+                self.process_handler_error(handler_name, ex, task)
         elif result is None:
             pass
         else:
-            #import pdb; pdb.set_trace()
-            raise Exception('Unknown result type: %s' % result)
+            raise SpiderError('Unknown result type: %s' % result)
 
     def add_task(self, task):
         """
-        Add new task to task queue.
+        Add task to the task queue.
 
-        Stop the task which was executed too many times.
+        Abort the task which was restarted too many times.
         """
 
         if task.priority is None:
@@ -275,6 +296,8 @@ class Spider(SpiderPattern, SpiderStat):
             else:
                 task.priority = randint(*RANDOM_TASK_PRIORITY_RANGE)
 
+        # WTF??? to almost similar blocks
+
         if not task.url.startswith('http'):
             if self.base_url is None:
                 raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified')
@@ -282,50 +305,57 @@ class Spider(SpiderPattern, SpiderStat):
                 task.url = urljoin(self.base_url, task.url)
 
         if task.grab and not task.grab.config['url'].startswith('http'):
-            task.grab.config['url'] = urljoin(self.base_url, task.grab.config['url'])
-
-        if task.task_try_count > self.task_try_limit:
-            logger.debug('Task tries ended: %s / %s' % (task.name, task.url))
-
-            try:
-                fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
-            except AttributeError:
-                pass
+            if self.base_url is None:
+                raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified')
             else:
-                fallback_handler(task)
+                task.grab.config['url'] = urljoin(self.base_url, task.grab.config['url'])
 
-            return False
-        elif task.network_try_count >= self.network_try_limit:
-            logger.debug('Network tries ended: %s / %s' % (task.name, task.url))
-
-            try:
-                fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
-            except AttributeError:
-                pass
-            else:
-                fallback_handler(task)
-
-            return False
-        else:
+        is_valid = self.check_task_limits(task)
+        if is_valid:
             self.taskq.put((task.priority, task))
-            return True
+        return is_valid
 
-    def data_default(self, item):
+    def check_task_limits(self, task):
         """
-        Default handler for Content result for which
-        no handler defined.
+        Check that network/try counters are OK.
+
+        If one of counter is invalid then display error
+        and try to call fallback handler.
         """
 
-        raise Exception('No content handler for %s item', item)
+        is_valid = True
+        if task.task_try_count > self.task_try_limit:
+            logger.debug('Task tries ended: %s / %s' % (
+                          task.name, task.url))
+            self.add_item('too-many-task-tries', task.url)
+            is_valid = False
+        elif task.network_try_count > self.network_try_limit:
+            logger.debug('Network tries ended: %s / %s' % (
+                          task.name, task.url))
+            self.add_item('too-many-network-tries', task.url)
+            is_valid = False
 
-    def fetch(self):
+        if not is_valid:
+            try:
+                fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
+            except AttributeError:
+                pass
+            else:
+                fallback_handler(task)
+
+        return is_valid
+
+    def get_next_response(self):
         """
-        Download urls via multicurl.
-        
-        Get new tasks from queue.
+        Download urls via multicurl. Get new tasks from queue.
+        If it yields None then scraping process should stop.
 
         TODO: REFACTOR IT!
+        TODO: Refactor to not depends on curl
         """ 
+
+        # TODO:
+        # Design: init transport object
         m = pycurl.CurlMulti()
         m.handles = []
 
@@ -345,6 +375,8 @@ class Spider(SpiderPattern, SpiderStat):
 
             cached_request = None
 
+            # TODO:
+            # Design: if transport is ready for new requests
             while len(freelist):
 
                 # If request number limit is reached
@@ -375,37 +407,10 @@ class Spider(SpiderPattern, SpiderStat):
                         if task.task_try_count == 0:
                             task.task_try_count = 1
 
-                        # WTF?
-                        # See same block on  :428 lines :)
-
-                        if task.task_try_count > self.task_try_limit:
-                            logger.debug('Task tries ended: %s / %s' % (
-                                          task.name, task.url))
-                            self.add_item('too-many-task-tries', task.url)
-
-                            try:
-                                fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
-                            except AtributeError:
-                                pass
-                            else:
-                                fallback_handler(task)
-
-                            continue
-                        
-                        if task.network_try_count > self.network_try_limit:
-                            logger.debug('Network tries ended: %s / %s' % (
-                                          task.name, task.url))
-                            self.add_item('too-many-network-tries', task.url)
-
-                            try:
-                                fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
-                            except AttributeError:
-                                pass
-                            else:
-                                fallback_handler(task)
-
+                        if not self.check_task_limits(task):
                             continue
 
+                        # GRAB CLONE ISSUE
                         if task.grab:
                             grab = task.grab
                         else:
@@ -413,45 +418,55 @@ class Spider(SpiderPattern, SpiderStat):
                             grab = self.create_grab_instance()
                             grab.setup(url=task.url)
 
+                        # TODO:
+                        # Design: ask cache layer for cached result
                         if (self.use_cache
-                            and not task.get('refresh_cache')
-                            and not task.get('disable_cache')):
-                            if grab.detect_request_method() == 'GET':
-                                url = grab.config['url']
-                                _hash = self.build_cache_hash(url)
-                                cache_item = self.cache.find_one({'_id': _hash})
-                                if cache_item:
-                                #if url in self.cache:
-                                    #cache_item = pickle.loads(self.cache[url])
-                                    #logger.debug('From cache: %s' % url)
+                            and not task.get('refresh_cache', False)
+                            and not task.get('disable_cache', False)
+                            and grab.detect_request_method() == 'GET'):
 
-                                    # `curl` attribute should not be None
-                                    # If it is None (which could be if the fire Task
-                                    # objects with grab objects which was recevied in
-                                    # as input argument of response handler function)
-                                    # then `prepare_request` method will failed
-                                    # because it asssumes that Grab instance
-                                    # has valid `curl` attribute
-                                    if grab.curl is None:
-                                        grab.curl = CURL_OBJECT
-                                    cached_request = (grab, grab.clone(),
-                                                      task, cache_item)
-                                    grab.prepare_request()
-                                    grab.log_request('CACHED')
-                                    self.inc_count('request-cache')
+                            url = grab.config['url']
+                            _hash = self.build_cache_hash(url)
+                            cache_item = self.cache.find_one({'_id': _hash})
+                            if cache_item:
+                                # `curl` attribute should not be None
+                                # If it is None (which could be if we fire Task
+                                # object with grab object which was recevied in
+                                # as input argument of response handler function)
+                                # then `prepare_request` method will failed
+                                # because it asssumes that Grab instance
+                                # has valid `curl` attribute
+                                # TODO: Looks strange
+                                # Maybe refactor preapre_request method
+                                # to not fail on grab instance with empty curl instance
+                                if grab.curl is None:
+                                    grab.curl = CURL_OBJECT
+                                # GRAB CLONE ISSUE
+                                cached_request = (grab, grab.clone(),
+                                                  task, cache_item)
+                                grab.prepare_request()
+                                grab.log_request('CACHED')
+                                self.inc_count('request-cache')
 
-                                    # break from prepare-request cycle
-                                    # and go to process-response code
-                                    break
+                                # break from prepare-request cycle
+                                # and go to process-response code
+                                break
 
                         self.inc_count('request-network')
                         if task.use_proxylist and self.proxylist_config:
                             args, kwargs = self.proxylist_config
                             grab.setup_proxylist(*args, **kwargs)
 
+                        # TODO:
+                        # Design: pass task to transport object
                         curl = freelist.pop()
+                        # All this shit looks strange
+                        # Maybe we should not assign extr attributes to
+                        # curls instance but just maintain some mapping
+                        # where all extra attributes will be stored
                         curl.grab = grab
                         curl.grab.curl = curl
+                        # GRAB CLONE ISSUE
                         curl.grab_original = grab.clone()
                         curl.grab.prepare_request()
                         curl.grab.log_request()
@@ -460,7 +475,12 @@ class Spider(SpiderPattern, SpiderStat):
                         m.add_handle(curl)
 
 
-            # If there were done network requests
+            # If real network requests were fired
+            # when wait for some result
+            # TODO: probably this code should go after prcessing
+            # of results from the cache
+            # TODO
+            # Design: wait till network transport will have some results
             if len(freelist) != self.thread_number:
                 while True:
                     status, active_objects = m.perform()
@@ -468,6 +488,7 @@ class Spider(SpiderPattern, SpiderStat):
                         break
 
             if cached_request:
+                # GRAB CLONE ISSUE
                 grab, grab_original, task, cache_item = cached_request
                 url = task.url# or grab.config['url']
                 grab.fake_response(cache_item['body'])
@@ -475,6 +496,11 @@ class Spider(SpiderPattern, SpiderStat):
                 body = cache_item['body']
                 if self.use_cache_compression:
                     body = zlib.decompress(body)
+
+                # TODO:
+                # Design: call method of cache layoer which
+                # configures grab instance with cache item
+
                 def custom_prepare_response(g):
                     g.response.head = cache_item['head']
                     g.response.body = body
@@ -489,10 +515,14 @@ class Spider(SpiderPattern, SpiderStat):
 
                 grab.process_request_result(custom_prepare_response)
 
+                # GRAB CLONE ISSUE
                 yield {'ok': True, 'grab': grab, 'grab_original': grab_original,
                        'task': task, 'ecode': None, 'emsg': None}
                 self.inc_count('request')
 
+            # TODO:
+            # Design: iterate over network trasport ready results
+            # Each result could be valid or failed
             while True:
                 queued_messages, ok_list, fail_list = m.info_read()
 
@@ -512,8 +542,7 @@ class Spider(SpiderPattern, SpiderStat):
                         results.append((False, curl, ecode, emsg))
 
                 for ok, curl, ecode, emsg in results:
-                    res = self.process_multicurl_response(ok, curl,
-                                                          ecode, emsg)
+                    res = self.process_multicurl_response(ok, curl, ecode, emsg)
                     m.remove_handle(curl)
                     freelist.append(curl)
                     yield res
@@ -524,13 +553,15 @@ class Spider(SpiderPattern, SpiderStat):
 
             m.select(0.01)
 
-    def process_multicurl_response(self, ok, curl, ecode=None, emsg=None):
+    def process_multicurl_response(self, ok, curl, ecode, emsg):
         """
-        Process reponse returned from multicurl cycle.
+        Process curl instance produced by call to multicurl
+        info_read() method.
         """
 
         task = curl.task
         # Note: curl.grab == task.grab if task.grab is not None
+        # GRAB CLONE ISSUE
         grab = curl.grab
         grab_original = curl.grab_original
 
@@ -543,9 +574,10 @@ class Spider(SpiderPattern, SpiderStat):
         curl.grab = None
         curl.task = None
 
+        # TODO:
+        # Design: ask cache layer to save the result
         if ok and self.use_cache and grab.request_method == 'GET' and not task.get('disable_cache'):
-            if (grab.response.code < 400 or grab.response.code == 404 or
-                grab.response.code in task.valid_status):
+            if self.valid_response_code(grab.response.code, task):
                 body = grab.response.body
                 if self.use_cache_compression:
                     body = zlib.compress(body)
@@ -560,9 +592,7 @@ class Spider(SpiderPattern, SpiderStat):
                     'response_code': grab.response.code,
                     'cookies': None,#grab.response.cookies,
                 }
-                #import pdb; pdb.set_trace()
                 try:
-                    #self.mongo.cache.save(item, safe=True)
                     self.cache.save(item, safe=True)
                 except Exception, ex:
                     if 'document too large' in unicode(ex):
@@ -591,17 +621,18 @@ class Spider(SpiderPattern, SpiderStat):
 
         self.proxylist_config = (args, kwargs)
 
-    def error_handler(self, func_name, ex, task, error_tb=None):
+    def process_handler_error(self, func_name, ex, task, error_tb=None):
         self.inc_count('error-%s' % ex.__class__.__name__.lower())
 
         if error_tb:
             logger.error('Error in %s function' % func_name)
-            if error_tb:
-                logger.error(error_tb)
+            logger.error(error_tb)
         else:
             logger.error('Error in %s function' % func_name,
                           exc_info=ex)
 
+        # Looks strange but I really have some problems with
+        # serializing exception into string
         try:
             ex_str = unicode(ex)
         except TypeError:
@@ -609,14 +640,14 @@ class Spider(SpiderPattern, SpiderStat):
                 ex_str = unicode(ex, 'utf-8', 'ignore')
             except TypeError:
                 ex_str = str(ex)
+
         self.add_item('fatal', '%s|%s|%s' % (ex.__class__.__name__,
                                              ex_str, task.url))
         if self.debug_error:
-            #import sys, traceback,  pdb
-            #type, value, tb = sys.exc_info()
-            #traceback.print_exc()
-            #pdb.post_mortem(tb)
+            # TODO: open pdb session in the place where exception
+            # was raised
             import pdb; pdb.set_trace()
+
         if isinstance(ex, FatalError):
             raise
 
@@ -631,7 +662,7 @@ class Spider(SpiderPattern, SpiderStat):
         """
 
         if False:
-            # Some magic to make this function generator
+            # Some magic to make this function empty generator
             yield ':-)'
         return
 
@@ -652,7 +683,7 @@ class Spider(SpiderPattern, SpiderStat):
             #try:
                 #return handler(task)
             #except Exception, ex:
-                #self.error_handler(handler_name, ex, task)
+                #self.process_handler_error(handler_name, ex, task)
                 #return False
         #else:
             #return task
@@ -667,14 +698,14 @@ class Spider(SpiderPattern, SpiderStat):
         """
 
         qsize = self.taskq.qsize()
-        new_count = 0
-        min_limit = int(self.thread_number * 2)
+        min_limit = self.thread_number * 2
         if qsize < min_limit:
             try:
                 for x in xrange(min_limit - qsize):
                     self.add_task(self.task_generator_object.next())
-                    new_count += 1
             except StopIteration:
+                # If generator have no values to yield
+                # then disable it
                 self.task_generator_enabled = False
 
     def create_grab_instance(self):
