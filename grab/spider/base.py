@@ -1,6 +1,9 @@
+"""
+Global TODO:
+* make task_%s_preprocess methods
+"""
 from __future__ import absolute_import
 from Queue import PriorityQueue, Empty
-import pycurl
 from grab import Grab
 from grab.base import GLOBAL_STATE
 import logging
@@ -32,8 +35,9 @@ from .task import Task
 from .data import Data
 from .pattern import SpiderPattern
 from .stat  import SpiderStat
+from .transport.multicurl import MulticurlTransport
+#from .transport.threadpool import ThreadPoolTransport
 
-CURL_OBJECT = pycurl.Curl()
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (80, 100)
 
@@ -358,24 +362,12 @@ class Spider(SpiderPattern, SpiderStat):
 
     def get_next_response(self):
         """
-        Download urls via multicurl. Get new tasks from queue.
+        Use async transport to download tasks.
         If it yields None then scraping process should stop.
 
-        TODO: REFACTOR IT!
-        TODO: Refactor to not depends on curl
         """ 
 
-        # TODO:
-        # Design: init transport object
-        m = pycurl.CurlMulti()
-        m.handles = []
-
-        # Create curl instances
-        for x in xrange(self.thread_number):
-            curl = pycurl.Curl()
-            m.handles.append(curl)
-
-        freelist = m.handles[:]
+        transport = MulticurlTransport(self.thread_number)
 
         # This is infinite cycle
         # You can break it only from outside code which
@@ -386,9 +378,9 @@ class Spider(SpiderPattern, SpiderStat):
 
             cached_request = None
 
-            # TODO:
-            # Design: if transport is ready for new requests
-            while len(freelist):
+            # while transport is ready for new requests
+            while transport.ready_for_task():
+            #while len(freelist):
 
                 # If request number limit is reached
                 # then do not add new tasks and yield None (which will stop all)
@@ -399,7 +391,7 @@ class Spider(SpiderPattern, SpiderStat):
                     if self.counters['request'] >= self.request_limit:
                         logger.debug('Request limit is reached: %s' %
                                      self.request_limit)
-                        if len(freelist) == self.thread_number:
+                        if not transport.active_task_number():
                             yield None
                         else:
                             break
@@ -409,7 +401,7 @@ class Spider(SpiderPattern, SpiderStat):
                     except Empty:
                         # If All handlers are free and no tasks in queue
                         # yield None signal
-                        if len(freelist) == self.thread_number:
+                        if not transport.active_task_number():
                             yield None
                         else:
                             break
@@ -425,7 +417,7 @@ class Spider(SpiderPattern, SpiderStat):
                         if task.grab:
                             grab = task.grab
                         else:
-                            # Set up curl instance via Grab interface
+                            # Set up grab instance
                             grab = self.create_grab_instance()
                             grab.setup(url=task.url)
 
@@ -438,18 +430,7 @@ class Spider(SpiderPattern, SpiderStat):
 
                             cache_item = self.cache.get_item(grab.config['url'])
                             if cache_item:
-                                # `curl` attribute should not be None
-                                # If it is None (which could be if we fire Task
-                                # object with grab object which was recevied in
-                                # as input argument of response handler function)
-                                # then `prepare_request` method will failed
-                                # because it asssumes that Grab instance
-                                # has valid `curl` attribute
-                                # TODO: Looks strange
-                                # Maybe refactor prepare_request method
-                                # to not fail on grab instance with empty curl instance
-                                if grab.curl is None:
-                                    grab.curl = CURL_OBJECT
+                                transport.repair_grag(grab)
                                 # GRAB CLONE ISSUE
                                 cached_request = (grab, grab.clone(),
                                                   task, cache_item)
@@ -466,35 +447,14 @@ class Spider(SpiderPattern, SpiderStat):
                             args, kwargs = self.proxylist_config
                             grab.setup_proxylist(*args, **kwargs)
 
-                        # TODO:
                         # Design: pass task to transport object
-                        curl = freelist.pop()
-                        # All this shit looks strange
-                        # Maybe we should not assign extr attributes to
-                        # curls instance but just maintain some mapping
-                        # where all extra attributes will be stored
-                        curl.grab = grab
-                        curl.grab.curl = curl
-                        # GRAB CLONE ISSUE
-                        curl.grab_original = grab.clone()
-                        curl.grab.prepare_request()
-                        curl.grab.log_request()
-                        curl.task = task
-                        # Add configured curl instance to multi-curl processor
-                        m.add_handle(curl)
-
+                        transport.add_task(task, grab)
 
             # If real network requests were fired
             # when wait for some result
             # TODO: probably this code should go after prcessing
             # of results from the cache
-            # TODO
-            # Design: wait till network transport will have some results
-            if len(freelist) != self.thread_number:
-                while True:
-                    status, active_objects = m.perform()
-                    if status != pycurl.E_CALL_MULTI_PERFORM:
-                        break
+            transport.wait_result()
 
             if cached_request:
                 # GRAB CLONE ISSUE
@@ -503,70 +463,35 @@ class Spider(SpiderPattern, SpiderStat):
 
                 # GRAB CLONE ISSUE
                 yield {'ok': True, 'grab': grab, 'grab_original': grab_original,
-                       'task': task, 'ecode': None, 'emsg': None}
+                       'task': task, 'emsg': None}
                 self.inc_count('request')
 
-            # TODO:
-            # Design: iterate over network trasport ready results
+            # Iterate over network trasport ready results
             # Each result could be valid or failed
-            while True:
-                queued_messages, ok_list, fail_list = m.info_read()
+            # Result format: {ok, grab, grab_original, task, emsg}
+            for result in transport.iterate_results():
+                yield self.process_transport_result(result)
+                self.inc_count('request')
 
-                results = []
-                for curl in ok_list:
-                    results.append((True, curl, None, None))
-                for curl, ecode, emsg in fail_list:
-                    # Do not treat 23 error code as failed
-                    # It just means that some callback explicitly 
-                    # breaked response processing, e.g. nobody option
-                    # Maybe this leads to some unexpected errors :)
-                    if ecode == 23:
-                        ecode = None
-                        emsge = None
-                        results.append((True, curl, None, None))
-                    else:
-                        results.append((False, curl, ecode, emsg))
+            # Calling special async magic function
+            # to do async things
+            transport.select()
 
-                for ok, curl, ecode, emsg in results:
-                    res = self.process_multicurl_response(ok, curl, ecode, emsg)
-                    m.remove_handle(curl)
-                    freelist.append(curl)
-                    yield res
-                    self.inc_count('request')
-
-                if not queued_messages:
-                    break
-
-            m.select(0.01)
-
-    def process_multicurl_response(self, ok, curl, ecode, emsg):
+    def process_transport_result(self, res):
         """
-        Process curl instance produced by call to multicurl
-        info_read() method.
+        Process asyncronous transport result
+
+        res: {ok, grab, grab_original, task, emsg}
         """
 
-        task = curl.task
-        # Note: curl.grab == task.grab if task.grab is not None
-        # GRAB CLONE ISSUE
-        grab = curl.grab
-        grab_original = curl.grab_original
 
-        grab.process_request_result()
-
-        # Break links, free resources
-        curl.grab.curl = None
-        curl.grab = None
-        curl.task = None
-
-        # TODO:
         # Design: ask cache layer to save the result
-        if ok and self.cache_enabled and grab.request_method == 'GET' and not task.get('disable_cache'):
-            if self.valid_response_code(grab.response.code, task):
-                self.cache.save_response(task.url, grab)
+        if (res['ok'] and self.cache_enabled and res['grab'].request_method == 'GET'
+            and not res['task'].get('disable_cache')):
+            if self.valid_response_code(res['grab'].response.code, res['task']):
+                self.cache.save_response(res['task'].url, res['grab'])
 
-        return {'ok': ok, 'grab': grab, 'grab_original': grab_original,
-                'task': task,
-                'ecode': ecode, 'emsg': emsg}
+        return res
 
     def shutdown(self):
         """
@@ -575,7 +500,6 @@ class Spider(SpiderPattern, SpiderStat):
         """
 
         logger.debug('Job done!')
-        #self.tracker.stats.print_summary()
 
     def setup_proxylist(self, *args, **kwargs):
         """
@@ -629,28 +553,6 @@ class Spider(SpiderPattern, SpiderStat):
             # Some magic to make this function empty generator
             yield ':-)'
         return
-
-    # TODO: make task_%s_preprocess methods
-    #def _preprocess_task(self, task):
-        #"""
-        #Run custom task preprocessor which could change task
-        #properties or cancel it.
-
-        #This method is called *before* network request.
-
-        #Return True to continue process the task or False to cancel the task.
-        #"""
-
-        #handler_name = 'preprocess_%s' % task.name
-        #handler = getattr(self, handler_name, None)
-        #if handler:
-            #try:
-                #return handler(task)
-            #except Exception, ex:
-                #self.process_handler_error(handler_name, ex, task)
-                #return False
-        #else:
-            #return task
 
     def process_task_generator(self):
         """
