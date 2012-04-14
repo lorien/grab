@@ -47,6 +47,7 @@ def unique_host(path):
 
 
 def hash_path(url, ext='jpg'):
+    logging.debug('This function name is depricated. Please use hashed_path function')
     _hash = sha1(url).hexdigest()
     a, b, tail = _hash[:2], _hash[2:4], _hash[4:]
     if ext is not None:
