@@ -437,7 +437,7 @@ class Spider(SpiderPattern, SpiderStat):
                                 # because it asssumes that Grab instance
                                 # has valid `curl` attribute
                                 # TODO: Looks strange
-                                # Maybe refactor preapre_request method
+                                # Maybe refactor prepare_request method
                                 # to not fail on grab instance with empty curl instance
                                 if grab.curl is None:
                                     grab.curl = CURL_OBJECT
