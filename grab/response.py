@@ -49,8 +49,15 @@ class Response(object):
         for line in self.head.split('\n'):
             line = line.rstrip('\r')
             if line:
+                # Each HTTP line meand the start of new response
+                # self.head could contains info about multiple responses
+                # For example, then 301/302 redirect was processed automatically
+                # Maybe it is a bug and should be fixed
+                # Anyway, we handle this issue here and save headers
+                # only from last response
                 if line.startswith('HTTP'):
                     self.status = line
+                    valid_lines = []
                 else:
                     if ':' in line:
                         valid_lines.append(line)
