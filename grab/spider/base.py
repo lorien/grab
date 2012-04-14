@@ -139,11 +139,6 @@ class Spider(object):
         before it has started working.
         """
 
-    def container_prepare(self):
-        """
-        Executed in container-mode on instance creating phase.
-        """
-
     def sigusr1_handler(self, signal, frame):
         """
         Catches SIGUSR1 signal and dumps current state
@@ -152,20 +147,6 @@ class Spider(object):
 
         with open('/tmp/spider.state', 'w') as out:
             out.write(self.render_stats())
-
-
-    def load_tasks(self, path, task_name='initial', task_priority=100,
-                   limit=None):
-        count = 0
-        with open(path) as inf:
-            for line in inf:
-                url = line.strip()
-                if url:
-                    self.taskq.put((task_priority, Task(task_name, url)))
-                    count += 1
-                    if limit is not None and count >= limit:
-                        logger.debug('load_tasks limit reached')
-                        break
 
     def setup_grab(self, **kwargs):
         self.grab_config = kwargs
@@ -298,6 +279,7 @@ class Spider(object):
                 raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified')
             else:
                 task.url = urljoin(self.base_url, task.url)
+
         if task.grab and not task.grab.config['url'].startswith('http'):
             task.grab.config['url'] = urljoin(self.base_url, task.grab.config['url'])
 
@@ -324,13 +306,6 @@ class Spider(object):
 
             return False
         else:
-            #prep = getattr(self, 'task_%s_preprocessor' % task.name, None)
-            #ok = True
-            #if prep:
-                #ok = prep(task)
-            #if ok:
-                #self.taskq.put((task.priority, task))
-            #return ok
             self.taskq.put((task.priority, task))
             return True
 
@@ -395,9 +370,6 @@ class Spider(object):
                         else:
                             break
                     else:
-                        if not self._preprocess_task(task):
-                            continue
-
                         task.network_try_count += 1
                         if task.task_try_count == 0:
                             task.task_try_count = 1
@@ -723,19 +695,6 @@ class Spider(object):
         if isinstance(ex, FatalError):
             raise
 
-    # TODO: remove
-    #def generate_tasks(self, init):
-        #"""
-        #Create new tasks.
-
-        #This method is called on each step of main run cycle and
-        #at Spider initialization.
-
-        #initi is True only for call on Spider initialization stage
-        #"""
-
-        #pass
-
     def task_generator(self):
         """
         You can override this method to load new tasks smoothly.
@@ -751,26 +710,27 @@ class Spider(object):
             yield ':-)'
         return
 
-    def _preprocess_task(self, task):
-        """
-        Run custom task preprocessor which could change task
-        properties or cancel it.
+    # TODO: make task_%s_preprocess methods
+    #def _preprocess_task(self, task):
+        #"""
+        #Run custom task preprocessor which could change task
+        #properties or cancel it.
 
-        This method is called *before* network request.
+        #This method is called *before* network request.
 
-        Return True to continue process the task or False to cancel the task.
-        """
+        #Return True to continue process the task or False to cancel the task.
+        #"""
 
-        handler_name = 'preprocess_%s' % task.name
-        handler = getattr(self, handler_name, None)
-        if handler:
-            try:
-                return handler(task)
-            except Exception, ex:
-                self.error_handler(handler_name, ex, task)
-                return False
-        else:
-            return task
+        #handler_name = 'preprocess_%s' % task.name
+        #handler = getattr(self, handler_name, None)
+        #if handler:
+            #try:
+                #return handler(task)
+            #except Exception, ex:
+                #self.error_handler(handler_name, ex, task)
+                #return False
+        #else:
+            #return task
 
     def process_task_generator(self):
         """
