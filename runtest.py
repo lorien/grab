@@ -29,14 +29,13 @@ def main():
     parser = OptionParser()
     parser.add_option('-t', '--test', help='Run only specified tests')
     parser.add_option('--transport', help='Test specified transport',
-                      default='GrabCurl')
+                      default='curl.CurlTransport')
     opts, args = parser.parse_args()
 
     prepare_test_environment()
 
     import grab
-    transport = getattr(grab, opts.transport)
-    grab.Grab = transport
+    #transport = getattr(grab, opts.transport)
 
     loader = unittest.TestLoader()
     if opts.test:
@@ -44,6 +43,8 @@ def main():
     else:
         suite = loader.loadTestsFromNames(TEST_CASE_LIST)
     runner = unittest.TextTestRunner()
+    # TODO: pass opts.transport setting to all test so they could
+    # build Grab instance with required transport
     runner.run(suite)
 
     clear_test_environment()

@@ -8,7 +8,7 @@ class TestContentLimit(TestCase):
     def setUp(self):
         FakeServerThread().start()
 
-    @ignore_transport('GrabRequests')
+    @ignore_transport('requests.RequestsTransport')
     def test_nobody(self):
         g = Grab()
         g.setup(nobody=True)
@@ -17,7 +17,7 @@ class TestContentLimit(TestCase):
         self.assertEqual('', g.response.body)
         self.assertTrue(len(g.response.head) > 0)
 
-    @ignore_transport('GrabRequests')
+    @ignore_transport('requests.RequestsTransport')
     def test_body_maxsize(self):
         g = Grab()
         g.setup(body_maxsize=100)

@@ -136,33 +136,32 @@ def default_config():
         strip_xml_declaration = True,
     )
 
-class GrabInterface(object):
-    """
-    The methods of this class should be
-    implemented by the so-called transport class
+#class GrabInterface(object):
+    #"""
+    #The methods of this class should be
+    #implemented by the so-called transport class
 
-    Any Grab class should inhertis from the transport class.
+    #Any Grab class should inhertis from the transport class.
     
-    By default, then you do::
+    #By default, then you do::
     
-        from grab import Grab
+        #from grab import Grab
 
-    You use ``the grab.transport.curl.CurlTransport``.
-    """
+    #You use ``the grab.transport.curl.CurlTransport``.
+    #"""
 
-    def process_config(self):
-        raise NotImplementedError
+    #def process_config(self):
+        #raise NotImplementedError
 
-    def _extract_cookies(self):
-        raise NotImplementedError
+    #def _extract_cookies(self):
+        #raise NotImplementedError
 
-    def prepare_response(self):
-        raise NotImplementedError
+    #def prepare_response(self):
+        #raise NotImplementedError
 
 
 class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
-               DjangoExtension, TextExtension, RegexpExtension, 
-               GrabInterface):
+               DjangoExtension, TextExtension, RegexpExtension):
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
@@ -181,7 +180,8 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
     Public methods
     """
 
-    def __init__(self, response_body=None, **kwargs):
+    def __init__(self, transport='curl.CurlTransport', response_body=None,
+                 **kwargs):
         """
         Create Grab instance
         """
@@ -191,6 +191,12 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         self.default_headers = self.common_headers()
         self.trigger_extensions('init')
         self._request_prepared = False
+
+        mod_name, cls_name = transport.split('.')
+        mod = __import__('grab.transport.%s' % mod_name, globals(),
+                         locals(), ['foo'])
+        self.transport = getattr(mod, cls_name)()
+
         self.reset()
         self.proxylist = None
         self.proxylist_auto_change = False
@@ -210,8 +216,18 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         This methods is automatically called before each network request.
         """
 
+        # TODO: set None
         self.response = Response()
+
+        # ???
+        self.request_headers = ''
+        self.request_head = ''
+        self.request_log = ''
+        self.request_body = ''
+
+        self.request_method = None
         self.trigger_extensions('reset')
+        self.transport.reset()
 
     def clone(self, **kwargs):
         """
@@ -229,6 +245,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         for key in self.mutable_config_keys:
             g.config[key] = copy(self.config[key])
 
+        # Handle None case
         g.response = self.response.copy()
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
@@ -252,6 +269,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         for key in self.mutable_config_keys:
             self.config[key] = copy(g.config[key])
 
+        # Handle None case
         self.response = g.response.copy()
         for key in self.clonable_attributes:
             setattr(self, key, getattr(g, key))
@@ -308,7 +326,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
             if kwargs:
                 self.setup(**kwargs)
             self.request_method = self.detect_request_method()
-            self.process_config()
+            self.transport.process_config(self)
             self._request_prepared = True
 
     def log_request(self, extra=''):
@@ -358,7 +376,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
             try:
                 self.prepare_request(**kwargs)
                 self.log_request()
-                self.transport_request()
+                self.transport.request()
             except GrabError, ex:
 
                 # In hammer mode try to use next timeouts
@@ -423,9 +441,9 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         self.config['method'] = None
 
         if prepare_response_func:
-            prepare_response_func(self)
+            self.response = prepare_response_func(self.transport, self)
         else:
-            self.prepare_response()
+            self.response = self.transport.prepare_response(self)
 
         if self.config['reuse_cookies']:
             # Copy cookies from response into config
@@ -454,6 +472,8 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         if self.config['reuse_referer']:
             self.config['referer'] = self.response.url
 
+        self.copy_request_data()
+
         self._request_prepared = False
 
         # TODO: check max redirect count
@@ -464,6 +484,13 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
                 return self.request(url=url)
 
         return None
+
+    def copy_request_data(self):
+        self.request_headers = self.transport.request_headers
+        self.request_head = self.transport.request_head
+        self.request_body = self.transport.request_body
+        self.request_log = self.transport.request_log
+
 
     # Disabled due to perfomance issue
     # Who needs this method?

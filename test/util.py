@@ -139,10 +139,12 @@ def ignore_transport(transport):
 
     def wrapper(func):
         def test_method(*args, **kwargs):
-            cls = getattr(grab, transport)
-            if grab.Grab == cls:
-                return
-            else:
-                func(*args, **kwargs)
+            # TODO: FIX
+            return func(*args, **kwargs)
+            #cls = getattr(grab, transport)
+            #if grab.Grab == cls:
+                #return
+            #else:
+                #func(*args, **kwargs)
         return test_method
     return wrapper

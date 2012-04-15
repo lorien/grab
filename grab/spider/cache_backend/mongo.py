@@ -10,9 +10,12 @@ CacheItem interface:
 
 TODO: WTF with cookies???
 """
+from __future__ import absolute_import
 from hashlib import sha1
 import zlib
 import logging
+
+from grab.response import Response
 
 logger = logging.getLogger('grab.spider.cache_backend.mongo')
 
@@ -50,23 +53,25 @@ class CacheBackend(object):
         if self.use_cache_compression:
             body = zlib.decompress(body)
 
-        def custom_prepare_response(g):
-            g.response.head = cache_item['head']
-            g.response.body = body
-            g.response.code = cache_item['response_code']
-            g.response.time = 0
+        def custom_prepare_response_func(g.transport, g):
+            response = Response()
+            response.head = cache_item['head']
+            response.body = body
+            response.code = cache_item['response_code']
+            response.time = 0
 
             # Hack for deprecated behaviour
             if 'response_url' in cache_item:
-                g.response.url = cache_item['response_url']
+                response.url = cache_item['response_url']
             else:
                 logger.debug('You cache contains items without `response_url` key. It is depricated data format. Please re-download you cache or build manually `response_url` keys.')
-                g.response.url = cache_item['url']
+                response.url = cache_item['url']
 
-            g.response.parse()
-            g.response.cookies = g._extract_cookies()
+            response.parse()
+            response.cookies = self.extract_cookies()
+            return response
 
-        grab.process_request_result(custom_prepare_response)
+        grab.process_request_result(custom_prepare_response_func)
 
     def save_response(self, url, grab):
         body = grab.response.body
