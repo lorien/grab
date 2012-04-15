@@ -191,6 +191,8 @@ class CurlTransport(object):
                     # dict, tuple, list should be serialized into byte-string
                     post_data = urlencode(grab.config['post'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
+            else:
+                self.curl.setopt(pycurl.POSTFIELDS, '')
         elif grab.request_method == 'PUT':
             self.curl.setopt(pycurl.PUT, 1)
             self.curl.setopt(pycurl.READFUNCTION, StringIO(grab.config['post']).read) 
