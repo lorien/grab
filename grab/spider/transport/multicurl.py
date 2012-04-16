@@ -28,7 +28,7 @@ class MulticurlTransport(object):
         # curls instance but just maintain some mapping
         # where all extra attributes will be stored
         curl.grab = grab
-        curl.grab.curl = curl
+        curl.grab.transport.curl = curl
         # GRAB CLONE ISSUE
         curl.grab_original = grab.clone()
         curl.grab.prepare_request()
@@ -75,7 +75,7 @@ class MulticurlTransport(object):
                 grab.process_request_result()
 
                 # Break links, free resources
-                curl.grab.curl = None
+                curl.grab.transport.curl = None
                 curl.grab = None
                 curl.task = None
 

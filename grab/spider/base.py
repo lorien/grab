@@ -368,7 +368,7 @@ class Spider(SpiderPattern, SpiderStat):
 
         """ 
 
-        transport = ThreadPoolTransport(self.thread_number)
+        transport = MulticurlTransport(self.thread_number)
 
         # This is infinite cycle
         # You can break it only from outside code which
