@@ -313,7 +313,8 @@ class Spider(SpiderPattern, SpiderStat):
 
         # WTF??? to almost similar blocks
 
-        if not task.url.startswith('http'):
+        if (not task.url.startswith('http://') and not task.url.startswith('https://')
+            and not task.url.startswith('ftp://')):
             if self.base_url is None:
                 raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified')
             else:
