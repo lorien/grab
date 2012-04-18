@@ -70,22 +70,20 @@ Spider
     :maxdepth: 2
 
     spider/tutorial
+    spider/task
 
-* Задания и функции-обработчики
- * yield
- * initial_urls
- * task_generator
- * self.add_task
+TODO::
 
-* Система кэширования в mongodb
-* Функция повторного выполнения заданий
-* Утилиты:
- * process_links
- * process_next_page
- * inc_count/add_item/save_list/render_stats/save_all_lists
- * process_object_image
-* Работа с прокси
-* Обработка сетевых ошибок и исключений
+    * Объект задания
+    * Система кэширования в mongodb
+    * Функция повторного выполнения заданий
+    * Утилиты:
+     * process_links
+     * process_next_page
+     * inc_count/add_item/save_list/render_stats/save_all_lists
+     * process_object_image
+    * Работа с прокси
+    * Обработка сетевых ошибок и исключений
     
 
 
