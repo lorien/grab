@@ -1,11 +1,15 @@
 """
 Text parsing and processing utilities.
 """
+from __future__ import absolute_import
+
+from ..error import GrabMisuseError
 import re
 
 RE_NUMBER = re.compile(r'\d+')
 RE_NUMBER_WITH_SPACES = re.compile(r'\d[\s\d]*', re.U)
 RE_SPACE = re.compile(r'\s+', re.U)
+BOM_TOKEN = '\xef\xbb\xbf'
 
 def find_number(text, ignore_spaces=False):
     """
@@ -49,3 +53,15 @@ def normalize_space(text, replace=' '):
     """
 
     return RE_SPACE.sub(replace, text.strip()).strip()
+
+
+def remove_bom(text):
+    """
+    Remove BOM-sequence from the start of byte string.
+    """
+    if isinstance(text, unicode):
+        raise GrabMisuseError('remove_bom function accepts only byte strings')
+    if text.startswith(BOM_TOKEN):
+        return text[3:]
+    else:
+        return text
