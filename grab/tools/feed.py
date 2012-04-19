@@ -11,6 +11,7 @@ from time import mktime
 from datetime import datetime
 import feedparser
 from lxml.html.clean import clean_html
+from grab.tools.text import remove_bom
 
 from ..base import DataNotFound, GrabMisuseError
 
@@ -84,7 +85,9 @@ def parse_feed(grab, teaser_size=1000):
     * entries
     """
 
-    feed = feedparser.parse(grab.response.body)
+    # BOM removing is required because without it
+    # sometimes feedparser just raise SegmentationFault o_O
+    feed = feedparser.parse(remove_bom(grab.response.body))
 
     entries = []
     for entry in feed.entries:
