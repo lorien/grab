@@ -14,6 +14,7 @@ from __future__ import absolute_import
 from hashlib import sha1
 import zlib
 import logging
+import pymongo
 
 from grab.response import Response
 
@@ -22,8 +23,6 @@ logger = logging.getLogger('grab.spider.cache_backend.mongo')
 
 class CacheBackend(object):
     def __init__(self, database, use_compression=True)
-        import pymongo
-
         self.db = pymongo.Connection()[database]
         self.use_compression = use_compression
 
