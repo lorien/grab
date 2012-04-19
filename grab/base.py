@@ -192,6 +192,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         self.trigger_extensions('init')
         self._request_prepared = False
 
+        self.transport_name = transport
         mod_name, cls_name = transport.split('.')
         mod = __import__('grab.transport.%s' % mod_name, globals(),
                          locals(), ['foo'])
@@ -238,7 +239,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         :param **kwargs: overrides settings of cloned grab instance
         """
 
-        g = self.__class__()
+        g = self.__class__(transport=self.transport_name)
 
         g.config = copy(self.config)
         # Apply ``copy`` function to mutable config values
