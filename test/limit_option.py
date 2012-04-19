@@ -2,7 +2,7 @@
 from unittest import TestCase
 
 from grab import Grab
-from util import FakeServerThread, BASE_URL, RESPONSE, ignore_transport
+from util import FakeServerThread, BASE_URL, RESPONSE, ignore_transport, GRAB_TRANSPORT
 
 class TestContentLimit(TestCase):
     def setUp(self):
@@ -10,7 +10,7 @@ class TestContentLimit(TestCase):
 
     @ignore_transport('requests.RequestsTransport')
     def test_nobody(self):
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         g.setup(nobody=True)
         RESPONSE['get'] = 'foo'
         g.go(BASE_URL)
@@ -19,7 +19,7 @@ class TestContentLimit(TestCase):
 
     @ignore_transport('requests.RequestsTransport')
     def test_body_maxsize(self):
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         g.setup(body_maxsize=100)
         RESPONSE['get'] = 'x' * 10 ** 6
         g.go(BASE_URL)

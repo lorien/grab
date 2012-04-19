@@ -64,10 +64,12 @@ class CurlTransport(object):
         self.response_head_chunks = []
         self.response_body_chunks = []
         self.response_body_bytes_read = 0
-        self.request_log = ''
+
+        # Maybe move to super-class???
         self.request_headers = ''
         self.request_head = ''
         self.request_body = ''
+        self.request_log = ''
 
     def head_processor(self, chunk):
         """

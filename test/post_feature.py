@@ -2,14 +2,15 @@
 from unittest import TestCase
 
 from grab import Grab, GrabMisuseError
-from util import FakeServerThread, BASE_URL, REQUEST, ignore_transport
+from util import (FakeServerThread, BASE_URL, REQUEST, ignore_transport,
+                  GRAB_TRANSPORT)
 
 class TestPostFeature(TestCase):
     def setUp(self):
         FakeServerThread().start()
 
     def test_post(self):
-        g = Grab(url=BASE_URL, debug_post=True)
+        g = Grab(url=BASE_URL, debug_post=True, transport=GRAB_TRANSPORT)
 
         # Provide POST data in dict
         g.setup(post={'foo': 'bar'})
@@ -48,7 +49,7 @@ class TestPostFeature(TestCase):
 
     @ignore_transport('requests.RequestsTransport')
     def test_multipart_post(self):
-        g = Grab(url=BASE_URL, debug_post=True)
+        g = Grab(url=BASE_URL, debug_post=True, transport=GRAB_TRANSPORT)
         
         # Dict
         g.setup(multipart_post={'foo': 'bar'})

@@ -5,20 +5,20 @@ import json
 
 from grab import Grab, GrabMisuseError
 from util import (FakeServerThread, BASE_URL, RESPONSE, REQUEST,
-                  RESPONSE_ONCE_HEADERS, TMP_FILE)
+                  RESPONSE_ONCE_HEADERS, TMP_FILE, GRAB_TRANSPORT)
 
 class TestCookies(TestCase):
     def setUp(self):
         FakeServerThread().start()
 
     def test_cookies_parsing(self):
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         RESPONSE['cookies'] = {'foo': 'bar', '1': '2'}
         g.go(BASE_URL)
         self.assertEqual(g.response.cookies['foo'], 'bar')
 
     def test_multiple_cookies(self):
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         RESPONSE['cookies'] = {}
         g.setup(cookies={'foo': '1', 'bar': '2'})
         g.go(BASE_URL)
@@ -27,7 +27,7 @@ class TestCookies(TestCase):
             set(['foo=1', 'bar=2']))
 
     def test_session(self):
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         g.setup(reuse_cookies=True)
         RESPONSE['cookies'] = {'foo': 'bar'}
         g.go(BASE_URL)
@@ -37,7 +37,7 @@ class TestCookies(TestCase):
         g.go(BASE_URL)
         self.assertEqual(REQUEST['headers']['Cookie'], 'foo=bar')
 
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         g.setup(reuse_cookies=False)
         RESPONSE['cookies'] = {'foo': 'baz'}
         g.go(BASE_URL)
@@ -45,7 +45,7 @@ class TestCookies(TestCase):
         g.go(BASE_URL)
         self.assertTrue('Cookie' not in REQUEST['headers'])
 
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         g.setup(reuse_cookies=True)
         RESPONSE['cookies'] = {'foo': 'bar'}
         g.go(BASE_URL)
@@ -55,13 +55,13 @@ class TestCookies(TestCase):
         self.assertTrue('Cookie' not in REQUEST['headers'])
 
     def test_redirect_session(self):
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         RESPONSE['cookies'] = {'foo': 'bar'}
         g.go(BASE_URL)
         self.assertEqual(g.response.cookies['foo'], 'bar')
 
         # Setup one-time redirect
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         RESPONSE['cookies'] = {}
         RESPONSE_ONCE_HEADERS.append(('Location', BASE_URL))
         RESPONSE_ONCE_HEADERS.append(('Set-Cookie', 'foo=bar'))
@@ -70,28 +70,28 @@ class TestCookies(TestCase):
         self.assertEqual(REQUEST['headers']['Cookie'], 'foo=bar')
 
     def test_load_dump(self):
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         cookies = {'foo': 'bar', 'spam': 'ham'}
         g.setup(cookies=cookies)
         g.dump_cookies(TMP_FILE)
         self.assertEqual(set(cookies.items()), set(json.load(open(TMP_FILE)).items()))
 
         # Test non-ascii
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         cookies = {'foo': 'bar', 'spam': u'бегемот'}
         g.setup(cookies=cookies)
         g.dump_cookies(TMP_FILE)
         self.assertEqual(set(cookies.items()), set(json.load(open(TMP_FILE)).items()))
 
         # Test load cookies
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         cookies = {'foo': 'bar', 'spam': u'бегемот'}
         json.dump(cookies, open(TMP_FILE, 'w'))
         g.load_cookies(TMP_FILE)
         self.assertEqual(set(g.config['cookies'].items()), set(cookies.items()))
 
     def test_cookiefile(self):
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
 
         # Empty file should not raise Exception
         open(TMP_FILE, 'w').write('')

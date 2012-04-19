@@ -5,7 +5,7 @@ from grab import Grab, DataNotFound, GrabMisuseError
 import os.path
 
 from .util import (FakeServerThread, TEST_DIR, TMP_DIR,
-                   RESPONSE, BASE_URL)
+                   RESPONSE, BASE_URL, GRAB_TRANSPORT)
 
 HTML = """
 Hello world
@@ -26,7 +26,7 @@ class TestResponse(TestCase):
         temp_file = os.path.join(TMP_DIR, 'file.bin')
         RESPONSE['get'] = img_data
 
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         g.go(BASE_URL)
         g.response.save(temp_file)
         self.assertEqual(open(temp_file, 'rb').read(), img_data)
@@ -39,7 +39,7 @@ class TestResponse(TestCase):
         img_data = open(IMG_FILE, 'rb').read()
         RESPONSE['get'] = img_data
 
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         g.go(BASE_URL)
         path = g.response.save_hash(BASE_URL, TMP_DIR)
         test_data = open(os.path.join(TMP_DIR, path), 'rb').read()
@@ -47,7 +47,7 @@ class TestResponse(TestCase):
 
     def test_custom_charset(self):
         RESPONSE['get'] = u'<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf8;charset=cp1251" /></head><body><h1>крокодил</h1></body></html>'.encode('utf-8')
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         g.setup(charset='utf-8')
         g.go(BASE_URL)
         self.assertTrue(u'крокодил' in g.response.unicode_body())

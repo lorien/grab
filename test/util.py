@@ -29,6 +29,10 @@ SLEEP = {'get': 0, 'post': 0}
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 
+# Global variable which is used in all tests to build
+# Grab instance with specific transport layer
+GRAB_TRANSPORT = None
+
 def prepare_test_environment():
     global TMP_DIR, TMP_FILE
 
@@ -133,18 +137,15 @@ class FakeServerThread(threading.Thread):
 def ignore_transport(transport):
     """
     If test function is wrapped into this decorator then
-    it does not do testing if test is performed for
+    it should not be tested if test is performed for
     specified transport
     """
 
     def wrapper(func):
         def test_method(*args, **kwargs):
-            # TODO: FIX
-            return func(*args, **kwargs)
-            #cls = getattr(grab, transport)
-            #if grab.Grab == cls:
-                #return
-            #else:
-                #func(*args, **kwargs)
+            if GRAB_TRANSPORT == transport:
+                return
+            else:
+                func(*args, **kwargs)
         return test_method
     return wrapper

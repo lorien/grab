@@ -6,6 +6,7 @@ from optparse import OptionParser
 import logging
 
 from test.util import prepare_test_environment, clear_test_environment
+import test.util
 
 TEST_CASE_LIST = (
     'test.text_extension',
@@ -34,8 +35,7 @@ def main():
 
     prepare_test_environment()
 
-    import grab
-    #transport = getattr(grab, opts.transport)
+    test.util.GRAB_TRANSPORT = opts.transport
 
     loader = unittest.TestLoader()
     if opts.test:
@@ -43,8 +43,6 @@ def main():
     else:
         suite = loader.loadTestsFromNames(TEST_CASE_LIST)
     runner = unittest.TextTestRunner()
-    # TODO: pass opts.transport setting to all test so they could
-    # build Grab instance with required transport
     runner.run(suite)
 
     clear_test_environment()

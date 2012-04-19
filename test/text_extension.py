@@ -3,6 +3,8 @@ from unittest import TestCase
 from grab import Grab, DataNotFound, GrabMisuseError
 import re
 
+from test.util import GRAB_TRANSPORT
+
 # TODO: split on two tests: text extension and rex extension
 
 HTML = u"""
@@ -36,7 +38,7 @@ HTML = u"""
 class TextExtensionTest(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
-        self.g = Grab()
+        self.g = Grab(transport=GRAB_TRANSPORT)
         self.g.fake_response(HTML, charset='cp1251')
 
     def test_search(self):

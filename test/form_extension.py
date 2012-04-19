@@ -2,7 +2,7 @@
 from unittest import TestCase
 from grab import Grab, DataNotFound, GrabMisuseError
 from util import (FakeServerThread, BASE_URL, RESPONSE, REQUEST,
-                  ignore_transport)
+                  ignore_transport, GRAB_TRANSPORT)
 
 FORMS = u"""
 <head>
@@ -54,7 +54,7 @@ MULTIPLE_SUBMIT_FORM = """
 class TestHtmlForms(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
-        self.g = Grab()
+        self.g = Grab(transport=GRAB_TRANSPORT)
         self.g.fake_response(FORMS)
         FakeServerThread().start()
 
@@ -96,7 +96,7 @@ class TestHtmlForms(TestCase):
         self.assertEqual('dummy', self.g._lxml_form.get('name'))
 
     def test_submit(self):
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         RESPONSE['get'] = POST_FORM
         g.go(BASE_URL)
         g.set_input('name', 'Alex')
@@ -122,7 +122,7 @@ class TestHtmlForms(TestCase):
         self.assertEqual(REQUEST['post'], 'secret=123&submit1=submit1')
 
     def test_set_methods(self):
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         RESPONSE['get'] = FORMS
         g.go(BASE_URL)
 

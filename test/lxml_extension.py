@@ -2,6 +2,8 @@
 from unittest import TestCase
 from grab import Grab, DataNotFound
 
+from test.util import GRAB_TRANSPORT
+
 HTML = u"""
 <head>
     <title>фыва</title>
@@ -31,7 +33,7 @@ HTML = u"""
 class LXMLExtensionTest(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
-        self.g = Grab()
+        self.g = Grab(transport=GRAB_TRANSPORT)
         self.g.fake_response(HTML, charset='cp1251')
 
         from lxml.html import fromstring
