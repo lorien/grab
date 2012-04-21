@@ -2,8 +2,12 @@
 Functions to process content of lxml nodes.
 """
 from StringIO import StringIO
+import re
 
 from text import normalize_space as normalize_space_func, find_number
+from encoding import smart_str, smart_unicode
+
+RE_TAG_START = re.compile(r'<[a-z]')
 
 def get_node_text(node, smart=False, normalize_space=True):
     """
@@ -106,3 +110,13 @@ def disable_links(elem):
         node.tag = 'span'
         if 'href' in node.attrib:
             del node.attrib['href']
+
+
+def sanitize_html(html, encoding='utf-8', return_unicode=False):
+    html = smart_str(html, encoding=encoding)
+    if RE_TAG_START.search(html):
+        html = render_html(parse_html(html))
+    if return_unicode:
+        return html.decode('utf-8')
+    else:
+        return html
