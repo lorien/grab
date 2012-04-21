@@ -22,7 +22,7 @@ logger = logging.getLogger('grab.spider.cache_backend.mongo')
 
 
 class CacheBackend(object):
-    def __init__(self, database, use_compression=True)
+    def __init__(self, database, use_compression=True):
         self.db = pymongo.Connection()[database]
         self.use_compression = use_compression
 
@@ -32,7 +32,7 @@ class CacheBackend(object):
         """
 
         _hash = self.build_hash(url)
-        return self.cache.find_one({'_id': _hash})
+        return self.db.cache.find_one({'_id': _hash})
 
     def build_hash(self, url):
         if isinstance(url, unicode):
@@ -43,16 +43,16 @@ class CacheBackend(object):
 
     def remove_cache_item(self, url):
         _hash = self.build_hash(url)
-        self.db.remove({'_id': _hash})
+        self.db.cache.remove({'_id': _hash})
 
-    def load_response(self, grab, item):
+    def load_response(self, grab, cache_item):
         grab.fake_response(cache_item['body'])
 
         body = cache_item['body']
-        if self.use_cache_compression:
+        if self.use_compression:
             body = zlib.decompress(body)
 
-        def custom_prepare_response_func(g.transport, g):
+        def custom_prepare_response_func(transport, g):
             response = Response()
             response.head = cache_item['head']
             response.body = body
@@ -67,7 +67,7 @@ class CacheBackend(object):
                 response.url = cache_item['url']
 
             response.parse()
-            response.cookies = self.extract_cookies()
+            response.cookies = transport.extract_cookies()
             return response
 
         grab.process_request_result(custom_prepare_response_func)
@@ -88,7 +88,7 @@ class CacheBackend(object):
             'cookies': None,
         }
         try:
-            self.cache.save(item, safe=True)
+            self.db.cache.save(item, safe=True)
         except Exception, ex:
             if 'document too large' in unicode(ex):
                 pass

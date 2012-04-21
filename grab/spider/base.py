@@ -128,6 +128,8 @@ class Spider(SpiderPattern, SpiderStat):
         # Initial cache-subsystem values
         self.cache_enabled = False
         self.cache = None
+
+        # TODO: Remove
         if use_cache:
             self.setup_cache(backend='mongo', database=cache_db,
                              use_compression=use_cache_compression)
@@ -143,7 +145,7 @@ class Spider(SpiderPattern, SpiderStat):
 
     def setup_cache(self, backend='mongo', database=None, use_compression=True, **kwargs):
         if database is None:
-            yield SpiderMisuseError('setup_cache method requires database option')
+            raise SpiderMisuseError('setup_cache method requires database option')
         self.cache_enabled = True
         mod = __import__('grab.spider.cache_backend.%s' % backend,
                          globals(), locals(), ['foo'])
