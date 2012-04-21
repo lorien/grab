@@ -40,7 +40,7 @@ def parse_entry_tags(entry):
             if item:
                 tags.add(item)
 
-    return tags
+    return list(tags)
 
 
 def parse_entry_content(entry):
