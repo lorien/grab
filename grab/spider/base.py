@@ -343,13 +343,13 @@ class Spider(SpiderPattern, SpiderStat):
 
         is_valid = True
         if task.task_try_count > self.task_try_limit:
-            logger.debug('Task tries ended: %s / %s' % (
-                          task.name, task.url))
+            logger.debug('Task tries (%d) ended: %s / %s' % (
+                          self.task_try_limit, task.name, task.url))
             self.add_item('too-many-task-tries', task.url)
             is_valid = False
         elif task.network_try_count > self.network_try_limit:
-            logger.debug('Network tries ended: %s / %s' % (
-                          task.name, task.url))
+            logger.debug('Network tries (%d) ended: %s / %s' % (
+                          self.network_try_limit, task.name, task.url))
             self.add_item('too-many-network-tries', task.url)
             is_valid = False
 
