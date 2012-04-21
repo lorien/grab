@@ -16,8 +16,10 @@ def default_logging(grab_log='/tmp/grab.log', level=logging.DEBUG, mode='a',
     if network_log:
         hdl = logging.FileHandler(network_log, mode)
         network_logger.addHandler(hdl)
+        network_logger.setLevel(level)
 
     grab_logger = logging.getLogger('grab')
     if grab_log:
         hdl = logging.FileHandler(grab_log, mode)
         grab_logger.addHandler(hdl)
+        grab_logger.setLevel(level)
