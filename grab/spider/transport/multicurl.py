@@ -104,5 +104,5 @@ class MulticurlTransport(object):
         # TODO: Looks strange
         # Maybe refactor prepare_request method
         # to not fail on grab instance with empty curl instance
-        if grab.curl is None:
+        if getattr(grab, 'curl', None) is None:
             grab.curl = CURL_OBJECT

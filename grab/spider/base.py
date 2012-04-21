@@ -432,7 +432,7 @@ class Spider(SpiderPattern, SpiderStat):
 
                             cache_item = self.cache.get_item(grab.config['url'])
                             if cache_item:
-                                transport.repair_grag(grab)
+                                transport.repair_grab(grab)
                                 # GRAB CLONE ISSUE
                                 cached_request = (grab, grab.clone(),
                                                   task, cache_item)
