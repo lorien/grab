@@ -70,6 +70,8 @@ def default_config():
         log_file = None,
         log_dir = False,
         debug_post = False,
+        # Only for curl transport
+        verbose_logging = False,
 
         # Proxy
         proxy = None,

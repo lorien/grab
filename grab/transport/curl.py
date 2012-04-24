@@ -64,6 +64,7 @@ class CurlTransport(object):
         self.response_head_chunks = []
         self.response_body_chunks = []
         self.response_body_bytes_read = 0
+        self.verbose_logging = False
 
         # Maybe move to super-class???
         self.request_headers = ''
@@ -117,8 +118,8 @@ class CurlTransport(object):
         if _type == pycurl.INFOTYPE_HEADER_OUT:
             self.request_head += text
             lines = text.splitlines()
-            text = '\n'.join(lines[1:])
-            self.request_headers = email.message_from_string(text)
+            merged_lines = '\n'.join(lines[1:])
+            self.request_headers = email.message_from_string(merged_lines)
 
         if _type == pycurl.INFOTYPE_DATA_OUT:
             self.request_body += text
@@ -127,6 +128,17 @@ class CurlTransport(object):
             if self.request_log is None:
                 self.request_log = ''
             self.request_log += text
+
+        if self.verbose_logging:
+            if _type in (pycurl.INFOTYPE_TEXT, pycurl.INFOTYPE_HEADER_IN,
+                         pycurl.INFOTYPE_HEADER_OUT):
+                marker_types = {
+                    pycurl.INFOTYPE_TEXT: 'i',
+                    pycurl.INFOTYPE_HEADER_IN: '<',
+                    pycurl.INFOTYPE_HEADER_OUT: '>',
+                }
+                marker = marker_types[_type]
+                logger.debug('%s: %s' % (marker, text.rstrip()))
 
     def process_config(self, grab):
         """
@@ -150,6 +162,9 @@ class CurlTransport(object):
         self.curl.setopt(pycurl.NOSIGNAL, 1)
         self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
         self.curl.setopt(pycurl.HEADERFUNCTION, self.head_processor)
+
+        if grab.config['verbose_logging']:
+            self.verbose_logging = True
 
         # User-Agent
         if grab.config['user_agent'] is None:
