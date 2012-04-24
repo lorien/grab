@@ -4,7 +4,7 @@
 from __future__ import absolute_import
 from urlparse import urljoin
 
-from ..base import DataNotFound, GrabMisuseError
+from ..error import DataNotFound, GrabMisuseError
 from ..tools.http import urlencode
 
 # TODO: refactor this hell

@@ -1,6 +1,6 @@
-from base import (GrabError, DataNotFound, GrabNetworkError,
-                  GrabMisuseError, UploadContent, UploadFile,
-                  GrabTimeoutError)
+from error import (GrabError, DataNotFound, GrabNetworkError,
+                  GrabMisuseError, GrabTimeoutError)
+from base import UploadContent, UploadFile
 from base import BaseGrab as Grab
 #from transport.curl import GrabCurl
 #from transport.urllib import GrabUrllib

@@ -5,7 +5,7 @@ from __future__ import absolute_import
 from contextlib import contextmanager
 import logging
 
-from ..base import DataNotFound, GrabError, GrabMisuseError
+from ..error import DataNotFound, GrabError, GrabMisuseError
 from ..tools.text import normalize_space
 from ..tools.html import decode_entities
 

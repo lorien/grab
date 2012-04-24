@@ -3,14 +3,8 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 """
-Exceptions:
-
-Exception
--> GrabError
----> GrabNetworkError <- IOError 
----> DataNotFound <- IndexError
+The core of grab package: the Grab class.
 """
-
 import logging
 import os
 import urllib
@@ -26,8 +20,7 @@ from proxylist import ProxyList, parse_proxyline
 from tools.html import find_refresh_url, find_base_url
 from response import Response
 
-from error import (GrabError, GrabNetworkError, GrabMisuseError, DataNotFound,
-                   GrabTimeoutError)
+import error
 from upload import UploadContent, UploadFile
 from tools.http import normalize_http_values
 
@@ -55,8 +48,7 @@ from ext.rex import RegexpExtension
 from ext.pquery import PyqueryExtension
 
 
-__all__ = ('Grab', 'GrabError', 'DataNotFound', 'GrabNetworkError', 'GrabMisuseError',
-           'UploadContent', 'UploadFile')
+__all__ = ('Grab', 'UploadContent', 'UploadFile')
 
 PACKAGE_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -283,7 +275,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
 
         for key in kwargs:
             if not key in self.config.keys():
-                raise GrabMisuseError('Unknown option: %s' % key)
+                raise error.GrabMisuseError('Unknown option: %s' % key)
 
         if 'url' in kwargs:
             if self.config.get('url'):
@@ -378,10 +370,11 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
                 self.prepare_request(**kwargs)
                 self.log_request()
                 self.transport.request()
-            except GrabError, ex:
+            except error.GrabError, ex:
 
                 # In hammer mode try to use next timeouts
-                if self.config['hammer_mode'] and isinstance(ex, GrabTimeoutError):
+                if self.config['hammer_mode'] and isinstance(ex, (error.GrabTimeoutError,
+                                                                  error.GrabConnectionError)):
                     # If not more timeouts
                     # then raise an error
                     if not hammer_timeouts:

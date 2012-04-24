@@ -6,7 +6,8 @@ from urlparse import urljoin
 import re
 import time
 
-from ..base import DataNotFound, GrabMisuseError, GLOBAL_STATE
+from ..error import DataNotFound, GrabMisuseError
+from ..base import GLOBAL_STATE
 from ..tools.text import normalize_space as normalize_space_func, find_number
 from ..tools.lxml_tools import get_node_text
 

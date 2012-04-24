@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 import re
 
-from ..base import DataNotFound
+from ..error import DataNotFound
 from .text import normalize_space
 from .html import decode_entities
 

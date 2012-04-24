@@ -2,9 +2,9 @@
 Text parsing and processing utilities.
 """
 from __future__ import absolute_import
-
-from ..error import GrabMisuseError
 import re
+
+from ..error import GrabMisuseError, DataNotFound
 
 RE_NUMBER = re.compile(r'\d+')
 RE_NUMBER_WITH_SPACES = re.compile(r'\d[\s\d]*', re.U)
@@ -22,7 +22,6 @@ def find_number(text, ignore_spaces=False):
     """
     # tmp hack
     # to avoid import error
-    from ..base import DataNotFound
 
     if ignore_spaces:
         match = RE_NUMBER_WITH_SPACES.search(text)

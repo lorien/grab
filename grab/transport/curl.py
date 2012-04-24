@@ -11,8 +11,8 @@ import random
 from urlparse import urlsplit, urlunsplit
 import pycurl
 
-from ..base import (GrabError, GrabMisuseError, UploadContent, UploadFile,
-                    GrabTimeoutError, GrabNetworkError)
+from ..base import UploadContent, UploadFile
+from .. import error
 from ..response import Response
 from ..tools.http import encode_cookies, urlencode, normalize_unicode,\
                          normalize_http_values
@@ -177,7 +177,7 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.POST, 1)
             if grab.config['multipart_post']:
                 if isinstance(grab.config['multipart_post'], basestring):
-                    raise GrabMisuseError('multipart_post option could not be a string')
+                    raise error.GrabMisuseError('multipart_post option could not be a string')
                 post_items = normalize_http_values(grab.config['multipart_post'],
                                                    charset=grab.charset)
                 self.curl.setopt(pycurl.HTTPPOST, post_items) 
@@ -239,7 +239,7 @@ class CurlTransport(object):
 
         if grab.config['cookies']:
             if not isinstance(grab.config['cookies'], dict):
-                raise GrabMisuseError('cookies option shuld be a dict')
+                raise error.GrabMisuseError('cookies option shuld be a dict')
             items = encode_cookies(grab.config['cookies'], join=False)
             self.curl.setopt(pycurl.COOKIELIST, 'ALL')
             for item in items:
@@ -269,7 +269,7 @@ class CurlTransport(object):
 
         if grab.config['encoding']:
             if 'gzip' in grab.config['encoding'] and not 'zlib' in pycurl.version:
-                raise GrabMisuseError('You can not use gzip encoding because '\
+                raise error.GrabMisuseError('You can not use gzip encoding because '\
                                       'pycurl was built without zlib support')
             self.curl.setopt(pycurl.ENCODING, grab.config['encoding'])
 
@@ -295,9 +295,11 @@ class CurlTransport(object):
                 pass
             else:
                 if ex[0] == 28:
-                    raise GrabTimeoutError(ex[0], ex[1])
+                    raise error.GrabTimeoutError(ex[0], ex[1])
+                elif ex[0] == 7:
+                    raise error.GrabConnectionError(ex[0], ex[1])
                 else:
-                    raise GrabNetworkError(ex[0], ex[1])
+                    raise error.GrabNetworkError(ex[0], ex[1])
 
     def prepare_response(self, grab):
         response = Response()
