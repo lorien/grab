@@ -202,6 +202,8 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
         elif grab.request_method == 'HEAD':
             self.curl.setopt(pycurl.NOBODY, 1)
+        elif grab.request_method == 'UPLOAD':
+            self.curl.setopt(pycurl.UPLOAD, 1)
         else:
             self.curl.setopt(pycurl.HTTPGET, 1)
         

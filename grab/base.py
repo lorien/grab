@@ -46,6 +46,7 @@ from ext.django import DjangoExtension
 from ext.text import TextExtension
 from ext.rex import RegexpExtension
 from ext.pquery import PyqueryExtension
+from ext.ftp import FTPExtension
 
 
 __all__ = ('Grab', 'UploadContent', 'UploadFile')
@@ -153,7 +154,8 @@ def default_config():
 
 
 class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
-               DjangoExtension, TextExtension, RegexpExtension):
+               DjangoExtension, TextExtension, RegexpExtension,
+               FTPExtension):
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
