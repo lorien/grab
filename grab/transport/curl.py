@@ -315,6 +315,8 @@ class CurlTransport(object):
                     raise error.GrabTimeoutError(ex[0], ex[1])
                 elif ex[0] == 7:
                     raise error.GrabConnectionError(ex[0], ex[1])
+                elif ex[0] == 67:
+                    raise error.GrabAuthError(ex[0], ex[1])
                 else:
                     raise error.GrabNetworkError(ex[0], ex[1])
 

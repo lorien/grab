@@ -3,15 +3,14 @@ Global TODO:
 * make task_%s_preprocess methods
 """
 from __future__ import absolute_import
-from Queue import PriorityQueue, Empty
-from grab import Grab
-from grab.base import GLOBAL_STATE
-import logging
 import types
+import signal
+import inspect
+import traceback
+import logging
 from collections import defaultdict
 import os
 import time
-import signal
 import json
 import cPickle as pickle
 import anydbm
@@ -25,11 +24,11 @@ except ImportError:
     PYMONGO_IMPORTED = False
 else:
     PYMONGO_IMPORTED = True
-import inspect
-import traceback
 from urlparse import urljoin
 from random import randint
 
+import Queue
+from ..base import GLOBAL_STATE, Grab
 from .error import SpiderError, SpiderMisuseError, FatalError
 from .task import Task
 from .data import Data
@@ -69,6 +68,7 @@ class Spider(SpiderPattern, SpiderStat):
                  log_taskname=False,
                  request_pause=0,
                  priority_mode='random',
+                 queue=None,
                  meta=None,
                  ):
         """
@@ -101,12 +101,16 @@ class Spider(SpiderPattern, SpiderStat):
             use_cache_compression = False
         if cache_db is not None:
             logger.error('cache_db argument is depricated. Use setup_cache method.')
+        # TODO: Remove
+        if use_cache:
+            self.setup_cache(backend='mongo', database=cache_db,
+                             use_compression=use_cache_compression)
 
         if meta:
             self.meta = meta
         else:
             self.meta = {}
-        self.taskq = PriorityQueue()
+
         self.thread_number = thread_number
         self.request_limit = request_limit
         self.counters = defaultdict(int)
@@ -129,11 +133,6 @@ class Spider(SpiderPattern, SpiderStat):
         self.cache_enabled = False
         self.cache = None
 
-        # TODO: Remove
-        if use_cache:
-            self.setup_cache(backend='mongo', database=cache_db,
-                             use_compression=use_cache_compression)
-
         self.log_taskname = log_taskname
         self.prepare()
         self.should_stop = False
@@ -141,7 +140,9 @@ class Spider(SpiderPattern, SpiderStat):
         # Init task generator
         self.task_generator_object = self.task_generator()
         self.task_generator_enabled = True
-        self.process_task_generator()
+        # Setup temporary in-memory queue which could be reconfigured
+        # later for more sophisticated queue implementation
+        self.setup_queue()
 
     def setup_cache(self, backend='mongo', database=None, use_compression=True, **kwargs):
         if database is None:
@@ -150,6 +151,11 @@ class Spider(SpiderPattern, SpiderStat):
         mod = __import__('grab.spider.cache_backend.%s' % backend,
                          globals(), locals(), ['foo'])
         self.cache = mod.CacheBackend(database=database, use_compression=use_compression)
+
+    def setup_queue(self, backend='memory', database=None, **kwargs):
+        mod = __import__('grab.spider.queue_backend.%s' % backend,
+                         globals(), locals(), ['foo'])
+        self.taskq = mod.QueueBackend(database=database, **kwargs)
 
     def prepare(self):
         """
@@ -188,6 +194,10 @@ class Spider(SpiderPattern, SpiderStat):
         try:
             self.start_time = time.time()
             self.load_initial_urls()
+
+            # Initial call to task generator
+            # before main cycle
+            self.process_task_generator()
 
             for res_count, res in enumerate(self.get_next_response()):
                 if res_count > 0 and self.request_pause > 0:
@@ -400,7 +410,7 @@ class Spider(SpiderPattern, SpiderStat):
                 else:
                     try:
                         priority, task = self.taskq.get(True, 0.1)
-                    except Empty:
+                    except Queue.Empty:
                         # If All handlers are free and no tasks in queue
                         # yield None signal
                         if not transport.active_task_number():

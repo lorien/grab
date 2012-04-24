@@ -155,7 +155,7 @@ def default_config():
         #raise NotImplementedError
 
 
-class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
+class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                DjangoExtension, TextExtension, RegexpExtension,
                FTPExtension):
 
@@ -732,3 +732,7 @@ class BaseGrab(LXMLExtension, FormExtension, PyqueryExtension,
         if user:
             userpwd = '%s:%s' % (user, pwd)
             self.setup(proxy_userpwd=userpwd)
+
+
+# For backward compatibility
+BaseGrab = Grab
