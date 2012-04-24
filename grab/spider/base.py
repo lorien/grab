@@ -68,7 +68,7 @@ class Spider(SpiderPattern, SpiderStat):
                  log_taskname=False,
                  request_pause=0,
                  priority_mode='random',
-                 queue=None,
+                 queue_backend=None,
                  meta=None,
                  ):
         """
@@ -142,7 +142,10 @@ class Spider(SpiderPattern, SpiderStat):
         self.task_generator_enabled = True
         # Setup temporary in-memory queue which could be reconfigured
         # later for more sophisticated queue implementation
-        self.setup_queue()
+        self.setup_queue(
+            backend=queue_backend or 'memory',
+            database=None if not queue_backend else 'spider-queue',
+        )
 
     def setup_cache(self, backend='mongo', database=None, use_compression=True, **kwargs):
         if database is None:
