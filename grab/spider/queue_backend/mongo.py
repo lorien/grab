@@ -12,14 +12,14 @@ class QueueBackend(Queue):
         clear_on_del = kwargs.get('clear_on_init', False)
         name = kwargs.get('name', None)
 
-        if not name:
+        if name is None:
             name = 'queue_%s' % str(time())
             if clear_on_init:
                 raise Exception('Not named queue!')
             self.clear_on_del = True
 
-        self.database = database
-        self.name = name
+        self.database_name = database
+        self.collection_name = name
         self.clear_on_init = clear_on_init
         self.clear_on_del = clear_on_del
 
@@ -31,19 +31,18 @@ class QueueBackend(Queue):
 
     def _init(self, maxsize):
         connection = Connection()
-        database = connection[self.database]
-
-        self.queue = database[self.name]
+        database = connection[self.database_name]
+        self.collection = database[self.collection_name]
 
         if self.clear_on_init:
             self.clear()
 
     def clear(self):
         if not self.empty():
-            self.queue.drop()
+            self.collection.drop()
 
     def _qsize(self, len=len):
-        return self.queue.count()
+        return self.collection.count()
 
     def _put(self, item):
         priority, value = item[:2]
@@ -51,10 +50,10 @@ class QueueBackend(Queue):
             'value': Binary(dumps(value)),
             'priority': priority,
             }
-        self.queue.save(item)
+        self.collection.save(item)
 
     def _get(self):
-        item = self.queue.find_and_modify(
+        item = self.collection.find_and_modify(
             sort={'priority': ASCENDING},
             remove=True
         )

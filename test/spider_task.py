@@ -30,6 +30,7 @@ class TestSpider(TestCase):
         # Automatic random priority
         grab.spider.base.RANDOM_TASK_PRIORITY_RANGE = (10, 20)
         bot = self.SimpleSpider(priority_mode='random')
+        bot.setup_queue()
         task = Task('baz', url='xxx')
         self.assertEqual(task.priority, None)
         bot.add_task(task)
@@ -38,6 +39,7 @@ class TestSpider(TestCase):
         # Automatic constant priority
         grab.spider.base.DEFAULT_TASK_PRIORITY = 33
         bot = self.SimpleSpider(priority_mode='const')
+        bot.setup_queue()
         task = Task('baz', url='xxx')
         self.assertEqual(task.priority, None)
         bot.add_task(task)
@@ -46,6 +48,7 @@ class TestSpider(TestCase):
         # Automatic priority does not override explictily setted priority
         grab.spider.base.DEFAULT_TASK_PRIORITY = 33
         bot = self.SimpleSpider(priority_mode='const')
+        bot.setup_queue()
         task = Task('baz', url='xxx', priority=1)
         self.assertEqual(1, task.priority)
         bot.add_task(task)
@@ -56,6 +59,7 @@ class TestSpider(TestCase):
 
     def test_task_url(self):
         bot = self.SimpleSpider()
+        bot.setup_queue()
         task = Task('baz', url='xxx')
         self.assertEqual('xxx', task.url)
         bot.add_task(task)

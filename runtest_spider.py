@@ -9,6 +9,7 @@ TEST_CASE_LIST = (
     'test.spider',
     #'tests.test_distributed_spider',
     'test.spider_task',
+    'test.spider_mongo_queue',
 )
 
 def main():

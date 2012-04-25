@@ -19,6 +19,7 @@ class TestSpider(TestCase):
         RESPONSE['get'] = 'Hello spider!'
         SLEEP['get'] = 0
         sp = self.SimpleSpider()
+        sp.setup_queue()
         sp.add_task(Task('baz', BASE_URL))
         sp.run()
         self.assertEqual('Hello spider!', sp.SAVED_ITEM)
@@ -28,12 +29,14 @@ class TestSpider(TestCase):
         SLEEP['get'] = 1.1
 
         sp = self.SimpleSpider(network_try_limit=1)
+        sp.setup_queue()
         sp.setup_grab(connect_timeout=1, timeout=1)
         sp.add_task(Task('baz', BASE_URL))
         sp.run()
         self.assertEqual(sp.counters['request-network'], 1)
 
         sp = self.SimpleSpider(network_try_limit=2)
+        sp.setup_queue()
         sp.setup_grab(connect_timeout=1, timeout=1)
         sp.add_task(Task('baz', BASE_URL))
         sp.run()
@@ -45,11 +48,13 @@ class TestSpider(TestCase):
 
         sp = self.SimpleSpider(network_try_limit=1)
         sp.setup_grab(connect_timeout=1, timeout=1)
+        sp.setup_queue()
         sp.add_task(Task('baz', BASE_URL))
         sp.run()
         self.assertEqual(sp.counters['task-baz'], 1)
 
         sp = self.SimpleSpider(task_try_limit=2)
+        sp.setup_queue()
         sp.add_task(Task('baz', BASE_URL, task_try_count=3))
         sp.run()
         self.assertEqual(sp.counters['request-network'], 0)

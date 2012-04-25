@@ -68,7 +68,6 @@ class Spider(SpiderPattern, SpiderStat):
                  log_taskname=False,
                  request_pause=0,
                  priority_mode='random',
-                 queue_backend=None,
                  meta=None,
                  ):
         """
@@ -93,12 +92,7 @@ class Spider(SpiderPattern, SpiderStat):
         * meta - arbitrary user data
         """
 
-        # Setup temporary in-memory queue which could be reconfigured
-        # later for more sophisticated queue implementation
-        self.setup_queue(
-            backend=queue_backend or 'memory',
-            database=None if not queue_backend else 'spider-queue',
-        )
+        self.taskq = None
 
         if use_cache is not None:
             logger.error('use_cache argument is depricated. Use setup_cache method.')
@@ -141,12 +135,8 @@ class Spider(SpiderPattern, SpiderStat):
         self.cache = None
 
         self.log_taskname = log_taskname
-        self.prepare()
         self.should_stop = False
         self.request_pause = request_pause
-        # Init task generator
-        self.task_generator_object = self.task_generator()
-        self.task_generator_enabled = True
 
     def setup_cache(self, backend='mongo', database=None, use_compression=True, **kwargs):
         if database is None:
@@ -190,6 +180,29 @@ class Spider(SpiderPattern, SpiderStat):
             for url in self.initial_urls:
                 self.add_task(Task('initial', url=url))
 
+    def prepare_before_run(self):
+        """
+        Configure all things required to begin
+        executing tasks in main `run` method.
+        """
+
+        # If queue is still not configured
+        # then configure it with default backend
+        if self.taskq is None:
+            self.setup_queue()
+
+        self.prepare()
+
+        # Init task generator
+        self.task_generator_object = self.task_generator()
+        self.task_generator_enabled = True
+
+        self.load_initial_urls()
+
+        # Initial call to task generator
+        # before main cycle
+        self.process_task_generator()
+
     def run(self):
         """
         Main work cycle.
@@ -197,11 +210,7 @@ class Spider(SpiderPattern, SpiderStat):
 
         try:
             self.start_time = time.time()
-            self.load_initial_urls()
-
-            # Initial call to task generator
-            # before main cycle
-            self.process_task_generator()
+            self.prepare_before_run()
 
             for res_count, res in enumerate(self.get_next_response()):
                 if res_count > 0 and self.request_pause > 0:
@@ -321,6 +330,8 @@ class Spider(SpiderPattern, SpiderStat):
         Abort the task which was restarted too many times.
         """
 
+        if self.taskq is None:
+            raise SpiderMisuseError('You should configure task queue before adding tasks. Use `setup_queue` method.')
         if task.priority is None:
             if self.priority_mode == 'const':
                 task.priority = DEFAULT_TASK_PRIORITY
