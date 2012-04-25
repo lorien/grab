@@ -93,6 +93,13 @@ class Spider(SpiderPattern, SpiderStat):
         * meta - arbitrary user data
         """
 
+        # Setup temporary in-memory queue which could be reconfigured
+        # later for more sophisticated queue implementation
+        self.setup_queue(
+            backend=queue_backend or 'memory',
+            database=None if not queue_backend else 'spider-queue',
+        )
+
         if use_cache is not None:
             logger.error('use_cache argument is depricated. Use setup_cache method.')
             use_cache = False
@@ -140,12 +147,6 @@ class Spider(SpiderPattern, SpiderStat):
         # Init task generator
         self.task_generator_object = self.task_generator()
         self.task_generator_enabled = True
-        # Setup temporary in-memory queue which could be reconfigured
-        # later for more sophisticated queue implementation
-        self.setup_queue(
-            backend=queue_backend or 'memory',
-            database=None if not queue_backend else 'spider-queue',
-        )
 
     def setup_cache(self, backend='mongo', database=None, use_compression=True, **kwargs):
         if database is None:
