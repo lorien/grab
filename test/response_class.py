@@ -48,6 +48,6 @@ class TestResponse(TestCase):
     def test_custom_charset(self):
         RESPONSE['get'] = u'<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf8;charset=cp1251" /></head><body><h1>крокодил</h1></body></html>'.encode('utf-8')
         g = Grab(transport=GRAB_TRANSPORT)
-        g.setup(charset='utf-8')
+        g.setup(document_charset='utf-8')
         g.go(BASE_URL)
         self.assertTrue(u'крокодил' in g.response.unicode_body())

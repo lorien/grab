@@ -136,6 +136,9 @@ def default_config():
         # This setting is overwritten after each request with
         # charset of rertreived document
         charset = 'utf-8',
+        # Charset to use for converting content of response
+        # into unicode, by default it is detected automatically
+        document_charset = None,
 
         # Convert document body to lower case before bulding LXML tree
         # It does not affect `response.body`
@@ -435,6 +438,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         else:
             self.response = self.transport.prepare_response(self)
 
+        self.config['charset'] = self.response.charset
+
         if self.config['reuse_cookies']:
             # Copy cookies from response into config object
             for name, value in self.response.cookies.items():
@@ -502,7 +507,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         res.body = content
         res.status = ''
         res.head = ''
-        res.parse(charset=kwargs.get('charset'))
+        res.parse(charset=kwargs.get('document_charset'))
         res.cookies = {}
         res.code = 200
         res.time = 0
