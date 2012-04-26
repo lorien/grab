@@ -57,9 +57,6 @@ class CurlTransport(object):
     Grab transport layer using pycurl.
     """
 
-    def __init__(self):
-        self.curl = pycurl.Curl()
-
     def reset(self):
         self.response_head_chunks = []
         self.response_body_chunks = []
@@ -144,6 +141,11 @@ class CurlTransport(object):
         """
         Setup curl instance with values from ``self.config``.
         """
+
+        try:
+            self.curl
+        except NameError:
+            self.curl = pycurl.Curl()
 
         # Copy some config for future usage
         self.config_nobody = grab.config['nobody']
