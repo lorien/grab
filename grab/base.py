@@ -489,36 +489,14 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.request_body = self.transport.request_body
         self.request_log = self.transport.request_log
 
-
-    # Disabled due to perfomance issue
-    # Who needs this method?
-    #def repeat_request(self):
-        #"""
-        #Make the same network request again.
-
-        #All cookies, POST data, headers will be sent again.
-        #"""
-
-        #self.config = deepcopy(self.old_config)
-        #self.request()
-
-    def sleep(self, limit1=1, limit2=None):
+    def sleep(self, *args, **kwargs):
         """
-        Sleep baby.
-        
-        Arguments given:
-        0 - sleep for [0, 1] seconds
-        1 - sleep for [0, limit1] seconds
-        2 - sleep for [limit1, limit2] seconds
+        See grab.tools.control.sleep
         """
 
-        if limit2 is None:
-            limit1, limit2 = 0, limit1
-        limit1 = int(limit1 * 1000)
-        limit2 = int(limit2 * 1000)
-        sleep_time = randint(limit1, limit2) / 1000.0
-        logger.debug('Sleeping for %f seconds' % sleep_time)
-        time.sleep(sleep_time)
+        logger.debug('Grab.sleep method is depricated. Use grab.tools.control.sleep method instead.')
+        from grab.tools.control import sleep
+        sleep(*args, **kwargs)
 
     def fake_response(self, content, **kwargs):
         """

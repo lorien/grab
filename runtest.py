@@ -23,6 +23,7 @@ TEST_CASE_LIST = (
     'test.lxml_tools',
     'test.response_class',
     'test.tools_account',
+    'test.tools_control',
 )
 
 def main():
