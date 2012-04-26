@@ -325,10 +325,12 @@ class CurlTransport(object):
         response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
 
-        if grab.config['charset'] is not None:
-            response.parse(charset=grab.config['charset'])
-        else:
-            response.parse()
+        # TODO: new option: response_charset
+        #if grab.config['charset'] is not None:
+            #response.parse(charset=grab.config['charset'])
+        #else:
+            #response.parse()
+        response.parse()
 
         response.cookies = self.extract_cookies()
 
