@@ -144,7 +144,7 @@ class CurlTransport(object):
 
         try:
             self.curl
-        except NameError:
+        except AttributeError:
             self.curl = pycurl.Curl()
 
         # Copy some config for future usage
