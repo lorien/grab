@@ -50,7 +50,7 @@ class TestSpider(TestCase):
         sp.setup_queue(backend='mongo', database='queue_test')
         sp.run()
 
-        #self.assertEqual(range(TASKS_COUNT) * 2, sp.tasks_order)
+        self.assertEqual(range(TASK_COUNT) * 2, sp.tasks_order)
 
 
 if __name__ == '__main__':
