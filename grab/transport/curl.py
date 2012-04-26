@@ -350,6 +350,11 @@ class CurlTransport(object):
             cookies[chunks[-2]] = chunks[-1]
         return cookies
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state['curl'] = None
+        return state
+
 
 
 #from ..base import BaseGrab

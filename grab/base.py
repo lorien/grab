@@ -701,6 +701,13 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             userpwd = '%s:%s' % (user, pwd)
             self.setup(proxy_userpwd=userpwd)
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state['_lxml_form'] = None
+        state['_lxml_tree'] = None
+        state['_strict_lxml_tree'] = None
+        return state
+
 
 # For backward compatibility
 BaseGrab = Grab
