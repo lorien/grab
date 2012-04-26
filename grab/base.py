@@ -702,6 +702,9 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             self.setup(proxy_userpwd=userpwd)
 
     def __getstate__(self):
+        """
+        Reset cached lxml objects which could not be pickled.
+        """
         state = self.__dict__.copy()
         state['_lxml_form'] = None
         state['_lxml_tree'] = None

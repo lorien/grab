@@ -351,6 +351,9 @@ class CurlTransport(object):
         return cookies
 
     def __getstate__(self):
+        """
+        Reset curl attribute which could not be pickled.
+        """
         state = self.__dict__.copy()
         state['curl'] = None
         return state
