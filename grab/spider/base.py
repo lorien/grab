@@ -355,8 +355,21 @@ class Spider(SpiderPattern, SpiderStat):
 
         is_valid = self.check_task_limits(task)
         if is_valid:
+            task = self.prepare_task(task)
             self.taskq.put((task.priority, task))
         return is_valid
+
+    def prepare_task(self, task):
+        """
+        Prepare task for put it in tasks queue.
+
+        task.grab instance of Grab() must contain only pickable attributes
+        """
+
+        grab = task.grab
+        if grab is not None:
+            task.grab = grab.clone()
+        return task
 
     def check_task_limits(self, task):
         """
