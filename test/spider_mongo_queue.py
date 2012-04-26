@@ -28,16 +28,6 @@ class TestSpider(TestCase):
                     index=index,
                 )
 
-            for index in self.tasks:
-                grab = self.create_grab_instance()
-                grab.setup(url=BASE_URL)
-                yield Task(
-                    name='foo',
-                    grab=grab,
-                    priority=TestSpider.TASKS_COUNT + index,
-                    index=index,
-                )
-
         def task_foo(self, grab, task):
             self.tasks_order.append(task.index)
 
@@ -51,8 +41,7 @@ class TestSpider(TestCase):
         sp = TestSpider.SimpleSpider(thread_number=TestSpider.TASKS_COUNT * 2)
         sp.run()
 
-        self.assertEqual(range(TestSpider.TASKS_COUNT) * 2, sp.tasks_order)
-
+        self.assertEqual(range(TestSpider.TASKS_COUNT), sp.tasks_order)
 
 if __name__ == '__main__':
     main()
