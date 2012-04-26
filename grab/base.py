@@ -51,6 +51,8 @@ from .ext.ftp import FTPExtension
 __all__ = ('Grab', 'UploadContent', 'UploadFile')
 
 PACKAGE_DIR = os.path.dirname(os.path.realpath(__file__))
+MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies',
+                       'hammer_timeouts']
 
 logger = logging.getLogger('grab.base')
 
@@ -58,6 +60,19 @@ logger = logging.getLogger('grab.base')
 # It is separate logger to allow you easily
 # control network logging separately from other grab logs
 logger_network = logging.getLogger('grab.network')
+
+def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
+    """
+    Copy grab config ojection with correct handling
+    of mutable config values.
+    """
+
+    cloned_config = copy(config)
+    # Apply ``copy`` function to mutable config values
+    for key in mutable_config_keys:
+        cloned_config[key] = copy(config[key])
+    return cloned_config
+
 
 def default_config():
     return dict(
@@ -145,8 +160,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                            'proxylist', 'proxylist_auto_change')
 
     # Complex config items which points to mutable objects
-    mutable_config_keys = ('post', 'multipart_post', 'headers', 'cookies',
-                           'hammer_timeouts')
+    mutable_config_keys = copy(MUTABLE_CONFIG_KEYS)
 
     """
     Public methods
@@ -209,7 +223,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         g = Grab(transport=self.transport_name)
-        g.config = self.copy_config()
+        g.config = self.dump_config()
 
         if self.response is not None:
             g.response = self.response.copy()
@@ -222,17 +236,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         return g
 
-    def copy_config(self):
-        """
-        Special method for correct copying the
-        grab config object.
-        """
-        cloned_config = copy(self.config)
-        # Apply ``copy`` function to mutable config values
-        for key in self.mutable_config_keys:
-            cloned_config[key] = copy(self.config[key])
-        return cloned_config
-
     def adopt(self, g):
         """
         Copy the state of another `Grab` instance.
@@ -241,16 +244,26 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         then restore the state from it.
         """
 
-        self.config = copy(g.config)
-        # Apply ``copy`` function to mutable config values
-        for key in self.mutable_config_keys:
-            self.config[key] = copy(g.config[key])
-
+        self.load_config(g.config)
         if g.response is not None:
             self.response = g.response.copy()
         for key in self.clonable_attributes:
             setattr(self, key, getattr(g, key))
         self.clone_counter = g.clone_counter + 1
+
+    def dump_config(self):
+        """
+        Make clone of current config.
+        """
+
+        return copy_config(self.config, self.mutable_config_keys)
+
+    def load_config(self, config):
+        """
+        Configure grab instance with external config object.
+        """
+
+        self.config = copy_config(config, self.mutable_config_keys)
 
     def setup(self, **kwargs):
         """
