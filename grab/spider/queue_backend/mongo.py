@@ -8,15 +8,15 @@ from pymongo.binary import Binary
 
 class QueueBackend(Queue):
     def __init__(self, database, **kwargs):
-        clear_on_init = kwargs.get('clear_on_init', False)
-        clear_on_del = kwargs.get('clear_on_init', False)
-        name = kwargs.get('name', None)
+        clear_on_init = kwargs.pop('clear_on_init', False)
+        clear_on_del = kwargs.pop('clear_on_del', False)
+        name = kwargs.pop('name', None)
 
         if name is None:
             name = 'queue_%s' % str(time())
             if clear_on_init:
                 raise Exception('Not named queue!')
-            self.clear_on_del = True
+            clear_on_del = True
 
         self.database_name = database
         self.collection_name = name
@@ -38,8 +38,7 @@ class QueueBackend(Queue):
             self.clear()
 
     def clear(self):
-        if not self.empty():
-            self.collection.drop()
+        self.collection.drop()
 
     def _qsize(self, len=len):
         return self.collection.count()
