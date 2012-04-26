@@ -222,7 +222,7 @@ class CurlTransport(object):
         else:
             self.curl.setopt(pycurl.HTTPGET, 1)
         
-        headers = grab.default_headers
+        headers = grab.config['common_headers']
         if grab.config['headers']:
             headers.update(grab.config['headers'])
         header_tuples = [str('%s: %s' % x) for x\

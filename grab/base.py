@@ -83,6 +83,7 @@ def default_config():
 
         # Headers, User-Agent, Referer
         headers = {},
+        common_headers = {},
         user_agent = None,
         # TODO: generate user agents in run-time, do not use file
         user_agent_file = os.path.join(PACKAGE_DIR, 'user_agent.txt'),
@@ -158,8 +159,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         self.config = default_config()
+        self.config['common_headers'] = self.common_headers()
         self.trigger_extensions('config')
-        self.default_headers = self.common_headers()
         self.trigger_extensions('init')
         self._request_prepared = False
 

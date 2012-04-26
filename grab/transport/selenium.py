@@ -258,7 +258,7 @@ class SeleniumTransportExtension(object):
         #else:
             #self.curl.setopt(pycurl.HTTPGET, 1)
         
-        #headers = self.default_headers
+        #headers = self.config['common_headers']
         #if self.config['headers']:
             #headers.update(self.config['headers'])
         #header_tuples = [str('%s: %s' % x) for x\

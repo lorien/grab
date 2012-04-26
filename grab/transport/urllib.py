@@ -1,6 +1,9 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
+"""
+AHTUNG: VERY OLD CODE :)
+"""
 from __future__ import absolute_import
 import logging
 import urllib2
@@ -79,7 +82,7 @@ class Extension(object):
 
         # TODO: start fucking from here in next time...
         
-        headers = self.default_headers
+        headers = self.config['common_headers']
         if self.config['headers']:
             headers.update(self.config['headers'])
         for key, value in headers.iteritems():
