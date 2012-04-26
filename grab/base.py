@@ -209,13 +209,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         g = Grab(transport=self.transport_name)
+        g.config = self.copy_config()
 
-        g.config = copy(self.config)
-        # Apply ``copy`` function to mutable config values
-        for key in self.mutable_config_keys:
-            g.config[key] = copy(self.config[key])
-
-        # Handle None case
         if self.response is not None:
             g.response = self.response.copy()
         for key in self.clonable_attributes:
@@ -226,6 +221,17 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             g.setup(**kwargs)
 
         return g
+
+    def copy_config(self):
+        """
+        Special method for correct copying the
+        grab config object.
+        """
+        cloned_config = copy(self.config)
+        # Apply ``copy`` function to mutable config values
+        for key in self.mutable_config_keys:
+            cloned_config[key] = copy(self.config[key])
+        return cloned_config
 
     def adopt(self, g):
         """
