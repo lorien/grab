@@ -24,7 +24,7 @@ class MulticurlTransport(object):
     def add_task(self, task, grab):
         curl = self.freelist.pop()
         # All this shit looks strange
-        # Maybe we should not assign extr attributes to
+        # Maybe we should not assign extra attributes to
         # curls instance but just maintain some mapping
         # where all extra attributes will be stored
         curl.grab = grab

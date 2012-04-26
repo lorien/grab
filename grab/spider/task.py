@@ -21,9 +21,9 @@ class Task(object):
             :param url: URL of network document. Any task requires `url` or `grab`
                 option to be specified.
             :param grab: configured `Grab` instance. You can use that option in case
-                when `url` option is not enought. Do not forget to configure `url` option
+                when `url` option is not enough. Do not forget to configure `url` option
                 of `Grab` instance because in this case the `url` option of `Task`
-                constructor will be ignored.
+                constructor will be overwritten with `grab.config['url']`.
             :param priority: - priority of the Task. Tasks with lower priority will be
                 processed earlier. By default each new task is assigned with random
                 priority from (80, 100) range.
@@ -51,19 +51,31 @@ class Task(object):
             `get` method which allows to use default value if attrubute does not exist.
         """
 
-        # TODO: raise MisuseError if task name is "generator"
+        if name == 'generator':
+            # The name "generator" is restricted because
+            # `task_generator` handler could not be created because
+            # this name is already used for special method which
+            # generates new tasks
+            raise SpiderMisuseError('Task name could not be "generator"')
 
         self.name = name
-        if url is None and grab is None:
-            raise SpiderMisuseError('Either url of grab option of '\
-                                    'Task should be not None')
-        if url is not None and grab is not None:
-            raise SpiderMisuseError('Both url and grab options could not be not None')
-        self.url = url
-        self.grab = grab
+
+        if grab is not None:
+            if url is not None:
+                raise SpiderMisuseError('It is not allowed to specify both options: '\
+                                        'grab and url')
+            else:
+                self.grab = grab
+                self.url = grab.config['url']
+        else:
+            if url is None:
+                raise SpiderMisuseError('Either url of grab option of '\
+                                        'Task should be not None')
+            else:
+                self.url = url
+                self.grab = None
+
         self.priority = priority
-        if self.grab:
-            self.url = grab.config['url']
         self.network_try_count = network_try_count
         self.task_try_count = task_try_count
         self.disable_cache = disable_cache
@@ -86,6 +98,7 @@ class Task(object):
 
         Reset network_try_count, increase task_try_count.
         Also reset grab property
+
         TODO: maybe do not reset grab
         """
 
