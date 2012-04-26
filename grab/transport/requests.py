@@ -138,7 +138,7 @@ class RequestsTransport(object):
                 #if isinstance(grab.config['multipart_post'], basestring):
                     #raise GrabMisuseError('multipart_post option could not be a string')
                 #post_items = normalize_http_values(grab.config['multipart_post'],
-                                                    #charset=self.charset)
+                                                    #charset=grab.config['charset'])
                 #self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif grab.config['post']:
                 if isinstance(grab.config['post'], basestring):
@@ -213,9 +213,6 @@ class RequestsTransport(object):
 
         #if grab.config['userpwd']:
             #self.curl.setopt(pycurl.USERPWD, grab.config['userpwd'])
-
-        #if grab.config['charset']:
-            #self.charset = grab.config['charset']
 
     #def _extract_cookies(self):
         #"""

@@ -393,6 +393,7 @@ class Spider(SpiderPattern, SpiderStat):
         Use async transport to download tasks.
         If it yields None then scraping process should stop.
 
+        # TODO: this method is TOO big
         """ 
 
         transport = MulticurlTransport(self.thread_number)

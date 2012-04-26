@@ -194,7 +194,7 @@ class CurlTransport(object):
                 if isinstance(grab.config['multipart_post'], basestring):
                     raise error.GrabMisuseError('multipart_post option could not be a string')
                 post_items = normalize_http_values(grab.config['multipart_post'],
-                                                   charset=grab.charset)
+                                                   charset=grab.config['charset'])
                 self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif grab.config['post']:
                 if isinstance(grab.config['post'], basestring):
@@ -292,9 +292,6 @@ class CurlTransport(object):
 
         if grab.config['userpwd']:
             self.curl.setopt(pycurl.USERPWD, grab.config['userpwd'])
-
-        if grab.config['charset']:
-            self.charset = grab.config['charset']
 
     def request(self):
 

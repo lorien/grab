@@ -116,8 +116,11 @@ def default_config():
         # Authentication
         userpwd = None,
 
-        # Charset
-        charset = None,
+        # Character set to which any unicode data should be encoded
+        # before get placed in request
+        # This setting is overwritten after each request with
+        # charset of rertreived document
+        charset = 'utf-8',
 
         # Convert document body to lower case before bulding LXML tree
         # It does not affect `response.body`
@@ -162,7 +165,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     # Attributes which should be processed when clone
     # of Grab instance is creating
     clonable_attributes = ('request_headers', 'request_head', 'request_log', 'request_body',
-                           'proxylist', 'proxylist_auto_change', 'charset')
+                           'proxylist', 'proxylist_auto_change')
 
     # Complex config items which points to mutable objects
     mutable_config_keys = ('post', 'multipart_post', 'headers', 'cookies',
@@ -197,8 +200,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.reset()
         self.proxylist = None
         self.proxylist_auto_change = False
-        # ??? config['charset']
-        self.charset = 'utf-8'
         if kwargs:
             self.setup(**kwargs)
         self.clone_counter = 0
@@ -450,9 +451,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             # Copy cookies from response into config object
             for name, value in self.response.cookies.items():
                 self.config['cookies'][name] = value
-
-        # Set working charset to encode POST data of next requests
-        self.charset = self.response.charset
 
         # TODO: raise GrabWarning if self.config['http_warnings']
         #if 400 <= self.response_code:
