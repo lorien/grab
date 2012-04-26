@@ -338,38 +338,20 @@ class Spider(SpiderPattern, SpiderStat):
             else:
                 task.priority = randint(*RANDOM_TASK_PRIORITY_RANGE)
 
-        # WTF??? to almost similar blocks
-
         if (not task.url.startswith('http://') and not task.url.startswith('https://')
             and not task.url.startswith('ftp://')):
             if self.base_url is None:
                 raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified')
             else:
                 task.url = urljoin(self.base_url, task.url)
-
-        if task.grab and not task.grab.config['url'].startswith('http'):
-            if self.base_url is None:
-                raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified')
-            else:
-                task.grab.config['url'] = urljoin(self.base_url, task.grab.config['url'])
+                # If task has grab_config object then update it too
+                if task.grab_config:
+                    task.grab_config['url'] = task.url
 
         is_valid = self.check_task_limits(task)
         if is_valid:
-            task = self.prepare_task(task)
             self.taskq.put((task.priority, task))
         return is_valid
-
-    def prepare_task(self, task):
-        """
-        Prepare task for put it in tasks queue.
-
-        task.grab instance of Grab() must contain only pickable attributes
-        """
-
-        grab = task.grab
-        if grab is not None:
-            task.grab = grab.clone()
-        return task
 
     def check_task_limits(self, task):
         """
@@ -455,8 +437,9 @@ class Spider(SpiderPattern, SpiderStat):
                             continue
 
                         # GRAB CLONE ISSUE
-                        if task.grab:
-                            grab = task.grab
+                        if task.grab_config:
+                            grab = Grab()
+                            grab.load_config(task.grab_config)
                         else:
                             # Set up grab instance
                             grab = self.create_grab_instance()

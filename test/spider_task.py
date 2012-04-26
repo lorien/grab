@@ -64,10 +64,10 @@ class TestSpider(TestCase):
         self.assertEqual('xxx', task.url)
         bot.add_task(task)
         self.assertEqual('http://google.com/xxx', task.url)
-        self.assertEqual(None, task.grab)
+        self.assertEqual(None, task.grab_config)
 
         g = Grab(url='yyy')
         task = Task('baz', grab=g)
         bot.add_task(task)
         self.assertEqual('http://google.com/yyy', task.url)
-        self.assertEqual('http://google.com/yyy', task.grab.config['url'])
+        self.assertEqual('http://google.com/yyy', task.grab_config['url'])

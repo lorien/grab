@@ -1,13 +1,15 @@
+from __future__ import absolute_import
 from random import randint
 
-from error import SpiderMisuseError
+from .error import SpiderMisuseError
+from ..base import copy_config
 
 class Task(object):
     """
     Task for spider.
     """
 
-    def __init__(self, name, url=None, grab=None, priority=None,
+    def __init__(self, name='initial', url=None, grab=None, grab_config=None, priority=None,
                  network_try_count=0, task_try_count=0, 
                  disable_cache=False, refresh_cache=False,
                  valid_status=[], use_proxylist=True,
@@ -60,20 +62,19 @@ class Task(object):
 
         self.name = name
 
-        if grab is not None:
-            if url is not None:
-                raise SpiderMisuseError('It is not allowed to specify both options: '\
-                                        'grab and url')
-            else:
-                self.grab = grab
-                self.url = grab.config['url']
+        count = sum(1 if x is not None else 0 for x in (url, grab, grab_config))
+        if count != 1:
+            raise SpiderMisuseError('Only one argument from the following list should '\
+                                    'be non-empty: url, grab, grab_config')
+
+        self.url = url
+        if grab:
+            grab_config = grab.dump_config()
+        if grab_config:
+            self.grab_config = copy_config(grab_config)
+            self.url = grab_config['url']
         else:
-            if url is None:
-                raise SpiderMisuseError('Either url of grab option of '\
-                                        'Task should be not None')
-            else:
-                self.url = url
-                self.grab = None
+            self.grab_config = None
 
         self.priority = priority
         self.network_try_count = network_try_count
@@ -97,26 +98,21 @@ class Task(object):
         Clone Task instance.
 
         Reset network_try_count, increase task_try_count.
-        Also reset grab property
-
-        TODO: maybe do not reset grab
         """
 
-        task = Task(self.name, self.url)
-
-        for key, value in self.__dict__.items():
-            if key != 'grab':
-                setattr(task, key, getattr(self, key))
+        task = Task(**self.__dict__)
 
         task.network_try_count = 0
         task.task_try_count += 1
-        task.grab = None
 
         for key, value in kwargs.items():
-            setattr(task, key, value)
+            if key == 'grab':
+                key = 'grab_config'
+                value = value.config
+            if key == 'grab_config':
+                self.url = grab_config['url']
+                self.grab_config = grab.copy_config(grab_config)
+            else:
+                setattr(task, key, value)
             
-        if 'grab' in kwargs:
-            task.url = kwargs['grab'].config['url']
-            task.grab = kwargs['grab']
-
         return task
