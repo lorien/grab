@@ -82,10 +82,14 @@ class TestGrab(TestCase):
         g.go(BASE_URL)
         self.assertEqual(g.response.body, 'Blood')
         g2 = Grab(transport=GRAB_TRANSPORT)
-        self.assertEqual(g2.response.body, None)
+        self.assertEqual(g2.response, None)
         g2 = g.clone()
         self.assertEqual(g.response.body, 'Blood')
-    
+
+    def test_empty_clone(self):
+        g = Grab()
+        g.clone()
+
     def test_adopt(self):
         g = Grab(transport=GRAB_TRANSPORT)
         RESPONSE['get'] = 'Blood'
@@ -95,6 +99,11 @@ class TestGrab(TestCase):
         g2.adopt(g)
         self.assertEqual(g2.response.body, 'Blood')
         self.assertEqual(g2.config['url'], BASE_URL)
+
+    def test_empty_adopt(self):
+        g = Grab()
+        g2 = Grab()
+        g2.adopt(g)
 
     def test_find_content_blocks(self):
         porno = u'порно ' * 100

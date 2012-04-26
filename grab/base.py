@@ -213,8 +213,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         This methods is automatically called before each network request.
         """
 
-        # TODO: set None
-        self.response = Response()
+        self.response = None
 
         # ???
         self.request_headers = ''
@@ -235,7 +234,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         :param **kwargs: overrides settings of cloned grab instance
         """
 
-        g = self.__class__(transport=self.transport_name)
+        g = Grab(transport=self.transport_name)
 
         g.config = copy(self.config)
         # Apply ``copy`` function to mutable config values
@@ -243,7 +242,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             g.config[key] = copy(self.config[key])
 
         # Handle None case
-        g.response = self.response.copy()
+        if self.response is not None:
+            g.response = self.response.copy()
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
         g.clone_counter = self.clone_counter + 1
@@ -266,8 +266,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         for key in self.mutable_config_keys:
             self.config[key] = copy(g.config[key])
 
-        # Handle None case
-        self.response = g.response.copy()
+        if g.response is not None:
+            self.response = g.response.copy()
         for key in self.clonable_attributes:
             setattr(self, key, getattr(g, key))
         self.clone_counter = g.clone_counter + 1
@@ -398,7 +398,9 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 # Break the infinite loop in case of success response
                 break
 
+        # It will configure `self.response`
         self.process_request_result()
+
         return self.response
 
     def process_request_result(self, prepare_response_func=None):
@@ -406,6 +408,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         Process result of real request performed via transport extension.
         """
 
+        # TODO: move into separate method
         if self.config['debug_post']:
             post = self.config['post'] or self.config['multipart_post']
             if isinstance(post, dict):
@@ -444,11 +447,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             self.response = self.transport.prepare_response(self)
 
         if self.config['reuse_cookies']:
-            # Copy cookies from response into config
-            # for future requests
+            # Copy cookies from response into config object
             for name, value in self.response.cookies.items():
-                #if not name in self.config['cookies']:
-                    #self.config['cookies'][name] = value
                 self.config['cookies'][name] = value
 
         # Set working charset to encode POST data of next requests
@@ -484,6 +484,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         return None
 
     def copy_request_data(self):
+        # TODO: Maybe request object?
         self.request_headers = self.transport.request_headers
         self.request_head = self.transport.request_head
         self.request_body = self.transport.request_body
@@ -508,28 +509,23 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         # Trigger reset
-        # It will reset request state and also create new
-        # uninitialized response object
         self.reset()
 
-        # Set the response body
-        self.response.body = content
-
-        # And fill other properties with reasonable empty values
-        self.headers = {}
-        self.status = ''
-        self.response.head = ''
-        if 'charset' in kwargs:
-            self.response.parse(charset=kwargs['charset'])
-        else:
-            self.response.parse()
-        self.response.cookies = {}
-        self.response.code = 200
-        self.response.time = 0
-        self.response.url = ''
+        # Configure fake response object
+        res = Response()
+        res.body = content
+        res.status = ''
+        res.head = ''
+        res.parse(charset=kwargs.get('charset'))
+        res.cookies = {}
+        res.code = 200
+        res.time = 0
+        res.url = ''
 
         for key, value in kwargs.items():
-            setattr(self.response, key, value)
+            setattr(res, key, value)
+
+        self.response = res
 
     def setup_proxylist(self, proxy_file=None, proxy_type='http', read_timeout=None,
                         auto_init=True, auto_change=False,
@@ -628,10 +624,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 out.write(self.response.head)
 
             fext = 'html'
-            #dirs = self.response_url().split('//')[1].strip().split('/')
-            #if len(dirs) > 1:
-                #fext = dirs[-1].split('.')[-1]
-                
             fname = os.path.join(self.config['log_dir'], '%02d%s.%s' % (
                 self.request_counter, tname, fext))
             self.response.save(fname)
