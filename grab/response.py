@@ -11,6 +11,8 @@ from urllib2 import Request
 import os
 import json
 from urlparse import urlsplit, parse_qs
+import tempfile
+import webbrowser
 
 from tools.files import hash_path
 
@@ -248,3 +250,12 @@ class Response(object):
         """
 
         return parse_qs(self.url_details().query)[key][0]
+
+    def browse(self):
+        """
+        Save response in temporary file and open it in GUI browser.
+        """
+
+        fh, path = tempfile.mkstemp()
+        self.save(path)
+        webbrowser.open('file://' + path)
