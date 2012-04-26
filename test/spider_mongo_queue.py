@@ -37,7 +37,7 @@ class TestSpider(TestCase):
             def task_foo(self, grab, task):
                 self.tasks_order.append(task.index)
 
-                if task.first:
+                if task.get('first', False):
                     yield Task(
                         name=task.name,
                         priority=TestSpider.TASKS_COUNT + task.priority,
