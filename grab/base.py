@@ -5,6 +5,7 @@
 """
 The core of grab package: the Grab class.
 """
+from __future__ import absolute_import
 import logging
 import os
 import urllib
@@ -16,13 +17,12 @@ import time
 import re
 import json
 
-from proxylist import ProxyList, parse_proxyline
-from tools.html import find_refresh_url, find_base_url
-from response import Response
-
-import error
-from upload import UploadContent, UploadFile
-from tools.http import normalize_http_values
+from .proxylist import ProxyList, parse_proxyline
+from .tools.html import find_refresh_url, find_base_url
+from .response import Response
+from . import error
+from .upload import UploadContent, UploadFile
+from .tools.http import normalize_http_values
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
@@ -40,19 +40,17 @@ GLOBAL_STATE = {
 
 # Some extensions need GLOBAL_STATE variable
 # what's why they go after GLOBAL_STATE definition
-from ext.lxml import LXMLExtension
-from ext.form import FormExtension
-from ext.django import DjangoExtension
-from ext.text import TextExtension
-from ext.rex import RegexpExtension
-from ext.pquery import PyqueryExtension
-from ext.ftp import FTPExtension
-
+from .ext.lxml import LXMLExtension
+from .ext.form import FormExtension
+from .ext.django import DjangoExtension
+from .ext.text import TextExtension
+from .ext.rex import RegexpExtension
+from .ext.pquery import PyqueryExtension
+from .ext.ftp import FTPExtension
 
 __all__ = ('Grab', 'UploadContent', 'UploadFile')
 
 PACKAGE_DIR = os.path.dirname(os.path.realpath(__file__))
-
 
 logger = logging.getLogger('grab.base')
 
@@ -86,6 +84,7 @@ def default_config():
         # Headers, User-Agent, Referer
         headers = {},
         user_agent = None,
+        # TODO: generate user agents in run-time, do not use file
         user_agent_file = os.path.join(PACKAGE_DIR, 'user_agent.txt'),
         referer = None,
         reuse_referer = True,
@@ -134,33 +133,10 @@ def default_config():
         strip_xml_declaration = True,
     )
 
-#class GrabInterface(object):
-    #"""
-    #The methods of this class should be
-    #implemented by the so-called transport class
-
-    #Any Grab class should inhertis from the transport class.
-    
-    #By default, then you do::
-    
-        #from grab import Grab
-
-    #You use ``the grab.transport.curl.CurlTransport``.
-    #"""
-
-    #def process_config(self):
-        #raise NotImplementedError
-
-    #def _extract_cookies(self):
-        #raise NotImplementedError
-
-    #def prepare_response(self):
-        #raise NotImplementedError
-
 
 class Grab(LXMLExtension, FormExtension, PyqueryExtension,
-               DjangoExtension, TextExtension, RegexpExtension,
-               FTPExtension):
+           DjangoExtension, TextExtension, RegexpExtension,
+           FTPExtension):
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
@@ -170,10 +146,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     # Complex config items which points to mutable objects
     mutable_config_keys = ('post', 'multipart_post', 'headers', 'cookies',
                            'hammer_timeouts')
-
-    # Info about loaded extensions
-    #extensions = []
-    #transport_extension = None
 
     """
     Public methods
@@ -315,7 +287,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         tranposrt extension.
         """
 
-        # Reset the state setted by prevous request
+        # Reset the state setted by previous request
         if not self._request_prepared:
             self.reset()
             self.request_counter = self.get_request_counter()
@@ -432,11 +404,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 logger_network.debug('POST request:\n%s\n' % post)
 
         # It's important to delete old POST data after request is performed.
-        # If POST data remains when next request will try to use them again!
-        # This is not what typical user waits.
-
-        # Disabled, see comments to repeat_request method
-        #self.old_config = deepcopy(self.config) 
+        # If POST data is not cleared then next request will try to use them again!
 
         self.config['post'] = None
         self.config['multipart_post'] = None
@@ -566,18 +534,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         for cls in self.__class__.mro()[1:]:
             if hasattr(cls, 'extra_%s' % event):
                 getattr(cls, 'extra_%s' % event)(self)
-
-    #def load_extension(self, ext_class):
-        #for attr in ext_class.export_attributes:
-            #self.add_to_class(attr, ext_class.__dict__[attr])
-        #ext = ext_class()
-        #self.extensions.append(ext)
-        #if getattr(ext, 'transport', None):
-            #self.transport_extension = ext
-
-    @classmethod
-    def add_to_class(cls, name, obj):
-        setattr(cls, name, obj)
 
     def common_headers(self):
         """
