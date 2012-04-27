@@ -1,6 +1,7 @@
 import logging
 
 def default_logging(grab_log='/tmp/grab.log', level=logging.DEBUG, mode='a',
+                    propagate_network_logger=False,
                     network_log='/tmp/grab.network.log'):
     """
     Customize logging output to display all log messages
@@ -12,7 +13,7 @@ def default_logging(grab_log='/tmp/grab.log', level=logging.DEBUG, mode='a',
     logging.basicConfig(level=level)
 
     network_logger = logging.getLogger('grab.network')
-    network_logger.propagate = False
+    network_logger.propagate = propagate_network_logger
     if network_log:
         hdl = logging.FileHandler(network_log, mode)
         network_logger.addHandler(hdl)
