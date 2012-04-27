@@ -15,9 +15,8 @@ BASE_URL = 'http://localhost:%d' % FAKE_SERVER_PORT
 
 # This global objects is used by Fake HTTP Server
 # It return content of HTML variable for any GET request
-RESPONSE = {'get': '', 'post': '', 'cookies': None,
-            'once_code': None, 'get_callback': None}
-RESPONSE_ONCE = {'get': None, 'post': None}
+RESPONSE = {}
+RESPONSE_ONCE = {}
 RESPONSE_ONCE_HEADERS = []
 
 # Fake HTTP Server saves request details
@@ -34,6 +33,16 @@ TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 GRAB_TRANSPORT = None
 
 # TODO: wrap all RESPONSE* things into class
+
+def reset_env():
+    RESPONSE.update({'get': '', 'post': '', 'cookies': None,
+                     'once_code': None, 'get_callback': None})
+    RESPONSE_ONCE.update({'get': None, 'post': None})
+    for x in xrange(len(RESPONSE_ONCE_HEADERS)):
+        RESPONSE_ONCE_HEADERS.pop()
+
+# Initial env configuration
+reset_env()
 
 def prepare_test_environment():
     global TMP_DIR, TMP_FILE
