@@ -24,6 +24,7 @@ TEST_CASE_LIST = (
     'test.response_class',
     'test.tools_account',
     'test.tools_control',
+    'test.extension',
 )
 
 def main():
