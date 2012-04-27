@@ -23,6 +23,7 @@ from .response import Response
 from . import error
 from .upload import UploadContent, UploadFile
 from .tools.http import normalize_http_values
+from .extension import ExtensionManager
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
@@ -156,6 +157,11 @@ def default_config():
 class Grab(LXMLExtension, FormExtension, PyqueryExtension,
            DjangoExtension, TextExtension, RegexpExtension,
            FTPExtension):
+
+    __metaclass__ = ExtensionManager
+
+    # Points which could be handled in extension classes
+    extension_points = ('config', 'init', 'reset')
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
@@ -554,11 +560,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     """
     Private methods
     """
-
-    def trigger_extensions(self, event):
-        for cls in self.__class__.mro()[1:]:
-            if hasattr(cls, 'extra_%s' % event):
-                getattr(cls, 'extra_%s' % event)(self)
 
     def common_headers(self):
         """
