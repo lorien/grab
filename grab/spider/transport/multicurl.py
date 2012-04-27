@@ -21,16 +21,15 @@ class MulticurlTransport(object):
     def active_task_number(self):
         return self.thread_number - len(self.freelist)
 
-    def add_task(self, task, grab):
+    def process_task(self, task, grab, grab_config_backup):
         curl = self.freelist.pop()
         # All this shit looks strange
         # Maybe we should not assign extra attributes to
         # curls instance but just maintain some mapping
         # where all extra attributes will be stored
         curl.grab = grab
+        curl.grab_config_backup = grab_config_backup
         curl.grab.transport.curl = curl
-        # GRAB CLONE ISSUE
-        curl.grab_original = grab.clone()
         curl.grab.prepare_request()
         curl.grab.log_request()
         curl.task = task
@@ -65,12 +64,12 @@ class MulticurlTransport(object):
 
             for ok, curl, ecode, emsg in results:
                 #res = self.process_multicurl_response(ok, curl, ecode, emsg)
-                # FORMAT: {ok, grab, grab_original, task, emsg}
+                # FORMAT: {ok, grab, grab_config_backup, task, emsg}
 
                 task = curl.task
                 grab = curl.grab
                 # GRAB CLONE ISSUE
-                grab_original = curl.grab_original
+                grab_config_backup = curl.grab_config_backup
 
                 grab.process_request_result()
 
@@ -80,7 +79,7 @@ class MulticurlTransport(object):
                 curl.task = None
 
                 yield {'ok': ok, 'emsg': emsg, 'grab': grab,
-                       'grab_original': grab_original, 'task': task}
+                       'grab_config_backup': grab_config_backup, 'task': task}
 
                 self.multi.remove_handle(curl)
                 self.freelist.append(curl)

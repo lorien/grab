@@ -75,6 +75,9 @@ def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
 
 
 def default_config():
+    # TODO: it seems config should be splitted into two entities:
+    # 1) config which is not changed during request
+    # 2) changable config
     return dict(
         # Common
         url = None,

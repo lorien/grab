@@ -36,7 +36,7 @@ class Worker(Thread):
                     emsg = None
                 self.resultq.put({'ok': ok, 'emsg': emsg, 'task': info['task'],
                                   'grab': info['grab'],
-                                  'grab_original': info['grab_original']})
+                                  'grab_config_backup': info['grab_config_backup']})
 
 
 class ThreadPoolTransport(object):
@@ -57,11 +57,10 @@ class ThreadPoolTransport(object):
     def active_task_number(self):
         return sum(1 if x.busy else 0 for x in self.threads)
 
-    def add_task(self, task, grab):
-        grab_original = grab.clone()
+    def process_task(self, task, grab, grab_config_backup):
         grab.prepare_request()
         grab.log_request()
-        self.taskq.put({'grab': grab, 'grab_original': grab_original,
+        self.taskq.put({'grab': grab, 'grab_config_backup': grab_config_backup,
                         'task': task})
 
     def wait_result(self):

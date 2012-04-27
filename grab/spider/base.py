@@ -286,7 +286,8 @@ class Spider(SpiderPattern, SpiderStat):
             if self.network_try_limit > 0:
                 task = res['task']
                 # GRAB CLONE ISSUE
-                task.grab = res['grab_original']
+                # Should use task.grab_config or backup of grab_config
+                task.grab = res['grab_config_backup']
                 self.add_task(task)
             # TODO: allow to write error handlers
     
@@ -431,17 +432,14 @@ class Spider(SpiderPattern, SpiderStat):
                         if not self.check_task_limits(task):
                             continue
 
-                        # GRAB CLONE ISSUE
+                        grab = self.create_grab_instance()
                         if task.grab_config:
-                            grab = Grab()
                             grab.load_config(task.grab_config)
                         else:
-                            # Set up grab instance
-                            grab = self.create_grab_instance()
                             grab.setup(url=task.url)
 
-                        # TODO:
-                        # Design: ask cache layer for cached result
+                        grab_config_backup = grab.dump_config()
+
                         if (self.cache_enabled
                             and not task.get('refresh_cache', False)
                             and not task.get('disable_cache', False)
@@ -451,8 +449,7 @@ class Spider(SpiderPattern, SpiderStat):
                             if cache_item:
                                 transport.repair_grab(grab)
                                 # GRAB CLONE ISSUE
-                                cached_request = (grab, grab.clone(),
-                                                  task, cache_item)
+                                cached_request = (grab, task, cache_item)
                                 grab.prepare_request()
                                 grab.log_request('CACHED')
                                 self.inc_count('request-cache')
@@ -466,8 +463,7 @@ class Spider(SpiderPattern, SpiderStat):
                             args, kwargs = self.proxylist_config
                             grab.setup_proxylist(*args, **kwargs)
 
-                        # Design: pass task to transport object
-                        transport.add_task(task, grab)
+                        transport.process_task(task, grab, grab_config_backup)
 
             # If real network requests were fired
             # when wait for some result
@@ -477,17 +473,18 @@ class Spider(SpiderPattern, SpiderStat):
 
             if cached_request:
                 # GRAB CLONE ISSUE
-                grab, grab_original, task, cache_item = cached_request
+                grab, task, cache_item = cached_request
                 self.cache.load_response(grab, cache_item)
 
                 # GRAB CLONE ISSUE
-                yield {'ok': True, 'grab': grab, 'grab_original': grab_original,
+                yield {'ok': True, 'grab': grab,
+                       'grab_config_backup': grab_config_backup,
                        'task': task, 'emsg': None}
                 self.inc_count('request')
 
             # Iterate over network trasport ready results
             # Each result could be valid or failed
-            # Result format: {ok, grab, grab_original, task, emsg}
+            # Result format: {ok, grab, grab_config_backup, task, emsg}
             for result in transport.iterate_results():
                 yield self.process_transport_result(result)
                 self.inc_count('request')
@@ -500,11 +497,10 @@ class Spider(SpiderPattern, SpiderStat):
         """
         Process asyncronous transport result
 
-        res: {ok, grab, grab_original, task, emsg}
+        res: {ok, grab, grab_config_backup, task, emsg}
         """
 
 
-        # Design: ask cache layer to save the result
         if (res['ok'] and self.cache_enabled and res['grab'].request_method == 'GET'
             and not res['task'].get('disable_cache')):
             if self.valid_response_code(res['grab'].response.code, res['task']):

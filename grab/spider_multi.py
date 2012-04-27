@@ -1,4 +1,8 @@
 1/0
+"""
+This is old version of spider where I did
+experiments with multiprocessing. 
+"""
 from Queue import PriorityQueue, Empty
 import pycurl
 from grab import Grab
