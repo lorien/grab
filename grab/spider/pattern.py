@@ -36,7 +36,7 @@ class SpiderPattern(object):
                                         '%s_url' % task.image_field: task.url}})
 
 
-    def process_next_page(self, grab, task, xpath, **kwargs):
+    def process_next_page(self, grab, task, xpath, resolve_base=False, **kwargs):
         """
         Generate task for next page.
 
@@ -54,7 +54,7 @@ class SpiderPattern(object):
         except IndexError:
             return False
         else:
-            url = grab.make_url_absolute(next_url)
+            url = grab.make_url_absolute(next_url, resolve_base=resolve_base)
             page = task.get('page', 1) + 1
             grab2 = grab.clone()
             grab2.setup(url=url)
