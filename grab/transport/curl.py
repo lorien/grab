@@ -118,9 +118,13 @@ class CurlTransport(object):
 
         if _type == pycurl.INFOTYPE_HEADER_OUT:
             self.request_head += text
-            lines = text.splitlines()
-            merged_lines = '\n'.join(lines[1:])
-            self.request_headers = email.message_from_string(merged_lines)
+            #lines = text.splitlines()
+            #merged_lines = '\n'.join(lines[1:])
+            pos = text.find('\n')
+            if pos > -1:
+                self.request_headers = email.message_from_string(text[pos:])
+            else:
+                self.request_headers = email.message_from_string(text)
 
         if _type == pycurl.INFOTYPE_DATA_OUT:
             self.request_body += text

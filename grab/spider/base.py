@@ -17,13 +17,6 @@ import anydbm
 import multiprocessing
 import zlib
 from hashlib import sha1
-try:
-    import pymongo
-    import pymongo.binary
-except ImportError:
-    PYMONGO_IMPORTED = False
-else:
-    PYMONGO_IMPORTED = True
 from urlparse import urljoin
 from random import randint
 
@@ -39,6 +32,7 @@ from .transport.threadpool import ThreadPoolTransport
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (80, 100)
+TASK_QUEUE_TIMEOUT = 0.001
 
 logger = logging.getLogger('grab.spider.base')
 
@@ -409,18 +403,19 @@ class Spider(SpiderPattern, SpiderStat):
                 # when length of freelist (number of free workers)
                 # will become equal to number of threads (total number of workers)
                 # Worker is just a network stream
-                if self.request_limit is not None:
-                    if self.counters['request'] >= self.request_limit:
-                        logger.debug('Request limit is reached: %s' %
-                                     self.request_limit)
-                        if not transport.active_task_number():
-                            yield None
-                        else:
-                            print 'break'
-                            break
+                if (self.request_limit is not None and
+                    self.counters['request'] >= self.request_limit):
+
+                    logger.debug('Request limit is reached: %s' %
+                                 self.request_limit)
+                    if not transport.active_task_number():
+                        yield None
+                    else:
+                        print 'break'
+                        break
                 else:
                     try:
-                        priority, task = self.taskq.get(True, 0.1)
+                        priority, task = self.taskq.get(True, TASK_QUEUE_TIMEOUT)
                     except Queue.Empty:
                         # If All handlers are free and no tasks in queue
                         # yield None signal

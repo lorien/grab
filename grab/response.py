@@ -104,15 +104,13 @@ class Response(object):
 
         # Try to extract charset from http-equiv meta tag
         if self.body:
-            body_lower = self.body.lower()
-            pos = body_lower.find('</head>')
-            if pos > -1:
-                html_head = body_lower[:pos]
-                if html_head.find('http-equiv') > -1:
-                    try:
-                        charset = RE_META_CHARSET.search(html_head).group(1)
-                    except AttributeError:
-                        pass
+            chunk = self.body[:4096]
+            try:
+                charset = RE_META_CHARSET.search(chunk).group(1)
+            except AttributeError:
+                pass
+
+        # TODO: <meta charset="utf-8" />
 
         # Try to process XML declaration
         if not charset:

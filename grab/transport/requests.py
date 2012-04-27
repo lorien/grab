@@ -10,7 +10,8 @@ import threading
 import random
 import requests 
 
-from ..base import GrabError, GrabMisuseError, UploadContent, UploadFile
+from ..error import GrabError, GrabMisuseError
+from ..base import UploadContent, UploadFile
 from ..response import Response
 from ..tools.http import urlencode, normalize_http_values, normalize_unicode
 
