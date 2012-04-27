@@ -110,8 +110,10 @@ class Task(object):
                 key = 'grab_config'
                 value = value.config
             if key == 'grab_config':
-                self.url = grab_config['url']
-                self.grab_config = grab.copy_config(grab_config)
+                #self.url = grab_config['url']
+                #self.grab_config = grab.copy_config(grab_config)
+                self.url = value['url']
+                self.grab_config = copy_config(value)
             else:
                 setattr(task, key, value)
             

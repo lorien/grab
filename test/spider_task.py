@@ -71,3 +71,20 @@ class TestSpider(TestCase):
         bot.add_task(task)
         self.assertEqual('http://google.com/yyy', task.url)
         self.assertEqual('http://google.com/yyy', task.grab_config['url'])
+
+    def test_task_clone(self):
+        bot = self.SimpleSpider()
+        bot.setup_queue()
+
+        task = Task('baz', url='xxx')
+        bot.add_task(task.clone())
+
+        # Pass grab to clone
+        task = Task('baz', url='xxx')
+        g = Grab()
+        bot.add_task(task.clone(grab=g))
+
+        # Pass grab_config to clone
+        task = Task('baz', url='xxx')
+        g = Grab()
+        bot.add_task(task.clone(grab_config=g.config))
