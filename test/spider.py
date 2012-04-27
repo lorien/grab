@@ -7,11 +7,8 @@ class TestSpider(TestCase):
 
     class SimpleSpider(Spider):
         def task_baz(self, grab, task):
-            return Data('foo', grab.response.body)
+            self.SAVED_ITEM = grab.response.body
 
-        def data_foo(self, item):
-            self.SAVED_ITEM = item
-           
     def setUp(self):
         FakeServerThread().start()
 
@@ -58,3 +55,12 @@ class TestSpider(TestCase):
         sp.add_task(Task('baz', BASE_URL, task_try_count=3))
         sp.run()
         self.assertEqual(sp.counters['request-network'], 0)
+
+    def test_task_retry(self):
+        RESPONSE['get'] = 'xxx'
+        RESPONSE['once_code'] = 403
+        sp = self.SimpleSpider()
+        sp.setup_queue()
+        sp.add_task(Task('baz', BASE_URL))
+        sp.run()
+        self.assertEqual('xxx', sp.SAVED_ITEM)

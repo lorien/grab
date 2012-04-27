@@ -33,6 +33,8 @@ TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 # Grab instance with specific transport layer
 GRAB_TRANSPORT = None
 
+# TODO: wrap all RESPONSE* things into class
+
 def prepare_test_environment():
     global TMP_DIR, TMP_FILE
 
