@@ -15,6 +15,7 @@ from hashlib import sha1
 import zlib
 import logging
 import pymongo
+import pymongo.binary
 
 from grab.response import Response
 
