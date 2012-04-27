@@ -68,7 +68,6 @@ class CurlTransport(object):
         self.verbose_logging = False
 
         # Maybe move to super-class???
-        self.request_headers = ''
         self.request_head = ''
         self.request_body = ''
         self.request_log = ''
@@ -106,7 +105,7 @@ class CurlTransport(object):
 
     def debug_processor(self, _type, text):
         """
-        Parse request headers and save to ``self.request_headers``
+        Process request details.
 
         0: CURLINFO_TEXT
         1: CURLINFO_HEADER_IN
@@ -118,13 +117,6 @@ class CurlTransport(object):
 
         if _type == pycurl.INFOTYPE_HEADER_OUT:
             self.request_head += text
-            #lines = text.splitlines()
-            #merged_lines = '\n'.join(lines[1:])
-            pos = text.find('\n')
-            if pos > -1:
-                self.request_headers = email.message_from_string(text[pos:])
-            else:
-                self.request_headers = email.message_from_string(text)
 
         if _type == pycurl.INFOTYPE_DATA_OUT:
             self.request_body += text

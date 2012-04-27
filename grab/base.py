@@ -163,7 +163,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
-    clonable_attributes = ('request_headers', 'request_head', 'request_log', 'request_body',
+    clonable_attributes = ('request_head', 'request_log', 'request_body',
                            'proxylist', 'proxylist_auto_change')
 
     # Complex config items which points to mutable objects
@@ -211,7 +211,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.response = None
 
         # ???
-        self.request_headers = ''
         self.request_head = ''
         self.request_log = ''
         self.request_body = ''
@@ -480,7 +479,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
     def copy_request_data(self):
         # TODO: Maybe request object?
-        self.request_headers = self.transport.request_headers
         self.request_head = self.transport.request_head
         self.request_body = self.transport.request_body
         self.request_log = self.transport.request_log
@@ -690,6 +688,20 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         state['_lxml_tree'] = None
         state['_strict_lxml_tree'] = None
         return state
+
+    @property
+    def request_headers(self):
+        """
+        Temporary hack till the time I'll understand
+        where to store request details.
+        """
+
+
+        head = self.request_head
+        pos = head.find('\n')
+        if pos > -1:
+            head = head[pos:]
+        return email.message_from_string(text[pos:])
 
 
 # For backward compatibility
