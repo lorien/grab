@@ -51,7 +51,6 @@ from .ext.ftp import FTPExtension
 
 __all__ = ('Grab', 'UploadContent', 'UploadFile')
 
-PACKAGE_DIR = os.path.dirname(os.path.realpath(__file__))
 MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies',
                        'hammer_timeouts']
 
@@ -101,8 +100,7 @@ def default_config():
         headers = {},
         common_headers = {},
         user_agent = None,
-        # TODO: generate user agents in run-time, do not use file
-        user_agent_file = os.path.join(PACKAGE_DIR, 'user_agent.txt'),
+        user_agent_file = None,
         referer = None,
         reuse_referer = True,
 

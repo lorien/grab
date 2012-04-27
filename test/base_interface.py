@@ -42,7 +42,7 @@ class TestGrab(TestCase):
         self.assertTrue(len(REQUEST['headers']) > 0)
         self.assertFalse('PycURL' in REQUEST['headers']['user-agent'])
 
-        # By default user_agent is None, hence random user agent is loaded
+        # By default user_agent is None => random user agent is generated
         g = Grab(transport=GRAB_TRANSPORT)
         g.go(BASE_URL)
         self.assertTrue(len(REQUEST['headers']) > 0)

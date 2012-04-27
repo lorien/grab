@@ -16,6 +16,7 @@ from .. import error
 from ..response import Response
 from ..tools.http import encode_cookies, urlencode, normalize_unicode,\
                          normalize_http_values
+from ..tools.user_agent import random_user_agent
 
 logger = logging.getLogger('grab.transport.curl')
 
@@ -172,6 +173,8 @@ class CurlTransport(object):
                 with open(grab.config['user_agent_file']) as inf:
                     lines = inf.read().splitlines()
                 grab.config['user_agent'] = random.choice(lines)
+            else:
+                grab.config['user_agent'] = random_user_agent()
 
         # If value is None then set empty string
         # None is not acceptable because in such case
