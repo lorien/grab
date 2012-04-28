@@ -100,7 +100,11 @@ class Task(object):
         Reset network_try_count, increase task_try_count.
         """
 
-        task = Task(**self.__dict__)
+        attr_copy = self.__dict__.copy()
+        if 'grab' in attr_copy:
+            del attr_copy['grab']
+        task = Task(**attr_copy)
+
         task.network_try_count = 0
         task.task_try_count += 1
 
