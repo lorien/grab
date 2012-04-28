@@ -62,7 +62,8 @@ class SpiderPattern(object):
             self.add_task(task2)
             return True
 
-    def process_links(self, grab, task_name, xpath, limit=None, **kwargs):
+    def process_links(self, grab, task_name, xpath,
+                      resolve_base=False, limit=None, **kwargs):
         """
         :param grab: Grab instance
         :param xpath: xpath expression which calculates list of URLS
@@ -75,7 +76,7 @@ class SpiderPattern(object):
         urls = set()
         count = 0
         for url in grab.xpath_list(xpath):
-            url = grab.make_url_absolute(url)
+            url = grab.make_url_absolute(url, resolve_base=resolve_base)
             if not url in urls:
                 urls.add(url)
                 g2 = grab.clone(url=url)
