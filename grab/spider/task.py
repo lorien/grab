@@ -17,6 +17,11 @@ class Task(object):
         """
         Create `Task` object.
 
+        If more than one of url, grab and grab_config options are non-empty then they
+        processed in following order:
+        * grab overwrite grab_config
+        * grab_config overwrite url
+
         Args:
             :param name: name of the task. After successfull network operation
                 task's result will be passed to `task_<name>` method.
@@ -62,18 +67,13 @@ class Task(object):
 
         self.name = name
 
-        count = sum(1 if x is not None else 0 for x in (url, grab, grab_config))
-        if count != 1:
-            raise SpiderMisuseError('Only one argument from the following list should '\
-                                    'be non-empty: url, grab, grab_config')
-
-        self.url = url
         if grab:
             grab_config = grab.dump_config()
         if grab_config:
-            self.grab_config = copy_config(grab_config)
             self.url = grab_config['url']
+            self.grab_config = copy_config(grab_config)
         else:
+            self.url = url
             self.grab_config = None
 
         self.priority = priority
@@ -101,20 +101,26 @@ class Task(object):
         """
 
         task = Task(**self.__dict__)
-
         task.network_try_count = 0
         task.task_try_count += 1
 
+        # Carefully process url, grab, grab_config options
+        url = kwargs.pop('url', None)
+        grab_config = kwargs.pop('grab_config', None)
+        grab = kwargs.pop('grab', None)
+
+        if grab:
+            grab_config = grab.dump_config()
+
+        if grab_config:
+            task.url = grab_config['url']
+            task.grab_config = copy_config(grab_config) 
+        elif url:
+            task.url = url
+            if task.grab_config:
+                task.grab_config['url'] = url
+
         for key, value in kwargs.items():
-            if key == 'grab':
-                key = 'grab_config'
-                value = value.config
-            if key == 'grab_config':
-                #self.url = grab_config['url']
-                #self.grab_config = grab.copy_config(grab_config)
-                self.url = value['url']
-                self.grab_config = copy_config(value)
-            else:
-                setattr(task, key, value)
-            
+            setattr(task, key, value)
+
         return task

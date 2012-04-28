@@ -82,9 +82,11 @@ class TestSpider(TestCase):
         # Pass grab to clone
         task = Task('baz', url='xxx')
         g = Grab()
+        g.setup(url='zzz')
         bot.add_task(task.clone(grab=g))
 
         # Pass grab_config to clone
         task = Task('baz', url='xxx')
         g = Grab()
+        g.setup(url='zzz')
         bot.add_task(task.clone(grab_config=g.config))
