@@ -13,3 +13,6 @@ prof
 tests/tmp
 update_site.sh
 update_all.sh
+
+syntax:regexp
+^log$

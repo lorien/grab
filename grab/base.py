@@ -213,10 +213,9 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         self.response = None
 
-        # ???
-        self.request_head = ''
-        self.request_log = ''
-        self.request_body = ''
+        self.request_head = None
+        self.request_log = None
+        self.request_body = None
 
         self.request_method = None
         self.trigger_extensions('reset')
@@ -459,7 +458,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             with open(self.config['log_file'], 'w') as out:
                 out.write(self.response.body)
 
-        self.save_dumps()
 
         if self.config['cookiefile']:
             self.dump_cookies(self.config['cookiefile'])
@@ -468,6 +466,9 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             self.config['referer'] = self.response.url
 
         self.copy_request_data()
+
+        # Should be called after `copy_request_data`
+        self.save_dumps()
 
         self._request_prepared = False
 
