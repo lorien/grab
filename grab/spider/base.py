@@ -32,7 +32,7 @@ from .transport.threadpool import ThreadPoolTransport
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (80, 100)
-TASK_QUEUE_TIMEOUT = 0.001
+TASK_QUEUE_TIMEOUT = 0.01
 
 logger = logging.getLogger('grab.spider.base')
 
