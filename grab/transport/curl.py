@@ -121,10 +121,10 @@ class CurlTransport(object):
         if _type == pycurl.INFOTYPE_DATA_OUT:
             self.request_body += text
 
-        if _type == pycurl.INFOTYPE_TEXT:
-            if self.request_log is None:
-                self.request_log = ''
-            self.request_log += text
+        #if _type == pycurl.INFOTYPE_TEXT:
+            #if self.request_log is None:
+                #self.request_log = ''
+            #self.request_log += text
 
         if self.verbose_logging:
             if _type in (pycurl.INFOTYPE_TEXT, pycurl.INFOTYPE_HEADER_IN,
@@ -194,6 +194,7 @@ class CurlTransport(object):
                     raise error.GrabMisuseError('multipart_post option could not be a string')
                 post_items = normalize_http_values(grab.config['multipart_post'],
                                                    charset=grab.config['charset'])
+                #import pdb; pdb.set_trace()
                 self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif grab.config['post']:
                 if isinstance(grab.config['post'], basestring):
