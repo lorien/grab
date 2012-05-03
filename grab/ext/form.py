@@ -280,7 +280,7 @@ class FormExtension(object):
             else:
                 extra_post_items = extra_post
 
-            # Drip existing post items with such key
+            # Drop existing post items with such key
             keys_to_drop = set([x for x, y in extra_post_items])
             for key in keys_to_drop:
                 post_items = [(x, y) for x, y in post_items if x != key]

@@ -6,12 +6,13 @@ This module works only with curl transport.
 # License: BSD
 from __future__ import absolute_import
 import os.path
-import pycurl
 import os
 
 class FTPExtension(object):
     def ftp_upload_file(self, server, local_path, remote_path, userpwd=None,
                         make_request=True):
+        import pycurl
+
         if userpwd:
             self.setup(userpwd=userpwd)#config['userpwd'] = userpwd
             #g.curl.setopt(pycurl.USERPWD, userpwd)
@@ -34,7 +35,7 @@ class FTPExtension(object):
 
         # TODO:
         # http://www.saltycrane.com/blog/2011/10/using-curl-ftp-took-3-minutes-4-byte-file-epsv/
-        # c.setopt(c.FTP_USE_EPSV, 0)
+        self.transport.curl.setopt(pycurl.FTP_USE_EPSV, 0)
 
         if make_request:
             self.request()
