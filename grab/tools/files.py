@@ -46,8 +46,7 @@ def unique_host(path):
     return len(lines)
 
 
-def hash_path(url, ext='jpg'):
-    logging.debug('This function name is depricated. Please use hashed_path function')
+def hashed_path(url, ext='jpg'):
     _hash = sha1(url).hexdigest()
     a, b, tail = _hash[:2], _hash[2:4], _hash[4:]
     if ext is not None:
@@ -56,5 +55,7 @@ def hash_path(url, ext='jpg'):
     return rel_path
 
 
-def hashed_path(url, ext='jpg'):
-    return hash_path(url, ext=ext)
+# Alias for back-ward compatibility
+def hash_path(*args, **kwargs):
+    logging.debug('This function name is depricated. Please use hashed_path function')
+    return hashed_path(*args, **kwargs)

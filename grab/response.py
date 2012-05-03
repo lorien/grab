@@ -14,7 +14,7 @@ from urlparse import urlsplit, parse_qs
 import tempfile
 import webbrowser
 
-from tools.files import hash_path
+from tools.files import hashed_path
 
 RE_XML_DECLARATION = re.compile(r'^[\r\n\t]*<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(r'encoding\s*=\s*["\']([^"\']+)["\']')
@@ -215,7 +215,7 @@ class Response(object):
         returns save_to + path
         """
 
-        rel_path = hash_path(location, ext=ext)
+        rel_path = hashed_path(location, ext=ext)
         path = os.path.join(basedir, rel_path)
         if not os.path.exists(path):
             path_dir, path_fname = os.path.split(path)
