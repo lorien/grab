@@ -290,7 +290,7 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.ENCODING, grab.config['encoding'])
 
         if grab.config['userpwd']:
-            self.curl.setopt(pycurl.USERPWD, grab.config['userpwd'])
+            self.curl.setopt(pycurl.USERPWD, str(grab.config['userpwd']))
 
     def request(self):
 
