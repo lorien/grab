@@ -13,13 +13,40 @@ import json
 from urlparse import urlsplit, parse_qs
 import tempfile
 import webbrowser
+import codecs
 
 from tools.files import hashed_path
 
-RE_XML_DECLARATION = re.compile(r'^[\r\n\t]*<\?xml[^>]+\?>', re.I)
+RE_XML_DECLARATION = re.compile(r'^[^<]{,100}<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(r'encoding\s*=\s*["\']([^"\']+)["\']')
 RE_META_CHARSET = re.compile(r'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)',
                              re.I)
+
+# Bom processing logic was copied from
+# https://github.com/scrapy/w3lib/blob/master/w3lib/encoding.py
+_BOM_TABLE = [
+    (codecs.BOM_UTF32_BE, 'utf-32-be'),
+    (codecs.BOM_UTF32_LE, 'utf-32-le'),
+    (codecs.BOM_UTF16_BE, 'utf-16-be'),
+    (codecs.BOM_UTF16_LE, 'utf-16-le'),
+    (codecs.BOM_UTF8, 'utf-8')
+]
+
+_FIRST_CHARS = set(char[0] for (char, name) in _BOM_TABLE)
+
+def read_bom(data):
+    """Read the byte order mark in the text, if present, and 
+    return the encoding represented by the BOM and the BOM.
+
+    If no BOM can be detected, (None, None) is returned.
+    """
+    # common case is no BOM, so this is fast
+    if data and data[0] in _FIRST_CHARS:
+        for bom, encoding in _BOM_TABLE:
+            if data.startswith(bom):
+                return encoding, bom
+    return None, None
+
 
 class Response(object):
     """
@@ -38,6 +65,7 @@ class Response(object):
         #self.cookiejar = None
         self.charset = 'utf-8'
         self._unicode_body = None
+        self.bom = None
 
     def parse(self, charset=None):
         """
@@ -111,6 +139,10 @@ class Response(object):
                 pass
 
         # TODO: <meta charset="utf-8" />
+        bom_enc, bom = read_bom(self.body)
+        if bom_enc:
+            charset = bom_enc
+            self.bom = bom
 
         # Try to process XML declaration
         if not charset:
@@ -149,7 +181,11 @@ class Response(object):
                 errors = 'ignore'
             else:
                 errors = 'strict'
-            ubody = self.body.decode(self.charset, errors)
+            if self.bom:
+                body = self.body[len(self.bom):]
+            else:
+                body = self.body
+            ubody = body.decode(self.charset, errors).strip()
             if strip_xml_declaration:
                 ubody = RE_XML_DECLARATION.sub('', ubody)
             self._unicode_body = ubody
