@@ -25,6 +25,7 @@ class LXMLExtension(object):
         Return DOM-tree of the document calculated with `lxml.html.fromstring` function.
         """
         from lxml.html import fromstring
+        from lxml.etree import ParserError
 
         if self._lxml_tree is None:
             body = self.response.unicode_body(
@@ -41,7 +42,21 @@ class LXMLExtension(object):
                 # which will not break lxml parser
                 body = '<html></html>'
             start = time.time()
-            self._lxml_tree = fromstring(body)
+
+            try:
+                self._lxml_tree = fromstring(body)
+            except ParserError, ex:
+                if str(ex) == 'Document is empty':
+                    body = u'<html>%s</html>' % body
+                else:
+                    raise
+
+            try:
+                self._lxml_tree = fromstring(body)
+            except Exception, ex:
+                #import pdb; pdb.set_trace()
+                raise
+
             GLOBAL_STATE['dom_build_time'] += (time.time() - start)
         return self._lxml_tree
 
