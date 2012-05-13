@@ -9,22 +9,26 @@ from test.util import prepare_test_environment, clear_test_environment
 import test.util
 
 TEST_CASE_LIST = (
-    'test.text_extension',
-    'test.lxml_extension',
-    'test.form_extension',
-    'test.fake_server',
     'test.base_interface',
     'test.post_feature',
     'test.proxy_feature',
     'test.upload_file',
     'test.limit_option',
     'test.cookies',
+    'test.response_class',
+    # test server
+    'test.fake_server',
+    # tools
     'test.text_tools',
     'test.lxml_tools',
-    'test.response_class',
     'test.tools_account',
     'test.tools_control',
+    # extension sub-system
     'test.extension',
+    # extensions
+    'test.text_extension',
+    'test.lxml_extension',
+    'test.form_extension',
 )
 
 def main():

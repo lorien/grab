@@ -104,6 +104,8 @@ class FakeServerThread(threading.Thread):
                     while RESPONSE_ONCE_HEADERS:
                         self.send_header(*RESPONSE_ONCE_HEADERS.pop())
 
+                    #self.send_header('Content-Type', 'text/html')
+
                     self.end_headers()
 
                     if RESPONSE_ONCE['get'] is not None:
