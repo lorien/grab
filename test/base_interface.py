@@ -10,11 +10,11 @@ class TestGrab(TestCase):
     def setUp(self):
         FakeServerThread().start()
 
-    def test_basic(self):
-        RESPONSE['get'] = 'The cat is кошка'
-        g = Grab(transport=GRAB_TRANSPORT)
-        g.go(BASE_URL)
-        self.assertTrue('The cat' in g.response.body)
+    #def test_basic(self):
+        #RESPONSE['get'] = '<meta charset="utf-8">The cat is кошка'
+        #g = Grab(transport=GRAB_TRANSPORT)
+        #g.go(BASE_URL)
+        #self.assertTrue('The cat' in g.response.body)
         #self.assertTrue('кошка' in g.response.body)
 
     #def test_xml_with_declaration(self):
@@ -28,13 +28,13 @@ class TestGrab(TestCase):
         #self.assertRaises(GrabMisuseError,
             #lambda: g.setup(save_the_word=True))
 
-    #def test_useragent(self):
-        #g = Grab(transport=GRAB_TRANSPORT)
+    def test_useragent(self):
+        g = Grab(transport=GRAB_TRANSPORT)
 
-        ## Empty string disable default pycurl user-agent
-        #g.setup(user_agent='')
-        #g.go(BASE_URL)
-        #self.assertEqual(REQUEST['headers'].get('user-agent', ''), '')
+        # Empty string disable default pycurl user-agent
+        g.setup(user_agent='z')
+        g.go(BASE_URL)
+        self.assertEqual(REQUEST['headers'].get('user-agent', ''), '')
 
         ## Null value activates default random user-agent
         #g = Grab(transport=GRAB_TRANSPORT)

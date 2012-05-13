@@ -17,7 +17,7 @@ from ghost import Ghost
 from ..response import Response
 #from ..tools.http import encode_cookies, urlencode, normalize_unicode,\
                          #normalize_http_values
-#from ..tools.user_agent import random_user_agent
+from ..tools.user_agent import random_user_agent
 
 logger = logging.getLogger('grab.transport.ghost')
 
@@ -135,21 +135,22 @@ class GhostTransport(object):
             #self.verbose_logging = True
 
         ## User-Agent
-        #if grab.config['user_agent'] is None:
-            #if grab.config['user_agent_file'] is not None:
-                #with open(grab.config['user_agent_file']) as inf:
-                    #lines = inf.read().splitlines()
-                #grab.config['user_agent'] = random.choice(lines)
-            #else:
-                #grab.config['user_agent'] = random_user_agent()
+        if grab.config['user_agent'] is None:
+            if grab.config['user_agent_file'] is not None:
+                with open(grab.config['user_agent_file']) as inf:
+                    lines = inf.read().splitlines()
+                grab.config['user_agent'] = random.choice(lines)
+            else:
+                grab.config['user_agent'] = random_user_agent()
 
         ## If value is None then set empty string
         ## None is not acceptable because in such case
         ## pycurl will set its default user agent "PycURL/x.xx.x"
-        #if not grab.config['user_agent']:
-            #grab.config['user_agent'] = ''
+        if not grab.config['user_agent']:
+            grab.config['user_agent'] = ''
 
         #self.curl.setopt(pycurl.USERAGENT, grab.config['user_agent'])
+        self.request_config['user_agent'] = grab.config['user_agent']
 
         #self.curl.setopt(pycurl.VERBOSE, 1)
         #self.curl.setopt(pycurl.DEBUGFUNCTION, self.debug_processor)
@@ -266,8 +267,9 @@ class GhostTransport(object):
 
     def request(self):
 
-        self.response_page, self.response_extra =\
-            self.ghost.open(self.request_config['url'])
+        self.ghost.user_agent = self.request_config['user_agent']
+        items = self.ghost.open(self.request_config['url'])
+        self.response_page, self.response_extra = items
                 #if ex[0] == 28:
                     #raise error.GrabTimeoutError(ex[0], ex[1])
                 #elif ex[0] == 7:

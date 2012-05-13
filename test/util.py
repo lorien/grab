@@ -91,6 +91,8 @@ class FakeServerThread(threading.Thread):
                 if RESPONSE['get_callback'] is not None:
                     RESPONSE['get_callback'](self)
                 else:
+                    headers_sent = set()
+
                     if RESPONSE['once_code']:
                         self.send_response(RESPONSE['once_code'])
                         RESPONSE['once_code'] = None
@@ -102,9 +104,12 @@ class FakeServerThread(threading.Thread):
                             self.send_header('Set-Cookie', '%s=%s' % (name, value))
 
                     while RESPONSE_ONCE_HEADERS:
-                        self.send_header(*RESPONSE_ONCE_HEADERS.pop())
+                        key, value = RESPONSE_ONCE_HEADERS.pop()
+                        self.send_header(key, value)
+                        headers_sent.add(key)
 
-                    #self.send_header('Content-Type', 'text/html')
+                    if not 'Content-Type' in headers_sent:
+                        self.send_header('Content-Type', 'text/html')
 
                     self.end_headers()
 
@@ -131,7 +136,13 @@ class FakeServerThread(threading.Thread):
                 else:
                     self.send_response(200)
                 while RESPONSE_ONCE_HEADERS:
-                    self.send_header(*RESPONSE_ONCE_HEADERS.pop())
+                    key, value = RESPONSE_ONCE_HEADERS.pop()
+                    self.send_header(key, value)
+                    headers_sent.add(key)
+
+                if not 'Content-Type' in headers_sent:
+                    self.send_header('Content-Type', 'text/html')
+
                 self.end_headers()
                 if RESPONSE_ONCE['post'] is not None:
                     self.wfile.write(RESPONSE_ONCE['post'])

@@ -96,25 +96,25 @@ class GhostWebPage(QtWebKit.QWebPage):
         result.append(result_value)
         return True
 
-    def networkAccessManager(self):
-        return MyNetworkAccessManager()
+    #def networkAccessManager(self):
+        #return MyNetworkAccessManager()
 
 
-class MyNetworkAccessManager(QNetworkAccessManager):
-    def createRequest(op, req, device):
-        rep = MyNetworkReply(op, req, device)
-        #rep.finished.connect(foo)
-        return rep
+#class MyNetworkAccessManager(QNetworkAccessManager):
+    #def createRequest(op, req, device):
+        #rep = MyNetworkReply(op, req, device)
+        ##rep.finished.connect(foo)
+        #return rep
 
-    #def foo(self
+    ##def foo(self
 
 
-class MyNetworkReply(QNetworkReply):
-    def rawHeader(self, key):
-        print '!!!'
+#class MyNetworkReply(QNetworkReply):
+    #def rawHeader(self, key):
+        #print '!!!'
 
-    def header(self, key):
-        print '!!!'
+    #def header(self, key):
+        #print '!!!'
 
 
 def can_load_page(func):
@@ -575,8 +575,6 @@ class Ghost(object):
         :param res: The request result.
         """
 
-        print 'JJ', res.rawHeader('Content-Type')
-        res.setRawHeader('Content-Type', 'text/html')
         if res.attribute(QNetworkRequest.HttpStatusCodeAttribute):
             self.http_resources.append(HttpResource(res))
 

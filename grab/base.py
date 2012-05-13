@@ -373,6 +373,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         while True:
             try:
                 self.prepare_request(**kwargs)
+                print 'UA', self.config['user_agent']
                 self.log_request()
                 self.transport.request()
             except error.GrabError, ex:
