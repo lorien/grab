@@ -275,7 +275,7 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.PROXY, '')
 
         if grab.config['proxy_userpwd']:
-            self.curl.setopt(pycurl.PROXYUSERPWD, grab.config['proxy_userpwd'])
+            self.curl.setopt(pycurl.PROXYUSERPWD, str(grab.config['proxy_userpwd']))
 
         # PROXYTYPE
         # Pass a long with this option to set type of the proxy. Available options for this are CURLPROXY_HTTP, CURLPROXY_HTTP_1_0 (added in 7.19.4), CURLPROXY_SOCKS4 (added in 7.15.2), CURLPROXY_SOCKS5, CURLPROXY_SOCKS4A (added in 7.18.0) and CURLPROXY_SOCKS5_HOSTNAME (added in 7.18.0). The HTTP type is default. (Added in 7.10) 
