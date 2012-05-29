@@ -15,7 +15,10 @@ from hashlib import sha1
 import zlib
 import logging
 import pymongo
-import pymongo.binary
+try:
+    from bson import Binary
+except ImportError:
+    from pymongo.binary import Binary
 
 from grab.response import Response
 
@@ -83,8 +86,8 @@ class CacheBackend(object):
             '_id': _hash,
             'url': url,
             'response_url': grab.response.url,
-            'body': pymongo.binary.Binary(body),
-            'head': pymongo.binary.Binary(grab.response.head),
+            'body': Binary(body),
+            'head': Binary(grab.response.head),
             'response_code': grab.response.code,
             'cookies': None,
         }
