@@ -184,6 +184,8 @@ def parse_search_results(grab, parse_index_size=False, strict_query=False):
                     index_size = None
 
                 # Yield found results
+                results = []
+
                 for elem in grab.xpath_list('//*[h3[@class="r"]/a]'):
                     title_elem = elem.xpath('h3/a')[0]
 
@@ -226,14 +228,15 @@ def parse_search_results(grab, parse_index_size=False, strict_query=False):
 
                     #if 'File Format':
                     if url:
-                        yield {
+                        results.append({
                             'url': url,
                             'title': title,
                             'snippet': snippet,
                             'filetype': filetype,
                             'index_size': index_size,
                             'extended': extended_result,
-                        }
+                        })
+                return results
             else:
                 pass
                 #return []
