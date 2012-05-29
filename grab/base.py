@@ -384,6 +384,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                     # then raise an error
                     if not hammer_timeouts:
                         self._request_prepared = False
+                        self.save_failed_dump()
                         raise
                     else:
                         connect_timeout, total_timeout = hammer_timeouts.pop(0)
@@ -394,6 +395,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 # Then just raise an error
                 else:
                     self._request_prepared = False
+                    self.save_failed_dump()
                     raise
             else:
                 # Break the infinite loop in case of success response
@@ -480,6 +482,24 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 return self.request(url=url)
 
         return None
+
+    def save_failed_dump(self):
+        """
+        Save dump of failed request for debugging.
+
+        This method is called then fatal network exception is raised.
+        The saved dump could be used for debugging the reason of the failure.
+        """
+
+        # This is very untested feature, so
+        # I put it inside try/except to not break
+        # live spiders
+        try:
+            self.response = self.transport.prepare_response(self)
+            self.copy_request_data()
+            self.save_dumps()
+        except Exception, ex:
+            logging.error(unicode(ex))
 
     def copy_request_data(self):
         # TODO: Maybe request object?
