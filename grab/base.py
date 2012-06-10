@@ -16,6 +16,7 @@ from urlparse import urljoin
 import time
 import re
 import json
+import email
 
 from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url
@@ -720,12 +721,15 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         where to store request details.
         """
 
-
-        head = self.request_head
-        pos = head.find('\n')
-        if pos > -1:
-            head = head[pos:]
-        return email.message_from_string(text[pos:])
+        try:
+            first_head = self.request_head.split('\r\n\r\n')[0]
+            lines = first_head.split('\r\n')
+            lines = [x for x in lines if ':' in x]
+            headers = email.message_from_string('\n'.join(lines))
+            return headers
+        except Exception, ex:
+            logging.error('Could not parse request headers', exc_info=ex)
+            return {}
 
 
 # For backward compatibility
