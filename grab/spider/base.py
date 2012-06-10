@@ -243,6 +243,7 @@ class Spider(SpiderPattern, SpiderStat):
         except KeyboardInterrupt:
             print '\nGot ^C signal. Stopping.'
             print self.render_stats()
+            raise
         finally:
             # This code is executed when main cycles is breaked
             self.shutdown()
