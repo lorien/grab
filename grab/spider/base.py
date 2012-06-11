@@ -140,10 +140,11 @@ class Spider(SpiderPattern, SpiderStat):
                          globals(), locals(), ['foo'])
         self.cache = mod.CacheBackend(database=database, use_compression=use_compression)
 
-    def setup_queue(self, backend='memory', database=None, **kwargs):
+    def setup_queue(self, backend='memory', **kwargs):
+        logger.debug('Using %s backend for task queue' % backend)
         mod = __import__('grab.spider.queue_backend.%s' % backend,
                          globals(), locals(), ['foo'])
-        self.taskq = mod.QueueBackend(database=database, **kwargs)
+        self.taskq = mod.QueueBackend(**kwargs)
 
     def prepare(self):
         """
@@ -346,7 +347,7 @@ class Spider(SpiderPattern, SpiderStat):
 
         is_valid = self.check_task_limits(task)
         if is_valid:
-            self.taskq.put((task.priority, task))
+            self.taskq.put(task, task.priority)
         return is_valid
 
     def check_task_limits(self, task):
@@ -417,7 +418,8 @@ class Spider(SpiderPattern, SpiderStat):
                         break
                 else:
                     try:
-                        priority, task = self.taskq.get(True, TASK_QUEUE_TIMEOUT)
+                        # TODO: implement timeout via sleep
+                        task = self.taskq.get(TASK_QUEUE_TIMEOUT)
                     except Queue.Empty:
                         # If All handlers are free and no tasks in queue
                         # yield None signal
@@ -579,7 +581,7 @@ class Spider(SpiderPattern, SpiderStat):
         then load new tasks from tasks file.
         """
 
-        qsize = self.taskq.qsize()
+        qsize = self.taskq.size()
         min_limit = self.thread_number * 2
         if qsize < min_limit:
             try:
