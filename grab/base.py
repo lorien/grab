@@ -458,7 +458,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             #raise IOError('Response code is %s: ' % self.response_code)
 
         if self.config['log_file']:
-            with open(self.config['log_file'], 'w') as out:
+            with open(self.config['log_file'], 'wb') as out:
                 out.write(self.response.body)
 
 
