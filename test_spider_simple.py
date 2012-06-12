@@ -19,5 +19,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     bot = TestSpider(thread_number=4)
     bot.setup_queue(backend='mongo', database='grab_test')
+    #bot.setup_queue(backend='mongo', database='grab_test', queue_name='foo',
+                    #clear_on_init=True, clear_on_exit=True)
     #bot.setup_queue(backend='memory')
     bot.run()
