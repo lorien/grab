@@ -82,7 +82,7 @@ def normalize_http_values(items, charset='utf-8'):
         return key, value
 
     items =  map(process, items)
-    items = sorted(items, key=lambda x: x[0])
+    #items = sorted(items, key=lambda x: x[0])
     return items
 
 

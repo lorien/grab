@@ -4,6 +4,7 @@ from unittest import TestCase
 from grab import Grab, GrabMisuseError
 from util import (FakeServerThread, BASE_URL, REQUEST, ignore_transport,
                   GRAB_TRANSPORT)
+from urlparse import parse_qsl
 
 class TestPostFeature(TestCase):
     def setUp(self):
@@ -27,6 +28,16 @@ class TestPostFeature(TestCase):
         g.request()
         self.assertEqual(REQUEST['post'], 'foo=LIST')
 
+        # Order of elements should not be changed (1)
+        g.setup(post=[('foo', 'LIST'), ('bar', 'BAR')])
+        g.request()
+        self.assertEqual(REQUEST['post'], 'foo=LIST&bar=BAR')
+
+        # Order of elements should not be changed (2)
+        g.setup(post=[('bar', 'BAR'), ('foo', 'LIST')])
+        g.request()
+        self.assertEqual(REQUEST['post'], 'bar=BAR&foo=LIST')
+
         # Provide POST data in byte-string
         g.setup(post='Hello world!')
         g.request()
@@ -46,6 +57,11 @@ class TestPostFeature(TestCase):
         g.setup(post=(('foo', 'bar'), ('foo', 'baz')))
         g.request()
         self.assertEqual(REQUEST['post'], 'foo=bar&foo=baz')
+
+    def assertEqualQueryString(self, qs1, qs2):
+        args1 = set([(x, y[0]) for x, y in parse_qsl(qs1)])
+        args2 = set([(x, y[0]) for x, y in parse_qsl(qs2)])
+        self.assertEqual(args1, args2)
 
     @ignore_transport('requests.RequestsTransport')
     def test_multipart_post(self):
