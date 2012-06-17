@@ -326,7 +326,7 @@ class FormExtension(object):
             if elem.tag == 'select':
                 if fields[elem.name] is None:
                     if len(elem.value_options):
-                        fields[elem.name] = elem.value_options[-1]
+                        fields[elem.name] = elem.value_options[0]
 
             if getattr(elem, 'type', None) == 'radio':
                 if fields[elem.name] is None:
