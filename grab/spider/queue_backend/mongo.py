@@ -27,7 +27,7 @@ class QueueBackend(QueueInterface):
         self.queue_name = queue_name
         conn = pymongo.Connection(**kwargs)
         self.collection = conn[self.database][self.queue_name]
-        logging.debug('Using collection: %s' % self.collection)
+        logger.debug('Using collection: %s' % self.collection)
         self.clear_on_init = clear_on_init
         self.clear_on_exit = clear_on_exit
 
