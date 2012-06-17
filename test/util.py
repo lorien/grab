@@ -64,9 +64,10 @@ def remove_directory(path):
 
 
 class FakeServerThread(threading.Thread):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, port=FAKE_SERVER_PORT, *args, **kwargs):
         super(FakeServerThread, self).__init__(*args, **kwargs)
         self.daemon = True
+        self.listen_port = port
 
     def start(self):
         super(FakeServerThread, self).start()
@@ -137,7 +138,7 @@ class FakeServerThread(threading.Thread):
                 else:
                     self.wfile.write(RESPONSE['post'])
 
-        server_address = ('localhost', FAKE_SERVER_PORT)
+        server_address = ('localhost', self.listen_port)
         try:
             httpd = HTTPServer(server_address, RequestHandlerClass)
             httpd.serve_forever()
