@@ -27,6 +27,7 @@ Grab сайты
 * Официальный сайт: http://grablib.org
 * Репозиторий на bitbucket: http://bitbucket.org/lorien/grab
 * Группа рассылки: http://groups.google.com/group/python-grab
+* Jabber конференция: grablab@conference.jabber.ru
 
 
 
