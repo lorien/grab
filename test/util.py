@@ -4,6 +4,7 @@ import time
 import os
 import shutil
 import tempfile
+from copy import deepcopy
 
 import grab
 
@@ -87,6 +88,7 @@ class FakeServerThread(threading.Thread):
                 time.sleep(SLEEP['get'])
 
                 REQUEST['headers'] = self.headers
+                print "RH:", REQUEST['headers']
                 REQUEST['path'] = self.path
 
                 if RESPONSE['get_callback'] is not None:
@@ -104,6 +106,8 @@ class FakeServerThread(threading.Thread):
 
                     while RESPONSE_ONCE_HEADERS:
                         self.send_header(*RESPONSE_ONCE_HEADERS.pop())
+
+                    self.send_header('Listen-Port', str(self.server.server_port))
 
                     self.end_headers()
 
@@ -131,6 +135,9 @@ class FakeServerThread(threading.Thread):
                     self.send_response(200)
                 while RESPONSE_ONCE_HEADERS:
                     self.send_header(*RESPONSE_ONCE_HEADERS.pop())
+
+                self.send_header('Listen-Port', str(self.server.server_port))
+
                 self.end_headers()
                 if RESPONSE_ONCE['post'] is not None:
                     self.wfile.write(RESPONSE_ONCE['post'])

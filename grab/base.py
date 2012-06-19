@@ -723,7 +723,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     #
 
     def setup_proxylist(self, proxy_file=None, proxy_type='http', read_timeout=None,
-                        auto_init=True, auto_change=False,
+                        auto_init=True, auto_change=True,
                         server_list=None):
         """
         Setup location of files with proxy servers
@@ -751,7 +751,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type,
                                    read_timeout=read_timeout)
-        if auto_init:
+        if not auto_change and auto_init:
             self.change_proxy()
         self.setup(proxy_auto_change=auto_change)
 

@@ -29,6 +29,7 @@ from .pattern import SpiderPattern
 from .stat  import SpiderStat
 from .transport.multicurl import MulticurlTransport
 from .transport.threadpool import ThreadPoolTransport
+from ..proxylist import ProxyList
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (80, 100)
@@ -110,7 +111,6 @@ class Spider(SpiderPattern, SpiderStat):
         self.request_limit = request_limit
         self.counters = defaultdict(int)
         self.grab_config = {}
-        self.proxylist_config = None
         self.items = {}
         self.task_try_limit = task_try_limit
         self.network_try_limit = network_try_limit
@@ -131,6 +131,11 @@ class Spider(SpiderPattern, SpiderStat):
         self.log_taskname = log_taskname
         self.should_stop = False
         self.request_pause = request_pause
+
+        self.proxylist_enabled = None
+        self.proxylist = None
+        self.proxy = None
+        self.proxy_auto_change = False
 
     def setup_cache(self, backend='mongo', database=None, use_compression=True, **kwargs):
         if database is None:
@@ -462,9 +467,13 @@ class Spider(SpiderPattern, SpiderStat):
                                 break
 
                         self.inc_count('request-network')
-                        if task.use_proxylist and self.proxylist_config:
-                            args, kwargs = self.proxylist_config
-                            grab.setup_proxylist(*args, **kwargs)
+                        if task.use_proxylist and self.proxylist_enabled:
+                            if self.proxy_auto_change:
+                                self.proxy = self.proxylist.get_random()
+                            if self.proxy:
+                                proxy, proxy_userpwd, proxy_type = self.proxy
+                                grab.setup(proxy=proxy, proxy_userpwd=proxy_userpwd,
+                                           proxy_type=proxy_type)
 
                         transport.process_task(task, grab, grab_config_backup)
 
@@ -518,14 +527,6 @@ class Spider(SpiderPattern, SpiderStat):
         """
 
         logger.debug('Job done!')
-
-    def setup_proxylist(self, *args, **kwargs):
-        """
-        Save proxylist config which will be later passed to Grab
-        constructor.
-        """
-
-        self.proxylist_config = (args, kwargs)
 
     def process_handler_error(self, func_name, ex, task, error_tb=None):
         self.inc_count('error-%s' % ex.__class__.__name__.lower())
@@ -602,40 +603,37 @@ class Spider(SpiderPattern, SpiderStat):
 
         self.should_stop = True
 
-    @classmethod
-    def init_with_config(cls, modname):
-        """
-        This method create spider instance and configure it
-        with options found in given config module.
-        
-        Args:
-            :modname string: name of module with settings
-        """
+    def load_proxylist(self, source, source_type, proxy_type='http',
+                       auto_init=True, auto_change=True,
+                       **kwargs):
+        self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type, **kwargs)
 
-        # Load key, value dict from config module
-        config = __import__(modname, fromlist=[''])
-        config_dict = {}
-        for key in dir(config):
-            config_dict[key.lower()] = getattr(config, key)
+        self.proxylist_enabled = True
+        self.proxy = None
+        if not auto_change and auto_init:
+            self.proxy = self.proxylist.get_random()
+        self.proxy_auto_change = auto_change
 
-        # Find names of arguments of __init__ method
-        arg_names = inspect.getargspec(getattr(cls, '__init__'))[0]
-        arg_names = [x.lower() for x in arg_names]
+    # 
+    # Deprecated methods
+    #
 
-        # Find __init__ arguments in config module
-        kwargs = {}
-        for name in arg_names:
-            if name in config_dict:
-                kwargs[name] = config_dict[name]
+    def setup_proxylist(self, proxy_file=None, proxy_type='http', read_timeout=None,
+                        auto_init=True, auto_change=True,
+                        server_list=None):
+        logging.error('Method `setup_proxylist` is deprecated. Use `load_proxylist` instead.')
+        if server_list is not None:
+            raise error.GrabMisuseError('setup_proxylist: the argument `server_list` is not suppported more')
+        if proxy_file is None:
+            raise error.GrabMisuseError('setup_proxylist: value of argument `proxy_file` could not be None')
+        source = proxy_file
+        source_type = 'text_file'
 
-        # Create Spider instance
-        obj = cls(**kwargs)
 
-        # Configure proxy list
-        if 'proxylist' in config_dict:
-            obj.setup_proxylist(**config_dict['proxylist'])
-
-        return obj
-
-    def dump_title(self, grab):
-        print grab.xpath_text('//title', 'N/A')
+        self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type,
+                                   read_timeout=read_timeout)
+        self.proxylist_enabled = True
+        self.proxy = None
+        if not auto_change and auto_init:
+            self.proxy = self.proxylist.get_random()
+        self.proxy_auto_change = auto_change
