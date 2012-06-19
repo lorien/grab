@@ -70,20 +70,20 @@ Spider
     :maxdepth: 2
 
     spider/tutorial
+    spider/task_building
     spider/task
+    spider/task_queue
+    spider/error_handling
+    spider/cache
 
 TODO::
 
-    * Объект задания
-    * Система кэширования в mongodb
-    * Функция повторного выполнения заданий
+    * Работа с прокси
     * Утилиты:
      * process_links
      * process_next_page
      * inc_count/add_item/save_list/render_stats/save_all_lists
      * process_object_image
-    * Работа с прокси
-    * Обработка сетевых ошибок и исключений
     
 
 
