@@ -167,7 +167,7 @@ class Spider(SpiderPattern, SpiderStat):
             out.write(self.render_stats())
 
     def setup_grab(self, **kwargs):
-        self.grab_config = kwargs
+        self.grab_config.update(**kwargs)
 
     def load_initial_urls(self):
         """

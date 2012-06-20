@@ -64,3 +64,14 @@ class TestSpider(TestCase):
         sp.add_task(Task('baz', BASE_URL))
         sp.run()
         self.assertEqual('xxx', sp.SAVED_ITEM)
+
+    def test_setup_grab(self):
+        """
+        Mulitple calls to `setup_grab` should accumulate changes in config object.
+        """
+        bot = self.SimpleSpider()
+        bot.setup_grab(log_dir='/tmp')
+        bot.setup_grab(timeout=30)
+        grab = bot.create_grab_instance()
+        self.assertEqual(grab.config['log_dir'], '/tmp')
+        self.assertEqual(grab.config['timeout'], 30)
