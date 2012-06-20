@@ -178,7 +178,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     Public methods
     """
 
-    def __init__(self, transport='curl.CurlTransport', response_body=None,
+    def __init__(self, response_body=None, transport='curl.CurlTransport',
                  **kwargs):
         """
         Create Grab instance
@@ -620,7 +620,10 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         if self.config['url']:
             if resolve_base:
-                base_url = find_base_url(self.response.unicode_body())
+                ubody = self.response.unicode_body(
+                    strip_xml_declaration=self.config['strip_xml_declaration']
+                )
+                base_url = find_base_url(ubody)
                 if base_url:
                     return urljoin(base_url, url)
             return urljoin(self.config['url'], url)

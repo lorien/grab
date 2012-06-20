@@ -177,3 +177,26 @@ class TestGrab(TestCase):
         finally:
             # Clean up test environment
             RESPONSE['get_callback'] = None
+
+    def test_default_content_for_fake_response(self):
+        content = '<strong>test</strong>'
+        g = Grab(content)
+        self.assertEqual(g.response.body, content)
+
+    # TODO: move into test/bugs.py
+    def test_declaration_bug(self):
+        """
+        1. Build Grab instance with XML with xml declaration
+        2. Call search method
+        3. Call xpath
+        4. Get ValueError: Unicode strings with encoding declaration are not supported.
+        """
+        xml = '<?xml version="1.0" encoding="UTF-8"?><tree><leaf>text</leaf></tree>'
+        g = Grab(xml)
+        self.assertTrue(g.search(u'text'))
+        self.assertEqual(g.xpath('//leaf').text, u'text')
+
+        # Similar bugs
+        g = Grab(xml)
+        self.assertTrue(g.rex(u'text'))
+        self.assertEqual(g.xpath('//leaf').text, u'text')
