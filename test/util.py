@@ -69,6 +69,8 @@ class FakeServerThread(threading.Thread):
         super(FakeServerThread, self).__init__(*args, **kwargs)
         self.daemon = True
         self.listen_port = port
+        SLEEP['get'] = 0
+        SLEEP['post'] = 0
 
     def start(self):
         super(FakeServerThread, self).start()
