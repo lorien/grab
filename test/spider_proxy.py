@@ -25,7 +25,7 @@ class TestSpider(TestCase):
         FakeServerThread(port=PORT2).start()
         FakeServerThread(port=PORT3).start()
 
-    def test_load_proxylist(self):
+    def test_setup_proxylist(self):
         content = '%s\n%s\n%s' % (PROXY1, PROXY2, PROXY3)
         open('/tmp/__proxy.txt', 'w').write(content)
 
@@ -87,3 +87,31 @@ class TestSpider(TestCase):
                          '%s:%s' % ('localhost', FAKE_SERVER_PORT))
         self.assertTrue(len(bot.ports) == 1)
         self.assertEqual(list(bot.ports)[0], FAKE_SERVER_PORT)
+
+    def test_setup_grab(self):
+        # Simple test, one task
+        bot = SimpleSpider(thread_number=1)
+        bot.setup_grab(proxy=PROXY1)
+        bot.setup_queue()
+        bot.add_task(Task('baz', 'http://yandex.ru'))
+        bot.run()
+
+        self.assertEqual(REQUEST['headers']['host'], 'yandex.ru')
+        self.assertEqual(bot.ports, set([PORT1]))
+        self.assertTrue(len(bot.ports) == 1)
+
+        content = '%s\n%s' % (PROXY1, PROXY2)
+        open('/tmp/__proxy.txt', 'w').write(content)
+
+        # If proxy is configured with both methods (setup_grab and load_proxylist)
+        # then proxylist has priority
+        bot = SimpleSpider(thread_number=1)
+        bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
+        bot.setup_queue()
+        for x in xrange(10):
+            bot.add_task(Task('baz', 'http://yandex.ru'))
+        bot.setup_grab(proxy=PROXY3)
+        bot.run()
+
+        self.assertEqual(REQUEST['headers']['host'], 'yandex.ru')
+        self.assertTrue(not PORT3 in bot.ports)

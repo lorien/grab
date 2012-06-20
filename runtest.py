@@ -11,7 +11,7 @@ import test.util
 TEST_CASE_LIST = (
     'test.base_interface',
     'test.post_feature',
-    'test.proxy_feature',
+    'test.grab_proxy',
     'test.upload_file',
     'test.limit_option',
     'test.cookies',

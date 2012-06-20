@@ -467,14 +467,8 @@ class Spider(SpiderPattern, SpiderStat):
                                 break
 
                         self.inc_count('request-network')
-                        if task.use_proxylist and self.proxylist_enabled:
-                            if self.proxy_auto_change:
-                                self.proxy = self.proxylist.get_random()
-                            if self.proxy:
-                                proxy, proxy_userpwd, proxy_type = self.proxy
-                                grab.setup(proxy=proxy, proxy_userpwd=proxy_userpwd,
-                                           proxy_type=proxy_type)
 
+                        self.change_proxy(task, grab)
                         transport.process_task(task, grab, grab_config_backup)
 
             # If real network requests were fired
@@ -504,6 +498,19 @@ class Spider(SpiderPattern, SpiderStat):
             # Calling special async magic function
             # to do async things
             transport.select()
+
+    def change_proxy(self, task, grab):
+        """
+        Choose proxy server for the task.
+        """
+
+        if task.use_proxylist and self.proxylist_enabled:
+            if self.proxy_auto_change:
+                self.proxy = self.proxylist.get_random()
+            if self.proxy:
+                proxy, proxy_userpwd, proxy_type = self.proxy
+                grab.setup(proxy=proxy, proxy_userpwd=proxy_userpwd,
+                           proxy_type=proxy_type)
 
     def process_transport_result(self, res):
         """
