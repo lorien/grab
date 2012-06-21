@@ -106,7 +106,7 @@ class Task(object):
         task = Task(**attr_copy)
 
         task.network_try_count = 0
-        task.task_try_count += 1
+        task.task_try_count = 0
 
         # Carefully process url, grab, grab_config options
         url = kwargs.pop('url', None)
