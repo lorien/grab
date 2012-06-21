@@ -201,12 +201,14 @@ class CurlTransport(object):
                     # bytes-string should be posted as-is
                     # unicode should be converted into byte-string
                     if isinstance(grab.config['post'], unicode):
-                        post_data = normalize_unicode(grab.config['post'])
+                        post_data = normalize_unicode(grab.config['post'],
+                                                      charset=grab.config['charset'])
                     else:
                         post_data = grab.config['post']
                 else:
                     # dict, tuple, list should be serialized into byte-string
-                    post_data = urlencode(grab.config['post'])
+                    post_data = urlencode(grab.config['post'],
+                                          charset=grab.config['charset'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
             else:
                 self.curl.setopt(pycurl.POSTFIELDS, '')
@@ -257,7 +259,8 @@ class CurlTransport(object):
         if grab.config['cookies']:
             if not isinstance(grab.config['cookies'], dict):
                 raise error.GrabMisuseError('cookies option shuld be a dict')
-            items = encode_cookies(grab.config['cookies'], join=False)
+            items = encode_cookies(grab.config['cookies'], join=False,
+                                   charset=grab.config['charset'])
             self.curl.setopt(pycurl.COOKIELIST, 'ALL')
             for item in items:
                 self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s' % item)

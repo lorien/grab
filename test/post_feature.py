@@ -1,5 +1,6 @@
 # coding: utf-8
 from unittest import TestCase
+import urllib
 
 from grab import Grab, GrabMisuseError
 from util import (FakeServerThread, BASE_URL, REQUEST, ignore_transport,
@@ -92,3 +93,25 @@ class TestPostFeature(TestCase):
         g.setup(multipart_post=(('foo', 'bar'), ('foo', 'baz')))
         g.request()
         self.assertTrue('name="foo"' in REQUEST['post'])
+
+    def test_unicode_post(self):
+        # By default, unicode post shuuld be converted into utf-8
+        g = Grab()
+        data = u'фыва'
+        g.setup(post=data, url=BASE_URL)
+        g.request()
+        self.assertEqual(REQUEST['post'], data.encode('utf-8'))
+
+        # Now try cp1251 with charset option
+        g = Grab()
+        data = u'фыва'
+        g.setup(post=data, url=BASE_URL, charset='cp1251')
+        g.request()
+        self.assertEqual(REQUEST['post'], data.encode('cp1251'))
+
+        # Now try dict with unicode value & charset option
+        g = Grab()
+        data = u'фыва'
+        g.setup(post={'foo': data}, url=BASE_URL, charset='cp1251')
+        g.request()
+        self.assertEqual(REQUEST['post'], 'foo=%s' % urllib.quote(data.encode('cp1251')))

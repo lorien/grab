@@ -3,7 +3,7 @@ import urllib
 from ..base import UploadFile, UploadContent
 from ..error import GrabMisuseError
 
-def urlencode(items):
+def urlencode(items, charset='utf-8'):
     """
     Convert sequence of items into bytestring which could be submitted
     in POST or GET request.
@@ -16,10 +16,10 @@ def urlencode(items):
 
     if isinstance(items, dict):
         items = items.items()
-    return urllib.urlencode(normalize_http_values(items))
+    return urllib.urlencode(normalize_http_values(items, charset=charset))
 
 
-def encode_cookies(items, join=True):
+def encode_cookies(items, join=True, charset='utf-8'):
     """
     Serialize dict or sequence of two-element items into string suitable
     for sending in Cookie http header.
@@ -37,7 +37,7 @@ def encode_cookies(items, join=True):
 
     if isinstance(items, dict):
         items = items.items()
-    items = normalize_http_values(items)
+    items = normalize_http_values(items, charset=charset)
     tokens = []
     for key, value in items:
         tokens.append('%s=%s' % (encode(key), encode(value)))
