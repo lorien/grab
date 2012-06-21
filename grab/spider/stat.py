@@ -55,7 +55,7 @@ class SpiderStat(object):
         out.append('  %s' % '\n  '.join('%s: %s' % x for x in items))
 
         total_time = time.time() - self.start_time
-        out.append('Queue size: %d' % self.taskq.qsize())
+        out.append('Queue size: %d' % self.taskq.size())
         out.append('Threads: %d' % self.thread_number)
         out.append('DOM build time: %.3f' % GLOBAL_STATE['dom_build_time'])
         out.append('Time: %.2f sec' % total_time)
