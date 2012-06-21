@@ -625,9 +625,9 @@ class Spider(SpiderPattern, SpiderStat):
     # Deprecated methods
     #
 
-    def setup_proxylist(self, proxy_file=None, proxy_type='http', read_timeout=None,
+    def setup_proxylist(self, proxy_file=None, proxy_type='http',
                         auto_init=True, auto_change=True,
-                        server_list=None):
+                        server_list=None, **kwargs):
         logging.error('Method `setup_proxylist` is deprecated. Use `load_proxylist` instead.')
         if server_list is not None:
             raise error.GrabMisuseError('setup_proxylist: the argument `server_list` is not suppported more')
@@ -638,7 +638,7 @@ class Spider(SpiderPattern, SpiderStat):
 
 
         self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type,
-                                   read_timeout=read_timeout)
+                                   **kwargs)
         self.proxylist_enabled = True
         self.proxy = None
         if not auto_change and auto_init:

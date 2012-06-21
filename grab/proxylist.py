@@ -93,7 +93,7 @@ class TextFileSource(object):
         
         if (self.read_time is None or
             (time.time() - self.read_time) > self.read_timeout):
-            logging.debug('Reloading proxy list')
+            logger.debug('Reloading proxy list')
             self.load()
 
 
@@ -144,6 +144,6 @@ class ProxyList(object):
         Return next server in the list.
         """
 
-        logging.debug('Changing proxy')
+        logger.debug('Changing proxy')
         self.source.reload()
         return self.source.server_list_iterator.next()
