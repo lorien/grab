@@ -2,6 +2,7 @@ from __future__ import absolute_import
 import logging
 import time
 from grab.base import GLOBAL_STATE
+import os
 
 logger = logging.getLogger('grab.spider.stat')
 
