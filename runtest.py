@@ -7,6 +7,7 @@ import logging
 
 from test.util import prepare_test_environment, clear_test_environment
 import test.util
+from grab.tools.watch import watch
 
 TEST_CASE_LIST = (
     'test.base_interface',
@@ -55,4 +56,5 @@ def main():
 
 
 if __name__ == '__main__':
+    watch()
     main()

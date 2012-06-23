@@ -24,3 +24,4 @@ update_all.sh
 syntax:regexp
 ^log$
 ^data/
+^ghost$
