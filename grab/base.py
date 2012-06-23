@@ -421,8 +421,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 if isinstance(post, basestring):
                     post = post[:150] + '...'
                 else:
-                    post = normalize_http_values(post, charset='utf-8')
-                    items = sorted(post, key=lambda x: x[0])
+                    items = normalize_http_values(post, charset='utf-8')
                     new_items = []
                     for key, value in items:
                         if len(value) > 150:
