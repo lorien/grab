@@ -49,7 +49,10 @@ class RegexpExtension(object):
         if byte:
             match =  regexp.search(self.response.body)
         else:
-            match = regexp.search(self.response.unicode_body())
+            ubody = self.response.unicode_body(
+                strip_xml_declaration=self.config['strip_xml_declaration']
+            )
+            match = regexp.search(ubody)
         if match:
             return match
         else:

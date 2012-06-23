@@ -201,12 +201,14 @@ class CurlTransport(object):
                     # bytes-string should be posted as-is
                     # unicode should be converted into byte-string
                     if isinstance(grab.config['post'], unicode):
-                        post_data = normalize_unicode(grab.config['post'])
+                        post_data = normalize_unicode(grab.config['post'],
+                                                      charset=grab.config['charset'])
                     else:
                         post_data = grab.config['post']
                 else:
                     # dict, tuple, list should be serialized into byte-string
-                    post_data = urlencode(grab.config['post'])
+                    post_data = urlencode(grab.config['post'],
+                                          charset=grab.config['charset'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
             else:
                 self.curl.setopt(pycurl.POSTFIELDS, '')
@@ -257,7 +259,8 @@ class CurlTransport(object):
         if grab.config['cookies']:
             if not isinstance(grab.config['cookies'], dict):
                 raise error.GrabMisuseError('cookies option shuld be a dict')
-            items = encode_cookies(grab.config['cookies'], join=False)
+            items = encode_cookies(grab.config['cookies'], join=False,
+                                   charset=grab.config['charset'])
             self.curl.setopt(pycurl.COOKIELIST, 'ALL')
             for item in items:
                 self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s' % item)
@@ -275,7 +278,7 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.PROXY, '')
 
         if grab.config['proxy_userpwd']:
-            self.curl.setopt(pycurl.PROXYUSERPWD, grab.config['proxy_userpwd'])
+            self.curl.setopt(pycurl.PROXYUSERPWD, str(grab.config['proxy_userpwd']))
 
         # PROXYTYPE
         # Pass a long with this option to set type of the proxy. Available options for this are CURLPROXY_HTTP, CURLPROXY_HTTP_1_0 (added in 7.19.4), CURLPROXY_SOCKS4 (added in 7.15.2), CURLPROXY_SOCKS5, CURLPROXY_SOCKS4A (added in 7.18.0) and CURLPROXY_SOCKS5_HOSTNAME (added in 7.18.0). The HTTP type is default. (Added in 7.10) 
@@ -321,6 +324,8 @@ class CurlTransport(object):
         response = Response()
         response.head = ''.join(self.response_head_chunks)
         response.body = ''.join(self.response_body_chunks)
+        # Clear memory
+        self.response_body_chunks = []
         response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)

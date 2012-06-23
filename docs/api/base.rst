@@ -18,15 +18,10 @@ grab.base: API базового класса
     .. automethod:: request
     .. automethod:: sleep
     .. automethod:: fake_response
-    .. automethod:: setup_proxylist
+    .. automethod:: load_proxylist
     .. automethod:: change_proxy
     .. automethod:: make_url_absolute
     .. automethod:: detect_request_method
     .. automethod:: clear_cookies
     .. automethod:: load_cookies
     .. automethod:: dump_cookies
-
-
-.. autoclass:: UploadFile
-
-.. autoclass:: GrabInterface

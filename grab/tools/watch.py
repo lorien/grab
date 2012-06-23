@@ -42,7 +42,8 @@ class Watcher(object):
     def kill(self):
         try:
             os.kill(self.child, signal.SIGKILL)
-        except OSError: pass
+        except OSError:
+            pass
 
 
 def watch():

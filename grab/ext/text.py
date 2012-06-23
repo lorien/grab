@@ -27,7 +27,9 @@ class TextExtension(object):
             if byte:
                 raise GrabMisuseError('The anchor should be bytes string in byte mode')
             else:
-                return anchor in self.response.unicode_body()
+                return anchor in self.response.unicode_body(
+                    strip_xml_declaration=self.config['strip_xml_declaration']
+                )
 
         if not isinstance(anchor, unicode):
             if byte:

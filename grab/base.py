@@ -16,6 +16,7 @@ from urlparse import urljoin
 import time
 import re
 import json
+import email
 
 from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url
@@ -93,6 +94,7 @@ def default_config():
         proxy = None,
         proxy_type = None,
         proxy_userpwd = None,
+        proxy_auto_change = True,
 
         # Method, Post
         method = None,
@@ -128,7 +130,7 @@ def default_config():
         # Редиректы
         follow_refresh = False,
         follow_location = True,
-        redirect_limit = 5,
+        redirect_limit = 10,
 
         # Authentication
         userpwd = None,
@@ -167,7 +169,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     # Attributes which should be processed when clone
     # of Grab instance is creating
     clonable_attributes = ('request_head', 'request_log', 'request_body',
-                           'proxylist', 'proxylist_auto_change')
+                           'proxylist')
 
     # Complex config items which points to mutable objects
     mutable_config_keys = copy(MUTABLE_CONFIG_KEYS)
@@ -176,7 +178,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     Public methods
     """
 
-    def __init__(self, transport='curl.CurlTransport', response_body=None,
+    def __init__(self, response_body=None, transport='curl.CurlTransport',
                  **kwargs):
         """
         Create Grab instance
@@ -196,7 +198,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         self.reset()
         self.proxylist = None
-        self.proxylist_auto_change = False
         if kwargs:
             self.setup(**kwargs)
         self.clone_counter = 0
@@ -319,10 +320,10 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         if not self._request_prepared:
             self.reset()
             self.request_counter = self.get_request_counter()
-            if self.proxylist_auto_change:
-                self.change_proxy()
             if kwargs:
                 self.setup(**kwargs)
+            if self.proxylist and self.config['proxy_auto_change']:
+                self.change_proxy()
             self.request_method = self.detect_request_method()
             self.transport.process_config(self)
             self._request_prepared = True
@@ -385,6 +386,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                     # then raise an error
                     if not hammer_timeouts:
                         self._request_prepared = False
+                        self.save_failed_dump()
                         raise
                     else:
                         connect_timeout, total_timeout = hammer_timeouts.pop(0)
@@ -395,6 +397,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 # Then just raise an error
                 else:
                     self._request_prepared = False
+                    self.save_failed_dump()
                     raise
             else:
                 # Break the infinite loop in case of success response
@@ -419,8 +422,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 if isinstance(post, basestring):
                     post = post[:150] + '...'
                 else:
-                    post = normalize_http_values(post, charset='utf-8')
-                    items = sorted(post, key=lambda x: x[0])
+                    items = normalize_http_values(post, charset='utf-8')
                     new_items = []
                     for key, value in items:
                         if len(value) > 150:
@@ -456,7 +458,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             #raise IOError('Response code is %s: ' % self.response_code)
 
         if self.config['log_file']:
-            with open(self.config['log_file'], 'w') as out:
+            with open(self.config['log_file'], 'wb') as out:
                 out.write(self.response.body)
 
 
@@ -481,6 +483,24 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 return self.request(url=url)
 
         return None
+
+    def save_failed_dump(self):
+        """
+        Save dump of failed request for debugging.
+
+        This method is called then fatal network exception is raised.
+        The saved dump could be used for debugging the reason of the failure.
+        """
+
+        # This is very untested feature, so
+        # I put it inside try/except to not break
+        # live spiders
+        try:
+            self.response = self.transport.prepare_response(self)
+            self.copy_request_data()
+            self.save_dumps()
+        except Exception, ex:
+            logging.error(unicode(ex))
 
     def copy_request_data(self):
         # TODO: Maybe request object?
@@ -525,38 +545,22 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         self.response = res
 
-    def setup_proxylist(self, proxy_file=None, proxy_type='http', read_timeout=None,
-                        auto_init=True, auto_change=False,
-                        server_list=None):
-        """
-        Setup location of files with proxy servers
-
-        ``proxy_file`` - file which contains list of proxy servers
-        Each server could be a line of one of following formats:
-        * server:port
-        * server:port:username:password
-
-        ``proxy_type`` - type of proxy servers from proxy file.
-        For now all proxies should be of one type
-
-        ``auto_init`` - if True then ``change_proxy`` method will be automatically
-        called
-        """
-
-        self.proxylist = ProxyList(proxy_file=proxy_file, proxy_type=proxy_type,
-                                   server_list=server_list, read_timeout=read_timeout)
-        if auto_init:
+    def load_proxylist(self, source, source_type, proxy_type='http',
+                       auto_init=True, auto_change=True,
+                       **kwargs):
+        self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type, **kwargs)
+        self.setup(proxy_auto_change=auto_change)
+        if not auto_change and auto_init:
             self.change_proxy()
-        self.proxylist_auto_change = auto_change
 
     def change_proxy(self):
         """
         Set random proxy from proxylist.
         """
 
-        server, userpwd = self.proxylist.get_random()
+        server, userpwd, proxy_type = self.proxylist.get_random()
         self.setup(proxy=server, proxy_userpwd=userpwd,
-                   proxy_type=self.proxylist.proxy_type)
+                   proxy_type=proxy_type)
 
     """
     Private methods
@@ -616,7 +620,10 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         if self.config['url']:
             if resolve_base:
-                base_url = find_base_url(self.response.unicode_body())
+                ubody = self.response.unicode_body(
+                    strip_xml_declaration=self.config['strip_xml_declaration']
+                )
+                base_url = find_base_url(ubody)
                 if base_url:
                     return urljoin(base_url, url)
             return urljoin(self.config['url'], url)
@@ -677,6 +684,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             out.write(json.dumps(self.config['cookies']))
 
     def setup_with_proxyline(self, line, proxy_type='http'):
+        # TODO: remove from base class
+        # maybe to proxylist?
         host, port, user, pwd = parse_proxyline(line)
         server_port = '%s:%s' % (host, port)
         self.setup(proxy=server_port, proxy_type=proxy_type)
@@ -701,12 +710,54 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         where to store request details.
         """
 
+        try:
+            first_head = self.request_head.split('\r\n\r\n')[0]
+            lines = first_head.split('\r\n')
+            lines = [x for x in lines if ':' in x]
+            headers = email.message_from_string('\n'.join(lines))
+            return headers
+        except Exception, ex:
+            logging.error('Could not parse request headers', exc_info=ex)
+            return {}
 
-        head = self.request_head
-        pos = head.find('\n')
-        if pos > -1:
-            head = head[pos:]
-        return email.message_from_string(text[pos:])
+
+    # 
+    # Deprecated methods
+    #
+
+    def setup_proxylist(self, proxy_file=None, proxy_type='http', read_timeout=None,
+                        auto_init=True, auto_change=True,
+                        server_list=None):
+        """
+        Setup location of files with proxy servers
+
+        ``proxy_file`` - file which contains list of proxy servers
+        Each server could be a line of one of following formats:
+        * server:port
+        * server:port:username:password
+
+        ``proxy_type`` - type of proxy servers from proxy file.
+        For now all proxies should be of one type
+
+        ``auto_init`` - if True then ``change_proxy`` method will be automatically
+        called
+        """
+
+        logging.error('Method `setup_proxylist` is deprecated. Use `load_proxylist` instead.')
+        if server_list is not None:
+            raise error.GrabMisuseError('setup_proxylist: the argument `server_list` is not suppported more')
+        if proxy_file is None:
+            raise error.GrabMisuseError('setup_proxylist: value of argument `proxy_file` could not be None')
+        source = proxy_file
+        source_type = 'text_file'
+
+
+        self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type,
+                                   read_timeout=read_timeout)
+        if not auto_change and auto_init:
+            self.change_proxy()
+        self.setup(proxy_auto_change=auto_change)
+
 
 
 # For backward compatibility

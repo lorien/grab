@@ -2,9 +2,10 @@
    sphinx-quickstart on Tue Nov  9 11:04:59 2010.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
+.. _home:
 
-Документация по библиотеке Grab
-===============================
+Grab - фреймворк для парсинга сайтов
+====================================
 
 Grab - библиотека для работы с сетевыми документами. Основные области использования Grab:
 
@@ -27,14 +28,14 @@ Grab сайты
 * Официальный сайт: http://grablib.org
 * Репозиторий на bitbucket: http://bitbucket.org/lorien/grab
 * Группа рассылки: http://groups.google.com/group/python-grab
+* Jabber конференция: grablab@conference.jabber.ru
 
 
 
-Разделы документации
---------------------
+.. _grab_toc:
 
-Руководство пользователя
-~~~~~~~~~~~~~~~~~~~~~~~~
+Документация Grab
+-----------------
 
 .. toctree::
     :maxdepth: 2
@@ -60,9 +61,10 @@ Grab сайты
     grab/transport
     grab/tools
 
+.. _spider_toc:
 
-Spider
-~~~~~~
+Документация Grab:Spider
+------------------------
 
 Асинхронный модуль для разработки сложных парсеров.
 
@@ -70,26 +72,26 @@ Spider
     :maxdepth: 2
 
     spider/tutorial
+    spider/task_building
     spider/task
+    spider/task_queue
+    spider/error_handling
+    spider/cache
 
 TODO::
 
-    * Объект задания
-    * Система кэширования в mongodb
-    * Функция повторного выполнения заданий
+    * Работа с прокси
     * Утилиты:
      * process_links
      * process_next_page
      * inc_count/add_item/save_list/render_stats/save_all_lists
      * process_object_image
-    * Работа с прокси
-    * Обработка сетевых ошибок и исключений
     
 
 
 
 API
-~~~
+---
 
 Вся нижеследующая информация сгенерирована из комментариев в исходном коде.  Поэтому она на английском языке. Документы из раздела API полезны тем, что они показывают описания всех аргументов каждого метода и класса библиотеки Grab.
 

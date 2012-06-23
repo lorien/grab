@@ -26,12 +26,19 @@ Grab тестируется под python 2.6
 Установка под Windows
 =====================
 
-Скачайте и установите lxml и pycurl библиотеки с сайта http://www.lfd.uci.edu/~gohlke/pythonlibs/:
+Скачайте и установите lxml библиотеку с сайта http://www.lfd.uci.edu/~gohlke/pythonlibs/:
 
 * lxml-2.3.3.win32-py2.6.exe  
-* pycurl-7.19.0.win32-py2.6.exe 
 
-Скачайте и установите grab с http://pypi.python.org/pypi/grab/0.3.25:
+Скачайте и установите pycurl библиотеку с нашего сайта: http://grablib.org/static/pycurl-ssl-7.19.0.win32-py2.7.msi
+
+* pycurl-ssl-7.19.0.win32-py2.7.msi
+
+.. warning::
+
+    Не используйте библиотеку pycurl, установленную из другого источника, в ней может быть баг, при котором неправильно формируются POST-запросы.
+
+Скачайте и установите grab с http://pypi.python.org/pypi/grab:
 
 * качаем tar.gz архив
 * распаковываем

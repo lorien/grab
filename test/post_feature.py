@@ -1,9 +1,11 @@
 # coding: utf-8
 from unittest import TestCase
+import urllib
 
 from grab import Grab, GrabMisuseError
 from util import (FakeServerThread, BASE_URL, REQUEST, ignore_transport,
                   GRAB_TRANSPORT)
+from urlparse import parse_qsl
 
 class TestPostFeature(TestCase):
     def setUp(self):
@@ -27,6 +29,16 @@ class TestPostFeature(TestCase):
         g.request()
         self.assertEqual(REQUEST['post'], 'foo=LIST')
 
+        # Order of elements should not be changed (1)
+        g.setup(post=[('foo', 'LIST'), ('bar', 'BAR')])
+        g.request()
+        self.assertEqual(REQUEST['post'], 'foo=LIST&bar=BAR')
+
+        # Order of elements should not be changed (2)
+        g.setup(post=[('bar', 'BAR'), ('foo', 'LIST')])
+        g.request()
+        self.assertEqual(REQUEST['post'], 'bar=BAR&foo=LIST')
+
         # Provide POST data in byte-string
         g.setup(post='Hello world!')
         g.request()
@@ -46,6 +58,11 @@ class TestPostFeature(TestCase):
         g.setup(post=(('foo', 'bar'), ('foo', 'baz')))
         g.request()
         self.assertEqual(REQUEST['post'], 'foo=bar&foo=baz')
+
+    def assertEqualQueryString(self, qs1, qs2):
+        args1 = set([(x, y[0]) for x, y in parse_qsl(qs1)])
+        args2 = set([(x, y[0]) for x, y in parse_qsl(qs2)])
+        self.assertEqual(args1, args2)
 
     @ignore_transport('requests.RequestsTransport')
     def test_multipart_post(self):
@@ -76,3 +93,25 @@ class TestPostFeature(TestCase):
         g.setup(multipart_post=(('foo', 'bar'), ('foo', 'baz')))
         g.request()
         self.assertTrue('name="foo"' in REQUEST['post'])
+
+    def test_unicode_post(self):
+        # By default, unicode post shuuld be converted into utf-8
+        g = Grab()
+        data = u'фыва'
+        g.setup(post=data, url=BASE_URL)
+        g.request()
+        self.assertEqual(REQUEST['post'], data.encode('utf-8'))
+
+        # Now try cp1251 with charset option
+        g = Grab()
+        data = u'фыва'
+        g.setup(post=data, url=BASE_URL, charset='cp1251')
+        g.request()
+        self.assertEqual(REQUEST['post'], data.encode('cp1251'))
+
+        # Now try dict with unicode value & charset option
+        g = Grab()
+        data = u'фыва'
+        g.setup(post={'foo': data}, url=BASE_URL, charset='cp1251')
+        g.request()
+        self.assertEqual(REQUEST['post'], 'foo=%s' % urllib.quote(data.encode('cp1251')))

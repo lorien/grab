@@ -32,6 +32,7 @@ import base64
 from grab.tools.html import decode_entities
 from grab.tools.lxml_tools import get_node_text, drop_node, render_html
 from grab.tools.http import urlencode
+from grab.tools.encoding import smart_str
 
 class CaptchaError(Exception):
     """
@@ -45,7 +46,7 @@ class ParsingError(Exception):
     """
 
 
-def build_search_url(query, page=1, per_page=None, lang='en', filter=True, **kwargs):
+def build_search_url(query, page=None, per_page=None, lang=None, filter=None, **kwargs):
     """
     Build google search url with specified query and pagination options.
 
@@ -60,15 +61,26 @@ def build_search_url(query, page=1, per_page=None, lang='en', filter=True, **kwa
 
     if per_page is None:
         per_page = 10
-    if isinstance(query, unicode):
-        query = query.encode('utf-8')
+    if page is None:
+        page = 1
+    if lang is None:
+        lang = 'en'
+    if filter is None:
+        filter = True
     start = per_page * (page - 1)
-    url = 'http://google.com/search?hl=%s&q=%s&start=%s' % (
-        lang, urllib.quote(query), start)
-    if per_page != 10:
-        url += '&num=%d' % per_page
-    if not filter:
-        url += '&filter=0'
+
+    if not 'hl' in kwargs:
+        kwargs['hl'] = lang
+    if not 'num' in kwargs:
+        kwargs['num'] = per_page
+    if not 'start' in kwargs:
+        kwargs['start'] = start
+    if not 'filter' in kwargs:
+        if not filter:
+            kwargs['filter'] = '0'
+
+
+    url = 'http://google.com/search?q=%s' % urllib.quote(smart_str(query))
     if kwargs:
         url += '&' + urlencode(kwargs)
     return url
@@ -184,6 +196,8 @@ def parse_search_results(grab, parse_index_size=False, strict_query=False):
                     index_size = None
 
                 # Yield found results
+                results = []
+
                 for elem in grab.xpath_list('//*[h3[@class="r"]/a]'):
                     title_elem = elem.xpath('h3/a')[0]
 
@@ -226,14 +240,15 @@ def parse_search_results(grab, parse_index_size=False, strict_query=False):
 
                     #if 'File Format':
                     if url:
-                        yield {
+                        results.append({
                             'url': url,
                             'title': title,
                             'snippet': snippet,
                             'filetype': filetype,
                             'index_size': index_size,
                             'extended': extended_result,
-                        }
+                        })
+                return results
             else:
                 pass
                 #return []

@@ -26,7 +26,7 @@ POST-запрос
     g.setup(post=[('user', 'root'), ('pwd', '123')])
     g.setup(post='user=root&pwd=123')
 
-Чтобы отправить POST запрос с `Content-Type` равным `multipart/form-data`, используйте опцию `post_multipart` вместо `post`.
+Чтобы отправить POST запрос с `Content-Type` равным `multipart/form-data`, используйте опцию `multipart_post` вместо `post`.
 
 Отправка файлов
 ===============
