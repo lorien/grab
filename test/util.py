@@ -90,7 +90,6 @@ class FakeServerThread(threading.Thread):
                 time.sleep(SLEEP['get'])
 
                 REQUEST['headers'] = self.headers
-                print "RH:", REQUEST['headers']
                 REQUEST['path'] = self.path
 
                 if RESPONSE['get_callback'] is not None:
@@ -115,7 +114,8 @@ class FakeServerThread(threading.Thread):
 
                     self.send_header('Listen-Port', str(self.server.server_port))
                     if not 'Content-Type' in headers_sent:
-                        self.send_header('Content-Type', 'text/html')
+                        charset = 'utf-8'
+                        self.send_header('Content-Type', 'text/html; charset=%s' % charset)
 
                     self.end_headers()
 
@@ -149,7 +149,8 @@ class FakeServerThread(threading.Thread):
 
                 self.send_header('Listen-Port', str(self.server.server_port))
                 if not 'Content-Type' in headers_sent:
-                    self.send_header('Content-Type', 'text/html')
+                    charset = 'utf-8'
+                    self.send_header('Content-Type', 'text/html; charset=%s' % charset)
 
                 self.end_headers()
                 if RESPONSE_ONCE['post'] is not None:
@@ -179,5 +180,21 @@ def ignore_transport(transport):
                 return
             else:
                 func(*args, **kwargs)
+        return test_method
+    return wrapper
+
+
+def only_transport(transport):
+    """
+    If test function is wrapped into this decorator then
+    it should be called only for specified transport.
+    """
+
+    def wrapper(func):
+        def test_method(*args, **kwargs):
+            if GRAB_TRANSPORT == transport:
+                func(*args, **kwargs)
+            else:
+                return
         return test_method
     return wrapper
