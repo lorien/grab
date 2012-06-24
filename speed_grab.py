@@ -30,6 +30,7 @@ def main():
         url = 'http://load.local/28k.html'
         g = Grab()
         g.go(url)
+        assert 'Scrapy' in g.response.body
         #g.css_text('title')
         #urllib.urlopen(url).read()
 

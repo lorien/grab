@@ -27,7 +27,7 @@ class SpeedSpider(Spider):
             yield Task('load', url=URL_28K)
 
     def task_load(self, grab, task):
-        pass
+        assert 'Scrapy' in grab.response.body
 
 
 @timer
