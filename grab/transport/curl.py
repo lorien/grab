@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import email
 import logging
 import urllib
-from StringIO import StringIO
+from cStringIO import StringIO
 import threading
 import random
 from urlparse import urlsplit, urlunsplit
@@ -62,8 +62,10 @@ class CurlTransport(object):
         self.curl = pycurl.Curl()
 
     def reset(self):
-        self.response_head_chunks = []
-        self.response_body_chunks = []
+        #self.response_head_chunks = []
+        self.response_head_chunks = StringIO()
+        #self.response_body_chunks = []
+        self.response_body_chunks = StringIO()
         self.response_body_bytes_read = 0
         self.verbose_logging = False
 
@@ -79,7 +81,7 @@ class CurlTransport(object):
 
         #if self.config['nohead']:
             #return 0
-        self.response_head_chunks.append(chunk)
+        self.response_head_chunks.write(chunk)
         # Returning None implies that all bytes were written
         return None
 
@@ -93,7 +95,8 @@ class CurlTransport(object):
 
         bytes_read = len(chunk)
         self.response_body_bytes_read += bytes_read
-        self.response_body_chunks.append(chunk)
+        #self.response_body_chunks.append(chunk)
+        self.response_body_chunks.write(chunk)
         if self.config_body_maxsize is not None:
             if self.response_body_bytes_read > self.config_body_maxsize:
                 logger.debug('Response body max size limit reached: %s' %
@@ -322,10 +325,11 @@ class CurlTransport(object):
 
     def prepare_response(self, grab):
         response = Response()
-        response.head = ''.join(self.response_head_chunks)
-        response.body = ''.join(self.response_body_chunks)
+        response.head = self.response_head_chunks.getvalue()
+        response.body = self.response_body_chunks.getvalue()
         # Clear memory
-        self.response_body_chunks = []
+        self.response_head_chunks.close()# = []
+        self.response_body_chunks.close()# = []
         response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)

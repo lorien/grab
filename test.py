@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding: utf-8
 import csv
 import logging
@@ -5,9 +6,11 @@ import logging
 from grab.spider import Spider, Task
 from grab import Grab
 
-g = Grab()
-g.go('http://drlz.kiev.ua/ibp/ddsite.nsf/all/shlist?opendocument')
-g.setup(charset='cp1251')
-g.set_input('title', u'анальг')
-g.submit()
-g.response.save('/tmp/x.html')
+logging.basicConfig(level=logging.DEBUG)
+
+for x in xrange(5):
+    g = Grab()
+    g.setup(body_maxsize=8 * 1024 * 1024)
+    #g.go('http://load.local/31m.html')
+    g.go('http://bombaybazaar.se/henna.php?page=8927')
+    print len(g.response.body)
