@@ -10,5 +10,5 @@ from tools.logs import default_logging
 
 #Grab = GrabCurl
 
-version_info = (0, 4, 4)
+version_info = (0, 4, 5)
 __version__ = '.'.join(map(str, version_info))
