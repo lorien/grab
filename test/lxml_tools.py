@@ -42,5 +42,6 @@ class LXMLToolsTest(TestCase):
 
     def test_find_node_number(self):
         node = self.lxml_tree.xpath('//li[@id="num-1"]')[0]
-        self.assertEqual('100', find_node_number(node))
-        self.assertEqual('1002', find_node_number(node, ignore_spaces=True))
+        self.assertEqual(100, find_node_number(node))
+        self.assertEqual('100', find_node_number(node, make_int=False))
+        self.assertEqual(1002, find_node_number(node, ignore_spaces=True))

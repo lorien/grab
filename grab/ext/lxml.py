@@ -187,14 +187,14 @@ class LXMLExtension(object):
                 return get_node_text(elem, smart=smart, normalize_space=normalize_space)
 
     def xpath_number(self, path, default=NULL, filter=None, ignore_spaces=False,
-                     smart=False):
+                     smart=False, make_int=True):
         """
         Find number in normalized text of node which matches the given xpath.
         """
 
         try:
-            return find_number(self.xpath_text(path, filter=filter, smart=smart),
-                                    ignore_spaces=ignore_spaces)
+            text = self.xpath_text(path, filter=filter, smart=smart)
+            return find_number(text, ignore_spaces=ignore_spaces, make_int=make_int)
         except IndexError:
             if default is NULL:
                 raise
@@ -235,13 +235,15 @@ class LXMLExtension(object):
             else:
                 return default
 
-    def css_number(self, path, default=NULL, ignore_spaces=False, smart=False):
+    def css_number(self, path, default=NULL, ignore_spaces=False, smart=False,
+                   make_int=True):
         """
         Find number in normalized text of node which matches the given css path.
         """
 
         try:
-            return find_number(self.css_text(path, smart=smart), ignore_spaces=ignore_spaces)
+            text = self.css_text(path, smart=smart)
+            return find_number(text, ignore_spaces=ignore_spaces, make_int=make_int)
         except IndexError:
             if default is NULL:
                 raise

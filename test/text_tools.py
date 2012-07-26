@@ -6,10 +6,11 @@ from grab.tools.text import find_number, drop_space, normalize_space
 class TextExtensionTest(TestCase):
 
     def test_find_number(self):
-        self.assertEqual('2', find_number('2'))
-        self.assertEqual('2', find_number('foo 2 4 bar'))
-        self.assertEqual('24', find_number('foo 2 4 bar', ignore_spaces=True))
-        self.assertEqual('24', find_number(u'бешеный 2 4 барсук', ignore_spaces=True))
+        self.assertEqual(2, find_number('2'))
+        self.assertEqual(2, find_number('foo 2 4 bar'))
+        self.assertEqual('2', find_number('foo 2 4 bar', make_int=False))
+        self.assertEqual(24, find_number('foo 2 4 bar', ignore_spaces=True))
+        self.assertEqual(24, find_number(u'бешеный 2 4 барсук', ignore_spaces=True))
         self.assertRaises(DataNotFound,
             lambda: find_number('foo'))
         self.assertRaises(DataNotFound,

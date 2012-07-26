@@ -30,12 +30,13 @@ def get_node_text(node, smart=False, normalize_space=True):
         value = normalize_space_func(value)
     return value
 
-def find_node_number(node, ignore_spaces=False):
+def find_node_number(node, ignore_spaces=False, make_int=True):
     """
     Find number in text content of the `node`.
     """
 
-    return find_number(get_node_text(node), ignore_spaces=ignore_spaces)
+    text = get_node_text(node)
+    return find_number(text, ignore_spaces=ignore_spaces, make_int=make_int)
 
 
 def truncate_tail(node, xpath):

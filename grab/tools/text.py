@@ -11,7 +11,7 @@ RE_NUMBER_WITH_SPACES = re.compile(r'\d[\s\d]*', re.U)
 RE_SPACE = re.compile(r'\s+', re.U)
 BOM_TOKEN = '\xef\xbb\xbf'
 
-def find_number(text, ignore_spaces=False):
+def find_number(text, ignore_spaces=False, make_int=True):
     """
     Find the number in the `text`.
 
@@ -28,10 +28,12 @@ def find_number(text, ignore_spaces=False):
     else:
         match = RE_NUMBER.search(text)
     if match:
+        val = match.group(0)
         if ignore_spaces:
-            return drop_space(match.group(0))
-        else:
-            return match.group(0)
+            val = drop_space(val)
+        if make_int:
+            val = int(val)
+        return val
     else:
         raise DataNotFound
 

@@ -70,8 +70,12 @@ class LXMLExtensionTest(TestCase):
             lambda: self.g.xpath_text('//*[@id="bee2"]/@id'))
 
     def test_xpath_number(self):
-        self.assertEqual('100', self.g.xpath_number('//li'))
-        self.assertEqual('1002', self.g.xpath_number('//li', ignore_spaces=True))
+        self.assertEqual(100, self.g.xpath_number('//li'))
+        self.assertEqual(100, self.g.xpath_number('//li', make_int=True))
+        self.assertEqual('100', self.g.xpath_number('//li', make_int=False))
+        self.assertEqual(1002, self.g.xpath_number('//li', ignore_spaces=True))
+        self.assertEqual('1002', self.g.xpath_number('//li', ignore_spaces=True,
+                         make_int=False))
         self.assertRaises(DataNotFound,
             lambda: self.g.xpath_number('//liza'))
         self.assertEqual('foo', self.g.xpath_number('//zzz', default='foo'))
@@ -95,8 +99,9 @@ class LXMLExtensionTest(TestCase):
         self.assertEqual('foo', self.g.css_text('zzz', default='foo'))
 
     def test_css_number(self):
-        self.assertEqual('100', self.g.css_number('li'))
-        self.assertEqual('1002', self.g.css_number('li', ignore_spaces=True))
+        self.assertEqual(100, self.g.css_number('li'))
+        self.assertEqual('100', self.g.css_number('li', make_int=False))
+        self.assertEqual(1002, self.g.css_number('li', ignore_spaces=True))
         self.assertRaises(DataNotFound,
             lambda: self.g.css_number('liza'))
         self.assertEqual('foo', self.g.css_number('zzz', default='foo'))
