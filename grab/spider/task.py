@@ -105,8 +105,16 @@ class Task(object):
             del attr_copy['grab']
         task = Task(**attr_copy)
 
-        task.network_try_count = 0
-        task.task_try_count = 0
+        # Reset some task properties if the have not
+        # been set explicitly in kwargs
+        if not 'network_try_count' in kwargs:
+            task.network_try_count = 0
+        if not 'task_try_count' in kwargs:
+            task.task_try_count = 0
+        if not 'refresh_cache' in kwargs:
+            task.refresh_cache = False
+        if not 'disable_cache' in kwargs:
+            task.disable_cache = False
 
         # Carefully process url, grab, grab_config options
         url = kwargs.pop('url', None)
