@@ -2,6 +2,7 @@ from __future__ import absolute_import
 import logging
 import time
 from grab.base import GLOBAL_STATE
+from grab.tools.encoding import smart_str
 import os
 
 logger = logging.getLogger('grab.spider.stat')
@@ -38,7 +39,7 @@ class SpiderStat(object):
             lines = []
             for item in self.items.get(list_name, []):
                 if isinstance(item, basestring):
-                    lines.append(item)
+                    lines.append(smart_str(item))
                 else:
                     lines.append(json.dumps(item))
             out.write('\n'.join(lines))
