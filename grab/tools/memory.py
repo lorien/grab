@@ -3,12 +3,15 @@ import os
 SCALE = {'kB': 1024.0, 'mB': 1024.0 * 1024.0,
          'KB': 1024.0, 'MB': 1024.0 * 1024.0}
 
-def memory_usage(since=0, render=True):
+def memory_usage(since=0, render=True, pid=None):
     """
     Return resident memory usage in bytes.
     """
 
-    proc_status = '/proc/%d/status' % os.getpid()
+    if pid is None:
+        pid = os.getpid()
+
+    proc_status = '/proc/%d/status' % pid
     try:
         status = open(proc_status).read()
     except:
