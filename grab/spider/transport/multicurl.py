@@ -51,14 +51,23 @@ class MulticurlTransport(object):
             for curl in ok_list:
                 results.append((True, curl, None, None))
             for curl, ecode, emsg in fail_list:
-                # Do not treat 23 error code as failed
-                # It just means that some callback explicitly 
-                # breaked response processing, e.g. nobody option
-                # Maybe this leads to some unexpected errors :)
+                # CURLE_WRITE_ERROR (23)
+                # An error occurred when writing received data to a local file, or
+                # an error was returned to libcurl from a write callback.
+                # This is expected error and we should ignore it
+                #
+                # Also this error is raised when curl receives KeyboardInterrupt
+                # while it is processing some callback function
+                # (WRITEFUNCTION, HEADERFUNCTIO, etc)
                 if ecode == 23:
-                    ecode = None
-                    emsge = None
-                    results.append((True, curl, None, None))
+                    if getattr(curl, '_callback_interrupted', None) == True:
+                        curl._callback_interrupted = False
+                        ecode = None
+                        emsge = None
+                        results.append((True, curl, None, None))
+                    else:
+                        #raise error.GrabNetworkError(ex[0], ex[1])
+                        raise KeyboardInterrupt
                 else:
                     results.append((False, curl, ecode, emsg))
 
