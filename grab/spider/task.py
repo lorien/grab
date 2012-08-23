@@ -110,7 +110,7 @@ class Task(object):
         if not 'network_try_count' in kwargs:
             task.network_try_count = 0
         if not 'task_try_count' in kwargs:
-            task.task_try_count = 0
+            task.task_try_count = self.task_try_count + 1
         if not 'refresh_cache' in kwargs:
             task.refresh_cache = False
         if not 'disable_cache' in kwargs:
