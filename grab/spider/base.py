@@ -309,6 +309,7 @@ class Spider(SpiderPattern, SpiderStat):
             # Try to repeat the same network query
             if self.network_try_limit > 0:
                 task = res['task']
+                task.refresh_cache = True
                 # GRAB CLONE ISSUE
                 # Should use task.grab_config or backup of grab_config
                 task.grab = res['grab_config_backup']
