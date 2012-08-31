@@ -33,6 +33,7 @@ from grab.tools.html import decode_entities
 from grab.tools.lxml_tools import get_node_text, drop_node, render_html
 from grab.tools.http import urlencode
 from grab.tools.encoding import smart_str
+from grab.tools.text import find_number
 
 class CaptchaError(Exception):
     """
@@ -104,13 +105,13 @@ def parse_index_size(grab):
         return 0
     text = text.replace(',', '').replace('.', '')
     if 'about' in text:
-        number = grab.find_number(text.split('about')[1])
+        number = find_number(text.split('about')[1])
         return int(number)
     elif 'of' in text:
-        number = grab.find_number(text.split('of')[1])
+        number = find_number(text.split('of')[1])
         return int(number)
     else:
-        number = grab.find_number(text)
+        number = find_number(text)
         return int(number)
 
 
