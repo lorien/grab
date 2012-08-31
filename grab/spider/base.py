@@ -239,12 +239,22 @@ class Spider(SpiderPattern, SpiderStat):
 
                 # Process the response
                 handler_name = 'task_%s' % res['task'].name
+                raw_handler_name = 'task_raw_%s' % res['task'].name
+                try:
+                    raw_handler = getattr(self, raw_handler_name)
+                except AttributeError:
+                    raw_handler = None
+
                 try:
                     handler = getattr(self, handler_name)
                 except AttributeError:
-                    raise SpiderError('Task handler does not exist: %s' % handler_name)
+                    handler = None
+
+                if handler is None and raw_handler is None:
+                    raise SpiderError('No handler or raw handler defined for task %s' %\
+                                      res['task'].name)
                 else:
-                    self.process_response(res, handler)
+                    self.process_response(res, handler, raw_handler)
 
         except KeyboardInterrupt:
             print '\nGot ^C signal. Stopping.'
@@ -263,11 +273,18 @@ class Spider(SpiderPattern, SpiderStat):
         return (code < 400 or code == 404 or
                 code in task.valid_status)
 
-    def process_response(self, res, handler):
+    def process_response(self, res, handler, raw_handler=None):
         """
         Run the handler associated with the task for which the response
         was received.
         """
+
+        process_handler = True
+        if raw_handler is not None:
+            process_handler = raw_handler(res)
+
+        if not process_handler:
+            return
 
         if res['ok'] and self.valid_response_code(res['grab'].response.code,
                                                   res['task']):
