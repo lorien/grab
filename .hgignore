@@ -20,6 +20,7 @@ prof
 tests/tmp
 update_site.sh
 update_all.sh
+alexa.py
 
 syntax:regexp
 ^log$
