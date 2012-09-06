@@ -221,3 +221,36 @@ class TestGrab(TestCase):
         g = Grab(xml)
         self.assertTrue(g.rex(u'text'))
         self.assertEqual(g.xpath('//leaf').text, u'text')
+
+    def test_inheritance(self):
+        class SimpleExtension(object):
+            data = {'counter': 0}
+
+            def extra_init(self):
+                self.get_data()['counter'] += 1
+
+            @classmethod
+            def get_data(cls):
+                return cls.data
+
+        class CustomGrab(Grab, SimpleExtension):
+            pass
+
+        SimpleExtension.get_data()['counter'] = 0
+        g = CustomGrab()
+        self.assertEqual(SimpleExtension.get_data()['counter'], 1)
+
+        class VeryCustomGrab(CustomGrab):
+            pass
+
+        SimpleExtension.get_data()['counter'] = 0
+        g = VeryCustomGrab()
+        self.assertEqual(SimpleExtension.get_data()['counter'], 1)
+
+
+        class VeryCustomGrab(CustomGrab, SimpleExtension):
+            pass
+
+        SimpleExtension.get_data()['counter'] = 0
+        g = VeryCustomGrab()
+        self.assertEqual(SimpleExtension.get_data()['counter'], 2)
