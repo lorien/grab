@@ -56,6 +56,8 @@ def hashed_path_details(url, ext='jpg', base_dir=None):
         directory = '%s/%s' % (base_dir, directory)
     if ext is not None:
         filename = '%s.%s' % (tail, ext)
+    else:
+        filename = tail
     full_path = '%s/%s' % (directory, filename)
     return {'directory': directory,
             'filename': filename,
