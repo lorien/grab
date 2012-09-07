@@ -307,7 +307,8 @@ class CurlTransport(object):
             # CURLE_WRITE_ERROR (23)
             # An error occurred when writing received data to a local file, or
             # an error was returned to libcurl from a write callback.
-            # This is expected error and we should ignore it
+            # This exception should be ignored if _callback_interrupted flag
+            # is enabled (this happens when nohead or nobody options enabeld)
             #
             # Also this error is raised when curl receives KeyboardInterrupt
             # while it is processing some callback function
@@ -316,8 +317,7 @@ class CurlTransport(object):
                 if getattr(self.curl, '_callback_interrupted', None) == True:
                     self.curl._callback_interrupted = False
                 else:
-                    #raise error.GrabNetworkError(ex[0], ex[1])
-                    raise KeyboardInterrupt
+                    raise error.GrabNetworkError(ex[0], ex[1])
             else:
                 if ex[0] == 28:
                     raise error.GrabTimeoutError(ex[0], ex[1])

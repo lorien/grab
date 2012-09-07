@@ -122,6 +122,10 @@ class Spider(SpiderPattern, SpiderStat):
             signal.signal(signal.SIGUSR1, self.sigusr1_handler)
         except (ValueError, AttributeError):
             pass
+        try:
+            signal.signal(signal.SIGUSR2, self.sigusr2_handler)
+        except (ValueError, AttributeError):
+            pass
         self.debug_error = debug_error
 
         # Initial cache-subsystem values
@@ -165,6 +169,14 @@ class Spider(SpiderPattern, SpiderStat):
 
         with open('/tmp/spider.state', 'w') as out:
             out.write(self.render_stats())
+
+    def sigusr2_handler(self, signal, frame):
+        """
+        Catches SIGUSR1 signal and shutdowns spider.
+        """
+        
+        logging.error('Received SIGUSR2 signal. Doing shutdown')
+        self.stop()
 
     def setup_grab(self, **kwargs):
         self.grab_config.update(**kwargs)

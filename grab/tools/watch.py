@@ -1,6 +1,8 @@
 import os
 import signal
 import sys
+import logging
+import time
 
 class Watcher(object):
     """this class solves two problems with multithreaded
@@ -33,17 +35,20 @@ class Watcher(object):
         try:
             os.wait()
         except KeyboardInterrupt:
-            # I put the capital B in KeyBoardInterrupt so I can
-            # tell when the Watcher gets the SIGINT
-            print 'KeyBoardInterrupt'
-            self.kill()
+            logging.debug('Watcher process received KeyboardInterrupt')
+            logging.debug('Sending SIGUSR2 signal to child process')
+            try:
+                os.kill(self.child, signal.SIGUSR2)
+            except OSError:
+                pass
+            logging.debug('Waiting 5 seconds before sending SIGKILL')
+            time.sleep(5)
+            logging.debug('Sending SIGKILL signal to child process')
+            try:
+                os.kill(self.child, signal.SIGKILL)
+            except OSError:
+                pass
         sys.exit()
-
-    def kill(self):
-        try:
-            os.kill(self.child, signal.SIGKILL)
-        except OSError:
-            pass
 
 
 def watch():
