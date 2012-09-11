@@ -3,6 +3,7 @@
 import csv
 import logging
 import signal
+import time
 
 from grab.spider import Spider, Task
 from grab import Grab
@@ -18,14 +19,17 @@ def handler(signum, frame):
 def main():
     signal.signal(signal.SIGUSR2, handler)
 
-    for x in xrange(1000):
+    start = time.time()
+    for x in xrange(100):
         g = Grab()
-        #g.setup(body_maxsize=8 * 1024 * 1024)
         try:
-            g.go('http://ya.ru')
+            g.go('http://load.local/grab.html')
+            g.tree
         except GrabNetworkError, ex:
             logging.error('', exc_info=ex)
         print len(g.response.body)
+    stop = time.time()
+    print '%.2f' % (stop - start)
 
 
 if __name__ == '__main__':

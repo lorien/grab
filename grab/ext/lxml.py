@@ -48,14 +48,12 @@ class LXMLExtension(object):
             except ParserError, ex:
                 if str(ex) == 'Document is empty':
                     body = u'<html>%s</html>' % body
+                    try:
+                        self._lxml_tree = fromstring(body)
+                    except Exception, ex:
+                        raise
                 else:
                     raise
-
-            try:
-                self._lxml_tree = fromstring(body)
-            except Exception, ex:
-                #import pdb; pdb.set_trace()
-                raise
 
             GLOBAL_STATE['dom_build_time'] += (time.time() - start)
         return self._lxml_tree

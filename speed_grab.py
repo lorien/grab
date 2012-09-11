@@ -26,12 +26,12 @@ def timer(func):
 @timer
 def main():
     default_logging()
-    for x in xrange(500):
-        url = 'http://load.local/28k.html'
+    for x in xrange(100):
+        url = 'http://load.local/grab.html'
         g = Grab()
         g.go(url)
-        assert 'Scrapy' in g.response.body
-        #g.css_text('title')
+        assert 'grab' in g.response.body
+        g.tree
         #urllib.urlopen(url).read()
 
 if __name__ == '__main__':
