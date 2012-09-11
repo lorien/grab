@@ -30,6 +30,8 @@ TEST_CASE_LIST = (
     'test.text_extension',
     'test.lxml_extension',
     'test.form_extension',
+    # test containers
+    'test.container',
 )
 
 def main():
