@@ -30,5 +30,3 @@ def memory_usage(since=0, render=True, pid=None):
             return '%s %s' % (str(round(mem, 2)), metric)
         else:
             return mem
-
-
