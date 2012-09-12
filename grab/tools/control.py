@@ -32,7 +32,6 @@ def repeat(func, limit=3, args=None, kwargs=None, fatal_exceptions=()):
                 res = func(**kwargs)
             else:
                 res = func()
-            return res
         except Exception, ex:
             if isinstance(ex, fatal_exceptions):
                 raise
@@ -40,4 +39,4 @@ def repeat(func, limit=3, args=None, kwargs=None, fatal_exceptions=()):
             if x == (limit - 1):
                 raise
         else:
-            break
+            return res
