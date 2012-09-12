@@ -25,7 +25,12 @@ def get_node_text(node, smart=False, normalize_space=True):
             './descendant-or-self::*[name() != "script" and '\
             'name() != "style"]/text()[normalize-space()]'))
     else:
-        value = node.text_content()
+        # If DOM tree was built with lxml.etree.fromstring
+        # then tree nodes do not have text_content() method
+        try:
+            value = node.text_content()
+        except AttributeError:
+            value = ''.join(node.xpath('.//text()'))
     if normalize_space:
         value = normalize_space_func(value)
     return value
