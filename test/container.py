@@ -15,6 +15,8 @@ XML = """
         <age>19</age>
         <height>75</height>
         <dmi>14300</dmi>
+        <comment>abc</comment>
+        <comment_cdata><![CDATA[abc]]></comment>
     </player>
 </bbapi>
 """
@@ -23,6 +25,8 @@ class Player(Container):
     id = IntegerField('//player/@id')
     first_name = StringField('//player/firstname')
     retrieved = DateTimeField('//player/@retrieved', '%Y-%m-%dT%H:%M:%SZ')
+    comment = StringField('//player/comment')
+    comment_cdata = StringField('//player/comment_cdata')
 
     data_not_found = StringField('//data/no/found')
 
@@ -36,5 +40,10 @@ class TestContainers(TestCase):
         self.assertEquals(26982032, player.id)
         self.assertEquals('Ardeshir', player.first_name)
         self.assertEquals('2012-09-11 07:38:44', str(player.retrieved))
+
+        # By default comment_cdata attribute contains empty string
+        # because HTML DOM builder is used by default
+        self.assertEquals('abc', player.comment)
+        self.assertEquals('', player.comment_cdata)
 
         with self.assertRaises(DataNotFound): player.data_not_found
