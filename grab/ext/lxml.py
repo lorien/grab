@@ -5,11 +5,14 @@ from __future__ import absolute_import
 from urlparse import urljoin
 import re
 import time
+import logging
 
 from ..error import DataNotFound, GrabMisuseError
 from ..base import GLOBAL_STATE
 from ..tools.text import normalize_space as normalize_space_func, find_number
 from ..tools.lxml_tools import get_node_text
+
+logger = logging.getLogger('grab.ext.lxml')
 
 NULL = object()
 NULL_BYTE = chr(0)
@@ -22,8 +25,15 @@ class LXMLExtension(object):
     @property
     def tree(self):
         """
-        Return DOM-tree of the document calculated with `lxml.html.fromstring` function.
+        Return DOM tree of the document built with HTML DOM builder.
         """
+
+        if self.config['content_type'] == 'xml':
+            return self.build_xml_tree()
+        else:
+            return self.build_html_tree()
+
+    def build_html_tree(self):
         from lxml.html import fromstring
         from lxml.etree import ParserError
 
@@ -61,8 +71,14 @@ class LXMLExtension(object):
     @property
     def xml_tree(self):
         """
-        Return DOM-tree of the document calculated with `lxml.etree.fromstring` function.
+        Return DOM-tree of the document built with XML DOM builder.
         """
+    
+        logger.debug('This method is deprecated. Please use `tree` property '\
+                     'and content_type="xml" option instead.')
+        return self.build_xml_tree()
+
+    def build_xml_tree(self):
         from lxml.etree import fromstring
 
         if self._strict_lxml_tree is None:

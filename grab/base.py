@@ -145,6 +145,11 @@ def default_config():
         # into unicode, by default it is detected automatically
         document_charset = None,
 
+        # Conent type control how DOM are built
+        # For html type HTML DOM builder is used
+        # For xml type XML DOM builder is used
+        content_type = 'html',
+
         # Convert document body to lower case before bulding LXML tree
         # It does not affect `response.body`
         lowercased_tree = False,

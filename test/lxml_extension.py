@@ -30,6 +30,17 @@ HTML = u"""
     </ul>
 """.encode('cp1251')
 
+
+XML = """
+<root>
+    <man>
+        <age>25</age>
+        <weight><![CDATA[30]]></weight>
+    </man>
+</root>
+"""
+
+
 class LXMLExtensionTest(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
@@ -124,3 +135,24 @@ class LXMLExtensionTest(TestCase):
     def test_xpath_exists(self):
         self.assertTrue(self.g.xpath_exists('//li[@id="num-1"]'))
         self.assertFalse(self.g.xpath_exists('//li[@id="num-3"]'))
+
+    def test_cdata_issue(self):
+        g = Grab(transport=GRAB_TRANSPORT)
+        g.fake_response(XML)
+
+        # By default HTML DOM builder is used
+        # It handles CDATA incorrectly
+        self.assertEqual(None, g.xpath('//weight').text)
+        self.assertEqual(None, g.tree.xpath('//weight')[0].text)
+
+        # But XML DOM builder produces valid result
+        #self.assertEqual(None, g.xpath('//weight').text)
+        self.assertEqual('30', g.xml_tree.xpath('//weight')[0].text)
+
+        # Use `content_type` option to change default DOM builder
+        g = Grab(transport=GRAB_TRANSPORT)
+        g.fake_response(XML)
+        g.setup(content_type='xml')
+
+        self.assertEqual('30', g.xpath('//weight').text)
+        self.assertEqual('30', g.tree.xpath('//weight')[0].text)
