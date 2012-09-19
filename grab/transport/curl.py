@@ -216,8 +216,12 @@ class CurlTransport(object):
             else:
                 self.curl.setopt(pycurl.POSTFIELDS, '')
         elif grab.request_method == 'PUT':
+            data = grab.config['post']
+            if isinstance(data, unicode) or not isinstance(data, basestring):
+                raise error.GrabMisuseError('Value of post option could be only byte string if PUT method is used')
             self.curl.setopt(pycurl.PUT, 1)
-            self.curl.setopt(pycurl.READFUNCTION, StringIO(grab.config['post']).read) 
+            self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read) 
+            self.curl.setopt(pycurl.INFILESIZE, len(data))
         elif grab.request_method == 'DELETE':
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
         elif grab.request_method == 'HEAD':
