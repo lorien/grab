@@ -20,6 +20,12 @@ def get_node_text(node, smart=False, normalize_space=True):
     with normalized spaces
     """
 
+    # If xpath return a attribute value, it value will be string not a node
+    if isinstance(node, basestring):
+        if normalize_space:
+            node = normalize_space_func(node)
+        return node
+
     if smart:
         value = ' '.join(node.xpath(
             './descendant-or-self::*[name() != "script" and '\
