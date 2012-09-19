@@ -34,7 +34,7 @@ class TestContainers(TestCase):
         grab = Grab(transport=GRAB_TRANSPORT)
         grab.fake_response(XML)
 
-        player = Player(grab)
+        player = Player(grab.tree)
 
         self.assertEquals(26982032, player.id)
         self.assertEquals('Ardeshir', player.first_name)
@@ -50,8 +50,8 @@ class TestContainers(TestCase):
         grab = Grab(transport=GRAB_TRANSPORT)
         grab.fake_response(XML)
         grab.setup(content_type='xml')
-        player = Player(grab)
+        player = Player(grab.tree)
         self.assertEquals('abc', player.comment)
         self.assertEquals('abc', player.comment_cdata)
 
-        with self.assertRaises(DataNotFound): player.data_not_found
+        with self.assertRaises(IndexError): player.data_not_found

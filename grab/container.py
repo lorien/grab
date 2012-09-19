@@ -13,14 +13,17 @@ Usage example:
     >>> grab = Grab()
     >>> grab.go('http://exmaple.com')
 
-    >>> structure = SomeStructure(grab)
+    >>> structure = SomeStructure(grab.tree)
 
     >>> structure.id    # 1
     >>> structure.name  # "Name of Element"
     >>> structure.date  # Return a datetime object
 
 """
+from __future__ import absolute_import
 from abc import ABCMeta, abstractmethod
+
+from .tools.lxml_tools import get_node_text
 
 
 class Field(object):
@@ -39,12 +42,12 @@ class Field(object):
 
 class IntegerField(Field):
     def get(self, container):
-        return int(container.grab.xpath_text(self.xpath_exp))
+        return int(get_node_text(container.node.xpath(self.xpath_exp)[0]))
 
 
 class StringField(Field):
     def get(self, container):
-        return container.grab.xpath_text(self.xpath_exp)
+        return get_node_text(container.node.xpath(self.xpath_exp)[0])
 
 
 class DateTimeField(Field):
@@ -55,7 +58,7 @@ class DateTimeField(Field):
     def get(self, container):
         from datetime import datetime
 
-        datetime_str = container.grab.xpath_text(self.xpath_exp)
+        datetime_str = get_node_text(container.node.xpath(self.xpath_exp)[0])
 
         return datetime.strptime(datetime_str, self.datetime_format)
 
@@ -75,5 +78,5 @@ class ContainerBuilder(type):
 class Container(object):
     __metaclass__ = ContainerBuilder
 
-    def __init__(self, grab):
-        self.grab = grab
+    def __init__(self, node):
+        self.node = node
