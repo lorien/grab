@@ -90,8 +90,11 @@ class FormExtension(object):
 
         if self._lxml_form is None:
             forms = [(idx, len(x.fields)) for idx, x in enumerate(self.tree.forms)]
-            idx = sorted(forms, key=lambda x: x[1], reverse=True)[0][0]
-            self.choose_form(idx)
+            if len(forms):
+                idx = sorted(forms, key=lambda x: x[1], reverse=True)[0][0]
+                self.choose_form(idx)
+            else:
+                raise DataNotFound('Response does not contains any form')
         return self._lxml_form
 
     def set_input(self, name, value):

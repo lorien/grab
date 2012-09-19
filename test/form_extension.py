@@ -52,6 +52,10 @@ MULTIPLE_SUBMIT_FORM = """
 </form>
 """
 
+NO_FORM_HTML = """
+<div>Hello world</div>
+"""
+
 class TestHtmlForms(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
@@ -149,3 +153,9 @@ class TestHtmlForms(TestCase):
         g._lxml_form = None
         g.set_input_by_xpath('//*[@name="gender"]', '2')
         self.assertEqual('common_form', g._lxml_form.get('id'))
+
+    def test_html_without_forms(self):
+        g = Grab(transport=GRAB_TRANSPORT)
+        RESPONSE['get'] = NO_FORM_HTML
+        g.go(BASE_URL)
+        self.assertRaises(DataNotFound, lambda: g.form)
