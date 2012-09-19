@@ -22,8 +22,10 @@ import logging
 from copy import deepcopy
 import time
 import logging
+import urllib2
+from urllib2 import URLError, HTTPError
 
-from error import GrabError, GrabMisuseError
+from error import GrabError, GrabNetworkError, GrabMisuseError
 
 logger = logging.getLogger('grab.proxylist')
 
@@ -31,12 +33,12 @@ READ_TIMEOUT = 60 * 10
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
 RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')
 
+
 def parse_proxyline(line):
     """
     Extract proxy details from the text line.
     """
 
-    line = line.strip()
     match = RE_SIMPLE_PROXY.search(line)
     if match:
         host, port = match.groups()
@@ -49,40 +51,46 @@ def parse_proxyline(line):
     raise GrabError('Invalid proxy line: %s' % line)
 
 
-class TextFileSource(object):
-    source_type = 'text_file'
+class ProxySource(object):
 
-    def __init__(self, filename, read_timeout=READ_TIMEOUT, proxy_type='http'):
-        self.filename = filename
-        self.proxy_type = proxy_type
+    def __init__(self, source, read_timeout=READ_TIMEOUT, proxy_type='http'):
+        self.source = source
         self.read_timeout = read_timeout
+        self.proxy_type = proxy_type
+        self.read_time = None
 
-    def load(self):
+
+    def parse_lines(self, proxies):
         """
-        Load proxy list from specified source and validate loaded data.
-
-        Each server could be in two forms:
-        * simple: "server:port"
-        * complex: "server:port:user:pwd"
+        Parse each line from proxies list step by step.
+        Returns tuple with server (host:port) and user_pwd (user:password)
+        :param lines: list which contains proxy servers
         """
 
-        with open(self.filename) as src:
-            lines = src.read().splitlines()
-
-        servers = []
-        for line in lines:
-            line = line.strip().replace(' ', '')
-            if line:
-                host, port, user, pwd = parse_proxyline(line)
+        for proxy in proxies:
+            if isinstance(proxy, unicode):
+                proxy = proxy.encode("utf8")
+            proxy = proxy.strip().replace(' ', '')
+            if proxy:
+                host, port, user, pwd = parse_proxyline(proxy)
                 server = '%s:%s' % (host, port)
+                user_pwd = None
                 if user:
                     user_pwd = '%s:%s' % (user, pwd)
-                else:
-                    user_pwd = None
-                servers.append((server, user_pwd, self.proxy_type))
-        self.read_time = time.time()
-        self.server_list = servers
-        self.server_list_iterator = itertools.cycle(self.server_list)
+                yield server, user_pwd
+
+    def get_server_list(self, proxylist):
+        if isinstance(proxylist, unicode):
+            proxylist = proxylist.encode("utf8")
+        if isinstance(proxylist, str):
+            proxylist = proxylist.split()
+        servers = []
+        for server, user_pwd in self.parse_lines(proxylist):
+            servers.append((server, user_pwd, self.proxy_type))
+        return servers
+
+    def load(self):
+        pass
 
     def reload(self):
         """
@@ -97,8 +105,95 @@ class TextFileSource(object):
             self.load()
 
 
+class TextFileSource(ProxySource):
+    source_type = 'text_file'
+
+    def load(self):
+        """
+        Load proxy list from specified source and validate loaded data.
+
+        Each server could be in two forms:
+        * simple: "server:port"
+        * complex: "server:port:user:pwd"
+        """
+
+        with open(self.source) as src:
+            lines = src.read().splitlines()
+
+        self.read_time = time.time()
+        self.server_list = self.get_server_list(lines)
+        self.server_list_iterator = itertools.cycle(self.server_list)
+
+
+class URLSource(ProxySource):
+    source_type = 'url'
+
+    def load(self):
+        """
+        Load proxy list from specified URL and validate loaded data.
+
+        Each proxy server could be in two forms:
+        * simple: "server:port"
+        * complex: "server:port:user:pwd"
+        """
+        try:
+            proxylist = urllib2.urlopen(self.source).readlines()
+        except (URLError, HTTPError):
+            raise GrabNetworkError("Can't load proxies from URL (%s)" % self.source)
+
+        self.read_time = time.time()
+        self.server_list = self.get_server_list(proxylist)
+        self.server_list_iterator = itertools.cycle(self.server_list)
+
+
+class ListSource(ProxySource):
+    source_type = 'list'
+
+    def load(self):
+        """
+        Load proxies from given list.
+
+        Each proxy server could be in two forms:
+        * simple: "server:port"
+        * complex: "server:port:user:pwd"
+        """
+
+        if not isinstance(self.source, list):
+            raise GrabMisuseError("Given proxy list isn't a list type")
+        self.server_list = self.get_server_list(self.source)
+        self.server_list_iterator = itertools.cycle(self.server_list)
+
+    def reload(self):
+        pass
+
+
+class StringSource(ProxySource):
+    source_type = 'string'
+
+    def load(self):
+        """
+        Load proxies from given string. String can be multiline.
+
+        Each proxy server could be in two forms:
+        * simple: "server:port"
+        * complex: "server:port:user:pwd"
+        """
+
+        if not isinstance(self.source, (str, unicode)):
+            raise GrabMisuseError("Given proxy list isn't a string or unicode type")
+        self.server_list = self.get_server_list(self.source)
+        self.server_list_iterator = itertools.cycle(self.server_list)
+
+    def reload(self):
+        pass
+
+
+
 SOURCE_LIST = {
     'text_file': TextFileSource,
+    'url': URLSource,
+    'list': ListSource,
+    'string': StringSource,
 }
 
 
