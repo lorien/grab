@@ -56,6 +56,16 @@ NO_FORM_HTML = """
 <div>Hello world</div>
 """
 
+DISABLED_RADIO_HTML = """
+<form>
+    <input type="radio" name="foo" value="1" disabled="disabled" />
+    <input type="radio" name="foo" value="2" disabled="disabled" />
+
+    <input type="radio" name="bar" value="1" checked="checked" />
+    <input type="radio" name="bar" value="2" disabled="disabled" />
+</form>
+"""
+
 class TestHtmlForms(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
@@ -159,3 +169,13 @@ class TestHtmlForms(TestCase):
         RESPONSE['get'] = NO_FORM_HTML
         g.go(BASE_URL)
         self.assertRaises(DataNotFound, lambda: g.form)
+
+    def test_disabled_radio(self):
+        """
+        Bug #57
+        """
+
+        g = Grab(transport=GRAB_TRANSPORT)
+        RESPONSE['get'] = DISABLED_RADIO_HTML
+        g.go(BASE_URL)
+        g.submit(make_request=False)

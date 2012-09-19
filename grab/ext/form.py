@@ -323,19 +323,19 @@ class FormExtension(object):
             # Do not submit disabled fields
             # http://www.w3.org/TR/html4/interact/forms.html#h-17.12
             if elem.get('disabled'):
-                del fields[elem.name]
-                continue
+                if elem.name in fields:
+                    del fields[elem.name]
 
-            if elem.tag == 'select':
+            elif elem.tag == 'select':
                 if fields[elem.name] is None:
                     if len(elem.value_options):
                         fields[elem.name] = elem.value_options[0]
 
-            if getattr(elem, 'type', None) == 'radio':
+            elif getattr(elem, 'type', None) == 'radio':
                 if fields[elem.name] is None:
                     fields[elem.name] = elem.get('value')
 
-            if getattr(elem, 'type', None) == 'checkbox':
+            elif getattr(elem, 'type', None) == 'checkbox':
                 if not elem.checked:
                     if elem.name is not None:
                         if elem.name in fields:
