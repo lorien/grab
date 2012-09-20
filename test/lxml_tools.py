@@ -1,7 +1,7 @@
 # coding: utf-8
 from unittest import TestCase
 from lxml.html import fromstring
-from grab.tools.lxml_tools import get_node_text, find_node_number
+from grab.tools.lxml_tools import get_node_text, find_node_number, render_html
 
 HTML = u"""
 <head>
@@ -45,3 +45,11 @@ class LXMLToolsTest(TestCase):
         self.assertEqual(100, find_node_number(node))
         self.assertEqual('100', find_node_number(node, make_int=False))
         self.assertEqual(1002, find_node_number(node, ignore_spaces=True))
+
+    def test_render_html(self):
+        html = u'<html><body><p>фыва</p></body></html>'
+        html_utf = html.encode('utf-8')
+        tree = fromstring(html)
+        self.assertEqual(html_utf, render_html(tree))
+        self.assertEqual(html, render_html(tree, make_unicode=True))
+        self.assertEqual(html.encode('cp1251'), render_html(tree, encoding='cp1251'))
