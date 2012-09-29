@@ -13,7 +13,7 @@ import feedparser
 from lxml.html.clean import clean_html
 from grab.tools.text import remove_bom
 
-from ..base import DataNotFound, GrabMisuseError
+from ..error import DataNotFound, GrabMisuseError
 
 log = logging.getLogger('grab.tools.feed')
 
