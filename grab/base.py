@@ -564,6 +564,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         server, userpwd, proxy_type = self.proxylist.get_random()
+        print server, userpwd
         self.setup(proxy=server, proxy_userpwd=userpwd,
                    proxy_type=proxy_type)
 

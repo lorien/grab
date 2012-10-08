@@ -121,12 +121,14 @@ class TestGrab(TestCase):
         g2.adopt(g)
 
     def test_find_content_blocks(self):
+        # TODO: move to separate file
+        from grab.tools.content import find_content_blocks
         porno = u'порно ' * 100
         redis = u'редис ' * 100
         RESPONSE['get'] = ('<div>%s</div><p>%s' % (porno, redis)).encode('utf-8')
         g = Grab(transport=GRAB_TRANSPORT)
         g.go(BASE_URL)
-        blocks = list(g.find_content_blocks())
+        blocks = list(find_content_blocks(g.tree))
         print '>>>'
         print blocks[0]
         print '<<<'
