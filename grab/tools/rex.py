@@ -74,7 +74,7 @@ def rex_list(body, rex, flags=0):
     """
 
     rex = normalize_regexp(rex, flags)
-    return rex.finditer(body)
+    return list(rex.finditer(body))
 
 def rex_text_list(body, rex, flags=0):
     """

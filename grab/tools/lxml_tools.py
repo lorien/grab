@@ -81,13 +81,16 @@ def parse_html(html, encoding='utf-8'):
     return lxml.html.fromstring(html, parser=parser)
 
 
-def render_html(node, encoding='utf-8'):
+def render_html(node, encoding='utf-8', make_unicode=False):
     """
     Render Element node.
     """
     import lxml.html
 
-    return lxml.html.tostring(node, encoding=encoding)
+    if make_unicode:
+        return lxml.html.tostring(node, encoding='utf-8').decode('utf-8')
+    else:
+        return lxml.html.tostring(node, encoding=encoding)
 
 
 def truncate_html(html, limit, encoding='utf-8'):
