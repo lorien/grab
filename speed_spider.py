@@ -5,7 +5,7 @@ from grab.tools.logs import default_logging
 import time
 import logging
 
-URL_28K = 'http://load.local/28k.html'
+URL_28K = 'http://load.local/grab.html'
 
 def timer(func):
     """
@@ -23,17 +23,20 @@ def timer(func):
 
 class SpeedSpider(Spider):
     def task_generator(self):
-        for x in xrange(500):
-            yield Task('load', url=URL_28K)
+        url_template = 'http://load.local/grab%d.html'
+        for x in xrange(1000):
+            disable_flag = not (x % 2)
+            yield Task('load', url=url_template % x, disable_cache=disable_flag)
 
     def task_load(self, grab, task):
-        assert 'Scrapy' in grab.response.body
+        assert 'grab' in grab.response.body
 
 
 @timer
 def main():
     default_logging()
     bot = SpeedSpider(thread_number=30)
+    bot.setup_cache(database='speed_spider', use_compression=True)
     bot.run()
     print bot.render_stats()
 

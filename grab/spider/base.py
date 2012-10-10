@@ -54,7 +54,7 @@ class Spider(SpiderPattern, SpiderStat):
     # The resolving takes place in `add_task` method
     base_url = None
 
-    def __init__(self, thread_number=3, request_limit=None,
+    def __init__(self, thread_number=3,
                  network_try_limit=10, task_try_limit=10,
                  debug_error=False,
                  use_cache=None,
@@ -68,8 +68,6 @@ class Spider(SpiderPattern, SpiderStat):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
-        * request_limit - Limit number of all network requests
-            Useful for debugging
         * network_try_limit - How many times try to send request
             again if network error was occuried, use 0 to disable
         * network_try_limit - Limit of tries to execute some task
@@ -108,7 +106,6 @@ class Spider(SpiderPattern, SpiderStat):
             self.meta = {}
 
         self.thread_number = thread_number
-        self.request_limit = request_limit
         self.counters = defaultdict(int)
         self.grab_config = {}
         self.items = {}
@@ -276,6 +273,103 @@ class Spider(SpiderPattern, SpiderStat):
             # This code is executed when main cycles is breaked
             self.shutdown()
 
+    def get_next_response(self):
+        """
+        Use async transport to download tasks.
+        If it yields None then scraping process should stop.
+
+        # TODO: this method is TOO big
+        """ 
+
+        transport = MulticurlTransport(self.thread_number)
+
+        # This is infinite cycle
+        # You can break it only from outside code which
+        # iterates over result of this method
+        while True:
+
+            cached_request = None
+
+            # while transport is ready for new requests
+            while transport.ready_for_task():
+                try:
+                    # TODO: implement timeout via sleep
+                    task = self.taskq.get(TASK_QUEUE_TIMEOUT)
+                except Queue.Empty:
+                    # If All handlers are free and no tasks in queue
+                    # yield None signal
+                    if not transport.active_task_number():
+                        yield None
+                    else:
+                        break
+                else:
+                    task.network_try_count += 1
+                    if task.task_try_count == 0:
+                        task.task_try_count = 1
+
+                    if not self.check_task_limits(task):
+                        continue
+
+                    grab = self.create_grab_instance()
+                    if task.grab_config:
+                        grab.load_config(task.grab_config)
+                    else:
+                        grab.setup(url=task.url)
+
+                    grab_config_backup = grab.dump_config()
+
+                    if (self.cache_enabled
+                        and not task.get('refresh_cache', False)
+                        and not task.get('disable_cache', False)
+                        and grab.detect_request_method() == 'GET'):
+
+                        cache_item = self.cache.get_item(grab.config['url'])
+                        if cache_item:
+                            transport.repair_grab(grab)
+                            # GRAB CLONE ISSUE
+                            cached_request = (grab, task, cache_item)
+                            grab.prepare_request()
+                            grab.log_request('CACHED')
+                            self.inc_count('request-cache')
+
+                            # break from prepare-request cycle
+                            # and go to process-response code
+                            break
+
+                    self.inc_count('request-network')
+
+                    self.change_proxy(task, grab)
+                    transport.process_task(task, grab, grab_config_backup)
+
+            # If real network requests were fired
+            # when wait for some result
+            # TODO: probably this code should go after prcessing
+            # of results from the cache
+            transport.wait_result()
+
+            if cached_request:
+                # GRAB CLONE ISSUE
+                grab, task, cache_item = cached_request
+                self.cache.load_response(grab, cache_item)
+
+                # GRAB CLONE ISSUE
+                yield {'ok': True, 'grab': grab,
+                       'grab_config_backup': grab_config_backup,
+                       'task': task, 'emsg': None}
+                self.inc_count('request')
+
+            # Iterate over network trasport ready results
+            # Each result could be valid or failed
+            # Result format: {ok, grab, grab_config_backup, task, emsg}
+            for result in transport.iterate_results():
+                yield self.process_transport_result(result)
+                self.inc_count('request')
+
+            # Calling special async magic function
+            # to do async things
+            transport.select()
+
+
     def valid_response_code(self, code, task):
         """
         Answer the question: if the response could be handled via
@@ -414,120 +508,6 @@ class Spider(SpiderPattern, SpiderStat):
                 fallback_handler(task)
 
         return is_valid
-
-    def get_next_response(self):
-        """
-        Use async transport to download tasks.
-        If it yields None then scraping process should stop.
-
-        # TODO: this method is TOO big
-        """ 
-
-        transport = MulticurlTransport(self.thread_number)
-
-        # This is infinite cycle
-        # You can break it only from outside code which
-        # iterates over result of this method
-        # This cyle is breaked from inside only
-        # if self.request_limit is reached
-        while True:
-
-            cached_request = None
-
-            # while transport is ready for new requests
-            while transport.ready_for_task():
-                # If request number limit is reached
-                # then do not add new tasks and yield None (which will stop all)
-                # when length of freelist (number of free workers)
-                # will become equal to number of threads (total number of workers)
-                # Worker is just a network stream
-                if (self.request_limit is not None and
-                    self.counters['request'] >= self.request_limit):
-
-                    logger.debug('Request limit is reached: %s' %
-                                 self.request_limit)
-                    if not transport.active_task_number():
-                        yield None
-                    else:
-                        print 'break'
-                        break
-                else:
-                    try:
-                        # TODO: implement timeout via sleep
-                        task = self.taskq.get(TASK_QUEUE_TIMEOUT)
-                    except Queue.Empty:
-                        # If All handlers are free and no tasks in queue
-                        # yield None signal
-                        if not transport.active_task_number():
-                            yield None
-                        else:
-                            break
-                    else:
-                        task.network_try_count += 1
-                        if task.task_try_count == 0:
-                            task.task_try_count = 1
-
-                        if not self.check_task_limits(task):
-                            continue
-
-                        grab = self.create_grab_instance()
-                        if task.grab_config:
-                            grab.load_config(task.grab_config)
-                        else:
-                            grab.setup(url=task.url)
-
-                        grab_config_backup = grab.dump_config()
-
-                        if (self.cache_enabled
-                            and not task.get('refresh_cache', False)
-                            and not task.get('disable_cache', False)
-                            and grab.detect_request_method() == 'GET'):
-
-                            cache_item = self.cache.get_item(grab.config['url'])
-                            if cache_item:
-                                transport.repair_grab(grab)
-                                # GRAB CLONE ISSUE
-                                cached_request = (grab, task, cache_item)
-                                grab.prepare_request()
-                                grab.log_request('CACHED')
-                                self.inc_count('request-cache')
-
-                                # break from prepare-request cycle
-                                # and go to process-response code
-                                break
-
-                        self.inc_count('request-network')
-
-                        self.change_proxy(task, grab)
-                        transport.process_task(task, grab, grab_config_backup)
-
-            # If real network requests were fired
-            # when wait for some result
-            # TODO: probably this code should go after prcessing
-            # of results from the cache
-            transport.wait_result()
-
-            if cached_request:
-                # GRAB CLONE ISSUE
-                grab, task, cache_item = cached_request
-                self.cache.load_response(grab, cache_item)
-
-                # GRAB CLONE ISSUE
-                yield {'ok': True, 'grab': grab,
-                       'grab_config_backup': grab_config_backup,
-                       'task': task, 'emsg': None}
-                self.inc_count('request')
-
-            # Iterate over network trasport ready results
-            # Each result could be valid or failed
-            # Result format: {ok, grab, grab_config_backup, task, emsg}
-            for result in transport.iterate_results():
-                yield self.process_transport_result(result)
-                self.inc_count('request')
-
-            # Calling special async magic function
-            # to do async things
-            transport.select()
 
     def change_proxy(self, task, grab):
         """
