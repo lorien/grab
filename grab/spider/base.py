@@ -283,15 +283,9 @@ class Spider(SpiderPattern, SpiderStat):
 
         transport = MulticurlTransport(self.thread_number)
 
-        # This is infinite cycle
-        # You can break it only from outside code which
-        # iterates over result of this method
         while True:
 
-            cached_request = None
-
-            # while transport is ready for new requests
-            while transport.ready_for_task():
+            if transport.ready_for_task():
                 try:
                     # TODO: implement timeout via sleep
                     task = self.taskq.get(TASK_QUEUE_TIMEOUT)
@@ -300,8 +294,6 @@ class Spider(SpiderPattern, SpiderStat):
                     # yield None signal
                     if not transport.active_task_number():
                         yield None
-                    else:
-                        break
                 else:
                     task.network_try_count += 1
                     if task.task_try_count == 0:
@@ -318,45 +310,23 @@ class Spider(SpiderPattern, SpiderStat):
 
                     grab_config_backup = grab.dump_config()
 
-                    if (self.cache_enabled
-                        and not task.get('refresh_cache', False)
-                        and not task.get('disable_cache', False)
-                        and grab.detect_request_method() == 'GET'):
+                    cache_result = None
+                    if self.cache_allowed_for_task(task, grab):
+                        cache_result = self.query_cache(transport, task, grab,
+                                                        grab_config_backup)
 
-                        cache_item = self.cache.get_item(grab.config['url'])
-                        if cache_item:
-                            transport.repair_grab(grab)
-                            # GRAB CLONE ISSUE
-                            cached_request = (grab, task, cache_item)
-                            grab.prepare_request()
-                            grab.log_request('CACHED')
-                            self.inc_count('request-cache')
+                    if cache_result:
+                        yield cache_result
+                    else:
+                        self.inc_count('request-network')
+                        self.change_proxy(task, grab)
+                        transport.process_task(task, grab, grab_config_backup)
+                        transport.process_handlers()
 
-                            # break from prepare-request cycle
-                            # and go to process-response code
-                            break
-
-                    self.inc_count('request-network')
-
-                    self.change_proxy(task, grab)
-                    transport.process_task(task, grab, grab_config_backup)
-
-            # If real network requests were fired
-            # when wait for some result
-            # TODO: probably this code should go after prcessing
-            # of results from the cache
-            transport.wait_result()
-
-            if cached_request:
-                # GRAB CLONE ISSUE
-                grab, task, cache_item = cached_request
-                self.cache.load_response(grab, cache_item)
-
-                # GRAB CLONE ISSUE
-                yield {'ok': True, 'grab': grab,
-                       'grab_config_backup': grab_config_backup,
-                       'task': task, 'emsg': None}
-                self.inc_count('request')
+            # If some handlers should be processed
+            # then process them
+            if transport.select(0.01):
+                transport.process_handlers()
 
             # Iterate over network trasport ready results
             # Each result could be valid or failed
@@ -365,10 +335,35 @@ class Spider(SpiderPattern, SpiderStat):
                 yield self.process_transport_result(result)
                 self.inc_count('request')
 
-            # Calling special async magic function
-            # to do async things
-            transport.select()
+    def cache_allowed_for_task(self, task, grab):
+        if (# cache is disabled for all tasks
+            not self.cache_enabled
+            # cache data should be refreshed
+            or task.get('refresh_cache', False)
+            # cache could not be used
+            or task.get('disable_cache', False)
+            # request type is not cacheable
+            or grab.detect_request_method() != 'GET'):
+            return False
+        else:
+            return True
 
+    def query_cache(self, transport, task, grab, grab_config_backup):
+        cache_item = self.cache.get_item(grab.config['url'])
+        if cache_item is None:
+            return None
+        else:
+            transport.repair_grab(grab)
+            grab.prepare_request()
+            self.cache.load_response(grab, cache_item)
+
+            grab.log_request('CACHED')
+            self.inc_count('request')
+            self.inc_count('request-cache')
+
+            return {'ok': True, 'grab': grab,
+                   'grab_config_backup': grab_config_backup,
+                   'task': task, 'emsg': None}
 
     def valid_response_code(self, code, task):
         """
