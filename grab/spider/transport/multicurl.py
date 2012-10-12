@@ -1,4 +1,5 @@
 import pycurl
+import time
 
 CURL_OBJECT = pycurl.Curl()
 
@@ -36,12 +37,13 @@ class MulticurlTransport(object):
         # Add configured curl instance to multi-curl processor
         self.multi.add_handle(curl)
 
-    def wait_result(self):
-        if self.active_task_number():
-            while True:
-                status, active_objects = self.multi.perform()
-                if status != pycurl.E_CALL_MULTI_PERFORM:
-                    break
+    def process_handlers(self):
+        # http://curl.haxx.se/libcurl/c/curl_multi_perform.html
+        #if self.active_task_number():
+        while True:
+            status, active_objects = self.multi.perform()
+            if status != pycurl.E_CALL_MULTI_PERFORM:
+                break
 
     def iterate_results(self):
         while True:
@@ -98,8 +100,8 @@ class MulticurlTransport(object):
             if not queued_messages:
                 break
 
-    def select(self):
-        self.multi.select(0.01)
+    def select(self, timeout=0.01):
+        return self.multi.select(timeout)
 
     def repair_grab(self, grab):
         # `curl` attribute should not be None

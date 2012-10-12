@@ -95,6 +95,7 @@ class CacheBackend(object):
             self.db.cache.save(item, safe=True)
         except Exception, ex:
             if 'document too large' in unicode(ex):
-                pass
+                logging.error('Document too large. It was not saved into mongo '\
+                              'cache. Url: %s' % url)
             else:
                 raise

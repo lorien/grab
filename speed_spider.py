@@ -4,6 +4,7 @@ from grab.spider import Spider, Task
 from grab.tools.logs import default_logging
 import time
 import logging
+from random import randint
 
 URL_28K = 'http://load.local/grab.html'
 
@@ -24,12 +25,19 @@ def timer(func):
 class SpeedSpider(Spider):
     def task_generator(self):
         url_template = 'http://load.local/grab%d.html'
-        for x in xrange(1000):
-            disable_flag = not (x % 2)
+        #fast_url = 'http://load.local/grab0.html'
+        slow_url = 'http://load.local/slow.html'
+        #yield Task('load', url=slow_url, disable_cache=True)
+        #yield Task('load', url=fast_url, disable_cache=False)
+        for x in xrange(500):
+            disable_flag = False#not (x % 2)
             yield Task('load', url=url_template % x, disable_cache=disable_flag)
+            #if randint(0, 10) == 10:
+                #yield Task('load', url=slow_url, disable_cache=True)
 
     def task_load(self, grab, task):
         assert 'grab' in grab.response.body
+        print 'ok', task.url
 
 
 @timer
