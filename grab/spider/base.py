@@ -144,7 +144,8 @@ class Spider(SpiderPattern, SpiderStat):
         self.cache_enabled = True
         mod = __import__('grab.spider.cache_backend.%s' % backend,
                          globals(), locals(), ['foo'])
-        self.cache = mod.CacheBackend(database=database, use_compression=use_compression)
+        self.cache = mod.CacheBackend(database=database, use_compression=use_compression,
+                                      **kwargs)
 
     def setup_queue(self, backend='memory', **kwargs):
         logger.debug('Using %s backend for task queue' % backend)

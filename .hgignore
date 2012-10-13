@@ -26,3 +26,4 @@ syntax:regexp
 ^log$
 ^data/
 ^ghost$
+^var/
