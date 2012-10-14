@@ -41,8 +41,9 @@ class CacheBackend(object):
     def create_cache_table(self):
         self.cursor.execute('''
             create table cache (
-                id varchar(40) primary key,
-                data blob not null
+                id binary(20) not null,
+                data mediumblob not null,
+                primary key (id)
             ) engine = myisam
         ''')
 
@@ -53,7 +54,7 @@ class CacheBackend(object):
 
         _hash = self.build_hash(url)
         res = self.cursor.execute('''
-            select data from cache where id = %s
+            select data from cache where id = x%s
         ''', (_hash,))
         row = self.cursor.fetchone()
         if row:
@@ -75,7 +76,7 @@ class CacheBackend(object):
     def remove_cache_item(self, url):
         _hash = self.build_hash(url)
         self.cursor.execute('''
-            delete from cache where id = %s
+            delete from cache where id = x%s
         ''', (_hash,))
 
     def load_response(self, grab, cache_item):
@@ -124,13 +125,13 @@ class CacheBackend(object):
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
         res = self.cursor.execute('''
-            update cache set data = %s where id = %s
+            update cache set data = %s where id = x%s
         ''', (data, _hash))
         if self.cursor.rowcount:
             return
         else:
             res = self.cursor.execute('''
-                insert into cache (id, data) values(%s, %s)
+                insert into cache (id, data) values(x%s, %s)
             ''', (_hash, data))
 
     def pack_database_value(self, val):
