@@ -115,3 +115,17 @@ class TestPostFeature(TestCase):
         g.setup(post={'foo': data}, url=BASE_URL, charset='cp1251')
         g.request()
         self.assertEqual(REQUEST['post'], 'foo=%s' % urllib.quote(data.encode('cp1251')))
+
+    def test_put(self):
+        g = Grab()
+        g.setup(post='abc', url=BASE_URL, method='put')
+        g.request()
+        self.assertEqual(REQUEST['method'], 'PUT')
+        self.assertEqual(REQUEST['headers']['content-length'], '3')
+
+    def test_patch(self):
+        g = Grab()
+        g.setup(post='abc', url=BASE_URL, method='patch')
+        g.request()
+        self.assertEqual(REQUEST['method'], 'PATCH')
+        self.assertEqual(REQUEST['headers']['content-length'], '3')

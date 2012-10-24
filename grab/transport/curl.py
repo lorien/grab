@@ -218,8 +218,18 @@ class CurlTransport(object):
         elif grab.request_method == 'PUT':
             data = grab.config['post']
             if isinstance(data, unicode) or not isinstance(data, basestring):
-                raise error.GrabMisuseError('Value of post option could be only byte string if PUT method is used')
-            self.curl.setopt(pycurl.PUT, 1)
+                raise error.GrabMisuseError('Value of post option could be only '\
+                                            'byte string if PUT method is used')
+            self.curl.setopt(pycurl.UPLOAD, 1)
+            self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read) 
+            self.curl.setopt(pycurl.INFILESIZE, len(data))
+        elif grab.request_method == 'PATCH':
+            data = grab.config['post']
+            if isinstance(data, unicode) or not isinstance(data, basestring):
+                raise error.GrabMisuseError('Value of post option could be only byte '\
+                                            'string if PATCH method is used')
+            self.curl.setopt(pycurl.UPLOAD, 1)
+            self.curl.setopt(pycurl.CUSTOMREQUEST, 'PATCH')
             self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read) 
             self.curl.setopt(pycurl.INFILESIZE, len(data))
         elif grab.request_method == 'DELETE':
@@ -228,8 +238,10 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.NOBODY, 1)
         elif grab.request_method == 'UPLOAD':
             self.curl.setopt(pycurl.UPLOAD, 1)
-        else:
+        elif grab.request_method == 'GET':
             self.curl.setopt(pycurl.HTTPGET, 1)
+        else:
+            raise error.GrabMisuseError('Invalid method: %s' % grab.request_method)
         
         headers = grab.config['common_headers']
         if grab.config['headers']:

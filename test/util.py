@@ -23,7 +23,7 @@ RESPONSE_ONCE_HEADERS = []
 # Fake HTTP Server saves request details
 # into global REQUEST variable
 REQUEST = {'get': None, 'post': None, 'headers': None,
-           'path': None}
+           'path': None, 'method': None}
 
 SLEEP = {'get': 0, 'post': 0}
 
@@ -89,6 +89,7 @@ class FakeServerThread(threading.Thread):
                 print '<-- (GET)'
                 time.sleep(SLEEP['get'])
 
+                REQUEST['method'] = 'GET'
                 REQUEST['headers'] = self.headers
                 REQUEST['path'] = self.path
 
@@ -132,6 +133,7 @@ class FakeServerThread(threading.Thread):
             def do_POST(self):
                 time.sleep(SLEEP['post'])
                 post_size = int(self.headers.getheader('content-length'))
+                REQUEST['method'] = 'POST'
                 REQUEST['post'] = self.rfile.read(post_size)
                 REQUEST['headers'] = self.headers
                 REQUEST['path'] = self.path
@@ -158,6 +160,34 @@ class FakeServerThread(threading.Thread):
                     RESPONSE_ONCE['post'] = None
                 else:
                     self.wfile.write(RESPONSE['post'])
+
+            def do_PUT(self):
+                post_size = int(self.headers.getheader('content-length'))
+                REQUEST['method'] = 'PUT'
+                REQUEST['post'] = self.rfile.read(post_size)
+                REQUEST['headers'] = self.headers
+                REQUEST['path'] = self.path
+
+                headers_sent = set()
+                self.send_response(200)
+                charset = 'utf-8'
+                self.send_header('Content-Type', 'text/html; charset=%s' % charset)
+                self.end_headers()
+                self.wfile.write('ok')
+
+            def do_PATCH(self):
+                post_size = int(self.headers.getheader('content-length'))
+                REQUEST['method'] = 'PATCH'
+                REQUEST['post'] = self.rfile.read(post_size)
+                REQUEST['headers'] = self.headers
+                REQUEST['path'] = self.path
+
+                headers_sent = set()
+                self.send_response(200)
+                charset = 'utf-8'
+                self.send_header('Content-Type', 'text/html; charset=%s' % charset)
+                self.end_headers()
+                self.wfile.write('ok')
 
         server_address = ('localhost', self.listen_port)
         try:
