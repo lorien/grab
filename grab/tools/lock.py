@@ -7,6 +7,7 @@ import sys
 import logging
 import os
 
+logger = logging.getLogger('grab.tools.lock')
 fh = None
 
 def set_lock(fname):
@@ -59,7 +60,7 @@ def assert_lock(fname):
     If file is locked then terminate program else lock file.
     """
 
-    logging.debug('Trying to lock: %s' % fname)
+    logger.debug('Trying to lock: %s' % fname)
     if not set_lock(fname):
-        logging.error(u'%s is already locked. Terminating.' % fname)
+        logger.error(u'%s is already locked. Terminating.' % fname)
         sys.exit()

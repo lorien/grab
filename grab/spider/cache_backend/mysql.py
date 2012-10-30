@@ -15,7 +15,6 @@ from hashlib import sha1
 import zlib
 import logging
 import MySQLdb
-import zlib
 import marshal
 
 from grab.response import Response
@@ -36,7 +35,6 @@ class CacheBackend(object):
                 break
         if not found:
             self.create_cache_table()
-        self.use_compression = use_compression
 
     def create_cache_table(self):
         self.cursor.execute('''
@@ -83,8 +81,6 @@ class CacheBackend(object):
         grab.fake_response(cache_item['body'])
 
         body = cache_item['body']
-        if self.use_compression:
-            body = zlib.decompress(body)
 
         def custom_prepare_response_func(transport, g):
             response = Response()
@@ -108,8 +104,6 @@ class CacheBackend(object):
 
     def save_response(self, url, grab):
         body = grab.response.body
-        if self.use_compression:
-            body = zlib.compress(body)
 
         item = {
             'url': url,
@@ -125,14 +119,9 @@ class CacheBackend(object):
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
         res = self.cursor.execute('''
-            update cache set data = %s where id = x%s
-        ''', (data, _hash))
-        if self.cursor.rowcount:
-            return
-        else:
-            res = self.cursor.execute('''
-                insert into cache (id, data) values(x%s, %s)
-            ''', (_hash, data))
+            insert into cache (id, data) values(x%s, %s)
+            on duplicate key update data = %s
+        ''', (_hash, data, data))
 
     def pack_database_value(self, val):
         dump = marshal.dumps(val)

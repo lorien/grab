@@ -32,10 +32,15 @@ def main():
     bot = cls(thread_number=1)
     bot.setup_cache(
         backend='mysql',
-        database='spider_test',
+        database='encdic_cache',
         use_compression=True,
         user='web', passwd='web-**'
     )
+    #bot.setup_cache(
+        #backend='mongo',
+        #database='spider_test',
+        #use_compression=True,
+    #)
     #bot.load_proxylist('/web/proxy.txt', 'text_file')
     try:
         bot.run()
