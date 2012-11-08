@@ -10,6 +10,7 @@ import threading
 import random
 from urlparse import urlsplit, urlunsplit
 import pycurl
+import tempfile
 
 from ..base import UploadContent, UploadFile
 from .. import error
@@ -61,11 +62,18 @@ class CurlTransport(object):
     def __init__(self):
         self.curl = pycurl.Curl()
 
+    def setup_body_file(self, storage_dir):
+        handle, path = tempfile.mkstemp(dir=storage_dir)
+        self.body_file = open(path, 'w')
+        self.body_path = path
+
     def reset(self):
         self.response_head_chunks = []
         self.response_body_chunks = []
         self.response_body_bytes_read = 0
         self.verbose_logging = False
+        self.body_file = None
+        self.body_path = None
 
         # Maybe move to super-class???
         self.request_head = ''
@@ -93,8 +101,12 @@ class CurlTransport(object):
             return 0
 
         bytes_read = len(chunk)
+
         self.response_body_bytes_read += bytes_read
-        self.response_body_chunks.append(chunk)
+        if self.body_file:
+            self.body_file.write(chunk)
+        else:
+            self.response_body_chunks.append(chunk)
         if self.config_body_maxsize is not None:
             if self.response_body_bytes_read > self.config_body_maxsize:
                 logger.debug('Response body max size limit reached: %s' %
@@ -159,8 +171,15 @@ class CurlTransport(object):
         self.curl.setopt(pycurl.TIMEOUT, grab.config['timeout'])
 
         self.curl.setopt(pycurl.NOSIGNAL, 1)
-        self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
         self.curl.setopt(pycurl.HEADERFUNCTION, self.head_processor)
+
+        if grab.config['body_inmemory']:
+            self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
+        else:
+            if not grab.config['body_storage_dir']:
+                raise error.GrabMisuseError('Option body_storage_di is not defined')
+            self.setup_body_file(grab.config['body_storage_dir'])
+            self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
 
         if grab.config['verbose_logging']:
             self.verbose_logging = True
@@ -345,9 +364,15 @@ class CurlTransport(object):
                     raise error.GrabNetworkError(ex[0], ex[1])
 
     def prepare_response(self, grab):
+        if self.body_file:
+            self.body_file.close()
         response = Response()
         response.head = ''.join(self.response_head_chunks)
-        response.body = ''.join(self.response_body_chunks)
+        if self.body_file:
+            response.body_path = self.body_path
+        else:
+            response.body = ''.join(self.response_body_chunks)
+
         # Clear memory
         self.response_head_chunks = []
         self.response_body_chunks = []

@@ -124,6 +124,8 @@ def default_config():
         # Response processing
         nobody = False,
         body_maxsize = None,
+        body_inmemory = True,
+        body_storage_dir = None,
 
         # Content compression
         encoding = 'gzip',

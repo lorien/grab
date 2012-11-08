@@ -57,7 +57,8 @@ class Response(object):
         self.status = None
         self.code = None
         self.head = None
-        self.body = None
+        self._body = None
+        self.body_path = None
         self.headers =None
         self.time = None
         self.url = None
@@ -130,30 +131,34 @@ class Response(object):
 
         charset = None
 
-        # Try to extract charset from http-equiv meta tag
-        if self.body:
-            chunk = self.body[:4096]
+        body_chunk = None
+        if self.body_path:
+            with open(self.body_path) as inp:
+                body_chunk = inp.read(4096)
+        elif self._body:
+            body_chunk = self._body[:4096]
+
+        if body_chunk:
+            # Try to extract charset from http-equiv meta tag
             try:
-                charset = RE_META_CHARSET.search(chunk).group(1)
+                charset = RE_META_CHARSET.search(body_chunk).group(1)
             except AttributeError:
                 pass
 
-        # TODO: <meta charset="utf-8" />
-        bom_enc, bom = read_bom(self.body)
-        if bom_enc:
-            charset = bom_enc
-            self.bom = bom
+            # TODO: <meta charset="utf-8" />
+            bom_enc, bom = read_bom(body_chunk)
+            if bom_enc:
+                charset = bom_enc
+                self.bom = bom
 
-        # Try to process XML declaration
-        if not charset:
-            if self.body:
-                if self.body.startswith('<?xml'):
+            # Try to process XML declaration
+            if not charset:
+                if body_chunk.startswith('<?xml'):
                     match = RE_XML_DECLARATION.search(self.body)
                     if match:
                         enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
                         if enc_match:
                             charset = enc_match.group(1)
-
 
         if not charset:
             if 'Content-Type' in self.headers:
@@ -293,3 +298,15 @@ class Response(object):
         fh, path = tempfile.mkstemp()
         self.save(path)
         webbrowser.open('file://' + path)
+
+    def _read_body(self):
+        if not self._body:
+            if self.body_path:
+                with open(self.body_path) as inp:
+                    self._body = inp.read()
+        return self._body
+
+    def _write_body(self, body):
+        self._body = body
+
+    body = property(_read_body, _write_body)
