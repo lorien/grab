@@ -133,7 +133,7 @@ class Response(object):
 
         body_chunk = None
         if self.body_path:
-            with open(self.body_path) as inp:
+            with open(self.body_path, 'rb') as inp:
                 body_chunk = inp.read(4096)
         elif self._body:
             body_chunk = self._body[:4096]
@@ -154,7 +154,7 @@ class Response(object):
             # Try to process XML declaration
             if not charset:
                 if body_chunk.startswith('<?xml'):
-                    match = RE_XML_DECLARATION.search(self.body)
+                    match = RE_XML_DECLARATION.search(body_chunk)
                     if match:
                         enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
                         if enc_match:
@@ -302,7 +302,7 @@ class Response(object):
     def _read_body(self):
         if not self._body:
             if self.body_path:
-                with open(self.body_path) as inp:
+                with open(self.body_path, 'rb') as inp:
                     self._body = inp.read()
         return self._body
 

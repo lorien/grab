@@ -64,7 +64,7 @@ class CurlTransport(object):
 
     def setup_body_file(self, storage_dir):
         handle, path = tempfile.mkstemp(dir=storage_dir)
-        self.body_file = open(path, 'w')
+        self.body_file = open(path, 'wb')
         self.body_path = path
 
     def reset(self):
@@ -368,7 +368,7 @@ class CurlTransport(object):
             self.body_file.close()
         response = Response()
         response.head = ''.join(self.response_head_chunks)
-        if self.body_file:
+        if self.body_path:
             response.body_path = self.body_path
         else:
             response.body = ''.join(self.response_body_chunks)
