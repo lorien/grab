@@ -385,9 +385,9 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             except error.GrabError, ex:
 
                 # In hammer mode try to use next timeouts
-                if self.config['hammer_mode'] and isinstance(ex, (error.GrabTimeoutError,
-                                                                  error.GrabConnectionError)):
-                    # If not more timeouts
+                if self.config['hammer_mode']:# and isinstance(ex, (error.GrabTimeoutError,
+                                              #                    error.GrabConnectionError)):
+                    # If no more timeouts
                     # then raise an error
                     if not hammer_timeouts:
                         self._request_prepared = False
@@ -564,7 +564,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         server, userpwd, proxy_type = self.proxylist.get_random()
-        print server, userpwd
         self.setup(proxy=server, proxy_userpwd=userpwd,
                    proxy_type=proxy_type)
 

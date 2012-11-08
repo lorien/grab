@@ -2,6 +2,7 @@ import urllib
 
 from ..base import UploadFile, UploadContent
 from ..error import GrabMisuseError
+from encoding import smart_str
 
 def urlencode(items, charset='utf-8'):
     """
@@ -98,3 +99,7 @@ def normalize_unicode(value, charset='utf-8'):
     if not isinstance(value, unicode):
         raise GrabMisuseError('normalize_unicode function accepts only unicode values')
     return value.encode(charset, 'ignore')
+
+
+def quote(data):
+    return urllib.quote_plus(smart_str(data))

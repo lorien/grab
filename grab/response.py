@@ -162,7 +162,7 @@ class Response(object):
                     charset = self.headers['Content-Type'][(pos + 8):]
 
         if charset:
-            # Check that python know such charset
+            # Check that python knows such charset
             try:
                 u'x'.encode(charset)
             except LookupError:
