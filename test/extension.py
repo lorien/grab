@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from grab.extension import ExtensionManager
+from grab.extension import register_extensions
 from unittest import TestCase
 
 GLOBAL = {}
@@ -13,13 +13,14 @@ class ExtensionB(object):
         GLOBAL['items'].append('b')
 
 class Worker(ExtensionA,  ExtensionB):
-    __metaclass__ = ExtensionManager
-
     extension_points = ('foo',)
 
     def do_something(self):
         GLOBAL['items'].append('c')
         self.trigger_extensions('foo')
+
+
+register_extensions(Worker)
 
 
 class ExtensionTestCase(TestCase):

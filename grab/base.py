@@ -27,7 +27,7 @@ from .response import Response
 from . import error
 from .upload import UploadContent, UploadFile
 from .tools.http import normalize_http_values
-from .extension import ExtensionManager, register_extensions
+from .extension import register_extensions
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
@@ -171,8 +171,6 @@ def default_config():
 class Grab(LXMLExtension, FormExtension, PyqueryExtension,
            DjangoExtension, TextExtension, RegexpExtension,
            FTPExtension):
-
-    #__metaclass__ = ExtensionManager
 
     # Points which could be handled in extension classes
     extension_points = ('config', 'init', 'reset')
@@ -770,15 +768,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
 
 register_extensions(Grab)
-#import sys
-#if sys.version_info.major > 2:
-    #OldGrab = Grab
-    #BaseGrab = ExtensionManager('Grab', (object, OldGrab), {})
-
-    #class Grab(BaseGrab):
-        #pass
-        ##extension_points = ('config', 'init', 'reset')
-
 
 # For backward compatibility
 BaseGrab = Grab
