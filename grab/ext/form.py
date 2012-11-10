@@ -2,7 +2,10 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 from __future__ import absolute_import
-from urlparse import urljoin
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 
 from ..error import DataNotFound, GrabMisuseError
 from ..tools.http import urlencode

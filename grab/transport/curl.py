@@ -5,10 +5,16 @@ from __future__ import absolute_import
 import email
 import logging
 import urllib
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import BytesIO as StringIO
 import threading
 import random
-from urlparse import urlsplit, urlunsplit
+try:
+    from urlparse import urlsplit, urlunsplit
+except ImportError:
+    from urllib.parse import urlsplit, urlunsplit
 import pycurl
 import tempfile
 
@@ -161,8 +167,14 @@ class CurlTransport(object):
         self.config_body_maxsize = grab.config['body_maxsize']
 
         request_url = grab.config['url']
-        if isinstance(request_url, unicode):
-            request_url = request_url.encode('utf-8')
+
+        # py3 hack
+        try:
+            if isinstance(request_url, unicode):
+                request_url = request_url.encode('utf-8')
+        except NameError:
+            pass
+
         self.curl.setopt(pycurl.URL, request_url)
 
         self.curl.setopt(pycurl.FOLLOWLOCATION, 1 if grab.config['follow_location'] else 0)
@@ -266,7 +278,7 @@ class CurlTransport(object):
         if grab.config['headers']:
             headers.update(grab.config['headers'])
         header_tuples = [str('%s: %s' % x) for x\
-                         in headers.iteritems()]
+                         in headers.items()]
         self.curl.setopt(pycurl.HTTPHEADER, header_tuples)
 
 
@@ -338,7 +350,7 @@ class CurlTransport(object):
 
         try:
             self.curl.perform()
-        except pycurl.error, ex:
+        except pycurl.error as ex:
             # CURLE_WRITE_ERROR (23)
             # An error occurred when writing received data to a local file, or
             # an error was returned to libcurl from a write callback.

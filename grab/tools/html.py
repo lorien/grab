@@ -3,10 +3,13 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 import re
-from htmlentitydefs import name2codepoint
+try:
+    from htmlentitydefs import name2codepoint
+except ImportError:
+    from html.entities import name2codepoint
 import logging
 
-from text import normalize_space as normalize_space_func
+from .text import normalize_space as normalize_space_func
 
 RE_TAG = re.compile(r'<[^>]+>')
 RE_REFRESH_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']*Refresh[^>]+', re.I)

@@ -22,10 +22,13 @@ import logging
 from copy import deepcopy
 import time
 import logging
-import urllib2
-from urllib2 import URLError, HTTPError
+try:
+    from urllib2 import urlopen, URLError, HTTPError
+except ImportError:
+    from urllib.request import urlopen
+    from urllib.error import URLError, HTTPError
 
-from error import GrabError, GrabNetworkError, GrabMisuseError
+from .error import GrabError, GrabNetworkError, GrabMisuseError
 
 logger = logging.getLogger('grab.proxylist')
 
@@ -137,7 +140,7 @@ class URLSource(ProxySource):
         * complex: "server:port:user:pwd"
         """
         try:
-            proxylist = urllib2.urlopen(self.source).readlines()
+            proxylist = urlopen(self.source).readlines()
         except (URLError, HTTPError):
             raise GrabNetworkError("Can't load proxies from URL (%s)" % self.source)
 

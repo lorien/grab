@@ -2,7 +2,10 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 from __future__ import absolute_import
-from urlparse import urljoin
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 import re
 import time
 import logging
@@ -55,12 +58,12 @@ class LXMLExtension(object):
 
             try:
                 self._lxml_tree = fromstring(body)
-            except ParserError, ex:
+            except ParserError as ex:
                 if str(ex) == 'Document is empty':
-                    body = u'<html>%s</html>' % body
+                    body = '<html>%s</html>'.format(body)
                     try:
                         self._lxml_tree = fromstring(body)
-                    except Exception, ex:
+                    except Exception as ex:
                         raise
                 else:
                     raise
@@ -135,7 +138,7 @@ class LXMLExtension(object):
         for item in self.tree.iterlinks():
             if item[0].tag == 'a':
                 found = False
-                text = item[0].text or u''
+                text = item[0].text or ''
                 url = item[2]
                 # if object is regular expression
                 if anchor:

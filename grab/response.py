@@ -5,17 +5,22 @@ import re
 from copy import copy
 import logging
 import email
-from StringIO import StringIO
 #from cookielib import CookieJar
-from urllib2 import Request
+try:
+    from urllib2 import Request
+except ImportError:
+    from urllib.request import Request
 import os
 import json
-from urlparse import urlsplit, parse_qs
+try:
+    from urlparse import urlsplit, parse_qs
+except ImportError:
+    from urllib.parse import urlsplit, parse_qs
 import tempfile
 import webbrowser
 import codecs
 
-from tools.files import hashed_path
+from .tools.files import hashed_path
 
 RE_XML_DECLARATION = re.compile(r'^[^<]{,100}<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(r'encoding\s*=\s*["\']([^"\']+)["\']')
@@ -169,7 +174,7 @@ class Response(object):
         if charset:
             # Check that python knows such charset
             try:
-                u'x'.encode(charset)
+                codecs.lookup(charset)
             except LookupError:
                 logging.error('Unknown charset found: %s' % charset)
                 self.charset = 'utf-8'

@@ -2,7 +2,7 @@ import urllib
 
 from ..base import UploadFile, UploadContent
 from ..error import GrabMisuseError
-from encoding import smart_str
+from .encoding import smart_str
 
 def urlencode(items, charset='utf-8'):
     """

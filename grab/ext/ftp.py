@@ -50,6 +50,6 @@ class FTPExtension(object):
                     os.path.join(root, fname),
                     remote_dir + rel_path,
                     userpwd=userpwd)
-                print local_path, '-->', remote_dir + rel_path
+                print(local_path, '-->', remote_dir + rel_path)
             #for _dir in dirs:
                 #shutil.rmtree(os.path.join(root, _dir))

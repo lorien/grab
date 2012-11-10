@@ -2,7 +2,10 @@
 Miscelanius utilities which are helpful sometime.
 """
 import logging
-from urlparse import urlsplit
+try:
+    from urlparse import urlsplit
+except ImportError:
+    from urllib.parse import urlsplit
 from hashlib import sha1
 import os
 import shutil

@@ -1,11 +1,10 @@
 """
 Functions to process content of lxml nodes.
 """
-from StringIO import StringIO
 import re
 
-from text import normalize_space as normalize_space_func, find_number
-from encoding import smart_str, smart_unicode
+from .text import normalize_space as normalize_space_func, find_number
+from .encoding import smart_str, smart_unicode
 
 RE_TAG_START = re.compile(r'<[a-z]')
 

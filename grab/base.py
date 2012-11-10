@@ -12,7 +12,10 @@ import urllib
 from random import randint, choice
 from copy import copy
 import threading
-from urlparse import urljoin
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 import time
 import re
 import json
@@ -24,7 +27,7 @@ from .response import Response
 from . import error
 from .upload import UploadContent, UploadFile
 from .tools.http import normalize_http_values
-from .extension import ExtensionManager
+from .extension import ExtensionManager, register_extensions
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
@@ -169,7 +172,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
            DjangoExtension, TextExtension, RegexpExtension,
            FTPExtension):
 
-    __metaclass__ = ExtensionManager
+    #__metaclass__ = ExtensionManager
 
     # Points which could be handled in extension classes
     extension_points = ('config', 'init', 'reset')
@@ -384,7 +387,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 self.prepare_request(**kwargs)
                 self.log_request()
                 self.transport.request()
-            except error.GrabError, ex:
+            except error.GrabError as ex:
 
                 # In hammer mode try to use next timeouts
                 if self.config['hammer_mode']:# and isinstance(ex, (error.GrabTimeoutError,
@@ -506,7 +509,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             self.response = self.transport.prepare_response(self)
             self.copy_request_data()
             self.save_dumps()
-        except Exception, ex:
+        except Exception as ex:
             logging.error(unicode(ex))
 
     def copy_request_data(self):
@@ -723,7 +726,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             lines = [x for x in lines if ':' in x]
             headers = email.message_from_string('\n'.join(lines))
             return headers
-        except Exception, ex:
+        except Exception as ex:
             logging.error('Could not parse request headers', exc_info=ex)
             return {}
 
@@ -765,6 +768,16 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             self.change_proxy()
         self.setup(proxy_auto_change=auto_change)
 
+
+register_extensions(Grab)
+#import sys
+#if sys.version_info.major > 2:
+    #OldGrab = Grab
+    #BaseGrab = ExtensionManager('Grab', (object, OldGrab), {})
+
+    #class Grab(BaseGrab):
+        #pass
+        ##extension_points = ('config', 'init', 'reset')
 
 
 # For backward compatibility
