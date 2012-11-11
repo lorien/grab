@@ -95,7 +95,7 @@ class SpiderPattern(object):
         was found.
         """
 
-        logger.error('This method is deprecated. Use process_next_page method instead.')
+        logger.error('Method next_page_task is deprecated. Use process_next_page method instead.')
         nav = grab.xpath(xpath, None)
         if nav is not None:
             url = grab.make_url_absolute(nav.get('href'))
@@ -116,7 +116,7 @@ class SpiderPattern(object):
 
             self.follow_links(grab, '//div[@class="topic"]/a/@href', 'topic')
         """
-        logger.error('This method is deprecated. Use process_links method instead.')
+        logger.error('Method follow_links is deprecated. Use process_links method instead.')
 
         urls = []
         for url in grab.xpath_list(xpath):

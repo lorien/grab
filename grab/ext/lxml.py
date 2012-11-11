@@ -20,6 +20,19 @@ logger = logging.getLogger('grab.ext.lxml')
 NULL = object()
 NULL_BYTE = chr(0)
 
+#rex_script = re.compile(r'<script[^>]*>.+?</script>', re.S)
+#rex_style = re.compile(r'<style[^>]*>.+?<?style>', re.S)
+#rex_comment = re.compile(r'<!--(?:.(?!-->))-->', re.S)
+
+#def simplify_html(html, targets=['script', 'style', 'comment']):
+    #if 'script' in targets:
+        #html = rex_script.sub(' ', html)
+    #if 'style' in targets:
+        #html = rex_style.sub(' ', html)
+    #if 'comment' in targets:
+        #html = rex_comment.sub(' ', html)
+    #return html
+
 class LXMLExtension(object):
     def extra_reset(self):
         self._lxml_tree = None
@@ -56,6 +69,7 @@ class LXMLExtension(object):
                 body = '<html></html>'
             start = time.time()
 
+            #body = simplify_html(body)
             try:
                 self._lxml_tree = fromstring(body)
             except ParserError as ex:
