@@ -30,7 +30,7 @@ class SpeedSpider(Spider):
         #yield Task('load', url=slow_url, disable_cache=True)
         #yield Task('load', url=fast_url, disable_cache=False)
         for x in xrange(500):
-            disable_flag = False#not (x % 2)
+            disable_flag = True#not (x % 2)
             yield Task('load', url=url_template % x, disable_cache=disable_flag)
             #if randint(0, 10) == 10:
                 #yield Task('load', url=slow_url, disable_cache=True)

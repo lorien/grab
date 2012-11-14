@@ -336,10 +336,10 @@ class Spider(SpiderPattern, SpiderStat):
                         self.log_verbose('Asking transport layer to do something')
                         transport.process_handlers()
 
-            # If some handlers should be processed
-            # then process them
-            if transport.select(0.01):
-                transport.process_handlers()
+            self.log_verbose('Asking transport layer to do something')
+            # Process active handlers
+            transport.select(0.01)
+            transport.process_handlers()
 
             self.log_verbose('Processing network results (if any).')
             # Iterate over network trasport ready results
