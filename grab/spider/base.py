@@ -36,6 +36,7 @@ RANDOM_TASK_PRIORITY_RANGE = (80, 100)
 TASK_QUEUE_TIMEOUT = 0.01
 
 logger = logging.getLogger('grab.spider.base')
+logger_verbose = logging.getLogger('grab.spider.base.verbose')
 
 class Spider(SpiderPattern, SpiderStat):
     """
@@ -86,6 +87,7 @@ class Spider(SpiderPattern, SpiderStat):
         """
 
         self.taskq = None
+        self.disable_verbose_logging()
 
         if use_cache is not None:
             logger.error('use_cache argument is depricated. Use setup_cache method.')
@@ -287,20 +289,27 @@ class Spider(SpiderPattern, SpiderStat):
         while True:
 
             if transport.ready_for_task():
+                self.log_verbose('Transport has free resources. Adding new task')
                 try:
                     # TODO: implement timeout via sleep
                     task = self.taskq.get(TASK_QUEUE_TIMEOUT)
                 except Queue.Empty:
+                    self.log_verbose('Task queue is empty.')
                     # If All handlers are free and no tasks in queue
                     # yield None signal
                     if not transport.active_task_number():
+                        self.log_verbose('Network transport is also empty. Time to stop the spider!')
                         yield None
+                    else:
+                        self.log_verbose('Network transport is still busy')
                 else:
+                    self.log_verbose('Task details loaded from task queue. Preparing Task object.')
                     task.network_try_count += 1
                     if task.task_try_count == 0:
                         task.task_try_count = 1
 
                     if not self.check_task_limits(task):
+                        self.log_verbose('Task is rejected due to some limits.')
                         continue
 
                     grab = self.create_grab_instance()
@@ -317,11 +326,14 @@ class Spider(SpiderPattern, SpiderStat):
                                                         grab_config_backup)
 
                     if cache_result:
+                        self.log_verbose('Task data is loaded from the cache. Yielding task result.')
                         yield cache_result
                     else:
                         self.inc_count('request-network')
                         self.change_proxy(task, grab)
+                        self.log_verbose('Submitting task to the transport layer')
                         transport.process_task(task, grab, grab_config_backup)
+                        self.log_verbose('Asking transport layer to do something')
                         transport.process_handlers()
 
             # If some handlers should be processed
@@ -329,6 +341,7 @@ class Spider(SpiderPattern, SpiderStat):
             if transport.select(0.01):
                 transport.process_handlers()
 
+            self.log_verbose('Processing network results (if any).')
             # Iterate over network trasport ready results
             # Each result could be valid or failed
             # Result format: {ok, grab, grab_config_backup, task, emsg}
@@ -626,6 +639,16 @@ class Spider(SpiderPattern, SpiderStat):
         if not auto_change and auto_init:
             self.proxy = self.proxylist.get_random()
         self.proxy_auto_change = auto_change
+
+    def _log_verbose(msg):
+        logger_verbose.debug(msg)
+
+    def enable_verbose_logging(self):
+        self.log_verbose = self._log_verbose
+
+    def disable_verbose_logging(self):
+        self.log_verbose = lambda *args, **kwargs: None
+
 
     # 
     # Deprecated methods
