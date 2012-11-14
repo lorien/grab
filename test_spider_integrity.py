@@ -32,7 +32,7 @@ class TestSpider(Spider):
     def task_bitbucket_login(self, grab, task):
         grab.set_input('username', 'grabtest')
         grab.set_input('password', 'grabtest')
-        assert grab.xpath_text('//title') == u'Log in to your Bitbucket account'
+        assert 'Log in' in grab.xpath_text('//title')
         grab.submit(make_request=False)
         yield Task('bitbucket_dashboard', grab=grab)
 
