@@ -14,7 +14,6 @@ docs/_build
 docs-redirect/_build
 
 # misc
-test2.py
 log.html
 prof
 tests/tmp
