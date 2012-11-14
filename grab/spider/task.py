@@ -67,6 +67,9 @@ class Task(object):
 
         self.name = name
 
+        if url is None and grab is None and grab_config is None:
+            raise SpiderMisuseError('Either url, grab or grab_config argument of Task constructor should not be None')
+
         if grab:
             grab_config = grab.dump_config()
         if grab_config:
