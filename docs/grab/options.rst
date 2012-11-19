@@ -351,13 +351,3 @@ strip_null_bytes
 
 :Type: bool
 :Default: True
-
-.. _option_strip_xml_declaration
-
-strip_xml_declaration
----------------------
-
-Удаление XML declaration из тела документа перед тем, как строить его unicode-представление. Я забыл зачем это нужно :) Попозже допишу помощь.
-
-:Type: bool
-:Default: True

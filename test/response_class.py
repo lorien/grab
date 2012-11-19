@@ -51,3 +51,14 @@ class TestResponse(TestCase):
         g.setup(document_charset='utf-8')
         g.go(BASE_URL)
         self.assertTrue(u'крокодил' in g.response.unicode_body())
+
+    def test_xml_declaration(self):
+        """
+        HTML with XML declaration shuld be processed without errors.
+        """
+        RESPONSE['get'] = """<?xml version="1.0" encoding="UTF-8"?>
+        <html><body><h1>test</h1></body></html>
+        """
+        g = Grab()
+        g.go(BASE_URL)
+        self.assertEqual('test', g.xpath_text('//h1'))

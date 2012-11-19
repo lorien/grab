@@ -163,6 +163,7 @@ def default_config():
         # It does not affect `response.body`
         strip_null_bytes = True,
 
+        # Obsolete options, will be removed in future versions
         # Strip XML declaration before building unicode body
         strip_xml_declaration = True,
     )
@@ -291,6 +292,9 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         for key in kwargs:
             if not key in self.config.keys():
                 raise error.GrabMisuseError('Unknown option: %s' % key)
+
+        if key == 'strip_xml_declaration':
+            logging.error('Option strip_xml_declaration is deprecated. Now xml declarations is alwas striped out. This option will be removed in future versions')
 
         if 'url' in kwargs:
             if self.config.get('url'):
@@ -485,8 +489,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         # TODO: check max redirect count
         if self.config['follow_refresh']:
-            url = find_refresh_url(self.response.unicode_body(
-                strip_xml_declaration=self.config['strip_xml_declaration']))
+            url = find_refresh_url(self.response.unicode_body())
             if url:
                 return self.request(url=url)
 
@@ -628,9 +631,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         if self.config['url']:
             if resolve_base:
-                ubody = self.response.unicode_body(
-                    strip_xml_declaration=self.config['strip_xml_declaration']
-                )
+                ubody = self.response.unicode_body()
                 base_url = find_base_url(ubody)
                 if base_url:
                     return urljoin(base_url, url)
