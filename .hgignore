@@ -15,10 +15,6 @@ docs-redirect/_build
 # misc
 log.html
 prof
-tests/tmp
-update_site.sh
-update_all.sh
-alexa.py
 
 syntax:regexp
 ^log$
