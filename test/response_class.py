@@ -54,11 +54,14 @@ class TestResponse(TestCase):
 
     def test_xml_declaration(self):
         """
-        HTML with XML declaration shuld be processed without errors.
+        unicode_body() should return HTML with xml declaration (if it
+        exists in original HTML)
         """
         RESPONSE['get'] = """<?xml version="1.0" encoding="UTF-8"?>
-        <html><body><h1>test</h1></body></html>
+        <html><body><h1>тест</h1></body></html>
         """
         g = Grab()
         g.go(BASE_URL)
-        self.assertEqual('test', g.xpath_text('//h1'))
+        ubody = g.response.unicode_body()
+        self.assertTrue(u'тест' in ubody)
+        self.assertTrue('<?xml' in ubody)

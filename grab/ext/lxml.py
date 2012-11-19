@@ -14,6 +14,7 @@ from ..error import DataNotFound, GrabMisuseError
 from ..base import GLOBAL_STATE
 from ..tools.text import normalize_space as normalize_space_func, find_number
 from ..tools.lxml_tools import get_node_text
+from ..response import RE_XML_DECLARATION
 
 logger = logging.getLogger('grab.ext.lxml')
 
@@ -62,6 +63,7 @@ class LXMLExtension(object):
                 body = body.lower()
             if self.config['strip_null_bytes']:
                 body = body.replace(NULL_BYTE, '')
+            body = RE_XML_DECLARATION.sub('', body)
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser

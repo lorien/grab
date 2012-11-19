@@ -2,7 +2,8 @@
 from unittest import TestCase
 from grab import Grab, DataNotFound
 
-from test.util import GRAB_TRANSPORT
+from test.util import (GRAB_TRANSPORT, RESPONSE, BASE_URL,
+                       FakeServerThread)
 
 HTML = u"""
 <head>
@@ -46,6 +47,7 @@ class LXMLExtensionTest(TestCase):
         # Create fake grab instance with fake response
         self.g = Grab(transport=GRAB_TRANSPORT)
         self.g.fake_response(HTML, charset='cp1251')
+        FakeServerThread().start()
 
         from lxml.html import fromstring
         self.lxml_tree = fromstring(self.g.response.body)
@@ -156,3 +158,14 @@ class LXMLExtensionTest(TestCase):
 
         self.assertEqual('30', g.xpath('//weight').text)
         self.assertEqual('30', g.tree.xpath('//weight')[0].text)
+
+    def test_xml_declaration(self):
+        """
+        HTML with XML declaration shuld be processed without errors.
+        """
+        RESPONSE['get'] = """<?xml version="1.0" encoding="UTF-8"?>
+        <html><body><h1>test</h1></body></html>
+        """
+        g = Grab()
+        g.go(BASE_URL)
+        self.assertEqual('test', g.xpath_text('//h1'))

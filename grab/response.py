@@ -196,7 +196,6 @@ class Response(object):
             else:
                 body = self.body
             ubody = body.decode(self.charset, errors).strip()
-            ubody = RE_XML_DECLARATION.sub('', ubody)
             self._unicode_body = ubody
         return self._unicode_body
 
