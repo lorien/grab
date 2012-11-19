@@ -169,3 +169,14 @@ class LXMLExtensionTest(TestCase):
         g = Grab()
         g.go(BASE_URL)
         self.assertEqual('test', g.xpath_text('//h1'))
+
+    def test_empty_document(self):
+        RESPONSE['get'] = 'oops'
+        g = Grab()
+        g.go(BASE_URL)
+        g.xpath_exists('//anytag')
+
+        RESPONSE['get'] = '<frameset></frameset>'
+        g = Grab()
+        g.go(BASE_URL)
+        g.xpath_exists('//anytag')

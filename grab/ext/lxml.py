@@ -73,13 +73,22 @@ class LXMLExtension(object):
             #body = simplify_html(body)
             try:
                 self._lxml_tree = fromstring(body)
-            except ParserError as ex:
-                if str(ex) == 'Document is empty':
+            except Exception, ex:
+                if (isinstance(ex, ParserError)
+                    and 'Document is empty' in str(ex)
+                    and not '<html' in body):
+
+                    # Fix for "just a string" body
                     body = '<html>%s</html>'.format(body)
-                    try:
-                        self._lxml_tree = fromstring(body)
-                    except Exception as ex:
-                        raise
+                    self._lxml_tree = fromstring(body)
+
+                elif (isinstance(ex, TypeError)
+                      and "object of type 'NoneType' has no len" in str(ex)
+                      and not '<html' in body):
+
+                    # Fix for smth like "<frameset></frameset>"
+                    body = '<html>%s</html>'.format(body)
+                    self._lxml_tree = fromstring(body)
                 else:
                     raise
 
