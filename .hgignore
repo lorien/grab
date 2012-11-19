@@ -7,7 +7,6 @@ syntax: glob
 
 # setuptools
 dist/
-pypi.sh
 
 # docs
 docs/_build
