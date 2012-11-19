@@ -26,7 +26,7 @@ from .tools.html import find_refresh_url, find_base_url
 from .response import Response
 from . import error
 from .upload import UploadContent, UploadFile
-from .tools.http import normalize_http_values
+from .tools.http import normalize_http_values, normalize_url
 from .extension import register_extensions
 
 # This counter will used in enumerating network queries.
@@ -299,6 +299,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         if 'url' in kwargs:
             if self.config.get('url'):
                 kwargs['url'] = self.make_url_absolute(kwargs['url'])
+            kwargs['url'] = normalize_url(kwargs['url'])
         self.config.update(kwargs)
 
     def go(self, url, **kwargs):

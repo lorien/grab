@@ -1,8 +1,12 @@
 import urllib
+from urlparse import urlsplit, urlunsplit
+import re
 
 from ..base import UploadFile, UploadContent
 from ..error import GrabMisuseError
-from .encoding import smart_str
+from .encoding import smart_str, smart_unicode
+
+RE_NON_ASCII = re.compile(r'[^-.a-zA-Z0-9]')
 
 def urlencode(items, charset='utf-8'):
     """
@@ -103,3 +107,13 @@ def normalize_unicode(value, charset='utf-8'):
 
 def quote(data):
     return urllib.quote_plus(smart_str(data))
+
+
+def normalize_url(url):
+    parts = list(urlsplit(url))
+    if RE_NON_ASCII.search(parts[1]):
+        parts[1] = smart_unicode(parts[1]).encode('idna')
+        url = urlunsplit(parts)
+        return url
+    else:
+        return url

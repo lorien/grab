@@ -32,6 +32,8 @@ TEST_CASE_LIST = (
     'test.form_extension',
     # test containers
     'test.container',
+    # idn
+    'test.i18n',
 )
 
 def main():
