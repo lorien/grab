@@ -17,6 +17,7 @@ except ImportError:
     from urllib.parse import urlsplit, urlunsplit
 import pycurl
 import tempfile
+import os.path
 
 from ..base import UploadContent, UploadFile
 from .. import error
@@ -68,8 +69,11 @@ class CurlTransport(object):
     def __init__(self):
         self.curl = pycurl.Curl()
 
-    def setup_body_file(self, storage_dir):
-        handle, path = tempfile.mkstemp(dir=storage_dir)
+    def setup_body_file(self, storage_dir, storage_filename):
+        if storage_filename is None:
+            handle, path = tempfile.mkstemp(dir=storage_dir)
+        else:
+            path = os.path.join(storage_dir, storage_filename)
         self.body_file = open(path, 'wb')
         self.body_path = path
 
@@ -189,8 +193,9 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
         else:
             if not grab.config['body_storage_dir']:
-                raise error.GrabMisuseError('Option body_storage_di is not defined')
-            self.setup_body_file(grab.config['body_storage_dir'])
+                raise error.GrabMisuseError('Option body_storage_dir is not defined')
+            self.setup_body_file(grab.config['body_storage_dir'],
+                                 grab.config['body_storage_filename'])
             self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
 
         if grab.config['verbose_logging']:

@@ -1,10 +1,12 @@
 # coding: utf-8
 from unittest import TestCase
+import os
 
 from grab import Grab, GrabMisuseError
 from util import (FakeServerThread, BASE_URL, RESPONSE, REQUEST,
                   RESPONSE_ONCE, ignore_transport, GRAB_TRANSPORT,
-                  ignore_transport, only_transport)
+                  ignore_transport, only_transport,
+                  TMP_DIR)
 from grab.extension import register_extensions
 
 
@@ -262,3 +264,32 @@ class TestGrab(TestCase):
         #SimpleExtension.get_data()['counter'] = 0
         #g = VeryCustomGrab()
         #self.assertEqual(SimpleExtension.get_data()['counter'], 2)
+
+    def test_body_inmemory(self):
+        g = Grab()
+        g.setup(body_inmemory=False)
+        self.assertRaises(GrabMisuseError, lambda: g.go(BASE_URL))
+
+        RESPONSE['get'] = 'foo'
+        g = Grab()
+        g.setup(body_inmemory=False)
+        g.setup(body_storage_dir=TMP_DIR)
+        g.go(BASE_URL)
+        self.assertTrue(os.path.exists(g.response.body_path))
+        self.assertTrue(TMP_DIR in g.response.body_path)
+        self.assertEqual('foo', open(g.response.body_path).read())
+        old_path = g.response.body_path
+
+        g.go(BASE_URL)
+        self.assertTrue(old_path != g.response.body_path)
+
+        RESPONSE['get'] = 'foo'
+        g = Grab()
+        g.setup(body_inmemory=False)
+        g.setup(body_storage_dir=TMP_DIR)
+        g.setup(body_storage_filename='musik.mp3')
+        g.go(BASE_URL)
+        self.assertTrue(os.path.exists(g.response.body_path))
+        self.assertTrue(TMP_DIR in g.response.body_path)
+        self.assertEqual('foo', open(g.response.body_path).read())
+        self.assertEqual(os.path.join(TMP_DIR, 'musik.mp3'), g.response.body_path)

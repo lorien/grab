@@ -129,6 +129,7 @@ def default_config():
         body_maxsize = None,
         body_inmemory = True,
         body_storage_dir = None,
+        body_storage_filename = None,
 
         # Content compression
         encoding = 'gzip',
@@ -450,9 +451,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         # It's important to delete old POST data after request is performed.
         # If POST data is not cleared then next request will try to use them again!
 
-        self.config['post'] = None
-        self.config['multipart_post'] = None
-        self.config['method'] = None
+        self.reset_temporary_options()
 
         if prepare_response_func:
             self.response = prepare_response_func(self.transport, self)
@@ -495,6 +494,12 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 return self.request(url=url)
 
         return None
+
+    def reset_temporary_options(self):
+        self.config['post'] = None
+        self.config['multipart_post'] = None
+        self.config['method'] = None
+        self.config['body_storage_filename'] = None
 
     def save_failed_dump(self):
         """
