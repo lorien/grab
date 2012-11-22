@@ -65,6 +65,7 @@ class Spider(SpiderPattern, SpiderStat):
                  request_pause=0,
                  priority_mode='random',
                  meta=None,
+                 verbose_logging=False,
                  ):
         """
         Arguments:
@@ -87,7 +88,10 @@ class Spider(SpiderPattern, SpiderStat):
         """
 
         self.taskq = None
-        self.disable_verbose_logging()
+        if verbose_logging:
+            self.enable_verbose_logging()
+        else:
+            self.disable_verbose_logging()
 
         if use_cache is not None:
             logger.error('use_cache argument is depricated. Use setup_cache method.')
@@ -289,7 +293,7 @@ class Spider(SpiderPattern, SpiderStat):
         while True:
 
             if transport.ready_for_task():
-                self.log_verbose('Transport has free resources. Adding new task')
+                self.log_verbose('Transport has free resources. Trying to add new task (if exists)')
                 try:
                     # TODO: implement timeout via sleep
                     task = self.taskq.get(TASK_QUEUE_TIMEOUT)
@@ -611,12 +615,16 @@ class Spider(SpiderPattern, SpiderStat):
         qsize = self.taskq.size()
         min_limit = self.thread_number * 2
         if qsize < min_limit:
+            self.log_verbose('Task queue contains less tasks than limit. Tryring to add new tasks')
             try:
                 for x in xrange(min_limit - qsize):
-                    self.add_task(self.task_generator_object.next())
+                    item = self.task_generator_object.next()
+                    self.log_verbose('Found new task. Adding it')
+                    self.add_task(item)
             except StopIteration:
                 # If generator have no values to yield
                 # then disable it
+                self.log_verbose('Task generator has no more tasks. Disabling it')
                 self.task_generator_enabled = False
 
     def create_grab_instance(self):
@@ -640,7 +648,7 @@ class Spider(SpiderPattern, SpiderStat):
             self.proxy = self.proxylist.get_random()
         self.proxy_auto_change = auto_change
 
-    def _log_verbose(msg):
+    def _log_verbose(self, msg):
         logger_verbose.debug(msg)
 
     def enable_verbose_logging(self):
