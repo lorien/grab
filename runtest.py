@@ -17,6 +17,7 @@ TEST_CASE_LIST = (
     'test.limit_option',
     'test.cookies',
     'test.response_class',
+    'test.charset_issue',
     # test server
     'test.fake_server',
     # tools

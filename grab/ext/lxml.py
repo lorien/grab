@@ -55,7 +55,9 @@ class LXMLExtension(object):
         from lxml.etree import ParserError
 
         if self._lxml_tree is None:
-            body = self.response.unicode_body().strip()
+            body = self.response.unicode_body(
+                fix_special_entities=self.config['fix_special_entities']
+            ).strip()
             #if self.config['tidy']:
                 #from tidylib import tidy_document
                 #body, errors = tidy_document(body)

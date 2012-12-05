@@ -147,6 +147,7 @@ def default_config():
         # This setting is overwritten after each request with
         # charset of rertreived document
         charset = 'utf-8',
+
         # Charset to use for converting content of response
         # into unicode, by default it is detected automatically
         document_charset = None,
@@ -155,6 +156,14 @@ def default_config():
         # For html type HTML DOM builder is used
         # For xml type XML DOM builder is used
         content_type = 'html',
+
+        # Fix &#X; entities, where X between 128 and 160
+        # Such entities are parsed by modern browsers as
+        # windows-1251 entities independently of the real charset of
+        # the document, If this option is True then such entities
+        # will be replaced with correct unicode entitites e.g.:
+        # &#151; ->  &#8212;
+        fix_special_entities = True,
 
         # Convert document body to lower case before bulding LXML tree
         # It does not affect `response.body`

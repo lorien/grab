@@ -19,6 +19,7 @@ except ImportError:
 import tempfile
 import webbrowser
 import codecs
+from grab.tools import encoding as encoding_tools
 
 from .tools.files import hashed_path
 
@@ -181,7 +182,7 @@ class Response(object):
             else:
                 self.charset = charset
 
-    def unicode_body(self, ignore_errors=True):
+    def unicode_body(self, ignore_errors=True, fix_special_entities=True):
         """
         Return response body as unicode string.
         """
@@ -195,6 +196,8 @@ class Response(object):
                 body = self.body[len(self.bom):]
             else:
                 body = self.body
+            if fix_special_entities:
+                body = encoding_tools.fix_special_entities(body)
             ubody = body.decode(self.charset, errors).strip()
             self._unicode_body = ubody
         return self._unicode_body
