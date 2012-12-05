@@ -28,7 +28,6 @@ from .data import Data
 from .pattern import SpiderPattern
 from .stat  import SpiderStat
 from .transport.multicurl import MulticurlTransport
-from .transport.threadpool import ThreadPoolTransport
 from ..proxylist import ProxyList
 
 DEFAULT_TASK_PRIORITY = 100
@@ -162,7 +161,8 @@ class Spider(SpiderPattern, SpiderStat):
     def prepare(self):
         """
         You can do additional spider customizatin here
-        before it has started working.
+        before it has started working. Simply redefine
+        this method in your Spider class.
         """
 
     def sigusr1_handler(self, signal, frame):
@@ -198,8 +198,8 @@ class Spider(SpiderPattern, SpiderStat):
 
     def prepare_before_run(self):
         """
-        Configure all things required to begin
-        executing tasks in main `run` method.
+        Configure all things required to start
+        main work loop.
         """
 
         # If queue is still not configured
@@ -210,6 +210,7 @@ class Spider(SpiderPattern, SpiderStat):
         self.prepare()
 
         # Init task generator
+        # TODO: task generator should work in separate OS process
         self.task_generator_object = self.task_generator()
         self.task_generator_enabled = True
 
@@ -240,6 +241,7 @@ class Spider(SpiderPattern, SpiderStat):
 
                 if self.task_generator_enabled:
                     self.process_task_generator()
+
 
                 # Increase task counters
                 self.inc_count('task')

@@ -90,3 +90,11 @@ def clear_directory(path):
             os.unlink(os.path.join(root, fname))
         for _dir in dirs:
             shutil.rmtree(os.path.join(root, _dir))
+
+
+def smart_copy_file(filename, dst_root):
+    dir_path, fname = os.path.split(filename)
+    dst_dir = os.path.join(dst_root, dir_path)
+    if not os.path.exists(dst_dir):
+        os.makedirs(dst_dir)
+    shutil.copy(filename, dst_dir)
