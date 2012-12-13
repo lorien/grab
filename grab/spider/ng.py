@@ -11,6 +11,12 @@ class Spider(TraditionalSpider):
         self.result_queue = result_queue
         super(Spider, self).__init__(*args, **kwargs)
 
+    def setup_worker(self):
+        pass
+
+    def setup_manager(self):
+        pass
+
     def run(self):
         """
         Main work cycle.
@@ -21,6 +27,7 @@ class Spider(TraditionalSpider):
             self.run_manager()
 
         if self.role == 'worker':
+            self.setup_worker()
             self.run_worker()
 
     def prepare_before_run(self):
@@ -78,10 +85,12 @@ class Spider(TraditionalSpider):
                     self.process_task_generator()
 
                 for task in res['task_list']:
+                    logging.debug('Processing task items from result queue')
                     self.add_task(task)
 
                 for data in res['data_list']:
-                    self.process_handler_result(data, task) 
+                    logging.debug('Processing data items from result queue')
+                    #self.process_handler_result(data, task) 
 
         except KeyboardInterrupt:
             print '\nGot ^C signal. Stopping.'
@@ -189,17 +198,10 @@ class Spider(TraditionalSpider):
                 raise SpiderError('Unknown result type: %s' % result)
 
 
-class Actor(Process):
-    def __init__(self, spider_cls, role, result_queue,
-                 spider_args=None, spider_kwargs=None, *args, **kwargs):
-        self.spider_cls = spider_cls
-        self.role = role
-        self.result_queue = result_queue
-        self.spider_args = spider_args or ()
-        self.spider_kwargs = spider_kwargs or {}
-        super(Actor, self).__init__(*args, **kwargs)
+def create_process(spider_cls, role, result_queue, *args, **kwargs):
+    # Create spider instance which will performe
+    # actions specific to given role
+    bot = spider_cls(role, result_queue, *args, **kwargs)
 
-    def run(self):
-        bot = self.spider_cls(self.role, self.result_queue, *self.spider_args,
-                              **self.spider_kwargs)
-        bot.run()
+    # Return Process object binded to the `bot.run` method
+    return Process(target=bot.run)

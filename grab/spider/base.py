@@ -31,7 +31,7 @@ from .transport.multicurl import MulticurlTransport
 from ..proxylist import ProxyList
 
 DEFAULT_TASK_PRIORITY = 100
-RANDOM_TASK_PRIORITY_RANGE = (80, 100)
+RANDOM_TASK_PRIORITY_RANGE = (50, 100)
 TASK_QUEUE_TIMEOUT = 0.01
 
 logger = logging.getLogger('grab.spider.base')
