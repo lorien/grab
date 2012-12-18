@@ -61,13 +61,20 @@ def truncate_tail(node, xpath):
     subnode.getparent().remove(subnode)
 
 
-def drop_node(node, xpath):
+def drop_node(tree, xpath, keep_children=False):
     """
     Find sub-node by its xpath and remove it.
     """
 
-    for item in node.xpath(xpath):
-        item.getparent().remove(item)
+    for node in tree.xpath(xpath):
+        parent = node.getparent()
+        if keep_children:
+            # Find position of node in list of adjacent nodes
+            pos = parent.index(node) + 1
+            for subnode in node:
+                parent.insert(pos, subnode)
+                pos += 1
+        parent.remove(node)
 
 
 def parse_html(html, encoding='utf-8'):
@@ -134,3 +141,16 @@ def sanitize_html(html, encoding='utf-8', return_unicode=False):
         return html.decode('utf-8')
     else:
         return html
+
+
+def replace_node_with_text(root, xpath, text):
+    for node in root.xpath(xpath):
+        new_text = (text + node.tail) if node.tail else text
+        parent = node.getparent()
+        if parent is not None:
+            previous = node.getprevious()
+            if previous is not None:
+                previous.tail = (previous.tail or '') + new_text
+            else:
+                parent.text = (parent.text or '') + new_text
+            parent.remove(node)
