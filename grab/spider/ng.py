@@ -75,7 +75,7 @@ class Spider(TraditionalSpider):
                     res = None
 
                 if res is None:
-                    logging.error('res is None')
+                    logging.error('res is None: stopping')
                     break
 
                 if self.should_stop:
@@ -168,7 +168,7 @@ class Spider(TraditionalSpider):
         * Data instance.
         """
 
-        if self.role == 'worker':
+        if self.role == 'manager':
             if isinstance(result, Task):
                 if not self.add_task(result):
                     self.add_item('task-could-not-be-added', task.url)
@@ -187,7 +187,7 @@ class Spider(TraditionalSpider):
             else:
                 raise SpiderError('Unknown result type: %s' % result)
 
-        if self.role == 'manager':
+        if self.role == 'worker':
             if isinstance(result, Task):
                 self.result_cache['task'].append(result)
             elif isinstance(result, Data):
