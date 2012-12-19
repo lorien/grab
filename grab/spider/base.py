@@ -464,6 +464,12 @@ class Spider(SpiderPattern, SpiderStat):
         else:
             raise SpiderError('Unknown result type: %s' % result)
 
+    def generate_task_priority(self):
+        if self.priority_mode == 'const':
+            return DEFAULT_TASK_PRIORITY
+        else:
+            return randint(*RANDOM_TASK_PRIORITY_RANGE)
+
     def add_task(self, task):
         """
         Add task to the task queue.
@@ -474,10 +480,7 @@ class Spider(SpiderPattern, SpiderStat):
         if self.taskq is None:
             raise SpiderMisuseError('You should configure task queue before adding tasks. Use `setup_queue` method.')
         if task.priority is None:
-            if self.priority_mode == 'const':
-                task.priority = DEFAULT_TASK_PRIORITY
-            else:
-                task.priority = randint(*RANDOM_TASK_PRIORITY_RANGE)
+            task.priority = self.generate_task_priority()
 
         if (not task.url.startswith('http://') and not task.url.startswith('https://')
             and not task.url.startswith('ftp://')):
@@ -491,7 +494,8 @@ class Spider(SpiderPattern, SpiderStat):
 
         is_valid = self.check_task_limits(task)
         if is_valid:
-            self.taskq.put(task, task.priority)
+            # TODO: keep original task priority if it was set explicitly
+            self.taskq.put(task, self.generate_task_priority())
         return is_valid
 
     def check_task_limits(self, task):
