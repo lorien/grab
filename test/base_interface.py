@@ -25,7 +25,7 @@ class TestGrab(TestCase):
         RESPONSE['get'] = '<?xml version="1.0" encoding="UTF-8"?><root><foo>foo</foo></root>'
         g = Grab(strip_xml_declaration=True, transport=GRAB_TRANSPORT)
         g.go(BASE_URL)
-        self.assertTrue(g.xpath('//foo').text == 'foo')
+        self.assertTrue(g.xpath_one('//foo').text == 'foo')
 
     def test_incorrect_option_name(self):
         g = Grab(transport=GRAB_TRANSPORT)
@@ -226,12 +226,12 @@ class TestGrab(TestCase):
         xml = '<?xml version="1.0" encoding="UTF-8"?><tree><leaf>text</leaf></tree>'
         g = Grab(xml)
         self.assertTrue(g.search(u'text'))
-        self.assertEqual(g.xpath('//leaf').text, u'text')
+        self.assertEqual(g.xpath_one('//leaf').text, u'text')
 
         # Similar bugs
         g = Grab(xml)
         self.assertTrue(g.rex(u'text'))
-        self.assertEqual(g.xpath('//leaf').text, u'text')
+        self.assertEqual(g.xpath_one('//leaf').text, u'text')
 
     def test_inheritance(self):
         class SimpleExtension(object):

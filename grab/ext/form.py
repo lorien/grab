@@ -48,12 +48,12 @@ class FormExtension(object):
 
         if id is not None:
             try:
-                self._lxml_form = self.css('form[id="%s"]' % id)
+                self._lxml_form = self.css_one('form[id="%s"]' % id)
             except IndexError:
                 raise DataNotFound("There is no form with id: %s" % id)
         elif name is not None:
             try:
-                self._lxml_form = self.css('form[name="%s"]' % name)
+                self._lxml_form = self.css_one('form[name="%s"]' % name)
             except IndexError:
                 raise DataNotFound('There is no form with name: %s' % name)
         elif number is not None:
@@ -63,7 +63,7 @@ class FormExtension(object):
                 raise DataNotFound('There is no form with number: %s' % number)
         elif xpath is not None:
             try:
-                self._lxml_form = self.xpath(xpath)
+                self._lxml_form = self.xpath_one(xpath)
             except IndexError:
                 raise DataNotFound('Could not find form with xpath: %s' % xpath)
         else:

@@ -65,12 +65,12 @@ class LXMLExtensionTest(TestCase):
         self.assertEqual(set(['em', 'div', 'strong']), names)
 
     def test_xpath(self):
-        self.assertEqual('bee-em', self.g.xpath('//em').get('id'))
-        self.assertEqual('num-2', self.g.xpath(u'//*[text() = "item #2"]').get('id'))
+        self.assertEqual('bee-em', self.g.xpath_one('//em').get('id'))
+        self.assertEqual('num-2', self.g.xpath_one(u'//*[text() = "item #2"]').get('id'))
         self.assertRaises(DataNotFound,
-            lambda: self.g.xpath('//em[@id="baz"]'))
-        self.assertEqual(None, self.g.xpath('//zzz', default=None))
-        self.assertEqual('foo', self.g.xpath('//zzz', default='foo'))
+            lambda: self.g.xpath_one('//em[@id="baz"]'))
+        self.assertEqual(None, self.g.xpath_one('//zzz', default=None))
+        self.assertEqual('foo', self.g.xpath_one('//zzz', default='foo'))
 
     def test_xpath_text(self):
         self.assertEqual(u'пче ла', self.g.xpath_text('//*[@id="bee"]', smart=True))
@@ -78,7 +78,7 @@ class LXMLExtensionTest(TestCase):
         self.assertEqual(u'пче ла му ха item #100 2 item #2', self.g.xpath_text('/html/body', smart=True))
         self.assertRaises(DataNotFound,
             lambda: self.g.xpath_text('//code'))
-        self.assertEqual(u'bee', self.g.xpath('//*[@id="bee"]/@id'))
+        self.assertEqual(u'bee', self.g.xpath_one('//*[@id="bee"]/@id'))
         self.assertRaises(DataNotFound,
             lambda: self.g.xpath_text('//*[@id="bee2"]/@id'))
 
@@ -98,11 +98,11 @@ class LXMLExtensionTest(TestCase):
             [x.get('id') for x in self.g.xpath_list('//li')])
 
     def test_css(self):
-        self.assertEqual('bee-em', self.g.css('em').get('id'))
-        self.assertEqual('num-2', self.g.css('#num-2').get('id'))
+        self.assertEqual('bee-em', self.g.css_one('em').get('id'))
+        self.assertEqual('num-2', self.g.css_one('#num-2').get('id'))
         self.assertRaises(DataNotFound,
-            lambda: self.g.css('em#baz'))
-        self.assertEqual('foo', self.g.css('zzz', default='foo'))
+            lambda: self.g.css_one('em#baz'))
+        self.assertEqual('foo', self.g.css_one('zzz', default='foo'))
 
     def test_css_text(self):
         self.assertEqual(u'пче ла', self.g.css_text('#bee', smart=True))
@@ -144,11 +144,11 @@ class LXMLExtensionTest(TestCase):
 
         # By default HTML DOM builder is used
         # It handles CDATA incorrectly
-        self.assertEqual(None, g.xpath('//weight').text)
+        self.assertEqual(None, g.xpath_one('//weight').text)
         self.assertEqual(None, g.tree.xpath('//weight')[0].text)
 
         # But XML DOM builder produces valid result
-        #self.assertEqual(None, g.xpath('//weight').text)
+        #self.assertEqual(None, g.xpath_one('//weight').text)
         self.assertEqual('30', g.xml_tree.xpath('//weight')[0].text)
 
         # Use `content_type` option to change default DOM builder
@@ -156,7 +156,7 @@ class LXMLExtensionTest(TestCase):
         g.fake_response(XML)
         g.setup(content_type='xml')
 
-        self.assertEqual('30', g.xpath('//weight').text)
+        self.assertEqual('30', g.xpath_one('//weight').text)
         self.assertEqual('30', g.tree.xpath('//weight')[0].text)
 
     def test_xml_declaration(self):

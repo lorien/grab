@@ -14,8 +14,8 @@ def parse(g):
     """
 
     try:
-        ip = g.xpath('//strong').text.split('is ')[1]
-        country = g.xpath('//b[contains(text(), "Your Country")]').text.split(':')[1].strip()
+        ip = g.xpath_one('//strong').text.split('is ')[1]
+        country = g.xpath_one('//b[contains(text(), "Your Country")]').text.split(':')[1].strip()
         return {'ip': ip, 'country': country}
     except IndexError:
         raise ParsingError('Could not parser formyip.com response')

@@ -96,7 +96,7 @@ class SpiderPattern(object):
         """
 
         logger.error('Method next_page_task is deprecated. Use process_next_page method instead.')
-        nav = grab.xpath(xpath, None)
+        nav = grab.xpath_one(xpath, None)
         if nav is not None:
             url = grab.make_url_absolute(nav.get('href'))
             page = task.get('page', 1) + 1

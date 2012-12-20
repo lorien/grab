@@ -186,7 +186,11 @@ class LXMLExtension(object):
                     return self.request(url=item[2])
         raise DataNotFound('Cannot find link ANCHOR=%s, HREF=%s' % (anchor, href))
 
-    def xpath(self, path, default=NULL, filter=None):
+    def xpath(self, *args, **kwargs):
+        logger.debug('Method xpath is depricated. Please use xpath_one method')
+        return self.xpath_one(*args, **kwargs)
+
+    def xpath_one(self, path, default=NULL, filter=None):
         """
         Get first element which matches the given xpath or raise DataNotFound.
         """
@@ -217,7 +221,7 @@ class LXMLExtension(object):
         """
 
         try:
-            elem = self.xpath(path, filter=filter)
+            elem = self.xpath_one(path, filter=filter)
         except IndexError:
             if default is NULL:
                 raise
@@ -244,7 +248,11 @@ class LXMLExtension(object):
             else:
                 return default
 
-    def css(self, path, default=NULL):
+    def css(self, *args, **kwargs):
+        logger.debug('Method css is depricated. Please use css_one method')
+        return self.css_one(*args, **kwargs)
+
+    def css_one(self, path, default=NULL):
         """
         Get first element which matches the given css path or raise DataNotFound.
         """
@@ -270,7 +278,7 @@ class LXMLExtension(object):
         """
 
         try:
-            return get_node_text(self.css(path), smart=smart,
+            return get_node_text(self.css_one(path), smart=smart,
                                  normalize_space=normalize_space)
         except IndexError:
             if default is NULL:
@@ -306,14 +314,14 @@ class LXMLExtension(object):
         If css path is not found then raise `DataNotFound` exception.
         """
 
-        self.css(path)
+        self.css_one(path)
 
     def assert_xpath(self, path):
         """
         If xpath path is not found then raise `DataNotFound` exception.
         """
 
-        self.xpath(path)
+        self.xpath_one(path)
 
     def css_exists(self, path):
         """

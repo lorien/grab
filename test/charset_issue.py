@@ -16,16 +16,16 @@ class LXMLExtensionTest(TestCase):
         g.go(BASE_URL)
 
         # By default &#[128-160]; are fixed
-        self.assertFalse(g.xpath('//strong/text()') == unichr(151))
-        self.assertTrue(g.xpath('//strong/text()') == unichr(8212))
+        self.assertFalse(g.xpath_one('//strong/text()') == unichr(151))
+        self.assertTrue(g.xpath_one('//strong/text()') == unichr(8212))
 
         # disable fix-behaviour
         g.setup(fix_special_entities=False)
         g.go(BASE_URL)
 
         # By default &#[128-160]; are fixed
-        self.assertTrue(g.xpath('//strong/text()') == unichr(151))
-        self.assertFalse(g.xpath('//strong/text()') == unichr(8212))
+        self.assertTrue(g.xpath_one('//strong/text()') == unichr(151))
+        self.assertFalse(g.xpath_one('//strong/text()') == unichr(8212))
 
         # Explicitly use unicode_body func
         g = Grab()
