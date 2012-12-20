@@ -65,6 +65,7 @@ class Spider(SpiderPattern, SpiderStat):
                  priority_mode='random',
                  meta=None,
                  verbose_logging=False,
+                 retry_rebuild_user_agent=True,
                  ):
         """
         Arguments:
@@ -84,6 +85,8 @@ class Spider(SpiderPattern, SpiderStat):
             `thread_number` option). The value of `request_pause` could be float.
         * priority_mode - could be "random" or "const"
         * meta - arbitrary user data
+        * retry_rebuid_user_agent - generate new random user-agent for each
+            network request which is performed again due to network error
         """
 
         self.taskq = None
@@ -142,6 +145,7 @@ class Spider(SpiderPattern, SpiderStat):
         self.proxylist = None
         self.proxy = None
         self.proxy_auto_change = False
+        self.retry_rebuild_user_agent = retry_rebuild_user_agent
 
     def setup_cache(self, backend='mongo', database=None, use_compression=True, **kwargs):
         if database is None:
@@ -323,6 +327,10 @@ class Spider(SpiderPattern, SpiderStat):
                         grab.load_config(task.grab_config)
                     else:
                         grab.setup(url=task.url)
+                    # Generate new common headers
+                    grab.config['common_headers'] = grab.common_headers()
+                    if self.retry_rebuild_user_agent:
+                        grab.config['user_agent'] = None
 
                     grab_config_backup = grab.dump_config()
 
@@ -433,7 +441,7 @@ class Spider(SpiderPattern, SpiderStat):
                 task.refresh_cache = True
                 # GRAB CLONE ISSUE
                 # Should use task.grab_config or backup of grab_config
-                task.grab = res['grab_config_backup']
+                task.setup_grab_config(res['grab_config_backup'])
                 self.add_task(task)
             # TODO: allow to write error handlers
     

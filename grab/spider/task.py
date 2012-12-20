@@ -73,8 +73,7 @@ class Task(object):
         if grab:
             grab_config = grab.dump_config()
         if grab_config:
-            self.url = grab_config['url']
-            self.grab_config = copy_config(grab_config)
+            self.setup_grab_config(grab_config)
         else:
             self.url = url
             self.grab_config = None
@@ -88,6 +87,10 @@ class Task(object):
         self.use_proxylist = use_proxylist
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+    def setup_grab_config(self, grab_config):
+        self.url = grab_config['url']
+        self.grab_config = copy_config(grab_config)
 
     def get(self, key, default=None):
         """
