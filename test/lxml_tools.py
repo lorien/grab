@@ -57,15 +57,15 @@ class LXMLToolsTest(TestCase):
 
     def test_drop_node(self):
         HTML = """
-            <div><p><span>span</span><a href="#">link</a></p></div>
+            <div><p>text<span>span</span><a href="#">link</a></p>tail</div>
         """
         tree = fromstring(HTML)
         drop_node(tree, './/p')
-        self.assertTrue(render_html(tree) == '<div></div>')
+        self.assertTrue(render_html(tree) == '<div>tail</div>')
 
         tree = fromstring(HTML)
-        drop_node(tree, './/p', keep_children=True)
-        self.assertTrue(render_html(tree) == '<div><span>span</span><a href="#">link</a></div>')
+        drop_node(tree, './/span', keep_content=True)
+        self.assertTrue(render_html(tree) == '<div><p>textspan<a href="#">link</a></p>tail</div>')
 
     def test_replace_node_with_text(self):
         # replace span

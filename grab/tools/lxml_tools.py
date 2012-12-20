@@ -61,22 +61,6 @@ def truncate_tail(node, xpath):
     subnode.getparent().remove(subnode)
 
 
-def drop_node(tree, xpath, keep_children=False):
-    """
-    Find sub-node by its xpath and remove it.
-    """
-
-    for node in tree.xpath(xpath):
-        parent = node.getparent()
-        if keep_children:
-            # Find position of node in list of adjacent nodes
-            pos = parent.index(node) + 1
-            for subnode in node:
-                parent.insert(pos, subnode)
-                pos += 1
-        parent.remove(node)
-
-
 def parse_html(html, encoding='utf-8'):
     """
     Parse html into ElementTree node.
@@ -143,14 +127,41 @@ def sanitize_html(html, encoding='utf-8', return_unicode=False):
         return html
 
 
+def drop_node(tree, xpath, keep_content=False):
+    """
+    Find sub-node by its xpath and remove it.
+    """
+
+    for node in tree.xpath(xpath):
+        parent = node.getparent()
+        if keep_content:
+            # Find position of node in list of adjacent nodes
+            pos = parent.index(node) + 1
+            # move all node's childrent to level higher
+            for subnode in node:
+                parent.insert(pos, subnode)
+                pos += 1
+            # now replace node with its text
+            node_text = (node.text or '') + (node.tail or '')
+            _replace_node_with_text(node, node_text)
+        else:
+            _replace_node_with_text(node, node.tail or '')
+
+
+
+
 def replace_node_with_text(root, xpath, text):
     for node in root.xpath(xpath):
         new_text = (text + node.tail) if node.tail else text
-        parent = node.getparent()
-        if parent is not None:
-            previous = node.getprevious()
-            if previous is not None:
-                previous.tail = (previous.tail or '') + new_text
-            else:
-                parent.text = (parent.text or '') + new_text
-            parent.remove(node)
+        _replace_node_with_text(node, new_text)
+
+
+def _replace_node_with_text(node, text):
+    parent = node.getparent()
+    if parent is not None:
+        previous = node.getprevious()
+        if previous is not None:
+            previous.tail = (previous.tail or '') + text
+        else:
+            parent.text = (parent.text or '') + text
+        parent.remove(node)

@@ -66,3 +66,9 @@ def remove_bom(text):
         return text[3:]
     else:
         return text
+
+
+#def strip_space(text):
+    #"""Strip all spaces at begin or end of the text"""
+
+    #return RE_STRIP_SPACE.sub('', text)
