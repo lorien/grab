@@ -186,21 +186,26 @@ class Spider(SpiderPattern, SpiderStat):
             for url in self.initial_urls:
                 self.add_task(Task('initial', url=url))
 
-    def prepare_before_run(self):
+    def setup_default_queue(self):
         """
-        Configure all things required to start
-        main work loop.
+        If task queue is not configured explicitly
+        then create task queue with default parameters
         """
 
         # If queue is still not configured
         # then configure it with default backend
         if self.taskq is None:
             self.setup_queue()
+        
 
-        self.prepare()
+    def init_task_generators(self):
+        """
+        Process `initial_urls` and `task_generator`.
+        Generate first portion of tasks.
 
-        # Init task generator
-        # TODO: task generator should work in separate OS process
+        TODO: task generator should work in separate OS process
+        """
+
         self.task_generator_object = self.task_generator()
         self.task_generator_enabled = True
 
@@ -217,7 +222,9 @@ class Spider(SpiderPattern, SpiderStat):
 
         try:
             self.start_time = time.time()
-            self.prepare_before_run()
+            self.setup_default_queue()
+            self.prepare()
+            self.init_task_generators()
 
             for res_count, res in enumerate(self.get_next_response()):
                 if res_count > 0 and self.request_pause > 0:
