@@ -1,11 +1,12 @@
 import setup_script
-from grab.spider.ng import Spider, Task, Data, create_process
+from grab.spider.ng import (BaseWorkerSpider, BaseManagerSpider,
+                            Task, Data, create_process)
 import logging
 import pymongo
 from multiprocessing import Manager
 import time
 
-class SimpleSpider(Spider):
+class SimpleSpider(BaseWorkerSpider):
     def task_generator(self):
         yield Task('page', url='http://flask.pocoo.org/', level=0)
 
@@ -26,25 +27,30 @@ class SimpleSpider(Spider):
         logging.debug('Saving data: %s' % page['_id'])
         self.db.page.save(page)
 
-    def setup_worker(self):
+    def prepare(self):
         self.db = pymongo.Connection()['ng']
 
 
-logging.basicConfig(level=logging.DEBUG)
+def main():
+    logging.basicConfig(level=logging.DEBUG)
 
-mp_manager = Manager()
-result_queue = mp_manager.Queue()
+    mp_manager = Manager()
+    result_queue = mp_manager.Queue()
 
-manager = create_process(SimpleSpider, 'manager', result_queue,
-                         verbose_logging=True)
-manager.start()
+    manager = create_process(BaseManagerSpider, result_queue,
+                             verbose_logging=True)
+    manager.start()
 
-time.sleep(1)
+    time.sleep(1)
 
-worker = create_process(SimpleSpider, 'worker', result_queue,
-                        verbose_logging=True)
-worker.start()
+    worker = create_process(SimpleSpider, result_queue,
+                            verbose_logging=True)
+    worker.start()
 
-manager.join()
-print 'MANAAGER HAS STOPED'
-worker.terminate()
+    manager.join()
+    print 'MANAAGER HAS STOPED'
+    worker.terminate()
+
+
+if __name__ == '__main__':
+    main()
