@@ -57,15 +57,13 @@ class Spider(SpiderPattern, SpiderStat):
     def __init__(self, thread_number=3,
                  network_try_limit=10, task_try_limit=10,
                  debug_error=False,
-                 use_cache=None,
-                 use_cache_compression=None,
-                 cache_db = None,
                  log_taskname=False,
                  request_pause=0,
                  priority_mode='random',
                  meta=None,
                  verbose_logging=False,
                  retry_rebuild_user_agent=True,
+                 only_cache=False,
                  ):
         """
         Arguments:
@@ -94,19 +92,6 @@ class Spider(SpiderPattern, SpiderStat):
             self.enable_verbose_logging()
         else:
             self.disable_verbose_logging()
-
-        if use_cache is not None:
-            logger.error('use_cache argument is depricated. Use setup_cache method.')
-            use_cache = False
-        if use_cache_compression is not None:
-            logger.error('use_cache_compression argument is depricated. Use setup_cache method.')
-            use_cache_compression = False
-        if cache_db is not None:
-            logger.error('cache_db argument is depricated. Use setup_cache method.')
-        # TODO: Remove
-        if use_cache:
-            self.setup_cache(backend='mongo', database=cache_db,
-                             use_compression=use_cache_compression)
 
         if meta:
             self.meta = meta
