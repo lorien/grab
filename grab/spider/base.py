@@ -98,6 +98,7 @@ class Spider(SpiderPattern, SpiderStat):
         else:
             self.meta = {}
 
+        self.only_cache = only_cache
         self.thread_number = thread_number
         self.counters = defaultdict(int)
         self.grab_config = {}
@@ -328,12 +329,15 @@ class Spider(SpiderPattern, SpiderStat):
                         self.log_verbose('Task data is loaded from the cache. Yielding task result.')
                         yield cache_result
                     else:
-                        self.inc_count('request-network')
-                        self.change_proxy(task, grab)
-                        self.log_verbose('Submitting task to the transport layer')
-                        transport.process_task(task, grab, grab_config_backup)
-                        self.log_verbose('Asking transport layer to do something')
-                        transport.process_handlers()
+                        if self.only_cache:
+                            logger.debug('Skipping network request to %s' % grab.config['url'])
+                        else:
+                            self.inc_count('request-network')
+                            self.change_proxy(task, grab)
+                            self.log_verbose('Submitting task to the transport layer')
+                            transport.process_task(task, grab, grab_config_backup)
+                            self.log_verbose('Asking transport layer to do something')
+                            transport.process_handlers()
 
             self.log_verbose('Asking transport layer to do something')
             # Process active handlers
