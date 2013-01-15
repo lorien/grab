@@ -160,14 +160,16 @@ def is_last_page(grab):
     # <td class="b" style="text-align:left"><a href="/search?q=punbb&amp;num=100&amp;hl=ru&amp;prmd=ivns&amp;ei=67DBTs3TJMfpOfrhkcsB&amp;start=100&amp;sa=N" style="text-align:left"><span class="csb ch" style="background-position:-96px 0;width:71px"></span><span style="display:block;margin-left:53px">{NEXT MESSAGE}</span></a></td>
 
     try:
-        next_link_text = grab.xpath_list('//span[contains(@class, "csb ") and '\
-                                         'contains(@class, " ch")]/..')[-1]\
-                             .text_content().strip()
+        #next_link_text = grab.xpath_list('//span[contains(@class, "csb ") and '\
+                                         #'contains(@class, " ch")]/..')[-1]\
+                             #.text_content().strip()
+        next_link = grab.xpath_one('//a[@id="pnnext"]')
     except IndexError:
         logging.debug('No results found')
         return True
     else:
-        return not len(next_link_text)
+        return False
+        #return not len(next_link_text)
 
 
 
