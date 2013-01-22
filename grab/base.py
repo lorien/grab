@@ -303,8 +303,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             if not key in self.config.keys():
                 raise error.GrabMisuseError('Unknown option: %s' % key)
 
-        if key == 'strip_xml_declaration':
-            logging.error('Option strip_xml_declaration is deprecated. Now xml declarations is alwas striped out. This option will be removed in future versions')
+            if key == 'strip_xml_declaration':
+                logging.error('Option strip_xml_declaration is deprecated. Now xml declarations is alwas striped out. This option will be removed in future versions')
 
         if 'url' in kwargs:
             if self.config.get('url'):
