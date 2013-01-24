@@ -584,9 +584,12 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         Set random proxy from proxylist.
         """
 
-        server, userpwd, proxy_type = self.proxylist.get_random()
-        self.setup(proxy=server, proxy_userpwd=userpwd,
-                   proxy_type=proxy_type)
+        if self.proxylist:
+            server, userpwd, proxy_type = self.proxylist.get_random()
+            self.setup(proxy=server, proxy_userpwd=userpwd,
+                       proxy_type=proxy_type)
+        else:
+            logging.debug('Could not change proxy because proxy list is not loaded')
 
     """
     Private methods
