@@ -2,7 +2,7 @@
 from unittest import TestCase
 import time
 
-from grab.tools.control import sleep
+from grab.tools.control import sleep, repeat
 
 class ControlToolsTestCase(TestCase):
     def test_sleep(self):
@@ -13,3 +13,28 @@ class ControlToolsTestCase(TestCase):
         now = time.time()
         sleep(0, 0.5)
         self.assertTrue(0 < (time.time() - now) < 0.6)
+
+    def test_repeat(self):
+        COUNTER = [0]
+
+        def foo(counter=COUNTER):
+            counter[0] += 1
+            if counter[0] == 1:
+                raise ValueError
+            elif counter[0] == 2:
+                raise IndexError
+            else:
+                return 4
+
+        COUNTER[0] = 0
+        self.assertRaises(ValueError, lambda: repeat(foo, limit=1))
+
+        COUNTER[0] = 0
+        self.assertRaises(IndexError, lambda: repeat(foo, limit=2))
+
+        COUNTER[0] = 0
+        self.assertEqual(4, repeat(foo, limit=3))
+
+        COUNTER[0] = 0
+        self.assertRaises(IndexError,
+                          lambda: repeat(foo, limit=2, fatal_exceptions=(IndexError,)))

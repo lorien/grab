@@ -21,22 +21,30 @@ def sleep(lower_limit, upper_limit):
 
 
 def repeat(func, limit=3, args=None, kwargs=None, fatal_exceptions=()):
-    for x in xrange(limit):
-        ok = False
+    """
+    Return value of execution `func` function.
+
+    In case of error try to execute `func` maximum `limit` times
+    and then raise latest exception.
+
+    Example::
+
+        def download(url):
+            return urllib.urlopen(url).read()
+
+        data = repeat(download, 3, args=['http://google.com/'])
+
+    """
+    for try_count in xrange(1, limit + 1):
         try:
-            if args is not None and kwargs is not None:
-                res = func(*args, **kwargs)
-            elif args is not None:
-                res = func(*args)
-            elif kwargs is not None:
-                res = func(**kwargs)
-            else:
-                res = func()
+            res = func(*(args or {}), **(kwargs or {}))
         except Exception, ex:
             if isinstance(ex, fatal_exceptions):
                 raise
-            logging.error('', exc_info=ex)
-            if x == (limit - 1):
-                raise
+            else:
+                logging.error('', exc_info=ex)
+                if try_count >= limit:
+                    logger.debug('Too many errors while executing function %s' % func.__name__)
+                    raise
         else:
             return res
