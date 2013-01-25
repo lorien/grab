@@ -63,6 +63,7 @@ def parse_search_results(grab, parse_index_size=False, strict_query=False):
     elif grab.xpath_exists('//div[contains(@class, "b-error")]'):
         err_msg = grab.xpath_text('//div[contains(@class, "b-error")]')
         logging.debug('Found error message: %s' % err_msg)
+        return []
     elif grab.xpath_exists('//ol[contains(@class, "b-serp-list")]'):
         # TODO:
         #if (strict_query and (
