@@ -9,6 +9,7 @@ except ImportError:
 import re
 import time
 import logging
+import traceback
 
 from ..error import DataNotFound, GrabMisuseError
 from ..base import GLOBAL_STATE
@@ -187,7 +188,9 @@ class LXMLExtension(object):
         raise DataNotFound('Cannot find link ANCHOR=%s, HREF=%s' % (anchor, href))
 
     def xpath(self, *args, **kwargs):
-        logger.debug('Method xpath is depricated. Please use xpath_one method')
+        stack = traceback.extract_stack()
+        stack_call = stack[-2]
+        logger.debug('Method xpath is depricated. Please use xpath_one method. Location of problem: %s::%d' % (stack_call[0], stack_call[1]))
         return self.xpath_one(*args, **kwargs)
 
     def xpath_one(self, path, default=NULL, filter=None):
@@ -249,7 +252,9 @@ class LXMLExtension(object):
                 return default
 
     def css(self, *args, **kwargs):
-        logger.debug('Method css is depricated. Please use css_one method')
+        stack = traceback.extract_stack()
+        stack_call = stack[-2]
+        logger.debug('Method css is depricated. Please use css_one method. Location of problem: %s::%d' % (stack_call[0], stack_call[1]))
         return self.css_one(*args, **kwargs)
 
     def css_one(self, path, default=NULL):
