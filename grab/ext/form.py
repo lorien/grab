@@ -92,7 +92,7 @@ class FormExtension(object):
         """
 
         if self._lxml_form is None:
-            forms = [(idx, len(x.fields)) for idx, x in enumerate(self.tree.forms)]
+            forms = [(idx, len(list(x.fields))) for idx, x in enumerate(self.tree.forms)]
             if len(forms):
                 idx = sorted(forms, key=lambda x: x[1], reverse=True)[0][0]
                 self.choose_form(idx)
