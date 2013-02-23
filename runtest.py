@@ -32,7 +32,7 @@ TEST_CASE_LIST = (
     'test.lxml_extension',
     'test.form_extension',
     # test containers
-    'test.container',
+    'test.item',
     # idn
     'test.i18n',
 )

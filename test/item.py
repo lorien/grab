@@ -2,7 +2,7 @@
 from unittest import TestCase
 
 from grab import Grab, DataNotFound
-from grab.container import Container, IntegerField, StringField, DateTimeField
+from grab.item import Item, IntegerField, StringField, DateTimeField
 from test.util import GRAB_TRANSPORT
 
 XML = """<?xml version='1.0' encoding='utf-8'?>
@@ -20,7 +20,7 @@ XML = """<?xml version='1.0' encoding='utf-8'?>
 </bbapi>
 """
 
-class Player(Container):
+class Player(Item):
     id = IntegerField('//player/@id')
     first_name = StringField('//player/firstname')
     retrieved = DateTimeField('//player/@retrieved', '%Y-%m-%dT%H:%M:%SZ')
@@ -29,7 +29,7 @@ class Player(Container):
 
     data_not_found = StringField('//data/no/found')
 
-class TestContainers(TestCase):
+class TestItems(TestCase):
     def test_container_base_behavior(self):
         grab = Grab(transport=GRAB_TRANSPORT)
         grab.fake_response(XML)
