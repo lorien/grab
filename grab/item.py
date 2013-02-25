@@ -31,7 +31,7 @@ from .tools.lxml_tools import get_node_text
 from .error import DataNotFound
 from .selector import Selector
 
-NONE = object()
+NULL = object()
 
 class Field(object):
     """
@@ -40,7 +40,7 @@ class Field(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, xpath=None, default=NONE, empty_default=NONE):
+    def __init__(self, xpath=None, default=NULL, empty_default=NULL):
         self.xpath_exp = xpath
         self.default = default
         self.empty_default = empty_default
@@ -69,12 +69,12 @@ def default(func):
         try:
             value = func(self, item, itemtype)
         except DataNotFound:
-            if self.default is not NONE:
+            if self.default is not NULL:
                 value = self.default
             else:
                 raise
         else:
-            if self.empty_default is not NONE:
+            if self.empty_default is not NULL:
                 if not value:
                     value = self.empty_default
         item._cache[self.attr_name] = value
@@ -85,7 +85,10 @@ def default(func):
 def empty(func):
     def internal(self, item, itemtype):
         if self.xpath_exp is None:
-            return None
+            if self.default is not NULL:
+                return self.default
+            else:
+                return None
         else:
             return func(self, item, itemtype)
     return internal
@@ -97,7 +100,7 @@ class IntegerField(Field):
     @empty
     def __get__(self, item, itemtype):
         value = item._selector.select(self.xpath_exp).text()
-        if self.empty_default is not NONE:
+        if self.empty_default is not NULL:
             if value == "":
                 return self.empty_default
         return int(value)
@@ -176,8 +179,9 @@ class Item(object):
     def _parse(self):
         pass
 
-    def _render(self):
+    def _render(self, exclude=()):
         out = []
         for key in self._field_list:
-            out.append('%s: %s' % (key, getattr(self, key)))
+            if not key in exclude:
+                out.append('%s: %s' % (key, getattr(self, key)))
         return '\n'.join(out)

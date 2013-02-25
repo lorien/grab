@@ -6,7 +6,7 @@ import sys
 root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(0, root)
 
-from grab.selector import Selector
+from grab.selector import Selector, TextSelector
 from lxml.html import fromstring
 
 HTML = """
@@ -16,7 +16,7 @@ HTML = """
         <li>one</li>
         <li>two</li>
         <li>three</li>
-        <li>z 4 foo</li>
+        <li id="6">z 4 foo</li>
     </ul>
 </body>
 """
@@ -37,6 +37,14 @@ class TestSelector(TestCase):
 
     def test_textselector(self):
         self.assertEquals('one', Selector(self.tree).select('//li/text()').text())
+
+    def test_number(self):
+        self.assertEquals(4, Selector(self.tree).select('//li[last()]').number())
+        self.assertEquals(6, Selector(self.tree).select('//li[last()]/@id').number())
+
+    def test_text_selector(self):
+        sel = Selector(self.tree).select('//li/text()').one()
+        self.assertTrue(isinstance(sel, TextSelector))
 
 
 class TestSelectorList(TestCase):
