@@ -16,6 +16,6 @@ except Exception, ex:
 else:
     print g.doc.select('//title').text()
 
-g.setup(interface='tun0')
+g.setup(interface='192.168.170.18')
 g.request()
 print g.doc.select('//title').text()

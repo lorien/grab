@@ -352,9 +352,7 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.USERPWD, str(grab.config['userpwd']))
 
         if grab.config.get('interface') is not None:
-            iname = grab.config['interface']
-            iname_tuned = 'if!' + iname
-            self.curl.setopt(pycurl.INTERFACE, iname_tuned)
+            self.curl.setopt(pycurl.INTERFACE, grab.config['interface'])
 
     def request(self):
 
