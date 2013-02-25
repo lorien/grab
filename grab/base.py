@@ -135,7 +135,10 @@ def default_config():
         # Content compression
         encoding = 'gzip',
 
-        # Редиректы
+        # Network interface
+        interface = None,
+
+        # Redirects
         follow_refresh = False,
         follow_location = True,
         redirect_limit = 10,
