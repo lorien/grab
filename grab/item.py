@@ -29,6 +29,7 @@ from datetime import datetime
 
 from .tools.lxml_tools import get_node_text
 from .error import DataNotFound
+from .selector import Selector
 
 NONE = object()
 
@@ -81,23 +82,21 @@ def default(func):
     return internal
 
 
-def func_field(func):
-    class FuncField(Field):
-        @cached
-        @default
-        def __get__(self, item, itemtype):
-            return func(self, item._tree)
-    #FuncField.__name__ = func.__name__
-    return FuncField()
+def empty(func):
+    def internal(self, item, itemtype):
+        if self.xpath_exp is None:
+            return None
+        else:
+            return func(self, item, itemtype)
+    return internal
 
 
 class IntegerField(Field):
     @cached
     @default
+    @empty
     def __get__(self, item, itemtype):
-        if self.xpath_exp is None:
-            return None
-        value = get_node_text(item._tree.xpath(self.xpath_exp)[0])
+        value = item._selector.select(self.xpath_exp).text()
         if self.empty_default is not NONE:
             if value == "":
                 return self.empty_default
@@ -107,10 +106,9 @@ class IntegerField(Field):
 class StringField(Field):
     @cached
     @default
+    @empty
     def __get__(self, item, itemtype):
-        if self.xpath_exp is None:
-            return None
-        return get_node_text(item._tree.xpath(self.xpath_exp)[0])
+        return item._selector.select(self.xpath_exp).text()
 
 
 class DateTimeField(Field):
@@ -121,19 +119,35 @@ class DateTimeField(Field):
     @cached
     @default
     def __get__(self, item, itemtype):
-        _str = get_node_text(item._tree.xpath(self.xpath_exp)[0])
-        return datetime.strptime(_str, self.datetime_format)
+        value = item._selector.select(self.xpath_exp).text()
+        return datetime.strptime(value, self.datetime_format)
 
 
 class FuncField(Field):
-    def __init__(self, func, *args, **kwargs):
+    def __init__(self, func, pass_item=False, *args, **kwargs):
         self.func = func
+        self.pass_item = pass_item
         super(FuncField, self).__init__(*args, **kwargs)
 
     @cached
     @default
     def __get__(self, item, itemtype):
-        return self.func(self, item._tree)
+        if self.pass_item:
+            return self.func(item, item._selector)
+        else:
+            return self.func(item._selector)
+
+
+def func_field(pass_item=False, *args, **kwargs):
+    def inner(func):
+        def method_wrapper(self, *args, **kwargs):
+            return func(*args, **kwargs)
+        if pass_item:
+            func2 = func
+        else:
+            func2 = method_wrapper(func)
+        return FuncField(func=func2, pass_item=True, *args, **kwargs)
+    return inner
 
 
 class ItemBuilder(type):
@@ -157,9 +171,7 @@ class Item(object):
         self._cache = {}
         self._grab = grab
         self._task = task
-        # TODO: Remove this hack
-        if grab:
-            self._tree.grab = grab
+        self._selector = Selector(self._tree)
 
     def _parse(self):
         pass
@@ -169,4 +181,3 @@ class Item(object):
         for key in self._field_list:
             out.append('%s: %s' % (key, getattr(self, key)))
         return '\n'.join(out)
-

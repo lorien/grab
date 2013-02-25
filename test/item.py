@@ -27,12 +27,12 @@ XML = """<?xml version='1.0' encoding='utf-8'?>
 </bbapi>
 """
 
-def calculated_func2(self, tree):
-    if not hasattr(self, 'count2'):
-        self.count2 = 1
+def calculated_func2(item, sel):
+    if not hasattr(item, 'count2'):
+        item.count2 = 1
     else:
-        self.count2 += 1
-    return get_node_text(tree.xpath('//height')[0]) + '-zoo2-' + str(self.count2)
+        item.count2 += 1
+    return sel.select('//height').text() + '-zoo2-' + str(item.count2)
 
 
 class Player(Item):
@@ -44,19 +44,19 @@ class Player(Item):
 
     data_not_found = StringField('//data/no/found')
 
-    @func_field
-    def calculated(self, tree):
-        if not hasattr(self, 'count'):
-            self.count = 1
+    @func_field(pass_item=True)
+    def calculated(item, sel):
+        if not hasattr(item, 'count'):
+            item.count = 1
         else:
-            self.count += 1
-        return get_node_text(tree.xpath('//height')[0]) + '-zoo-' + str(self.count)
+            item.count += 1
+        return sel.select('//height').text() + '-zoo-' + str(item.count)
 
-    calculated2 = FuncField(calculated_func2)
+    calculated2 = FuncField(calculated_func2, pass_item=True)
 
 
 class TestItems(TestCase):
-    def test_container_base_behavior(self):
+    def test_item_interface(self):
         grab = Grab(transport=GRAB_TRANSPORT)
         grab.fake_response(XML)
 

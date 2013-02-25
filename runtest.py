@@ -31,7 +31,8 @@ TEST_CASE_LIST = (
     'test.text_extension',
     'test.lxml_extension',
     'test.form_extension',
-    # test containers
+    'test.doc_extension',
+    # test items
     'test.item',
     # test selector
     'test.selector',
