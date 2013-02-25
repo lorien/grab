@@ -77,7 +77,7 @@ def render_html(node, encoding='utf-8', make_unicode=False):
     """
     import lxml.html
 
-    if make_unicode:
+    if make_unicode or encoding == 'unicode':
         return lxml.html.tostring(node, encoding='utf-8').decode('utf-8')
     else:
         return lxml.html.tostring(node, encoding=encoding)
