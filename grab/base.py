@@ -52,6 +52,7 @@ from .ext.text import TextExtension
 from .ext.rex import RegexpExtension
 from .ext.pquery import PyqueryExtension
 from .ext.ftp import FTPExtension
+from .ext.doc import DocExtension
 
 __all__ = ('Grab', 'UploadContent', 'UploadFile')
 
@@ -181,7 +182,7 @@ def default_config():
 
 class Grab(LXMLExtension, FormExtension, PyqueryExtension,
            DjangoExtension, TextExtension, RegexpExtension,
-           FTPExtension):
+           FTPExtension, DocExtension):
 
     # Points which could be handled in extension classes
     extension_points = ('config', 'init', 'reset')

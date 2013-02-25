@@ -16,6 +16,7 @@ from ..base import GLOBAL_STATE
 from ..tools.text import normalize_space as normalize_space_func, find_number
 from ..tools.lxml_tools import get_node_text
 from ..response import RE_XML_DECLARATION
+from ..tools.internal import deprecated
 
 logger = logging.getLogger('grab.ext.lxml')
 
@@ -187,12 +188,13 @@ class LXMLExtension(object):
                     return self.request(url=item[2])
         raise DataNotFound('Cannot find link ANCHOR=%s, HREF=%s' % (anchor, href))
 
+    @deprecated(use_instead='grab.doc.select()')
     def xpath(self, *args, **kwargs):
         stack = traceback.extract_stack()
         stack_call = stack[-2]
-        logger.debug('Method xpath is depricated. Please use xpath_one method. Location of problem: %s::%d' % (stack_call[0], stack_call[1]))
         return self.xpath_one(*args, **kwargs)
 
+    @deprecated(use_instead='grab.doc.select().one()')
     def xpath_one(self, path, default=NULL, filter=None):
         """
         Get first element which matches the given xpath or raise DataNotFound.
@@ -206,6 +208,7 @@ class LXMLExtension(object):
             else:
                 raise DataNotFound('Xpath not found: %s' % path)
 
+    @deprecated(use_instead='grab.doc.select()')
     def xpath_list(self, path, filter=None):
         """
         Find all elements which match given xpath.
@@ -217,6 +220,7 @@ class LXMLExtension(object):
         else:
             return items 
 
+    @deprecated(use_instead='grab.doc.select().text()')
     def xpath_text(self, path, default=NULL, filter=None, smart=False,
                    normalize_space=True):
         """
@@ -236,6 +240,7 @@ class LXMLExtension(object):
             else:
                 return get_node_text(elem, smart=smart, normalize_space=normalize_space)
 
+    @deprecated(use_instead='grab.doc.select().number()')
     def xpath_number(self, path, default=NULL, filter=None, ignore_spaces=False,
                      smart=False, make_int=True):
         """
@@ -335,6 +340,7 @@ class LXMLExtension(object):
 
         return len(self.css_list(path)) > 0
 
+    @deprecated(use_instead='grab.doc.select().exists()')
     def xpath_exists(self, path):
         """
         Return True if at least one element with specified xpath path exists.
