@@ -33,6 +33,8 @@ TEST_CASE_LIST = (
     'test.form_extension',
     # test containers
     'test.item',
+    # test selector
+    'test.selector',
     # idn
     'test.i18n',
 )
