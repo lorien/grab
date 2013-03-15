@@ -23,8 +23,10 @@ logger = logging.getLogger('grab.spider.cache_backend.mysql')
 
 
 class CacheBackend(object):
-    def __init__(self, database, use_compression=True, **kwargs):
+    def __init__(self, database, use_compression=True,
+                 mysql_engine='innodb', **kwargs):
         self.conn = MySQLdb.connect(**kwargs)
+        self.mysql_engine = mysql_engine
         self.conn.select_db(database)
         self.cursor = self.conn.cursor()
         res = self.cursor.execute('show tables')
@@ -34,16 +36,18 @@ class CacheBackend(object):
                 found = True
                 break
         if not found:
-            self.create_cache_table()
+            self.create_cache_table(self.mysql_engine)
 
-    def create_cache_table(self):
+    def create_cache_table(self, engine):
+        self.cursor.execute('begin')
         self.cursor.execute('''
             create table cache (
                 id binary(20) not null,
                 data mediumblob not null,
                 primary key (id)
-            ) engine = myisam
-        ''')
+            ) engine = %s
+        ''' % engine)
+        self.cursor.execute('commit')
 
     def get_item(self, url):
         """
@@ -51,10 +55,12 @@ class CacheBackend(object):
         """
 
         _hash = self.build_hash(url)
+        self.cursor.execute('begin')
         res = self.cursor.execute('''
             select data from cache where id = x%s
         ''', (_hash,))
         row = self.cursor.fetchone()
+        self.cursor.execute('commit')
         if row:
             return self.unpack_database_value(row[0])
         else:
@@ -73,9 +79,11 @@ class CacheBackend(object):
 
     def remove_cache_item(self, url):
         _hash = self.build_hash(url)
+        self.cursor.execute('begin')
         self.cursor.execute('''
             delete from cache where id = x%s
         ''', (_hash,))
+        self.cursor.execute('commit')
 
     def load_response(self, grab, cache_item):
         grab.fake_response(cache_item['body'])
@@ -118,10 +126,12 @@ class CacheBackend(object):
     def set_item(self, url, item):
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
+        self.cursor.execute('begin')
         res = self.cursor.execute('''
             insert into cache (id, data) values(x%s, %s)
             on duplicate key update data = %s
         ''', (_hash, data, data))
+        self.cursor.execute('commit')
 
     def pack_database_value(self, val):
         dump = marshal.dumps(val)
