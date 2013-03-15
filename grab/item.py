@@ -40,10 +40,12 @@ class Field(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, xpath=None, default=NULL, empty_default=NULL):
+    def __init__(self, xpath=None, default=NULL, empty_default=NULL,
+                 processor=None):
         self.xpath_exp = xpath
         self.default = default
         self.empty_default = empty_default
+        self.processor = processor
 
     @abstractmethod
     def __get__(self, obj, objtype):
@@ -51,6 +53,12 @@ class Field(object):
 
     def __set__(self, obj, value):
         obj._cache[self.attr_name] = value
+
+    def process(self, value):
+        if self.processor:
+            return self.processor(value)
+        else:
+            return value
 
 
 def cached(func):
@@ -82,6 +90,16 @@ def default(func):
     return internal
 
 
+def processor(func):
+    def internal(self, item, itemtype):
+        value = func(self, item, itemtype)
+        if self.processor:
+            return self.processor(value)
+        else:
+            return value
+    return internal
+
+
 def empty(func):
     def internal(self, item, itemtype):
         if self.xpath_exp is None:
@@ -94,6 +112,31 @@ def empty(func):
     return internal
 
 
+class NullField(Field):
+    @cached
+    @default
+    @empty
+    def __get__(self, item, itemtype):
+        return self.process(None)
+
+
+class ItemListField(Field):
+    def __init__(self, xpath, item_cls, *args, **kwargs):
+        self.item_cls = item_cls
+        super(ItemListField, self).__init__(xpath, *args, **kwargs)
+
+    @cached
+    @default
+    @empty
+    def __get__(self, item, itemtype):
+        subitems = []
+        for sel in item._selector.select(self.xpath_exp):
+            subitem = self.item_cls(sel.node)
+            subitem._parse()
+            subitems.append(subitem)
+        return self.process(subitems)
+
+
 class IntegerField(Field):
     @cached
     @default
@@ -103,7 +146,7 @@ class IntegerField(Field):
         if self.empty_default is not NULL:
             if value == "":
                 return self.empty_default
-        return int(value)
+        return int(self.process(value))
 
 
 class StringField(Field):
@@ -111,7 +154,24 @@ class StringField(Field):
     @default
     @empty
     def __get__(self, item, itemtype):
-        return item._selector.select(self.xpath_exp).text()
+        value = item._selector.select(self.xpath_exp).text()
+        return self.process(value)
+
+
+class RegexField(Field):
+    def __init__(self, xpath, regex, *args, **kwargs):
+        self.regex = regex
+        super(RegexField, self).__init__(xpath, *args, **kwargs)
+
+    @cached
+    @default
+    def __get__(self, item, itemtype):
+        value = item._selector.select(self.xpath_exp).text()
+        match = self.regex.search(value)
+        if match:
+            return self.process(match.group(1))
+        else:
+            raise DataNotFound('Could not find regex')
 
 
 class DateTimeField(Field):
@@ -123,7 +183,8 @@ class DateTimeField(Field):
     @default
     def __get__(self, item, itemtype):
         value = item._selector.select(self.xpath_exp).text()
-        return datetime.strptime(value, self.datetime_format)
+        return datetime.strptime(self.process(value),
+                                 self.datetime_format)
 
 
 class FuncField(Field):
@@ -136,9 +197,10 @@ class FuncField(Field):
     @default
     def __get__(self, item, itemtype):
         if self.pass_item:
-            return self.func(item, item._selector)
+            val = self.func(item, item._selector)
         else:
-            return self.func(item._selector)
+            val = self.func(item._selector)
+        return self.process(val)
 
 
 def func_field(pass_item=False, *args, **kwargs):
@@ -155,33 +217,52 @@ def func_field(pass_item=False, *args, **kwargs):
 
 class ItemBuilder(type):
     def __new__(cls, name, base, namespace):
-        field_list = []
+        fields = {}
         for attr in namespace:
             if isinstance(namespace[attr], Field):
                 field = namespace[attr]
                 field.attr_name = attr
-                field_list.append(attr)
                 namespace[attr] = field
-        namespace['_field_list'] = field_list
+                fields[attr] = namespace[attr]
+        namespace['_fields'] = fields
         return super(ItemBuilder, cls).__new__(cls, name, base, namespace)
 
 
 class Item(object):
     __metaclass__ = ItemBuilder
 
-    def __init__(self, tree, grab=None, task=None):
+    def __init__(self, tree, grab=None):
         self._tree = tree
         self._cache = {}
         self._grab = grab
-        self._task = task
         self._selector = Selector(self._tree)
 
-    def _parse(self):
+    @classmethod
+    def find(cls, root, **kwargs):
+        for sel in root.select(cls.Meta.find_selector):
+            item = cls(sel.node)
+            item._parse(**kwargs)
+            yield item
+
+    def _parse(self, url=None, **kwargs):
         pass
 
-    def _render(self, exclude=()):
+    def _render(self, exclude=(), prefix=''):
         out = []
-        for key in self._field_list:
+        for key, field in self._fields.items():
             if not key in exclude:
-                out.append('%s: %s' % (key, getattr(self, key)))
+                if not isinstance(field, ItemListField):
+                    out.append(prefix + '%s: %s' % (key, getattr(self, key)))
+        for key, field in self._fields.items():
+            if not key in exclude:
+                if isinstance(field, ItemListField):
+                    child_out = []
+                    for item in getattr(self, key):
+                        child_out.append(item._render(prefix=prefix + '  '))
+                    out.append('\n'.join(child_out))
+        out.append(prefix + '---')
         return '\n'.join(out)
+
+    def update_object(self, obj, keys):
+        for key in keys:
+            setattr(obj, key, getattr(self, key))
