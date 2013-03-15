@@ -49,6 +49,12 @@ class SelectorList(object):
     def __getitem__(self, x):
         return self.items[x]
 
+    def __len__(self):
+        return self.count()
+
+    def count(self):
+        return len(self.items)
+
     def one(self, default=NULL):
         try:
             return self.items[0]
@@ -86,7 +92,8 @@ class SelectorList(object):
             else:
                 return default
         else:
-            return sel.number(ignore_spaces=ignore_spaces, smart=smart, make_int=make_int)
+            return sel.number(ignore_spaces=ignore_spaces, smart=smart,
+                              default=default, make_int=make_int)
 
     def exists(self):
         """
@@ -117,6 +124,12 @@ class SelectorList(object):
         else:
             return self.one().rex(regexp, flags=flags, byte=byte)
 
+    def node_list(self):
+        return [x.node for x in self.items]
+
+    def node(self):
+        return self.one().node
+
 
 class Selector(object):
     def __init__(self, node):
@@ -139,7 +152,10 @@ class Selector(object):
 
     def attr(self, key, default=NULL):
         if default is NULL:
-            return self.node.get(key)
+            if key in self.node.attrib:
+                return self.node.get(key)
+            else:
+                raise DataNotFound(u'No such attribute: %s' % key)
         else:
             return self.node.get(key, default)
 
@@ -155,7 +171,14 @@ class Selector(object):
 
     def number(self, default=NULL, ignore_spaces=False,
                smart=False, make_int=True):
-        return find_number(self.text(smart=smart), ignore_spaces=ignore_spaces, make_int=make_int)
+        try:
+            return find_number(self.text(smart=smart), ignore_spaces=ignore_spaces,
+                               make_int=make_int)
+        except IndexError:
+            if default is NULL:
+                raise
+            else:
+                return default
 
     def rex(self, regexp, flags=0, byte=False):
         norm_regexp = rex_tools.normalize_regexp(regexp, flags)
@@ -173,6 +196,10 @@ class RexResultList(object):
 
     def text(self):
         return normalize_space(decode_entities(self.one().group(1)))
+
+    def number(self):
+        return int(self.text())
+
 
 class TextSelector(Selector):
     def select(self, xpath=None):
