@@ -50,7 +50,8 @@ class SpiderPattern(object):
             self.follow_links(grab, 'topic', '//div[@class="topic"]/a/@href')
         """
         try:
-            next_url = grab.xpath_text(xpath)
+            #next_url = grab.xpath_text(xpath)
+            next_url = grab.doc.select(xpath).text()
         except IndexError:
             return False
         else:

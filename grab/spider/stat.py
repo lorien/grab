@@ -61,7 +61,7 @@ class SpiderStat(object):
         out.append('Threads: %d' % self.thread_number)
         out.append('DOM build time: %.3f' % GLOBAL_STATE['dom_build_time'])
         out.append('Time: %.2f sec' % total_time)
-        return '\n'.join(out)
+        return '\n'.join(out) + '\n'
 
     def save_all_lists(self, dir_path):
         """

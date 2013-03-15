@@ -20,8 +20,6 @@ def find_number(text, ignore_spaces=False, make_int=True):
         by spaces are considered as one number
     :raises: :class:`DataNotFound` if number was not found.
     """
-    # tmp hack
-    # to avoid import error
 
     if ignore_spaces:
         match = RE_NUMBER_WITH_SPACES.search(text)
