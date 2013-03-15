@@ -380,7 +380,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             extra = '[%s] ' % extra
         logger_network.debug('[%02d%s] %s%s %s%s' % (
             self.request_counter, tname,
-            extra, self.request_method,
+            extra, self.request_method or 'GET',
             self.config['url'], proxy_info))
 
     def request(self, **kwargs):
