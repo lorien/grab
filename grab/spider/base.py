@@ -190,6 +190,12 @@ class Spider(SpiderPattern, SpiderStat):
         """
         If task queue is not configured explicitly
         then create task queue with default parameters
+
+        This method is not the same as `self.setup_queue` because
+        `self.setup_queue` works by default with in-memory queue.
+        You can override `setup_default_queue` in your custom
+        Spider and use other storage engines for you
+        default task queue.
         """
 
         # If queue is still not configured
@@ -311,7 +317,7 @@ class Spider(SpiderPattern, SpiderStat):
                     if task.task_try_count == 0:
                         task.task_try_count = 1
 
-                    if not self.check_task_limits(task):
+                    if not self.check_task_limits_deprecated(task):
                         self.log_verbose('Task is rejected due to some limits.')
                         continue
 
@@ -356,7 +362,9 @@ class Spider(SpiderPattern, SpiderStat):
             # Each result could be valid or failed
             # Result format: {ok, grab, grab_config_backup, task, emsg}
             for result in transport.iterate_results():
-                yield self.process_transport_result(result)
+                if self.is_valid_for_cache(result):
+                    self.cache.save_response(result['task'].url, result['grab'])
+                yield result
                 self.inc_count('request')
 
     def cache_allowed_for_task(self, task, grab):
@@ -496,11 +504,14 @@ class Spider(SpiderPattern, SpiderStat):
                 if task.grab_config:
                     task.grab_config['url'] = task.url
 
-        is_valid = self.check_task_limits(task)
+        is_valid = self.check_task_limits_deprecated(task)
         if is_valid:
             # TODO: keep original task priority if it was set explicitly
-            self.taskq.put(task, self.generate_task_priority())
+            self.add_task_handler(task)
         return is_valid
+
+    def add_task_handler(self, task):
+        self.taskq.put(task, task.priority)
 
     def check_task_limits(self, task):
         """
@@ -521,6 +532,11 @@ class Spider(SpiderPattern, SpiderStat):
                           self.network_try_limit, task.name, task.url))
             self.add_item('too-many-network-tries', task.url)
             is_valid = False
+
+        return is_valid
+
+    def check_task_limits_deprecated(self, task):
+        is_valid = self.check_task_limits(task)
 
         if not is_valid:
             try:
@@ -545,7 +561,7 @@ class Spider(SpiderPattern, SpiderStat):
                 grab.setup(proxy=proxy, proxy_userpwd=proxy_userpwd,
                            proxy_type=proxy_type)
 
-    def process_transport_result(self, res):
+    def is_valid_for_cache(self, res):
         """
         Process asyncronous transport result
 
@@ -553,12 +569,13 @@ class Spider(SpiderPattern, SpiderStat):
         """
 
 
-        if (res['ok'] and self.cache_enabled and res['grab'].request_method == 'GET'
-            and not res['task'].get('disable_cache')):
-            if self.valid_response_code(res['grab'].response.code, res['task']):
-                self.cache.save_response(res['task'].url, res['grab'])
-
-        return res
+        if res['ok']:
+            if self.cache_enabled:
+                if res['grab'].request_method == 'GET':
+                    if not res['task'].get('disable_cache'):
+                        if self.valid_response_code(res['grab'].response.code, res['task']):
+                            return True
+        return False
 
     def shutdown(self):
         """
@@ -622,20 +639,24 @@ class Spider(SpiderPattern, SpiderStat):
         then load new tasks from tasks file.
         """
 
-        qsize = self.taskq.size()
-        min_limit = self.thread_number * 2
-        if qsize < min_limit:
-            self.log_verbose('Task queue contains less tasks than limit. Tryring to add new tasks')
-            try:
-                for x in xrange(min_limit - qsize):
-                    item = self.task_generator_object.next()
-                    self.log_verbose('Found new task. Adding it')
-                    self.add_task(item)
-            except StopIteration:
-                # If generator have no values to yield
-                # then disable it
-                self.log_verbose('Task generator has no more tasks. Disabling it')
-                self.task_generator_enabled = False
+        if self.task_generator_enabled:
+            if hasattr(self.taskq, 'qsize'):
+                qsize = self.taskq.qsize()
+            else:
+                qsize = self.taskq.size()
+            min_limit = self.thread_number * 2
+            if qsize < min_limit:
+                self.log_verbose('Task queue contains less tasks than limit. Tryring to add new tasks')
+                try:
+                    for x in xrange(min_limit - qsize):
+                        item = self.task_generator_object.next()
+                        self.log_verbose('Found new task. Adding it')
+                        self.add_task(item)
+                except StopIteration:
+                    # If generator have no values to yield
+                    # then disable it
+                    self.log_verbose('Task generator has no more tasks. Disabling it')
+                    self.task_generator_enabled = False
 
     def create_grab_instance(self):
         return Grab(**self.grab_config)

@@ -1,17 +1,19 @@
 import grab.spider.base
+import time
+import logging
+
+logger = logging.getLogger('spider.ng.base')
 
 class BaseNGSpider(grab.spider.base.Spider):
-    def __init__(self, result_queue, *args, **kwargs):
+    def __init__(self, wating_shutdown_event, taskq, result_queue, response_queue, shutdown_event,
+                 generator_done_event, *args, **kwargs):
+        self.wating_shutdown_event = wating_shutdown_event
+        self.taskq = taskq
         self.result_queue = result_queue
+        self.shutdown_event = shutdown_event
+        self.generator_done_event = generator_done_event
+        self.response_queue = response_queue
         super(BaseNGSpider, self).__init__(*args, **kwargs)
 
-    def setup_default_queue(self):
-        """
-        If task queue is not configured explicitly
-        then create task queue with default parameters
-        """
-
-        if self.taskq is None:
-            self.log_verbose('Starting task queue with mongodb backend')
-            self.setup_queue(backend='mongo', database='ng_queue',
-                             queue_name='task')
+        # Fix behaviour of super init method which nulls the `self.taskq`
+        self.taskq = taskq
