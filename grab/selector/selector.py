@@ -37,9 +37,16 @@ from ..error import GrabMisuseError, DataNotFound
 from ..tools import rex as rex_tools
 from ..tools.text import normalize_space
 from ..tools.html import decode_entities
+import logging
+import time
+from lxml.etree import XPath
 
 __all__ = ['Selector', 'TextSelector']
 NULL = object()
+DEBUG_LOGGING = False
+XPATH_CACHE = {}
+logger = logging.getLogger('grab.selector.selector')
+
 
 class SelectorList(object):
     def __init__(self, items, source_xpath):
@@ -136,7 +143,18 @@ class Selector(object):
         self.node = node
 
     def select(self, xpath=None):
-        return self.wrap_list(self.node.xpath(xpath), xpath)
+        start = time.time()
+
+        if not xpath in XPATH_CACHE:
+            obj = XPath(xpath)
+            XPATH_CACHE[xpath] = obj
+        xpath_obj = XPATH_CACHE[xpath]
+
+        val = self.wrap_list(xpath_obj(self.node), xpath)
+        total = time.time() - start
+        if DEBUG_LOGGING:
+            logger.debug(u'Performed xpath [%s], elements: %d, time: %.05f sec' % (xpath, len(val), total))
+        return val
 
     def wrap_list(self, items, xpath):
         selectors = []
