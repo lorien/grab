@@ -4,4 +4,4 @@ from grab import Grab
 
 g = Grab()
 g.go('http://ya.ru')
-print g.xpath('//title')
+print g.doc.select('//title').text()

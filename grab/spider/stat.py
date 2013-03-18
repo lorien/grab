@@ -4,6 +4,7 @@ import time
 from grab.base import GLOBAL_STATE
 from grab.tools.encoding import smart_str
 import os
+from contextlib import contextmanager
 
 logger = logging.getLogger('grab.spider.stat')
 
@@ -45,6 +46,8 @@ class SpiderStat(object):
             out.write('\n'.join(lines))
 
     def render_stats(self):
+        self.stop_timer('total')
+
         out = []
         out.append('Counters:')
         # Sort counters by its names
@@ -56,14 +59,17 @@ class SpiderStat(object):
         items = sorted(items, key=lambda x: x[1], reverse=True)
         out.append('  %s' % '\n  '.join('%s: %s' % x for x in items))
 
-        total_time = time.time() - self.start_time
         if hasattr(self.taskq, 'qsize'):
             out.append('Queue size: %d' % self.taskq.qsize())
         else:
             out.append('Queue size: %d' % self.taskq.size())
         out.append('Threads: %d' % self.thread_number)
-        out.append('DOM build time: %.3f' % GLOBAL_STATE['dom_build_time'])
-        out.append('Time: %.2f sec' % total_time)
+        out.append('Timers:')
+        out.append('  DOM: %.3f' % GLOBAL_STATE['dom_build_time'])
+        out.append('  selector: %.03f' % GLOBAL_STATE['selector_time'])
+        items = [(x, y) for x, y in self.timers.items()]
+        items = sorted(items, key=lambda x: x[1])
+        out.append('  %s' % '\n  '.join('%s: %.03f' % x for x in items))
         return '\n'.join(out) + '\n'
 
     def save_all_lists(self, dir_path):
@@ -92,3 +98,29 @@ class SpiderStat(object):
             logger.debug(key)
         return self.counters[key]
 
+    def start_timer(self, key):
+        self.time_points['start-%s' % key] = time.time()
+
+    def stop_timer(self, key):
+        now = time.time()
+        start_key = 'start-%s' % key
+        try:
+            start = self.time_points[start_key]
+        except KeyError:
+            logger.error('Could not find start point with key %s' % key)
+            return 0
+        else:
+            total = now - start
+            if not key in self.timers:
+                self.timers[key] = 0
+            self.timers[key] += total
+            del self.time_points[start_key]
+            return total
+
+    @contextmanager
+    def save_timer(self, key):
+        self.start_timer(key)
+        try:
+            yield
+        finally:
+            self.stop_timer(key)

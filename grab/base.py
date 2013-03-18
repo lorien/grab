@@ -41,6 +41,7 @@ REQUEST_COUNTER_LOCK = threading.Lock()
 GLOBAL_STATE = {
     'request_counter': 0,
     'dom_build_time': 0,
+    'selector_time': 0,
 }
 
 # Some extensions need GLOBAL_STATE variable

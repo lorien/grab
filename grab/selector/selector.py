@@ -31,15 +31,17 @@ Example of usage::
     True
 """
 from __future__ import absolute_import
+import logging
+import time
+from lxml.etree import XPath
+
 from ..tools.lxml_tools import get_node_text, render_html
 from ..tools.text import find_number, normalize_space as normalize_space_func
 from ..error import GrabMisuseError, DataNotFound
 from ..tools import rex as rex_tools
 from ..tools.text import normalize_space
 from ..tools.html import decode_entities
-import logging
-import time
-from lxml.etree import XPath
+from ..base import GLOBAL_STATE
 
 __all__ = ['Selector', 'TextSelector']
 NULL = object()
@@ -154,6 +156,8 @@ class Selector(object):
         total = time.time() - start
         if DEBUG_LOGGING:
             logger.debug(u'Performed xpath [%s], elements: %d, time: %.05f sec' % (xpath, len(val), total))
+        GLOBAL_STATE['selector_time'] += total
+
         return val
 
     def wrap_list(self, items, xpath):

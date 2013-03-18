@@ -88,6 +88,10 @@ class Spider(SpiderPattern, SpiderStat):
             network request which is performed again due to network error
         """
 
+        self.timers = {}
+        self.time_points = {}
+        self.start_timer('total')
+
         self.taskq = None
         if verbose_logging:
             self.enable_verbose_logging()
@@ -229,12 +233,17 @@ class Spider(SpiderPattern, SpiderStat):
         Main work cycle.
         """
 
+        # Override start point set in __init__
+        self.start_timer('total')
+
         try:
-            self.start_time = time.time()
             self.setup_default_queue()
             self.prepare()
+
+            self.start_timer('task_generator')
             if not self.skip_generator:
                 self.init_task_generators()
+            self.stop_timer('task_generator')
 
             for res_count, res in enumerate(self.get_next_response()):
                 if res_count > 0 and self.request_pause > 0:
@@ -246,8 +255,10 @@ class Spider(SpiderPattern, SpiderStat):
                 if self.should_stop:
                     break
 
+                self.start_timer('task_generator')
                 if self.task_generator_enabled:
                     self.process_task_generator()
+                self.stop_timer('task_generator')
 
 
                 # Increase task counters
@@ -287,6 +298,7 @@ class Spider(SpiderPattern, SpiderStat):
             raise
         finally:
             # This code is executed when main cycles is breaked
+            self.stop_timer('total')
             self.shutdown()
 
     def get_next_response(self):
@@ -303,9 +315,11 @@ class Spider(SpiderPattern, SpiderStat):
 
             if transport.ready_for_task():
                 self.log_verbose('Transport has free resources. Trying to add new task (if exists)')
+
                 try:
                     # TODO: implement timeout via sleep
-                    task = self.taskq.get(TASK_QUEUE_TIMEOUT)
+                    with self.save_timer('task_queue'):
+                        task = self.taskq.get(TASK_QUEUE_TIMEOUT)
                 except Queue.Empty:
                     self.log_verbose('Task queue is empty.')
                     # If All handlers are free and no tasks in queue
@@ -339,8 +353,10 @@ class Spider(SpiderPattern, SpiderStat):
 
                     cache_result = None
                     if self.cache_allowed_for_task(task, grab):
-                        cache_result = self.query_cache(transport, task, grab,
-                                                        grab_config_backup)
+                        with self.save_timer('cache'):
+                            with self.save_timer('cache.read'):
+                                cache_result = self.query_cache(transport, task, grab,
+                                                                grab_config_backup)
 
                     if cache_result:
                         self.log_verbose('Task data is loaded from the cache. Yielding task result.')
@@ -351,15 +367,17 @@ class Spider(SpiderPattern, SpiderStat):
                         else:
                             self.inc_count('request-network')
                             self.change_proxy(task, grab)
-                            self.log_verbose('Submitting task to the transport layer')
-                            transport.process_task(task, grab, grab_config_backup)
-                            self.log_verbose('Asking transport layer to do something')
-                            transport.process_handlers()
+                            with self.save_timer('network_transport'):
+                                self.log_verbose('Submitting task to the transport layer')
+                                transport.process_task(task, grab, grab_config_backup)
+                                self.log_verbose('Asking transport layer to do something')
+                                transport.process_handlers()
 
-            self.log_verbose('Asking transport layer to do something')
-            # Process active handlers
-            transport.select(0.01)
-            transport.process_handlers()
+            with self.save_timer('network_transport'):
+                self.log_verbose('Asking transport layer to do something')
+                # Process active handlers
+                transport.select(0.01)
+                transport.process_handlers()
 
             self.log_verbose('Processing network results (if any).')
             # Iterate over network trasport ready results
@@ -367,7 +385,9 @@ class Spider(SpiderPattern, SpiderStat):
             # Result format: {ok, grab, grab_config_backup, task, emsg}
             for result in transport.iterate_results():
                 if self.is_valid_for_cache(result):
-                    self.cache.save_response(result['task'].url, result['grab'])
+                    with self.save_timer('cache'):
+                        with self.save_timer('cache.write'):
+                            self.cache.save_response(result['task'].url, result['grab'])
                 yield result
                 self.inc_count('request')
 
@@ -423,15 +443,22 @@ class Spider(SpiderPattern, SpiderStat):
         if not process_handler:
             return
 
+        try:
+            handler_name = handler.__name__
+        except AttributeError:
+            handler_name = 'none'
+
         if res['ok'] and self.valid_response_code(res['grab'].response.code,
                                                   res['task']):
             try:
-                result = handler(res['grab'], res['task'])
-                if isinstance(result, types.GeneratorType):
-                    for item in result:
-                        self.process_handler_result(item, res['task'])
-                else:
-                    self.process_handler_result(result, res['task'])
+                with self.save_timer('response_handler'):
+                    with self.save_timer('response_handler.%s' % handler_name):
+                        result = handler(res['grab'], res['task'])
+                        if isinstance(result, types.GeneratorType):
+                            for item in result:
+                                self.process_handler_result(item, res['task'])
+                        else:
+                            self.process_handler_result(result, res['task'])
             except Exception, ex:
                 self.process_handler_error(handler.__name__, ex, res['task'])
         else:
