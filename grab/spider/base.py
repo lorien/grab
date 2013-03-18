@@ -64,6 +64,7 @@ class Spider(SpiderPattern, SpiderStat):
                  verbose_logging=False,
                  retry_rebuild_user_agent=True,
                  only_cache=False,
+                 skip_generator=False,
                  ):
         """
         Arguments:
@@ -98,6 +99,8 @@ class Spider(SpiderPattern, SpiderStat):
         else:
             self.meta = {}
 
+        self.task_generator_enabled = False
+        self.skip_generator = skip_generator
         self.only_cache = only_cache
         self.thread_number = thread_number
         self.counters = defaultdict(int)
@@ -230,7 +233,8 @@ class Spider(SpiderPattern, SpiderStat):
             self.start_time = time.time()
             self.setup_default_queue()
             self.prepare()
-            self.init_task_generators()
+            if not self.skip_generator:
+                self.init_task_generators()
 
             for res_count, res in enumerate(self.get_next_response()):
                 if res_count > 0 and self.request_pause > 0:
