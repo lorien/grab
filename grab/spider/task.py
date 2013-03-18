@@ -142,3 +142,6 @@ class Task(object):
             setattr(task, key, value)
 
         return task
+
+    def __repr__(self):
+        return '<Task: %s>' % self.url

@@ -239,9 +239,10 @@ class Item(object):
 
     @classmethod
     def find(cls, root, **kwargs):
-        for sel in root.select(cls.Meta.find_selector):
+        for count, sel in enumerate(root.select(cls.Meta.find_selector)):
             item = cls(sel.node)
             item._parse(**kwargs)
+            item._position = count
             yield item
 
     def _parse(self, url=None, **kwargs):
@@ -266,3 +267,13 @@ class Item(object):
     def update_object(self, obj, keys):
         for key in keys:
             setattr(obj, key, getattr(self, key))
+
+    def update_dict(self, obj, keys):
+        for key in keys:
+            obj[key] = getattr(self, key)
+
+    def get_dict(self, keys):
+        obj = {}
+        for key in keys:
+            obj[key] = getattr(self, key)
+        return obj
