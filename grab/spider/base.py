@@ -684,7 +684,7 @@ class Spider(SpiderPattern, SpiderStat):
                 qsize = self.taskq.qsize()
             else:
                 qsize = self.taskq.size()
-            min_limit = self.thread_number * 2
+            min_limit = self.thread_number * 4
             if qsize < min_limit:
                 self.log_verbose('Task queue contains less tasks than limit. Tryring to add new tasks')
                 try:
