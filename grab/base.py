@@ -753,44 +753,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             return {}
 
 
-    # 
-    # Deprecated methods
-    #
-
-    def setup_proxylist(self, proxy_file=None, proxy_type='http', read_timeout=None,
-                        auto_init=True, auto_change=True,
-                        server_list=None):
-        """
-        Setup location of files with proxy servers
-
-        ``proxy_file`` - file which contains list of proxy servers
-        Each server could be a line of one of following formats:
-        * server:port
-        * server:port:username:password
-
-        ``proxy_type`` - type of proxy servers from proxy file.
-        For now all proxies should be of one type
-
-        ``auto_init`` - if True then ``change_proxy`` method will be automatically
-        called
-        """
-
-        logging.error('Method `setup_proxylist` is deprecated. Use `load_proxylist` instead.')
-        if server_list is not None:
-            raise error.GrabMisuseError('setup_proxylist: the argument `server_list` is not suppported more')
-        if proxy_file is None:
-            raise error.GrabMisuseError('setup_proxylist: value of argument `proxy_file` could not be None')
-        source = proxy_file
-        source_type = 'text_file'
-
-
-        self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type,
-                                   read_timeout=read_timeout)
-        if not auto_change and auto_init:
-            self.change_proxy()
-        self.setup(proxy_auto_change=auto_change)
-
-
 register_extensions(Grab)
 
 # For backward compatibility

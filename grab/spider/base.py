@@ -727,28 +727,3 @@ class Spider(SpiderPattern, SpiderStat):
 
     def disable_verbose_logging(self):
         self.log_verbose = lambda *args, **kwargs: None
-
-
-    # 
-    # Deprecated methods
-    #
-
-    def setup_proxylist(self, proxy_file=None, proxy_type='http',
-                        auto_init=True, auto_change=True,
-                        server_list=None, **kwargs):
-        logging.error('Method `setup_proxylist` is deprecated. Use `load_proxylist` instead.')
-        if server_list is not None:
-            raise error.GrabMisuseError('setup_proxylist: the argument `server_list` is not suppported more')
-        if proxy_file is None:
-            raise error.GrabMisuseError('setup_proxylist: value of argument `proxy_file` could not be None')
-        source = proxy_file
-        source_type = 'text_file'
-
-
-        self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type,
-                                   **kwargs)
-        self.proxylist_enabled = True
-        self.proxy = None
-        if not auto_change and auto_init:
-            self.proxy = self.proxylist.get_random()
-        self.proxy_auto_change = auto_change
