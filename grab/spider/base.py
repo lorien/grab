@@ -33,6 +33,7 @@ from ..proxylist import ProxyList
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
 TASK_QUEUE_TIMEOUT = 0.01
+NULL = object()
 
 logger = logging.getLogger('grab.spider.base')
 logger_verbose = logging.getLogger('grab.spider.base.verbose')
@@ -61,7 +62,7 @@ class Spider(SpiderPattern, SpiderStat):
                  network_try_limit=10, task_try_limit=10,
                  debug_error=False,
                  log_taskname=False,
-                 request_pause=0,
+                 request_pause=NULL,
                  priority_mode='random',
                  meta=None,
                  retry_rebuild_user_agent=True,
@@ -81,10 +82,6 @@ class Spider(SpiderPattern, SpiderStat):
             of some other physical error
             but task_try_limit limits the number of attempts which
             are scheduled manually in the spider business logic
-        * request_pause - amount of time on which the main `run` cycle should
-            pause the activity of spider. By default it is equal to zero. You
-            can use this option to slow down the spider speed (also you can use
-            `thread_number` option). The value of `request_pause` could be float.
         * priority_mode - could be "random" or "const"
         * meta - arbitrary user data
         * retry_rebuid_user_agent - generate new random user-agent for each
@@ -136,7 +133,8 @@ class Spider(SpiderPattern, SpiderStat):
 
         self.log_taskname = log_taskname
         self.work_allowed = True
-        self.request_pause = request_pause
+        if request_pause is not NULL:
+            logging.error('Option `request_pause` is deprecated and is not supported anymore')
 
         self.proxylist_enabled = None
         self.proxylist = None
