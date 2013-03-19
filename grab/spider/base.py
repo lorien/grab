@@ -64,8 +64,8 @@ class Spider(SpiderPattern, SpiderStat):
                  verbose_logging=False,
                  retry_rebuild_user_agent=True,
                  only_cache=False,
-                 skip_generator=False,
                  config=None,
+                 slave=False,
                  ):
         """
         Arguments:
@@ -89,6 +89,8 @@ class Spider(SpiderPattern, SpiderStat):
             network request which is performed again due to network error
         """
 
+        self.slave = slave
+
         self.timers = {}
         self.time_points = {}
         self.start_timer('total')
@@ -109,7 +111,6 @@ class Spider(SpiderPattern, SpiderStat):
             self.meta = {}
 
         self.task_generator_enabled = False
-        self.skip_generator = skip_generator
         self.only_cache = only_cache
         self.thread_number = thread_number
         self.counters = defaultdict(int)
@@ -246,7 +247,7 @@ class Spider(SpiderPattern, SpiderStat):
             self.prepare()
 
             self.start_timer('task_generator')
-            if not self.skip_generator:
+            if not self.slave:
                 self.init_task_generators()
             self.stop_timer('task_generator')
 
