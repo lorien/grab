@@ -31,7 +31,7 @@ class TestSpider(TestCase):
 
         # Simple test, one task
         bot = SimpleSpider(thread_number=1)
-        bot.setup_proxylist('/tmp/__proxy.txt')
+        bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
         bot.setup_queue()
         bot.add_task(Task('baz', 'http://yandex.ru'))
         bot.run()
@@ -41,7 +41,7 @@ class TestSpider(TestCase):
 
         # By default auto_change is True
         bot = SimpleSpider(thread_number=1)
-        bot.setup_proxylist('/tmp/__proxy.txt')
+        bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
         bot.setup_queue()
         for x in xrange(10):
             bot.add_task(Task('baz', 'http://yandex.ru'))
@@ -64,7 +64,7 @@ class TestSpider(TestCase):
         # Disable auto_change
         # By default auto_init is True
         bot = SimpleSpider(thread_number=1)
-        bot.setup_proxylist('/tmp/__proxy.txt', auto_change=False)
+        bot.load_proxylist('/tmp/__proxy.txt', 'text_file', auto_change=False)
         bot.setup_queue()
         for x in xrange(10):
             bot.add_task(Task('baz', 'http://yandex.ru'))
@@ -77,7 +77,8 @@ class TestSpider(TestCase):
         # Disable auto_init
         # Proxylist will not be used by default
         bot = SimpleSpider(thread_number=1)
-        bot.setup_proxylist('/tmp/__proxy.txt', auto_change=False, auto_init=False)
+        bot.load_proxylist('/tmp/__proxy.txt', 'text_file',
+                           auto_change=False, auto_init=False)
         bot.setup_queue()
         for x in xrange(10):
             bot.add_task(Task('baz', BASE_URL))

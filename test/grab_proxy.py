@@ -31,7 +31,7 @@ class TestProxy(TestCase):
     def test_deprecated_setup_proxylist(self):
         g = Grab(transport=GRAB_TRANSPORT)
         open('/tmp/__proxy.txt', 'w').write(PROXY1)
-        g.setup_proxylist('/tmp/__proxy.txt', 'http')
+        g.load_proxylist('/tmp/__proxy.txt', 'text_file')
         RESPONSE['get'] = '123'
         g.change_proxy()
         g.go('http://yandex.ru')
@@ -90,20 +90,16 @@ class TestProxy(TestCase):
             for x in xrange(10):
                 out.write('server-%d:777\n' % x)
 
-        g.setup_proxylist('/tmp/__proxy.txt', 'http', auto_init=False, auto_change=False)
+        g.load_proxylist('/tmp/__proxy.txt', 'text_file', auto_init=False, auto_change=False)
         self.assertEqual(g.config['proxy'], None)
 
-        g.setup_proxylist('/tmp/__proxy.txt', 'http', auto_init=False, auto_change=True)
+        g.load_proxylist('/tmp/__proxy.txt', 'text_file', auto_init=False, auto_change=True)
         self.assertEqual(g.config['proxy'], None)
 
-        g.setup_proxylist('/tmp/__proxy.txt', 'http', auto_init=True, auto_change=False)
+        g.load_proxylist('/tmp/__proxy.txt', 'text_file', auto_init=True, auto_change=False)
         self.assertTrue('server-' in g.config['proxy'])
 
     def test_proxylist_api(self):
         g = Grab(transport=GRAB_TRANSPORT)
         #self.assertRaises(GrabMisuseError,
                           #lambda: g.setup_proxylist(proxy_file='foo', server_list=[]))
-        self.assertRaises(GrabMisuseError,
-                          lambda: g.setup_proxylist(proxy_file=None, server_list=None))
-        self.assertRaises(GrabMisuseError,
-                          lambda: g.setup_proxylist('foo', server_list=[]))
