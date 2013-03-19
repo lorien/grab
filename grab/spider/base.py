@@ -65,6 +65,7 @@ class Spider(SpiderPattern, SpiderStat):
                  retry_rebuild_user_agent=True,
                  only_cache=False,
                  skip_generator=False,
+                 config=None,
                  ):
         """
         Arguments:
@@ -91,6 +92,10 @@ class Spider(SpiderPattern, SpiderStat):
         self.timers = {}
         self.time_points = {}
         self.start_timer('total')
+        if config is not None:
+            self.config = config
+        else:
+            self.config = {}
 
         self.taskq = None
         if verbose_logging:
@@ -147,7 +152,7 @@ class Spider(SpiderPattern, SpiderStat):
         mod = __import__('grab.spider.cache_backend.%s' % backend,
                          globals(), locals(), ['foo'])
         self.cache = mod.CacheBackend(database=database, use_compression=use_compression,
-                                      **kwargs)
+                                      spider=self, **kwargs)
 
     def setup_queue(self, backend='memory', **kwargs):
         logger.debug('Using %s backend for task queue' % backend)
@@ -553,6 +558,9 @@ class Spider(SpiderPattern, SpiderStat):
         """
 
         is_valid = True
+        if not self.config.get('task_%s' % task.name, True):
+            logger.debug('Task %s disabled via config' % task.name)
+            is_valid = False
         if task.task_try_count > self.task_try_limit:
             logger.debug('Task tries (%d) ended: %s / %s' % (
                           self.task_try_limit, task.name, task.url))

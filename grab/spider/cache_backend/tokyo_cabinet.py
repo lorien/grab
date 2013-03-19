@@ -21,8 +21,9 @@ logger = logging.getLogger('grab.spider.cache_backend.mongo')
 
 
 class CacheBackend(object):
-    def __init__(self, database, use_compression=True):
+    def __init__(self, database, use_compression=True, spider=None):
         # database == filename
+        self.spider = spider
         self.db = tc_open(database, compress=use_compression)
         self.use_compression = use_compression
 

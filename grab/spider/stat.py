@@ -46,8 +46,6 @@ class SpiderStat(object):
             out.write('\n'.join(lines))
 
     def render_stats(self):
-        self.stop_timer('total')
-
         out = []
         out.append('Counters:')
         # Sort counters by its names

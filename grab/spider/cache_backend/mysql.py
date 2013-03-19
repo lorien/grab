@@ -24,11 +24,13 @@ logger = logging.getLogger('grab.spider.cache_backend.mysql')
 
 class CacheBackend(object):
     def __init__(self, database, use_compression=True,
-                 mysql_engine='innodb', **kwargs):
+                 mysql_engine='innodb', spider=None, **kwargs):
+        self.spider = spider
         self.conn = MySQLdb.connect(**kwargs)
         self.mysql_engine = mysql_engine
         self.conn.select_db(database)
         self.cursor = self.conn.cursor()
+        self.cursor.execute('SET TRANSACTION ISOLATION LEVEL READ COMMITTED')
         res = self.cursor.execute('show tables')
         found = False
         for row in self.cursor:
@@ -55,20 +57,22 @@ class CacheBackend(object):
         """
 
         _hash = self.build_hash(url)
-        self.cursor.execute('begin')
-        res = self.cursor.execute('''
-            select data from cache where id = x%s
-        ''', (_hash,))
-        row = self.cursor.fetchone()
-        self.cursor.execute('commit')
+        with self.spider.save_timer('cache.read.mysql_query'):
+            self.cursor.execute('begin')
+            res = self.cursor.execute('''
+                select data from cache where id = x%s
+            ''', (_hash,))
+            row = self.cursor.fetchone()
+            self.cursor.execute('commit')
         if row:
             return self.unpack_database_value(row[0])
         else:
             return None
 
     def unpack_database_value(self, val):
-        dump = zlib.decompress(val)
-        return marshal.loads(dump)
+        with self.spider.save_timer('cache.read.unpack_data'):
+            dump = zlib.decompress(val)
+            return marshal.loads(dump)
 
     def build_hash(self, url):
         if isinstance(url, unicode):
