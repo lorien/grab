@@ -34,6 +34,10 @@ from __future__ import absolute_import
 import logging
 import time
 from lxml.etree import XPath
+try:
+    from pyquery import PyQuery
+except ImportError:
+    pass
 
 from ..tools.lxml_tools import get_node_text, render_html
 from ..tools.text import find_number, normalize_space as normalize_space_func
@@ -51,8 +55,9 @@ logger = logging.getLogger('grab.selector.selector')
 
 
 class SelectorList(object):
-    def __init__(self, items, query_exp):
+    def __init__(self, items, query_type, query_exp):
         self.items = items
+        self.query_type = query_type
         self.query_exp = query_exp
 
     def __getitem__(self, x):
@@ -69,7 +74,8 @@ class SelectorList(object):
             return self.items[0]
         except IndexError:
             if default is NULL:
-                raise DataNotFound('Could not get first item for xpath: %s' % self.query_exp)
+                raise DataNotFound('Could not get first item for %s: %s' % (
+                    self.query_type, self.query_exp))
             else:
                 return default
 
@@ -144,30 +150,43 @@ class Selector(object):
     def __init__(self, node):
         self.node = node
 
-    def select(self, xpath=None):
+    def pyquery_node(self):
+        return PyQuery(self.node)
+
+    def select(self, xpath=None, pyquery=None):
         start = time.time()
+        
+        if xpath is None and pyquery is None:
+            raise Exception('Both xpath and pyquery option are None')
 
-        if not xpath in XPATH_CACHE:
-            obj = XPath(xpath)
-            XPATH_CACHE[xpath] = obj
-        xpath_obj = XPATH_CACHE[xpath]
+        if xpath is not None and pyquery is not None:
+            raise Exception('Both xpath and pyquery option are not None')
 
-        val = self.wrap_list(xpath_obj(self.node), xpath)
+        if xpath is not None:
+            if not xpath in XPATH_CACHE:
+                obj = XPath(xpath)
+                XPATH_CACHE[xpath] = obj
+            xpath_obj = XPATH_CACHE[xpath]
+
+            val = self.wrap_list(xpath_obj(self.node), 'xpath', xpath)
+        else:
+            val = self.wrap_list(self.pyquery_node().find(pyquery), 'pyquery', pyquery)
+
         total = time.time() - start
         if DEBUG_LOGGING:
-            logger.debug(u'Performed query [%s], elements: %d, time: %.05f sec' % (xpath, len(val), total))
+            logger.debug(u'Performed query [%s], elements: %d, time: %.05f sec' % (query_exp, len(val), total))
         GLOBAL_STATE['selector_time'] += total
 
         return val
 
-    def wrap_list(self, items, xpath):
+    def wrap_list(self, items, query_type, query_exp):
         selectors = []
         for x in items:
             if isinstance(x, basestring):
                 selectors.append(TextSelector(x))
             else:
                 selectors.append(Selector(x))
-        return SelectorList(selectors, query_exp=xpath)
+        return SelectorList(selectors, query_type=query_type, query_exp=query_exp)
 
     def html(self, encoding='unicode'):
         return render_html(self.node, encoding=encoding)
