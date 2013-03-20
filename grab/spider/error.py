@@ -6,3 +6,8 @@ class SpiderMisuseError(SpiderError):
 
 class FatalError(SpiderError):
     "Fatal error which should stop parsing process"
+
+class StopTaskProcessing(SpiderError):
+    """
+    Used in middlewares to stop task processing
+    """

@@ -1,6 +1,7 @@
 import setup_script
 
 from grab.spider import Spider, Task
+from grab.tools.logs import default_logging
 
 class SimpleSpider(Spider):
     def task_generator(self):
@@ -12,9 +13,11 @@ class SimpleSpider(Spider):
 
 def main():
     bot = SimpleSpider()
+    bot.setup_middleware(['grab.spider.middleware.TestMiddleware'])
     bot.run()
     print bot.render_stats()
 
 
 if __name__ == '__main__':
+    default_logging()
     main()

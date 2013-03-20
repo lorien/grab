@@ -22,7 +22,8 @@ from random import randint
 
 import Queue
 from ..base import GLOBAL_STATE, Grab
-from .error import SpiderError, SpiderMisuseError, FatalError
+from .error import (SpiderError, SpiderMisuseError, FatalError,
+                    StopTaskProcessing)
 from .task import Task
 from .data import Data
 from .pattern import SpiderPattern
@@ -57,6 +58,11 @@ class Spider(SpiderPattern, SpiderStat):
     # The base url which is used to resolve all relative urls
     # The resolving takes place in `add_task` method
     base_url = None
+
+    middlewares = []
+    middleware_points = {
+        'response': [],
+    }
 
     def __init__(self, thread_number=3,
                  network_try_limit=10, task_try_limit=10,
@@ -139,6 +145,16 @@ class Spider(SpiderPattern, SpiderStat):
         self.proxy = None
         self.proxy_auto_change = False
         self.retry_rebuild_user_agent = retry_rebuild_user_agent
+
+    def setup_middleware(self, middleware_list):
+        for item in middleware_list:
+            self.middlewares.append(item)
+            mod_path, cls_name = item.rsplit('.', 1)
+            mod = __import__(mod_path, None, None, ['foo'])
+            cls = getattr(mod, cls_name)
+            mid = cls()
+            if hasattr(mid, 'process_response'):
+                self.middleware_points['response'].append(mid)
 
     def setup_cache(self, backend='mongo', database=None, use_compression=True, **kwargs):
         if database is None:
@@ -258,6 +274,8 @@ class Spider(SpiderPattern, SpiderStat):
         if is_valid:
             # TODO: keep original task priority if it was set explicitly
             self.add_task_handler(task)
+        else:
+            self.add_item('task-could-not-be-added', task.url)
         return is_valid
 
     def load_initial_urls(self):
@@ -442,8 +460,7 @@ class Spider(SpiderPattern, SpiderStat):
         """
 
         if isinstance(result, Task):
-            if not self.add_task(result):
-                self.add_item('task-could-not-be-added', task.url)
+            self.add_task(result)
         elif isinstance(result, Data):
             handler_name = 'data_%s' % result.name
             try:
@@ -459,7 +476,7 @@ class Spider(SpiderPattern, SpiderStat):
         else:
             raise SpiderError('Unknown result type: %s' % result)
 
-    def process_response(self, res, handler, raw_handler=None):
+    def execute_task_handler(self, res, handler, raw_handler=None):
         """
         Apply `handler` function to the network result.
 
@@ -492,6 +509,8 @@ class Spider(SpiderPattern, SpiderStat):
                             self.process_handler_result(result, res['task'])
             except Exception, ex:
                 self.process_handler_error(handler.__name__, ex, res['task'])
+            else:
+                self.inc_count('task-%s-ok' % res['task'].name)
         else:
             # Log the error
             if res['ok']:
@@ -527,6 +546,28 @@ class Spider(SpiderPattern, SpiderStat):
             res['task'].task_try_count == 1):
             self.inc_count('task-%s-initial' % res['task'].name)
 
+        stop = False
+        for mid in self.middleware_points['response']:
+            try:
+                mid_response = mid.process_response(self, res)
+            except StopTaskProcessing:
+                logger.debug('Got StopTaskProcessing exception')
+                stop = True
+                break
+            else:
+                if isinstance(mid_response, Task):
+                    logger.debug('Got task from middleware')
+                    self.add_task(mid_response)
+                    stop = True
+                    break
+                elif mid_response is None:
+                    pass
+                else:
+                    raise Exception('Unknown response from middleware %s' % mid)
+
+        if stop:
+            return
+
         # Process the response
         handler_name = 'task_%s' % res['task'].name
         raw_handler_name = 'task_raw_%s' % res['task'].name
@@ -544,7 +585,7 @@ class Spider(SpiderPattern, SpiderStat):
             raise SpiderError('No handler or raw handler defined for task %s' %\
                               res['task'].name)
         else:
-            self.process_response(res, handler, raw_handler)
+            self.execute_task_handler(res, handler, raw_handler)
 
     def change_proxy(self, task, grab):
         """
