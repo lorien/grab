@@ -93,6 +93,12 @@ class SelectorList(object):
         else:
             return sel.text(smart=smart, normalize_space=normalize_space)
 
+    def text_list(self, smart=False, normalize_space=True):
+        result_list = []
+        for item in self.items:
+            result_list.append(item.text())
+        return result_list
+
     def number(self, default=NULL, ignore_spaces=False,
                smart=False, make_int=True):
         """
@@ -144,6 +150,16 @@ class SelectorList(object):
 
     def node(self):
         return self.one().node
+
+    def select(self, xpath=None, pyquery=None):
+        result_list = None
+        for count, item in enumerate(self.items):
+            item_result_list = item.select(xpath=xpath, pyquery=pyquery)
+            if count == 0:
+                result_list = item_result_list
+            else:
+                result_list.items.extend(item_result_list.items)
+        return result_list
 
 
 class Selector(object):

@@ -19,6 +19,9 @@ HTML = """
             <li>three</li>
             <li id="6">z 4 foo</li>
         </ul>
+        <ul>
+            <li>yet one</li>
+        </ul>
     </body>
 </html>
 """
@@ -52,6 +55,19 @@ class TestSelector(TestCase):
         root = Selector(self.tree)
         self.assertEquals('test', root.select(pyquery='h1')[0].node.text)
         self.assertEquals('z 4 foo', root.select(pyquery='body')[0].select(pyquery='#6')[0].node.text)
+
+    def test_select_select(self):
+        root = Selector(self.tree)
+        self.assertEquals(set(['one', 'yet one']),
+                          set([x.text() for x in root.select('//ul').select('./li[1]')]),
+                          )
+
+    def test_text_list(self):
+        root = Selector(self.tree)
+        self.assertEquals(set(['one', 'yet one']),
+                          set(root.select('//ul/li[1]').text_list()),
+                          )
+
 
 
 class TestSelectorList(TestCase):
