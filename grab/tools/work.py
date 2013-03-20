@@ -66,11 +66,11 @@ def make_work(callback, tasks, limit, ignore_exceptions=True,
     # Do it in separate thread
     def task_processor(task_iter, task_queue, limit):
         try:
-            for task in tasks:
-                taskq.put(task)
+            for task in task_iter:
+                task_queue.put(task)
         finally:
             for x in xrange(limit):
-                taskq.put(STOP)
+                task_queue.put(STOP)
 
     processor = Thread(target=task_processor, args=[tasks, taskq, limit])
     processor.daemon = True

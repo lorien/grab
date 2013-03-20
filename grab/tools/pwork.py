@@ -70,10 +70,10 @@ def make_work(callback, tasks, limit, ignore_exceptions=True,
     def task_processor(task_iter, task_queue, limit):
         try:
             for task in task_iter:
-                taskq.put(task)
+                task_queue.put(task)
         finally:
             for x in xrange(limit):
-                taskq.put(STOP)
+                task_queue.put(STOP)
 
     processor = Process(target=task_processor, args=[tasks, taskq, limit])
     processor.daemon = True
