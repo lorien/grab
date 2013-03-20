@@ -617,7 +617,7 @@ class Spider(SpiderPattern, SpiderStat):
             with self.save_timer('cache'):
                 with self.save_timer('cache.read'):
                     cache_result = self.load_task_from_cache(
-                        transport, task, grab, grab_config_backup)
+                        self.transport, task, grab, grab_config_backup)
 
         if cache_result:
             logger_verbose.debug('Task data is loaded from the cache. Yielding task result.')
