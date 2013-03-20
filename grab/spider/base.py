@@ -61,7 +61,6 @@ class Spider(SpiderPattern, SpiderStat):
     def __init__(self, thread_number=3,
                  network_try_limit=10, task_try_limit=10,
                  debug_error=False,
-                 log_taskname=False,
                  request_pause=NULL,
                  priority_mode='random',
                  meta=None,
@@ -131,7 +130,6 @@ class Spider(SpiderPattern, SpiderStat):
         self.cache_enabled = False
         self.cache = None
 
-        self.log_taskname = log_taskname
         self.work_allowed = True
         if request_pause is not NULL:
             logging.error('Option `request_pause` is deprecated and is not supported anymore')
@@ -529,13 +527,6 @@ class Spider(SpiderPattern, SpiderStat):
             res['task'].task_try_count == 1):
             self.inc_count('task-%s-initial' % res['task'].name)
 
-        logger_verbose.debug('Submitting result for task %s to response queue' % res['task'])
-
-        # Log task name
-        if self.log_taskname:
-            status = 'OK' if res['ok'] else 'FAIL'
-            logger.error('TASK: %s - %s' % (res['task'].name, status))
-
         # Process the response
         handler_name = 'task_%s' % res['task'].name
         raw_handler_name = 'task_raw_%s' % res['task'].name
@@ -568,7 +559,7 @@ class Spider(SpiderPattern, SpiderStat):
                 grab.setup(proxy=proxy, proxy_userpwd=proxy_userpwd,
                            proxy_type=proxy_type)
 
-    def process_task(self, task):
+    def process_new_task(self, task):
         """
         Handle new task.
 
@@ -673,7 +664,7 @@ class Spider(SpiderPattern, SpiderStat):
                         if not self.check_task_limits(task):
                             logger_verbose.debug('Task %s is rejected due to limits' % task.name)
                         else:
-                            self.process_task(task)
+                            self.process_new_task(task)
 
                 with self.save_timer('network_transport'):
                     logger_verbose.debug('Asking transport layer to do something')
