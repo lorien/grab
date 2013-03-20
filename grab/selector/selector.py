@@ -51,9 +51,9 @@ logger = logging.getLogger('grab.selector.selector')
 
 
 class SelectorList(object):
-    def __init__(self, items, source_xpath):
+    def __init__(self, items, query_exp):
         self.items = items
-        self.source_xpath = source_xpath
+        self.query_exp = query_exp
 
     def __getitem__(self, x):
         return self.items[x]
@@ -69,7 +69,7 @@ class SelectorList(object):
             return self.items[0]
         except IndexError:
             if default is NULL:
-                raise DataNotFound('Could not get first item for xpath: %s' % self.source_xpath)
+                raise DataNotFound('Could not get first item for xpath: %s' % self.query_exp)
             else:
                 return default
 
@@ -155,7 +155,7 @@ class Selector(object):
         val = self.wrap_list(xpath_obj(self.node), xpath)
         total = time.time() - start
         if DEBUG_LOGGING:
-            logger.debug(u'Performed xpath [%s], elements: %d, time: %.05f sec' % (xpath, len(val), total))
+            logger.debug(u'Performed query [%s], elements: %d, time: %.05f sec' % (xpath, len(val), total))
         GLOBAL_STATE['selector_time'] += total
 
         return val
@@ -167,7 +167,7 @@ class Selector(object):
                 selectors.append(TextSelector(x))
             else:
                 selectors.append(Selector(x))
-        return SelectorList(selectors, source_xpath=xpath)
+        return SelectorList(selectors, query_exp=xpath)
 
     def html(self, encoding='unicode'):
         return render_html(self.node, encoding=encoding)
