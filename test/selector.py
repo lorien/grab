@@ -19,8 +19,9 @@ HTML = """
             <li>three</li>
             <li id="6">z 4 foo</li>
         </ul>
-        <ul>
-            <li>yet one</li>
+        <ul id="second-list">
+            <li class="li-1">yet one</li>
+            <li class="li-2">yet two</li>
         </ul>
     </body>
 </html>
@@ -68,6 +69,12 @@ class TestSelector(TestCase):
                           set(root.select('//ul/li[1]').text_list()),
                           )
 
+    def test_attr_list(self):
+        root = Selector(self.tree)
+        self.assertEquals(set(['li-1', 'li-2']),
+                          set(root.select('//ul[@id="second-list"]/li')\
+                                  .attr_list('class'))
+                          )
 
 
 class TestSelectorList(TestCase):

@@ -134,6 +134,12 @@ class SelectorList(object):
         else:
             return sel.attr(key, default=default)
 
+    def attr_list(self, key, default=NULL):
+        result_list = []
+        for item in self.items:
+            result_list.append(item.attr(key, default=default))
+        return result_list
+
     def rex(self, regexp, flags=0, byte=False, default=NULL):
         try:
             sel = self.one()
