@@ -3,7 +3,7 @@ from unittest import TestCase
 from grab.spider import Spider, Task, Data
 from util import FakeServerThread, BASE_URL, RESPONSE, SLEEP
 
-class TestSpider(TestCase):
+class BasicSpiderTestCase(TestCase):
 
     class SimpleSpider(Spider):
         def task_baz(self, grab, task):
@@ -75,3 +75,19 @@ class TestSpider(TestCase):
         grab = bot.create_grab_instance()
         self.assertEqual(grab.config['log_dir'], '/tmp')
         self.assertEqual(grab.config['timeout'], 30)
+
+    def test_generator(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.count = 0
+
+            def task_generator(self):
+                for x in xrange(1111):
+                    yield Task('page', url=BASE_URL)
+
+            def task_page(self, grab, task):
+                self.count += 1
+
+        bot = TestSpider()
+        bot.run()
+        self.assertEqual(bot.count, 1111)

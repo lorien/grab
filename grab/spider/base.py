@@ -491,10 +491,13 @@ class Spider(SpiderPattern, SpiderStat):
         if not process_handler:
             return
 
+        if handler is None:
+            raise SpiderMisuseError('Handler is not defined for task %s' % res['task'].name)
+
         try:
             handler_name = handler.__name__
         except AttributeError:
-            handler_name = 'none'
+            handler_name = 'NONE'
 
         if res['ok'] and self.valid_response_code(res['grab'].response.code,
                                                   res['task']):
@@ -508,7 +511,7 @@ class Spider(SpiderPattern, SpiderStat):
                         else:
                             self.process_handler_result(result, res['task'])
             except Exception, ex:
-                self.process_handler_error(handler.__name__, ex, res['task'])
+                self.process_handler_error(handler_name, ex, res['task'])
             else:
                 self.inc_count('task-%s-ok' % res['task'].name)
         else:
@@ -571,6 +574,7 @@ class Spider(SpiderPattern, SpiderStat):
         # Process the response
         handler_name = 'task_%s' % res['task'].name
         raw_handler_name = 'task_raw_%s' % res['task'].name
+
         try:
             raw_handler = getattr(self, raw_handler_name)
         except AttributeError:
@@ -678,6 +682,12 @@ class Spider(SpiderPattern, SpiderStat):
             self.stop_timer('task_generator')
 
             while self.work_allowed:
+
+                self.start_timer('task_generator')
+                if self.task_generator_enabled:
+                    self.process_task_generator()
+                self.stop_timer('task_generator')
+
                 if self.transport.ready_for_task():
                     logger_verbose.debug('Transport has free resources. '\
                                          'Trying to add new task (if exists)')
