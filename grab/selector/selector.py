@@ -191,8 +191,10 @@ class Selector(object):
             xpath_obj = XPATH_CACHE[xpath]
 
             val = self.wrap_list(xpath_obj(self.node), 'xpath', xpath)
+            query_exp = xpath
         else:
             val = self.wrap_list(self.pyquery_node().find(pyquery), 'pyquery', pyquery)
+            query_exp = pyquery
 
         total = time.time() - start
         if DEBUG_LOGGING:
