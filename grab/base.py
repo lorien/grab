@@ -96,6 +96,9 @@ def default_config():
         debug = False,
         verbose_logging = False,
 
+        # Only for selenium transport
+        webdriver = 'firefox',
+
         # Proxy
         proxy = None,
         proxy_type = None,

@@ -8,11 +8,11 @@ import urllib
 from StringIO import StringIO
 import threading
 import random
-#import pycurl
 import os
 
-from ..base import (GrabError, GrabMisuseError, UploadContent, UploadFile,
-                    PACKAGE_DIR)
+from ..response import Response
+from ..error import GrabError, GrabMisuseError
+from ..base import UploadContent, UploadFile
 
 logger = logging.getLogger('grab')
 
@@ -171,23 +171,36 @@ class SeleniumTransportExtension(object):
                 #self.request_log = ''
             #self.request_log += text
 
-    def process_config(self):
+    def process_config(self, grab):
         """
         Setup curl instance with values from ``self.config``.
         """
 
         from selenium import webdriver
 
-        display = ':%s.0' % self.config['xserver_display']
+        display = ':%s.0' % grab.config.get('xserver_display')
         logging.debug('Setting DISPLAY env to %s' % display)
         os.environ['DISPLAY'] = display
 
-        self.browser = webdriver.Firefox()
+        driver = grab.config.get('webdriver', 'firefox')
+
+        if driver.lower() == 'chrome':
+            self.browser = webdriver.Chrome()
+        elif driver.lower() == 'opera':
+            self.browser = webdriver.Opera()
+        elif driver.lower() == 'ie':
+            self.browser = webdriver.Ie()
+        else:
+            self.browser = webdriver.Firefox()
+
+        self.config = {
+            'url': grab.config['url']
+        }
 
         #url = self.config['url']
-        if isinstance(self.config['url'], unicode):
+        if isinstance(grab.config['url'], unicode):
             #url = url.encode('utf-8')
-            self.config['url'] = self.config['url'].encode('utf-8')
+            grab.config['url'] = grab.config['url'].encode('utf-8')
 
         #self.curl.setopt(pycurl.URL, url)
         #self.curl.setopt(pycurl.FOLLOWLOCATION, 1)
@@ -360,9 +373,7 @@ class SeleniumTransportExtension(object):
             cookies[item['name']] = item['value']
         return cookies
 
-
-
-    def transport_request(self):
+    def request(self):
         try:
             self.browser.get(self.config['url'])
         except Exception, ex:
@@ -380,23 +391,34 @@ class SeleniumTransportExtension(object):
             #else:
                 #raise GrabError(ex[0], ex[1])
 
-    def prepare_response(self):
+    def prepare_response(self, grab):
         #self.response.head = ''.join(self.response_head_chunks)
         #self.response.body = ''.join(self.response_body_chunks)
         #self.response.parse()
-        self.response.head = ''
-        self.response._unicode_body = self.browser.page_source#.encode('utf-8')
-        self.response.body = self.browser.page_source.encode('utf-8')
-        self.response.charset = 'utf-8'
+
+        response = Response()
+
+        response.head = ''
+        response._unicode_body = self.browser.page_source #.encode('utf-8')
+        response.body = self.browser.page_source.encode('utf-8')
+        response.charset = 'utf-8'
         #import pdb; pdb.set_trace()
-        self.response.url = self.browser.current_url
-        self.response.code = 200# TODO: fix, self.browser.status_code
-        self.response.cookies = self._extract_cookies()
+        response.url = self.browser.current_url
+        response.code = 200# TODO: fix, self.browser.status_code
+        response.cookies = self._extract_cookies()
         #self.response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         #self.response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         #self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
         #import pdb; pdb.set_trace()
         self.browser.quit()
+
+        return response
+
+    def reset(self):
+        # Maybe move to super-class???
+        self.request_head = ''
+        self.request_body = ''
+        self.request_log = ''
 
     #def load_cookies(self, path):
         #"""
@@ -440,6 +462,7 @@ class SeleniumTransportExtension(object):
         #self.curl = pycurl.Curl()
 
 
-from ..base import BaseGrab
-class GrabSelenium(SeleniumTransportExtension, BaseGrab):
-    pass
+# from ..base import BaseGrab
+# class GrabSelenium(SeleniumTransportExtension, BaseGrab):
+#     def __init__(self, response_body=None):
+#         super(GrabSelenium, self).__init__(response_body, 'selenium.SeleniumTransportExtension')
