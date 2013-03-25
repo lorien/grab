@@ -1,13 +1,7 @@
-# coding: utf-8
+from unittest import TestCase
 
-from random import shuffle
-from unittest import TestCase, main
-
-from grab.spider import Spider, Task
-
-from util import (FakeServerThread, RESPONSE, SLEEP, BASE_URL,
-                  reset_env)
-
+from grab.spider import Spider, Task, Data
+from util import FakeServerThread, BASE_URL, RESPONSE, SLEEP
 
 class BasicSpiderTestCase(TestCase):
 
@@ -25,7 +19,7 @@ class BasicSpiderTestCase(TestCase):
 
     def test_basic_priority(self):
         bot = self.SimpleSpider()
-        bot.setup_queue(backend='mongo', database='queue_test')
+        bot.setup_queue(backend='memory')
         requested_urls = {}
         for priority in (4, 2, 1, 5):
             url = BASE_URL + '?p=%d' % priority
@@ -36,7 +30,3 @@ class BasicSpiderTestCase(TestCase):
         urls = [x[1] for x in sorted(requested_urls.items(), 
                                      key=lambda x: x[0])]
         self.assertEqual(urls, bot.url_history)
-
-
-if __name__ == '__main__':
-    main()

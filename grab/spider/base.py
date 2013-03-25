@@ -257,8 +257,11 @@ class Spider(SpiderPattern, SpiderStat):
 
         if self.taskq is None:
             raise SpiderMisuseError('You should configure task queue before adding tasks. Use `setup_queue` method.')
-        if task.priority is None:
+        if task.priority is None or not task.priority_is_custom:
             task.priority = self.generate_task_priority()
+            task.priority_is_custom = False
+        else:
+            task.priority_is_custom = True
 
         if (not task.url.startswith('http://') and not task.url.startswith('https://')
             and not task.url.startswith('ftp://')):
