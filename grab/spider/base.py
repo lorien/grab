@@ -257,8 +257,11 @@ class Spider(SpiderPattern, SpiderStat):
 
         if self.taskq is None:
             raise SpiderMisuseError('You should configure task queue before adding tasks. Use `setup_queue` method.')
-        if task.priority is None:
+        if task.priority is None or not task.priority_is_custom:
             task.priority = self.generate_task_priority()
+            task.priority_is_custom = False
+        else:
+            task.priority_is_custom = True
 
         if (not task.url.startswith('http://') and not task.url.startswith('https://')
             and not task.url.startswith('ftp://')):
@@ -320,7 +323,7 @@ class Spider(SpiderPattern, SpiderStat):
                 qsize = self.taskq.qsize()
             else:
                 qsize = self.taskq.size()
-            min_limit = self.thread_number * 4
+            min_limit = self.thread_number * 10
             if qsize < min_limit:
                 logger_verbose.debug('Task queue contains less tasks than limit. Tryring to add new tasks')
                 try:
@@ -352,12 +355,29 @@ class Spider(SpiderPattern, SpiderStat):
         self.process_task_generator()
 
     def load_new_task(self):
-        try:
-            with self.save_timer('task_queue'):
-                return self.taskq.get(TASK_QUEUE_TIMEOUT)
-        except Queue.Empty:
-            logger_verbose.debug('Task queue is empty.')
-            return None
+        start = time.time()
+        while True:
+            try:
+                with self.save_timer('task_queue'):
+                    return self.taskq.get(TASK_QUEUE_TIMEOUT)
+            except Queue.Empty:
+                if not self.slave:
+                    logger_verbose.debug('Task queue is empty.')
+                    return None
+                else:
+                    # Temporarly hack which force slave crawler
+                    # to wait 2 seconds for new tasks, this solves
+                    # the problem that sometimes slave crawler stop
+                    # its work because it could not receive new
+                    # tasks immediatelly
+                    if time.time() - start < 2:
+                        time.sleep(0.1)
+                        logger.debug('Slave sleeping')
+                    else:
+                        break
+
+        logger_verbose.debug('Task queue is empty.')
+        return None
 
     def process_task_counters(self, task):
         task.network_try_count += 1
@@ -699,7 +719,7 @@ class Spider(SpiderPattern, SpiderStat):
                             #self.wating_shutdown_event.set()
                             #if self.shutdown_event.is_set():
                             if True:
-                                logger_verbose.debug('Got shutdown signal')
+                                #logger_verbose.debug('Got shutdown signal')
                                 self.stop()
                             #else:
                                 #logger_verbose.debug('Shutdown event has not been set yet')

@@ -58,7 +58,7 @@ class QueueBackend(QueueInterface):
 
     def get(self, timeout):
         item = self.collection.find_and_modify(
-            sort={'priority': pymongo.ASCENDING},
+            sort=[('priority', pymongo.ASCENDING)],
             remove=True
         )
         if item is None:
