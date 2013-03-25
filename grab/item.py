@@ -26,6 +26,7 @@ Usage example:
 from __future__ import absolute_import
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
+import logging
 
 from .tools.lxml_tools import get_node_text
 from .error import DataNotFound
@@ -244,6 +245,11 @@ class Item(object):
             item._parse(**kwargs)
             item._position = count
             yield item
+
+
+    @classmethod
+    def find_one(cls, *args, **kwargs):
+        return list(cls.find(*args, **kwargs))[0]
 
     def _parse(self, url=None, **kwargs):
         pass
