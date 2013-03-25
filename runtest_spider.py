@@ -10,10 +10,12 @@ TEST_CASE_LIST = (
     #'tests.test_distributed_spider',
     'test.spider_task',
     'test.spider_proxy',
+    'test.spider_queue',
 )
 
 EXTRA_TEST_LIST = (
     'test.spider_mongo_queue',
+    'test.spider_redis_queue',
 )
 
 def main():

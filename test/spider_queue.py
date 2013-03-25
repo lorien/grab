@@ -9,4 +9,4 @@ class BasicSpiderTestCase(TestCase, SpiderQueueMixin):
         FakeServerThread().start()
 
     def setup_queue(self, bot):
-        bot.setup_queue(backend='mongo', database='queue_test')
+        bot.setup_queue(backend='memory')
