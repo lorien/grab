@@ -8,6 +8,7 @@ import urllib
 from StringIO import StringIO
 import threading
 import random
+import time
 import os
 
 from ..response import Response
@@ -194,7 +195,8 @@ class SeleniumTransportExtension(object):
             self.browser = webdriver.Firefox()
 
         self.config = {
-            'url': grab.config['url']
+            'url': grab.config['url'],
+            'wait': grab.config['selenium_wait']
         }
 
         #url = self.config['url']
@@ -376,6 +378,7 @@ class SeleniumTransportExtension(object):
     def request(self):
         try:
             self.browser.get(self.config['url'])
+            time.sleep(self.config['wait'])
         except Exception, ex:
             logging.error('', exc_info=ex)
             raise GrabError(999, 'Error =8-[ ]')

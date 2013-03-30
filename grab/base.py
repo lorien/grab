@@ -98,6 +98,7 @@ def default_config():
 
         # Only for selenium transport
         webdriver = 'firefox',
+        selenium_wait = 1,
 
         # Proxy
         proxy = None,
