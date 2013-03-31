@@ -14,7 +14,20 @@ metric_labels = {
 } 
 
 
-def parse_size(size):
+def in_unit(num, unit):
+    if unit == 'b':
+        return num
+    elif unit == 'kb':
+        return round(num / float(KB), 2)
+    elif unit == 'mb':
+        return round(num / float(MB), 2)
+    elif unit == 'gb':
+        return round(num / float(GB), 2)
+    else:
+        return num
+
+
+def parse_size(size, unit='mb'):
     size = size.lower().strip()
     if size.isdigit():
         return int(size)
@@ -25,5 +38,5 @@ def parse_size(size):
                 size = size.replace(',', '.')
                 size = size.strip()
                 val = int(float(size) * mult)
-                return val
+                return in_unit(val, unit)
         return 0
