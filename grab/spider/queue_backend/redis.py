@@ -24,3 +24,10 @@ class QueueBackend(QueueInterface):
 
     def size(self):
         return len(self.queue_object)
+
+    def clear(self):
+        try:
+            while True:
+                self.get(0)
+        except Queue.Empty:
+            pass

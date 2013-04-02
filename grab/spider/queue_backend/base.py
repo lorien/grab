@@ -20,3 +20,8 @@ class QueueInterface(object):
 
     def size(self):
         pass
+
+    def clear(self):
+        """
+        Remove all tasks from the queue.
+        """
