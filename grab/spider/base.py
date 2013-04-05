@@ -370,9 +370,12 @@ class Spider(SpiderPattern, SpiderStat):
                     # the problem that sometimes slave crawler stop
                     # its work because it could not receive new
                     # tasks immediatelly
-                    if time.time() - start < 2:
-                        time.sleep(0.1)
-                        logger.debug('Slave sleeping')
+                    if not self.transport.active_task_number():
+                        if time.time() - start < 5:
+                            time.sleep(0.1)
+                            logger.debug('Slave sleeping')
+                        else:
+                            break
                     else:
                         break
 
@@ -418,9 +421,12 @@ class Spider(SpiderPattern, SpiderStat):
         if cache_item is None:
             return None
         else:
-            transport.repair_grab(grab)
-            grab.prepare_request()
-            self.cache.load_response(grab, cache_item)
+            with self.save_timer('cache.read.repair_grab'):
+                transport.repair_grab(grab)
+            with self.save_timer('cache.read.prepare_request'):
+                grab.prepare_request()
+            with self.save_timer('cache.read.load_response'):
+                self.cache.load_response(grab, cache_item)
 
             grab.log_request('CACHED')
             self.inc_count('request')
@@ -563,6 +569,7 @@ class Spider(SpiderPattern, SpiderStat):
         """
 
         # Increase stat counters
+        self.inc_count('request-processed')
         self.inc_count('task')
         self.inc_count('task-%s' % res['task'].name)
         if (res['task'].network_try_count == 1 and

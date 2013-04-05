@@ -75,11 +75,12 @@ class CacheBackend(object):
             return marshal.loads(dump)
 
     def build_hash(self, url):
-        if isinstance(url, unicode):
-            utf_url = url.encode('utf-8')
-        else:
-            utf_url = url
-        return sha1(utf_url).hexdigest()
+        with self.spider.save_timer('cache.read.build_hash'):
+            if isinstance(url, unicode):
+                utf_url = url.encode('utf-8')
+            else:
+                utf_url = url
+            return sha1(utf_url).hexdigest()
 
     def remove_cache_item(self, url):
         _hash = self.build_hash(url)
