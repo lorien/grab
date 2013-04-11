@@ -20,6 +20,7 @@ import time
 import re
 import json
 import email
+from datetime import datetime
 
 from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url
@@ -444,6 +445,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         Process result of real request performed via transport extension.
         """
 
+        now = datetime.now()
         # TODO: move into separate method
         if self.config['debug_post']:
             post = self.config['post'] or self.config['multipart_post']
@@ -474,6 +476,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             self.response = prepare_response_func(self.transport, self)
         else:
             self.response = self.transport.prepare_response(self)
+
+        self.response.done_time = now
 
         self.config['charset'] = self.response.charset
 

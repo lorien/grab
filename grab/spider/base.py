@@ -24,7 +24,7 @@ import Queue
 from ..base import GLOBAL_STATE, Grab
 from .error import (SpiderError, SpiderMisuseError, FatalError,
                     StopTaskProcessing)
-from .task import Task
+from .task import Task, NullTask
 from .data import Data
 from .pattern import SpiderPattern
 from .stat  import SpiderStat
@@ -74,6 +74,7 @@ class Spider(SpiderPattern, SpiderStat):
                  only_cache=False,
                  config=None,
                  slave=False,
+                 max_task_generator_chunk=None,
                  ):
         """
         Arguments:
@@ -95,6 +96,7 @@ class Spider(SpiderPattern, SpiderStat):
 
         self.slave = slave
 
+        self.max_task_generator_chunk = max_task_generator_chunk
         self.timers = {}
         self.time_points = {}
         self.start_timer('total')
@@ -263,15 +265,16 @@ class Spider(SpiderPattern, SpiderStat):
         else:
             task.priority_is_custom = True
 
-        if (not task.url.startswith('http://') and not task.url.startswith('https://')
-            and not task.url.startswith('ftp://')):
-            if self.base_url is None:
-                raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified')
-            else:
-                task.url = urljoin(self.base_url, task.url)
-                # If task has grab_config object then update it too
-                if task.grab_config:
-                    task.grab_config['url'] = task.url
+        if not isinstance(task, NullTask):
+            if (not task.url.startswith('http://') and not task.url.startswith('https://')
+                and not task.url.startswith('ftp://')):
+                if self.base_url is None:
+                    raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified')
+                else:
+                    task.url = urljoin(self.base_url, task.url)
+                    # If task has grab_config object then update it too
+                    if task.grab_config:
+                        task.grab_config['url'] = task.url
 
         is_valid = self.check_task_limits_deprecated(task)
         if is_valid:
@@ -323,7 +326,11 @@ class Spider(SpiderPattern, SpiderStat):
                 qsize = self.taskq.qsize()
             else:
                 qsize = self.taskq.size()
-            min_limit = self.thread_number * 10
+            if self.max_task_generator_chunk is not None:
+                min_limit = min(self.max_task_generator_chunk,
+                                self.thread_number * 10)
+            else:
+                min_limit = self.thread_number * 10
             if qsize < min_limit:
                 logger_verbose.debug('Task queue contains less tasks than limit. Tryring to add new tasks')
                 try:
@@ -709,7 +716,6 @@ class Spider(SpiderPattern, SpiderStat):
             self.stop_timer('task_generator')
 
             while self.work_allowed:
-
                 self.start_timer('task_generator')
                 if self.task_generator_enabled:
                     self.process_task_generator()
@@ -733,6 +739,12 @@ class Spider(SpiderPattern, SpiderStat):
                         else:
                             logger_verbose.debug('Transport active tasks: %d' %
                                                  self.transport.active_task_number())
+                    elif isinstance(task, NullTask):
+                        logger_verbose.debug('Got NullTask')
+                        if not self.transport.active_task_number():
+                            if task.sleep:
+                                logger.debug('Got NullTask with sleep instruction. Sleeping for %.2f seconds' % task.sleep)
+                                time.sleep(task.sleep)
                     else:
                         #if self.wating_shutdown_event.is_set():
                             #self.wating_shutdown_event.clear()
