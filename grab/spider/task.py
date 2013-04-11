@@ -4,7 +4,11 @@ from random import randint
 from .error import SpiderMisuseError
 from ..base import copy_config
 
-class Task(object):
+class BaseTask(object):
+    pass
+
+
+class Task(BaseTask):
     """
     Task for spider.
     """
@@ -149,3 +153,15 @@ class Task(object):
 
     def __repr__(self):
         return '<Task: %s>' % self.url
+
+
+class NullTask(BaseTask):
+    def __init__(self, name='initial', sleep=0, priority=None,
+                 priority_is_custom=True, network_try_count=0,
+                 task_try_count=0):
+        self.name = name
+        self.sleep = sleep
+        self.priority = None
+        self.priority_is_custom = False
+        self.network_try_count = network_try_count
+        self.task_try_count = task_try_count
