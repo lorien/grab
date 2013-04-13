@@ -73,6 +73,7 @@ class Response(object):
         self.charset = 'utf-8'
         self._unicode_body = None
         self.bom = None
+        self.done_time = None
 
     def parse(self, charset=None):
         """

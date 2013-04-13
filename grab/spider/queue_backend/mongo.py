@@ -65,3 +65,7 @@ class QueueBackend(QueueInterface):
             raise Queue.Empty()
         else:
             return pickle.loads(item['task'])
+
+
+    def clear(self):
+        self.collection.remove()

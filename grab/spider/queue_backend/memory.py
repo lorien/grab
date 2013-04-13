@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from .base import QueueInterface
-from Queue import PriorityQueue
+from Queue import PriorityQueue, Empty
 
 class QueueBackend(QueueInterface):
     def __init__(self, unique=False, **kwargs):
@@ -27,6 +27,13 @@ class QueueBackend(QueueInterface):
 
     def size(self):
         return self.queue_object.qsize()
+
+    def clear(self):
+        try:
+            while True:
+                self.queue_object.get(False)
+        except Empty:
+            pass
 
 def unique_key(task):
     return '%s:%s' % (task.name, task.url)
