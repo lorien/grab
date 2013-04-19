@@ -165,6 +165,15 @@ class SelectorList(object):
                 result_list = item_result_list
             else:
                 result_list.items.extend(item_result_list.items)
+        if result_list is None:
+            # TODO: refactor
+            if xpath is not None:
+                query_type = 'xpath'
+                query_exp = xpath
+            else:
+                query_type = 'pyquery'
+                query_exp = pyquery
+            return SelectorList([], query_type=query_type, query_exp=query_exp)
         return result_list
 
 
