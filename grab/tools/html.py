@@ -17,6 +17,7 @@ RE_REFRESH_URL = re.compile(r'url=["\']*([^\'"> ]+)', re.I)
 RE_ENTITY = re.compile(r'(&[a-z]+;)')
 RE_NUM_ENTITY = re.compile(r'(&#\d+;)')
 RE_BASE_URL = re.compile(r'<base[^>]+href\s*=["\']*([^\'"> ]+)', re.I)
+RE_BR = re.compile(r'<br\s*/?>', re.I)
 
 def decode_entities(html):
     """
@@ -88,7 +89,10 @@ def find_base_url(html):
     else:
         return None
 
-def strip_tags(html, normalize_space=True):
+
+def strip_tags(html, normalize_space=True, convert_br=False):
+    if convert_br:
+        html = RE_BR.sub('\n', html)
     text = RE_TAG.sub(' ', html)
     if normalize_space:
         return normalize_space_func(text)
