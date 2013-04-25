@@ -724,14 +724,23 @@ class Spider(SpiderPattern, SpiderStat):
                 if self.transport.ready_for_task():
                     logger_verbose.debug('Transport has free resources. '\
                                          'Trying to add new task (if exists)')
-                    task = self.load_new_task()
+
+                    # Try five times to get new task and proces task generator
+                    # because slave parser could agressively consume
+                    # tasks from task queue
+                    for x in xrange(5):
+                        task = self.load_new_task()
+                        if not task:
+                            if not self.transport.active_task_number():
+                                self.process_task_generator()
+                        else:
+                            break
 
                     if not task:
                         if not self.transport.active_task_number():
                             logger_verbose.debug('Network transport has no active tasks')
                             #self.wating_shutdown_event.set()
-                            #if self.shutdown_event.is_set():
-                            if True:
+                            if True:#self.shutdown_event.is_set():
                                 #logger_verbose.debug('Got shutdown signal')
                                 self.stop()
                             #else:
