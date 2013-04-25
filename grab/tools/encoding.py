@@ -25,7 +25,10 @@ def smart_unicode(value, encoding='utf-8'):
 def special_entity_handler(match):
     num = int(match.group(1))
     if 128 <= num <= 160:
-        return '&#%d;' % ord(chr(num).decode('cp1252'))
+        try:
+            return '&#%d;' % ord(chr(num).decode('cp1252'))
+        except UnicodeDecodeError:
+            return match.group(0)
     else:
         return match.group(0)
 
