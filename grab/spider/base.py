@@ -499,7 +499,7 @@ class Spider(SpiderPattern, SpiderStat):
             try:
                 handler = getattr(self, handler_name)
             except AttributeError:
-                raise SpiderError('No content handler for %s item', result.item)
+                raise SpiderError('No content handler for %s item' % result.name)
             try:
                 handler(result.item)
             except Exception, ex:
