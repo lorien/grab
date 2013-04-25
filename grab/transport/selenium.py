@@ -10,6 +10,7 @@ import threading
 import random
 import time
 import os
+import json
 
 from ..response import Response
 from ..error import GrabError, GrabMisuseError
@@ -194,9 +195,16 @@ class SeleniumTransportExtension(object):
         else:
             self.browser = webdriver.Firefox()
 
+        if grab.config['method']:
+            method = grab.config['method'].lower()
+        else:
+            method = 'get'
+
         self.config = {
             'url': grab.config['url'],
-            'wait': grab.config['selenium_wait']
+            'wait': grab.config['selenium_wait'],
+            'method': method,
+            'post': grab.config.get('post', {})
         }
 
         #url = self.config['url']
@@ -377,8 +385,34 @@ class SeleniumTransportExtension(object):
 
     def request(self):
         try:
-            self.browser.get(self.config['url'])
-            time.sleep(self.config['wait'])
+            if self.config['method'] == 'post':
+                post_params = json.dumps(self.config['post'])
+                script = """
+                    var form = document.createElement("form");
+                    form.setAttribute("method", "POST");
+                    form.setAttribute("action", "%s");
+
+                    var params = %s;
+
+                    for(var key in params) {
+                        if(params.hasOwnProperty(key)) {
+                            var hiddenField = document.createElement("input");
+                            hiddenField.setAttribute("type", "hidden");
+                            hiddenField.setAttribute("name", key);
+                            hiddenField.setAttribute("value", params[key]);
+
+                            form.appendChild(hiddenField);
+                         }
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
+                """ % (self.config['url'], post_params)
+
+                self.browser.execute_script(script)
+            else:
+                self.browser.get(self.config['url'])
+                time.sleep(self.config['wait'])
         except Exception, ex:
             logging.error('', exc_info=ex)
             raise GrabError(999, 'Error =8-[ ]')
@@ -402,7 +436,7 @@ class SeleniumTransportExtension(object):
         response = Response()
 
         response.head = ''
-        response._unicode_body = self.browser.page_source #.encode('utf-8')
+        response._unicode_body = self.browser.page_source
         response.body = self.browser.page_source.encode('utf-8')
         response.charset = 'utf-8'
         #import pdb; pdb.set_trace()
