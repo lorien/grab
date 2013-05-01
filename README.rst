@@ -2,6 +2,10 @@
 Grab
 ====
 
+.. image:: https://travis-ci.org/lorien/grab.png
+    :target: https://travis-ci.org/lorien/grab
+
+
 Grab is python site scraping framework. Grab provides interface to pycurl and lxml libraries.
 
 
