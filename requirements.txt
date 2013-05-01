@@ -1,2 +1,3 @@
 lxml
 pycurl
+cssselect

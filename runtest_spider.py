@@ -35,7 +35,11 @@ def main():
             compiled_test_list += EXTRA_TEST_LIST
         suite = loader.loadTestsFromNames(compiled_test_list)
     runner = unittest.TextTestRunner()
-    runner.run(suite)
+    result = runner.run(suite)
+    if result.wasSuccessful():
+        return 0
+    else:
+        return -1
 
 
 if __name__ == '__main__':

@@ -58,9 +58,12 @@ def main():
     else:
         suite = loader.loadTestsFromNames(TEST_CASE_LIST)
     runner = unittest.TextTestRunner()
-    runner.run(suite)
-
+    result = runner.run(suite)
     clear_test_environment()
+    if result.wasSuccessful():
+        return 0
+    else:
+        return -1
 
 
 if __name__ == '__main__':
