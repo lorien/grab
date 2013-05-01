@@ -6,7 +6,8 @@ version = __import__('grab').__version__
 setup(
     name = 'grab',
     version = version,
-    description = 'Pycurl wrapper',
+    description = 'Site Scraping Framework',
+    long_description = open('README.rst').read(),
     url = 'http://bitbucket.org/lorien/grab/',
     author = 'Grigoriy Petukhov',
     author_email = 'lorien@lorien.name',
