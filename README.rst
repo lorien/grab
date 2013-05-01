@@ -68,5 +68,5 @@ Contribution
 
 If you found a bug or if you want new feature please create new issue on bitbucket or github:
 
-    * https://bitbucket.org/lorien/grab/issues?status=new&status=open
-    * https://github.com/lorien/grab/issues
+* https://bitbucket.org/lorien/grab/issues?status=new&status=open
+* https://github.com/lorien/grab/issues
