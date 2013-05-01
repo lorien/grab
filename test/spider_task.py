@@ -3,7 +3,7 @@ from unittest import TestCase
 import grab.spider.base
 from grab import Grab
 from grab.spider import Spider, Task, Data, SpiderMisuseError
-from util import FakeServerThread, BASE_URL, RESPONSE, SLEEP
+from util import FakeServerThread, BASE_URL, RESPONSE, SLEEP, REQUEST
 
 class TestSpider(TestCase):
 
@@ -90,3 +90,16 @@ class TestSpider(TestCase):
         g = Grab()
         g.setup(url='zzz')
         bot.add_task(task.clone(grab_config=g.config))
+
+    def test_task_useragent(self):
+        bot = self.SimpleSpider()
+        bot.setup_queue()
+
+        g = Grab()
+        g.setup(url=BASE_URL)
+        g.setup(user_agent='Foo')
+
+        task = Task('baz', grab=g)
+        bot.add_task(task.clone())
+        bot.run()
+        self.assertEqual(REQUEST['headers']['User-Agent'], 'Foo')

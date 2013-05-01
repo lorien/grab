@@ -70,7 +70,6 @@ class Spider(SpiderPattern, SpiderStat):
                  request_pause=NULL,
                  priority_mode='random',
                  meta=None,
-                 retry_rebuild_user_agent=True,
                  only_cache=False,
                  config=None,
                  slave=False,
@@ -146,7 +145,6 @@ class Spider(SpiderPattern, SpiderStat):
         self.proxylist = None
         self.proxy = None
         self.proxy_auto_change = False
-        self.retry_rebuild_user_agent = retry_rebuild_user_agent
 
     def setup_middleware(self, middleware_list):
         for item in middleware_list:
@@ -406,8 +404,6 @@ class Spider(SpiderPattern, SpiderStat):
 
         # Generate new common headers
         grab.config['common_headers'] = grab.common_headers()
-        if self.retry_rebuild_user_agent:
-            grab.config['user_agent'] = None
         return grab
 
     def is_task_cacheable(self, task, grab):
