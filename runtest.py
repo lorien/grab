@@ -38,7 +38,10 @@ TEST_CASE_LIST = (
     'test.selector',
     # idn
     'test.i18n',
+    # flask
+    #'test.test_flask',
 )
+
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
@@ -48,9 +51,13 @@ def main():
                       default='curl.CurlTransport')
     opts, args = parser.parse_args()
 
-    prepare_test_environment()
-
     test.util.GRAB_TRANSPORT = opts.transport
+
+    prepare_test_environment()
+    # Check tests integrity
+    # Ensure that all test modules are imported correctly
+    for path in TEST_CASE_LIST:
+        __import__(path, None, None, ['foo'])
 
     loader = unittest.TestLoader()
     if opts.test:

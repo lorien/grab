@@ -27,6 +27,12 @@ def main():
     opts, args = parser.parse_args()
 
     loader = unittest.TestLoader()
+
+    # Check tests integrity
+    # Ensure that all test modules are imported correctly
+    for path in TEST_CASE_LIST:
+        __import__(path, None, None, ['foo'])
+
     if opts.test:
         suite = loader.loadTestsFromName(opts.test)
     else:
