@@ -2,18 +2,19 @@
 from unittest import TestCase
 
 from grab import Grab
-from util import FakeServerThread, BASE_URL, RESPONSE, ignore_transport, GRAB_TRANSPORT
+from util import ignore_transport, GRAB_TRANSPORT
+from tornado_util import SERVER
 
 class TestContentLimit(TestCase):
     def setUp(self):
-        FakeServerThread().start()
+        SERVER.reset()
 
     @ignore_transport('requests.RequestsTransport')
     def test_nobody(self):
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(nobody=True)
-        RESPONSE['get'] = 'foo'
-        g.go(BASE_URL)
+        SERVER.RESPONSE['get'] = 'foo'
+        g.go(SERVER.BASE_URL)
         self.assertEqual('', g.response.body)
         self.assertTrue(len(g.response.head) > 0)
 
@@ -21,7 +22,7 @@ class TestContentLimit(TestCase):
     def test_body_maxsize(self):
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(body_maxsize=100)
-        RESPONSE['get'] = 'x' * 10 ** 6
-        g.go(BASE_URL)
+        SERVER.RESPONSE['get'] = 'x' * 10 ** 6
+        g.go(SERVER.BASE_URL)
         # Should be less 50kb
         self.assertTrue(len(g.response.body) < 50000)

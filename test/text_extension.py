@@ -3,7 +3,8 @@ from unittest import TestCase
 from grab import Grab, DataNotFound, GrabMisuseError
 import re
 
-from test.util import GRAB_TRANSPORT
+from .util import GRAB_TRANSPORT
+from .tornado_util import SERVER
 
 # TODO: split on two tests: text extension and rex extension
 
@@ -37,6 +38,8 @@ HTML = u"""
 
 class TextExtensionTest(TestCase):
     def setUp(self):
+        SERVER.reset()
+
         # Create fake grab instance with fake response
         self.g = Grab(transport=GRAB_TRANSPORT)
         self.g.fake_response(HTML, charset='cp1251')

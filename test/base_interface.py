@@ -3,28 +3,27 @@ from unittest import TestCase
 import os
 
 from grab import Grab, GrabMisuseError
-from util import (FakeServerThread, BASE_URL, RESPONSE, REQUEST,
-                  RESPONSE_ONCE, ignore_transport, GRAB_TRANSPORT,
-                  ignore_transport, only_transport,
-                  TMP_DIR)
+from util import (GRAB_TRANSPORT, TMP_DIR,
+                  ignore_transport, only_transport)
+from tornado_util import SERVER
 from grab.extension import register_extensions
 
 
 class TestGrab(TestCase):
     def setUp(self):
-        FakeServerThread().start()
+        SERVER.reset()
 
     #def test_basic(self):
-        #RESPONSE['get'] = '<meta charset="utf-8">The cat is кошка'
+        #SERVER.RESPONSE['get'] = '<meta charset="utf-8">The cat is кошка'
         #g = Grab(transport=GRAB_TRANSPORT)
-        #g.go(BASE_URL)
+        #g.go(SERVER.BASE_URL)
         #self.assertTrue('The cat' in g.response.body)
         #self.assertTrue('кошка' in g.response.body)
 
     def test_xml_with_declaration(self):
-        RESPONSE['get'] = '<?xml version="1.0" encoding="UTF-8"?><root><foo>foo</foo></root>'
+        SERVER.RESPONSE['get'] = '<?xml version="1.0" encoding="UTF-8"?><root><foo>foo</foo></root>'
         g = Grab(strip_xml_declaration=True, transport=GRAB_TRANSPORT)
-        g.go(BASE_URL)
+        g.go(SERVER.BASE_URL)
         self.assertTrue(g.xpath_one('//foo').text == 'foo')
 
     def test_incorrect_option_name(self):
@@ -38,8 +37,8 @@ class TestGrab(TestCase):
 
         # Empty string disable default pycurl user-agent
         g.setup(user_agent='')
-        g.go(BASE_URL)
-        self.assertEqual(REQUEST['headers'].get('user-agent', ''), '')
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(SERVER.REQUEST['headers'].get('user-agent', ''), '')
 
     @ignore_transport('ghost.GhostTransport')
     def test_useragent_simple(self):
@@ -47,8 +46,8 @@ class TestGrab(TestCase):
 
         # Simple case: setup user agent manually
         g.setup(user_agent='foo')
-        g.go(BASE_URL)
-        self.assertEqual(REQUEST['headers']['user-agent'], 'foo')
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(SERVER.REQUEST['headers']['user-agent'], 'foo')
 
     @ignore_transport('ghost.GhostTransport')
     def test_useragent(self):
@@ -57,51 +56,51 @@ class TestGrab(TestCase):
         # Null value activates default random user-agent
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(user_agent=None)
-        g.go(BASE_URL)
-        self.assertTrue(len(REQUEST['headers']) > 0)
-        self.assertFalse('PycURL' in REQUEST['headers']['user-agent'])
+        g.go(SERVER.BASE_URL)
+        self.assertTrue(len(SERVER.REQUEST['headers']) > 0)
+        self.assertFalse('PycURL' in SERVER.REQUEST['headers']['user-agent'])
 
         # By default user_agent is None => random user agent is generated
         g = Grab(transport=GRAB_TRANSPORT)
-        g.go(BASE_URL)
-        self.assertTrue(len(REQUEST['headers']) > 0)
-        self.assertFalse('PycURL' in REQUEST['headers']['user-agent'])
+        g.go(SERVER.BASE_URL)
+        self.assertTrue(len(SERVER.REQUEST['headers']) > 0)
+        self.assertFalse('PycURL' in SERVER.REQUEST['headers']['user-agent'])
 
         # Simple case: setup user agent manually
         g.setup(user_agent='foo')
-        g.go(BASE_URL)
-        self.assertEqual(REQUEST['headers']['user-agent'], 'foo')
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(SERVER.REQUEST['headers']['user-agent'], 'foo')
         
         # user agent from file should be loaded
         path = '/tmp/__ua.txt'
         open(path, 'w').write('GOD')
         g.setup(user_agent=None, user_agent_file=path)
-        g.go(BASE_URL)
-        self.assertEqual(REQUEST['headers']['user-agent'], 'GOD')
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(SERVER.REQUEST['headers']['user-agent'], 'GOD')
 
         # random user agent from file should be loaded
         path = '/tmp/__ua.txt'
         open(path, 'w').write('GOD1\nGOD2')
         g.setup(user_agent=None, user_agent_file=path)
-        g.go(BASE_URL)
-        self.assertTrue(REQUEST['headers']['user-agent'] in ('GOD1', 'GOD2'))
+        g.go(SERVER.BASE_URL)
+        self.assertTrue(SERVER.REQUEST['headers']['user-agent'] in ('GOD1', 'GOD2'))
         ua = g.config['user_agent']
 
         # User-agent should not change
-        g.go(BASE_URL)
-        self.assertEqual(REQUEST['headers']['user-agent'], ua)
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(SERVER.REQUEST['headers']['user-agent'], ua)
 
         # User-agent should not change
-        g.go(BASE_URL)
-        self.assertEqual(REQUEST['headers']['user-agent'], ua)
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(SERVER.REQUEST['headers']['user-agent'], ua)
 
     @ignore_transport('ghost.GhostTransport')
     # Disabled because of strance error
     # Error when another Ghost instance is created
     def test_clone(self):
         g = Grab(transport=GRAB_TRANSPORT)
-        RESPONSE['get'] = 'Moon'
-        g.go(BASE_URL)
+        SERVER.RESPONSE['get'] = 'Moon'
+        g.go(SERVER.BASE_URL)
         self.assertTrue('Moon' in g.response.body)
         g2 = Grab(transport=GRAB_TRANSPORT)
         self.assertEqual(g2.response, None)
@@ -116,13 +115,13 @@ class TestGrab(TestCase):
     @ignore_transport('ghost.GhostTransport')
     def test_adopt(self):
         g = Grab(transport=GRAB_TRANSPORT)
-        RESPONSE['get'] = 'Moon'
-        g.go(BASE_URL)
+        SERVER.RESPONSE['get'] = 'Moon'
+        g.go(SERVER.BASE_URL)
         g2 = Grab(transport=GRAB_TRANSPORT)
         self.assertEqual(g2.config['url'], None)
         g2.adopt(g)
         self.assertTrue('Moon' in g2.response.body)
-        self.assertEqual(g2.config['url'], BASE_URL)
+        self.assertEqual(g2.config['url'], SERVER.BASE_URL)
 
     def test_empty_adopt(self):
         g = Grab()
@@ -134,9 +133,9 @@ class TestGrab(TestCase):
         from grab.tools.content import find_content_blocks
         porno = u'порно ' * 100
         redis = u'редис ' * 100
-        RESPONSE['get'] = ('<div>%s</div><p>%s' % (porno, redis)).encode('utf-8')
+        SERVER.RESPONSE['get'] = ('<div>%s</div><p>%s' % (porno, redis)).encode('utf-8')
         g = Grab(transport=GRAB_TRANSPORT)
-        g.go(BASE_URL)
+        g.go(SERVER.BASE_URL)
         blocks = list(find_content_blocks(g.tree))
         print '>>>'
         print blocks[0]
@@ -149,35 +148,32 @@ class TestGrab(TestCase):
 
     def test_meta_refresh_redirect(self):
         # By default meta-redirect is off
-        url = BASE_URL + '/foo'
-        RESPONSE_ONCE['get'] = '<meta http-equiv="refresh" content="5; url=%s">' % url
+        url = SERVER.BASE_URL + '/foo'
+        SERVER.RESPONSE_ONCE['get'] = '<meta http-equiv="refresh" content="5; url=%s">' % url
         g = Grab(transport=GRAB_TRANSPORT)
-        g.go(BASE_URL + '/')
-        self.assertEqual(REQUEST['path'], '/')
-        self.assertEqual(g.response.url, BASE_URL + '/')
+        g.go(SERVER.BASE_URL + '/')
+        self.assertEqual(SERVER.REQUEST['path'], '/')
+        self.assertEqual(g.response.url, SERVER.BASE_URL + '/')
 
         # Now test meta-auto-redirect
-        RESPONSE_ONCE['get'] = '<meta http-equiv="refresh" content="5; url=%s">' % url
+        SERVER.RESPONSE_ONCE['get'] = '<meta http-equiv="refresh" content="5; url=%s">' % url
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(follow_refresh=True)
-        g.go(BASE_URL)
-        self.assertEqual(REQUEST['path'], '/foo')
-        self.assertEqual(g.response.url, BASE_URL + '/foo')
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(SERVER.REQUEST['path'], '/foo')
+        self.assertEqual(g.response.url, SERVER.BASE_URL + '/foo')
 
     @only_transport('curl.CurlTransport')
     def test_redirect_limit(self):
-
         class Scope(object):
             counter = None
 
             def callback(self, server):
                 if self.counter:
-                    server.send_response(301)
-                    server.send_header('Location', BASE_URL)
-                    server.end_headers()
+                    server.set_status(301)
+                    server.set_header('Location', SERVER.BASE_URL)
                 else:
-                    server.send_response(200)
-                    server.end_headers()
+                    server.set_status(200)
                 self.counter -= 1
 
         scope = Scope()
@@ -185,11 +181,11 @@ class TestGrab(TestCase):
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(redirect_limit=5)
 
-        RESPONSE['get_callback'] = scope.callback
+        SERVER.RESPONSE['get_callback'] = scope.callback
 
         try:
             try:
-                g.go(BASE_URL)
+                g.go(SERVER.BASE_URL)
             except Exception, ex:
                 pass
             self.assert_(ex is not None)
@@ -199,7 +195,7 @@ class TestGrab(TestCase):
             g.setup(redirect_limit=20)
 
             try:
-                g.go(BASE_URL)
+                g.go(SERVER.BASE_URL)
             except Exception, ex:
                 pass
             else:
@@ -208,7 +204,7 @@ class TestGrab(TestCase):
 
         finally:
             # Clean up test environment
-            RESPONSE['get_callback'] = None
+            SERVER.RESPONSE['get_callback'] = None
 
     def test_default_content_for_fake_response(self):
         content = '<strong>test</strong>'
@@ -273,27 +269,27 @@ class TestGrab(TestCase):
     def test_body_inmemory(self):
         g = Grab()
         g.setup(body_inmemory=False)
-        self.assertRaises(GrabMisuseError, lambda: g.go(BASE_URL))
+        self.assertRaises(GrabMisuseError, lambda: g.go(SERVER.BASE_URL))
 
-        RESPONSE['get'] = 'foo'
+        SERVER.RESPONSE['get'] = 'foo'
         g = Grab()
         g.setup(body_inmemory=False)
         g.setup(body_storage_dir=TMP_DIR)
-        g.go(BASE_URL)
+        g.go(SERVER.BASE_URL)
         self.assertTrue(os.path.exists(g.response.body_path))
         self.assertTrue(TMP_DIR in g.response.body_path)
         self.assertEqual('foo', open(g.response.body_path).read())
         old_path = g.response.body_path
 
-        g.go(BASE_URL)
+        g.go(SERVER.BASE_URL)
         self.assertTrue(old_path != g.response.body_path)
 
-        RESPONSE['get'] = 'foo'
+        SERVER.RESPONSE['get'] = 'foo'
         g = Grab()
         g.setup(body_inmemory=False)
         g.setup(body_storage_dir=TMP_DIR)
         g.setup(body_storage_filename='musik.mp3')
-        g.go(BASE_URL)
+        g.go(SERVER.BASE_URL)
         self.assertTrue(os.path.exists(g.response.body_path))
         self.assertTrue(TMP_DIR in g.response.body_path)
         self.assertEqual('foo', open(g.response.body_path).read())

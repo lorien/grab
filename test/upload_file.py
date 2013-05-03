@@ -3,6 +3,7 @@ from unittest import TestCase
 from grab import Grab, UploadContent
 
 from test.util import GRAB_TRANSPORT
+from .tornado_util import SERVER
 
 FORMS = u"""
 <head>
@@ -36,6 +37,7 @@ FORMS = u"""
 
 class TestUploadContent(TestCase):
     def setUp(self):
+        SERVER.reset()
         # Create fake grab instance with fake response
         self.g = Grab(transport=GRAB_TRANSPORT)
         self.g.fake_response(FORMS, charset='utf-8')

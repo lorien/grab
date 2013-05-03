@@ -1,8 +1,8 @@
 # coding: utf-8
 from unittest import TestCase
 from grab import Grab, DataNotFound, GrabMisuseError
-from util import (FakeServerThread, BASE_URL, RESPONSE, REQUEST,
-                  ignore_transport, GRAB_TRANSPORT)
+from .util import ignore_transport, GRAB_TRANSPORT
+from .tornado_util import SERVER
 from urlparse import parse_qsl
 
 FORMS = u"""
@@ -42,7 +42,7 @@ POST_FORM = """
     <input type="text" name="name" />
     <input type="text" disabled value="some_text" name="disabled_text" />
 </form>
-""" % BASE_URL
+""" % SERVER.BASE_URL
 
 MULTIPLE_SUBMIT_FORM = """
 <form method="post">
@@ -68,10 +68,11 @@ DISABLED_RADIO_HTML = """
 
 class TestHtmlForms(TestCase):
     def setUp(self):
+        SERVER.reset()
+
         # Create fake grab instance with fake response
         self.g = Grab(transport=GRAB_TRANSPORT)
         self.g.fake_response(FORMS)
-        FakeServerThread().start()
 
     def test_choose_form(self):
         """
@@ -117,34 +118,34 @@ class TestHtmlForms(TestCase):
 
     def test_submit(self):
         g = Grab(transport=GRAB_TRANSPORT)
-        RESPONSE['get'] = POST_FORM
-        g.go(BASE_URL)
+        SERVER.RESPONSE['get'] = POST_FORM
+        g.go(SERVER.BASE_URL)
         g.set_input('name', 'Alex')
         g.submit()
-        self.assertEqualQueryString(REQUEST['post'], 'name=Alex&secret=123')
+        self.assertEqualQueryString(SERVER.REQUEST['post'], 'name=Alex&secret=123')
 
         # Default submit control
-        RESPONSE['get'] = MULTIPLE_SUBMIT_FORM
-        g.go(BASE_URL)
+        SERVER.RESPONSE['get'] = MULTIPLE_SUBMIT_FORM
+        g.go(SERVER.BASE_URL)
         g.submit()
-        self.assertEqualQueryString(REQUEST['post'], 'secret=123&submit1=submit1')
+        self.assertEqualQueryString(SERVER.REQUEST['post'], 'secret=123&submit1=submit1')
 
         # Selected submit control
-        RESPONSE['get'] = MULTIPLE_SUBMIT_FORM
-        g.go(BASE_URL)
+        SERVER.RESPONSE['get'] = MULTIPLE_SUBMIT_FORM
+        g.go(SERVER.BASE_URL)
         g.submit(submit_name='submit2')
-        self.assertEqualQueryString(REQUEST['post'], 'secret=123&submit2=submit2')
+        self.assertEqualQueryString(SERVER.REQUEST['post'], 'secret=123&submit2=submit2')
 
         # Default submit control if submit control name is invalid
-        RESPONSE['get'] = MULTIPLE_SUBMIT_FORM
-        g.go(BASE_URL)
+        SERVER.RESPONSE['get'] = MULTIPLE_SUBMIT_FORM
+        g.go(SERVER.BASE_URL)
         g.submit(submit_name='submit3')
-        self.assertEqualQueryString(REQUEST['post'], 'secret=123&submit1=submit1')
+        self.assertEqualQueryString(SERVER.REQUEST['post'], 'secret=123&submit1=submit1')
 
     def test_set_methods(self):
         g = Grab(transport=GRAB_TRANSPORT)
-        RESPONSE['get'] = FORMS
-        g.go(BASE_URL)
+        SERVER.RESPONSE['get'] = FORMS
+        g.go(SERVER.BASE_URL)
 
         self.assertEqual(g._lxml_form, None)
 
@@ -166,8 +167,8 @@ class TestHtmlForms(TestCase):
 
     def test_html_without_forms(self):
         g = Grab(transport=GRAB_TRANSPORT)
-        RESPONSE['get'] = NO_FORM_HTML
-        g.go(BASE_URL)
+        SERVER.RESPONSE['get'] = NO_FORM_HTML
+        g.go(SERVER.BASE_URL)
         self.assertRaises(DataNotFound, lambda: g.form)
 
     def test_disabled_radio(self):
@@ -176,6 +177,6 @@ class TestHtmlForms(TestCase):
         """
 
         g = Grab(transport=GRAB_TRANSPORT)
-        RESPONSE['get'] = DISABLED_RADIO_HTML
-        g.go(BASE_URL)
+        SERVER.RESPONSE['get'] = DISABLED_RADIO_HTML
+        g.go(SERVER.BASE_URL)
         g.submit(make_request=False)

@@ -1,29 +1,24 @@
 from unittest import TestCase
 
+from grab import Grab
 from grab.spider import Spider, Task, Data
-from util import (FakeServerThread, BASE_URL, RESPONSE, SLEEP, FAKE_SERVER_PORT,
-                  REQUEST)
+from .tornado_util import SERVER
 
-PORT1 = FAKE_SERVER_PORT + 1
-PORT2 = FAKE_SERVER_PORT + 2
-PORT3 = FAKE_SERVER_PORT + 3
-PROXY1 = 'localhost:%d' % PORT1
-PROXY2 = 'localhost:%d' % PORT2
-PROXY3 = 'localhost:%d' % PORT3
+PROXY1 = 'localhost:%d' % SERVER.PORT
+PROXY2 = 'localhost:%d' % SERVER.EXTRA_PORT1
+PROXY3 = 'localhost:%d' % SERVER.EXTRA_PORT2
 
 class SimpleSpider(Spider):
     def prepare(self):
         self.ports = set()
 
     def task_baz(self, grab, task):
+        print grab.request_headers
         self.ports.add(int(grab.response.headers.get('Listen-Port', 0)))
 
 class TestSpider(TestCase):
     def setUp(self):
-        FakeServerThread(port=FAKE_SERVER_PORT).start()
-        FakeServerThread(port=PORT1).start()
-        FakeServerThread(port=PORT2).start()
-        FakeServerThread(port=PORT3).start()
+        SERVER.reset()
 
     def test_setup_proxylist(self):
         content = '%s\n%s\n%s' % (PROXY1, PROXY2, PROXY3)
@@ -33,10 +28,10 @@ class TestSpider(TestCase):
         bot = SimpleSpider(thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
         bot.setup_queue()
-        bot.add_task(Task('baz', 'http://yandex.ru'))
+        bot.add_task(Task('baz', grab=Grab(url='http://yandex.ru', debug=True)))
         bot.run()
 
-        self.assertEqual(REQUEST['headers']['host'], 'yandex.ru')
+        self.assertEqual(SERVER.REQUEST['headers']['host'], 'yandex.ru')
         self.assertTrue(len(bot.ports) == 1)
 
         # By default auto_change is True
@@ -47,7 +42,7 @@ class TestSpider(TestCase):
             bot.add_task(Task('baz', 'http://yandex.ru'))
         bot.run()
 
-        self.assertEqual(REQUEST['headers']['host'], 'yandex.ru')
+        self.assertEqual(SERVER.REQUEST['headers']['host'], 'yandex.ru')
         self.assertTrue(len(bot.ports) > 1)
 
         # DO the same test with load_proxylist method
@@ -58,7 +53,7 @@ class TestSpider(TestCase):
             bot.add_task(Task('baz', 'http://yandex.ru'))
         bot.run()
 
-        self.assertEqual(REQUEST['headers']['host'], 'yandex.ru')
+        self.assertEqual(SERVER.REQUEST['headers']['host'], 'yandex.ru')
         self.assertTrue(len(bot.ports) > 1)
 
         # Disable auto_change
@@ -70,7 +65,7 @@ class TestSpider(TestCase):
             bot.add_task(Task('baz', 'http://yandex.ru'))
         bot.run()
 
-        self.assertEqual(REQUEST['headers']['host'], 'yandex.ru')
+        self.assertEqual(SERVER.REQUEST['headers']['host'], 'yandex.ru')
         self.assertTrue(len(bot.ports) == 1)
 
         # Disable auto_change
@@ -81,13 +76,13 @@ class TestSpider(TestCase):
                            auto_change=False, auto_init=False)
         bot.setup_queue()
         for x in xrange(10):
-            bot.add_task(Task('baz', BASE_URL))
+            bot.add_task(Task('baz', SERVER.BASE_URL))
         bot.run()
 
-        self.assertEqual(REQUEST['headers'].get('host'),
-                         '%s:%s' % ('localhost', FAKE_SERVER_PORT))
+        self.assertEqual(SERVER.REQUEST['headers'].get('host'),
+                         '%s:%s' % ('localhost', SERVER.PORT))
         self.assertTrue(len(bot.ports) == 1)
-        self.assertEqual(list(bot.ports)[0], FAKE_SERVER_PORT)
+        self.assertEqual(list(bot.ports)[0], SERVER.PORT)
 
     def test_setup_grab(self):
         # Simple test, one task
@@ -97,8 +92,8 @@ class TestSpider(TestCase):
         bot.add_task(Task('baz', 'http://yandex.ru'))
         bot.run()
 
-        self.assertEqual(REQUEST['headers']['host'], 'yandex.ru')
-        self.assertEqual(bot.ports, set([PORT1]))
+        self.assertEqual(SERVER.REQUEST['headers']['host'], 'yandex.ru')
+        self.assertEqual(bot.ports, set([SERVER.PORT]))
         self.assertTrue(len(bot.ports) == 1)
 
         content = '%s\n%s' % (PROXY1, PROXY2)
@@ -114,5 +109,5 @@ class TestSpider(TestCase):
         bot.setup_grab(proxy=PROXY3)
         bot.run()
 
-        self.assertEqual(REQUEST['headers']['host'], 'yandex.ru')
-        self.assertTrue(not PORT3 in bot.ports)
+        self.assertEqual(SERVER.REQUEST['headers']['host'], 'yandex.ru')
+        self.assertTrue(not SERVER.EXTRA_PORT2 in bot.ports)

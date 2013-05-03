@@ -5,6 +5,8 @@ import sys
 from optparse import OptionParser
 import logging
 
+from test.tornado_util import start_server, stop_server
+
 TEST_CASE_LIST = (
     'test.spider',
     #'tests.test_distributed_spider',
@@ -16,6 +18,7 @@ TEST_CASE_LIST = (
 EXTRA_TEST_LIST = (
     'test.spider_mongo_queue',
     'test.spider_redis_queue',
+    'test.spider_cache',
 )
 
 def main():
@@ -34,6 +37,8 @@ def main():
         __import__(path, None, None, ['foo'])
 
     if opts.test:
+        if opts.test.count('.') == 1:
+            __import__(opts.test, None, None, ['foo'])
         suite = loader.loadTestsFromName(opts.test)
     else:
         compiled_test_list = TEST_CASE_LIST
@@ -41,7 +46,11 @@ def main():
             compiled_test_list += EXTRA_TEST_LIST
         suite = loader.loadTestsFromNames(compiled_test_list)
     runner = unittest.TextTestRunner()
+
+    start_server()
     result = runner.run(suite)
+    stop_server()
+
     if result.wasSuccessful():
         return 0
     else:

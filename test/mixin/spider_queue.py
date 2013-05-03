@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from grab.spider import Spider, Task, Data
-from ..util import FakeServerThread, BASE_URL, RESPONSE, SLEEP
+from ..tornado_util import SERVER
 
 class SpiderQueueMixin(object):
     class SimpleSpider(Spider):
@@ -17,9 +17,10 @@ class SpiderQueueMixin(object):
         bot = self.SimpleSpider()
         #self.setup_queue(bot)
         bot.setup_queue(backend='memory')
+        bot.taskq.clear()
         requested_urls = {}
         for priority in (4, 2, 1, 5):
-            url = BASE_URL + '?p=%d' % priority
+            url = SERVER.BASE_URL + '?p=%d' % priority
             requested_urls[priority] = url
             bot.add_task(Task('page', url=url,
                               priority=priority))
@@ -31,8 +32,9 @@ class SpiderQueueMixin(object):
     def test_queue_length(self):
         bot = self.SimpleSpider()
         self.setup_queue(bot)
+        bot.taskq.clear()
         for x in xrange(5):
-            bot.add_task(Task('page', url=BASE_URL))
+            bot.add_task(Task('page', url=SERVER.BASE_URL))
         self.assertEqual(5, bot.taskq.size())
         bot.run()
         self.assertEqual(0, bot.taskq.size())

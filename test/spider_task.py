@@ -3,7 +3,8 @@ from unittest import TestCase
 import grab.spider.base
 from grab import Grab
 from grab.spider import Spider, Task, Data, SpiderMisuseError
-from util import FakeServerThread, BASE_URL, RESPONSE, SLEEP, REQUEST
+
+from .tornado_util import SERVER
 
 class TestSpider(TestCase):
 
@@ -17,13 +18,13 @@ class TestSpider(TestCase):
             self.SAVED_ITEM = item
            
     def setUp(self):
-        FakeServerThread().start()
+        SERVER.reset()
 
     def test_task_priority(self):
-        #RESPONSE['get'] = 'Hello spider!'
-        #SLEEP['get'] = 0
+        #SERVER.RESPONSE['get'] = 'Hello spider!'
+        #SERVER.SLEEP['get'] = 0
         #sp = self.SimpleSpider()
-        #sp.add_task(Task('baz', BASE_URL))
+        #sp.add_task(Task('baz', SERVER.BASE_URL))
         #sp.run()
         #self.assertEqual('Hello spider!', sp.SAVED_ITEM)
 
@@ -96,10 +97,10 @@ class TestSpider(TestCase):
         bot.setup_queue()
 
         g = Grab()
-        g.setup(url=BASE_URL)
+        g.setup(url=SERVER.BASE_URL)
         g.setup(user_agent='Foo')
 
         task = Task('baz', grab=g)
         bot.add_task(task.clone())
         bot.run()
-        self.assertEqual(REQUEST['headers']['User-Agent'], 'Foo')
+        self.assertEqual(SERVER.REQUEST['headers']['User-Agent'], 'Foo')

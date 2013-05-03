@@ -2,8 +2,8 @@
 from unittest import TestCase
 from grab import Grab, DataNotFound
 
-from test.util import (GRAB_TRANSPORT, RESPONSE, BASE_URL,
-                       FakeServerThread)
+from .util import GRAB_TRANSPORT
+from .tornado_util import SERVER
 
 HTML = u"""
 <html>
@@ -25,9 +25,10 @@ XML = """
 
 class DocExtensionTest(TestCase):
     def setUp(self):
+        SERVER.reset()
+
         # Create fake grab instance with fake response
         self.g = Grab(HTML, transport=GRAB_TRANSPORT)
-        FakeServerThread().start()
 
     def test_extension_in_general(self):
         self.assertTrue(self.g.doc)

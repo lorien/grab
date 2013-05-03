@@ -8,8 +8,10 @@ import logging
 from test.util import prepare_test_environment, clear_test_environment
 import test.util
 from grab.tools.watch import watch
+from test.tornado_util import start_server, stop_server
 
 TEST_CASE_LIST = (
+    # Main features
     'test.base_interface',
     'test.post_feature',
     'test.grab_proxy',
@@ -18,28 +20,27 @@ TEST_CASE_LIST = (
     'test.cookies',
     'test.response_class',
     'test.charset_issue',
-    # test server
-    'test.fake_server',
-    # tools
+    'test.grab_pickle',
+    # *** Tornado Test Server
+    'test.tornado_server',
+    # *** grab.tools
     'test.text_tools',
     'test.lxml_tools',
     'test.tools_account',
     'test.tools_control',
-    # extension sub-system
+    # *** Extension sub-system
     'test.extension',
-    # extensions
+    # *** Extensions
     'test.text_extension',
     'test.lxml_extension',
     'test.form_extension',
     'test.doc_extension',
-    # test items
+    # *** Item
     'test.item',
-    # test selector
+    # *** Selector
     'test.selector',
-    # idn
+    # *** IDN
     'test.i18n',
-    # flask
-    #'test.test_flask',
 )
 
 
@@ -61,11 +62,17 @@ def main():
 
     loader = unittest.TestLoader()
     if opts.test:
+        if opts.test.count('.') == 1:
+            __import__(opts.test, None, None, ['foo'])
         suite = loader.loadTestsFromName(opts.test)
     else:
         suite = loader.loadTestsFromNames(TEST_CASE_LIST)
     runner = unittest.TextTestRunner()
+
+    start_server()
     result = runner.run(suite)
+    stop_server()
+
     clear_test_environment()
     if result.wasSuccessful():
         return 0

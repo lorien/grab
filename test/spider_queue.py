@@ -1,12 +1,12 @@
 from unittest import TestCase
 
 from grab.spider import Spider, Task, Data
-from util import FakeServerThread, BASE_URL, RESPONSE, SLEEP
+from .tornado_util import SERVER
 from mixin.spider_queue import SpiderQueueMixin
 
 class BasicSpiderTestCase(TestCase, SpiderQueueMixin):
     def setUp(self):
-        FakeServerThread().start()
+        SERVER.reset()
 
     def setup_queue(self, bot):
         bot.setup_queue(backend='memory')
