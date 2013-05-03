@@ -21,6 +21,7 @@ TEST_CASE_LIST = (
     'test.response_class',
     'test.charset_issue',
     'test.grab_pickle',
+    'test.grab_transport',
     # *** Tornado Test Server
     'test.tornado_server',
     # *** grab.tools
@@ -49,7 +50,7 @@ def main():
     parser = OptionParser()
     parser.add_option('-t', '--test', help='Run only specified tests')
     parser.add_option('--transport', help='Test specified transport',
-                      default='curl.CurlTransport')
+                      default='grab.transport.curl.CurlTransport')
     opts, args = parser.parse_args()
 
     test.util.GRAB_TRANSPORT = opts.transport

@@ -208,7 +208,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     Public methods
     """
 
-    def __init__(self, response_body=None, transport='curl.CurlTransport',
+    def __init__(self, response_body=None, transport='grab.transport.curl.CurlTransport',
                  **kwargs):
         """
         Create Grab instance
@@ -220,11 +220,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.trigger_extensions('init')
         self._request_prepared = False
 
-        self.transport_name = transport
-        mod_name, cls_name = transport.split('.')
-        mod = __import__('grab.transport.%s' % mod_name, globals(),
-                         locals(), ['foo'])
-        self.transport = getattr(mod, cls_name)()
+        self.setup_transport(transport)
 
         self.reset()
         self.proxylist = None
@@ -233,6 +229,18 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.clone_counter = 0
         if response_body is not None:
             self.fake_response(response_body)
+
+    def setup_transport(self, transport_param):
+        self.transport_param = transport_param
+        if isinstance(transport_param, basestring):
+            mod_path, cls_name = transport_param.rsplit('.', 1)
+            mod = __import__(mod_path, globals(), locals(), ['foo'])
+            self.transport = getattr(mod, cls_name)()
+        elif callable(transport_param):
+            self.transport = transport_param()
+        else:
+            raise GrabMisuseError('Option `transport` should be string or callable. '\
+                                  'Got %s' % type(transport_param))
 
     def reset(self):
         """
@@ -261,7 +269,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         :param **kwargs: overrides settings of cloned grab instance
         """
 
-        g = Grab(transport=self.transport_name)
+        g = Grab(transport=self.transport_param)
         g.config = self.dump_config()
 
         if self.response is not None:
