@@ -10,7 +10,7 @@ import test.util
 from grab.tools.watch import watch
 from test.tornado_util import start_server, stop_server
 
-TEST_CASE_LIST = (
+GRAB_TEST_LIST = (
     # Main features
     'test.base_interface',
     'test.post_feature',
@@ -45,6 +45,22 @@ TEST_CASE_LIST = (
     'test.i18n',
 )
 
+SPIDER_TEST_LIST = (
+    'test.spider',
+    #'tests.test_distributed_spider',
+    'test.spider_task',
+    'test.spider_proxy',
+    'test.spider_queue',
+)
+
+GRAB_EXTRA_TEST_LIST = ()
+
+SPIDER_EXTRA_TEST_LIST = (
+    'test.spider_mongo_queue',
+    'test.spider_redis_queue',
+    'test.spider_cache',
+)
+
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
@@ -52,23 +68,48 @@ def main():
     parser.add_option('-t', '--test', help='Run only specified tests')
     parser.add_option('--transport', help='Test specified transport',
                       default='grab.transport.curl.CurlTransport')
+    parser.add_option('--extra', action='store_true',
+                      default=False, help='Run extra tests for specific backends')
+    parser.add_option('--test-grab', action='store_true',
+                      default=False, help='Run tests for Grab::Spider')
+    parser.add_option('--test-spider', action='store_true',
+                      default=False, help='Run tests for Grab')
+    parser.add_option('--test-all', action='store_true',
+                      default=False, help='Run tests for both Grab and Grab::Spider')
     opts, args = parser.parse_args()
 
     test.util.GRAB_TRANSPORT = opts.transport
 
     prepare_test_environment()
+    test_list = []
+
+    if opts.test_all:
+        test_list += GRAB_TEST_LIST
+        test_list += SPIDER_TEST_LIST
+        if opts.extra:
+            test_list += GRAB_EXTRA_TEST_LIST
+            test_list += SPIDER_EXTRA_TEST_LIST
+
+    if opts.test_grab:
+        test_list += GRAB_TEST_LIST
+        if opts.extra:
+            test_list += GRAB_EXTRA_TEST_LIST
+
+    if opts.test_spider:
+        test_list += SPIDER_TEST_LIST
+        if opts.extra:
+            test_list += SPIDER_EXTRA_TEST_LIST
+
+    if opts.test:
+        test_list += [opts.test]
+
     # Check tests integrity
     # Ensure that all test modules are imported correctly
-    for path in TEST_CASE_LIST:
+    for path in test_list:
         __import__(path, None, None, ['foo'])
 
     loader = unittest.TestLoader()
-    if opts.test:
-        if opts.test.count('.') == 1:
-            __import__(opts.test, None, None, ['foo'])
-        suite = loader.loadTestsFromName(opts.test)
-    else:
-        suite = loader.loadTestsFromNames(TEST_CASE_LIST)
+    suite = loader.loadTestsFromNames(test_list)
     runner = unittest.TextTestRunner()
 
     start_server()
@@ -77,11 +118,10 @@ def main():
 
     clear_test_environment()
     if result.wasSuccessful():
-        return 0
+        sys.exit(0)
     else:
-        return -1
+        sys.exit(1)
 
 
 if __name__ == '__main__':
-    watch()
     main()

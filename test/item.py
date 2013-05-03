@@ -92,4 +92,4 @@ class TestItems(TestCase):
         self.assertEquals('abc', player.comment)
         self.assertEquals('abc', player.comment_cdata)
 
-        with self.assertRaises(IndexError): player.data_not_found
+        self.assertRaises(DataNotFound, lambda: player.data_not_found)

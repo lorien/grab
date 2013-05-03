@@ -21,3 +21,4 @@ syntax:regexp
 ^data/
 ^ghost$
 ^var/
+^\.tox/
