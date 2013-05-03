@@ -241,9 +241,8 @@ class RequestsTransport(object):
             if cfg['proxy'] is not None:
                 kwargs['proxies'] = {'http': cfg['proxy'],
                                      'https': cfg['proxy']}
-            self._requests_response = func(cfg['url'],
-                                           headers=cfg['headers'],
-                                           **kwargs)
+            self._requests_response = func(
+                cfg['url'], headers=cfg['headers'], **kwargs)
         except Exception, ex:
             raise GrabError(0, unicode(ex))
 
@@ -257,6 +256,13 @@ class RequestsTransport(object):
         #self.response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
         response = Response()
         response.head = ''
+        #if grab.config['body_max_size'] is not None:
+            #chunks = []
+            #read_size = 0
+            #for chunk in self._requests_responsek
+        #else:
+            #response.body = self._requests_response.content
+
         response.body = self._requests_response.content
         response.code = self._requests_response.status_code
         response.headers = self._requests_response.headers

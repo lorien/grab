@@ -64,7 +64,7 @@ class TestPostFeature(TestCase):
         args2 = set([(x, y[0]) for x, y in parse_qsl(qs2)])
         self.assertEqual(args1, args2)
 
-    @ignore_transport('requests.RequestsTransport')
+    @ignore_transport('grab.transport.requests.RequestsTransport')
     def test_multipart_post(self):
         g = Grab(url=SERVER.BASE_URL, debug_post=True, transport=GRAB_TRANSPORT)
         

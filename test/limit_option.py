@@ -9,7 +9,7 @@ class TestContentLimit(TestCase):
     def setUp(self):
         SERVER.reset()
 
-    @ignore_transport('requests.RequestsTransport')
+    @ignore_transport('grab.transport.requests.RequestsTransport')
     def test_nobody(self):
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(nobody=True)
@@ -18,11 +18,11 @@ class TestContentLimit(TestCase):
         self.assertEqual('', g.response.body)
         self.assertTrue(len(g.response.head) > 0)
 
-    @ignore_transport('requests.RequestsTransport')
+    @ignore_transport('grab.transport.requests.RequestsTransport')
     def test_body_maxsize(self):
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(body_maxsize=100)
-        SERVER.RESPONSE['get'] = 'x' * 10 ** 6
+        SERVER.RESPONSE['get'] = 'x' * 1024 * 1024
         g.go(SERVER.BASE_URL)
         # Should be less 50kb
         self.assertTrue(len(g.response.body) < 50000)
