@@ -6,6 +6,7 @@ from __future__ import absolute_import
 from .base import QueueInterface
 from qr import PriorityQueue
 import Queue
+import random
 
 class QueueBackend(QueueInterface):
     def __init__(self, prefix='spider_task', **kwargs):
@@ -13,6 +14,11 @@ class QueueBackend(QueueInterface):
         self.queue_object = PriorityQueue(prefix)
 
     def put(self, task, priority):
+        # Add attribute with random value
+        # This is required because qr library
+        # does not allow to store multiple values with same hash
+        # in the PriorityQueue
+        task._rnd = random.random()
         self.queue_object.push(task, priority)
 
     def get(self, timeout):
