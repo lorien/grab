@@ -1,6 +1,7 @@
 import os
 import shutil
 import tempfile
+import functools
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -35,6 +36,7 @@ def ignore_transport(transport):
     """
 
     def wrapper(func):
+        @functools.wraps(func)
         def test_method(*args, **kwargs):
             if GRAB_TRANSPORT == transport:
                 return
@@ -51,6 +53,7 @@ def only_transport(transport):
     """
 
     def wrapper(func):
+        @functools.wraps(func)
         def test_method(*args, **kwargs):
             if GRAB_TRANSPORT == transport:
                 func(*args, **kwargs)

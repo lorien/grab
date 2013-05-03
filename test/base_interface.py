@@ -31,7 +31,7 @@ class TestGrab(TestCase):
         self.assertRaises(GrabMisuseError,
             lambda: g.setup(save_the_word=True))
 
-    @only_transport('curl.CurlTransport')
+    @only_transport('grab.transport.curl.CurlTransport')
     def test_empty_useragent_pycurl(self):
         g = Grab(transport=GRAB_TRANSPORT)
 
@@ -145,66 +145,6 @@ class TestGrab(TestCase):
         print '((('
         self.assertEqual(blocks[0], porno.strip())
         #self.assertEqual(blocks[1], redis.strip())
-
-    def test_meta_refresh_redirect(self):
-        # By default meta-redirect is off
-        url = SERVER.BASE_URL + '/foo'
-        SERVER.RESPONSE_ONCE['get'] = '<meta http-equiv="refresh" content="5; url=%s">' % url
-        g = Grab(transport=GRAB_TRANSPORT)
-        g.go(SERVER.BASE_URL + '/')
-        self.assertEqual(SERVER.REQUEST['path'], '/')
-        self.assertEqual(g.response.url, SERVER.BASE_URL + '/')
-
-        # Now test meta-auto-redirect
-        SERVER.RESPONSE_ONCE['get'] = '<meta http-equiv="refresh" content="5; url=%s">' % url
-        g = Grab(transport=GRAB_TRANSPORT)
-        g.setup(follow_refresh=True)
-        g.go(SERVER.BASE_URL)
-        self.assertEqual(SERVER.REQUEST['path'], '/foo')
-        self.assertEqual(g.response.url, SERVER.BASE_URL + '/foo')
-
-    @only_transport('curl.CurlTransport')
-    def test_redirect_limit(self):
-        class Scope(object):
-            counter = None
-
-            def callback(self, server):
-                if self.counter:
-                    server.set_status(301)
-                    server.set_header('Location', SERVER.BASE_URL)
-                else:
-                    server.set_status(200)
-                self.counter -= 1
-
-        scope = Scope()
-        scope.counter = 10
-        g = Grab(transport=GRAB_TRANSPORT)
-        g.setup(redirect_limit=5)
-
-        SERVER.RESPONSE['get_callback'] = scope.callback
-
-        try:
-            try:
-                g.go(SERVER.BASE_URL)
-            except Exception, ex:
-                pass
-            self.assert_(ex is not None)
-            self.assertEqual(ex.errno, 47)
-
-            scope.counter = 10
-            g.setup(redirect_limit=20)
-
-            try:
-                g.go(SERVER.BASE_URL)
-            except Exception, ex:
-                pass
-            else:
-                ex = None
-            self.assert_(ex is None)
-
-        finally:
-            # Clean up test environment
-            SERVER.RESPONSE['get_callback'] = None
 
     def test_default_content_for_fake_response(self):
         content = '<strong>test</strong>'

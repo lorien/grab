@@ -26,6 +26,7 @@ TEST_CASE_LIST = (
     'test.tornado_server',
     # *** grab.tools
     'test.text_tools',
+    'test.tools_html',
     'test.lxml_tools',
     'test.tools_account',
     'test.tools_control',

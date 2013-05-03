@@ -45,14 +45,22 @@ class GrabMisuseError(GrabError):
 
 class GrabConnectionError(GrabError):
     """
-    Raised then it is not possible to establish network connection.
+    Raised when it is not possible to establish network connection.
 
     In curl transport it is CURLE_COULDNT_CONNECT (7)
     """
 
+
 class GrabAuthError(GrabError):
     """
-    Raised then remote server denies authentication credentials.
+    Raised when remote server denies authentication credentials.
 
     In curl transport it is CURLE_COULDNT_CONNECT (67)
+    """
+
+
+class GrabTooManyRedirectsError(GrabError):
+    """
+    Raised when Grab reached max. allowd number of redirects for
+    one request.
     """

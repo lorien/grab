@@ -147,6 +147,7 @@ def default_config():
         # Redirects
         follow_refresh = False,
         follow_location = True,
+        refresh_redirect_count = 0,
         redirect_limit = 10,
 
         # Authentication
@@ -478,7 +479,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         # It's important to delete old POST data after request is performed.
         # If POST data is not cleared then next request will try to use them again!
-
+        old_refresh_count = self.config['refresh_redirect_count']
         self.reset_temporary_options()
 
         if prepare_response_func:
@@ -520,8 +521,14 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         # TODO: check max redirect count
         if self.config['follow_refresh']:
             url = find_refresh_url(self.response.unicode_body())
-            if url:
-                return self.request(url=url)
+            print 'URL', url
+            if url is not None:
+                inc_count = old_refresh_count + 1
+                if inc_count > self.config['redirect_limit']:
+                    raise error.GrabTooManyRedirectsError()
+                else:
+                    print inc_count
+                    return self.request(url=url, refresh_redirect_count=inc_count)
 
         return None
 
@@ -530,6 +537,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.config['multipart_post'] = None
         self.config['method'] = None
         self.config['body_storage_filename'] = None
+        self.config['refresh_redirect_count'] = 0
 
     def save_failed_dump(self):
         """
