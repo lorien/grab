@@ -433,6 +433,16 @@ class CurlTransport(object):
         state['curl'] = None
         return state
 
+    def __setstate__(self, state):
+        """
+        Create pycurl instance after Grag instance was restored
+        from pickled state.
+        """
+
+        state['curl'] = pycurl.Curl()
+        self.__dict__ = state
+
+
 
 
 #from ..base import BaseGrab
