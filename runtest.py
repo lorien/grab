@@ -43,6 +43,8 @@ GRAB_TEST_LIST = (
     'test.selector',
     # *** IDN
     'test.i18n',
+    # *** Mock transport
+    'test.grab_transport_mock',
 )
 
 SPIDER_TEST_LIST = (
