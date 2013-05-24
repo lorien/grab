@@ -3,7 +3,7 @@
 # License: BSD
 from datetime import datetime
 import logging
-#from ..base import UploadContent, UploadFile
+from ..base import Grab
 #from .. import error
 from ..response import Response
 #from ..tools.http import encode_cookies, urlencode, normalize_unicode,\
@@ -48,7 +48,7 @@ class MockTransport(object):
         response = Response()
         
         try:
-            response.body = MOCK_REGISTRY[self.request_url]
+            response.body = MOCK_REGISTRY[self.request_url]['body']
         except KeyError:
             raise GrabMockNotFoundError(
                 'Mock registry does not have information about '\
@@ -74,3 +74,11 @@ class MockTransport(object):
 
     def extract_cookies(self):
         return {}
+
+
+class GrabMock(Grab):
+    def __init__(self, response_body=None, transport='grab.transport.curl.CurlTransport',
+                 **kwargs):
+        super(GrabMock, self).__init__(response_body=response_body,
+                                       transport='grab.transport.mock.MockTransport',
+                                       **kwargs)

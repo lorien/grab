@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from grab import Grab
-from grab.transport.mock import GrabMockNotFoundError, MOCK_REGISTRY
+from grab.transport.mock import GrabMock, GrabMockNotFoundError, MOCK_REGISTRY
 from .tornado_util import SERVER
 
 MOCK_TRANSPORT = 'grab.transport.mock.MockTransport'
@@ -20,7 +20,13 @@ class GrabTransortMockTestCase(TestCase):
 
     def test_registry(self):
         g = Grab(transport=MOCK_TRANSPORT)
-        MOCK_REGISTRY['http://yandex.ru/'] = 'foo'
+        MOCK_REGISTRY['http://yandex.ru/'] = {'body': 'foo'}
         g.go('http://yandex.ru/')
         self.assertEqual(g.response.body, 'foo')
         self.assertEqual(g.response.code, 200)
+
+    def test_grabmock(self):
+        g = GrabMock()
+        MOCK_REGISTRY['http://yandex.ru/'] = {'body': 'foo'}
+        g.go('http://yandex.ru/')
+        self.assertEqual(g.response.body, 'foo')
