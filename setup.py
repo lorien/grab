@@ -9,7 +9,7 @@ setup(
     description = 'Site Scraping Framework',
     long_description = open('README.rst').read(),
     url = 'http://bitbucket.org/lorien/grab/',
-    author = 'Grigoriy Petukhov',
+    author = 'Grigory Petukhov',
     author_email = 'lorien@lorien.name',
 
     packages = find_packages(),
