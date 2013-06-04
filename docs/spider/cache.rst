@@ -1,34 +1,89 @@
 .. _spider_cache:
 
-====================================
-Система кэширования сетевых запросов
-====================================
+=======================
+The network cache layer
+=======================
 
-В целях ускорения тестирования паука в процессе разработки, а также ускорения повторного парсинга данных, была разработана система кэширования. В данный момент есть ограничение - только GET запросы могут быть закешированными. Важно понимать что кэш в Spider это не полноценный http-прокси-сервер это лишь средство для отладки. Хотя стоит заметить, что даже в таком примитвной реализации система кэширования в большинстве случаев позволяет успешно использовать закэшированные данные для повторного парсинга в случае изменения логики обработки данных.
+The network cache layer was developed by two reasons:
 
-Бэкенды системы кэширования
----------------------------
+* to speed up the process of testing and debugging the spider
+* to speed up the scraping of pages that already were processed some time ago
 
-Кэш в Spider разработан в виде отдельньго слоя для того, чтобы можно было подключать различные базы данных. В данный момент доступна только одна реализация кэша - хранение данных в mongodb
+The cache has limitation. It can store only pages which was downloaded with GET request.
+The network cache layer is not full-featured proxy service, it is very simple. But even being
+such simple the network layer helps very much.
 
-Исползование кэша
------------------
+Cache backend
+=============
 
-Для того, чтобы паук мог искать запрашиваемые документы в кэше и сохранять в кэш, полученные данные, нужно вызывать метод `setup_cache` до начала работы паука::
+The cache layer allows to use different storages for storing the cached pages. Now three backends are available: mongodb, mysql and tokyo cabinet.
+
+How to enable the cache
+=======================
+
+To allow the spider to search requested documents in the cache and to save received data into cache you need to call `setup_cache` method before spider started working::
 
     bot = ExampleSpider()
-    bot.setup_cache(database='some-database')
+    bot.setup_cache(...)
     bot.run()
 
-Вышенаписанный код активирует кэш, документы будут искаться и сохраняться в mongodb базе данных с именем 'some-datbase'. Имя коллекции с документами: "cache".
+The `setup_cache` method requires two arguments:
 
-Есть несколько настроек для регулирования работы кэша:
+    :param backend: type of storage: "mongo", "mysql" or "tokyo_cabinet"
+    :param database: name of mongo collection, mysql database or tokyo cabinet file
 
-:backend: бэкенд кэша, сейчас ничего кроме "mongo" не работает
-:database: имя mongodb базы данных
-:use_compression: использование gzip для сжатия данных, перед помещением их в кэш.
+Any other arguments you pass to the `setup_cache` method will goes to the backend's specific
+function which creates connection to the backend. For better understanding how it works see
+the source code of the specific cache backend.
 
-Сжатие кэшируемых данных
-------------------------
+Mongodb cache
+=============
 
-По-умолчанию, сжатие включено. Сжатие позволяет на порядок уменьшить размер места в базе данных, необходимого для хранения закешированных документов. Сжатие снижает скорость работы паука, но не намного.
+To enable mongodb cache use::
+
+    bot.setup_cache(backend='mongo', database='imdb')
+
+This code instruct spider to use `cache` collection in mongo database called `imdb`.
+
+MySQL cache
+===========
+
+To enable mongodb cache use::
+
+    bot.setup_cache(backend='mysql', database='imdb')
+
+This code instruct spider to use `cache` table in mysql database called `imdb`.
+
+You can additional arguments, any arguments which are valid for `MySQLdb.connect` method. Here
+is example of passing username and password::
+
+    bot.setup_cache(backend='mysql', database='imdb',
+                    user='root', passwd='123')
+
+Tokyo Cabinet Cache
+===================
+
+To enable tokyo cabinet cache use::
+
+    bot.setup_cache(backend='tokyo_cabinet', database='/path/to/file')
+
+This code instruct spider to use file located at /path/to/file as tokyo cabinet database.
+
+Cache compression
+=================
+
+All documents which are stored into the cache are compressed with zlib library.
+
+Control the cache usage
+=======================
+
+When you create new network task you can control how it will be handled by cache layer. By-default
+the network requests is not performed if corresponding record was found in the cache. Also by-default result of any network request is saved into cache.
+
+If you need to force the real network request and update the cache::
+
+    >>> Task('some-name, url='some_url', refresh_cache=True)
+
+If you need to force the real network request and not update the cached version::
+
+    >>> Task('some-name, url='some_url', disable_cache=True)
