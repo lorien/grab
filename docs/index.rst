@@ -31,8 +31,8 @@ Grab User Guide
 .. toctree::
     :maxdepth: 2
 
-    grab/tutorial
     grab/installation
+    grab/quickstart
     grab/customization
     grab/debugging
     grab/options

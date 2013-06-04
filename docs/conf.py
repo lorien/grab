@@ -82,11 +82,11 @@ exclude_patterns = ['_build']
 # output. They are ignored by default.
 #show_authors = False
 
-# The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
-
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
+
+# If false, no module index is generated.
+html_use_modindex = False
 
 
 # -- Options for HTML output ---------------------------------------------------
@@ -213,6 +213,9 @@ latex_documents = [
 #latex_appendices = []
 
 # If false, no module index is generated.
+latex_use_modindex = False
+
+# If false, no module index is generated.
 #latex_domain_indices = True
 
 
@@ -228,3 +231,21 @@ man_pages = [
 sys.path.append(os.path.abspath('_themes'))
 html_theme_path = ['_themes']
 html_theme = 'flask'
+
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = 'sphinx'
+
+# fall back if theme is not there
+try:
+    __import__('flask_theme_support')
+except ImportError, e:
+    print '-' * 74
+    print 'Warning: Flask themes unavailable.  Building with default theme'
+    print 'If you want the Flask themes, run this command and build again:'
+    print
+    print '  git submodule update --init'
+    print '-' * 74
+
+    pygments_style = 'tango'
+    html_theme = 'default'
+    html_theme_options = {}
