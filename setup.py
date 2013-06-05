@@ -14,6 +14,7 @@ setup(
 
     packages = find_packages(),
     include_package_data = True,
+    scripts = ['bin/grab'],
 
     license = "BSD",
     keywords = "pycurl curl network parsing grabbing scraping lxml xpath",
