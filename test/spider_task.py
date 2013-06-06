@@ -12,10 +12,13 @@ class TestSpider(TestCase):
         base_url = 'http://google.com'
 
         def task_baz(self, grab, task):
-            return Data('foo', grab.response.body)
+            return Data('foo', {'baz': 'bar'}, zoo='foo')
 
-        def data_foo(self, item):
-            self.SAVED_ITEM = item
+        def data_foo(self, item, zoo=None):
+            if zoo is None:
+                self.SAVED_ITEM = item
+            else:
+                self.SAVED_ITEM = {'item': item, 'zoo': zoo}
            
     def setUp(self):
         SERVER.reset()
@@ -104,3 +107,13 @@ class TestSpider(TestCase):
         bot.add_task(task.clone())
         bot.run()
         self.assertEqual(SERVER.REQUEST['headers']['User-Agent'], 'Foo')
+
+    def test_task_data(self):
+        bot = self.SimpleSpider()
+        bot.setup_queue()
+        task = Task('baz', url=SERVER.BASE_URL)
+        bot.add_task(task)
+        bot.run()
+
+        self.assertEqual(bot.SAVED_ITEM['zoo'], 'foo')
+        self.assertEqual(bot.SAVED_ITEM['none'], None)

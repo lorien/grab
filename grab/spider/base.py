@@ -497,7 +497,7 @@ class Spider(SpiderPattern, SpiderStat):
             except AttributeError:
                 raise SpiderError('No content handler for %s item' % result.name)
             try:
-                handler(result.item)
+                handler(result)
             except Exception, ex:
                 self.process_handler_error(handler_name, ex, task)
         elif result is None:
