@@ -47,10 +47,13 @@ class CacheBackend(object):
         self.db = tc_open(database, compress=use_compression)
         self.use_compression = use_compression
 
-    def get_item(self, url):
+    def get_item(self, url, timeout=None):
         """
         Returned item should have specific interface. See module docstring.
         """
+
+        if timeout is None:
+            raise NotImplemented('timeout option for tokyo cabinet cache backend is not supported')
         try:
             dump = self.db[self.build_key(url)]
         except KeyError:

@@ -60,7 +60,8 @@ GRAB_EXTRA_TEST_LIST = ()
 SPIDER_EXTRA_TEST_LIST = (
     'test.spider_mongo_queue',
     'test.spider_redis_queue',
-    'test.spider_cache',
+    'test.spider_mongo_cache',
+    'test.spider_mysql_cache',
 )
 
 

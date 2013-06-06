@@ -420,7 +420,8 @@ class Spider(SpiderPattern, SpiderStat):
             return True
 
     def load_task_from_cache(self, transport, task, grab, grab_config_backup):
-        cache_item = self.cache.get_item(grab.config['url'])
+        cache_item = self.cache.get_item(grab.config['url'],
+                                         timeout=task.cache_timeout)
         if cache_item is None:
             return None
         else:

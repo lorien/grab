@@ -2,7 +2,7 @@ from unittest import TestCase
 import pymongo
 
 from grab.spider import Spider, Task
-from .tornado_util import SERVER
+from ..tornado_util import SERVER
 
 class ContentGenerator():
     def __init__(self):
@@ -30,15 +30,14 @@ class SimpleSpider(Spider):
         self.resp_counters = []
 
     def process_counter(self, grab):
-        counter = grab.doc.select('//span[@id="counter"]').number(default=None)
+        counter = grab.doc.select('//span[@id="counter"]').number()
         self.resp_counters.append(counter)
 
     def task_one(self, grab, task):
         self.process_counter(grab)
 
     def task_foo(self, grab, task):
-        counter = grab.doc.select('//span[@id="counter"]').number(default=None)
-        self.resp_counters.append(counter)
+        self.process_counter(grab)
 
         if not task.get('secondary'):
             grab.setup(url=SERVER.BASE_URL)
@@ -49,13 +48,14 @@ class SimpleSpider(Spider):
                            priority=count + 2)
 
 
-class TestSpiderCache(TestCase):
+class SpiderCacheMixin(object):
     def setUp(self):
         SERVER.reset()
         SERVER.RESPONSE['get'] = ContentGenerator().build_html
 
     def test_counter(self):
         bot = SimpleSpider()
+        #self.setup_cache(bot)
         bot.setup_cache(backend='mysql', database='spider_test',
                         user='web', passwd='web-**')
         bot.cache.clear()
@@ -82,15 +82,28 @@ class TestSpiderCache(TestCase):
                 pass
 
         bot = Bug1Spider()
-        bot.setup_cache(backend='mongo', database='spider_test')
+        self.setup_cache(bot)
+        #bot.setup_cache(backend='mongo', database='spider_test')
         bot.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('foo', SERVER.BASE_URL))
         bot.run()
 
-    def test_cache(self):
+    ##def test_mysql_cache(self):
+        ##bot = SimpleSpider()
+        ##self.setup_cache(bot)
+        ###bot.setup_cache(backend='mysql', database='spider_test',
+                        ###user='web', passwd='web-**')
+        ##bot.cache.clear()
+        ##bot.setup_queue()
+        ##bot.add_task(Task('foo', SERVER.BASE_URL))
+        ##bot.run()
+        ##self.assertEqual([1, 1, 1, 2], bot.resp_counters)
+
+    def test_mongo_cache(self):
         bot = SimpleSpider()
-        bot.setup_cache(backend='mongo', database='spider_test')
+        #bot.setup_cache(backend='mongo', database='spider_test')
+        self.setup_cache(bot)
         bot.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('foo', SERVER.BASE_URL))
@@ -99,7 +112,8 @@ class TestSpiderCache(TestCase):
 
     def test_timeout(self):
         bot = SimpleSpider()
-        bot.setup_cache(backend='mongo', database='spider_test')
+        #bot.setup_cache(backend='mongo', database='spider_test')
+        self.setup_cache(bot)
         bot.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('one', SERVER.BASE_URL))
@@ -108,7 +122,8 @@ class TestSpiderCache(TestCase):
         self.assertEqual([1, 1], bot.resp_counters)
 
         bot = SimpleSpider()
-        bot.setup_cache(backend='mongo', database='spider_test')
+        #bot.setup_cache(backend='mongo', database='spider_test')
+        self.setup_cache(bot)
         # DO not clear the cache
         #bot.cache.clear()
         bot.setup_queue()

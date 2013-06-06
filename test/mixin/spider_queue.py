@@ -15,8 +15,7 @@ class SpiderQueueMixin(object):
 
     def test_basic_priority(self):
         bot = self.SimpleSpider()
-        #self.setup_queue(bot)
-        bot.setup_queue(backend='memory')
+        self.setup_queue(bot)
         bot.taskq.clear()
         requested_urls = {}
         for priority in (4, 2, 1, 5):

@@ -18,6 +18,7 @@ class Task(BaseTask):
                  network_try_count=0, task_try_count=0, 
                  disable_cache=False, refresh_cache=False,
                  valid_status=[], use_proxylist=True,
+                 cache_timeout=None,
                  **kwargs):
         """
         Create `Task` object.
@@ -59,6 +60,7 @@ class Task(BaseTask):
             :param valid_status: extra status codes which counts as valid
             :param use_proxylist: it means to use proxylist which was configured
                 via `setup_proxylist` method of spider
+            :param cache_timeout: maximum age (in seconds) of cache record to be valid
 
             Any non-standard named arguments passed to `Task` constructor will be saved as
             attributes of the object. You can get their values later as attributes or with
@@ -93,6 +95,7 @@ class Task(BaseTask):
         self.refresh_cache = refresh_cache
         self.valid_status = valid_status
         self.use_proxylist = use_proxylist
+        self.cache_timeout = cache_timeout
         for key, value in kwargs.items():
             setattr(self, key, value)
 

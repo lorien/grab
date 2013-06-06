@@ -87,3 +87,16 @@ If you need to force the real network request and update the cache::
 If you need to force the real network request and not update the cached version::
 
     >>> Task('some-name, url='some_url', disable_cache=True)
+
+You can pass `cache_timeout` argument which control how many seconds the recourd could be
+old to be valid::
+
+    >>> Task('some-name', url='some_url', cache_timeout=60 * 60 * 24)
+
+Clear the cache
+===============
+
+You can clear all cache contents with `clear` method::
+
+    >>> bot.setup_cache(...)
+    >>> bot.cache.clear()

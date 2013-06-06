@@ -16,6 +16,7 @@ import zlib
 import logging
 import MySQLdb
 import marshal
+import time
 
 from grab.response import Response
 
@@ -45,25 +46,35 @@ class CacheBackend(object):
         self.cursor.execute('''
             create table cache (
                 id binary(20) not null,
+                timestamp int not null,
                 data mediumblob not null,
-                primary key (id)
+                primary key (id),
+                index timestamp_idx(timestamp)
             ) engine = %s
         ''' % engine)
         self.cursor.execute('commit')
 
-    def get_item(self, url):
+    def get_item(self, url, timeout=None):
         """
         Returned item should have specific interface. See module docstring.
         """
 
         _hash = self.build_hash(url)
         with self.spider.save_timer('cache.read.mysql_query'):
-            self.cursor.execute('begin')
+            self.cursor.execute('BEGIN')
+            if timeout is None:
+                query = ""
+            else:
+                ts = int(time.time()) - timeout
+                query = " AND timestamp > %d" % ts
             res = self.cursor.execute('''
-                select data from cache where id = x%s
-            ''', (_hash,))
+                SELECT data
+                FROM cache
+                WHERE id = x%%s %(query)s
+                ''' % {'query': query},
+                (_hash,))
             row = self.cursor.fetchone()
-            self.cursor.execute('commit')
+            self.cursor.execute('COMMIT')
         if row:
             return self.unpack_database_value(row[0])
         else:
@@ -131,18 +142,20 @@ class CacheBackend(object):
     def set_item(self, url, item):
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
-        self.cursor.execute('begin')
+        self.cursor.execute('BEGIN')
+        ts = int(time.time())
         res = self.cursor.execute('''
-            insert into cache (id, data) values(x%s, %s)
-            on duplicate key update data = %s
-        ''', (_hash, data, data))
-        self.cursor.execute('commit')
+            INSERT INTO cache (id, timestamp, data)
+            VALUES(x%s, %s, %s)
+            ON DUPLICATE KEY UPDATE timestamp = %s, data = %s
+        ''', (_hash, ts, data, ts, data))
+        self.cursor.execute('COMMIT')
 
     def pack_database_value(self, val):
         dump = marshal.dumps(val)
         return zlib.compress(dump)
 
     def clear(self):
-        self.cursor.execute('begin')
+        self.cursor.execute('BEGIN')
         self.cursor.execute('TRUNCATE cache')
-        self.cursor.execute('commit')
+        self.cursor.execute('COMMIT')

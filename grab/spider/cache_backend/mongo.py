@@ -19,6 +19,7 @@ try:
     from bson import Binary
 except ImportError:
     from pymongo.binary import Binary
+import time
 
 from grab.response import Response
 
@@ -31,13 +32,18 @@ class CacheBackend(object):
         self.db = pymongo.Connection()[database]
         self.use_compression = use_compression
 
-    def get_item(self, url):
+    def get_item(self, url, timeout=None):
         """
         Returned item should have specific interface. See module docstring.
         """
 
         _hash = self.build_hash(url)
-        return self.db.cache.find_one({'_id': _hash})
+        if timeout is not None:
+            ts = int(time.time()) - timeout
+            query = {'_id': _hash, 'timestamp': {'$gt': ts}}
+        else:
+            query = {'_id': _hash}
+        return self.db.cache.find_one(query)
 
     def build_hash(self, url):
         if isinstance(url, unicode):
@@ -85,6 +91,7 @@ class CacheBackend(object):
         _hash = self.build_hash(url)
         item = {
             '_id': _hash,
+            'timestamp': int(time.time()),
             'url': url,
             'response_url': grab.response.url,
             'body': Binary(body),
