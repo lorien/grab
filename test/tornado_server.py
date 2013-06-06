@@ -25,3 +25,24 @@ class TestTornadoServer(TestCase):
         SERVER.RESPONSE['post'] = 'foo'
         data = urllib.urlopen(SERVER.BASE_URL, 'THE POST').read()
         self.assertEqual(data, SERVER.RESPONSE['post'])
+
+    def test_callback(self):
+        class ContentGenerator():
+            def __init__(self):
+                self.count = 0
+
+            def __call__(self):
+                self.count += 1
+                return 'foo'
+
+        gen = ContentGenerator()
+        SERVER.RESPONSE['get'] = gen 
+        urllib.urlopen(SERVER.BASE_URL).read()
+        self.assertEqual(gen.count, 1)
+        urllib.urlopen(SERVER.BASE_URL).read()
+        self.assertEqual(gen.count, 2)
+        # Now create POST request which should no be
+        # processed with ContentGenerator which is bind to GET
+        # requests
+        urllib.urlopen(SERVER.BASE_URL, 'some post').read()
+        self.assertEqual(gen.count, 2)

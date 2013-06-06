@@ -91,7 +91,11 @@ class MainHandler(tornado.web.RequestHandler):
                 self.write(SERVER.RESPONSE_ONCE[method_name])
                 SERVER.RESPONSE_ONCE[method_name] = None
             else:
-                self.write(SERVER.RESPONSE.get(method_name, ''))
+                resp = SERVER.RESPONSE.get(method_name, '')
+                if callable(resp):
+                    self.write(resp())
+                else:
+                    self.write(resp)
 
     get = method_handler
     post = method_handler
