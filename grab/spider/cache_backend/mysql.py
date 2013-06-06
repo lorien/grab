@@ -141,3 +141,8 @@ class CacheBackend(object):
     def pack_database_value(self, val):
         dump = marshal.dumps(val)
         return zlib.compress(dump)
+
+    def clear(self):
+        self.cursor.execute('begin')
+        self.cursor.execute('TRUNCATE cache')
+        self.cursor.execute('commit')

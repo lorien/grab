@@ -100,3 +100,6 @@ class CacheBackend(object):
                               'cache. Url: %s' % url)
             else:
                 raise
+
+    def clear(self):
+        self.db.cache.remove()

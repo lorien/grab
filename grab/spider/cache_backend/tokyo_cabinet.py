@@ -19,6 +19,26 @@ from grab.response import Response
 
 logger = logging.getLogger('grab.spider.cache_backend.mongo')
 
+def tc_open(path, mode='a+', compress=True, makedirs=True):
+    if makedirs:
+        try:
+            os.makedirs(os.path.dirname(path))
+        except OSError:
+            pass
+
+    db = tc.HDB()
+    if compress:
+        db.tune(-1, -1, -1, tc.HDBTDEFLATE)
+    db.open(path,
+        {
+            'r': tc.HDBOREADER,
+            'w': tc.HDBOWRITER | tc.HDBOCREAT | tc.HDBOTRUNC,
+            'a': tc.HDBOWRITER,
+            'a+': tc.HDBOWRITER | tc.HDBOCREAT,
+        }[mode]
+    )
+    return db
+
 
 class CacheBackend(object):
     def __init__(self, database, use_compression=True, spider=None):
@@ -79,23 +99,5 @@ class CacheBackend(object):
         }
         self.db[self.build_key(url)] = marshal.dumps(item)
 
-def tc_open(path, mode='a+', compress=True, makedirs=True):
-    if makedirs:
-        try:
-            os.makedirs(os.path.dirname(path))
-        except OSError:
-            pass
-
-    db = tc.HDB()
-    if compress:
-        db.tune(-1, -1, -1, tc.HDBTDEFLATE)
-    db.open(path,
-        {
-            'r': tc.HDBOREADER,
-            'w': tc.HDBOWRITER | tc.HDBOCREAT | tc.HDBOTRUNC,
-            'a': tc.HDBOWRITER,
-            'a+': tc.HDBOWRITER | tc.HDBOCREAT,
-        }[mode]
-    )
-    return db
-
+    def clear(self):
+        raise NotImplemented
