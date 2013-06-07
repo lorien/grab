@@ -79,7 +79,6 @@ class MulticurlTransport(object):
 
                 task = curl.task
                 grab = curl.grab
-                # GRAB CLONE ISSUE
                 grab_config_backup = curl.grab_config_backup
 
                 grab.process_request_result()
@@ -102,17 +101,3 @@ class MulticurlTransport(object):
 
     def select(self, timeout=0.01):
         return self.multi.select(timeout)
-
-    def repair_grab(self, grab):
-        # `curl` attribute should not be None
-        # If it is None (which could be if we fire Task
-        # object with grab object which was recevied in
-        # as input argument of response handler function)
-        # then `prepare_request` method will failed
-        # because it asssumes that Grab instance
-        # has valid `curl` attribute
-        # TODO: Looks strange
-        # Maybe refactor prepare_request method
-        # to not fail on grab instance with empty curl instance
-        if getattr(grab, 'curl', None) is None:
-            grab.transport.curl = CURL_OBJECT

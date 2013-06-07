@@ -425,8 +425,6 @@ class Spider(SpiderPattern, SpiderStat):
         if cache_item is None:
             return None
         else:
-            with self.save_timer('cache.read.repair_grab'):
-                transport.repair_grab(grab)
             with self.save_timer('cache.read.prepare_request'):
                 grab.prepare_request()
             with self.save_timer('cache.read.load_response'):
@@ -557,7 +555,6 @@ class Spider(SpiderPattern, SpiderStat):
             if self.network_try_limit > 0:
                 task = res['task']
                 task.refresh_cache = True
-                # GRAB CLONE ISSUE
                 # Should use task.grab_config or backup of grab_config
                 task.setup_grab_config(res['grab_config_backup'])
                 self.add_task(task)

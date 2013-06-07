@@ -53,6 +53,7 @@ SPIDER_TEST_LIST = (
     'test.spider_task',
     'test.spider_proxy',
     'test.spider_queue',
+    'test.spider_misc',
 )
 
 GRAB_EXTRA_TEST_LIST = ()
