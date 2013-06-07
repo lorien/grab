@@ -1,7 +1,4 @@
 import pycurl
-import time
-
-CURL_OBJECT = pycurl.Curl()
 
 class MulticurlTransport(object):
     def __init__(self, thread_number):
@@ -9,6 +6,7 @@ class MulticurlTransport(object):
         self.multi = pycurl.CurlMulti()
         self.multi.handles = []
         self.freelist = []
+        self.registry = {}
 
         # Create curl instances
         for x in xrange(self.thread_number):
@@ -24,22 +22,21 @@ class MulticurlTransport(object):
 
     def process_task(self, task, grab, grab_config_backup):
         curl = self.freelist.pop()
-        # All this shit looks strange
-        # Maybe we should not assign extra attributes to
-        # curls instance but just maintain some mapping
-        # where all extra attributes will be stored
-        curl.grab = grab
-        curl.grab_config_backup = grab_config_backup
-        curl.grab.transport.curl = curl
-        curl.grab.prepare_request()
-        curl.grab.log_request()
         curl.task = task
+        self.registry[id(curl)] = {
+            'grab': grab,
+            'grab_config_backup': grab_config_backup,
+            'task': task,
+        }
+        grab.transport.curl = curl
+        grab.prepare_request()
+        grab.log_request()
+
         # Add configured curl instance to multi-curl processor
         self.multi.add_handle(curl)
 
     def process_handlers(self):
         # http://curl.haxx.se/libcurl/c/curl_multi_perform.html
-        #if self.active_task_number():
         while True:
             status, active_objects = self.multi.perform()
             if status != pycurl.E_CALL_MULTI_PERFORM:
@@ -74,27 +71,23 @@ class MulticurlTransport(object):
                     results.append((False, curl, ecode, emsg))
 
             for ok, curl, ecode, emsg in results:
-                #res = self.process_multicurl_response(ok, curl, ecode, emsg)
                 # FORMAT: {ok, grab, grab_config_backup, task, emsg}
 
-                task = curl.task
-                grab = curl.grab
-                grab_config_backup = curl.grab_config_backup
+                curl_id = id(curl)
+                task = self.registry[curl_id]['task']
+                grab = self.registry[curl_id]['grab']
+                grab_config_backup = self.registry[curl_id]['grab_config_backup']
 
                 grab.process_request_result()
 
-                # Break links, free resources
-                curl.grab.transport.curl = None
-                curl.grab = None
-                curl.task = None
+                # Free resources
+                del self.registry[curl_id]
 
                 yield {'ok': ok, 'emsg': emsg, 'grab': grab,
                        'grab_config_backup': grab_config_backup, 'task': task}
 
                 self.multi.remove_handle(curl)
                 self.freelist.append(curl)
-                #yield res
-                #self.inc_count('request')
 
             if not queued_messages:
                 break
