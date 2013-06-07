@@ -58,7 +58,8 @@ Pip is recommended way to install Grab and its dependencies::
 Documentation
 =============
 
-Only Russian documentations is available:: http://grablib.org/docs/
+Russian docs: http://grablib.org/docs/
+English docs in progress.
 
 Discussion group (Russian or English): http://groups.google.com/group/python-grab/
 

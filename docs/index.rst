@@ -113,3 +113,11 @@ Tools:
     api/tools_html
     api/tools
     api/upload
+
+
+Also
+
+.. toctree::
+    :maxdepth: 1
+
+    changelog.rst
