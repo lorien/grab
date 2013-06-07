@@ -204,16 +204,11 @@ class FuncField(Field):
         return self.process(val)
 
 
-def func_field(pass_item=False, *args, **kwargs):
-    def inner(func):
-        def method_wrapper(self, *args, **kwargs):
-            return func(*args, **kwargs)
-        if pass_item:
-            func2 = func
-        else:
-            func2 = method_wrapper(func)
-        return FuncField(func=func2, pass_item=True, *args, **kwargs)
-    return inner
+def func_field(*args, **kwargs):
+    def wrapper(func):
+        kwargs['pass_item'] = True
+        return FuncField(func=func, *args, **kwargs)
+    return wrapper
 
 
 class ItemBuilder(type):
