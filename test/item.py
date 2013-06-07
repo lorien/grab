@@ -12,7 +12,8 @@ from grab import Grab, DataNotFound
 from grab.item import (Item, IntegerField, StringField, DateTimeField, func_field,
                        FuncField)
 from test.util import GRAB_TRANSPORT
-from grab.tools.lxml_tools import get_node_text
+from grab.tools.lxml_tools import get_node_text, parse_html
+from grab.selector import Selector
 
 XML = """<?xml version='1.0' encoding='utf-8'?>
 <bbapi version='1'>
@@ -126,6 +127,11 @@ class ItemTestCase(TestCase):
         player = self.get_item()
         self.assertEquals(75, player.height2)
 
-    def test_func_field_rawfunc(self):
-        player = self.get_item()
-        print player.height1
+    def test_get_function(self):
+        func = Player.get_function('height1')
+        html = '<html><body><height>3'
+        self.assertEquals(3, func(Selector(parse_html(html))))
+
+        func = Player.get_function('height2')
+        html = '<html><body><height>3'
+        self.assertEquals(3, func(Selector(parse_html(html))))

@@ -278,3 +278,16 @@ class Item(object):
         for key in keys:
             obj[key] = getattr(self, key)
         return obj
+
+    @classmethod
+    def get_function(cls, key):
+        """
+        Return standalone function which was used to build FuncField field.
+        """
+        field = cls._fields[key]
+        if field.pass_item:
+            def func_wrapper(*args, **kwargs):
+                return field.func(None, *args, **kwargs)
+            return func_wrapper
+        else:
+            return field.func
