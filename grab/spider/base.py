@@ -170,7 +170,8 @@ class Spider(SpiderPattern, SpiderStat):
         logger.debug('Using %s backend for task queue' % backend)
         mod = __import__('grab.spider.queue_backend.%s' % backend,
                          globals(), locals(), ['foo'])
-        self.taskq = mod.QueueBackend(**kwargs)
+        self.taskq = mod.QueueBackend(spider_name=self.get_name(),
+                                      **kwargs)
 
     def prepare(self):
         """

@@ -4,7 +4,7 @@ from .base import QueueInterface
 from Queue import PriorityQueue, Empty
 
 class QueueBackend(QueueInterface):
-    def __init__(self, unique=False, **kwargs):
+    def __init__(self, spider_name, unique=False, **kwargs):
         super(QueueInterface, self).__init__(**kwargs)
         self.queue_object = PriorityQueue()
         self.unique = unique

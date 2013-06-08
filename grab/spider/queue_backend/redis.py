@@ -9,9 +9,13 @@ import Queue
 import random
 
 class QueueBackend(QueueInterface):
-    def __init__(self, prefix='spider_task', **kwargs):
+    def __init__(self, spider_name, queue_name=None, **kwargs):
         super(QueueInterface, self).__init__(**kwargs)
-        self.queue_object = PriorityQueue(prefix)
+        self.spider_name = spider_name
+        if queue_name is None:
+            queue_name = 'task_queue_%s' % spider_name
+        self.queue_name = queue_name
+        self.queue_object = PriorityQueue(queue_name)
 
     def put(self, task, priority):
         # Add attribute with random value

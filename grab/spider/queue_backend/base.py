@@ -3,7 +3,7 @@ QueueInterface defines interface of queue backend.
 """
 
 class QueueInterface(object):
-    def __init__(self, **kwargs):
+    def __init__(self, spider_name, **kwargs):
         pass
 
     def put(self, task, priority):
