@@ -210,7 +210,7 @@ class Spider(SpiderPattern, SpiderStat):
 
         is_valid = True
 
-        if not self.config.get('task_%s' % task.name, True):
+        if not self.config.get('TASK_ENABLED', {}).get(task.name, True):
             logger.debug('Task %s disabled via config' % task.name)
             is_valid = False
 

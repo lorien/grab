@@ -11,3 +11,9 @@ class StopTaskProcessing(SpiderError):
     """
     Used in middlewares to stop task processing
     """
+
+class SpiderInternalError(SpiderError):
+    """
+    Used to indicate error in some internal spider services
+    like spider class discovering, CLI error
+    """

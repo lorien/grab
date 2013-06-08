@@ -26,25 +26,25 @@ def setup_logging(action, level):
     root.addHandler(hdl)
 
     # debug log
-    fname = 'var/log/%s.debug.log' % action
-    hdl = logging.FileHandler(fname, 'a')
-    hdl.setFormatter(logging.Formatter('%(asctime)s: [%(name)s] %(message)s'))
-    hdl.setLevel(logging.DEBUG)
-    root.addHandler(hdl)
+    #fname = 'var/log/%s.debug.log' % action
+    #hdl = logging.FileHandler(fname, 'a')
+    #hdl.setFormatter(logging.Formatter('%(asctime)s: [%(name)s] %(message)s'))
+    #hdl.setLevel(logging.DEBUG)
+    #root.addHandler(hdl)
 
     # error log
-    fname = 'var/log/%s.error.log' % action
-    hdl = logging.FileHandler(fname, 'a')
-    hdl.setFormatter(logging.Formatter('%(asctime)s: [%(name)s] %(message)s'))
-    hdl.setLevel(logging.ERROR)
-    root.addHandler(hdl)
+    #fname = 'var/log/%s.error.log' % action
+    #hdl = logging.FileHandler(fname, 'a')
+    #hdl.setFormatter(logging.Formatter('%(asctime)s: [%(name)s] %(message)s'))
+    #hdl.setLevel(logging.ERROR)
+    #root.addHandler(hdl)
 
     # common error log
-    fname = 'var/log/error.log'
-    hdl = logging.FileHandler(fname, 'a')
-    hdl.setFormatter(logging.Formatter('%(asctime)s: [%(name)s] %(message)s'))
-    hdl.setLevel(logging.ERROR)
-    root.addHandler(hdl)
+    #fname = 'var/log/error.log'
+    #hdl = logging.FileHandler(fname, 'a')
+    #hdl.setFormatter(logging.Formatter('%(asctime)s: [%(name)s] %(message)s'))
+    #hdl.setLevel(logging.ERROR)
+    #root.addHandler(hdl)
 
     #root.setLevel(logging.DEBUG)
     #default_logging(level=level)
@@ -57,11 +57,11 @@ def process_command_line():
 
     parser = ArgumentParser()
     parser.add_argument('action', type=str)
-    parser.add_argument('positional_args', nargs='*')
-    parser.add_argument('-t', '--thread-number', help='Number of network threads',
-                        default=1, type=int)
+    #parser.add_argument('positional_args', nargs='*')
+    #parser.add_argument('-t', '--thread-number', help='Number of network threads',
+                        #default=1, type=int)
     parser.add_argument('--logging-level', default='debug')
-    parser.add_argument('--slave', action='store_true', default=False)
+    #parser.add_argument('--slave', action='store_true', default=False)
     parser.add_argument('--lock-key')
     parser.add_argument('--ignore-lock', action='store_true', default=False)
 
@@ -69,24 +69,27 @@ def process_command_line():
 
     # Setup logging
     logging_level = getattr(logging, args.logging_level.upper())
-    if args.positional_args:
-        command_key = '_'.join([args.action] + args.positional_args)
-    else:
-        command_key = args.action
+    #if args.positional_args:
+        #command_key = '_'.join([args.action] + args.positional_args)
+    #else:
+        #command_key = args.action
     # TODO: enable logs
-    #setup_logging(command_key, logging_level)
+    setup_logging(args.action, logging_level)
 
     # Setup action handler
     action_name = args.action
     try:
         # First, try to import script from the grab package
         action_mod = __import__('grab.script.%s' % action_name, None, None, ['foo'])
-    except ImportError:
+    except ImportError, ex:
+        if not 'No module named' in str(ex):
+            logging.error('', exc_info=ex)
         # If grab does not provides the script
         # try to import it from the current project
         try:
             action_mod = __import__('script.%s' % action_name, None, None, ['foo'])
-        except ImportError:
+        except ImportError, ex:
+            logging.error('', exc_info=ex)
             sys.stderr.write('Could not import %s script' % action_name)
             sys.exit(1)
 
@@ -112,6 +115,6 @@ def process_command_line():
 
     logger.debug('Execution %s action' % action_name)
     try:
-        action_mod.main(*args.positional_args, **vars(args))
+        action_mod.main(**vars(args))
     except Exception, ex:
         logging.error('Unexpected exception from action handler:', exc_info=ex)
