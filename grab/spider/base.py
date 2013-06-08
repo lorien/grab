@@ -30,6 +30,7 @@ from .pattern import SpiderPattern
 from .stat  import SpiderStat
 from .transport.multicurl import MulticurlTransport
 from ..proxylist import ProxyList
+from grab.util.misc import camel_case_to_underscore
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
@@ -796,6 +797,12 @@ class Spider(SpiderPattern, SpiderStat):
         if not auto_change and auto_init:
             self.proxy = self.proxylist.get_random()
         self.proxy_auto_change = auto_change
+
+    def get_name(self):
+        if hasattr(self, 'spider_name'):
+            return name
+        else:
+            return camel_case_to_underscore(self.__class__.__name__)
 
     # ****************
     # Abstract methods
