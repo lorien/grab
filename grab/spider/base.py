@@ -212,6 +212,7 @@ class Spider(SpiderPattern, SpiderStat):
 
         if not self.config.get('TASK_ENABLED', {}).get(task.name, True):
             logger.debug('Task %s disabled via config' % task.name)
+            self.inc_count('task-disabled')
             is_valid = False
 
         elif task.task_try_count > self.task_try_limit:
@@ -275,6 +276,10 @@ class Spider(SpiderPattern, SpiderStat):
                     # If task has grab_config object then update it too
                     if task.grab_config:
                         task.grab_config['url'] = task.url
+
+        if self.config.get('TASK_REFRESH_CACHE', {}).get(task.name, False):
+            task.refresh_cache = True
+            is_valid = False
 
         is_valid = self.check_task_limits_deprecated(task)
         if is_valid:
@@ -656,11 +661,13 @@ class Spider(SpiderPattern, SpiderStat):
         if cache_result:
             logger_verbose.debug('Task data is loaded from the cache. Yielding task result.')
             self.process_network_result(cache_result)
+            self.inc_count('task-%s-cache' % task.name)
         else:
             if self.only_cache:
                 logger.debug('Skipping network request to %s' % grab.config['url'])
             else:
                 self.inc_count('request-network')
+                self.inc_count('task-%s-network' % task.name)
                 self.change_proxy(task, grab)
                 with self.save_timer('network_transport'):
                     logger_verbose.debug('Submitting task to the transport layer')
