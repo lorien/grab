@@ -33,7 +33,6 @@ Example of usage::
 from __future__ import absolute_import
 import logging
 import time
-from lxml.etree import XPath
 try:
     from pyquery import PyQuery
 except ImportError:
@@ -185,6 +184,8 @@ class Selector(object):
         return PyQuery(self.node)
 
     def select(self, xpath=None, pyquery=None):
+        from lxml.etree import XPath
+
         start = time.time()
         
         if xpath is None and pyquery is None:
