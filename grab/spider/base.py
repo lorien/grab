@@ -103,7 +103,9 @@ class Spider(SpiderPattern, SpiderStat):
         if config is not None:
             self.config = config
         else:
-            self.config = {}
+            # Fix curcular import error
+            from grab.util.config import Config
+            self.config = Config()
 
         self.taskq = None
 

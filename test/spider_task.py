@@ -104,3 +104,13 @@ class TestSpider(TestCase):
         bot.add_task(task.clone())
         bot.run()
         self.assertEqual(SERVER.REQUEST['headers']['User-Agent'], 'Foo')
+
+    #def test_task_relative_url_error(self):
+        #class SimpleSpider(Spider):
+            #def task_one(self, grab, task):
+                #yield Task('second', '/')
+
+        #bot = SimpleSpider()
+        #bot.setup_queue()
+        #bot.add_task(Task('one', SERVER.BASE_URL))
+        #bot.run()

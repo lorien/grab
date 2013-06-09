@@ -1,11 +1,9 @@
 import logging
 import os
 
-from grab.util.settings import build_spider_config, build_global_config
+from grab.util.config import build_spider_config, build_global_config
 from grab.util.module import load_spider_class
 from grab.tools.logs import default_logging
-
-import settings
 
 logger = logging.getLogger('grab.script.crawl')
 
@@ -17,11 +15,12 @@ def setup_arg_parser(parser):
     parser.add_argument('spider_name', type=str)
 
 
-def main(spider_name, thread_number=1, slave=False, force_url=None, *args, **kwargs):
+def main(spider_name, thread_number=1, slave=False, force_url=None,
+         settings='settings', *args, **kwargs):
     default_logging()
     config = build_global_config(settings)
     spider_class = load_spider_class(config, spider_name)
-    spider_config = build_spider_config(config, spider_name)
+    spider_config = build_spider_config(spider_name, config)
     bot = spider_class(thread_number=thread_number, slave=slave,
                        config=spider_config)
     if spider_config.get('QUEUE'):

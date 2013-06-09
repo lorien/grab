@@ -64,6 +64,7 @@ def process_command_line():
     #parser.add_argument('--slave', action='store_true', default=False)
     parser.add_argument('--lock-key')
     parser.add_argument('--ignore-lock', action='store_true', default=False)
+    parser.add_argument('--settings', type=str, default='settings')
 
     args, trash = parser.parse_known_args()
 
@@ -82,7 +83,10 @@ def process_command_line():
         # First, try to import script from the grab package
         action_mod = __import__('grab.script.%s' % action_name, None, None, ['foo'])
     except ImportError, ex:
-        if not 'No module named' in str(ex):
+        if (ex.message.startswith('No module named') and
+            'grab.script.%s' % action_name in ex.message):
+            pass
+        else:
             logging.error('', exc_info=ex)
         # If grab does not provides the script
         # try to import it from the current project
