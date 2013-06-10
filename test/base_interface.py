@@ -95,8 +95,8 @@ class TestGrab(TestCase):
         self.assertEqual(SERVER.REQUEST['headers']['user-agent'], ua)
 
     @ignore_transport('ghost.GhostTransport')
-    # Disabled because of strance error
-    # Error when another Ghost instance is created
+    # Disabled because of strange error
+    # When another Ghost instance is created
     def test_clone(self):
         g = Grab(transport=GRAB_TRANSPORT)
         SERVER.RESPONSE['get'] = 'Moon'
