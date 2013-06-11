@@ -14,7 +14,10 @@ from lxml.html import fromstring
 from grab.selector import Selector
 from grab.response import Response
 import logging
-from urlparse import urlsplit
+try:
+    from urlparse import urlsplit
+except ImportError:
+    from urllib.parse import urlsplit
 
 from grab.kit.network_access_manager import KitNetworkAccessManager
 from grab.kit.network_reply import KitNetworkReply
@@ -192,4 +195,4 @@ if __name__ == '__main__':
     br = Kit(gui=False)
     resp = br.request('http://httpbin.org/post', method='post', cookies={'foo': 'bar'},
                       data='foo=bar')
-    print resp.body
+    print(resp.body)

@@ -5,7 +5,10 @@ from __future__ import absolute_import
 
 from .base import QueueInterface
 from qr import PriorityQueue
-import Queue
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 import random
 
 class QueueBackend(QueueInterface):
@@ -28,7 +31,7 @@ class QueueBackend(QueueInterface):
     def get(self, timeout):
         task = self.queue_object.pop()
         if task is None:
-            raise Queue.Empty()
+            raise queue.Empty()
         else:
             return task
 
@@ -39,5 +42,5 @@ class QueueBackend(QueueInterface):
         try:
             while True:
                 self.get(0)
-        except Queue.Empty:
+        except queue.Empty:
             pass

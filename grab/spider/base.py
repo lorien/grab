@@ -12,15 +12,34 @@ from collections import defaultdict
 import os
 import time
 import json
-import cPickle as pickle
-import anydbm
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+try:
+    import anydbm as dbm
+except ImportError:
+    import dbm
 import multiprocessing
 import zlib
 from hashlib import sha1
-from urlparse import urljoin
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 from random import randint
+try:
+    import Queue as queue
+except ImportError:
+    import queue
+import sys
 
-import Queue
+# Backward compatibility for xrange function and unicode function
+if sys.version_info < (3,):
+    range = xrange
+else:
+    unicode = str
+
 from ..base import GLOBAL_STATE, Grab
 from .error import (SpiderError, SpiderMisuseError, FatalError,
                     StopTaskProcessing)
@@ -341,7 +360,7 @@ class Spider(SpiderPattern, SpiderStat):
             if qsize < min_limit:
                 logger_verbose.debug('Task queue contains less tasks than limit. Tryring to add new tasks')
                 try:
-                    for x in xrange(min_limit - qsize):
+                    for x in range(min_limit - qsize):
                         item = self.task_generator_object.next()
                         logger_verbose.debug('Found new task. Adding it')
                         self.add_task(item)
@@ -374,7 +393,7 @@ class Spider(SpiderPattern, SpiderStat):
             try:
                 with self.save_timer('task_queue'):
                     return self.taskq.get(TASK_QUEUE_TIMEOUT)
-            except Queue.Empty:
+            except queue.Empty:
                 if not self.slave:
                     logger_verbose.debug('Task queue is empty.')
                     return None
@@ -506,7 +525,7 @@ class Spider(SpiderPattern, SpiderStat):
                 raise SpiderError('No content handler for %s item' % result.name)
             try:
                 handler(result.item)
-            except Exception, ex:
+            except Exception as ex:
                 self.process_handler_error(handler_name, ex, task)
         elif result is None:
             pass
@@ -547,7 +566,7 @@ class Spider(SpiderPattern, SpiderStat):
                                 self.process_handler_result(item, res['task'])
                         else:
                             self.process_handler_result(result, res['task'])
-            except Exception, ex:
+            except Exception as ex:
                 self.process_handler_error(handler_name, ex, res['task'])
             else:
                 self.inc_count('task-%s-ok' % res['task'].name)
@@ -733,7 +752,7 @@ class Spider(SpiderPattern, SpiderStat):
                     # Try five times to get new task and proces task generator
                     # because slave parser could agressively consume
                     # tasks from task queue
-                    for x in xrange(5):
+                    for x in range(5):
                         task = self.load_new_task()
                         if not task:
                             if not self.transport.active_task_number():
@@ -790,7 +809,7 @@ class Spider(SpiderPattern, SpiderStat):
 
             logger_verbose.debug('Work done')
         except KeyboardInterrupt:
-            print '\nGot ^C signal. Stopping.'
+            print('\nGot ^C signal. Stopping.')
             raise
         finally:
             # This code is executed when main cycles is breaked

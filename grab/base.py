@@ -13,6 +13,7 @@ from random import randint, choice
 from copy import copy
 import threading
 import itertools
+import collections
 try:
     from urlparse import urljoin
 except ImportError:
@@ -22,6 +23,12 @@ import re
 import json
 import email
 from datetime import datetime
+import sys
+
+# Backward compatibility for basestring datatype and unicode function
+if sys.version_info >= (3,):
+    basestring = str
+    unicode = str
 
 from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url
@@ -233,7 +240,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             mod_path, cls_name = transport_param.rsplit('.', 1)
             mod = __import__(mod_path, globals(), locals(), ['foo'])
             self.transport = getattr(mod, cls_name)()
-        elif callable(transport_param):
+        elif isinstance(transport_param, collections.Callable):
             self.transport = transport_param()
         else:
             raise GrabMisuseError('Option `transport` should be string or callable. '\
@@ -513,13 +520,13 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         # TODO: check max redirect count
         if self.config['follow_refresh']:
             url = find_refresh_url(self.response.unicode_body())
-            print 'URL', url
+            print('URL', url)
             if url is not None:
                 inc_count = old_refresh_count + 1
                 if inc_count > self.config['redirect_limit']:
                     raise error.GrabTooManyRedirectsError()
                 else:
-                    print inc_count
+                    print(inc_count)
                     return self.request(url=url, refresh_redirect_count=inc_count)
 
         return None

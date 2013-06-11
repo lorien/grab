@@ -18,12 +18,12 @@ def main(*args, **kwargs):
     for url in urls:
         try:
             g.go(url)
-        except Exception, ex: 
-            print 'Fatal exception:'
-            print ex
+        except Exception as ex: 
+            print('Fatal exception:')
+            print(ex)
         else:
-            print 'URL: %s' % url 
+            print('URL: %s' % url )
             for count, item in enumerate(cls.find(g.doc, url=g.response.url)):
-                print '%s #%d' % (cls.__name__, count)
-                print item._render()
-                print '----------'
+                print('%s #%d' % (cls.__name__, count))
+                print(item._render())
+                print('----------')

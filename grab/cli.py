@@ -82,7 +82,7 @@ def process_command_line():
     try:
         # First, try to import script from the grab package
         action_mod = __import__('grab.script.%s' % action_name, None, None, ['foo'])
-    except ImportError, ex:
+    except ImportError as ex:
         if (ex.message.startswith('No module named') and
             'grab.script.%s' % action_name in ex.message):
             pass
@@ -92,7 +92,7 @@ def process_command_line():
         # try to import it from the current project
         try:
             action_mod = __import__('script.%s' % action_name, None, None, ['foo'])
-        except ImportError, ex:
+        except ImportError as ex:
             logging.error('', exc_info=ex)
             sys.stderr.write('Could not import %s script' % action_name)
             sys.exit(1)
@@ -120,5 +120,5 @@ def process_command_line():
     logger.debug('Execution %s action' % action_name)
     try:
         action_mod.main(**vars(args))
-    except Exception, ex:
+    except Exception as ex:
         logging.error('Unexpected exception from action handler:', exc_info=ex)

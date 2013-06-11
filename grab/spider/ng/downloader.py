@@ -1,6 +1,9 @@
 import logging
 import time
-from Queue import Empty
+try:
+    from Queue import Empty
+except ImportError:
+    from queue import Empty
 
 from ..task import Task
 from ..data import Data

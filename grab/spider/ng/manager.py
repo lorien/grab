@@ -1,5 +1,8 @@
 import time
-import Queue
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 import logging
 
 from ..task import Task
@@ -17,7 +20,7 @@ class BaseManagerSpider(BaseNGSpider):
             while True:
                 try:
                     res = self.result_queue.get(block=True, timeout=2)
-                except Queue.Empty:
+                except queue.Empty:
                     #pass
                     res = None
 
@@ -40,8 +43,8 @@ class BaseManagerSpider(BaseNGSpider):
                     #self.process_handler_result(data, task) 
 
         except KeyboardInterrupt:
-            print '\nGot ^C signal. Stopping.'
-            print self.render_stats()
+            print('\nGot ^C signal. Stopping.')
+            print(self.render_stats())
             raise
         finally:
             # This code is executed when main cycles is breaked
@@ -67,7 +70,7 @@ class BaseManagerSpider(BaseNGSpider):
                 raise SpiderError('No content handler for %s item', item)
             try:
                 handler(result.item)
-            except Exception, ex:
+            except Exception as ex:
                 self.process_handler_error(handler_name, ex, task)
         elif result is None:
             pass

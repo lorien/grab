@@ -1,6 +1,17 @@
 from __future__ import absolute_import
-from Queue import Queue, Empty
+try:
+    from Queue import Queue, Empty
+except ImportError:
+    from queue import Queue, Empty
 from threading import Thread
+import sys
+
+# Backward compatibility for xrange function and unicode function
+if sys.version_info < (3,):
+    range = xrange
+else:
+    unicode = str
+
 from grab.error import GrabNetworkError
 
 from grab.tools.work import make_work
@@ -25,10 +36,10 @@ class Worker(Thread):
                 self.busy = True
                 try:
                     info['grab'].request()
-                except GrabNetworkError, ex:
+                except GrabNetworkError as ex:
                     ok = False
                     emsg = unicode(ex)
-                except Exception, ex:
+                except Exception as ex:
                     raise
                     # TODO: WTF?
                 else:
@@ -45,7 +56,7 @@ class ThreadPoolTransport(object):
         self.taskq = Queue()
         self.resultq = Queue()
         self.threads = []
-        for x in xrange(self.thread_number):
+        for x in range(self.thread_number):
             t = Worker(self.taskq, self.resultq)
             t.daemon = True
             t.start()

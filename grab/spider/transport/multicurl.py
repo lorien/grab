@@ -1,4 +1,9 @@
 import pycurl
+import sys
+
+# Backward compatibility for xrange function
+if sys.version_info < (3,):
+    range = xrange
 
 class MulticurlTransport(object):
     def __init__(self, thread_number):
@@ -9,7 +14,7 @@ class MulticurlTransport(object):
         self.registry = {}
 
         # Create curl instances
-        for x in xrange(self.thread_number):
+        for x in range(self.thread_number):
             curl = pycurl.Curl()
             self.freelist.append(curl)
             self.multi.handles.append(curl)

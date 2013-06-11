@@ -34,12 +34,10 @@ from .selector import Selector
 
 NULL = object()
 
-class Field(object):
+class Field(object, metaclass=ABCMeta):
     """
     All custom fields should extend this class, and override the get method.
     """
-
-    __metaclass__ = ABCMeta
 
     def __init__(self, xpath=None, default=NULL, empty_default=NULL,
                  processor=None):
@@ -224,9 +222,7 @@ class ItemBuilder(type):
         return super(ItemBuilder, cls).__new__(cls, name, base, namespace)
 
 
-class Item(object):
-    __metaclass__ = ItemBuilder
-
+class Item(object, metaclass=ItemBuilder):
     def __init__(self, tree, grab=None):
         self._tree = tree
         self._cache = {}

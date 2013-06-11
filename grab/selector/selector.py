@@ -37,6 +37,11 @@ try:
     from pyquery import PyQuery
 except ImportError:
     pass
+import sys
+
+# Backward compatibility for basestring datatype
+if sys.version_info >= (3,):
+    basestring = str
 
 from ..tools.lxml_tools import get_node_text, render_html
 from ..tools.text import find_number, normalize_space as normalize_space_func

@@ -5,7 +5,12 @@ from grab.tools.work import make_work
 from grab.tools.logs import default_logging
 import time
 import logging
-import urllib
+#import urllib
+import sys
+
+# Backward compatibility for xrange function
+if sys.version_info < (3,):
+    range = xrange
 
 #logging.basicConfig(level=logging.DEBUG)
 
@@ -18,7 +23,7 @@ def timer(func):
         start = time.time()
         result = func(*args, **kwargs)
         total = time.time() - start
-        print 'Time: %.2f sec.' % total
+        print('Time: %.2f sec.' % total)
         return result
     return inner
 
@@ -26,7 +31,7 @@ def timer(func):
 @timer
 def main():
     default_logging()
-    for x in xrange(500):
+    for x in range(500):
         url = 'http://load.local/grab.html'
         g = Grab()
         g.go(url)

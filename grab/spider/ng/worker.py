@@ -60,8 +60,8 @@ class BaseWorkerSpider(BaseNGSpider):
                 self.result_queue.put(res)
 
         except KeyboardInterrupt:
-            print '\nGot ^C signal. Stopping.'
-            print self.render_stats()
+            print('\nGot ^C signal. Stopping.')
+            print(self.render_stats())
             raise
         finally:
             # This code is executed when main cycles is breaked

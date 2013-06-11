@@ -17,6 +17,11 @@ import logging
 import MySQLdb
 import marshal
 import time
+import sys
+
+# Backward compatibility for unicode datatype
+if sys.version_info >= (3,):
+    unicode = str
 
 from grab.response import Response
 

@@ -20,6 +20,11 @@ try:
 except ImportError:
     from pymongo.binary import Binary
 import time
+import sys
+
+# Backward compatibility for unicode datatype and function
+if sys.version_info >= (3,):
+    unicode = str
 
 from grab.response import Response
 
@@ -101,7 +106,7 @@ class CacheBackend(object):
         }
         try:
             self.db.cache.save(item, safe=True)
-        except Exception, ex:
+        except Exception as ex:
             if 'document too large' in unicode(ex):
                 logging.error('Document too large. It was not saved into mongo '\
                               'cache. Url: %s' % url)

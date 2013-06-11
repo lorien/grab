@@ -3,6 +3,11 @@
 # License: BSD
 from __future__ import absolute_import
 from contextlib import contextmanager
+import sys
+
+# Backward compatibility for basestring datatype
+if sys.version_info >= (3,):
+    basestring = str
 
 from ..error import DataNotFound, GrabError, GrabMisuseError
 from ..tools.text import normalize_space

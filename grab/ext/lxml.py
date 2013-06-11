@@ -10,6 +10,12 @@ import re
 import time
 import logging
 import traceback
+import sys
+
+# Backward compatibility for basestring datatype and unicode function
+if sys.version_info >= (3,):
+    basestring = str
+    unicode = str
 
 from ..error import DataNotFound, GrabMisuseError
 from ..base import GLOBAL_STATE
@@ -77,7 +83,7 @@ class LXMLExtension(object):
             #body = simplify_html(body)
             try:
                 self._lxml_tree = fromstring(body)
-            except Exception, ex:
+            except Exception as ex:
                 if (isinstance(ex, ParserError)
                     and 'Document is empty' in str(ex)
                     and not '<html' in body):

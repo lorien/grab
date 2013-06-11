@@ -1,7 +1,10 @@
 from __future__ import absolute_import
 
 from .base import QueueInterface
-from Queue import PriorityQueue, Empty
+try:
+    from Queue import PriorityQueue, Empty
+except ImportError:
+    from queue import PriorityQueue, Empty
 
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, unique=False, **kwargs):

@@ -1,5 +1,8 @@
 import time
-import Queue
+#try:
+#    import Queue as queue
+#except ImportError:
+#    import queue
 import logging
 
 from ..task import Task

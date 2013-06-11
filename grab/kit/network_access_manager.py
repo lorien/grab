@@ -2,6 +2,11 @@ import logging
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
 from PyQt4.QtWebKit import QWebFrame
 from PyQt4.QtCore import QByteArray
+import sys
+
+# Backward compatibility for unicode function
+if sys.version_info >= (3,):
+    unicode = str
 
 from grab.kit.const import NETWORK_ERROR
 from grab.kit.network_reply import KitNetworkReply
@@ -54,7 +59,7 @@ class KitNetworkAccessManager(QNetworkAccessManager):
         if isinstance(request.originatingObject(), QWebFrame):
             try:
                 reply.setRawHeader(QByteArray('Base-Url'), QByteArray('').append(request.originatingObject().page().mainFrame().baseUrl().toString()))
-            except Exception, e:
+            except Exception as e:
                 logger.debug(e)
 
         return reply
