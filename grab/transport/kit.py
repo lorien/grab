@@ -35,9 +35,8 @@ class KitTransport(object):
     Grab network transport powered with QtWebKit module
     """
 
-    pass
-    #def __init__(self):
-        #self.curl = pycurl.Curl()
+    def __init__(self):
+        self.kit = Kit()
 
     #def setup_body_file(self, storage_dir, storage_filename):
         #if storage_filename is None:
@@ -102,9 +101,8 @@ class KitTransport(object):
         self.request_object['user_agent'] = grab.config['user_agent']
 
     def request(self):
-        kit = Kit()
         req = self.request_object
-        self.kit_response = kit.request(
+        self.kit_response = self.kit.request(
             url=req['url'],
             cookies=req['cookies'],
             method=req['method'],
@@ -122,22 +120,22 @@ class KitTransport(object):
 
         return self.kit_response.cookies
 
-    #def __getstate__(self):
-        #"""
-        #Reset curl attribute which could not be pickled.
-        #"""
-        #state = self.__dict__.copy()
-        #state['curl'] = None
-        #return state
+    def __getstate__(self):
+        """
+        Reset curl attribute which could not be pickled.
+        """
+        state = self.__dict__.copy()
+        state['kit'] = None
+        return state
 
-    #def __setstate__(self, state):
-        #"""
-        #Create pycurl instance after Grag instance was restored
-        #from pickled state.
-        #"""
+    def __setstate__(self, state):
+        """
+        Create pycurl instance after Grag instance was restored
+        from pickled state.
+        """
 
-        #state['curl'] = pycurl.Curl()
-        #self.__dict__ = state
+        state['kit'] = Kit()
+        self.__dict__ = state
 
 
 class GrabKit(Grab):

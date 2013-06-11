@@ -26,7 +26,6 @@ class TestGrab(TestCase):
             text = g2.doc.select('//textarea').text()
             resultq.put(text)
 
-        open('data', 'w').write(data)
         result_queue = Queue()
         p = Process(target=func, args=[data, result_queue])
         p.start()

@@ -68,8 +68,11 @@ class KitPage(QWebPage):
 
 
 class Kit(object):
+    _app = None
+
     def __init__(self, gui=False):
-        self.app = QApplication(sys.argv)
+        if not Kit._app:
+            Kit._app = QApplication([])
 
         manager = KitNetworkAccessManager()
         manager.finished.connect(self.network_reply_handler)
@@ -82,7 +85,7 @@ class Kit(object):
 
         self.view = KitWebView()
         self.view.setPage(self.page)
-        self.view.setApplication(self.app)
+        self.view.setApplication(Kit._app)
 
         if gui:
             self.view.show()
