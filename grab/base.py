@@ -406,7 +406,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             connect_timeout, total_timeout = hammer_timeouts.pop(0)
             self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
 
-
         while True:
             try:
                 self.prepare_request(**kwargs)
@@ -555,15 +554,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.request_head = self.transport.request_head
         self.request_body = self.transport.request_body
         self.request_log = self.transport.request_log
-
-    def sleep(self, *args, **kwargs):
-        """
-        See grab.tools.control.sleep
-        """
-
-        logger.debug('Grab.sleep method is depricated. Use grab.tools.control.sleep method instead.')
-        from grab.tools.control import sleep
-        sleep(*args, **kwargs)
 
     def fake_response(self, content, **kwargs):
         """
