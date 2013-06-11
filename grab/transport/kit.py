@@ -70,19 +70,7 @@ class KitTransport(object):
         self.kit_response = kit.request(self.request_object['url'])
 
     def prepare_response(self, grab):
-        response = Response()
-        # FIX
-        response.head = ''
-        response.body = self.kit_response.body
-
-        # Fix
-        response.code = 200
-        response.url = self.kit_response.url
-
-        response.parse(charset='utf-8')
-
-        response.cookies = self.extract_cookies()
-        return response
+        return self.kit_response
 
     def extract_cookies(self):
         """
