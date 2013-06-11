@@ -12,6 +12,7 @@ import urllib
 from random import randint, choice
 from copy import copy
 import threading
+import itertools
 try:
     from urlparse import urljoin
 except ImportError:
@@ -38,12 +39,11 @@ from .extension import register_extensions
 # This could be helpful in debuggin when your script
 # creates multiple Grab instances - in case of shared counter
 # grab instances do not overwrite dump logs
-REQUEST_COUNTER_LOCK = threading.Lock()
 GLOBAL_STATE = {
-    'request_counter': 0,
     'dom_build_time': 0,
     'selector_time': 0,
 }
+REQUEST_COUNTER = itertools.count(1)
 
 # Some extensions need GLOBAL_STATE variable
 # what's why they go after GLOBAL_STATE definition
@@ -355,7 +355,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         # Reset the state setted by previous request
         if not self._request_prepared:
             self.reset()
-            self.request_counter = self.get_request_counter()
+            self.request_counter = REQUEST_COUNTER.next()
             if kwargs:
                 self.setup(**kwargs)
             if self.proxylist and self.config['proxy_auto_change']:
@@ -619,19 +619,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             'Keep-Alive': '300',
             'Expect': '',
         }
-
-    def get_request_counter(self):
-        """
-        Increase global request counter and return new value
-        which will be used as request number for current request.
-        """
-
-        # TODO: do not use lock in main thread
-        REQUEST_COUNTER_LOCK.acquire()
-        GLOBAL_STATE['request_counter'] += 1
-        counter = GLOBAL_STATE['request_counter']
-        REQUEST_COUNTER_LOCK.release()
-        return counter
 
     def save_dumps(self):
         if self.config['log_dir']:

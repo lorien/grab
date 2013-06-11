@@ -90,3 +90,32 @@ class GrabApiTestCase(TestCase):
         #SimpleExtension.get_data()['counter'] = 0
         #g = VeryCustomGrab()
         #self.assertEqual(SimpleExtension.get_data()['counter'], 2)
+
+    def test_request_counter(self):
+        import grab.base
+        import itertools
+        import threading
+
+        grab.base.REQUEST_COUNTER = itertools.count(1)
+        g = Grab(transport=GRAB_TRANSPORT)
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(g.request_counter, 1)
+
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(g.request_counter, 2)
+
+        def func():
+            g = Grab(transport=GRAB_TRANSPORT)
+            g.go(SERVER.BASE_URL)
+
+        # Make 10 requests in concurrent threads
+        threads = []
+        for x in xrange(10):
+            th = threading.Thread(target=func)
+            threads.append(th)
+            th.start()
+        for th in threads:
+            th.join()
+
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(g.request_counter, 13)
