@@ -167,17 +167,17 @@ class LXMLExtensionTest(TestCase):
         SERVER.RESPONSE['get'] = """<?xml version="1.0" encoding="UTF-8"?>
         <html><body><h1>test</h1></body></html>
         """
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         g.go(SERVER.BASE_URL)
         self.assertEqual('test', g.xpath_text('//h1'))
 
     def test_empty_document(self):
         SERVER.RESPONSE['get'] = 'oops'
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         g.go(SERVER.BASE_URL)
         g.xpath_exists('//anytag')
 
         SERVER.RESPONSE['get'] = '<frameset></frameset>'
-        g = Grab()
+        g = Grab(transport=GRAB_TRANSPORT)
         g.go(SERVER.BASE_URL)
         g.xpath_exists('//anytag')

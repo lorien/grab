@@ -91,6 +91,7 @@ class GrabApiTestCase(TestCase):
         #g = VeryCustomGrab()
         #self.assertEqual(SimpleExtension.get_data()['counter'], 2)
 
+    @ignore_transport('grab.transport.kit.KitTransport')
     def test_request_counter(self):
         import grab.base
         import itertools

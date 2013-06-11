@@ -5,10 +5,11 @@ Credits:
 """
 import time 
 import sys
-from PyQt4.QtCore import QEventLoop, QUrl, QEventLoop, QTimer
+from PyQt4.QtCore import QEventLoop, QUrl, QEventLoop, QTimer, QByteArray
 from PyQt4.QtGui import QApplication
 from PyQt4.QtWebKit import QWebView, QWebPage
-from PyQt4.QtNetwork import QNetworkRequest, QNetworkCookieJar, QNetworkCookie
+from PyQt4.QtNetwork import (QNetworkAccessManager, QNetworkRequest,
+                             QNetworkCookieJar, QNetworkCookie)
 from lxml.html import fromstring
 from grab.selector import Selector
 from grab.response import Response
@@ -93,7 +94,8 @@ class Kit(object):
         return cookies
 
 
-    def request(self, url, user_agent='Mozilla', cookies={}, timeout=15):
+    def request(self, url, user_agent='Mozilla', cookies={}, timeout=15,
+                method='get', data=None, headers={}):
         url_info = urlsplit(url)
 
         self.resource_list = []
@@ -110,7 +112,6 @@ class Kit(object):
         self.page.user_agent = user_agent
 
         # Cookies
-        
         cookie_obj_list = []
         for name, value in cookies.items():
             domain = ('.' + url_info.netloc).split(':')[0]
@@ -121,8 +122,26 @@ class Kit(object):
             cookie_obj_list.append(cookie_obj)
         self.cookie_jar.setAllCookies(cookie_obj_list)
 
+        # Method
+        method_obj = getattr(QNetworkAccessManager, '%sOperation' % method.capitalize())
+
+        # Ensure that Content-Type is correct if method is post
+        if method == 'post':
+            headers['Content-Type'] = 'application/x-www-form-urlencoded'
+
+        # Post data
+        if data is None:
+            data = QByteArray()
+
+        # Request object
+        request_obj = QNetworkRequest(QUrl(url))
+
+        # Headers
+        for name, value in headers.items():
+            request_obj.setRawHeader(name, value)
+
         # Make a request
-        self.view.load(QUrl(url))
+        self.view.load(request_obj, method_obj, data)
 
         loop.exec_()
 
@@ -144,12 +163,11 @@ class Kit(object):
     def build_response(self, resource):
         response = Response()
         response.head = ''
-        response.body = resource.reply.data
+        #response.runtime_body = unicode(self.page.mainFrame().toHtml()).encode('utf-8')
+        response.body = str(resource.reply.data)
         response.code = resource.status_code
         response.url = str(resource.reply.url().toString())
-
         response.parse(charset='utf-8')
-
         response.headers = resource.headers
         response.cookies = self.get_cookies()
         return response
@@ -169,7 +187,6 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
     br = Kit(gui=False)
-    resp = br.request('http://httpbin.org/cookies', cookies={'foo': 'bar'})
-    #resp = br.request('http://dumpz.org/')
+    resp = br.request('http://httpbin.org/post', method='post', cookies={'foo': 'bar'},
+                      data='foo=bar')
     print resp.body
-    print resp.cookies

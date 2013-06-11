@@ -1,6 +1,7 @@
 # coding: utf-8
 from unittest import TestCase
 import cPickle as pickle
+from multiprocessing import Process, Queue
 
 from grab import Grab
 from .tornado_util import SERVER
@@ -19,6 +20,16 @@ class TestGrab(TestCase):
         g.go(SERVER.BASE_URL)
         g.set_input('text', 'foobar')
         data = pickle.dumps(g)
-        
-        g2 = pickle.loads(data)
-        self.assertEqual(g2.doc.select('//textarea').text(), 'the cat')
+
+        def func(pickled_grab, resultq):
+            g2 = pickle.loads(pickled_grab)
+            text = g2.doc.select('//textarea').text()
+            resultq.put(text)
+
+        open('data', 'w').write(data)
+        result_queue = Queue()
+        p = Process(target=func, args=[data, result_queue])
+        p.start()
+
+        text = result_queue.get()
+        self.assertEqual(text, 'the cat')

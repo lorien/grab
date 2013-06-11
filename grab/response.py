@@ -64,6 +64,7 @@ class Response(object):
         self.code = None
         self.head = None
         self._body = None
+        #self.runtime_body = None
         self.body_path = None
         self.headers =None
         self.time = None
@@ -317,3 +318,14 @@ class Response(object):
         self._body = body
 
     body = property(_read_body, _write_body)
+
+    #def _read_runtime_body(self):
+        #if self._runtime_body is None:
+            #return self.body
+        #else:
+            #return self._runtime_body
+
+    #def _write_runtime_body(self, body):
+        #self._runtime_body = body
+
+    #runtime_body = property(_read_runtime_body, _write_runtime_body)

@@ -22,8 +22,8 @@ import os.path
 from ..base import UploadContent, UploadFile
 from .. import error
 from ..response import Response
-from ..tools.http import encode_cookies, urlencode, normalize_unicode,\
-                         normalize_http_values
+from ..tools.http import encode_cookies, smart_urlencode, normalize_unicode,\
+                         normalize_http_values, normalize_post_data
 from ..tools.user_agent import random_user_agent
 
 logger = logging.getLogger('grab.transport.curl')
@@ -236,18 +236,7 @@ class CurlTransport(object):
                 #import pdb; pdb.set_trace()
                 self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif grab.config['post']:
-                if isinstance(grab.config['post'], basestring):
-                    # bytes-string should be posted as-is
-                    # unicode should be converted into byte-string
-                    if isinstance(grab.config['post'], unicode):
-                        post_data = normalize_unicode(grab.config['post'],
-                                                      charset=grab.config['charset'])
-                    else:
-                        post_data = grab.config['post']
-                else:
-                    # dict, tuple, list should be serialized into byte-string
-                    post_data = urlencode(grab.config['post'],
-                                          charset=grab.config['charset'])
+                post_data = normalize_post_data(grab.config['post'], grab.config['charset'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
             else:
                 self.curl.setopt(pycurl.POSTFIELDS, '')

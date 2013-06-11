@@ -1,14 +1,21 @@
 import urllib
 from urlparse import urlsplit, urlunsplit
 import re
+import logging
 
 from ..base import UploadFile, UploadContent
 from ..error import GrabMisuseError
 from .encoding import smart_str, smart_unicode
 
+logger = logging.getLogger('grab.tools.http')
 RE_NON_ASCII = re.compile(r'[^-.a-zA-Z0-9]')
 
-def urlencode(items, charset='utf-8'):
+def urlencode(*args, **kwargs):
+    logger.debug('Method grab.tools.http.urlencode is deprecated. Please use grab.tools.http.smart_urlencode')
+    return smart_urlencode(*args, **kwargs)
+
+
+def smart_urlencode(items, charset='utf-8'):
     """
     Convert sequence of items into bytestring which could be submitted
     in POST or GET request.
@@ -117,3 +124,15 @@ def normalize_url(url):
         return url
     else:
         return url
+
+def normalize_post_data(data, charset):
+    if isinstance(data, basestring):
+        # bytes-string should be posted as-is
+        # unicode should be converted into byte-string
+        if isinstance(data, unicode):
+            return normalize_unicode(data, charset)
+        else:
+            return data
+    else:
+        # dict, tuple, list should be serialized into byte-string
+        return urlencode(data, charset)

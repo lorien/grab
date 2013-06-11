@@ -12,6 +12,7 @@ class GrabSimpleTestCase(TestCase):
     def setUp(self):
         SERVER.reset()
 
+    @ignore_transport('grab.transport.kit.KitTransport')
     def test_body_inmemory(self):
         g = Grab()
         g.setup(body_inmemory=False)

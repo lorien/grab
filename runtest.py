@@ -4,6 +4,7 @@ import unittest
 import sys
 from optparse import OptionParser
 import logging
+from copy import copy
 
 from test.util import prepare_test_environment, clear_test_environment
 import test.util
@@ -11,21 +12,30 @@ from grab.tools.watch import watch
 from test.tornado_util import start_server, stop_server
 
 GRAB_TEST_LIST = (
-    # Main features
-    'test.grab_simple',
-    'test.grab_xml_processing',
+    # Internal API
     'test.grab_api',
+    'test.grab_transport',
+    'test.response_class',
+    # Network
+    'test.grab_get_request',
+    'test.grab_post_request',
     'test.grab_user_agent',
-    'test.post_feature',
+    'test.grab_cookies',
+    'test.grab_xml_processing',
     'test.grab_response_body_processing',
+    # Refactor
     'test.grab_proxy',
     'test.upload_file',
     'test.limit_option',
-    'test.grab_cookies',
-    'test.response_class',
     'test.charset_issue',
     'test.grab_pickle',
-    'test.grab_transport',
+    # *** Extension sub-system
+    'test.extension',
+    # *** Extensions
+    'test.text_extension',
+    'test.lxml_extension',
+    #'test.form_extension',
+    'test.doc_extension',
     # *** Tornado Test Server
     'test.tornado_server',
     # *** grab.tools
@@ -35,13 +45,6 @@ GRAB_TEST_LIST = (
     'test.tools_account',
     'test.tools_control',
     'test.tools_content',
-    # *** Extension sub-system
-    'test.extension',
-    # *** Extensions
-    'test.text_extension',
-    'test.lxml_extension',
-    'test.form_extension',
-    'test.doc_extension',
     # *** Item
     'test.item',
     # *** Selector
@@ -51,6 +54,14 @@ GRAB_TEST_LIST = (
     # *** Mock transport
     'test.grab_transport_mock',
 )
+
+KIT_TEST_LIST = list(GRAB_TEST_LIST)
+for name in (
+    'test.grab_proxy',
+    'test.upload_file',
+    'test.limit_option',
+):
+    KIT_TEST_LIST.remove(name)
 
 SPIDER_TEST_LIST = (
     'test.spider',
@@ -62,6 +73,8 @@ SPIDER_TEST_LIST = (
 )
 
 GRAB_EXTRA_TEST_LIST = ()
+
+KIT_EXTRA_TEST_LIST = GRAB_EXTRA_TEST_LIST
 
 SPIDER_EXTRA_TEST_LIST = (
     'test.spider_mongo_queue',
@@ -85,9 +98,13 @@ def main():
                       default=False, help='Run tests for Grab')
     parser.add_option('--test-all', action='store_true',
                       default=False, help='Run tests for both Grab and Grab::Spider')
+    parser.add_option('--test-kit', action='store_true',
+                      default=False, help='Run tests for Grab with WebKit transport')
     opts, args = parser.parse_args()
 
     test.util.GRAB_TRANSPORT = opts.transport
+    if opts.test_kit:
+        test.util.GRAB_TRANSPORT = 'grab.transport.kit.KitTransport'
 
     prepare_test_environment()
     test_list = []
@@ -103,6 +120,11 @@ def main():
         test_list += GRAB_TEST_LIST
         if opts.extra:
             test_list += GRAB_EXTRA_TEST_LIST
+
+    if opts.test_kit:
+        test_list += KIT_TEST_LIST
+        if opts.extra:
+            test_list += KIT_EXTRA_TEST_LIST
 
     if opts.test_spider:
         test_list += SPIDER_TEST_LIST

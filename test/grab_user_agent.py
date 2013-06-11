@@ -33,6 +33,8 @@ class GrabSimpleTestCase(TestCase):
         g = Grab(transport=GRAB_TRANSPORT)
 
         # Null value activates default random user-agent
+        # For some transports it just allow them to send default user-agent
+        # like in Kit transport case
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(user_agent=None)
         g.go(SERVER.BASE_URL)

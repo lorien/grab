@@ -19,11 +19,12 @@ class GrabSimpleTestCase(TestCase):
         g.go(SERVER.BASE_URL)
         self.assertTrue('Final Countdown' in g.response.body)
 
-    def test_identity_of_downloaded_content(self):
+    def test_body_content(self):
         SERVER.RESPONSE['get'] = 'Simple String'
         g = Grab(transport=GRAB_TRANSPORT)
         g.go(SERVER.BASE_URL)
         self.assertEqual('Simple String', g.response.body)
+        #self.assertEqual('Simple String' in g.response.runtime_body)
 
     def test_status_code(self):
         SERVER.RESPONSE['get'] = 'Simple String'
@@ -31,14 +32,8 @@ class GrabSimpleTestCase(TestCase):
         g.go(SERVER.BASE_URL)
         self.assertEqual(200, g.response.code)
 
-    def test_response_headers(self):
+    def test_parsing_response_headers(self):
         SERVER.RESPONSE['headers'] = [('Hello', 'Grab')]
         g = Grab(transport=GRAB_TRANSPORT)
         g.go(SERVER.BASE_URL)
         self.assertTrue(g.response.headers['Hello'] == 'Grab')
-
-    def test_response_cookies(self):
-        SERVER.RESPONSE['cookies'] = {'Hello': 'Grab'}
-        g = Grab(transport=GRAB_TRANSPORT)
-        g.go(SERVER.BASE_URL)
-        self.assertTrue(g.response.cookies['Hello'] == 'Grab')

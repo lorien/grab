@@ -10,7 +10,7 @@ import logging
 #except ImportError:
     #from io import BytesIO as StringIO
 #import threading
-#import random
+import random
 #try:
     #from urlparse import urlsplit, urlunsplit
 #except ImportError:
@@ -22,9 +22,9 @@ import logging
 #from ..base import UploadContent, UploadFile
 #from .. import error
 from ..response import Response
-#from ..tools.http import encode_cookies, urlencode, normalize_unicode,\
-                         #normalize_http_values
-#from ..tools.user_agent import random_user_agent
+from ..tools.http import encode_cookies, smart_urlencode, normalize_unicode,\
+                         normalize_http_values, normalize_post_data
+from ..tools.user_agent import random_user_agent
 from ..base import Grab
 from grab.kit import Kit
 
@@ -51,6 +51,9 @@ class KitTransport(object):
         self.request_object = {
             'url': None,
             'cookies': {},
+            'method': None,
+            'data': None,
+            'user_agent': None,
         }
         self.response = None
         #self.response_head_chunks = []
@@ -67,6 +70,7 @@ class KitTransport(object):
 
     def process_config(self, grab):
         self.request_object['url'] = grab.config['url']
+        self.request_object['method'] = grab.request_method.lower()
 
         if grab.config['cookiefile']:
             grab.load_cookies(grab.config['cookiefile'])
@@ -76,10 +80,37 @@ class KitTransport(object):
                 raise error.GrabMisuseError('cookies option shuld be a dict')
             self.request_object['cookies'] = grab.config['cookies']
 
+        if grab.request_method == 'POST':
+            if grab.config['multipart_post']:
+                raise NotImplementedError
+            elif grab.config['post']:
+                post_data = normalize_post_data(grab.config['post'], grab.config['charset'])
+            else:
+                post_data = None
+            self.request_object['data'] = post_data
+
+        if grab.config['user_agent'] is None:
+            if grab.config['user_agent_file'] is not None:
+                with open(grab.config['user_agent_file']) as inf:
+                    lines = inf.read().splitlines()
+                grab.config['user_agent'] = random.choice(lines)
+            else:
+                pass
+                # I think that it does not make sense
+                # to create random user agents for webkit transport
+                #grab.config['user_agent'] = random_user_agent()
+        self.request_object['user_agent'] = grab.config['user_agent']
+
     def request(self):
         kit = Kit()
-        self.kit_response = kit.request(self.request_object['url'],
-                                        cookies=self.request_object['cookies'])
+        req = self.request_object
+        self.kit_response = kit.request(
+            url=req['url'],
+            cookies=req['cookies'],
+            method=req['method'],
+            data=req['data'],
+            user_agent=req['user_agent'],
+        )
 
     def prepare_response(self, grab):
         return self.kit_response

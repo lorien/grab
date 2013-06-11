@@ -65,6 +65,7 @@ class TestPostFeature(TestCase):
         self.assertEqual(args1, args2)
 
     @ignore_transport('grab.transport.requests.RequestsTransport')
+    @ignore_transport('grab.transport.kit.KitTransport')
     def test_multipart_post(self):
         g = Grab(url=SERVER.BASE_URL, debug_post=True, transport=GRAB_TRANSPORT)
         
