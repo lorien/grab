@@ -11,7 +11,7 @@ class GrabXMLProcessingTestCase(TestCase):
 
     def test_xml_with_declaration(self):
         SERVER.RESPONSE['get'] = '<?xml version="1.0" encoding="UTF-8"?><root><foo>foo</foo></root>'
-        g = Grab(strip_xml_declaration=True, transport=GRAB_TRANSPORT)
+        g = Grab(transport=GRAB_TRANSPORT)
         g.go(SERVER.BASE_URL)
         self.assertTrue(g.xpath_one('//foo').text == 'foo')
 
