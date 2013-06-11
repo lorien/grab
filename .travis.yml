@@ -5,5 +5,7 @@ python:
 install:
   - pip install --use-mirrors tornado
   - pip install -r requirements.txt --use-mirrors
+  # Deal with issue on Travis builders re: multiprocessing.Queue :(
+  - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
 script:
   - python runtest.py --test-all
