@@ -12,8 +12,12 @@ from test.tornado_util import start_server, stop_server
 
 GRAB_TEST_LIST = (
     # Main features
-    'test.base_interface',
+    'test.grab_simple',
+    'test.grab_xml_processing',
+    'test.grab_api',
+    'test.grab_user_agent',
     'test.post_feature',
+    'test.grab_response_body_processing',
     'test.grab_proxy',
     'test.upload_file',
     'test.limit_option',
@@ -30,6 +34,7 @@ GRAB_TEST_LIST = (
     'test.lxml_tools',
     'test.tools_account',
     'test.tools_control',
+    'test.tools_content',
     # *** Extension sub-system
     'test.extension',
     # *** Extensions
