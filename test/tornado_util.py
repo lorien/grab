@@ -27,8 +27,9 @@ class ServerState(object):
             'get': '',
             'post': '',
             'cookies': None,
-             'once_code': None,
-             'get_callback': None,
+            'headers': [],
+            'once_code': None,
+            'get_callback': None,
         })
         self.RESPONSE_ONCE.update({
             'get': None,
@@ -74,6 +75,10 @@ class MainHandler(tornado.web.RequestHandler):
             if SERVER.RESPONSE['cookies']:
                 for name, value in SERVER.RESPONSE['cookies'].items():
                     self.set_header('Set-Cookie', '%s=%s' % (name, value))
+
+            if SERVER.RESPONSE['headers']:
+                for name, value in SERVER.RESPONSE['headers']:
+                    self.set_header(name, value)
 
             while SERVER.RESPONSE_ONCE_HEADERS:
                 key, value = SERVER.RESPONSE_ONCE_HEADERS.pop()

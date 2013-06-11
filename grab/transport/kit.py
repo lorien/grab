@@ -48,7 +48,10 @@ class KitTransport(object):
         #self.body_path = path
 
     def reset(self):
-        self.request_object = {}
+        self.request_object = {
+            'url': None,
+            'cookies': {},
+        }
         self.response = None
         #self.response_head_chunks = []
         #self.response_body_chunks = []
@@ -65,9 +68,18 @@ class KitTransport(object):
     def process_config(self, grab):
         self.request_object['url'] = grab.config['url']
 
+        if grab.config['cookiefile']:
+            grab.load_cookies(grab.config['cookiefile'])
+
+        if grab.config['cookies']:
+            if not isinstance(grab.config['cookies'], dict):
+                raise error.GrabMisuseError('cookies option shuld be a dict')
+            self.request_object['cookies'] = grab.config['cookies']
+
     def request(self):
         kit = Kit()
-        self.kit_response = kit.request(self.request_object['url'])
+        self.kit_response = kit.request(self.request_object['url'],
+                                        cookies=self.request_object['cookies'])
 
     def prepare_response(self, grab):
         return self.kit_response

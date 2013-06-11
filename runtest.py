@@ -21,7 +21,7 @@ GRAB_TEST_LIST = (
     'test.grab_proxy',
     'test.upload_file',
     'test.limit_option',
-    'test.cookies',
+    'test.grab_cookies',
     'test.response_class',
     'test.charset_issue',
     'test.grab_pickle',

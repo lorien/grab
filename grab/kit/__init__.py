@@ -8,18 +8,31 @@ import sys
 from PyQt4.QtCore import QEventLoop, QUrl, QEventLoop, QTimer
 from PyQt4.QtGui import QApplication
 from PyQt4.QtWebKit import QWebView, QWebPage
-from PyQt4.QtNetwork import (QNetworkAccessManager, QNetworkReply, QNetworkRequest,
-                             QNetworkCookieJar)
+from PyQt4.QtNetwork import QNetworkRequest, QNetworkCookieJar, QNetworkCookie
 from lxml.html import fromstring
 from grab.selector import Selector
 from grab.response import Response
 import logging
+from urlparse import urlsplit
+
 from grab.kit.network_access_manager import KitNetworkAccessManager
 from grab.kit.network_reply import KitNetworkReply
 from grab.kit.error import KitError
 from grab.kit.network_reply import KitNetworkReply
 
 logger = logging.getLogger('grab.kit')
+
+class Resource(object):
+    def __init__(self, reply):
+        self.reply = reply
+        self.url = str(reply.url().toString())
+
+        self.status_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)\
+                                .toInt()[0]
+        self.headers = {}
+        for header in reply.rawHeaderList():
+            self.headers[header.data()] = reply.rawHeader(header).data()
+
 
 class KitWebView(QWebView):
     def setApplication(self, app):
@@ -58,7 +71,7 @@ class Kit(object):
         self.app = QApplication(sys.argv)
 
         manager = KitNetworkAccessManager()
-        manager.finished.connect(self.reply_handler)
+        manager.finished.connect(self.network_reply_handler)
 
         self.cookie_jar = QNetworkCookieJar()
         manager.setCookieJar(self.cookie_jar)
@@ -80,45 +93,83 @@ class Kit(object):
         return cookies
 
 
-    def request(self, url, user_agent='Mozilla', timeout=15):
+    def request(self, url, user_agent='Mozilla', cookies={}, timeout=15):
+        url_info = urlsplit(url)
+
+        self.resource_list = []
         loop = QEventLoop()
         self.view.loadFinished.connect(loop.quit)
+
+        # Timeout
         timer = QTimer()
         timer.setSingleShot(True)
         timer.timeout.connect(loop.quit)
         timer.start(timeout * 1000)
 
+        # User-Agent
         self.page.user_agent = user_agent
+
+        # Cookies
+        
+        cookie_obj_list = []
+        for name, value in cookies.items():
+            domain = ('.' + url_info.netloc).split(':')[0]
+            #print 'CREATE COOKIE %s=%s' % (name, value)
+            #print 'DOMAIN = %s' % domain
+            cookie_obj = QNetworkCookie(name, value)
+            cookie_obj.setDomain(domain)
+            cookie_obj_list.append(cookie_obj)
+        self.cookie_jar.setAllCookies(cookie_obj_list)
+
+        # Make a request
         self.view.load(QUrl(url))
 
         loop.exec_()
 
         if timer.isActive():
-            return self.build_response()
+            request_resource = None
+            url = str(self.page.mainFrame().url().toString()).rstrip('/')
+            for res in self.resource_list:
+                if url == res.url or url == res.url.rstrip('/'):
+                    request_resource = res
+                    break
+            if request_resource:
+                return self.build_response(request_resource)
+            else:
+                raise KitError('Request was successfull but it is not possible '\
+                               'to associate the request to one of received responses')
         else:
             raise KitError('Timeout while loading %s' % url)
 
-    def build_response(self):
+    def build_response(self, resource):
         response = Response()
         response.head = ''
-        response.body = unicode(self.page.mainFrame().toHtml())
-        response.code = 200
-        response.url = self.view.url(),
+        response.body = resource.reply.data
+        response.code = resource.status_code
+        response.url = str(resource.reply.url().toString())
+
         response.parse(charset='utf-8')
+
+        response.headers = resource.headers
         response.cookies = self.get_cookies()
         return response
 
     def __del__(self):
         self.view.setPage(None)
 
-    def reply_handler(self, reply):
-        logger.debug('Loaded %s, length %d' % (reply.url().toString(), len(reply.data)))
+    def network_reply_handler(self, reply):
+        status_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+        if status_code:
+            logger.debug('Resource loaded: %s [%d]' % (reply.url().toString(),
+                                                       status_code.toInt()[0]))
+            self.resource_list.append(Resource(reply))
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
     br = Kit(gui=False)
-    resp = br.request('http://ya.ru/')
-    print resp.body[:200]
+    resp = br.request('http://httpbin.org/cookies', cookies={'foo': 'bar'})
+    #resp = br.request('http://dumpz.org/')
+    print resp.body
     print resp.cookies

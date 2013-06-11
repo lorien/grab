@@ -11,7 +11,7 @@ class TestCookies(TestCase):
     def setUp(self):
         SERVER.reset()
 
-    def test_cookies_parsing(self):
+    def test_parsing_response_cookies(self):
         g = Grab(transport=GRAB_TRANSPORT)
         SERVER.RESPONSE['cookies'] = {'foo': 'bar', '1': '2'}
         g.go(SERVER.BASE_URL)

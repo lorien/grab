@@ -19,31 +19,26 @@ class GrabSimpleTestCase(TestCase):
         g.go(SERVER.BASE_URL)
         self.assertTrue('Final Countdown' in g.response.body)
 
-    #def test_body_inmemory(self):
-        #g = Grab()
-        #g.setup(body_inmemory=False)
-        #self.assertRaises(GrabMisuseError, lambda: g.go(SERVER.BASE_URL))
+    def test_identity_of_downloaded_content(self):
+        SERVER.RESPONSE['get'] = 'Simple String'
+        g = Grab(transport=GRAB_TRANSPORT)
+        g.go(SERVER.BASE_URL)
+        self.assertEqual('Simple String', g.response.body)
 
-        #SERVER.RESPONSE['get'] = 'foo'
-        #g = Grab()
-        #g.setup(body_inmemory=False)
-        #g.setup(body_storage_dir=TMP_DIR)
-        #g.go(SERVER.BASE_URL)
-        #self.assertTrue(os.path.exists(g.response.body_path))
-        #self.assertTrue(TMP_DIR in g.response.body_path)
-        #self.assertEqual('foo', open(g.response.body_path).read())
-        #old_path = g.response.body_path
+    def test_status_code(self):
+        SERVER.RESPONSE['get'] = 'Simple String'
+        g = Grab(transport=GRAB_TRANSPORT)
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(200, g.response.code)
 
-        #g.go(SERVER.BASE_URL)
-        #self.assertTrue(old_path != g.response.body_path)
+    def test_response_headers(self):
+        SERVER.RESPONSE['headers'] = [('Hello', 'Grab')]
+        g = Grab(transport=GRAB_TRANSPORT)
+        g.go(SERVER.BASE_URL)
+        self.assertTrue(g.response.headers['Hello'] == 'Grab')
 
-        #SERVER.RESPONSE['get'] = 'foo'
-        #g = Grab()
-        #g.setup(body_inmemory=False)
-        #g.setup(body_storage_dir=TMP_DIR)
-        #g.setup(body_storage_filename='musik.mp3')
-        #g.go(SERVER.BASE_URL)
-        #self.assertTrue(os.path.exists(g.response.body_path))
-        #self.assertTrue(TMP_DIR in g.response.body_path)
-        #self.assertEqual('foo', open(g.response.body_path).read())
-        #self.assertEqual(os.path.join(TMP_DIR, 'musik.mp3'), g.response.body_path)
+    def test_response_cookies(self):
+        SERVER.RESPONSE['cookies'] = {'Hello': 'Grab'}
+        g = Grab(transport=GRAB_TRANSPORT)
+        g.go(SERVER.BASE_URL)
+        self.assertTrue(g.response.cookies['Hello'] == 'Grab')
