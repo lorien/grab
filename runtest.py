@@ -53,6 +53,8 @@ GRAB_TEST_LIST = (
     'test.i18n',
     # *** Mock transport
     'test.grab_transport_mock',
+    # Javascript features
+    'test.grab_js',
 )
 
 KIT_TEST_LIST = list(GRAB_TEST_LIST)
