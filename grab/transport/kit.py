@@ -141,6 +141,6 @@ class KitTransport(object):
 class GrabKit(Grab):
     def __init__(self, response_body=None, transport='grab.transport.curl.CurlTransport',
                  **kwargs):
-        super(GrabMock, self).__init__(response_body=response_body,
+        super(GrabKit, self).__init__(response_body=response_body,
                                        transport='grab.transport.kit.KitTransport',
                                        **kwargs)

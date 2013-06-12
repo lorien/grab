@@ -11,6 +11,12 @@ import test.util
 from grab.tools.watch import watch
 from test.tornado_util import start_server, stop_server
 
+# **********
+# Grab Tests
+# * pycurl transport
+# * extensions
+# * tools
+# **********
 GRAB_TEST_LIST = (
     # Internal API
     'test.grab_api',
@@ -53,15 +59,37 @@ GRAB_TEST_LIST = (
     'test.i18n',
     # *** Mock transport
     'test.grab_transport_mock',
+    # Javascript features
+    'test.grab_js',
 )
 
+GRAB_EXTRA_TEST_LIST = ()
+
+# *******************************************
+# Kit Tests
+# * All Grab tests with enabled Kit Transport
+# * Kit Selectors
+# *******************************************
+
 KIT_TEST_LIST = list(GRAB_TEST_LIST)
+KIT_TEST_LIST += [
+    'test.selector_kit',
+]
 for name in (
     'test.grab_proxy',
     'test.upload_file',
     'test.limit_option',
 ):
     KIT_TEST_LIST.remove(name)
+
+KIT_EXTRA_TEST_LIST = list(GRAB_EXTRA_TEST_LIST)
+KIT_EXTRA_TEST_LIST += [
+    'test.kit_live_sites',
+]
+
+# ************
+# Spider Tests
+# ************
 
 SPIDER_TEST_LIST = (
     'test.spider',
@@ -71,10 +99,6 @@ SPIDER_TEST_LIST = (
     'test.spider_queue',
     'test.spider_misc',
 )
-
-GRAB_EXTRA_TEST_LIST = ()
-
-KIT_EXTRA_TEST_LIST = GRAB_EXTRA_TEST_LIST
 
 SPIDER_EXTRA_TEST_LIST = (
     'test.spider_mongo_queue',

@@ -30,7 +30,7 @@ import logging
 
 from .tools.lxml_tools import get_node_text
 from .error import DataNotFound
-from .selector import Selector
+from .selector import XpathSelector
 
 NULL = object()
 
@@ -227,7 +227,7 @@ class Item(object, metaclass=ItemBuilder):
         self._tree = tree
         self._cache = {}
         self._grab = grab
-        self._selector = Selector(self._tree)
+        self._selector = XpathSelector(self._tree)
 
     @classmethod
     def find(cls, root, **kwargs):

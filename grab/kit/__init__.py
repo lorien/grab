@@ -24,6 +24,10 @@ from grab.kit.network_reply import KitNetworkReply
 from grab.kit.error import KitError
 from grab.kit.network_reply import KitNetworkReply
 
+# Backward compatibility for unicode function
+if sys.version_info >= (3,):
+    unicode = str
+
 logger = logging.getLogger('grab.kit')
 
 class Resource(object):
@@ -52,7 +56,10 @@ class KitPage(QWebPage):
         self.user_agent = 'QtWebKitWrapper'
 
     def userAgentForUrl(self, url):
-        return self.user_agent
+        if self.user_agent is None:
+            return super(KitPage, self).userAgentForUrl(url)
+        else:
+            return self.user_agent
 
     def shouldInterruptJavaScript(self):
         return True
@@ -169,7 +176,7 @@ class Kit(object):
     def build_response(self, resource):
         response = Response()
         response.head = ''
-        #response.runtime_body = unicode(self.page.mainFrame().toHtml()).encode('utf-8')
+        response.runtime_body = unicode(self.page.mainFrame().toHtml()).encode('utf-8')
         response.body = str(resource.reply.data)
         response.code = resource.status_code
         response.url = str(resource.reply.url().toString())
@@ -193,6 +200,8 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
     br = Kit(gui=False)
-    resp = br.request('http://httpbin.org/post', method='post', cookies={'foo': 'bar'},
-                      data='foo=bar')
-    print(resp.body)
+    #resp = br.request('http://httpbin.org/post', method='post', cookies={'foo': 'bar'},
+                      #data='foo=bar')
+    #print(resp.body)
+    resp = br.request('http://ya.ru/')
+    print(unicode(br.page.mainFrame().documentElement().findFirst('title').toPlainText()))

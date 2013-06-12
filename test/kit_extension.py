@@ -2,8 +2,9 @@
 from unittest import TestCase
 from grab import Grab, DataNotFound
 
-from .util import GRAB_TRANSPORT
 from .tornado_util import SERVER
+
+GRAB_TRANSPORT = 'grab.transport.kit.KitTransport'
 
 HTML = u"""
 <html>
@@ -13,15 +14,15 @@ HTML = u"""
 </html>
 """
 
-class DocExtensionTest(TestCase):
+class KitExtensionTest(TestCase):
     def setUp(self):
         SERVER.reset()
-
-        # Create fake grab instance with fake response
-        self.g = Grab(HTML, transport=GRAB_TRANSPORT)
+        SERVER.RESPONSE['get'] = HTML
+        self.g = Grab(transport=GRAB_TRANSPORT)
+        self.g.go(SERVER.BASE_URL)
 
     def test_extension_in_general(self):
-        self.assertTrue(self.g.doc)
+        self.assertTrue(self.g.kit)
 
     def test_select_method(self):
-        self.assertEqual('test', self.g.doc.select('//h1').text())
+        self.assertEqual('test', self.g.kit.select('h1').text())

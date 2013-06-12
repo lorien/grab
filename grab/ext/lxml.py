@@ -63,7 +63,7 @@ class LXMLExtension(object):
         from lxml.etree import ParserError
 
         if self._lxml_tree is None:
-            body = self.response.unicode_body(
+            body = self.response.unicode_runtime_body(
                 fix_special_entities=self.config['fix_special_entities']
             ).strip()
             #if self.config['tidy']:

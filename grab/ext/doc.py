@@ -1,8 +1,16 @@
-# Copyright: 2011, Grigoriy Petukhov
+# Copyright: 2013, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
-# License: BSD
+# License: MIT
 from __future__ import absolute_import
-from ..selector import Selector
+from grab.selector import XpathSelector
+
+class DocInterface(object):
+    def __init__(self, grab):
+        self.grab = grab
+
+    def select(self, *args, **kwargs):
+        return XpathSelector(self.grab.tree).select(*args, **kwargs)
+
 
 class DocExtension(object):
     def extra_reset(self):
@@ -11,7 +19,10 @@ class DocExtension(object):
     @property
     def doc(self):
         """
-        Return Selector object bined to the `self.tree`
+        Return DocInterface object which provides some
+        shortcuts for faster access to Selector functions.
         """
         
-        return Selector(self.tree)
+        if not self._doc:
+            self._doc = DocInterface(self)
+        return self._doc
