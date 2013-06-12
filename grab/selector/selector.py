@@ -37,6 +37,7 @@ try:
     from pyquery import PyQuery
 except ImportError:
     pass
+from abc import ABCMeta, abstractmethod
 
 from ..tools.lxml_tools import get_node_text, render_html
 from ..tools.text import find_number, normalize_space as normalize_space_func
@@ -46,35 +47,34 @@ from ..tools.text import normalize_space
 from ..tools.html import decode_entities
 from ..base import GLOBAL_STATE
 
-__all__ = ['Selector', 'TextSelector']
+__all__ = ['Selector', 'TextSelector', 'XpathSelector', 'PyquerySelector']
 NULL = object()
-DEBUG_LOGGING = False
 XPATH_CACHE = {}
 logger = logging.getLogger('grab.selector.selector')
 
 
 class SelectorList(object):
-    def __init__(self, items, query_type, query_exp):
-        self.items = items
-        self.query_type = query_type
-        self.query_exp = query_exp
+    def __init__(self, selector_list, origin_selector_class, origin_query):
+        self.selector_list = selector_list
+        self.origin_selector_class = origin_selector_class
+        self.origin_query = origin_query
 
     def __getitem__(self, x):
-        return self.items[x]
+        return self.selector_list[x]
 
     def __len__(self):
         return self.count()
 
     def count(self):
-        return len(self.items)
+        return len(self.selector_list)
 
     def one(self, default=NULL):
         try:
-            return self.items[0]
+            return self.selector_list[0]
         except IndexError:
             if default is NULL:
-                raise DataNotFound('Could not get first item for %s: %s' % (
-                    self.query_type, self.query_exp))
+                raise DataNotFound('Could not get first item for %s query of class %s' % (
+                    self.origin_query, self.origin_selector_class.__name__))
             else:
                 return default
 
@@ -94,7 +94,7 @@ class SelectorList(object):
 
     def text_list(self, smart=False, normalize_space=True):
         result_list = []
-        for item in self.items:
+        for item in self.selector_list:
             result_list.append(item.text())
         return result_list
 
@@ -120,7 +120,7 @@ class SelectorList(object):
         Return True if selctor list is not empty.
         """
 
-        return len(self.items) > 0
+        return len(self.selector_list) > 0
 
     def attr(self, key, default=NULL):
         try:
@@ -135,7 +135,7 @@ class SelectorList(object):
 
     def attr_list(self, key, default=NULL):
         result_list = []
-        for item in self.items:
+        for item in self.selector_list:
             result_list.append(item.attr(key, default=default))
         return result_list
 
@@ -151,77 +151,60 @@ class SelectorList(object):
             return self.one().rex(regexp, flags=flags, byte=byte)
 
     def node_list(self):
-        return [x.node for x in self.items]
+        return [x.node for x in self.selector_list]
 
-    def node(self):
-        return self.one().node
-
-    def select(self, xpath=None, pyquery=None):
-        result_list = None
-        for count, item in enumerate(self.items):
-            item_result_list = item.select(xpath=xpath, pyquery=pyquery)
-            if count == 0:
-                result_list = item_result_list
-            else:
-                result_list.items.extend(item_result_list.items)
-        if result_list is None:
-            # TODO: refactor
-            if xpath is not None:
-                query_type = 'xpath'
-                query_exp = xpath
-            else:
-                query_type = 'pyquery'
-                query_exp = pyquery
-            return SelectorList([], query_type=query_type, query_exp=query_exp)
-        return result_list
+    def select(self, query):
+        result = SelectorList([], self.origin_selector_class,
+                              self.origin_query + ' + ' + query)
+        for count, selector in enumerate(self.selector_list):
+            result.selector_list.extend(selector.select(query))
+        return result
 
 
-class Selector(object):
+class BaseSelector(object):
+    __metaclass__ = ABCMeta
+
     def __init__(self, node):
         self.node = node
 
-    def pyquery_node(self):
-        return PyQuery(self.node)
-
-    def select(self, xpath=None, pyquery=None):
-        from lxml.etree import XPath
-
+    def select(self, query):
         start = time.time()
-        
-        if xpath is None and pyquery is None:
-            raise Exception('Both xpath and pyquery option are None')
-
-        if xpath is not None and pyquery is not None:
-            raise Exception('Both xpath and pyquery option are not None')
-
-        if xpath is not None:
-            if not xpath in XPATH_CACHE:
-                obj = XPath(xpath)
-                XPATH_CACHE[xpath] = obj
-            xpath_obj = XPATH_CACHE[xpath]
-
-            val = self.wrap_list(xpath_obj(self.node), 'xpath', xpath)
-            query_exp = xpath
-        else:
-            val = self.wrap_list(self.pyquery_node().find(pyquery), 'pyquery', pyquery)
-            query_exp = pyquery
-
+        selector_list = self.wrap_node_list(self.process_query(query), query)
         total = time.time() - start
-        if DEBUG_LOGGING:
-            logger.debug(u'Performed query [%s], elements: %d, time: %.05f sec' % (query_exp, len(val), total))
         GLOBAL_STATE['selector_time'] += total
+        return selector_list
 
-        return val
-
-    def wrap_list(self, items, query_type, query_exp):
-        selectors = []
-        for x in items:
-            if isinstance(x, basestring):
-                selectors.append(TextSelector(x))
+    def wrap_node_list(self, nodes, query):
+        selector_list = []
+        for node in nodes:
+            if isinstance(node, basestring):
+                selector_list.append(TextSelector(node))
             else:
-                selectors.append(Selector(x))
-        return SelectorList(selectors, query_type=query_type, query_exp=query_exp)
+                selector_list.append(self.__class__(node))
+        return SelectorList(selector_list, self.__class__, query)
 
+    @abstractmethod
+    def html(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def attr(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def text(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def number(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def rex(self):
+        raise NotImplementedError
+
+
+class LxmlNodeBaseSelector(BaseSelector):
     def html(self, encoding='unicode'):
         return render_html(self.node, encoding=encoding)
 
@@ -276,7 +259,7 @@ class RexResultList(object):
         return int(self.text())
 
 
-class TextSelector(Selector):
+class TextSelector(LxmlNodeBaseSelector):
     def select(self, xpath=None):
         raise GrabMisuseError('TextSelector does not allow select method') 
 
@@ -285,3 +268,32 @@ class TextSelector(Selector):
 
     def attr(self, key, default=NULL):
         raise GrabMisuseError('TextSelector does not allow attr method') 
+
+
+class XpathSelector(LxmlNodeBaseSelector):
+    def process_query(self, query):
+        from lxml.etree import XPath
+
+        if not query in XPATH_CACHE:
+            obj = XPath(query)
+            XPATH_CACHE[query] = obj
+        xpath_obj = XPATH_CACHE[query]
+
+        return xpath_obj(self.node)
+
+
+class PyquerySelector(LxmlNodeBaseSelector):
+    def pyquery_node(self):
+        return PyQuery(self.node)
+
+    def process_query(self, query):
+        return self.pyquery_node().find(pyquery)
+
+# ****************
+# Deprecated Stuff
+# ****************
+
+class Selector(XpathSelector):
+    def __init__(self, *args, **kwargs):
+        super(Selector, self).__init__(*args, **kwargs)
+        logger.debug('Selector class is deprecated. Please use XpathSelector class instead.')

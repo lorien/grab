@@ -2,7 +2,7 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 from __future__ import absolute_import
-from ..selector import Selector
+from grab.selector import XpathSelector
 
 class DocExtension(object):
     def extra_reset(self):
@@ -14,4 +14,4 @@ class DocExtension(object):
         Return Selector object bined to the `self.tree`
         """
         
-        return Selector(self.tree)
+        return XpathSelector(self.tree)
