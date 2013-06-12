@@ -5,7 +5,7 @@ Credits:
 """
 import time 
 import sys
-from PyQt4.QtCore import QEventLoop, QUrl, QEventLoop, QTimer, QByteArray
+from PyQt4.QtCore import QEventLoop, QUrl, QEventLoop, QTimer, QByteArray, QSize
 from PyQt4.QtGui import QApplication
 from PyQt4.QtWebKit import QWebView, QWebPage
 from PyQt4.QtNetwork import (QNetworkAccessManager, QNetworkRequest,
@@ -41,6 +41,10 @@ class KitWebView(QWebView):
 
     def closeEvent(self, event):
         self.app.quit()
+
+    def sizeHint(self):
+        viewport_size = (800, 600)
+        return QSize(*viewport_size)
 
 
 class KitPage(QWebPage):
