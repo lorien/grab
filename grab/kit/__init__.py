@@ -166,7 +166,7 @@ class Kit(object):
     def build_response(self, resource):
         response = Response()
         response.head = ''
-        #response.runtime_body = unicode(self.page.mainFrame().toHtml()).encode('utf-8')
+        response.runtime_body = unicode(self.page.mainFrame().toHtml()).encode('utf-8')
         response.body = str(resource.reply.data)
         response.code = resource.status_code
         response.url = str(resource.reply.url().toString())
@@ -190,6 +190,8 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
     br = Kit(gui=False)
-    resp = br.request('http://httpbin.org/post', method='post', cookies={'foo': 'bar'},
-                      data='foo=bar')
-    print resp.body
+    #resp = br.request('http://httpbin.org/post', method='post', cookies={'foo': 'bar'},
+                      #data='foo=bar')
+    #print resp.body
+    resp = br.request('http://ya.ru/')
+    print unicode(br.page.mainFrame().documentElement().findFirst('title').toPlainText())

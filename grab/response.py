@@ -64,6 +64,7 @@ class Response(object):
         self.code = None
         self.head = None
         self._body = None
+        self._runtime_body = None
         #self.runtime_body = None
         self.body_path = None
         self.headers =None
@@ -73,6 +74,7 @@ class Response(object):
         #self.cookiejar = None
         self.charset = 'utf-8'
         self._unicode_body = None
+        self._unicode_runtime_body = None
         self.bom = None
         self.done_time = None
 
@@ -184,25 +186,40 @@ class Response(object):
             else:
                 self.charset = charset
 
+    def process_unicode_body(self, body, bom, charset, ignore_errors, fix_special_entities):
+        if ignore_errors:
+            errors = 'ignore'
+        else:
+            errors = 'strict'
+        if bom:
+            body = body[len(self.bom):]
+        else:
+            body = body
+        if fix_special_entities:
+            body = encoding_tools.fix_special_entities(body)
+        return body.decode(charset, errors).strip()
+
     def unicode_body(self, ignore_errors=True, fix_special_entities=True):
         """
         Return response body as unicode string.
         """
 
         if not self._unicode_body:
-            if ignore_errors:
-                errors = 'ignore'
-            else:
-                errors = 'strict'
-            if self.bom:
-                body = self.body[len(self.bom):]
-            else:
-                body = self.body
-            if fix_special_entities:
-                body = encoding_tools.fix_special_entities(body)
-            ubody = body.decode(self.charset, errors).strip()
-            self._unicode_body = ubody
+            self._unicode_body = self.process_unicode_body(
+                self.body, self.bom, self.charset,
+                ignore_errors, fix_special_entities)
         return self._unicode_body
+
+    def unicode_runtime_body(self, ignore_errors=True, fix_special_entities=True):
+        """
+        Return response body as unicode string.
+        """
+
+        if not self._unicode_runtime_body:
+            self._unicode_runtime_body = self.process_unicode_body(
+                self.runtime_body, None, self.charset,
+                ignore_errors, fix_special_entities)
+        return self._unicode_runtime_body
 
     def copy(self):
         """
@@ -319,13 +336,13 @@ class Response(object):
 
     body = property(_read_body, _write_body)
 
-    #def _read_runtime_body(self):
-        #if self._runtime_body is None:
-            #return self.body
-        #else:
-            #return self._runtime_body
+    def _read_runtime_body(self):
+        if self._runtime_body is None:
+            return self.body
+        else:
+            return self._runtime_body
 
-    #def _write_runtime_body(self, body):
-        #self._runtime_body = body
+    def _write_runtime_body(self, body):
+        self._runtime_body = body
 
-    #runtime_body = property(_read_runtime_body, _write_runtime_body)
+    runtime_body = property(_read_runtime_body, _write_runtime_body)
