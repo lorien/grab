@@ -18,7 +18,8 @@ from ..tools.text import normalize_space
 from ..tools.html import decode_entities
 from ..base import GLOBAL_STATE
 
-__all__ = ['Selector', 'TextSelector', 'XpathSelector', 'PyquerySelector']
+__all__ = ['Selector', 'TextSelector', 'XpathSelector', 'PyquerySelector',
+           'KitSelector']
 NULL = object()
 XPATH_CACHE = {}
 logger = logging.getLogger('grab.selector.selector')
@@ -166,13 +167,21 @@ class BaseSelector(object):
     def text(self):
         raise NotImplementedError
 
-    @abstractmethod
-    def number(self):
-        raise NotImplementedError
+    def number(self, default=NULL, ignore_spaces=False,
+               smart=False, make_int=True):
+        try:
+            return find_number(self.text(smart=smart), ignore_spaces=ignore_spaces,
+                               make_int=make_int)
+        except IndexError:
+            if default is NULL:
+                raise
+            else:
+                return default
 
-    @abstractmethod
-    def rex(self):
-        raise NotImplementedError
+    def rex(self, regexp, flags=0, byte=False):
+        norm_regexp = rex_tools.normalize_regexp(regexp, flags)
+        matches = list(norm_regexp.finditer(self.html()))
+        return RexResultList(matches, source_rex=norm_regexp)
 
 
 class LxmlNodeBaseSelector(BaseSelector):
@@ -259,6 +268,32 @@ class PyquerySelector(LxmlNodeBaseSelector):
 
     def process_query(self, query):
         return self.pyquery_node().find(pyquery)
+
+
+class KitSelector(BaseSelector):
+    def process_query(self, query):
+        return self.node.findAll(query)
+
+    def html(self, encoding='unicode'):
+        xml = self.node.toOuterXml()
+        if encoding == 'unicode':
+            return xml
+        else:
+            return xml.encode(encoding)
+
+    def attr(self, key, default=NULL):
+        if default is NULL:
+            val = unicode(self.node.attribute(key, u'@NOTFOUND@'))
+            if val == u'@NOTFOUND@':
+                raise DataNotFound(u'No such attribute: %s' % key)
+            else:
+                return val
+        else:
+            return unicode(self.node.attribute(key, default))
+
+    def text(self, smart=False, normalize_space=True):
+        return unicode(self.node.toPlainText())
+
 
 # ****************
 # Deprecated Stuff
