@@ -49,7 +49,10 @@ class KitPage(QWebPage):
         self.user_agent = 'QtWebKitWrapper'
 
     def userAgentForUrl(self, url):
-        return self.user_agent
+        if self.user_agent is None:
+            return super(KitPage, self).userAgentForUrl(url)
+        else:
+            return self.user_agent
 
     def shouldInterruptJavaScript(self):
         return True
