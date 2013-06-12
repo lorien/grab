@@ -10,6 +10,7 @@ Exception
     |-> Grab*Error
 
 """
+import warnings
 
 class GrabError(Exception):
     """
@@ -64,3 +65,13 @@ class GrabTooManyRedirectsError(GrabError):
     Raised when Grab reached max. allowd number of redirects for
     one request.
     """
+
+
+class GrabDeprecationWarning(Warning):
+    """
+    Raised when some deprecated feature is used.
+    """
+
+
+def warn(msg):
+    warnings.warn(msg, category=GrabDeprecationWarning, stacklevel=3)

@@ -13,7 +13,7 @@ from grab.item import (Item, IntegerField, StringField, DateTimeField, func_fiel
                        FuncField)
 from test.util import GRAB_TRANSPORT
 from grab.tools.lxml_tools import get_node_text, parse_html
-from grab.selector import Selector
+from grab.selector import XpathSelector
 
 XML = """<?xml version='1.0' encoding='utf-8'?>
 <bbapi version='1'>
@@ -130,8 +130,8 @@ class ItemTestCase(TestCase):
     def test_get_function(self):
         func = Player.get_function('height1')
         html = '<html><body><height>3'
-        self.assertEquals(3, func(Selector(parse_html(html))))
+        self.assertEquals(3, func(XpathSelector(parse_html(html))))
 
         func = Player.get_function('height2')
         html = '<html><body><height>3'
-        self.assertEquals(3, func(Selector(parse_html(html))))
+        self.assertEquals(3, func(XpathSelector(parse_html(html))))

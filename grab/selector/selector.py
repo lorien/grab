@@ -1,34 +1,5 @@
 """
 Selector module provides high usability interface to lxml tree
-
-Example of usage::
-
-    >>> from lxml.html import fromstring
-    >>> from grab.selector import Selector
-    >>> HTML = '<body><h1>test</h1><ul><li>one: 1</li><li>two: 2</li></ul><span id="foo">FOO</span>'
-    >>> sel = Selector(fromstring(HTML))
-    >>> sel.select('//li')
-    <grab.selector.selector.SelectorList object at 0x1aeaa90>
-    >>> sel.select('//li')[0].node
-    <Element li at 0x1adad10>
-    >>> sel.select('//li')[0].node.text
-    'one: 1'
-    >>> sel.select('//li')[0].html()
-    '<li>one: 1</li>'
-    >>> sel.select('//span')[0].attr('id')
-    'foo'
-    >>> sel.select('//span/@id')[0]
-    <grab.selector.selector.Selector object at 0x1aeaa50>
-    >>> sel.select('//span').one().html()
-    '<span id="foo">FOO</span>'
-    >>> sel.select('//li').one().html()
-    '<li>one: 1</li>'
-    >>> sel.select('//li').text()
-    'one: 1'
-    >>> sel.select('//li').number()
-    1
-    >>> sel.select('//li').exists()
-    True
 """
 from __future__ import absolute_import
 import logging
@@ -41,7 +12,7 @@ from abc import ABCMeta, abstractmethod
 
 from ..tools.lxml_tools import get_node_text, render_html
 from ..tools.text import find_number, normalize_space as normalize_space_func
-from ..error import GrabMisuseError, DataNotFound
+from ..error import GrabMisuseError, DataNotFound, warn
 from ..tools import rex as rex_tools
 from ..tools.text import normalize_space
 from ..tools.html import decode_entities
@@ -296,4 +267,4 @@ class PyquerySelector(LxmlNodeBaseSelector):
 class Selector(XpathSelector):
     def __init__(self, *args, **kwargs):
         super(Selector, self).__init__(*args, **kwargs)
-        logger.debug('Selector class is deprecated. Please use XpathSelector class instead.')
+        warn('Selector class is deprecated. Please use XpathSelector class instead.')
