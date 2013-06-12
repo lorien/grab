@@ -23,12 +23,6 @@ import re
 import json
 import email
 from datetime import datetime
-import sys
-
-# Backward compatibility for basestring datatype and unicode function
-if sys.version_info >= (3,):
-    basestring = str
-    unicode = str
 
 from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url
@@ -37,6 +31,8 @@ from . import error
 from .upload import UploadContent, UploadFile
 from .tools.http import normalize_http_values, normalize_url
 from .extension import register_extensions
+
+from grab.util import py3k_support
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used

@@ -9,12 +9,6 @@ try:
 except ImportError:
     pass
 from abc import ABCMeta, abstractmethod
-import sys
-
-# Backward compatibility for basestring datatype and unicode function
-if sys.version_info >= (3,):
-    basestring = str
-    unicode = str
 
 from ..tools.lxml_tools import get_node_text, render_html
 from ..tools.text import find_number, normalize_space as normalize_space_func
@@ -23,6 +17,8 @@ from ..tools import rex as rex_tools
 from ..tools.text import normalize_space
 from ..tools.html import decode_entities
 from ..base import GLOBAL_STATE
+
+from grab.util import py3k_support
 
 __all__ = ['Selector', 'TextSelector', 'XpathSelector', 'PyquerySelector',
            'KitSelector']

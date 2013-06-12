@@ -4,7 +4,7 @@ Credits:
 * https://github.com/jeanphix/Ghost.py/blob/master/ghost/ghost.py
 """
 import time 
-import sys
+#import sys
 from PyQt4.QtCore import QEventLoop, QUrl, QEventLoop, QTimer, QByteArray
 from PyQt4.QtGui import QApplication
 from PyQt4.QtWebKit import QWebView, QWebPage
@@ -24,9 +24,7 @@ from grab.kit.network_reply import KitNetworkReply
 from grab.kit.error import KitError
 from grab.kit.network_reply import KitNetworkReply
 
-# Backward compatibility for unicode function
-if sys.version_info >= (3,):
-    unicode = str
+from grab.util import py3k_support
 
 logger = logging.getLogger('grab.kit')
 

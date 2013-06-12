@@ -32,13 +32,6 @@ try:
     import Queue as queue
 except ImportError:
     import queue
-import sys
-
-# Backward compatibility for xrange function and unicode function
-if sys.version_info < (3,):
-    range = xrange
-else:
-    unicode = str
 
 from ..base import GLOBAL_STATE, Grab
 from .error import (SpiderError, SpiderMisuseError, FatalError,
@@ -50,6 +43,8 @@ from .stat  import SpiderStat
 from .transport.multicurl import MulticurlTransport
 from ..proxylist import ProxyList
 from grab.util.misc import camel_case_to_underscore
+
+from grab.util import py3k_support
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
@@ -360,7 +355,7 @@ class Spider(SpiderPattern, SpiderStat):
             if qsize < min_limit:
                 logger_verbose.debug('Task queue contains less tasks than limit. Tryring to add new tasks')
                 try:
-                    for x in range(min_limit - qsize):
+                    for x in xrange(min_limit - qsize):
                         item = self.task_generator_object.next()
                         logger_verbose.debug('Found new task. Adding it')
                         self.add_task(item)
@@ -752,7 +747,7 @@ class Spider(SpiderPattern, SpiderStat):
                     # Try five times to get new task and proces task generator
                     # because slave parser could agressively consume
                     # tasks from task queue
-                    for x in range(5):
+                    for x in xrange(5):
                         task = self.load_new_task()
                         if not task:
                             if not self.transport.active_task_number():

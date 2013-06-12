@@ -1,5 +1,7 @@
 import os
 
+from grab.util import py3k_support
+
 SCALE = {'kB': 1024.0, 'mB': 1024.0 * 1024.0,
          'KB': 1024.0, 'MB': 1024.0 * 1024.0}
 

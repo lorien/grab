@@ -4,17 +4,12 @@ try:
 except ImportError:
     from queue import Queue, Empty
 from threading import Thread
-import sys
-
-# Backward compatibility for xrange function and unicode function
-if sys.version_info < (3,):
-    range = xrange
-else:
-    unicode = str
 
 from grab.error import GrabNetworkError
 
 from grab.tools.work import make_work
+
+from grab.util import py3k_support
 
 STOP = object()
 
@@ -56,7 +51,7 @@ class ThreadPoolTransport(object):
         self.taskq = Queue()
         self.resultq = Queue()
         self.threads = []
-        for x in range(self.thread_number):
+        for x in xrange(self.thread_number):
             t = Worker(self.taskq, self.resultq)
             t.daemon = True
             t.start()

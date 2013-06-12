@@ -2,6 +2,8 @@ import time
 import logging
 from random import randint
 
+from grab.util import py3k_support
+
 logger = logging.getLogger('grab.tools.control')
 
 def sleep(lower_limit, upper_limit):
@@ -38,7 +40,7 @@ def repeat(func, limit=3, args=None, kwargs=None, fatal_exceptions=()):
     for try_count in xrange(1, limit + 1):
         try:
             res = func(*(args or {}), **(kwargs or {}))
-        except Exception, ex:
+        except Exception as ex:
             if isinstance(ex, fatal_exceptions):
                 raise
             else:

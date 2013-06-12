@@ -5,11 +5,8 @@ from grab.tools.logs import default_logging
 import time
 import logging
 from random import randint
-import sys
 
-# Backward compatibility for xrange function
-if sys.version_info < (3,):
-    range = xrange
+from grab.util import py3k_support
 
 URL_28K = 'http://load.local/grab.html'
 
@@ -34,7 +31,7 @@ class SpeedSpider(Spider):
         slow_url = 'http://load.local/slow.html'
         #yield Task('load', url=slow_url, disable_cache=True)
         #yield Task('load', url=fast_url, disable_cache=False)
-        for x in range(500):
+        for x in xrange(500):
             disable_flag = True#not (x % 2)
             yield Task('load', url=url_template % x, disable_cache=disable_flag)
             #if randint(0, 10) == 10:

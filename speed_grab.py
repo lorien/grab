@@ -6,11 +6,8 @@ from grab.tools.logs import default_logging
 import time
 import logging
 #import urllib
-import sys
 
-# Backward compatibility for xrange function
-if sys.version_info < (3,):
-    range = xrange
+from grab.util import py3k_support
 
 #logging.basicConfig(level=logging.DEBUG)
 
@@ -31,7 +28,7 @@ def timer(func):
 @timer
 def main():
     default_logging()
-    for x in range(500):
+    for x in xrange(500):
         url = 'http://load.local/grab.html'
         g = Grab()
         g.go(url)

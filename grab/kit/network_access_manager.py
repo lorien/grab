@@ -2,15 +2,12 @@ import logging
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
 from PyQt4.QtWebKit import QWebFrame
 from PyQt4.QtCore import QByteArray
-import sys
-
-# Backward compatibility for unicode function
-if sys.version_info >= (3,):
-    unicode = str
 
 from grab.kit.const import NETWORK_ERROR
 from grab.kit.network_reply import KitNetworkReply
 from grab.kit.error import KitError
+
+from grab.util import py3k_support
 
 logger = logging.getLogger('grab.kit.network_access_manager')
 

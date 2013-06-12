@@ -10,12 +10,6 @@ import re
 import time
 import logging
 import traceback
-import sys
-
-# Backward compatibility for basestring datatype and unicode function
-if sys.version_info >= (3,):
-    basestring = str
-    unicode = str
 
 from ..error import DataNotFound, GrabMisuseError
 from ..base import GLOBAL_STATE
@@ -23,6 +17,8 @@ from ..tools.text import normalize_space as normalize_space_func, find_number
 from ..tools.lxml_tools import get_node_text
 from ..response import RE_XML_DECLARATION
 from ..tools.internal import deprecated
+
+from grab.util import py3k_support
 
 logger = logging.getLogger('grab.ext.lxml')
 

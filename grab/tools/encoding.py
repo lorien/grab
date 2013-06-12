@@ -1,5 +1,7 @@
 import re
 
+from grab.util import py3k_support
+
 RE_SPECIAL_ENTITY = re.compile('&#(1[2-6][0-9]);')
 
 def smart_str(value, encoding='utf-8'):

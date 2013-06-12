@@ -27,13 +27,10 @@ try:
 except ImportError:
     from urllib.request import urlopen
     from urllib.error import URLError, HTTPError
-import sys
-
-# Backward compatibility for unicode function
-if sys.version_info >= (3,):
-    unicode = str
 
 from .error import GrabError, GrabNetworkError, GrabMisuseError
+
+from grab.util import py3k_support
 
 logger = logging.getLogger('grab.proxylist')
 

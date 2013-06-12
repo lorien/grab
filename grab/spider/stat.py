@@ -5,11 +5,8 @@ from grab.base import GLOBAL_STATE
 from grab.tools.encoding import smart_str
 import os
 from contextlib import contextmanager
-import sys
 
-# Backward compatibility for basestring datatype
-if sys.version_info >= (3,):
-    basestring = str
+from grab.util import py3k_support
 
 logger = logging.getLogger('grab.spider.stat')
 

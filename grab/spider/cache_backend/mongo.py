@@ -20,13 +20,10 @@ try:
 except ImportError:
     from pymongo.binary import Binary
 import time
-import sys
-
-# Backward compatibility for unicode datatype and function
-if sys.version_info >= (3,):
-    unicode = str
 
 from grab.response import Response
+
+from grab.util import py3k_support
 
 logger = logging.getLogger('grab.spider.cache_backend.mongo')
 

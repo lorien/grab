@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 import sys 
 from grab.tools.logs import default_logging
 from grab import Grab
-import sys 
 #import setup_django
 
 logger = logging.getLogger('grab.cli')

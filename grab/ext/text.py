@@ -4,15 +4,12 @@
 from __future__ import absolute_import
 from contextlib import contextmanager
 import logging
-import sys
-
-# Backward compatibility for unicode datatype
-if sys.version_info >= (3,):
-    unicode = str
 
 from ..error import DataNotFound, GrabError, GrabMisuseError
 from ..tools.text import normalize_space
 from ..tools.html import decode_entities
+
+from grab.util import py3k_support
 
 class TextExtension(object):
     def search(self, anchor, byte=False):
