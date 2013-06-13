@@ -1,11 +1,19 @@
-import urllib
-from urlparse import urlsplit, urlunsplit
+try:
+    from urllib import urlencode, quote_plus
+except ImportError:
+    from urllib.parse import urlencode, quote_plus
+try:
+    from urlparse import urlsplit, urlunsplit
+except ImportError:
+    from urllib.parse import urlsplit, urlunsplit
 import re
 import logging
 
 from ..base import UploadFile, UploadContent
 from ..error import GrabMisuseError
 from .encoding import smart_str, smart_unicode
+
+from grab.util import py3k_support
 
 logger = logging.getLogger('grab.tools.http')
 RE_NON_ASCII = re.compile(r'[^-.a-zA-Z0-9]')
@@ -28,7 +36,7 @@ def smart_urlencode(items, charset='utf-8'):
 
     if isinstance(items, dict):
         items = items.items()
-    return urllib.urlencode(normalize_http_values(items, charset=charset))
+    return urlencode(normalize_http_values(items, charset=charset))
 
 
 def encode_cookies(items, join=True, charset='utf-8'):
@@ -93,7 +101,7 @@ def normalize_http_values(items, charset='utf-8'):
 
         return key, value
 
-    items =  map(process, items)
+    items =  list(map(process, items))
     #items = sorted(items, key=lambda x: x[0])
     return items
 
@@ -113,7 +121,7 @@ def normalize_unicode(value, charset='utf-8'):
 
 
 def quote(data):
-    return urllib.quote_plus(smart_str(data))
+    return quote_plus(smart_str(data))
 
 
 def normalize_url(url):
