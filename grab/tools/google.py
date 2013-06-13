@@ -24,7 +24,10 @@ Module contents:
 * parse_search_results
 
 """
-import urllib
+try:
+    from urllib import quote, unquote_plus
+except ImportError:
+    from urllib.parse import quote, unquote_plus
 import logging
 import re
 import base64
@@ -81,7 +84,7 @@ def build_search_url(query, page=None, per_page=None, lang=None, filter=None, **
             kwargs['filter'] = '0'
 
 
-    url = 'http://google.com/search?q=%s' % urllib.quote(smart_str(query))
+    url = 'http://google.com/search?q=%s' % quote(smart_str(query))
     if kwargs:
         url += '&' + urlencode(kwargs)
     return url
@@ -208,7 +211,7 @@ def parse_search_results(grab, parse_index_size=False, strict_query=False):
                     url = title_elem.get('href')
                     if url.startswith('/url?'):
                         url = url.split('?q=')[1].split('&')[0]
-                        url = urllib.unquote_plus(url)
+                        url = unquote_plus(url)
 
                     # title
                     title = get_node_text(title_elem)

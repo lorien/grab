@@ -53,7 +53,7 @@ def parse_entry_content(entry):
         elif 'application/xhtml+xml' in mapping:
             body = mapping['application/xhtml+xml']
         else:
-            body = mapping.values()[0]
+            body = list(mapping.values())[0]
 
     if hasattr(entry, 'summary') and len(entry.summary) > len(body):
         body = entry.summary
@@ -93,7 +93,7 @@ def parse_feed(grab, teaser_size=1000):
     for entry in feed.entries:
         try:
             entries.append(parse_entry(entry, feed, teaser_size=teaser_size))
-        except Exception, ex:
+        except Exception as ex:
             log.error('Entry parsing error', exc_info=ex)
     
     return {'feed': feed, 'entries': entries}
