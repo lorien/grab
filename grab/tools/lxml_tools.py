@@ -6,6 +6,8 @@ import re
 from .text import normalize_space as normalize_space_func, find_number
 from .encoding import smart_str, smart_unicode
 
+from grab.util import py3k_support
+
 RE_TAG_START = re.compile(r'<[a-z]')
 
 def get_node_text(node, smart=False, normalize_space=True):

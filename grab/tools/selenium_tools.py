@@ -12,7 +12,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import WebDriverException
 from random import randint
 
-
+from grab.util import py3k_support
 
 def delete_dir(path):
     """
@@ -140,7 +140,7 @@ def close_alert(browser, times=3):
     for x in xrange(times):
         try:
             ActionChains(browser).send_keys(Keys.ENTER).perform()
-        except WebDriverException, ex:
+        except WebDriverException as ex:
             if 'Modal dialog present' in str(ex):
                 logging.debug('Ignoring exception about modal dialog')
                 pass
@@ -151,7 +151,7 @@ def close_alert(browser, times=3):
 def safe_integer(value, default):
     try:
         int_value = int(value)
-    except (ValueError, TypeError), ex:
+    except (ValueError, TypeError) as ex:
         logging.debug('Non-fatal error', exc_info=ex)
         int_value = 0
     if not int_value:

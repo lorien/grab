@@ -14,9 +14,9 @@ def parse_line(line):
 with open('common.txt', 'r') as f:
 	lines = f.readlines()
 
-print len(lines)
-data = filter(None, [parse_line(line) for line in lines])
-print len(data)
+print(len(lines))
+data = [_f for _f in [parse_line(line) for line in lines] if _f]
+print(len(data))
 
 with open('result.txt', 'w') as f:
 	f.write('lname\n')

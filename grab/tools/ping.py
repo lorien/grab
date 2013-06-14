@@ -5,6 +5,8 @@ from grab.tools import html
 from grab.tools.pwork import make_work
 from grab.tools.encoding import smart_str
 
+from grab.util import py3k_support
+
 PING_XML = """<?xml version="1.0"?>
 <methodCall>
  	<methodName>weblogUpdates.ping</methodName>
@@ -42,7 +44,7 @@ def ping(name, url, grab, thread_number=10):
         ok = False
         try:
             grab.go(rpc_url, post=post)
-        except Exception, ex:
+        except Exception as ex:
             logging.error(unicode(ex))
         else:
             if not '<boolean>0' in grab.response.body:
@@ -64,6 +66,6 @@ if __name__ == '__main__':
     g.setup_proxylist('/web/proxy.txt', 'http', auto_change=True) 
     items = ping('seobeginner.ru', 'http://feeds2.feedburner.com/seobeginner',
                  g, thread_number=30)
-    print 'RESULT:'
+    print('RESULT:')
     for rpc, ok in items:
-        print rpc, ok
+        print(rpc, ok)

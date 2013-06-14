@@ -5,6 +5,8 @@ from ..error import DataNotFound
 from .text import normalize_space
 from .html import decode_entities
 
+from grab.util import py3k_support
+
 CACHE = {}
 NULL = object()
 

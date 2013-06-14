@@ -1,12 +1,26 @@
-import urllib2
-import urllib
+try:
+    from urllib2 import Request
+    from urllib2 import urlopen as urlopen2
+except ImportError:
+    from urllib.request import Request
+    from urllib.request import urlopen as urlopen2
+try:
+    from urllib import urlencode, urlopen
+except ImportError:
+    from urllib.parse import urlencode
+    from urllib.request import urlopen
 import logging
 import time
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from .contrib.poster.encode import multipart_encode, MultipartParam
 from .contrib.poster.streaminghttp import register_openers
 from .error import CaptchaError
+
+from grab.util import py3k_support
 
 register_openers()
 logger = logging.getLogger('grab.tools.captcha.antigate')
@@ -19,8 +33,8 @@ def send_captcha(key, fobj):
                                 fileobj=fobj))
 
     data, headers = multipart_encode(items)
-    req = urllib2.Request('http://antigate.com/in.php', data, headers)
-    res = urllib2.urlopen(req)
+    req = Request('http://antigate.com/in.php', data, headers)
+    res = urlopen2(req)
     if res.code == 200:
         chunks = res.read().split('|')
         if len(chunks) == 2:
@@ -31,14 +45,14 @@ def send_captcha(key, fobj):
     else:
         msg = '%s %s' % (res.code, res.msg)
         raise CaptchaError(msg)
-    print res.info()
+    print(res.info())
     return res.read()
 
 def get_solution(key, captcha_id):
     #logger.debug('Getting solution for captcha %s' % captcha_id)
     params = {'key': key, 'action': 'get', 'id': captcha_id}
-    url = 'http://antigate.com/res.php?%s' % urllib.urlencode(params)
-    data = urllib.urlopen(url).read()
+    url = 'http://antigate.com/res.php?%s' % urlencode(params)
+    data = urlopen(url).read()
     chunks = data.split('|')
     if len(chunks) == 2:
         return chunks[1]
@@ -73,7 +87,7 @@ def solve_captcha(key, data):
     for x in xrange(20):
         try:
             return get_solution(key, captcha_id)
-        except CaptchaError, ex:
+        except CaptchaError as ex:
             if ex.args[0] == 'CAPCHA_NOT_READY':
                 #logger.debug('Waiting for captcha solution')
                 time.sleep(3)

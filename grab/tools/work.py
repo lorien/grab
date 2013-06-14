@@ -1,7 +1,12 @@
 from threading import Thread, currentThread
 import time
-from Queue import Queue, Empty
+try:
+    from Queue import Queue, Empty
+except ImportError:
+    from queue import Queue, Empty
 import logging
+
+from grab.util import py3k_support
 
 STOP = object()
 
@@ -22,7 +27,7 @@ class Worker(Thread):
             else:
                 try:
                     self.resultq.put(self.callback(task))
-                except Exception, ex:
+                except Exception as ex:
                     if self.ignore_exceptions:
                         logging.error('', exc_info=ex)
                     else:

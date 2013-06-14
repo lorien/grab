@@ -37,7 +37,7 @@ def set_lock(fname):
         hfile = win32file._get_osfhandle(fh.fileno())
         try:
             win32file.LockFileEx(hfile, LOCK_EX | LOCK_NB, 0, -0x10000, __overlapped)
-        except pywintypes.error, exc_value:
+        except pywintypes.error as exc_value:
             # error: (33, 'LockFileEx', 'The process cannot access 
             # the file because another process has locked a portion
             # of the file.')
@@ -47,7 +47,7 @@ def set_lock(fname):
         from fcntl import flock, LOCK_EX, LOCK_NB
         try:
             flock(fh.fileno(), LOCK_EX | LOCK_NB)
-        except Exception, ex:
+        except Exception as ex:
             return False
     
     fh.write(str(os.getpid()))
