@@ -1,11 +1,17 @@
 # coding: utf-8
 from unittest import TestCase
-import urllib
+try:
+    from urllib import quote
+except ImportError:
+    from urllib.parse import quote
 
 from grab import Grab, GrabMisuseError
-from util import (ignore_transport, GRAB_TRANSPORT)
-from tornado_util import SERVER
-from urlparse import parse_qsl
+from .util import (ignore_transport, GRAB_TRANSPORT)
+from .tornado_util import SERVER
+try:
+    from urlparse import parse_qsl
+except ImportError:
+    from urllib.parse import parse_qsl
 
 class TestPostFeature(TestCase):
     def setUp(self):
@@ -117,7 +123,7 @@ class TestPostFeature(TestCase):
         data = u'фыва'
         g.setup(post={'foo': data}, url=SERVER.BASE_URL, charset='cp1251', debug=True)
         g.request()
-        self.assertEqual(SERVER.REQUEST['post'], 'foo=%s' % urllib.quote(data.encode('cp1251')))
+        self.assertEqual(SERVER.REQUEST['post'], 'foo=%s' % quote(data.encode('cp1251')))
 
     def test_put(self):
         g = Grab()

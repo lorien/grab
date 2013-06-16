@@ -1,6 +1,9 @@
 # coding: utf-8
 from unittest import TestCase
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 from multiprocessing import Process, Queue
 
 from grab import Grab

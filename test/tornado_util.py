@@ -2,6 +2,9 @@ from threading import Thread
 from tornado.ioloop import IOLoop
 import tornado.web
 import time
+import collections
+
+from grab.util import py3k_support
 
 class ServerState(object):
     PORT = 9876
@@ -97,7 +100,7 @@ class MainHandler(tornado.web.RequestHandler):
                 SERVER.RESPONSE_ONCE[method_name] = None
             else:
                 resp = SERVER.RESPONSE.get(method_name, '')
-                if callable(resp):
+                if isinstance(resp, collections.Callable):
                     self.write(resp())
                 else:
                     self.write(resp)

@@ -8,13 +8,18 @@ from grab.spider.base import Spider
 from grab.spider.error import SpiderInternalError
 from grab.util.misc import camel_case_to_underscore
 
+from grab.util import py3k_support
+
 PY2 = True
 SPIDER_REGISTRY = {}
 string_types = (str, unicode)
 logger = logging.getLogger('grab.util.module')
 
 def reraise(tp, value, tb=None):
-    raise tp, value, tb
+    if sys.version_info < (3,):
+        raise tp, value, tb
+    else:
+        raise tp(value).with_traceback(tb)
 
 class ImportStringError(ImportError):
     """Provides information about a failed :func:`import_string` attempt."""

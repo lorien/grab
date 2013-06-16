@@ -26,6 +26,8 @@ from ..tools.http import encode_cookies, smart_urlencode, normalize_unicode,\
                          normalize_http_values, normalize_post_data
 from ..tools.user_agent import random_user_agent
 
+from grab.util import py3k_support
+
 logger = logging.getLogger('grab.transport.curl')
 
 # @lorien: I do not understand these signals. Maybe you?

@@ -4,8 +4,11 @@
 from __future__ import absolute_import
 import email
 import logging
-import urllib
-from StringIO import StringIO
+#import urllib
+#try:
+#    from StringIO import StringIO
+#except ImportError:
+#    from io import StringIO
 import threading
 import random
 import requests 
@@ -14,6 +17,8 @@ from ..error import GrabError, GrabMisuseError
 from ..base import UploadContent, UploadFile
 from ..response import Response
 from ..tools.http import urlencode, normalize_http_values, normalize_unicode
+
+from grab.util import py3k_support
 
 logger = logging.getLogger('grab.transport.requests')
 
@@ -243,7 +248,7 @@ class RequestsTransport(object):
                                      'https': cfg['proxy']}
             self._requests_response = func(
                 cfg['url'], headers=cfg['headers'], **kwargs)
-        except Exception, ex:
+        except Exception as ex:
             raise GrabError(0, unicode(ex))
 
     def prepare_response(self, grab):

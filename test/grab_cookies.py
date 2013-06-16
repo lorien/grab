@@ -4,8 +4,8 @@ import string
 import json
 
 from grab import Grab, GrabMisuseError
-from util import TMP_FILE, GRAB_TRANSPORT
-from tornado_util import SERVER
+from .util import TMP_FILE, GRAB_TRANSPORT
+from .tornado_util import SERVER
 
 class TestCookies(TestCase):
     def setUp(self):

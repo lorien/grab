@@ -7,7 +7,7 @@ SPIDER_KEYS = ['QUEUE', 'CACHE', 'PROXY_LIST']
 def is_dict_interface(obj):
     try:
         obj['o_O']
-        obj.keys()
+        list(obj.keys())
     except (TypeError, AttributeError):
         return False
     except Exception:

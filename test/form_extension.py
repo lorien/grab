@@ -3,7 +3,10 @@ from unittest import TestCase
 from grab import Grab, DataNotFound, GrabMisuseError
 from .util import ignore_transport, GRAB_TRANSPORT
 from .tornado_util import SERVER
-from urlparse import parse_qsl
+try:
+    from urlparse import parse_qsl
+except ImportError:
+    from urllib.parse import parse_qsl
 
 FORMS = u"""
 <head>

@@ -6,11 +6,21 @@ AHTUNG: VERY OLD CODE :)
 """
 from __future__ import absolute_import
 import logging
-import urllib2
-import cookielib
+try:
+    import urllib2
+    from urllib2 import URLError
+except ImportError:
+    import urllib.request as urllib2
+    from urllib.error import URLError
+try:
+    import cookielib
+except ImportError:
+    import http.cookiejar as cookielib
 import socket
 
 from ..base import GrabError
+
+from grab.util import py3k_support
 
 logger = logging.getLogger('grab')
 
@@ -85,7 +95,7 @@ class Extension(object):
         headers = self.config['common_headers']
         if self.config['headers']:
             headers.update(self.config['headers'])
-        for key, value in headers.iteritems():
+        for key, value in headers.items():
             req.add_header(key, value)
         #headers_tuples = [str('%s: %s' % x) for x\
                           #in self.config['headers'].iteritems()]
@@ -163,7 +173,7 @@ class Extension(object):
         try:
             self._resp = self._opener.open(self.req)
             self._resp_body = self._resp.read()
-        except urllib2.URLError:
+        except URLError:
             raise GrabError(ex[0], ex[1])
 
     def prepare_response(self):
