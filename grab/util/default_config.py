@@ -4,5 +4,8 @@ class DefaultConfig(object):
     SAVE_FATAL_ERRORS = True
     SAVE_TASK_ADD_ERRORS = True
     SAVE_FINAL_STATS = True
+    THREAD_NUMBER = 1
+    NETWORK_TRY_LIMIT = 10
+    TASK_TRY_LIMIT = 10
 
 default_config = DefaultConfig()
