@@ -4,6 +4,7 @@ import os
 from grab.util.config import build_spider_config, build_global_config
 from grab.util.module import load_spider_class
 from grab.tools.logs import default_logging
+from grab.tools.lock import assert_lock
 
 logger = logging.getLogger('grab.script.crawl')
 
@@ -11,13 +12,22 @@ def setup_arg_parser(parser):
     parser.add_argument('-t', '--thread-number', help='Number of network threads',
                         default=None, type=int)
     parser.add_argument('--slave', action='store_true', default=False)
-    parser.add_argument('--force-url', type=str)
+    #parser.add_argument('--force-url', type=str)
     parser.add_argument('spider_name', type=str)
 
 
 def main(spider_name, thread_number=None, slave=False, force_url=None,
          settings='settings', *args, **kwargs):
     default_logging()
+
+    lock_key = None
+    if not slave:
+        lock_key = 'crawl.%s' % spider_name
+    if lock_key is not None:
+        lock_path = 'var/run/%s.lock' % lock_key
+        logger.debug('Trying to lock file: %s' % lock_path)
+        assert_lock(lock_path)
+
     config = build_global_config(settings)
     spider_class = load_spider_class(config, spider_name)
     spider_config = build_spider_config(spider_name, config)
