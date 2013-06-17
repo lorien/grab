@@ -4,7 +4,7 @@
 from __future__ import absolute_import
 import email
 import logging
-import urllib
+#import urllib
 try:
     from cStringIO import StringIO
 except ImportError:

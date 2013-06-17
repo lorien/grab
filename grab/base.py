@@ -8,7 +8,7 @@ The core of grab package: the Grab class.
 from __future__ import absolute_import
 import logging
 import os
-import urllib
+#import urllib
 from random import randint, choice
 from copy import copy
 import threading
@@ -456,7 +456,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         if self.config['debug_post']:
             post = self.config['post'] or self.config['multipart_post']
             if isinstance(post, dict):
-                post = post.items()
+                post = list(post.items())
             if post:
                 if isinstance(post, basestring):
                     post = post[:150] + '...'
