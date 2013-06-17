@@ -84,7 +84,7 @@ def process_command_line():
         action_mod = __import__('grab.script.%s' % action_name, None, None, ['foo'])
     except ImportError, ex:
         if (ex.message.startswith('No module named') and
-            'grab.script.%s' % action_name in ex.message):
+            action_name in ex.message):
             pass
         else:
             logging.error('', exc_info=ex)
