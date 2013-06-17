@@ -56,7 +56,6 @@ def main(spider_name, thread_number=None, slave=False, force_url=None,
     stats = bot.render_stats(timing=config.get('DISPLAY_TIMING'))
 
     if config.get('DISPLAY_STATS'):
-        import pdb; pdb.set_trace()
         logger.debug(stats)
 
     pid = os.getpid()
