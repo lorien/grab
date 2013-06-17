@@ -8,7 +8,7 @@ setup(
     version = version,
     description = 'Site Scraping Framework',
     long_description = open('README.rst').read(),
-    url = 'http://bitbucket.org/lorien/grab/',
+    url = 'http://github.com/lorien/grab',
     author = 'Grigory Petukhov',
     author_email = 'lorien@lorien.name',
 
@@ -17,7 +17,7 @@ setup(
     scripts = ['bin/grab'],
 
     license = "BSD",
-    keywords = "pycurl curl network parsing grabbing scraping lxml xpath",
+    keywords = "pycurl multicurl curl network parsing grabbing scraping lxml xpath",
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',

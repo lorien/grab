@@ -2,7 +2,8 @@ from copy import deepcopy
 from grab.util import default_config
 from grab.util.module import import_string
 
-SPIDER_KEYS = ['QUEUE', 'CACHE', 'PROXY_LIST']
+SPIDER_KEYS = ['QUEUE', 'CACHE', 'PROXY_LIST', 'THREAD_NUMBER',
+               'NETWORK_TRY_LIMIT', 'TASK_TRY_LIMIT']
 
 def is_dict_interface(obj):
     try:
@@ -30,6 +31,9 @@ class Config(dict):
 
     def clone(self):
         return Config(deepcopy(self))
+
+    def getint(self, key):
+        return int(self[key])
 
 
 def build_global_config(settings_mod_path='settings'):

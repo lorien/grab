@@ -58,7 +58,7 @@ Pip is recommended way to install Grab and its dependencies::
 Documentation
 =============
 
-Russian docs: http://grablib.org/docs/
+Russian docs: http://docs.grablib.org
 English docs in progress.
 
 Discussion group (Russian or English): http://groups.google.com/group/python-grab/
@@ -67,7 +67,6 @@ Discussion group (Russian or English): http://groups.google.com/group/python-gra
 Contribution
 ============
 
-If you found a bug or if you want new feature please create new issue on bitbucket or github:
+If you found a bug or if you want new feature please create new issue on github:
 
-* https://bitbucket.org/lorien/grab/issues?status=new&status=open
 * https://github.com/lorien/grab/issues
