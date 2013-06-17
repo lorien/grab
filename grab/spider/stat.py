@@ -45,7 +45,7 @@ class SpiderStat(object):
                     lines.append(json.dumps(item))
             out.write('\n'.join(lines))
 
-    def render_stats(self):
+    def render_stats(self, timing=True):
         out = []
         out.append('Counters:')
         # Sort counters by its names
@@ -62,12 +62,14 @@ class SpiderStat(object):
         else:
             out.append('Queue size: %d' % self.taskq.size())
         out.append('Threads: %d' % self.thread_number)
-        out.append('Timers:')
-        out.append('  DOM: %.3f' % GLOBAL_STATE['dom_build_time'])
-        out.append('  selector: %.03f' % GLOBAL_STATE['selector_time'])
-        items = [(x, y) for x, y in self.timers.items()]
-        items = sorted(items, key=lambda x: x[1])
-        out.append('  %s' % '\n  '.join('%s: %.03f' % x for x in items))
+
+        if timing:
+            out.append('Timers:')
+            out.append('  DOM: %.3f' % GLOBAL_STATE['dom_build_time'])
+            out.append('  selector: %.03f' % GLOBAL_STATE['selector_time'])
+            items = [(x, y) for x, y in self.timers.items()]
+            items = sorted(items, key=lambda x: x[1])
+            out.append('  %s' % '\n  '.join('%s: %.03f' % x for x in items))
         return '\n'.join(out) + '\n'
 
     def save_all_lists(self, dir_path):
