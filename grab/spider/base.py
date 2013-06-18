@@ -44,6 +44,7 @@ from .transport.multicurl import MulticurlTransport
 from ..proxylist import ProxyList
 from grab.util.misc import camel_case_to_underscore
 
+from grab.util.py2old_support import *
 from grab.util.py3k_support import *
 
 DEFAULT_TASK_PRIORITY = 100
