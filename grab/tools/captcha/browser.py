@@ -7,7 +7,7 @@ import webbrowser
 import time
 import os
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 #def build_html(image_url):
     #return """

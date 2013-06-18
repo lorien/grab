@@ -3,7 +3,7 @@ from unittest import TestCase
 from grab.spider import Spider, Task, Data
 from .tornado_util import SERVER
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 class BasicSpiderTestCase(TestCase):
 

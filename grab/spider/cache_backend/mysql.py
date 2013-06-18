@@ -20,7 +20,7 @@ import time
 
 from grab.response import Response
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.spider.cache_backend.mysql')
 

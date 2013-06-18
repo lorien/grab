@@ -18,7 +18,7 @@ from ..tools.lxml_tools import get_node_text
 from ..response import RE_XML_DECLARATION
 from ..tools.internal import deprecated
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.ext.lxml')
 

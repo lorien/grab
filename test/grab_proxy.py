@@ -5,7 +5,7 @@ from grab import Grab, GrabMisuseError
 from .util import GRAB_TRANSPORT
 from .tornado_util import SERVER
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 PROXY1 = 'localhost:%d' % SERVER.PORT
 PROXY2 = 'localhost:%d' % SERVER.EXTRA_PORT1

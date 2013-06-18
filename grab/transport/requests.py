@@ -18,7 +18,7 @@ from ..base import UploadContent, UploadFile
 from ..response import Response
 from ..tools.http import urlencode, normalize_http_values, normalize_unicode
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.transport.requests')
 

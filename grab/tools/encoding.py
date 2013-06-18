@@ -1,6 +1,6 @@
 import re
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 RE_SPECIAL_ENTITY = re.compile('&#(1[2-6][0-9]);')
 

@@ -6,7 +6,7 @@ except ImportError:
     from queue import Queue, Empty
 import logging
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 STOP = object()
 

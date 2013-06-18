@@ -4,7 +4,7 @@ from grab.tools.tinyurl import clck
 import logging
 import os
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 MODULES = {}
 logger = logging.getLogger('grab.tools.tinyurl')

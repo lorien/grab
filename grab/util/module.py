@@ -8,7 +8,7 @@ from grab.spider.base import Spider
 from grab.spider.error import SpiderInternalError
 from grab.util.misc import camel_case_to_underscore
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 PY2 = True
 SPIDER_REGISTRY = {}

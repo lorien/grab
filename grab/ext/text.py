@@ -9,7 +9,7 @@ from ..error import DataNotFound, GrabError, GrabMisuseError
 from ..tools.text import normalize_space
 from ..tools.html import decode_entities
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 class TextExtension(object):
     def search(self, anchor, byte=False):

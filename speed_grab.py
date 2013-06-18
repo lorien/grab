@@ -7,7 +7,7 @@ import time
 import logging
 #import urllib
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 #logging.basicConfig(level=logging.DEBUG)
 

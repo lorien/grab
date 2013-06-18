@@ -1,6 +1,6 @@
 import pycurl
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 class MulticurlTransport(object):
     def __init__(self, thread_number):

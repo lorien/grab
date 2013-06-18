@@ -18,7 +18,7 @@ from ..tools.text import normalize_space
 from ..tools.html import decode_entities
 from ..base import GLOBAL_STATE
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 __all__ = ['Selector', 'TextSelector', 'XpathSelector', 'PyquerySelector',
            'KitSelector']

@@ -9,7 +9,7 @@ from ..tools.text import normalize_space
 from ..tools.html import decode_entities
 from ..tools.rex import rex_cache
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 NULL = object()
 

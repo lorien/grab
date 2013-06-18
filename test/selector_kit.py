@@ -11,7 +11,7 @@ from .tornado_util import SERVER
 from grab.selector import KitSelector
 from grab import Grab
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 HTML = """
 <html>

@@ -32,7 +32,7 @@ from .upload import UploadContent, UploadFile
 from .tools.http import normalize_http_values, normalize_url
 from .extension import register_extensions
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used

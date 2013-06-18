@@ -12,7 +12,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import WebDriverException
 from random import randint
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 def delete_dir(path):
     """

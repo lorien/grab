@@ -4,7 +4,7 @@ from random import choice, randint
 from datetime import date
 from functools import reduce
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 SAFE_CHARS = letters + digits
 S_CHARS = 'bcdfghjklmnpqrstvwxz'

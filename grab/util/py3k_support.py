@@ -9,4 +9,4 @@ if sys.version_info >= (3,):
     unichr = chr
     raw_input = input
 
-#from grab.util import py3k_support
+#from grab.util.py3k_support import *

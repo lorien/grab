@@ -6,7 +6,7 @@ import time
 import logging
 from random import randint
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 URL_28K = 'http://load.local/grab.html'
 

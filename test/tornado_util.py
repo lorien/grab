@@ -4,7 +4,7 @@ import tornado.web
 import time
 import collections
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 class ServerState(object):
     PORT = 9876

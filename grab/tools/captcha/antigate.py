@@ -20,7 +20,7 @@ from .contrib.poster.encode import multipart_encode, MultipartParam
 from .contrib.poster.streaminghttp import register_openers
 from .error import CaptchaError
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 register_openers()
 logger = logging.getLogger('grab.tools.captcha.antigate')

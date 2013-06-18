@@ -13,7 +13,7 @@ from ..base import UploadFile, UploadContent
 from ..error import GrabMisuseError
 from .encoding import smart_str, smart_unicode
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.tools.http')
 RE_NON_ASCII = re.compile(r'[^-.a-zA-Z0-9]')

@@ -30,7 +30,7 @@ except ImportError:
 
 from .error import GrabError, GrabNetworkError, GrabMisuseError
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.proxylist')
 

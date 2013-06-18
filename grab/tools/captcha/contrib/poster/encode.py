@@ -27,7 +27,7 @@ except ImportError:
     from urllib.parse import quote_plus
 import re, os, mimetypes
 
-from grab.util import py3k_support
+from grab.util.py3k_support import *
 
 def encode_and_quote(data):
     """If ``data`` is unicode, return quote_plus(data.encode("utf-8"))
