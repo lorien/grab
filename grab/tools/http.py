@@ -1,7 +1,7 @@
 try:
-    from urllib import urlencode, quote_plus
+    import urllib.parse as urllib
 except ImportError:
-    from urllib.parse import urlencode, quote_plus
+    import urllib
 try:
     from urlparse import urlsplit, urlunsplit
 except ImportError:
@@ -36,7 +36,7 @@ def smart_urlencode(items, charset='utf-8'):
 
     if isinstance(items, dict):
         items = items.items()
-    return urlencode(normalize_http_values(items, charset=charset))
+    return urllib.urlencode(normalize_http_values(items, charset=charset))
 
 
 def encode_cookies(items, join=True, charset='utf-8'):
@@ -121,7 +121,7 @@ def normalize_unicode(value, charset='utf-8'):
 
 
 def quote(data):
-    return quote_plus(smart_str(data))
+    return urllib.quote_plus(smart_str(data))
 
 
 def normalize_url(url):
