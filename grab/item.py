@@ -34,7 +34,9 @@ from .selector import XpathSelector
 
 NULL = object()
 
-class Field(object, metaclass=ABCMeta):
+metaclass_ABCMeta = ABCMeta('metaclass_ABCMeta', (object, ), {})
+
+class Field(metaclass_ABCMeta):
     """
     All custom fields should extend this class, and override the get method.
     """
@@ -221,8 +223,10 @@ class ItemBuilder(type):
         namespace['_fields'] = fields
         return super(ItemBuilder, cls).__new__(cls, name, base, namespace)
 
+metaclass_ItemBuilder = ItemBuilder('metaclass_ItemBuilder', (object, ), {})
 
-class Item(object, metaclass=ItemBuilder):
+
+class Item(metaclass_ItemBuilder):
     def __init__(self, tree, grab=None):
         self._tree = tree
         self._cache = {}

@@ -246,4 +246,4 @@ class ProxyList(object):
 
         logger.debug('Changing proxy')
         self.source.reload()
-        return self.source.server_list_iterator.next()
+        return next(self.source.server_list_iterator)

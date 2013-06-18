@@ -356,7 +356,7 @@ class Spider(SpiderPattern, SpiderStat):
                 logger_verbose.debug('Task queue contains less tasks than limit. Tryring to add new tasks')
                 try:
                     for x in xrange(min_limit - qsize):
-                        item = self.task_generator_object.next()
+                        item = next(self.task_generator_object)
                         logger_verbose.debug('Found new task. Adding it')
                         self.add_task(item)
                 except StopIteration:

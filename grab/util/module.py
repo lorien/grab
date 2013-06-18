@@ -17,7 +17,8 @@ logger = logging.getLogger('grab.util.module')
 
 def reraise(tp, value, tb=None):
     if sys.version_info < (3,):
-        raise tp, value, tb
+        from grab.util import py2x_support
+        py2x_support.reraise(tp, value, tb)
     else:
         raise tp(value).with_traceback(tb)
 

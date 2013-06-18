@@ -359,7 +359,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         # Reset the state setted by previous request
         if not self._request_prepared:
             self.reset()
-            self.request_counter = REQUEST_COUNTER.next()
+            self.request_counter = next(REQUEST_COUNTER)
             if kwargs:
                 self.setup(**kwargs)
             if self.proxylist and self.config['proxy_auto_change']:
