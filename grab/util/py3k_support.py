@@ -2,7 +2,7 @@ import sys
 
 # Backward compatibility for xrange function, basestring datatype
 # unicode function/type, unichr function and raw_input function
-if sys.version_info >= (3,):
+if sys.version_info >= (3, ):
     xrange = range
     basestring = str
     unicode = str
