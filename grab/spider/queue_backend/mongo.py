@@ -44,7 +44,7 @@ class QueueBackend(QueueInterface):
         }
         self.collection.save(item)
 
-    def get(self, timeout):
+    def get(self):
         item = self.collection.find_and_modify(
             sort=[('priority', pymongo.ASCENDING)],
             remove=True

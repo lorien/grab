@@ -9,10 +9,9 @@ class QueueInterface(object):
     def put(self, task, priority):
         pass
 
-    def get(self, timeout):
+    def get(self):
         """
         Return `Task` object or raise `Queue.Empty` exception
-        after `timeout` seconds.
 
         @returns: `grab.spider.task.Task` object
         @raises: `Queue.Empty` exception

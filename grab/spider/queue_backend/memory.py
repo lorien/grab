@@ -11,8 +11,8 @@ class QueueBackend(QueueInterface):
     def put(self, task, priority):
         self.queue_object.put((priority, task))
 
-    def get(self, timeout):
-        priority, task = self.queue_object.get(True, timeout)
+    def get(self):
+        priority, task = self.queue_object.get(block=False)
         return task
 
     def size(self):

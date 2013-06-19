@@ -34,7 +34,6 @@ from grab.util.misc import camel_case_to_underscore
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
-TASK_QUEUE_TIMEOUT = 0.01
 NULL = object()
 
 logger = logging.getLogger('grab.spider.base')
@@ -373,7 +372,7 @@ class Spider(SpiderPattern, SpiderStat):
         while True:
             try:
                 with self.save_timer('task_queue'):
-                    return self.taskq.get(TASK_QUEUE_TIMEOUT)
+                    return self.taskq.get()
             except Queue.Empty:
                 if not self.slave:
                     logger_verbose.debug('Task queue is empty.')

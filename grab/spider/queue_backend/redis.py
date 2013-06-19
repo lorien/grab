@@ -25,7 +25,7 @@ class QueueBackend(QueueInterface):
         task._rnd = random.random()
         self.queue_object.push(task, priority)
 
-    def get(self, timeout):
+    def get(self):
         task = self.queue_object.pop()
         if task is None:
             raise Queue.Empty()
@@ -38,6 +38,6 @@ class QueueBackend(QueueInterface):
     def clear(self):
         try:
             while True:
-                self.get(0)
+                self.get()
         except Queue.Empty:
             pass
