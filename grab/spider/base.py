@@ -250,7 +250,7 @@ class Spider(SpiderPattern, SpiderStat):
             return randint(*RANDOM_TASK_PRIORITY_RANGE)
 
     def add_task_handler(self, task):
-        self.taskq.put(task, task.priority)
+        self.taskq.put(task, task.priority, schedule_time=task.schedule_time)
 
     def add_task(self, task):
         """
@@ -374,6 +374,9 @@ class Spider(SpiderPattern, SpiderStat):
                 with self.save_timer('task_queue'):
                     return self.taskq.get()
             except Queue.Empty:
+                if self.taskq.size():
+                    logger_verbose.debug('Waiting for scheduled task')
+                    return True
                 if not self.slave:
                     logger_verbose.debug('Task queue is empty.')
                     return None
@@ -734,10 +737,14 @@ class Spider(SpiderPattern, SpiderStat):
                     # tasks from task queue
                     for x in xrange(5):
                         task = self.load_new_task()
-                        if not task:
+                        if task is None:
                             if not self.transport.active_task_number():
                                 self.process_task_generator()
+                        elif task is True:
+                            # If only delayed tasks in queue
+                            break
                         else:
+                            # If got some task
                             break
 
                     if not task:
@@ -758,6 +765,8 @@ class Spider(SpiderPattern, SpiderStat):
                             if task.sleep:
                                 logger.debug('Got NullTask with sleep instruction. Sleeping for %.2f seconds' % task.sleep)
                                 time.sleep(task.sleep)
+                    elif task == True:
+                        pass
                     else:
                         #if self.wating_shutdown_event.is_set():
                             #self.wating_shutdown_event.clear()

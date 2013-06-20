@@ -17,13 +17,17 @@ class QueueBackend(QueueInterface):
         self.queue_name = queue_name
         self.queue_object = PriorityQueue(queue_name)
 
-    def put(self, task, priority):
+    def put(self, task, priority, schedule_time=None):
         # Add attribute with random value
         # This is required because qr library
         # does not allow to store multiple values with same hash
         # in the PriorityQueue
+
+        if schedule_time is not None:
+            raise SpiderMisuseError('Mongo task queue does not support delayed task') 
         task._rnd = random.random()
         self.queue_object.push(task, priority)
+
 
     def get(self):
         task = self.queue_object.pop()

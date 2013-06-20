@@ -22,3 +22,4 @@ syntax:regexp
 ^ghost$
 ^var/
 ^\.tox/
+^script/
