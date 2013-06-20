@@ -135,4 +135,4 @@ def normalize_post_data(data, charset):
             return data
     else:
         # dict, tuple, list should be serialized into byte-string
-        return urlencode(data, charset)
+        return smart_urlencode(data, charset)
