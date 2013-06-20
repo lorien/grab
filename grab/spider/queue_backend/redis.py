@@ -3,10 +3,12 @@ Spider task queue backend powered by redis
 """
 from __future__ import absolute_import
 
-from .base import QueueInterface
 from qr import PriorityQueue
 import Queue
 import random
+
+from .base import QueueInterface
+from ..error import SpiderMisuseError
 
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, queue_name=None, **kwargs):
