@@ -89,10 +89,7 @@ class Task(BaseTask):
             self.url = url
             self.grab_config = None
 
-        if delay:
-            self.schedule_time = datetime.now() + timedelta(seconds=delay)
-        else:
-            self.schedule_time = None
+        self.process_delay_option(delay)
 
         self.priority_is_custom = priority_is_custom
         self.priority = priority
@@ -116,6 +113,14 @@ class Task(BaseTask):
         does not exist.
         """
         return getattr(self, key, default)
+
+    def process_delay_option(self, delay):
+        if delay:
+            self.schedule_time = datetime.now() + timedelta(seconds=delay)
+            self.original_delay = delay
+        else:
+            self.schedule_time = None
+            self.original_delay = None
 
     def clone(self, **kwargs):
         """
@@ -158,6 +163,8 @@ class Task(BaseTask):
 
         for key, value in kwargs.items():
             setattr(task, key, value)
+
+        task.process_delay_option(task.get('delay', None))
 
         return task
 

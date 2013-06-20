@@ -18,16 +18,23 @@ class CaptchaService(object):
             backend_path = BACKEND_ALIAS[backend]
         else:
             backend_path = backend
-        self.backend = import_string(backend_path)(**kwargs)
+        self.backend = import_string(backend_path)()
+        self.backend.setup(**kwargs)
 
-    def submit_captcha(self, data):
-        return self.backend.submit_captcha(data)
+    def submit_captcha(self, data, **kwargs):
+        g = self.backend.get_submit_captcha_request(data, **kwargs)
+        g.request()
+        return self.backend.parse_submit_captcha_response(g.response)
 
-    def check_solution(self, reqid): 
+
+    def check_solution(self, captcha_id):
         """
         Raises:
         * SolutionNotReady
         * ServiceTooBusy
         """
 
-        return self.backend.check_solution(reqid)
+        g = self.backend.get_check_solution_request(captcha_id)
+        g.request()
+        return self.backend.parse_check_solution_response(g.response)
+

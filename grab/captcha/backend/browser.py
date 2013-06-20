@@ -3,19 +3,34 @@ import webbrowser
 import time
 import os
 
-class BrowserBackend(object):
-    def submit_captcha(self, data):
+from grab import Grab
+from .base import CaptchaBackend
+
+class BrowserBackend(CaptchaBackend):
+    def get_submit_captcha_request(self, data):
         fd, path = tempfile.mkstemp()
         with open(path, 'w') as out:
             out.write(data)
-        return path  
+        url = 'file://' + path
+        g = Grab()
+        g.setup(url=url)
+        return g
 
-    def check_solution(self, captcha_id):
-        image_url = 'file://' + captcha_id
-        webbrowser.open(url=image_url)
+    def parse_submit_captcha_response(self, res):
+        return res.url.replace('file://', '')
+
+    def get_check_solution_request(self, captcha_id):
+        url = 'file://' + captcha_id
+        g = Grab()
+        g.setup(url=url)
+        return g
+
+    def parse_check_solution_response(self, res):
+        webbrowser.open(url=res.url)
         # Wait some time, skip some debug messages
         # which browser could dump to console
         time.sleep(0.5)
         solution = raw_input('Enter solution: ')
-        os.unlink(captcha_id)
+        path = res.url.replace('file://', '')
+        os.unlink(path)
         return solution

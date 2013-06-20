@@ -3,10 +3,13 @@ import webbrowser
 import time
 import os
 import pygtk
-pygtk.require('2.0')
 import gtk
 from StringIO import StringIO
 
+from grab import Grab
+from .base import CaptchaBackend
+
+pygtk.require('2.0')
 
 class CaptchaWindow(object):
     def __init__(self, path, solution):
@@ -44,16 +47,29 @@ class CaptchaWindow(object):
         gtk.main()
 
 
-class GuiBackend(object):
-    def submit_captcha(self, data):
+class GuiBackend(CaptchaBackend):
+    def get_submit_captcha_request(self, data):
         fd, path = tempfile.mkstemp()
         with open(path, 'w') as out:
             out.write(data)
-        return path  
+        url = 'file://' + path
+        g = Grab()
+        g.setup(url=url)
+        return g
 
-    def check_solution(self, captcha_id):
+    def parse_submit_captcha_response(self, res):
+        return res.url.replace('file://', '')
+
+    def get_check_solution_request(self, captcha_id):
+        url = 'file://' + captcha_id
+        g = Grab()
+        g.setup(url=url)
+        return g
+
+    def parse_check_solution_response(self, res):
+        path = res.url.replace('file://', '')
         solution = []
-        window = CaptchaWindow(captcha_id, solution)
+        window = CaptchaWindow(path, solution)
         window.main()
-        os.unlink(captcha_id)
+        os.unlink(path)
         return solution[0]
