@@ -114,8 +114,9 @@ def build_spider_registry(config):
     for path in config.get('SPIDER_MODULES'):
         try:
             mod = __import__(path, None, None, ['foo'])
-        except ImportError:
-            pass
+        except ImportError, ex:
+            if not path in unicode(ex):
+                logging.error('', exc_info=ex)
         else:
             for key in dir(mod):
                 val = getattr(mod, key)
