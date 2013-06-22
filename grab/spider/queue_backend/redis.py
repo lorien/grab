@@ -3,10 +3,12 @@ Spider task queue backend powered by redis
 """
 from __future__ import absolute_import
 
-from .base import QueueInterface
 from qr import PriorityQueue
 import Queue
 import random
+
+from .base import QueueInterface
+from ..error import SpiderMisuseError
 
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, queue_name=None, **kwargs):
@@ -17,15 +19,19 @@ class QueueBackend(QueueInterface):
         self.queue_name = queue_name
         self.queue_object = PriorityQueue(queue_name)
 
-    def put(self, task, priority):
+    def put(self, task, priority, schedule_time=None):
         # Add attribute with random value
         # This is required because qr library
         # does not allow to store multiple values with same hash
         # in the PriorityQueue
+
+        if schedule_time is not None:
+            raise SpiderMisuseError('Mongo task queue does not support delayed task') 
         task._rnd = random.random()
         self.queue_object.push(task, priority)
 
-    def get(self, timeout):
+
+    def get(self):
         task = self.queue_object.pop()
         if task is None:
             raise Queue.Empty()
@@ -38,6 +44,6 @@ class QueueBackend(QueueInterface):
     def clear(self):
         try:
             while True:
-                self.get(0)
+                self.get()
         except Queue.Empty:
             pass

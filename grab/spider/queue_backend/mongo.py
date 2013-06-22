@@ -8,6 +8,7 @@ import logging
 import pymongo
 
 from .base import QueueInterface
+from ..error import SpiderMisuseError
 
 logger = logging.getLogger('grab.spider.queue_backend.mongo')
 
@@ -37,14 +38,16 @@ class QueueBackend(QueueInterface):
     def size(self):
         return self.collection.count()
 
-    def put(self, task, priority):
+    def put(self, task, priority, schedule_time=None):
+        if schedule_time is not None:
+            raise SpiderMisuseError('Mongo task queue does not support delayed task') 
         item = {
             'task': Binary(pickle.dumps(task)),
             'priority': priority,
         }
         self.collection.save(item)
 
-    def get(self, timeout):
+    def get(self):
         item = self.collection.find_and_modify(
             sort=[('priority', pymongo.ASCENDING)],
             remove=True
