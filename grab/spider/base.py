@@ -382,7 +382,7 @@ class Spider(SpiderPattern, SpiderStat):
                     return None
                 else:
                     # Temporarly hack which force slave crawler
-                    # to wait 2 seconds for new tasks, this solves
+                    # to wait 5 seconds for new tasks, this solves
                     # the problem that sometimes slave crawler stop
                     # its work because it could not receive new
                     # tasks immediatelly

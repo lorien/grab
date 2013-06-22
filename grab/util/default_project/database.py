@@ -1,3 +1,3 @@
 import pymongo
 
-mongodb = pymongo.Connection()['{{ PROJECT_NAME }}']
+db = pymongo.Connection()['{{ PROJECT_NAME }}']
