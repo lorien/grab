@@ -167,16 +167,17 @@ def _replace_node_with_text(node, text):
         parent.remove(node)
 
 
-def clean_html(html, safe_attrs=('src', 'href'), encoding='utf-8'):
+def clean_html(html, safe_attrs=('src', 'href'),
+               input_encoding='unicode',
+               output_encoding='unicode'):
     """
     Fix HTML structure and remove non-allowed attributes from all tags.
-    Return UTF-8 HTML.
     """
 
     from lxml.html.clean import Cleaner
 
     # Conver HTML to Unicode
-    html = render_html(parse_html(html, encoding=encoding), make_unicode=True)
+    html = render_html(parse_html(html, encoding=input_encoding), make_unicode=True)
 
     # Strip some shit with default lxml tools
     cleaner = Cleaner(page_structure=True)
@@ -189,4 +190,4 @@ def clean_html(html, safe_attrs=('src', 'href'), encoding='utf-8'):
             if key not in safe_attrs:
                 del elem.attrib[key]
 
-    return render_html(tree)
+    return render_html(tree, encoding=output_encoding)
