@@ -141,7 +141,7 @@ class Spider(SpiderPattern, SpiderStat):
 
         self.work_allowed = True
         if request_pause is not NULL:
-            logging.error('Option `request_pause` is deprecated and is not supported anymore')
+            logger.error('Option `request_pause` is deprecated and is not supported anymore')
 
         self.proxylist_enabled = None
         self.proxylist = None
@@ -195,7 +195,7 @@ class Spider(SpiderPattern, SpiderStat):
         Catches SIGUSR1 signal and shutdowns spider.
         """
         
-        logging.error('Received SIGUSR2 signal. Doing shutdown')
+        logger.error('Received SIGUSR2 signal. Doing shutdown')
         self.stop()
 
     def setup_grab(self, **kwargs):
@@ -239,6 +239,7 @@ class Spider(SpiderPattern, SpiderStat):
             except AttributeError:
                 pass
             else:
+                logger.error('task_*_fallback methods are deprecated! Do not use this feature please. It will be replaced with middleware layer')
                 fallback_handler(task)
 
         return is_valid
