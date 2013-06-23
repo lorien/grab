@@ -26,10 +26,13 @@ Usage example:
 from __future__ import absolute_import
 from .field import (StringField, IntegerField, DateTimeField,
                     HTMLField, FuncField, NullField, ChoiceField,
-                    RegexField)
+                    RegexField, ItemListField)
 from .item import Item
+from ..error import GrabMisuseError
 
 def func_field(*args, **kwargs):
+    if not kwargs and len(args) == 1 and callable(args[0]):
+        raise GrabMisuseError('It seems that you forgot to "call" the func_field decorator. Use "@func_field()" instead "func_field".')
     def wrapper(func):
         kwargs['pass_item'] = True
         return FuncField(func=func, *args, **kwargs)

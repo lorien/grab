@@ -1,4 +1,4 @@
-from .field import Field
+from .field import Field, ItemListField
 from ..selector import XpathSelector
 
 class ItemBuilder(type):
