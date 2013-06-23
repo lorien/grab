@@ -20,6 +20,7 @@ class Task(BaseTask):
                  disable_cache=False, refresh_cache=False,
                  valid_status=[], use_proxylist=True,
                  cache_timeout=None, delay=0,
+                 raw=False,
                  **kwargs):
         """
         Create `Task` object.
@@ -64,6 +65,11 @@ class Task(BaseTask):
             :param cache_timeout: maximum age (in seconds) of cache record to be valid
             :param delay: if specified tells the spider to schedule the task and execute
                 it after `delay` seconds
+            :param raw: if `raw` is True then the network response is forwarding to the
+                corresponding handler without any check of HTTP status code of network error,
+                if `raw` is False (by default) then failed response is putting back
+                to task queue or if tries limit is reached then the processing of this 
+                request is finished.
             Any non-standard named arguments passed to `Task` constructor will be saved as
             attributes of the object. You can get their values later as attributes or with
             `get` method which allows to use default value if attrubute does not exist.
@@ -100,6 +106,7 @@ class Task(BaseTask):
         self.valid_status = valid_status
         self.use_proxylist = use_proxylist
         self.cache_timeout = cache_timeout
+        self.raw = raw
         for key, value in kwargs.items():
             setattr(self, key, value)
 
