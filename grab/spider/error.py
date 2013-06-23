@@ -1,3 +1,7 @@
+__all__ = ('SpiderError', 'SpiderMisuseError', 'FatalError',
+           'StopTaskProcessing', 'SpiderInternalError',
+           'NoTaskHandler')
+
 class SpiderError(Exception):
     "Base class for Spider exceptions"
 
@@ -16,4 +20,11 @@ class SpiderInternalError(SpiderError):
     """
     Used to indicate error in some internal spider services
     like spider class discovering, CLI error
+    """
+
+
+class NoTaskHandler(SpiderError):
+    """
+    Used then it is not possible to find which
+    handler should be used to process network response.
     """

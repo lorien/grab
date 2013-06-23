@@ -2,35 +2,34 @@ from unittest import TestCase
 
 import grab.spider.base
 from grab import Grab
-from grab.spider import Spider, Task, Data, SpiderMisuseError
+from grab.spider import Spider, Task, Data, SpiderMisuseError, NoTaskHandler
 
 from .tornado_util import SERVER
 
+class SimpleSpider(Spider):
+    base_url = 'http://google.com'
+
+    def task_baz(self, grab, task):
+        return Data('foo', grab.response.body)
+
+    def data_foo(self, item):
+        self.SAVED_ITEM = item
+
 class TestSpider(TestCase):
-
-    class SimpleSpider(Spider):
-        base_url = 'http://google.com'
-
-        def task_baz(self, grab, task):
-            return Data('foo', grab.response.body)
-
-        def data_foo(self, item):
-            self.SAVED_ITEM = item
-           
     def setUp(self):
         SERVER.reset()
 
     def test_task_priority(self):
         #SERVER.RESPONSE['get'] = 'Hello spider!'
         #SERVER.SLEEP['get'] = 0
-        #sp = self.SimpleSpider()
+        #sp = SimpleSpider()
         #sp.add_task(Task('baz', SERVER.BASE_URL))
         #sp.run()
         #self.assertEqual('Hello spider!', sp.SAVED_ITEM)
 
         # Automatic random priority
         grab.spider.base.RANDOM_TASK_PRIORITY_RANGE = (10, 20)
-        bot = self.SimpleSpider(priority_mode='random')
+        bot = SimpleSpider(priority_mode='random')
         bot.setup_queue()
         task = Task('baz', url='xxx')
         self.assertEqual(task.priority, None)
@@ -39,7 +38,7 @@ class TestSpider(TestCase):
 
         # Automatic constant priority
         grab.spider.base.DEFAULT_TASK_PRIORITY = 33
-        bot = self.SimpleSpider(priority_mode='const')
+        bot = SimpleSpider(priority_mode='const')
         bot.setup_queue()
         task = Task('baz', url='xxx')
         self.assertEqual(task.priority, None)
@@ -48,7 +47,7 @@ class TestSpider(TestCase):
 
         # Automatic priority does not override explictily setted priority
         grab.spider.base.DEFAULT_TASK_PRIORITY = 33
-        bot = self.SimpleSpider(priority_mode='const')
+        bot = SimpleSpider(priority_mode='const')
         bot.setup_queue()
         task = Task('baz', url='xxx', priority=1)
         self.assertEqual(1, task.priority)
@@ -56,10 +55,10 @@ class TestSpider(TestCase):
         self.assertEqual(1, task.priority)
 
         self.assertRaises(SpiderMisuseError,
-                          lambda: self.SimpleSpider(priority_mode='foo'))
+                          lambda: SimpleSpider(priority_mode='foo'))
 
     def test_task_url(self):
-        bot = self.SimpleSpider()
+        bot = SimpleSpider()
         bot.setup_queue()
         task = Task('baz', url='xxx')
         self.assertEqual('xxx', task.url)
@@ -74,7 +73,7 @@ class TestSpider(TestCase):
         self.assertEqual('http://google.com/yyy', task.grab_config['url'])
 
     def test_task_clone(self):
-        bot = self.SimpleSpider()
+        bot = SimpleSpider()
         bot.setup_queue()
 
         task = Task('baz', url='xxx')
@@ -93,7 +92,7 @@ class TestSpider(TestCase):
         bot.add_task(task.clone(grab_config=g.config))
 
     def test_task_useragent(self):
-        bot = self.SimpleSpider()
+        bot = SimpleSpider()
         bot.setup_queue()
 
         g = Grab()
@@ -113,4 +112,26 @@ class TestSpider(TestCase):
         #bot = SimpleSpider()
         #bot.setup_queue()
         #bot.add_task(Task('one', SERVER.BASE_URL))
+        #bot.run()
+
+    def test_task_nohandler_error(self):
+        class TestSpider(Spider):
+            pass
+
+        bot = TestSpider()
+        bot.setup_queue()
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        self.assertRaises(NoTaskHandler, bot.run)
+
+    #def test_task_raw(self):
+        #class TestSpider(Spider):
+            #def prepare(self):
+                #self.count = 0
+
+            #def task_page(self):
+                #self.count += 1
+
+        #bot = TestSpider()
+        #bot.setup_queue()
+        #bot.add_task(Task('page', url=SERVER.BASE_URL))
         #bot.run()

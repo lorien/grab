@@ -23,7 +23,7 @@ from random import randint
 import Queue
 from ..base import GLOBAL_STATE, Grab
 from .error import (SpiderError, SpiderMisuseError, FatalError,
-                    StopTaskProcessing)
+                    StopTaskProcessing, NoTaskHandler)
 from .task import Task, NullTask
 from .data import Data
 from .pattern import SpiderPattern
@@ -516,20 +516,13 @@ class Spider(SpiderPattern, SpiderStat):
         else:
             raise SpiderError('Unknown result type: %s' % result)
 
-    def execute_task_handler(self, res, handler, raw_handler=None):
+    def execute_task_handler(self, res, handler):
         """
         Apply `handler` function to the network result.
 
         If network result is failed then submit task again
         to the network task queue.
         """
-
-        process_handler = True
-        if raw_handler is not None:
-            process_handler = raw_handler(res)
-
-        if not process_handler:
-            return
 
         if handler is None:
             raise SpiderMisuseError('Handler is not defined for task %s' % res['task'].name)
@@ -539,8 +532,8 @@ class Spider(SpiderPattern, SpiderStat):
         except AttributeError:
             handler_name = 'NONE'
 
-        if res['ok'] and self.valid_response_code(res['grab'].response.code,
-                                                  res['task']):
+        if (
+            res['ok'] and self.valid_response_code(res['grab'].response.code, res['task'])):
             try:
                 with self.save_timer('response_handler'):
                     with self.save_timer('response_handler.%s' % handler_name):
@@ -613,23 +606,18 @@ class Spider(SpiderPattern, SpiderStat):
 
         # Process the response
         handler_name = 'task_%s' % res['task'].name
-        raw_handler_name = 'task_raw_%s' % res['task'].name
-
-        try:
-            raw_handler = getattr(self, raw_handler_name)
-        except AttributeError:
-            raw_handler = None
 
         try:
             handler = getattr(self, handler_name)
         except AttributeError:
             handler = None
 
-        if handler is None and raw_handler is None:
-            raise SpiderError('No handler or raw handler defined for task %s' %\
-                              res['task'].name)
+        #callback = res['task'].get('callback')
+
+        if handler is None:
+            raise NoTaskHandler('No handler defined for task %s' % res['task'].name)
         else:
-            self.execute_task_handler(res, handler, raw_handler)
+            self.execute_task_handler(res, handler)
 
     def change_proxy(self, task, grab):
         """
