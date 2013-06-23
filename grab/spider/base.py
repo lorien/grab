@@ -532,8 +532,9 @@ class Spider(SpiderPattern, SpiderStat):
         except AttributeError:
             handler_name = 'NONE'
 
-        if (
-            res['ok'] and self.valid_response_code(res['grab'].response.code, res['task'])):
+        #if (res['task'].get('raw') or (
+            #res['ok'] and self.valid_response_code(res['grab'].response.code, res['task']))):
+        if (res['ok'] and self.valid_response_code(res['grab'].response.code, res['task'])):
             try:
                 with self.save_timer('response_handler'):
                     with self.save_timer('response_handler.%s' % handler_name):

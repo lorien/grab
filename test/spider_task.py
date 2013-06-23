@@ -126,12 +126,23 @@ class TestSpider(TestCase):
     #def test_task_raw(self):
         #class TestSpider(Spider):
             #def prepare(self):
-                #self.count = 0
+                #self.codes = []
 
-            #def task_page(self):
-                #self.count += 1
+            #def task_page(self, grab, task):
+                #self.codes.append(grab.response.code)
 
-        #bot = TestSpider()
+        #SERVER.RESPONSE['code'] = 502
+
+        #bot = TestSpider(network_try_limit=1)
         #bot.setup_queue()
         #bot.add_task(Task('page', url=SERVER.BASE_URL))
+        #bot.add_task(Task('page', url=SERVER.BASE_URL))
         #bot.run()
+        #self.assertEqual(0, len(bot.codes))
+
+        #bot = TestSpider(network_try_limit=1)
+        #bot.setup_queue()
+        #bot.add_task(Task('page', url=SERVER.BASE_URL, raw=True))
+        #bot.add_task(Task('page', url=SERVER.BASE_URL, raw=True))
+        #bot.run()
+        #self.assertEqual(2, len(bot.codes))
