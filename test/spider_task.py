@@ -1,4 +1,5 @@
 from unittest import TestCase
+import cPickle as pickle
 
 import grab.spider.base
 from grab import Grab
@@ -146,3 +147,59 @@ class TestSpider(TestCase):
         bot.add_task(Task('page', url=SERVER.BASE_URL, raw=True))
         bot.run()
         self.assertEqual(2, len(bot.codes))
+
+    def test_task_callback(self):
+        class TestSpider(Spider):
+            def task_page(self, grab, task):
+                self.meta['tokens'].append('0_handler')
+
+        class FuncWithState(object):
+            def __init__(self, tokens):
+                self.tokens = tokens
+
+            def __call__(self, grab, task):
+                self.tokens.append('1_func')
+
+        tokens = []
+        func = FuncWithState(tokens)
+
+        bot = TestSpider()
+        bot.meta['tokens'] = tokens
+        bot.setup_queue()
+        # classic handler
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        # callback option overried classic handler
+        bot.add_task(Task('page', url=SERVER.BASE_URL, callback=func))
+        # callback and null task name
+        bot.add_task(Task(name=None, url=SERVER.BASE_URL, callback=func))
+        # callback and default task name
+        bot.add_task(Task(url=SERVER.BASE_URL, callback=func))
+        bot.run()
+        self.assertEqual(['0_handler', '1_func', '1_func', '1_func'],
+                         sorted(tokens))
+
+
+    #def test_task_callback_serialization(self):
+        # 8-(
+        # FIX: pickling the spider instance completely does not work
+        # 8-(
+
+        #class FuncWithState(object):
+            #def __init__(self, tokens):
+                #self.tokens = tokens
+
+            #def __call__(self, grab, task):
+                #self.tokens.append('func')
+
+        #tokens = []
+        #func = FuncWithState(tokens)
+
+        #bot = SimpleSpider()
+        #bot.setup_queue()
+        ##bot.add_task(Task(url=SERVER.BASE_URL, callback=func))
+
+        #dump = pickle.dumps(bot)
+        #bot2 = pickle.loads(dump)
+
+        #bot.run()
+        #self.assertEqual(['func'], tokens)

@@ -20,7 +20,7 @@ class Task(BaseTask):
                  disable_cache=False, refresh_cache=False,
                  valid_status=[], use_proxylist=True,
                  cache_timeout=None, delay=0,
-                 raw=False,
+                 raw=False, callback=None,
                  **kwargs):
         """
         Create `Task` object.
@@ -70,6 +70,10 @@ class Task(BaseTask):
                 if `raw` is False (by default) then failed response is putting back
                 to task queue or if tries limit is reached then the processing of this 
                 request is finished.
+            :param callback: if you pass some function in `callback` option then the
+                network resposne will be passed to this callback and the usual 'task_*'
+                handler will be ignored and no error will be raised if such 'task_*' handler
+                does not exist.
             Any non-standard named arguments passed to `Task` constructor will be saved as
             attributes of the object. You can get their values later as attributes or with
             `get` method which allows to use default value if attrubute does not exist.
@@ -107,6 +111,7 @@ class Task(BaseTask):
         self.use_proxylist = use_proxylist
         self.cache_timeout = cache_timeout
         self.raw = raw
+        self.callback = callback
         for key, value in kwargs.items():
             setattr(self, key, value)
 

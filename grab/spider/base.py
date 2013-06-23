@@ -524,9 +524,6 @@ class Spider(SpiderPattern, SpiderStat):
         to the network task queue.
         """
 
-        if handler is None:
-            raise SpiderMisuseError('Handler is not defined for task %s' % res['task'].name)
-
         try:
             handler_name = handler.__name__
         except AttributeError:
@@ -612,12 +609,12 @@ class Spider(SpiderPattern, SpiderStat):
         except AttributeError:
             handler = None
 
-        #callback = res['task'].get('callback')
+        callback = res['task'].get('callback')
 
-        if handler is None:
-            raise NoTaskHandler('No handler defined for task %s' % res['task'].name)
+        if handler is None and callback is None:
+            raise NoTaskHandler('No handler or callback defined for task %s' % res['task'].name)
         else:
-            self.execute_task_handler(res, handler)
+            self.execute_task_handler(res, callback or handler)
 
     def change_proxy(self, task, grab):
         """
