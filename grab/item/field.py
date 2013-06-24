@@ -64,6 +64,7 @@ class ItemListField(Field):
 class IntegerField(Field):
     def __init__(self, *args, **kwargs):
         self.ignore_spaces = kwargs.get('ignore_spaces', False)
+        self.ignore_chars = kwargs.get('ignore_chars', None)
         super(IntegerField, self).__init__(*args, **kwargs)
 
     @cached
@@ -75,7 +76,8 @@ class IntegerField(Field):
         if self.empty_default is not NULL:
             if value == "":
                 return self.empty_default
-        return find_number(self.process(value), ignore_spaces=self.ignore_spaces)
+        return find_number(self.process(value), ignore_spaces=self.ignore_spaces,
+                           ignore_chars=self.ignore_chars)
 
 
 class StringField(Field):

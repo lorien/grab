@@ -11,7 +11,8 @@ RE_NUMBER_WITH_SPACES = re.compile(r'\d[\s\d]*', re.U)
 RE_SPACE = re.compile(r'\s+', re.U)
 BOM_TOKEN = '\xef\xbb\xbf'
 
-def find_number(text, ignore_spaces=False, make_int=True):
+def find_number(text, ignore_spaces=False, make_int=True,
+                ignore_chars=None):
     """
     Find the number in the `text`.
 
@@ -21,6 +22,9 @@ def find_number(text, ignore_spaces=False, make_int=True):
     :raises: :class:`DataNotFound` if number was not found.
     """
 
+    if ignore_chars:
+        for char in ignore_chars:
+            text = text.replace(char, '')
     if ignore_spaces:
         match = RE_NUMBER_WITH_SPACES.search(text)
     else:
