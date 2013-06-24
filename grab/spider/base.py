@@ -66,7 +66,6 @@ class Spider(SpiderPattern, SpiderStat):
 
     def __init__(self, thread_number=3,
                  network_try_limit=10, task_try_limit=10,
-                 debug_error=False,
                  request_pause=NULL,
                  priority_mode='random',
                  meta=None,
@@ -133,7 +132,6 @@ class Spider(SpiderPattern, SpiderStat):
             signal.signal(signal.SIGUSR2, self.sigusr2_handler)
         except (ValueError, AttributeError):
             pass
-        self.debug_error = debug_error
 
         # Initial cache-subsystem values
         self.cache_enabled = False
@@ -481,11 +479,6 @@ class Spider(SpiderPattern, SpiderStat):
 
         self.add_item('fatal', '%s|%s|%s' % (ex.__class__.__name__,
                                              ex_str, task.url))
-        if self.debug_error:
-            # TODO: open pdb session in the place where exception
-            # was raised
-            import pdb; pdb.set_trace()
-
         if isinstance(ex, FatalError):
             raise
 
@@ -535,11 +528,11 @@ class Spider(SpiderPattern, SpiderStat):
                 with self.save_timer('response_handler'):
                     with self.save_timer('response_handler.%s' % handler_name):
                         result = handler(res['grab'], res['task'])
-                        if isinstance(result, types.GeneratorType):
+                        if result is None:
+                            pass
+                        else:
                             for item in result:
                                 self.process_handler_result(item, res['task'])
-                        else:
-                            self.process_handler_result(result, res['task'])
             except Exception, ex:
                 self.process_handler_error(handler_name, ex, res['task'])
             else:
