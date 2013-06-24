@@ -2,8 +2,9 @@ from copy import deepcopy
 from grab.util import default_config
 from grab.util.module import import_string
 
-SPIDER_KEYS = ['QUEUE', 'CACHE', 'PROXY_LIST', 'THREAD_NUMBER',
-               'NETWORK_TRY_LIMIT', 'TASK_TRY_LIMIT']
+# Temporary disabled, spider config are mixed with all global config keys
+#SPIDER_KEYS = ['GRAB_QUEUE', 'GRAB_CACHE', 'GRAB_PROXY_LIST', 'GRAB_THREAD_NUMBER',
+               #'GRAB_NETWORK_TRY_LIMIT', 'GRAB_TASK_TRY_LIMIT']
 
 def is_dict_interface(obj):
     try:
@@ -49,5 +50,5 @@ def build_spider_config(spider_name, global_config=None):
     spider_settings_key = 'SPIDER_CONFIG_%s' % spider_name.upper()
     spider_config = Config(global_config.get(spider_settings_key, {}))
     spider_config.update_with_object(global_config, only_new_keys=True,
-                                     allowed_keys=SPIDER_KEYS)
+                                     allowed_keys=None)#SPIDER_KEYS)
     return spider_config

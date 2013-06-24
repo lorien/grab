@@ -111,7 +111,7 @@ def build_spider_registry(config):
                 #mod_path = path[:-3].replace('/', '.')
                 #try:
                     #mod = __import__
-    for path in config.get('SPIDER_MODULES'):
+    for path in config.get('GRAB_SPIDER_MODULES'):
         try:
             mod = __import__(path, None, None, ['foo'])
         except ImportError, ex:

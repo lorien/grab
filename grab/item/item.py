@@ -25,8 +25,8 @@ class Item(object):
     @classmethod
     def find(cls, root, **kwargs):
         for count, sel in enumerate(root.select(cls.Meta.find_selector)):
-            item = cls(sel.node)
-            item._parse(**kwargs)
+            item = cls(sel.node, **kwargs)
+            #item._parse(**kwargs)
             item._position = count
             yield item
 
@@ -35,8 +35,8 @@ class Item(object):
     def find_one(cls, *args, **kwargs):
         return list(cls.find(*args, **kwargs))[0]
 
-    def _parse(self, url=None, **kwargs):
-        pass
+    #def _parse(self, url=None, **kwargs):
+        #pass
 
     def _render(self, exclude=(), prefix=''):
         out = []
@@ -59,9 +59,9 @@ class Item(object):
         for key in keys:
             setattr(obj, key, getattr(self, key))
 
-    def update_dict(self, obj, keys):
+    def update_dict(self, dct, keys):
         for key in keys:
-            obj[key] = getattr(self, key)
+            dct[key] = getattr(self, key)
 
     def get_dict(self, keys):
         obj = {}
