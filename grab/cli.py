@@ -10,8 +10,14 @@ from grab.tools.logs import default_logging
 from grab import Grab
 import sys 
 #import setup_django
+from grab.util.config import build_global_config
 
 logger = logging.getLogger('grab.cli')
+
+config = build_global_config()
+if config['GRAB_ACTIVATE_VIRTUALENV']:
+    activate_script = os.path.join(config['GRAB_ACTIVATE_VIRTUALENV'], 'bin/activate_this.py')
+    execfile(activate_script)
 
 def setup_logging(action, level):
     root = logging.getLogger()
