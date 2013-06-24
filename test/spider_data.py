@@ -12,7 +12,7 @@ class TestSpider(TestCase):
     def test_data_nohandler_error(self):
         class TestSpider(Spider):
             def task_page(self, grab, task):
-                yield Data('foo', 1)
+                yield Data('foo', num=1)
 
         bot = TestSpider()
         bot.setup_queue()
@@ -22,7 +22,7 @@ class TestSpider(TestCase):
     def test_exception_from_data_handler(self):
         class TestSpider(Spider):
             def task_page(self, grab, task):
-                yield Data('foo', 1)
+                yield Data('foo', num=1)
             
             def data_foo(self, num):
                 1/0
@@ -32,3 +32,39 @@ class TestSpider(TestCase):
         bot.add_task(Task('page', url=SERVER.BASE_URL))
         bot.run()
         self.assertTrue('data_foo' in bot.items['fatal'][0])
+
+    def test_data_simple_case(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.data_processed = []
+
+            def task_page(self, grab, task):
+                yield Data('foo', number=1)
+            
+            def data_foo(self, number):
+                self.data_processed.append(number)
+
+        bot = TestSpider()
+        bot.setup_queue()
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        bot.run()
+        self.assertEqual(bot.data_processed, [1])
+
+    def test_complex_data(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.data_processed = []
+
+            def task_page(self, grab, task):
+                yield Data('foo', one=1, two=2, bar='gaz')
+            
+            def data_foo(self, one, two, **kwargs):
+                self.data_processed.append(one)
+                self.data_processed.append(two)
+                self.data_processed.append(kwargs)
+
+        bot = TestSpider()
+        bot.setup_queue()
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        bot.run()
+        self.assertEqual(bot.data_processed, [1, 2, {'bar': 'gaz'}])

@@ -501,7 +501,7 @@ class Spider(SpiderPattern, SpiderStat):
         elif isinstance(result, Data):
             handler = self.find_data_handler(result)
             try:
-                handler(result.item)
+                handler(**result.storage)
             except Exception, ex:
                 self.process_handler_error('data_%s' % result.name, ex, task)
         elif result is None:
