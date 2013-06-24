@@ -1,7 +1,3 @@
-"""
-Global TODO:
-* make task_%s_preprocess methods
-"""
 from __future__ import absolute_import
 import types
 import signal
@@ -23,7 +19,7 @@ from random import randint
 import Queue
 from ..base import GLOBAL_STATE, Grab
 from .error import (SpiderError, SpiderMisuseError, FatalError,
-                    StopTaskProcessing, NoTaskHandler)
+                    StopTaskProcessing, NoTaskHandler, NoDataHandler)
 from .task import Task, NullTask
 from .data import Data
 from .pattern import SpiderPattern
@@ -460,7 +456,7 @@ class Spider(SpiderPattern, SpiderStat):
     def process_handler_error(self, func_name, ex, task, error_tb=None):
         self.inc_count('error-%s' % ex.__class__.__name__.lower())
 
-        if error_tb:
+        if error_tb is not None:
             logger.error('Error in %s function' % func_name)
             logger.error(error_tb)
         else:
@@ -477,10 +473,18 @@ class Spider(SpiderPattern, SpiderStat):
             except TypeError:
                 ex_str = str(ex)
 
-        self.add_item('fatal', '%s|%s|%s' % (ex.__class__.__name__,
-                                             ex_str, task.url))
+        self.add_item('fatal', '%s|%s|%s|%s' % (
+            func_name, ex.__class__.__name__, ex_str, task.url))
         if isinstance(ex, FatalError):
             raise
+
+    def find_data_handler(self, data):
+        try:
+            handler = getattr(self, 'data_%s' % data.name)
+        except AttributeError:
+            raise NoDataHandler('No handler defined for Data %s' % data.name)
+        else:
+            return handler
 
     def process_handler_result(self, result, task):
         """
@@ -495,15 +499,11 @@ class Spider(SpiderPattern, SpiderStat):
         if isinstance(result, Task):
             self.add_task(result)
         elif isinstance(result, Data):
-            handler_name = 'data_%s' % result.name
-            try:
-                handler = getattr(self, handler_name)
-            except AttributeError:
-                raise SpiderError('No content handler for %s item' % result.name)
+            handler = self.find_data_handler(result)
             try:
                 handler(result.item)
             except Exception, ex:
-                self.process_handler_error(handler_name, ex, task)
+                self.process_handler_error('data_%s' % result.name, ex, task)
         elif result is None:
             pass
         else:
@@ -533,6 +533,8 @@ class Spider(SpiderPattern, SpiderStat):
                         else:
                             for item in result:
                                 self.process_handler_result(item, res['task'])
+            except NoDataHandler, ex:
+                raise
             except Exception, ex:
                 self.process_handler_error(handler_name, ex, res['task'])
             else:
@@ -555,6 +557,17 @@ class Spider(SpiderPattern, SpiderStat):
                 self.add_task(task)
             # TODO: allow to write error handlers
     
+    def find_task_handler(self, task):
+        callback = task.get('callback')
+        if callback:
+            return callback
+        else:
+            try:
+                handler = getattr(self, 'task_%s' % task.name)
+            except AttributeError:
+                raise NoTaskHandler('No handler or callback defined for task %s' % task.name)
+            else:
+                return handler
 
     def process_network_result(self, res):
         """
@@ -594,20 +607,8 @@ class Spider(SpiderPattern, SpiderStat):
         if stop:
             return
 
-        # Process the response
-        handler_name = 'task_%s' % res['task'].name
-
-        try:
-            handler = getattr(self, handler_name)
-        except AttributeError:
-            handler = None
-
-        callback = res['task'].get('callback')
-
-        if handler is None and callback is None:
-            raise NoTaskHandler('No handler or callback defined for task %s' % res['task'].name)
-        else:
-            self.execute_task_handler(res, callback or handler)
+        handler = self.find_task_handler(res['task'])
+        self.execute_task_handler(res, handler)
 
     def change_proxy(self, task, grab):
         """

@@ -11,10 +11,7 @@ class SimpleSpider(Spider):
     base_url = 'http://google.com'
 
     def task_baz(self, grab, task):
-        return Data('foo', grab.response.body)
-
-    def data_foo(self, item):
-        self.SAVED_ITEM = item
+        self.SAVED_ITEM = grab.response.body
 
 class TestSpider(TestCase):
     def setUp(self):
