@@ -480,11 +480,14 @@ class Spider(SpiderPattern, SpiderStat):
 
     def find_data_handler(self, data):
         try:
-            handler = getattr(self, 'data_%s' % data.data_name)
+            return getattr(data, 'handler')
         except AttributeError:
-            raise NoDataHandler('No handler defined for Data %s' % data.data_name)
-        else:
-            return handler
+            try:
+                handler = getattr(self, 'data_%s' % data.handler_key)
+            except AttributeError:
+                raise NoDataHandler('No handler defined for Data %s' % data.handler_key)
+            else:
+                return handler
 
     def process_handler_result(self, result, task):
         """
@@ -501,9 +504,15 @@ class Spider(SpiderPattern, SpiderStat):
         elif isinstance(result, Data):
             handler = self.find_data_handler(result)
             try:
-                handler(**result.storage)
+                data_result = handler(**result.storage)
+                if data_result is None:
+                    pass
+                else:
+                    for something in data_result:
+                        self.process_handler_result(something, task)
+
             except Exception, ex:
-                self.process_handler_error('data_%s' % result.data_name, ex, task)
+                self.process_handler_error('data_%s' % result.handler_key, ex, task)
         elif result is None:
             pass
         else:

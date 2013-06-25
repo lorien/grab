@@ -79,3 +79,24 @@ class TestSpider(TestCase):
         self.assertRaises(KeyError, lambda: data.get('name'))
         self.assertEqual('foo', data.get('name', 'foo'))
         self.assertEqual({'age': 22}, data.get('person'))
+
+    def test_things_yiled_from_data_handler(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.data_processed = []
+
+            def task_page(self, grab, task):
+                yield Data('foo', count=task.get('count', 1))
+            
+            def data_foo(self, count):
+                self.data_processed.append(count)
+                if count == 1:
+                    yield Data('foo', count=666)
+                    yield Task('page', url=SERVER.BASE_URL,
+                               count=count + 1)
+
+        bot = TestSpider()
+        bot.setup_queue()
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        bot.run()
+        self.assertEqual(bot.data_processed, [1, 666, 2])

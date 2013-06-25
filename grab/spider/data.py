@@ -5,8 +5,8 @@ class Data(object):
     Task handlers should return instances of that class.
     """
 
-    def __init__(self, data_name, **kwargs):
-        self.data_name = data_name
+    def __init__(self, handler_key=None, **kwargs):
+        self.handler_key = handler_key
         self.storage = kwargs
 
     def __getitem__(self, key):
