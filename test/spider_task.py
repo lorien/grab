@@ -200,3 +200,21 @@ class TestSpider(TestCase):
 
         #bot.run()
         #self.assertEqual(['func'], tokens)
+
+    def test_task_fallback(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.tokens = []
+
+            def task_page(self, grab, task):
+                self.tokens.append('task')
+
+            def task_page_fallback(self, task):
+                self.tokens.append('fallback')
+
+        SERVER.RESPONSE['code'] = 403
+        bot = TestSpider(network_try_limit=2)
+        bot.setup_queue()
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        bot.run()
+        self.assertEqual(bot.tokens, ['fallback'])

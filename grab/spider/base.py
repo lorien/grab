@@ -224,17 +224,20 @@ class Spider(SpiderPattern, SpiderStat):
 
         return is_valid
 
+    def process_task_fallback(self, task):
+        try:
+            fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
+        except AttributeError:
+            pass
+        else:
+            logger.error('task_*_fallback methods are deprecated! Do not use this feature please. It will be replaced with middleware layer')
+            fallback_handler(task)
+
     def check_task_limits_deprecated(self, task):
         is_valid = self.check_task_limits(task)
 
         if not is_valid:
-            try:
-                fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
-            except AttributeError:
-                pass
-            else:
-                logger.error('task_*_fallback methods are deprecated! Do not use this feature please. It will be replaced with middleware layer')
-                fallback_handler(task)
+            self.process_task_fallback(task)
 
         return is_valid
 
@@ -764,6 +767,7 @@ class Spider(SpiderPattern, SpiderStat):
 
                         if not self.check_task_limits(task):
                             logger_verbose.debug('Task %s is rejected due to limits' % task.name)
+                            self.process_task_fallback(task)
                         else:
                             self.process_new_task(task)
 
