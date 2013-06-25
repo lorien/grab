@@ -68,3 +68,14 @@ class TestSpider(TestCase):
         bot.add_task(Task('page', url=SERVER.BASE_URL))
         bot.run()
         self.assertEqual(bot.data_processed, [1, 2, {'bar': 'gaz'}])
+
+    def test_data_object_dict_interface(self):
+        data = Data('person', person={'age': 22})
+        self.assertRaises(KeyError, lambda: data['name'])
+        self.assertEqual(data['person'], {'age': 22})
+
+    def test_data_object_get_method(self):
+        data = Data('person', person={'age': 22})
+        self.assertRaises(KeyError, lambda: data.get('name'))
+        self.assertEqual('foo', data.get('name', 'foo'))
+        self.assertEqual({'age': 22}, data.get('person'))
