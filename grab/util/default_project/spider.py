@@ -11,7 +11,7 @@ import urllib
 from collections import defaultdict
 import re
 
-from database import mongodb
+from database import db
 
 class {{ PROJECT_NAME_CAMELCASE }}Spider(Spider):
     initial_urls = ['']
