@@ -8,5 +8,6 @@ class DefaultConfig(object):
     GRAB_TASK_TRY_LIMIT = 10
     GRAB_DISPLAY_TIMING = True
     GRAB_DISPLAY_STATS = True
+    GRAB_ACTIVATE_VIRTUALENV = False
 
 default_config = DefaultConfig()

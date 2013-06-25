@@ -2,14 +2,8 @@ import os
 from argparse import ArgumentParser
 import logging
 from grab.tools.lock import assert_lock
-import time
-import traceback
-from datetime import datetime, timedelta
-import sys 
 from grab.tools.logs import default_logging
-from grab import Grab
 import sys 
-#import setup_django
 from grab.util.config import build_global_config
 
 logger = logging.getLogger('grab.cli')

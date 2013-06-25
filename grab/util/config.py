@@ -1,3 +1,5 @@
+import os
+
 from copy import deepcopy
 from grab.util import default_config
 from grab.util.module import import_string
@@ -39,9 +41,19 @@ class Config(dict):
 
 def build_global_config(settings_mod_path='settings'):
     config = Config()
-    config.update_with_path(settings_mod_path)
-    config.update_with_object(default_config.default_config, only_new_keys=True)
-    return config
+    try:
+        config.update_with_path(settings_mod_path)
+    except ImportError:
+        # do not raise exception if settings_mod_path is default
+        # and no settings.py file found in current directory
+        if (settings_mod_path == 'settings' and
+            not os.path.exists(os.path.join(os.path.realpath(os.getcwd()), 'settings.py'))):
+            pass
+        else:
+            raise
+    else:
+        config.update_with_object(default_config.default_config, only_new_keys=True)
+        return config
 
 
 def build_spider_config(spider_name, global_config=None):
