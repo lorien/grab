@@ -5,6 +5,7 @@ from ..tools.lxml_tools import clean_html
 from ..tools.text import find_number
 from .decorator import default, empty, cached, bind_item
 from .const import NULL
+from .error import ChoiceFieldError
 
 class Field(object):
     """
@@ -56,13 +57,13 @@ class ItemListField(Field):
         subitems = []
         for sel in item._selector.select(self.xpath_exp):
             subitem = self.item_cls(sel.node)
-            subitem._parse()
             subitems.append(subitem)
         return self.process(subitems)
 
 
 class IntegerField(Field):
     def __init__(self, *args, **kwargs):
+        self.find_number = kwargs.get('find_number', False)
         self.ignore_spaces = kwargs.get('ignore_spaces', False)
         self.ignore_chars = kwargs.get('ignore_chars', None)
         super(IntegerField, self).__init__(*args, **kwargs)
@@ -76,8 +77,13 @@ class IntegerField(Field):
         if self.empty_default is not NULL:
             if value == "":
                 return self.empty_default
-        return find_number(self.process(value), ignore_spaces=self.ignore_spaces,
-                           ignore_chars=self.ignore_chars)
+
+        if self.find_number or self.ignore_spaces or self.ignore_chars:
+            return find_number(self.process(value), ignore_spaces=self.ignore_spaces,
+                               ignore_chars=self.ignore_chars)
+        else:
+            # TODO: process ignore_chars and ignore_spaces in this case too
+            return int(self.process(value))
 
 
 class StringField(Field):
