@@ -11,7 +11,7 @@ import logging
 
 from ..base import UploadFile, UploadContent
 from ..error import GrabMisuseError
-from .encoding import smart_str, smart_unicode
+from .encoding import smart_str, smart_unicode, decode_pairs
 
 from grab.util.py3k_support import *
 
@@ -58,6 +58,11 @@ def encode_cookies(items, join=True, charset='utf-8'):
     if isinstance(items, dict):
         items = items.items()
     items = normalize_http_values(items, charset=charset)
+
+    # py3 hack
+    if PY3K:
+        items = decode_pairs(items, charset)
+
     tokens = []
     for key, value in items:
         tokens.append('%s=%s' % (encode(key), encode(value)))
