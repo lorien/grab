@@ -60,11 +60,11 @@ class LXMLToolsTest(TestCase):
             <div><p>text<span>span</span><a href="#">link</a></p>tail</div>"""
         tree = fromstring(HTML)
         drop_node(tree, './/p')
-        self.assertTrue(render_html(tree) == '<div>tail</div>')
+        self.assertTrue(render_html(tree) == b'<div>tail</div>')
 
         tree = fromstring(HTML)
         drop_node(tree, './/span', keep_content=True)
-        self.assertTrue(render_html(tree) == '<div><p>textspan<a href="#">link</a></p>tail</div>')
+        self.assertTrue(render_html(tree) == b'<div><p>textspan<a href="#">link</a></p>tail</div>')
 
     def test_replace_node_with_text(self):
         # replace span
@@ -72,25 +72,25 @@ class LXMLToolsTest(TestCase):
             <div><p><span>span</span><a href="#">link</a></p></div>"""
         tree = fromstring(HTML)
         replace_node_with_text(tree, './/span', 'FOO')
-        self.assertTrue(render_html(tree) == '<div><p>FOO<a href="#">link</a></p></div>')
+        self.assertTrue(render_html(tree) == b'<div><p>FOO<a href="#">link</a></p></div>')
 
         # replace span and keep its tail
         HTML = """
             <div><p><span>span</span>BAR<a href="#">link</a></p></div>"""
         tree = fromstring(HTML)
         replace_node_with_text(tree, './/span', 'FOO')
-        self.assertTrue(render_html(tree) == '<div><p>FOOBAR<a href="#">link</a></p></div>')
+        self.assertTrue(render_html(tree) == b'<div><p>FOOBAR<a href="#">link</a></p></div>')
 
         # replace p which is only child of parent div
         HTML = """
             <div><p><span>span</span>BAR<a href="#">link</a></p></div>"""
         tree = fromstring(HTML)
         replace_node_with_text(tree, './/p', 'FOO')
-        self.assertTrue(render_html(tree) == '<div>FOO</div>')
+        self.assertTrue(render_html(tree) == b'<div>FOO</div>')
 
         # replace span and keep tai of its preceeding sibling element
         HTML = """
             <div><p><strong>str</strong>!<span>span</span>BAR<a href="#">link</a></p></div>"""
         tree = fromstring(HTML)
         replace_node_with_text(tree, './/span', 'FOO')
-        self.assertTrue(render_html(tree) == '<div><p><strong>str</strong>!FOOBAR<a href="#">link</a></p></div>')
+        self.assertTrue(render_html(tree) == b'<div><p><strong>str</strong>!FOOBAR<a href="#">link</a></p></div>')
