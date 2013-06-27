@@ -1,5 +1,9 @@
 import os.path
-from string import letters, digits, ascii_lowercase, ascii_uppercase
+try:
+    from string import letters
+except ImportError:
+    from string import ascii_letters as letters
+from string import digits, ascii_lowercase, ascii_uppercase
 from random import choice, randint
 from datetime import date
 from functools import reduce
