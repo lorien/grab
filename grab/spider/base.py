@@ -269,7 +269,7 @@ class Spider(SpiderPattern, SpiderStat):
             if (not task.url.startswith('http://') and not task.url.startswith('https://')
                 and not task.url.startswith('ftp://')):
                 if self.base_url is None:
-                    raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified')
+                    raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified. Task: %s, URL: %s' % (task.name, task.url))
                 else:
                     task.url = urljoin(self.base_url, task.url)
                     # If task has grab_config object then update it too

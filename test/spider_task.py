@@ -218,3 +218,31 @@ class TestSpider(TestCase):
         bot.add_task(Task('page', url=SERVER.BASE_URL))
         bot.run()
         self.assertEqual(bot.tokens, ['fallback'])
+
+    def test_task_fallback_yields_new_task(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.tokens = []
+
+            def task_page(self, grab, task):
+                self.tokens.append('task')
+                SERVER.RESPONSE['code'] = 403
+                yield Task('page2', url=SERVER.BASE_URL)
+
+            def task_page_fallback(self, task):
+                self.tokens.append('fallback')
+                SERVER.RESPONSE['code'] = 200
+                self.add_task(Task('page', url=SERVER.BASE_URL))
+
+            def task_page2(self, grab, task):
+                pass
+
+            def task_page2_fallback(self, task):
+                self.tokens.append('fallback2')
+
+        SERVER.RESPONSE['code'] = 403
+        bot = TestSpider(network_try_limit=2)
+        bot.setup_queue()
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        bot.run()
+        self.assertEqual(bot.tokens, ['fallback', 'task', 'fallback2'])

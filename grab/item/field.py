@@ -87,12 +87,17 @@ class IntegerField(Field):
 
 
 class StringField(Field):
+    def __init__(self, *args, **kwargs):
+        self.normalize_space = kwargs.pop('normalize_space', True)
+        super(StringField, self).__init__(*args, **kwargs)
+
     @cached
     @default
     @empty
     @bind_item
     def __get__(self, item, itemtype):
-        value = item._selector.select(self.xpath_exp).text()
+        value = item._selector.select(self.xpath_exp)\
+                    .text(normalize_space=self.normalize_space)
         return self.process(value)
 
 
