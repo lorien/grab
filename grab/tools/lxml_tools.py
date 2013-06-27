@@ -185,7 +185,7 @@ def clean_html(html, safe_attrs=('src', 'href'),
 
     # Keep only allowed attributes
     tree = parse_html(html)
-    for elem in tree.xpath('.//*'):
+    for elem in tree.xpath('./descendant-or-self::*'):
         for key in elem.attrib.keys():
             if key not in safe_attrs:
                 del elem.attrib[key]
