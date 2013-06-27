@@ -25,6 +25,8 @@ logger = logging.getLogger('grab.ext.lxml')
 NULL = object()
 NULL_BYTE = chr(0)
 
+RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode('utf-8'), re.I)
+
 #rex_script = re.compile(r'<script[^>]*>.+?</script>', re.S)
 #rex_style = re.compile(r'<style[^>]*>.+?<?style>', re.S)
 #rex_comment = re.compile(r'<!--(?:.(?!-->))-->', re.S)
@@ -69,7 +71,11 @@ class LXMLExtension(object):
                 body = body.lower()
             if self.config['strip_null_bytes']:
                 body = body.replace(NULL_BYTE, '')
-            body = RE_XML_DECLARATION.sub('', body)
+            # py3 hack
+            if PY3K:
+                body = RE_UNICODE_XML_DECLARATION.sub('', body)
+            else:
+                body = RE_XML_DECLARATION.sub('', body)
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser
@@ -115,7 +121,12 @@ class LXMLExtension(object):
         from lxml.etree import fromstring
 
         if self._strict_lxml_tree is None:
-            self._strict_lxml_tree = fromstring(self.response.body)
+            # py3 hack
+            if PY3K:
+                body = self.response.body_as_bytes(encode=True)
+            else:
+                body = self.response.body
+            self._strict_lxml_tree = fromstring(body)
         return self._strict_lxml_tree
 
     def find_link(self, href_pattern, make_absolute=True):

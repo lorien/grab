@@ -113,7 +113,10 @@ class Response(object):
             #self.cookies[cookie.name] = cookie.value
 
         if charset is None:
-            self.detect_charset()
+            if isinstance(self.body, unicode):
+                self.charset = 'utf-8'
+            else:
+                self.detect_charset()
         else:
             self.charset = charset
 
@@ -193,16 +196,21 @@ class Response(object):
                 self.charset = charset
 
     def process_unicode_body(self, body, bom, charset, ignore_errors, fix_special_entities):
+        if isinstance(body, unicode):
+            #if charset in ('utf-8', 'utf8'):
+            #    return body.strip()
+            #else:
+            #    body = body.encode('utf-8')
+            #
+            body = body.encode('utf-8')
+        if bom:
+            body = body[len(self.bom):]
+        if fix_special_entities:
+            body = encoding_tools.fix_special_entities(body)
         if ignore_errors:
             errors = 'ignore'
         else:
             errors = 'strict'
-        if bom:
-            body = body[len(self.bom):]
-        else:
-            body = body
-        if fix_special_entities:
-            body = encoding_tools.fix_special_entities(body)
         return body.decode(charset, errors).strip()
 
     def unicode_body(self, ignore_errors=True, fix_special_entities=True):
@@ -210,9 +218,10 @@ class Response(object):
         Return response body as unicode string.
         """
 
+        self._check_body()
         if not self._unicode_body:
             self._unicode_body = self.process_unicode_body(
-                self.body, self.bom, self.charset,
+                self._body, self.bom, self.charset,
                 ignore_errors, fix_special_entities)
         return self._unicode_body
 
@@ -371,10 +380,7 @@ class Response(object):
     runtime_body = property(_read_runtime_body, _write_runtime_body)
 
     def body_as_bytes(self, encode=False):
-        if not self._body:
-            if self.body_path:
-                with open(self.body_path, 'rb') as inp:
-                    self._body = inp.read()
+        self._check_body()
         if encode:
             return self.body.encode(self.charset)
         return self._body

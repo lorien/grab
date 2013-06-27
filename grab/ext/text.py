@@ -33,6 +33,8 @@ class TextExtension(object):
 
         if not isinstance(anchor, unicode):
             if byte:
+                if PY3K:
+                    return anchor in self.response.body_as_bytes()
                 return anchor in self.response.body
             else:
                 raise GrabMisuseError('The anchor should be byte string in non-byte mode')

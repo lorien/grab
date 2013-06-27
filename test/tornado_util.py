@@ -61,7 +61,12 @@ class MainHandler(tornado.web.RequestHandler):
         SERVER.REQUEST['headers'] = self.request.headers
         SERVER.REQUEST['path'] = self.request.path
         SERVER.REQUEST['method'] = self.request.method
-        SERVER.REQUEST['post'] = self.request.body
+        charset = SERVER.REQUEST['charset']
+        # py3 hack
+        if PY3K and (charset not in ('utf-8', 'utf8')):
+            SERVER.REQUEST['post'] = self.request.body.decode('utf-8').encode(charset)
+        else:
+            SERVER.REQUEST['post'] = self.request.body
 
         callback_name = '%s_callback' % method_name
         if SERVER.RESPONSE.get(callback_name) is not None:
@@ -76,7 +81,7 @@ class MainHandler(tornado.web.RequestHandler):
                 self.set_status(200)
 
             if SERVER.RESPONSE['cookies']:
-                for name, value in SERVER.RESPONSE['cookies'].items():
+                for name, value in sorted(SERVER.RESPONSE['cookies'].items()):
                     self.set_header('Set-Cookie', '%s=%s' % (name, value))
 
             if SERVER.RESPONSE['headers']:
