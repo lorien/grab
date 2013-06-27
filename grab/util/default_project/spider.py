@@ -14,7 +14,8 @@ import re
 from database import db
 
 class {{ PROJECT_NAME_CAMELCASE }}Spider(Spider):
-    initial_urls = ['']
+    def task_generator(self):
+        yield Task('initial', url='')
 
     def task_initial(self, grab, task):
         pass
