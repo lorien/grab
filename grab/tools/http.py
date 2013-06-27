@@ -132,7 +132,7 @@ def quote(data):
 def normalize_url(url):
     parts = list(urlsplit(url))
     if RE_NON_ASCII.search(parts[1]):
-        parts[1] = smart_unicode(parts[1]).encode('idna')
+        parts[1] = str(smart_unicode(parts[1]).encode('idna').decode())
         url = urlunsplit(parts)
         return url
     else:
