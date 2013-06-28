@@ -60,7 +60,7 @@ class BasicSpiderTestCase(TestCase):
 
     def test_task_retry(self):
         SERVER.RESPONSE['get'] = 'xxx'
-        SERVER.RESPONSE['once_code'] = 403
+        SERVER.RESPONSE_ONCE['code'] = 403
         sp = self.SimpleSpider()
         sp.setup_queue()
         sp.add_task(Task('baz', SERVER.BASE_URL))

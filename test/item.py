@@ -7,6 +7,7 @@ import sys
 # Hack environment to force import "item" module from grab/item.py location
 root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(0, root)
+from lxml.html import fromstring
 
 from grab import Grab, DataNotFound
 from grab.item import (Item, IntegerField, StringField, DateTimeField, func_field,
@@ -14,6 +15,7 @@ from grab.item import (Item, IntegerField, StringField, DateTimeField, func_fiel
 from test.util import GRAB_TRANSPORT
 from grab.tools.lxml_tools import get_node_text, parse_html
 from grab.selector import XpathSelector
+from grab.error import GrabMisuseError
 
 XML = """<?xml version='1.0' encoding='utf-8'?>
 <bbapi version='1'>
@@ -135,3 +137,27 @@ class ItemTestCase(TestCase):
         func = Player.get_function('height2')
         html = '<html><body><height>3'
         self.assertEquals(3, func(XpathSelector(parse_html(html))))
+
+    def test_func_field_warning(self):
+        """
+        Test that usage of func_field decorators without "()"
+        raises exception.
+        """
+
+        def foo():
+            class TestItem(Item):
+                @func_field
+                def foo(self, sel):
+                    return 'test'
+
+        self.assertRaises(GrabMisuseError, foo)
+
+        def foo():
+            class TestItem(Item):
+                @func_field()
+                def foo(self, sel):
+                    return 'test'
+            
+            return TestItem(fromstring('<div></div>')).foo
+
+        self.assertEqual('test', foo())

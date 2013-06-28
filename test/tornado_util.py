@@ -13,8 +13,7 @@ class ServerState(object):
     BASE_URL = None
     REQUEST = {}
     RESPONSE = {}
-    RESPONSE_ONCE = {}
-    RESPONSE_ONCE_HEADERS = []
+    RESPONSE_ONCE = {'headers': []}
     SLEEP = {}
 
     def reset(self):
@@ -31,19 +30,20 @@ class ServerState(object):
             'post': '',
             'cookies': None,
             'headers': [],
-            'once_code': None,
             'get_callback': None,
+            'code': 200,
         })
         self.RESPONSE_ONCE.update({
             'get': None,
             'post': None,
+            'code': None,
         })
         self.SLEEP.update({
             'get': 0,
             'post': 0,
         })
-        for x in xrange(len(self.RESPONSE_ONCE_HEADERS)):
-            self.RESPONSE_ONCE_HEADERS.pop()
+        for x in xrange(len(self.RESPONSE_ONCE['headers'])):
+            self.RESPONSE_ONCE['headers'].pop()
 
 SERVER = ServerState()
 
@@ -74,11 +74,11 @@ class MainHandler(tornado.web.RequestHandler):
         else:
             headers_sent = set()
 
-            if SERVER.RESPONSE['once_code']:
-                self.set_status(SERVER.RESPONSE['once_code'])
-                SERVER.RESPONSE['once_code'] = None
+            if SERVER.RESPONSE_ONCE['code']:
+                self.set_status(SERVER.RESPONSE_ONCE['code'])
+                SERVER.RESPONSE_ONCE['code'] = None
             else:
-                self.set_status(200)
+                self.set_status(SERVER.RESPONSE['code'])
 
             if SERVER.RESPONSE['cookies']:
                 for name, value in sorted(SERVER.RESPONSE['cookies'].items()):
@@ -88,8 +88,8 @@ class MainHandler(tornado.web.RequestHandler):
                 for name, value in SERVER.RESPONSE['headers']:
                     self.set_header(name, value)
 
-            while SERVER.RESPONSE_ONCE_HEADERS:
-                key, value = SERVER.RESPONSE_ONCE_HEADERS.pop()
+            while SERVER.RESPONSE_ONCE['headers']:
+                key, value = SERVER.RESPONSE_ONCE['headers'].pop()
                 self.set_header(key, value)
                 headers_sent.add(key)
 

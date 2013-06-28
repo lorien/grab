@@ -1,36 +1,33 @@
 from unittest import TestCase
+import cPickle as pickle
 
 import grab.spider.base
 from grab import Grab
-from grab.spider import Spider, Task, Data, SpiderMisuseError
+from grab.spider import Spider, Task, Data, SpiderMisuseError, NoTaskHandler
 
 from .tornado_util import SERVER
 
+class SimpleSpider(Spider):
+    base_url = 'http://google.com'
+
+    def task_baz(self, grab, task):
+        self.SAVED_ITEM = grab.response.body
+
 class TestSpider(TestCase):
-
-    class SimpleSpider(Spider):
-        base_url = 'http://google.com'
-
-        def task_baz(self, grab, task):
-            return Data('foo', grab.response.body)
-
-        def data_foo(self, item):
-            self.SAVED_ITEM = item
-           
     def setUp(self):
         SERVER.reset()
 
     def test_task_priority(self):
         #SERVER.RESPONSE['get'] = 'Hello spider!'
         #SERVER.SLEEP['get'] = 0
-        #sp = self.SimpleSpider()
+        #sp = SimpleSpider()
         #sp.add_task(Task('baz', SERVER.BASE_URL))
         #sp.run()
         #self.assertEqual('Hello spider!', sp.SAVED_ITEM)
 
         # Automatic random priority
         grab.spider.base.RANDOM_TASK_PRIORITY_RANGE = (10, 20)
-        bot = self.SimpleSpider(priority_mode='random')
+        bot = SimpleSpider(priority_mode='random')
         bot.setup_queue()
         task = Task('baz', url='xxx')
         self.assertEqual(task.priority, None)
@@ -39,7 +36,7 @@ class TestSpider(TestCase):
 
         # Automatic constant priority
         grab.spider.base.DEFAULT_TASK_PRIORITY = 33
-        bot = self.SimpleSpider(priority_mode='const')
+        bot = SimpleSpider(priority_mode='const')
         bot.setup_queue()
         task = Task('baz', url='xxx')
         self.assertEqual(task.priority, None)
@@ -48,7 +45,7 @@ class TestSpider(TestCase):
 
         # Automatic priority does not override explictily setted priority
         grab.spider.base.DEFAULT_TASK_PRIORITY = 33
-        bot = self.SimpleSpider(priority_mode='const')
+        bot = SimpleSpider(priority_mode='const')
         bot.setup_queue()
         task = Task('baz', url='xxx', priority=1)
         self.assertEqual(1, task.priority)
@@ -56,10 +53,10 @@ class TestSpider(TestCase):
         self.assertEqual(1, task.priority)
 
         self.assertRaises(SpiderMisuseError,
-                          lambda: self.SimpleSpider(priority_mode='foo'))
+                          lambda: SimpleSpider(priority_mode='foo'))
 
     def test_task_url(self):
-        bot = self.SimpleSpider()
+        bot = SimpleSpider()
         bot.setup_queue()
         task = Task('baz', url='xxx')
         self.assertEqual('xxx', task.url)
@@ -74,7 +71,7 @@ class TestSpider(TestCase):
         self.assertEqual('http://google.com/yyy', task.grab_config['url'])
 
     def test_task_clone(self):
-        bot = self.SimpleSpider()
+        bot = SimpleSpider()
         bot.setup_queue()
 
         task = Task('baz', url='xxx')
@@ -93,7 +90,7 @@ class TestSpider(TestCase):
         bot.add_task(task.clone(grab_config=g.config))
 
     def test_task_useragent(self):
-        bot = self.SimpleSpider()
+        bot = SimpleSpider()
         bot.setup_queue()
 
         g = Grab()
@@ -114,3 +111,138 @@ class TestSpider(TestCase):
         #bot.setup_queue()
         #bot.add_task(Task('one', SERVER.BASE_URL))
         #bot.run()
+
+    def test_task_nohandler_error(self):
+        class TestSpider(Spider):
+            pass
+
+        bot = TestSpider()
+        bot.setup_queue()
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        self.assertRaises(NoTaskHandler, bot.run)
+
+    def test_task_raw(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.codes = []
+
+            def task_page(self, grab, task):
+                self.codes.append(grab.response.code)
+
+        SERVER.RESPONSE['code'] = 502
+
+        bot = TestSpider(network_try_limit=1)
+        bot.setup_queue()
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        bot.run()
+        self.assertEqual(0, len(bot.codes))
+
+        bot = TestSpider(network_try_limit=1)
+        bot.setup_queue()
+        bot.add_task(Task('page', url=SERVER.BASE_URL, raw=True))
+        bot.add_task(Task('page', url=SERVER.BASE_URL, raw=True))
+        bot.run()
+        self.assertEqual(2, len(bot.codes))
+
+    def test_task_callback(self):
+        class TestSpider(Spider):
+            def task_page(self, grab, task):
+                self.meta['tokens'].append('0_handler')
+
+        class FuncWithState(object):
+            def __init__(self, tokens):
+                self.tokens = tokens
+
+            def __call__(self, grab, task):
+                self.tokens.append('1_func')
+
+        tokens = []
+        func = FuncWithState(tokens)
+
+        bot = TestSpider()
+        bot.meta['tokens'] = tokens
+        bot.setup_queue()
+        # classic handler
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        # callback option overried classic handler
+        bot.add_task(Task('page', url=SERVER.BASE_URL, callback=func))
+        # callback and null task name
+        bot.add_task(Task(name=None, url=SERVER.BASE_URL, callback=func))
+        # callback and default task name
+        bot.add_task(Task(url=SERVER.BASE_URL, callback=func))
+        bot.run()
+        self.assertEqual(['0_handler', '1_func', '1_func', '1_func'],
+                         sorted(tokens))
+
+
+    #def test_task_callback_serialization(self):
+        # 8-(
+        # FIX: pickling the spider instance completely does not work
+        # 8-(
+
+        #class FuncWithState(object):
+            #def __init__(self, tokens):
+                #self.tokens = tokens
+
+            #def __call__(self, grab, task):
+                #self.tokens.append('func')
+
+        #tokens = []
+        #func = FuncWithState(tokens)
+
+        #bot = SimpleSpider()
+        #bot.setup_queue()
+        ##bot.add_task(Task(url=SERVER.BASE_URL, callback=func))
+
+        #dump = pickle.dumps(bot)
+        #bot2 = pickle.loads(dump)
+
+        #bot.run()
+        #self.assertEqual(['func'], tokens)
+
+    def test_task_fallback(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.tokens = []
+
+            def task_page(self, grab, task):
+                self.tokens.append('task')
+
+            def task_page_fallback(self, task):
+                self.tokens.append('fallback')
+
+        SERVER.RESPONSE['code'] = 403
+        bot = TestSpider(network_try_limit=2)
+        bot.setup_queue()
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        bot.run()
+        self.assertEqual(bot.tokens, ['fallback'])
+
+    def test_task_fallback_yields_new_task(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.tokens = []
+
+            def task_page(self, grab, task):
+                self.tokens.append('task')
+                SERVER.RESPONSE['code'] = 403
+                yield Task('page2', url=SERVER.BASE_URL)
+
+            def task_page_fallback(self, task):
+                self.tokens.append('fallback')
+                SERVER.RESPONSE['code'] = 200
+                self.add_task(Task('page', url=SERVER.BASE_URL))
+
+            def task_page2(self, grab, task):
+                pass
+
+            def task_page2_fallback(self, task):
+                self.tokens.append('fallback2')
+
+        SERVER.RESPONSE['code'] = 403
+        bot = TestSpider(network_try_limit=2)
+        bot.setup_queue()
+        bot.add_task(Task('page', url=SERVER.BASE_URL))
+        bot.run()
+        self.assertEqual(bot.tokens, ['fallback', 'task', 'fallback2'])

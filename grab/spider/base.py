@@ -1,7 +1,3 @@
-"""
-Global TODO:
-* make task_%s_preprocess methods
-"""
 from __future__ import absolute_import
 import types
 import signal
@@ -35,7 +31,7 @@ except ImportError:
 
 from ..base import GLOBAL_STATE, Grab
 from .error import (SpiderError, SpiderMisuseError, FatalError,
-                    StopTaskProcessing)
+                    StopTaskProcessing, NoTaskHandler, NoDataHandler)
 from .task import Task, NullTask
 from .data import Data
 from .pattern import SpiderPattern
@@ -49,7 +45,6 @@ from grab.util.py3k_support import *
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
-TASK_QUEUE_TIMEOUT = 0.01
 NULL = object()
 
 logger = logging.getLogger('grab.spider.base')
@@ -82,7 +77,6 @@ class Spider(SpiderPattern, SpiderStat):
 
     def __init__(self, thread_number=3,
                  network_try_limit=10, task_try_limit=10,
-                 debug_error=False,
                  request_pause=NULL,
                  priority_mode='random',
                  meta=None,
@@ -149,7 +143,6 @@ class Spider(SpiderPattern, SpiderStat):
             signal.signal(signal.SIGUSR2, self.sigusr2_handler)
         except (ValueError, AttributeError):
             pass
-        self.debug_error = debug_error
 
         # Initial cache-subsystem values
         self.cache_enabled = False
@@ -157,7 +150,7 @@ class Spider(SpiderPattern, SpiderStat):
 
         self.work_allowed = True
         if request_pause is not NULL:
-            logging.error('Option `request_pause` is deprecated and is not supported anymore')
+            logger.error('Option `request_pause` is deprecated and is not supported anymore')
 
         self.proxylist_enabled = None
         self.proxylist = None
@@ -211,7 +204,7 @@ class Spider(SpiderPattern, SpiderStat):
         Catches SIGUSR1 signal and shutdowns spider.
         """
         
-        logging.error('Received SIGUSR2 signal. Doing shutdown')
+        logger.error('Received SIGUSR2 signal. Doing shutdown')
         self.stop()
 
     def setup_grab(self, **kwargs):
@@ -246,16 +239,20 @@ class Spider(SpiderPattern, SpiderStat):
 
         return is_valid
 
+    def process_task_fallback(self, task):
+        try:
+            fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
+        except AttributeError:
+            pass
+        else:
+            logger.error('task_*_fallback methods are deprecated! Do not use this feature please. It will be replaced with middleware layer')
+            fallback_handler(task)
+
     def check_task_limits_deprecated(self, task):
         is_valid = self.check_task_limits(task)
 
         if not is_valid:
-            try:
-                fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
-            except AttributeError:
-                pass
-            else:
-                fallback_handler(task)
+            self.process_task_fallback(task)
 
         return is_valid
 
@@ -266,7 +263,7 @@ class Spider(SpiderPattern, SpiderStat):
             return randint(*RANDOM_TASK_PRIORITY_RANGE)
 
     def add_task_handler(self, task):
-        self.taskq.put(task, task.priority)
+        self.taskq.put(task, task.priority, schedule_time=task.schedule_time)
 
     def add_task(self, task):
         """
@@ -287,7 +284,7 @@ class Spider(SpiderPattern, SpiderStat):
             if (not task.url.startswith('http://') and not task.url.startswith('https://')
                 and not task.url.startswith('ftp://')):
                 if self.base_url is None:
-                    raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified')
+                    raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified. Task: %s, URL: %s' % (task.name, task.url))
                 else:
                     task.url = urljoin(self.base_url, task.url)
                     # If task has grab_config object then update it too
@@ -388,14 +385,17 @@ class Spider(SpiderPattern, SpiderStat):
         while True:
             try:
                 with self.save_timer('task_queue'):
-                    return self.taskq.get(TASK_QUEUE_TIMEOUT)
+                    return self.taskq.get()
             except queue.Empty:
+                if self.taskq.size():
+                    logger_verbose.debug('Waiting for scheduled task')
+                    return True
                 if not self.slave:
                     logger_verbose.debug('Task queue is empty.')
                     return None
                 else:
                     # Temporarly hack which force slave crawler
-                    # to wait 2 seconds for new tasks, this solves
+                    # to wait 5 seconds for new tasks, this solves
                     # the problem that sometimes slave crawler stop
                     # its work because it could not receive new
                     # tasks immediatelly
@@ -474,7 +474,7 @@ class Spider(SpiderPattern, SpiderStat):
     def process_handler_error(self, func_name, ex, task, error_tb=None):
         self.inc_count('error-%s' % ex.__class__.__name__.lower())
 
-        if error_tb:
+        if error_tb is not None:
             logger.error('Error in %s function' % func_name)
             logger.error(error_tb)
         else:
@@ -491,15 +491,21 @@ class Spider(SpiderPattern, SpiderStat):
             except TypeError:
                 ex_str = str(ex)
 
-        self.add_item('fatal', '%s|%s|%s' % (ex.__class__.__name__,
-                                             ex_str, task.url))
-        if self.debug_error:
-            # TODO: open pdb session in the place where exception
-            # was raised
-            import pdb; pdb.set_trace()
-
+        self.add_item('fatal', '%s|%s|%s|%s' % (
+            func_name, ex.__class__.__name__, ex_str, task.url))
         if isinstance(ex, FatalError):
             raise
+
+    def find_data_handler(self, data):
+        try:
+            return getattr(data, 'handler')
+        except AttributeError:
+            try:
+                handler = getattr(self, 'data_%s' % data.handler_key)
+            except AttributeError:
+                raise NoDataHandler('No handler defined for Data %s' % data.handler_key)
+            else:
+                return handler
 
     def process_handler_result(self, result, task):
         """
@@ -514,21 +520,23 @@ class Spider(SpiderPattern, SpiderStat):
         if isinstance(result, Task):
             self.add_task(result)
         elif isinstance(result, Data):
-            handler_name = 'data_%s' % result.name
+            handler = self.find_data_handler(result)
             try:
-                handler = getattr(self, handler_name)
-            except AttributeError:
-                raise SpiderError('No content handler for %s item' % result.name)
-            try:
-                handler(result.item)
+                data_result = handler(**result.storage)
+                if data_result is None:
+                    pass
+                else:
+                    for something in data_result:
+                        self.process_handler_result(something, task)
+
             except Exception as ex:
-                self.process_handler_error(handler_name, ex, task)
+                self.process_handler_error('data_%s' % result.handler_key, ex, task)
         elif result is None:
             pass
         else:
             raise SpiderError('Unknown result type: %s' % result)
 
-    def execute_task_handler(self, res, handler, raw_handler=None):
+    def execute_task_handler(self, res, handler):
         """
         Apply `handler` function to the network result.
 
@@ -536,32 +544,24 @@ class Spider(SpiderPattern, SpiderStat):
         to the network task queue.
         """
 
-        process_handler = True
-        if raw_handler is not None:
-            process_handler = raw_handler(res)
-
-        if not process_handler:
-            return
-
-        if handler is None:
-            raise SpiderMisuseError('Handler is not defined for task %s' % res['task'].name)
-
         try:
             handler_name = handler.__name__
         except AttributeError:
             handler_name = 'NONE'
 
-        if res['ok'] and self.valid_response_code(res['grab'].response.code,
-                                                  res['task']):
+        if (res['task'].get('raw') or (
+            res['ok'] and self.valid_response_code(res['grab'].response.code, res['task']))):
             try:
                 with self.save_timer('response_handler'):
                     with self.save_timer('response_handler.%s' % handler_name):
                         result = handler(res['grab'], res['task'])
-                        if isinstance(result, types.GeneratorType):
+                        if result is None:
+                            pass
+                        else:
                             for item in result:
                                 self.process_handler_result(item, res['task'])
-                        else:
-                            self.process_handler_result(result, res['task'])
+            except NoDataHandler as ex:
+                raise
             except Exception as ex:
                 self.process_handler_error(handler_name, ex, res['task'])
             else:
@@ -584,6 +584,17 @@ class Spider(SpiderPattern, SpiderStat):
                 self.add_task(task)
             # TODO: allow to write error handlers
     
+    def find_task_handler(self, task):
+        callback = task.get('callback')
+        if callback:
+            return callback
+        else:
+            try:
+                handler = getattr(self, 'task_%s' % task.name)
+            except AttributeError:
+                raise NoTaskHandler('No handler or callback defined for task %s' % task.name)
+            else:
+                return handler
 
     def process_network_result(self, res):
         """
@@ -623,25 +634,8 @@ class Spider(SpiderPattern, SpiderStat):
         if stop:
             return
 
-        # Process the response
-        handler_name = 'task_%s' % res['task'].name
-        raw_handler_name = 'task_raw_%s' % res['task'].name
-
-        try:
-            raw_handler = getattr(self, raw_handler_name)
-        except AttributeError:
-            raw_handler = None
-
-        try:
-            handler = getattr(self, handler_name)
-        except AttributeError:
-            handler = None
-
-        if handler is None and raw_handler is None:
-            raise SpiderError('No handler or raw handler defined for task %s' %\
-                              res['task'].name)
-        else:
-            self.execute_task_handler(res, handler, raw_handler)
+        handler = self.find_task_handler(res['task'])
+        self.execute_task_handler(res, handler)
 
     def change_proxy(self, task, grab):
         """
@@ -750,10 +744,14 @@ class Spider(SpiderPattern, SpiderStat):
                     # tasks from task queue
                     for x in xrange(5):
                         task = self.load_new_task()
-                        if not task:
+                        if task is None:
                             if not self.transport.active_task_number():
                                 self.process_task_generator()
+                        elif task is True:
+                            # If only delayed tasks in queue
+                            break
                         else:
+                            # If got some task
                             break
 
                     if not task:
@@ -774,6 +772,8 @@ class Spider(SpiderPattern, SpiderStat):
                             if task.sleep:
                                 logger.debug('Got NullTask with sleep instruction. Sleeping for %.2f seconds' % task.sleep)
                                 time.sleep(task.sleep)
+                    elif task == True:
+                        pass
                     else:
                         #if self.wating_shutdown_event.is_set():
                             #self.wating_shutdown_event.clear()
@@ -782,6 +782,7 @@ class Spider(SpiderPattern, SpiderStat):
 
                         if not self.check_task_limits(task):
                             logger_verbose.debug('Task %s is rejected due to limits' % task.name)
+                            self.process_task_fallback(task)
                         else:
                             self.process_new_task(task)
 

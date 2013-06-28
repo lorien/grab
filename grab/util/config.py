@@ -1,9 +1,12 @@
+import os
+
 from copy import deepcopy
 from grab.util import default_config
 from grab.util.module import import_string
 
-SPIDER_KEYS = ['QUEUE', 'CACHE', 'PROXY_LIST', 'THREAD_NUMBER',
-               'NETWORK_TRY_LIMIT', 'TASK_TRY_LIMIT']
+# Temporary disabled, spider config are mixed with all global config keys
+#SPIDER_KEYS = ['GRAB_QUEUE', 'GRAB_CACHE', 'GRAB_PROXY_LIST', 'GRAB_THREAD_NUMBER',
+               #'GRAB_NETWORK_TRY_LIMIT', 'GRAB_TASK_TRY_LIMIT']
 
 def is_dict_interface(obj):
     try:
@@ -38,9 +41,19 @@ class Config(dict):
 
 def build_global_config(settings_mod_path='settings'):
     config = Config()
-    config.update_with_path(settings_mod_path)
-    config.update_with_object(default_config.default_config, only_new_keys=True)
-    return config
+    try:
+        config.update_with_path(settings_mod_path)
+    except ImportError:
+        # do not raise exception if settings_mod_path is default
+        # and no settings.py file found in current directory
+        if (settings_mod_path == 'settings' and
+            not os.path.exists(os.path.join(os.path.realpath(os.getcwd()), 'settings.py'))):
+            pass
+        else:
+            raise
+    else:
+        config.update_with_object(default_config.default_config, only_new_keys=True)
+        return config
 
 
 def build_spider_config(spider_name, global_config=None):
@@ -49,5 +62,5 @@ def build_spider_config(spider_name, global_config=None):
     spider_settings_key = 'SPIDER_CONFIG_%s' % spider_name.upper()
     spider_config = Config(global_config.get(spider_settings_key, {}))
     spider_config.update_with_object(global_config, only_new_keys=True,
-                                     allowed_keys=SPIDER_KEYS)
+                                     allowed_keys=None)#SPIDER_KEYS)
     return spider_config

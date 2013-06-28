@@ -161,3 +161,25 @@ class CacheBackend(object):
         self.cursor.execute('BEGIN')
         self.cursor.execute('TRUNCATE cache')
         self.cursor.execute('COMMIT')
+
+    def has_item(self, url, timeout=None):
+        """
+        Test if required item exists in the cache.
+        """
+
+        _hash = self.build_hash(url)
+        with self.spider.save_timer('cache.read.mysql_query'):
+            if timeout is None:
+                query = ""
+            else:
+                ts = int(time.time()) - timeout
+                query = " AND timestamp > %d" % ts
+            res = self.cursor.execute('''
+                SELECT id
+                FROM cache
+                WHERE id = x%%s %(query)s
+                LIMIT 1
+                ''' % {'query': query},
+                (_hash,))
+            row = self.cursor.fetchone()
+        return True if row else False

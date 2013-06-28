@@ -73,6 +73,17 @@ class SelectorList(object):
             result_list.append(item.text())
         return result_list
 
+    def html(self, default=NULL, encoding='unicode'):
+        try:
+            sel = self.one()
+        except IndexError:
+            if default is NULL:
+                raise
+            else:
+                return default
+        else:
+            return render_html(sel.node, encoding=encoding)
+
     def number(self, default=NULL, ignore_spaces=False,
                smart=False, make_int=True):
         """

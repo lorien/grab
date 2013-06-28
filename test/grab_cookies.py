@@ -64,9 +64,9 @@ class TestCookies(TestCase):
         # Setup one-time redirect
         g = Grab(transport=GRAB_TRANSPORT)
         SERVER.RESPONSE['cookies'] = {}
-        SERVER.RESPONSE_ONCE_HEADERS.append(('Location', SERVER.BASE_URL))
-        SERVER.RESPONSE_ONCE_HEADERS.append(('Set-Cookie', 'foo=bar'))
-        SERVER.RESPONSE['once_code'] = 302
+        SERVER.RESPONSE_ONCE['headers'].append(('Location', SERVER.BASE_URL))
+        SERVER.RESPONSE_ONCE['headers'].append(('Set-Cookie', 'foo=bar'))
+        SERVER.RESPONSE_ONCE['code'] = 302
         g.go(SERVER.BASE_URL)
         self.assertEqual(SERVER.REQUEST['headers']['Cookie'], 'foo=bar')
 

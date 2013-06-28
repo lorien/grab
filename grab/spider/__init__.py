@@ -1,2 +1,2 @@
-from .base import (Spider, Task, Data, SpiderError, SpiderMisuseError, FatalError,
-                   NullTask)
+from .base import Spider, Task, Data, NullTask
+from .error import *

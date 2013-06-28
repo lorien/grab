@@ -1,11 +1,12 @@
 from grab import Grab
 
 def setup_arg_parser(parser):
+    parser.add_argument('item_path')
     parser.add_argument('--all', action='store_true', default=False)
 
 
-def main(*args, **kwargs):
-    mod_path, cls_name = args[0].rsplit('.', 1)
+def main(item_path, **kwargs):
+    mod_path, cls_name = item_path.rsplit('.', 1)
     mod = __import__(mod_path, None, None, ['foo'])
     cls = getattr(mod, cls_name)
 

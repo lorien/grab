@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from random import randint
+from datetime import datetime, timedelta
 
 from .error import SpiderMisuseError
 from ..base import copy_config
@@ -18,7 +19,8 @@ class Task(BaseTask):
                  network_try_count=0, task_try_count=0, 
                  disable_cache=False, refresh_cache=False,
                  valid_status=[], use_proxylist=True,
-                 cache_timeout=None,
+                 cache_timeout=None, delay=0,
+                 raw=False, callback=None,
                  **kwargs):
         """
         Create `Task` object.
@@ -61,7 +63,17 @@ class Task(BaseTask):
             :param use_proxylist: it means to use proxylist which was configured
                 via `setup_proxylist` method of spider
             :param cache_timeout: maximum age (in seconds) of cache record to be valid
-
+            :param delay: if specified tells the spider to schedule the task and execute
+                it after `delay` seconds
+            :param raw: if `raw` is True then the network response is forwarding to the
+                corresponding handler without any check of HTTP status code of network error,
+                if `raw` is False (by default) then failed response is putting back
+                to task queue or if tries limit is reached then the processing of this 
+                request is finished.
+            :param callback: if you pass some function in `callback` option then the
+                network resposne will be passed to this callback and the usual 'task_*'
+                handler will be ignored and no error will be raised if such 'task_*' handler
+                does not exist.
             Any non-standard named arguments passed to `Task` constructor will be saved as
             attributes of the object. You can get their values later as attributes or with
             `get` method which allows to use default value if attrubute does not exist.
@@ -87,6 +99,8 @@ class Task(BaseTask):
             self.url = url
             self.grab_config = None
 
+        self.process_delay_option(delay)
+
         self.priority_is_custom = priority_is_custom
         self.priority = priority
         self.network_try_count = network_try_count
@@ -96,6 +110,8 @@ class Task(BaseTask):
         self.valid_status = valid_status
         self.use_proxylist = use_proxylist
         self.cache_timeout = cache_timeout
+        self.raw = raw
+        self.callback = callback
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -109,6 +125,14 @@ class Task(BaseTask):
         does not exist.
         """
         return getattr(self, key, default)
+
+    def process_delay_option(self, delay):
+        if delay:
+            self.schedule_time = datetime.now() + timedelta(seconds=delay)
+            self.original_delay = delay
+        else:
+            self.schedule_time = None
+            self.original_delay = None
 
     def clone(self, **kwargs):
         """
@@ -151,6 +175,8 @@ class Task(BaseTask):
 
         for key, value in kwargs.items():
             setattr(task, key, value)
+
+        task.process_delay_option(task.get('delay', None))
 
         return task
 
