@@ -772,7 +772,7 @@ class Spider(SpiderPattern, SpiderStat):
                             if task.sleep:
                                 logger.debug('Got NullTask with sleep instruction. Sleeping for %.2f seconds' % task.sleep)
                                 time.sleep(task.sleep)
-                    elif task == True:
+                    elif isinstance(task, bool) and (task == True):
                         pass
                     else:
                         #if self.wating_shutdown_event.is_set():
