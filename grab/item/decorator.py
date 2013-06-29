@@ -1,4 +1,4 @@
-from const import NULL
+from .const import NULL
 from ..error import DataNotFound
 
 # *******************

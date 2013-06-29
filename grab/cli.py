@@ -4,14 +4,21 @@ import logging
 from grab.tools.lock import assert_lock
 from grab.tools.logs import default_logging
 import sys 
+
 from grab.util.config import build_global_config
+
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.cli')
 
 config = build_global_config()
 if config and config['GRAB_ACTIVATE_VIRTUALENV']:
     activate_script = os.path.join(config['GRAB_ACTIVATE_VIRTUALENV'], 'bin/activate_this.py')
-    execfile(activate_script)
+    # py3 hack
+    if PY3K:
+        exec(compile(open(activate_script).read(), activate_script, 'exec'))
+    else:
+        execfile(activate_script)
 
 def setup_logging(action, level):
     root = logging.getLogger()

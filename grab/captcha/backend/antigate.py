@@ -1,6 +1,9 @@
 from tempfile import mkstemp
 from base64 import b64encode
-import urllib
+try:
+    from urllib import urlencode
+except ImportError:
+    from urllib.parse import urlencode
 
 from grab import Grab
 from .base import CaptchaBackend
@@ -38,7 +41,7 @@ class AntigateBackend(CaptchaBackend):
         
     def get_check_solution_request(self, captcha_id):
         params = {'key': self.api_key, 'action': 'get', 'id': captcha_id}
-        url = 'http://antigate.com/res.php?%s' % urllib.urlencode(params)
+        url = 'http://antigate.com/res.php?%s' % urlencode(params)
         g = Grab()
         g.setup(url=url)
         return g

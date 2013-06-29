@@ -1,5 +1,8 @@
 from unittest import TestCase
-import cPickle as pickle
+#try:
+#    import cPickle as pickle
+#except ImportError:
+#    import pickle
 
 import grab.spider.base
 from grab import Grab

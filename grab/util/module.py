@@ -120,7 +120,7 @@ def build_spider_registry(config):
     for path in config.get('GRAB_SPIDER_MODULES'):
         try:
             mod = __import__(path, None, None, ['foo'])
-        except ImportError, ex:
+        except ImportError as ex:
             if not path in unicode(ex):
                 logging.error('', exc_info=ex)
         else:
