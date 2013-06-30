@@ -3,6 +3,7 @@ Spider task queue backend powered by redis
 """
 from __future__ import absolute_import
 
+from redis import StrictRedis
 from qr import PriorityQueue
 import Queue
 import random
@@ -42,8 +43,10 @@ class QueueBackend(QueueInterface):
         return len(self.queue_object)
 
     def clear(self):
-        try:
-            while True:
-                self.get()
-        except Queue.Empty:
-            pass
+        con = StrictRedis()
+        con.delete(self.queue_name)
+        #try:
+            #while True:
+                #self.get()
+        #except Queue.Empty:
+            #pass
