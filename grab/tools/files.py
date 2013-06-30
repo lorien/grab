@@ -92,9 +92,11 @@ def clear_directory(path):
             shutil.rmtree(os.path.join(root, _dir))
 
 
-def smart_copy_file(filename, dst_root):
-    dir_path, fname = os.path.split(filename)
-    dst_dir = os.path.join(dst_root, dir_path)
-    if not os.path.exists(dst_dir):
-        os.makedirs(dst_dir)
-    shutil.copy(filename, dst_dir)
+# Bad name, not clear logic
+#def smart_copy_file(filename, dst_root):
+    #dir_path, fname = os.path.split(filename)
+    #dst_dir = os.path.join(dst_root, dir_path)
+    #if not os.path.exists(dst_dir):
+        #os.makedirs(dst_dir)
+    #import pdb; pdb.set_trace()
+    #shutil.copy(filename, dst_dir)
