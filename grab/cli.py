@@ -11,7 +11,7 @@ logger = logging.getLogger('grab.cli')
 config = build_global_config()
 if config and config['GRAB_ACTIVATE_VIRTUALENV']:
     activate_script = os.path.join(config['GRAB_ACTIVATE_VIRTUALENV'], 'bin/activate_this.py')
-    execfile(activate_script)
+    execfile(activate_script, dict(__file__=activate_script))
 
 def setup_logging(action, level):
     root = logging.getLogger()
