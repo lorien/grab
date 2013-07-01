@@ -63,11 +63,13 @@ class Item(object):
         for key in keys:
             dct[key] = getattr(self, key)
 
-    def get_dict(self, keys):
-        obj = {}
+    def get_dict(self, keys=None):
+        if keys is None:
+            keys = self._fields.keys()
+        dct = {}
         for key in keys:
-            obj[key] = getattr(self, key)
-        return obj
+            dct[key] = getattr(self, key)
+        return dct
 
     @classmethod
     def get_function(cls, key):
