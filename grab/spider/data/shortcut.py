@@ -16,6 +16,27 @@ def build_image_hosting_referer(url):
     return '.'.join(host.split('.')[-2:])
 
 
+def image_handler(grab, task):
+    if grab.response.code == 200:
+        if len(grab.response.body):
+            if not '<html' in grab.response.body:
+                grab.response.save(task.path)
+                db[task.collection].update({'_id': task.obj['_id']},
+                                           {'$set': {task.path_field: task.path}})
+
+
+def image_set_handler(grab, task):
+    if grab.response.code == 200:
+        if len(grab.response.body):
+            if not '<html' in grab.response.body:
+                grab.response.save(task.path)
+                db[task.collection].update(
+                    {'_id': task.obj['_id'], ('%s.key' % task.set_field): task.image['key']},
+                    {'$set': {('%s.$.path' % task.set_field): task.path}}
+                )   
+
+
+
 class MongoObjectImageData(Data):
     def handler(self, url, collection, obj, path_field, base_dir, task_args=None,
                 grab_args=None, callback=None):
@@ -36,7 +57,7 @@ class MongoObjectImageData(Data):
             g.setup(referer=build_image_hosting_referer(url))
 
             yield Task(
-                callback=callback,
+                callback=callback or image_handler,
                 grab=g,
                 collection=collection,
                 path=path,
@@ -70,7 +91,7 @@ class MongoObjectImageSetData(Data):
                 g.setup(referer=build_image_hosting_referer(image['url']))
 
                 yield Task(
-                    callback=callback,
+                    callback=callback or image_set_handler,
                     grab=g,
                     collection=collection,
                     path=path,
