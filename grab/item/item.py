@@ -24,7 +24,7 @@ class Item(object):
 
     @classmethod
     def find(cls, root, **kwargs):
-        for count, sel in enumerate(root.select(cls.Meta.find_selector)):
+        for count, sel in enumerate(root.select(getattr(cls.Meta, 'find_selector', '.'))):
             item = cls(sel.node, **kwargs)
             #item._parse(**kwargs)
             item._position = count
