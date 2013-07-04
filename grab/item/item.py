@@ -83,3 +83,17 @@ class Item(object):
             return func_wrapper
         else:
             return field.func
+
+    def __getstate__(self):
+        """
+        Delete `self._selector` object because it is not
+        possible to picklize lxml-tree.
+        Also calculate all fields becuase after deserialization
+        it will not be possible to calculate any field.
+        """
+        for key in self._fields.keys():
+            # trigger fields' content calcualation
+            getattr(self, key)
+        state = self.__dict__.copy()
+        state['_selector'] = None
+        return state
