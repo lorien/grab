@@ -4,9 +4,11 @@ import pymongo
 from multiprocessing import Manager, Queue, Event, active_children
 import time
 from urlparse import urlsplit
+import os
 
 from grab.spider import Spider, Task, Data
 from grab.spider.base import logger_verbose
+from grab.spider.queue_backend.redis import QueueBackend
 
 logger = logging.getLogger('ng')
 
@@ -17,15 +19,19 @@ class SimpleParserSpider(Spider):
         yield Task('page', url='http://flask.pocoo.org/')
         time.sleep(1)
         yield Task('page', url='http://ya.ru/')
+        yield Task('page', url='http://rambler.ru/')
+        yield Task('page', url='http://mail.ru/')
 
     def task_initial(self, grab, task):
         for res in self.task_page(grab, task):
             yield res
 
     def task_page(self, grab, task):
+        print task.url
+        title = grab.doc.select('//title').text(default=None)
+        print 'TITLE:', title, 'PID:', os.getpid()
         host = urlsplit(task.url).netloc
         if not task.get('secondary'):
-            title = grab.doc.select('//title').text()
             yield Task('page', url='http://%s/robots.txt' % host, secondary=True)
             open('var/%s.txt' % host, 'w').write(grab.response.body)
 
@@ -36,9 +42,9 @@ def start_spider(spider_cls):
         network_response_queue = Queue()
         shutdown_event = Event()
         generator_done_event = Event()
-        taskq = Queue()
+        taskq = QueueBackend('ng')
 
-        logger_verbose.setLevel(logging.DEBUG)
+        #logger_verbose.setLevel(logging.DEBUG)
 
         kwargs = {
             'taskq': taskq,
@@ -51,31 +57,34 @@ def start_spider(spider_cls):
 
         # Generator: OK
         generator_waiting_shutdown_event = Event()
-        bot = Spider(waiting_shutdown_event=generator_waiting_shutdown_event,
+        bot = spider_cls(waiting_shutdown_event=generator_waiting_shutdown_event,
                      **kwargs)
         generator = Process(target=bot.run_generator)
         generator.start()
 
         # Downloader: OK
         downloader_waiting_shutdown_event = Event()
-        bot = Spider(waiting_shutdown_event=downloader_waiting_shutdown_event,
-                     **kwargs)
+        bot = spider_cls(waiting_shutdown_event=downloader_waiting_shutdown_event,
+                         **kwargs)
         downloader = Process(target=bot.run)
         downloader.start()
 
         # Parser: OK
-        parser_waiting_shutdown_event = Event()
-        bot = spider_cls(waiting_shutdown_event=parser_waiting_shutdown_event,
-                         **kwargs)
-        parser = Process(target=bot.run_parser)
-        parser.start()
+        events = []
+        for x in xrange(2):
+            parser_waiting_shutdown_event = Event()
+            events.append(parser_waiting_shutdown_event)
+            bot = spider_cls(waiting_shutdown_event=parser_waiting_shutdown_event,
+                             **kwargs)
+            parser = Process(target=bot.run_parser)
+            parser.start()
 
         while True:
             time.sleep(2)
-            print 'task size', taskq.qsize()
+            print 'task size', taskq.size()
             print 'response size', network_response_queue.qsize()
             if (downloader_waiting_shutdown_event.is_set() and
-                parser_waiting_shutdown_event.is_set()):
+                all(x.is_set() for x in events)):
                 shutdown_event.set()
                 break
 

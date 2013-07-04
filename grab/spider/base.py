@@ -711,7 +711,8 @@ class Spider(SpiderPattern, SpiderStat):
 
             self.start_timer('task_generator')
             if not self.slave:
-                self.init_task_generator()
+                if not self.ng:
+                    self.init_task_generator()
             self.stop_timer('task_generator')
 
             while self.work_allowed:
