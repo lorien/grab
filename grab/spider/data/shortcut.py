@@ -31,7 +31,7 @@ def image_set_handler(grab, task):
             if not '<html' in grab.response.body:
                 grab.response.save(task.path)
                 db[task.collection].update(
-                    {'_id': task.obj['_id'], ('%s.key' % task.set_field): task.image['key']},
+                    {'_id': task.obj['_id'], ('%s.url' % task.set_field): task.image['url']},
                     {'$set': {('%s.$.path' % task.set_field): task.path}}
                 )   
 
@@ -77,7 +77,7 @@ class MongoObjectImageSetData(Data):
             if os.path.exists(path):
                 if path != image['path']:
                     db[collection].update(
-                        {'_id': obj['_id'], ('%s.key' % set_field): image['key']},
+                        {'_id': obj['_id'], ('%s.url' % set_field): image['url']},
                         {'$set': {'%s.$.path': path}})
             else:
                 kwargs = {}
