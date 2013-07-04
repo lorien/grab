@@ -9,9 +9,13 @@ from grab.util.config import build_global_config
 logger = logging.getLogger('grab.cli')
 
 config = build_global_config()
+
 if config and config['GRAB_ACTIVATE_VIRTUALENV']:
     activate_script = os.path.join(config['GRAB_ACTIVATE_VIRTUALENV'], 'bin/activate_this.py')
     execfile(activate_script, dict(__file__=activate_script))
+
+if config and config['GRAB_DJANGO_SETTINGS']:
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 def setup_logging(action, level):
     root = logging.getLogger()

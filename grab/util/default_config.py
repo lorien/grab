@@ -9,5 +9,6 @@ class DefaultConfig(object):
     GRAB_DISPLAY_TIMING = True
     GRAB_DISPLAY_STATS = True
     GRAB_ACTIVATE_VIRTUALENV = False
+    GRAB_DJANGO_SETTINGS = None
 
 default_config = DefaultConfig()
