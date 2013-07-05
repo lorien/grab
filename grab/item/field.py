@@ -5,6 +5,7 @@ from ..tools.lxml_tools import clean_html
 from ..tools.text import find_number
 from .decorator import default, empty, cached, bind_item
 from .const import NULL
+from .error import ChoiceFieldError
 
 metaclass_ABCMeta = ABCMeta('metaclass_ABCMeta', (object, ), {})
 
@@ -56,28 +57,49 @@ class ItemListField(Field):
         subitems = []
         for sel in item._selector.select(self.xpath_exp):
             subitem = self.item_cls(sel.node)
-            subitem._parse()
             subitems.append(subitem)
         return self.process(subitems)
 
 
 class IntegerField(Field):
     def __init__(self, *args, **kwargs):
+        self.find_number = kwargs.get('find_number', False)
         self.ignore_spaces = kwargs.get('ignore_spaces', False)
         self.ignore_chars = kwargs.get('ignore_chars', None)
+        self.multiple = kwargs.get('multiple', False)
         super(IntegerField, self).__init__(*args, **kwargs)
+
+    def get_raw_values(self, item):
+        return item._selector.select(self.xpath_exp).text_list()
+
+    def get_raw_value(self, item):
+        return item._selector.select(self.xpath_exp).text()
 
     @cached
     @default
     @empty
     @bind_item
     def __get__(self, item, itemtype):
-        value = item._selector.select(self.xpath_exp).text()
+        if self.multiple:
+            result = []
+            for raw_value in self.get_raw_values(item):
+                result.append(self.process_raw_value(raw_value))
+            return result
+        else:
+            raw_value = self.get_raw_value(item)
+            return self.process_raw_value(raw_value)
+
+    def process_raw_value(self, value):
         if self.empty_default is not NULL:
             if value == "":
                 return self.empty_default
-        return find_number(self.process(value), ignore_spaces=self.ignore_spaces,
-                           ignore_chars=self.ignore_chars)
+
+        if self.find_number or self.ignore_spaces or self.ignore_chars:
+            return find_number(self.process(value), ignore_spaces=self.ignore_spaces,
+                               ignore_chars=self.ignore_chars)
+        else:
+            # TODO: process ignore_chars and ignore_spaces in this case too
+            return int(self.process(value))
 
 
 class StringField(Field):
@@ -123,10 +145,11 @@ class ChoiceField(Field):
     @bind_item
     def __get__(self, item, itemtype):
         value = item._selector.select(self.xpath_exp).text()
+        clean_value = self.process(value)
         try:
-            return self.process(self.choices[value])
+            return self.choices[clean_value]
         except KeyError:
-            raise ChoiceFieldError('Unknown choice: %s' % value)
+            raise ChoiceFieldError('Unknown choice: %s' % clean_value)
 
 
 class RegexField(Field):

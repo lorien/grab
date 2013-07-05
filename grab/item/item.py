@@ -24,7 +24,7 @@ class Item(metaclass_ItemBuilder):
 
     @classmethod
     def find(cls, root, **kwargs):
-        for count, sel in enumerate(root.select(cls.Meta.find_selector)):
+        for count, sel in enumerate(root.select(getattr(cls.Meta, 'find_selector', '.'))):
             item = cls(sel.node, **kwargs)
             #item._parse(**kwargs)
             item._position = count
@@ -63,11 +63,13 @@ class Item(metaclass_ItemBuilder):
         for key in keys:
             dct[key] = getattr(self, key)
 
-    def get_dict(self, keys):
-        obj = {}
+    def get_dict(self, keys=None):
+        if keys is None:
+            keys = self._fields.keys()
+        dct = {}
         for key in keys:
-            obj[key] = getattr(self, key)
-        return obj
+            dct[key] = getattr(self, key)
+        return dct
 
     @classmethod
     def get_function(cls, key):
@@ -81,3 +83,17 @@ class Item(metaclass_ItemBuilder):
             return func_wrapper
         else:
             return field.func
+
+    def __getstate__(self):
+        """
+        Delete `self._selector` object because it is not
+        possible to picklize lxml-tree.
+        Also calculate all fields becuase after deserialization
+        it will not be possible to calculate any field.
+        """
+        for key in self._fields.keys():
+            # trigger fields' content calcualation
+            getattr(self, key)
+        state = self.__dict__.copy()
+        state['_selector'] = None
+        return state

@@ -5,6 +5,9 @@ from ..tools.encoding import smart_unicode
 from pytils.translit import translify
 import re
 
+MONTH_NAMES = u'января февраля марта апреля мая июня июля августа '\
+              u'сентября октября ноября декабря'.split()
+
 RE_NOT_ENCHAR = re.compile(ur'[^-a-zA-Z0-9]', re.U)
 RE_NOT_ENRUCHAR = re.compile(ur'[^-a-zA-Zа-яА-ЯёЁ0-9]', re.U)
 RE_RUSSIAN_CHAR = re.compile(ur'[а-яА-ЯёЁ]', re.U)
@@ -33,3 +36,6 @@ def slugify(value, limit=None, default=''):
         return value
     else:
         return default
+
+def get_month_number(name):
+    return MONTH_NAMES.index(name) + 1

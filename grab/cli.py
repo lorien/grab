@@ -12,13 +12,18 @@ from grab.util.py3k_support import *
 logger = logging.getLogger('grab.cli')
 
 config = build_global_config()
+
 if config and config['GRAB_ACTIVATE_VIRTUALENV']:
     activate_script = os.path.join(config['GRAB_ACTIVATE_VIRTUALENV'], 'bin/activate_this.py')
     # py3 hack
     if PY3K:
-        exec(compile(open(activate_script).read(), activate_script, 'exec'))
+        exec(compile(open(activate_script).read(), activate_script, 'exec'),
+             dict(__file__=activate_script))
     else:
-        execfile(activate_script)
+        execfile(activate_script, dict(__file__=activate_script))
+
+if config and config['GRAB_DJANGO_SETTINGS']:
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 def setup_logging(action, level):
     root = logging.getLogger()
