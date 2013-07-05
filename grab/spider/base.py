@@ -888,7 +888,7 @@ class Spider(SpiderPattern, SpiderStat):
                     for something in data_result:
                         self.process_handler_result(something, task)
 
-            except Exception, ex:
+            except Exception as ex:
                 self.process_handler_error('data_%s' % result.handler_key, ex, task)
         elif result is None:
             pass
@@ -930,7 +930,7 @@ class Spider(SpiderPattern, SpiderStat):
         while should_work:
             try:
                 response = self.network_response_queue.get(True, 0.1)
-            except Queue.Empty:
+            except queue.Empty:
                 logger_verbose.debug('Response queue is empty.')
                 response = None
 
