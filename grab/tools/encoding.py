@@ -43,7 +43,15 @@ def fix_special_entities(body):
 
 
 def decode_list(values, encoding='utf-8'):
+    if not isinstance(values, list):
+        raise TypeError('unsupported values type: %s' % type(values))
     return [smart_unicode(value, encoding) for value in values]
+
+
+def decode_dict(values, encoding='utf-8'):
+    if not isinstance(values, dict):
+        raise TypeError('unsupported values type: %s' % type(values))
+    return dict(decode_pairs(values.items(), encoding))
 
 
 def decode_pairs(pairs, encoding='utf-8'):

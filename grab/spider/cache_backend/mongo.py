@@ -67,7 +67,7 @@ class CacheBackend(object):
 
         def custom_prepare_response_func(transport, g):
             response = Response()
-            response.head = cache_item['head']
+            response.head = cache_item['head'].decode('utf-8')
             response.body = body
             response.code = cache_item['response_code']
             response.time = 0
@@ -86,7 +86,7 @@ class CacheBackend(object):
         grab.process_request_result(custom_prepare_response_func)
 
     def save_response(self, url, grab):
-        body = grab.response.body
+        body = grab.response.body_as_bytes()
         if self.use_compression:
             body = zlib.compress(body)
 
@@ -97,7 +97,7 @@ class CacheBackend(object):
             'url': url,
             'response_url': grab.response.url,
             'body': Binary(body),
-            'head': Binary(grab.response.head),
+            'head': Binary(grab.response.head.encode('utf-8')),
             'response_code': grab.response.code,
             'cookies': None,
         }
