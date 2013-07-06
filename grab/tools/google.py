@@ -222,7 +222,7 @@ def parse_search_results(grab, parse_index_size=False, strict_query=False):
                     # For <IE8, Opera, <FF3 you probably get simple format
                     try:
                         snippet_node = elem.xpath('div[@class="s"]')[0]
-                    except IndexError, ex:
+                    except IndexError as ex:
                         # Probably it is video or some other result
                         # Such result type is not supported yet
                         continue
