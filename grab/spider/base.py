@@ -879,7 +879,17 @@ class Spider(SpiderPattern, SpiderStat):
             pass
         else:
             raise SpiderError('Unknown result type: %s' % result)
+        
+    @classmethod
+    def get_spider_name(cls):
+        if hasattr(cls, 'spider_name'):
+            return cls.spider_name
+        else:
+            spider_name = camel_case_to_underscore(cls.__name__)
 
+    @classmethod
+    def update_spider_config(cls, config):
+        pass
 
     # ***********
     # NG Features

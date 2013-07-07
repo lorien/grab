@@ -56,11 +56,12 @@ def build_global_config(settings_mod_path='settings'):
         return config
 
 
-def build_spider_config(spider_name, global_config=None):
+def build_spider_config(spider_class, global_config=None):
     if global_config is None:
         global_config = build_global_config()
-    spider_settings_key = 'SPIDER_CONFIG_%s' % spider_name.upper()
+    spider_settings_key = 'SPIDER_CONFIG_%s' % spider_class.get_spider_name().upper()
     spider_config = Config(global_config.get(spider_settings_key, {}))
     spider_config.update_with_object(global_config, only_new_keys=True,
                                      allowed_keys=None)#SPIDER_KEYS)
+    spider_class.update_spider_config(spider_config)
     return spider_config

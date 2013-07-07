@@ -121,10 +121,7 @@ def build_spider_registry(config):
             for key in dir(mod):
                 val = getattr(mod, key)
                 if isinstance(val, type) and issubclass(val, Spider):
-                    if hasattr(val, 'spider_name'):
-                        spider_name = getattr(val, 'spider_name')
-                    else:
-                        spider_name = camel_case_to_underscore(val.__name__)
+                    spider_name = val.get_spider_name()
                     logger.debug('Module `%s`, found spider `%s` with name `%s`' % (
                         path, val.__name__, spider_name))
                     if spider_name in SPIDER_REGISTRY:

@@ -32,7 +32,7 @@ def main(spider_name, thread_number=None, slave=False, force_url=None,
 
     config = build_global_config(settings)
     spider_class = load_spider_class(config, spider_name)
-    spider_config = build_spider_config(spider_name, config)
+    spider_config = build_spider_config(spider_class, config)
 
     if thread_number is None:
         thread_number = spider_config.getint('GRAB_THREAD_NUMBER')
