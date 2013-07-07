@@ -27,7 +27,7 @@ class QueueBackend(QueueInterface):
         # in the PriorityQueue
 
         if schedule_time is not None:
-            raise SpiderMisuseError('Mongo task queue does not support delayed task') 
+            raise SpiderMisuseError('Redis task queue does not support delayed task') 
         task._rnd = random.random()
         self.queue_object.push(task, priority)
 
