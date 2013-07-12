@@ -7,16 +7,16 @@ from grab.tools.files import hashed_path
 from .. import Task
 from grab import Grab
 
-# Some day I'll remove this hack
-from database import db
-
-
 def build_image_hosting_referer(url):
+    from database import db
+
     host = urlsplit(url).netloc
     return '.'.join(host.split('.')[-2:])
 
 
 def image_handler(grab, task):
+    from database import db
+
     if grab.response.code == 200:
         if len(grab.response.body):
             if not '<html' in grab.response.body:
@@ -26,6 +26,8 @@ def image_handler(grab, task):
 
 
 def image_set_handler(grab, task):
+    from database import db
+
     if grab.response.code == 200:
         if len(grab.response.body):
             if not '<html' in grab.response.body:
@@ -40,6 +42,7 @@ def image_set_handler(grab, task):
 class MongoObjectImageData(Data):
     def handler(self, url, collection, obj, path_field, base_dir, task_args=None,
                 grab_args=None, callback=None):
+        from database import db
         path = hashed_path(url, base_dir=base_dir)
         if os.path.exists(path):
             if path != obj.get(path_field, None):
@@ -72,6 +75,8 @@ class MongoObjectImageData(Data):
 class MongoObjectImageSetData(Data):
     def handler(self, collection, obj, set_field, base_dir, task_args=None,
                 grab_args=None, callback=None):
+        from database import db
+
         for image in obj.get(set_field, []):
             path = hashed_path(image['url'], base_dir=base_dir)
             if os.path.exists(path):
