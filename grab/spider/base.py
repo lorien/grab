@@ -885,7 +885,7 @@ class Spider(SpiderPattern, SpiderStat):
         if hasattr(cls, 'spider_name'):
             return cls.spider_name
         else:
-            spider_name = camel_case_to_underscore(cls.__name__)
+            return camel_case_to_underscore(cls.__name__)
 
     @classmethod
     def update_spider_config(cls, config):
