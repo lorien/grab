@@ -15,7 +15,6 @@ Or you can do even simplier:
     g.change_proxy()
 
 """
-import itertools
 from random import choice
 import re
 import logging
@@ -56,12 +55,25 @@ def parse_proxyline(line):
 
 class ProxySource(object):
 
-    def __init__(self, source, read_timeout=READ_TIMEOUT, proxy_type='http'):
+    def __init__(self, source, read_timeout=READ_TIMEOUT, proxy_type='http', keep_old_proxies=False):
         self.source = source
         self.read_timeout = read_timeout
         self.proxy_type = proxy_type
         self.read_time = None
+        self.keep_old_proxies = keep_old_proxies
+        self.server_list = []
+        self.server_list_iterator = self._cycle(self.server_list)
 
+    def _cycle(self, iterable):
+        while iterable:
+            for elem in iterable:
+                yield elem
+
+    def update_servers_list(self, new_list):
+        if self.keep_old_proxies:
+            self.server_list += list(set(new_list).difference(self.server_list))
+        else:
+            self.server_list[:] = new_list
 
     def parse_lines(self, proxies):
         """
@@ -124,8 +136,7 @@ class TextFileSource(ProxySource):
             lines = src.read().splitlines()
 
         self.read_time = time.time()
-        self.server_list = self.get_server_list(lines)
-        self.server_list_iterator = itertools.cycle(self.server_list)
+        self.update_servers_list(self.get_server_list(lines))
 
 
 class URLSource(ProxySource):
@@ -145,8 +156,7 @@ class URLSource(ProxySource):
             raise GrabNetworkError("Can't load proxies from URL (%s)" % self.source)
 
         self.read_time = time.time()
-        self.server_list = self.get_server_list(proxylist)
-        self.server_list_iterator = itertools.cycle(self.server_list)
+        self.update_servers_list(self.get_server_list(proxylist))
 
 
 class ListSource(ProxySource):
@@ -163,8 +173,7 @@ class ListSource(ProxySource):
 
         if not isinstance(self.source, list):
             raise GrabMisuseError("Given proxy list isn't a list type")
-        self.server_list = self.get_server_list(self.source)
-        self.server_list_iterator = itertools.cycle(self.server_list)
+        self.update_servers_list(self.get_server_list(self.source))
 
     def reload(self):
         pass
@@ -184,8 +193,7 @@ class StringSource(ProxySource):
 
         if not isinstance(self.source, (str, unicode)):
             raise GrabMisuseError("Given proxy list isn't a string or unicode type")
-        self.server_list = self.get_server_list(self.source)
-        self.server_list_iterator = itertools.cycle(self.server_list)
+        self.update_servers_list(self.get_server_list(self.source))
 
     def reload(self):
         pass
