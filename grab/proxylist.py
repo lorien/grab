@@ -48,8 +48,8 @@ def parse_proxyline(line):
         return host, port, None, None
     else:
         match = RE_AUTH_PROXY.search(line)
-        host, port, user, pwd = match.groups()
         if match:
+            host, port, user, pwd = match.groups()
             return host, port, user, pwd
     raise GrabError('Invalid proxy line: %s' % line)
 
