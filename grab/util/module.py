@@ -112,6 +112,10 @@ def build_spider_registry(config):
                 #try:
                     #mod = __import__
     for path in config.get('GRAB_SPIDER_MODULES'):
+        if ':' in path:
+            path, cls_name = path.split(':')
+        else:
+            cls_name = None
         try:
             mod = __import__(path, None, None, ['foo'])
         except ImportError, ex:
@@ -119,16 +123,19 @@ def build_spider_registry(config):
                 logging.error('', exc_info=ex)
         else:
             for key in dir(mod):
-                val = getattr(mod, key)
-                if isinstance(val, type) and issubclass(val, Spider):
-                    spider_name = val.get_spider_name()
-                    logger.debug('Module `%s`, found spider `%s` with name `%s`' % (
-                        path, val.__name__, spider_name))
-                    if spider_name in SPIDER_REGISTRY:
-                        raise SpiderInternalError('There are two different spiders with the '\
-                                                'same name "%s" % spider_name')
-                    else:
-                        SPIDER_REGISTRY[spider_name] = val
+                if key == 'Spider':
+                    continue
+                if cls_name is None or key == cls_name:
+                    val = getattr(mod, key)
+                    if isinstance(val, type) and issubclass(val, Spider):
+                        spider_name = val.get_spider_name()
+                        logger.debug('Module `%s`, found spider `%s` with name `%s`' % (
+                            path, val.__name__, spider_name))
+                        if spider_name in SPIDER_REGISTRY:
+                            raise SpiderInternalError('There are two different spiders with the '\
+                                                    'same name "%s"' % spider_name)
+                        else:
+                            SPIDER_REGISTRY[spider_name] = val
 
 
 def load_spider_class(config, spider_name):
