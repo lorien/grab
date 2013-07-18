@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
 from ..tools.lxml_tools import clean_html
-from ..tools.text import find_number
+from ..tools.text import find_number, drop_space
 from .decorator import default, empty, cached, bind_item
 from .const import NULL
 from .error import ChoiceFieldError
@@ -99,7 +99,12 @@ class IntegerField(Field):
                                ignore_chars=self.ignore_chars)
         else:
             # TODO: process ignore_chars and ignore_spaces in this case too
-            return int(self.process(value))
+            if self.ignore_chars:
+                for char in ignore_chars:
+                    value = value.replace(char, '')
+            if self.ignore_spaces:
+                value = drop_space(value)
+            return int(self.process(value).strip())
 
 
 class StringField(Field):
