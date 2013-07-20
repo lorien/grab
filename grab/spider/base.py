@@ -165,6 +165,9 @@ class Spider(SpiderPattern, SpiderStat):
         self.proxy = None
         self.proxy_auto_change = False
 
+        # FIXIT: REMOVE
+        self.dump_spider_stats = None
+
     def setup_middleware(self, middleware_list):
         for item in middleware_list:
             self.middlewares.append(item)
@@ -716,6 +719,14 @@ class Spider(SpiderPattern, SpiderStat):
             self.stop_timer('task_generator')
 
             while self.work_allowed:
+
+                # FIXIT: REMOVE
+                # Run update task handler which
+                # updates database object which stores
+                # info about current scraping process
+                if self.dump_spider_stats:
+                    self.dump_spider_stats(self)
+
                 if not self.ng:
                     # NG
                     self.start_timer('task_generator')
