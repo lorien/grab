@@ -1,0 +1,23 @@
+*.pyc
+*.swp
+*.swo
+*.orig
+*.egg-info/
+
+# setuptools
+dist/
+
+# docs
+docs/_build
+docs-redirect/_build
+
+# misc
+log.html
+prof
+
+/log/
+/data/
+/ghost/
+/var/
+/.tox/
+/script/
