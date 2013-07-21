@@ -5,6 +5,7 @@ from grab.util.config import build_spider_config, build_global_config
 from grab.util.module import load_spider_class
 from grab.tools.logs import default_logging
 from grab.tools.lock import assert_lock
+from grab.spider.save_result import save_result
 
 logger = logging.getLogger('grab.script.crawl')
 
@@ -16,8 +17,10 @@ def setup_arg_parser(parser):
     parser.add_argument('spider_name', type=str)
     parser.add_argument('--propagate-network-logger', action='store_true',
                         default=False)
+    parser.add_argument('--save-result', action='store_true', default=False)
 
 
+@save_result
 def main(spider_name, thread_number=None, slave=False, force_url=None,
          settings='settings', *args, **kwargs):
     default_logging(propagate_network_logger=kwargs['propagate_network_logger'])
@@ -37,6 +40,8 @@ def main(spider_name, thread_number=None, slave=False, force_url=None,
     if thread_number is None:
         thread_number = spider_config.getint('GRAB_THREAD_NUMBER')
 
+    stat_task_object = kwargs.get('stat_task_object', None)
+
     bot = spider_class(
         thread_number=thread_number,
         slave=slave,
@@ -50,6 +55,11 @@ def main(spider_name, thread_number=None, slave=False, force_url=None,
         bot.setup_cache(**spider_config['GRAB_CACHE'])
     if spider_config.get('GRAB_PROXY_LIST'):
         bot.load_proxylist(**spider_config['GRAB_PROXY_LIST'])
+
+    # Dirty hack
+    # FIXIT: REMOVE
+    bot.dump_spider_stats = kwargs.get('dump_spider_stats')
+
     try:
         bot.run()
     except KeyboardInterrupt:
@@ -71,3 +81,8 @@ def main(spider_name, thread_number=None, slave=False, force_url=None,
 
     if config.get('GRAB_SAVE_FINAL_STATS'):
         open('var/stats-%d.txt' % pid, 'wb').write(stats)
+
+    return {
+        'spider_stats': bot.render_stats(timing=False),
+        'spider_timing': bot.render_timing(),
+    }

@@ -66,12 +66,17 @@ class SpiderStat(object):
         out.append('Threads: %d' % self.thread_number)
 
         if timing:
-            out.append('Timers:')
-            out.append('  DOM: %.3f' % GLOBAL_STATE['dom_build_time'])
-            out.append('  selector: %.03f' % GLOBAL_STATE['selector_time'])
-            items = [(x, y) for x, y in self.timers.items()]
-            items = sorted(items, key=lambda x: x[1])
-            out.append('  %s' % '\n  '.join('%s: %.03f' % x for x in items))
+            out.append(self.render_timing())
+        return '\n'.join(out) + '\n'
+
+    def render_timing(self):
+        out = []
+        out.append('Timers:')
+        out.append('  DOM: %.3f' % GLOBAL_STATE['dom_build_time'])
+        out.append('  selector: %.03f' % GLOBAL_STATE['selector_time'])
+        items = [(x, y) for x, y in self.timers.items()]
+        items = sorted(items, key=lambda x: x[1])
+        out.append('  %s' % '\n  '.join('%s: %.03f' % x for x in items))
         return '\n'.join(out) + '\n'
 
     def save_all_lists(self, dir_path):

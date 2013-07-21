@@ -171,7 +171,8 @@ def _replace_node_with_text(node, text):
 
 def clean_html(html, safe_attrs=('src', 'href'),
                input_encoding='unicode',
-               output_encoding='unicode'):
+               output_encoding='unicode',
+               **kwargs):
     """
     Fix HTML structure and remove non-allowed attributes from all tags.
     """
@@ -182,14 +183,15 @@ def clean_html(html, safe_attrs=('src', 'href'),
     html = render_html(parse_html(html, encoding=input_encoding), make_unicode=True)
 
     # Strip some shit with default lxml tools
-    cleaner = Cleaner(page_structure=True)
+    cleaner = Cleaner(page_structure=True, **kwargs)
     html = cleaner.clean_html(html)
 
     # Keep only allowed attributes
     tree = parse_html(html)
     for elem in tree.xpath('./descendant-or-self::*'):
         for key in elem.attrib.keys():
-            if key not in safe_attrs:
-                del elem.attrib[key]
+            if safe_attrs:
+                if key not in safe_attrs:
+                    del elem.attrib[key]
 
     return render_html(tree, encoding=output_encoding)
