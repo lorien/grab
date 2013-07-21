@@ -12,7 +12,7 @@ class DocInterface(object):
     def select(self, *args, **kwargs):
         return XpathSelector(self.grab.tree).select(*args, **kwargs)
 
-    def x(self, *args, **kwargs):
+    def structure(self, *args, **kwargs):
         return TreeInterface(self.grab.tree).structured_xpath(*args, **kwargs)
 
 

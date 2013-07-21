@@ -60,7 +60,7 @@ class StructuredExtensionTest(TestCase):
         self.g = Grab(XML, transport=GRAB_TRANSPORT)
 
     def test_1(self):
-        result = self.g.doc.x(
+        result = self.g.doc.structure(
             '//issue',
             title='./title/text()',
             date='./date/text()',
@@ -84,7 +84,7 @@ class StructuredExtensionTest(TestCase):
         )
 
     def test_2(self):
-        result = self.g.doc.x(
+        result = self.g.doc.structure(
             '//issue',
             x(
                 './detail',
@@ -109,7 +109,7 @@ class StructuredExtensionTest(TestCase):
         )
 
     def test_3(self):
-        result = self.g.doc.x(
+        result = self.g.doc.structure(
             '//issue',
             home_url='./home-url/text()',
             articles=x(
