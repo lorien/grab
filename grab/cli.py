@@ -13,7 +13,7 @@ logger = logging.getLogger('grab.cli')
 
 config = build_global_config()
 
-if config and config['GRAB_ACTIVATE_VIRTUALENV']:
+def activate_env(env_path):
     activate_script = os.path.join(config['GRAB_ACTIVATE_VIRTUALENV'], 'bin/activate_this.py')
     # py3 hack
     if PY3K:
@@ -22,8 +22,6 @@ if config and config['GRAB_ACTIVATE_VIRTUALENV']:
     else:
         execfile(activate_script, dict(__file__=activate_script))
 
-if config and config['GRAB_DJANGO_SETTINGS']:
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 def setup_logging(action, level):
     root = logging.getLogger()
@@ -62,10 +60,20 @@ def setup_logging(action, level):
     #default_logging(level=level)
 
 
+def process_env_option():
+    parser = ArgumentParser()
+    parser.add_argument('--env')
+    args, trash = parser.parse_known_args()
+    if args.env:
+        activate_env(args.env)
+
+
 def process_command_line():
     # Add current directory to python path
     cur_dir = os.path.realpath(os.getcwd())
     sys.path.insert(0, cur_dir)
+
+    process_env_option()
 
     parser = ArgumentParser()
     parser.add_argument('action', type=str)
@@ -77,8 +85,13 @@ def process_command_line():
     parser.add_argument('--lock-key')
     parser.add_argument('--ignore-lock', action='store_true', default=False)
     parser.add_argument('--settings', type=str, default='settings')
+    parser.add_argument('--env', type=str)
 
     args, trash = parser.parse_known_args()
+
+    config = build_global_config()
+    if config and config['GRAB_DJANGO_SETTINGS']:
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
     # Setup logging
     logging_level = getattr(logging, args.logging_level.upper())
