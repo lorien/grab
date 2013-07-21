@@ -4,7 +4,10 @@ import time
 import os
 import pygtk
 import gtk
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from grab import Grab
 from .base import CaptchaBackend

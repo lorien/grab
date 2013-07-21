@@ -8,9 +8,9 @@ import re
 MONTH_NAMES = u'января февраля марта апреля мая июня июля августа '\
               u'сентября октября ноября декабря'.split()
 
-RE_NOT_ENCHAR = re.compile(ur'[^-a-zA-Z0-9]', re.U)
-RE_NOT_ENRUCHAR = re.compile(ur'[^-a-zA-Zа-яА-ЯёЁ0-9]', re.U)
-RE_RUSSIAN_CHAR = re.compile(ur'[а-яА-ЯёЁ]', re.U)
+RE_NOT_ENCHAR = re.compile(u'[^-a-zA-Z0-9]', re.U)
+RE_NOT_ENRUCHAR = re.compile(u'[^-a-zA-Zа-яА-ЯёЁ0-9]', re.U)
+RE_RUSSIAN_CHAR = re.compile(u'[а-яА-ЯёЁ]', re.U)
 RE_DASH = re.compile(r'-+')
 
 def slugify(value, limit=None, default=''):

@@ -45,8 +45,8 @@ class TestSelector(TestCase):
         self.assertEquals('one', XpathSelector(self.tree).select('//li/text()').text())
 
     def test_number(self):
-        self.assertEquals(4, XpathSelector(self.tree).select('//li[last()]').number())
-        self.assertEquals(6, XpathSelector(self.tree).select('//li[last()]/@id').number())
+        self.assertEquals(4, XpathSelector(self.tree).select('//ul/li[last()]').number())
+        self.assertEquals(6, XpathSelector(self.tree).select('//ul/li[last()]/@id').number())
 
     def test_text_selector(self):
         sel = XpathSelector(self.tree).select('//li/text()').one()
@@ -88,12 +88,12 @@ class TestSelectorList(TestCase):
         self.assertEquals('one', sel.text())
 
     def test_number(self):
-        sel = XpathSelector(self.tree).select('//li[4]')
+        sel = XpathSelector(self.tree).select('//ul/li[4]')
         self.assertEquals(4, sel.number())
 
     def test_exists(self):
-        sel = XpathSelector(self.tree).select('//li[4]')
+        sel = XpathSelector(self.tree).select('//ul/li[4]')
         self.assertEquals(True, sel.exists())
 
-        sel = XpathSelector(self.tree).select('//li[5]')
+        sel = XpathSelector(self.tree).select('//ul/li[5]')
         self.assertEquals(False, sel.exists())

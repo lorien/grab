@@ -2,6 +2,9 @@ from threading import Thread
 from tornado.ioloop import IOLoop
 import tornado.web
 import time
+import collections
+
+from grab.util.py3k_support import *
 
 class ServerState(object):
     PORT = 9876
@@ -58,7 +61,12 @@ class MainHandler(tornado.web.RequestHandler):
         SERVER.REQUEST['headers'] = self.request.headers
         SERVER.REQUEST['path'] = self.request.path
         SERVER.REQUEST['method'] = self.request.method
-        SERVER.REQUEST['post'] = self.request.body
+        charset = SERVER.REQUEST['charset']
+        # py3 hack
+        if PY3K and (charset not in ('utf-8', 'utf8')):
+            SERVER.REQUEST['post'] = self.request.body.decode('utf-8').encode(charset)
+        else:
+            SERVER.REQUEST['post'] = self.request.body
 
         callback_name = '%s_callback' % method_name
         if SERVER.RESPONSE.get(callback_name) is not None:
@@ -73,7 +81,7 @@ class MainHandler(tornado.web.RequestHandler):
                 self.set_status(SERVER.RESPONSE['code'])
 
             if SERVER.RESPONSE['cookies']:
-                for name, value in SERVER.RESPONSE['cookies'].items():
+                for name, value in sorted(SERVER.RESPONSE['cookies'].items()):
                     self.set_header('Set-Cookie', '%s=%s' % (name, value))
 
             if SERVER.RESPONSE['headers']:
@@ -97,7 +105,7 @@ class MainHandler(tornado.web.RequestHandler):
                 SERVER.RESPONSE_ONCE[method_name] = None
             else:
                 resp = SERVER.RESPONSE.get(method_name, '')
-                if callable(resp):
+                if isinstance(resp, collections.Callable):
                     self.write(resp())
                 else:
                     self.write(resp)

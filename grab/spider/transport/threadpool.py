@@ -1,9 +1,15 @@
 from __future__ import absolute_import
-from Queue import Queue, Empty
+try:
+    from Queue import Queue, Empty
+except ImportError:
+    from queue import Queue, Empty
 from threading import Thread
+
 from grab.error import GrabNetworkError
 
 from grab.tools.work import make_work
+
+from grab.util.py3k_support import *
 
 STOP = object()
 
@@ -25,10 +31,10 @@ class Worker(Thread):
                 self.busy = True
                 try:
                     info['grab'].request()
-                except GrabNetworkError, ex:
+                except GrabNetworkError as ex:
                     ok = False
                     emsg = unicode(ex)
-                except Exception, ex:
+                except Exception as ex:
                     raise
                     # TODO: WTF?
                 else:

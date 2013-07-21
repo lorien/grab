@@ -6,6 +6,8 @@ import time
 import logging
 from random import randint
 
+from grab.util.py3k_support import *
+
 URL_28K = 'http://load.local/grab.html'
 
 def timer(func):
@@ -17,7 +19,7 @@ def timer(func):
         start = time.time()
         result = func(*args, **kwargs)
         total = time.time() - start
-        print 'Time: %.2f sec.' % total
+        print('Time: %.2f sec.' % total)
         return result
     return inner
 
@@ -37,7 +39,7 @@ class SpeedSpider(Spider):
 
     def task_load(self, grab, task):
         assert 'grab' in grab.response.body
-        print 'ok', task.url
+        print('ok', task.url)
 
 
 @timer
@@ -46,7 +48,7 @@ def main():
     bot = SpeedSpider(thread_number=30)
     bot.setup_cache(database='speed_spider', use_compression=True)
     bot.run()
-    print bot.render_stats()
+    print(bot.render_stats())
 
 if __name__ == '__main__':
     main()

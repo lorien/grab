@@ -8,11 +8,12 @@ The core of grab package: the Grab class.
 from __future__ import absolute_import
 import logging
 import os
-import urllib
+#import urllib
 from random import randint, choice
 from copy import copy
 import threading
 import itertools
+import collections
 try:
     from urlparse import urljoin
 except ImportError:
@@ -30,6 +31,9 @@ from . import error
 from .upload import UploadContent, UploadFile
 from .tools.http import normalize_http_values, normalize_url
 from .extension import register_extensions
+
+from grab.util.py2old_support import *
+from grab.util.py3k_support import *
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
@@ -234,7 +238,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             mod_path, cls_name = transport_param.rsplit('.', 1)
             mod = __import__(mod_path, globals(), locals(), ['foo'])
             self.transport = getattr(mod, cls_name)()
-        elif callable(transport_param):
+        elif isinstance(transport_param, collections.Callable):
             self.transport = transport_param()
         else:
             raise GrabMisuseError('Option `transport` should be string or callable. '\
@@ -356,7 +360,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         # Reset the state setted by previous request
         if not self._request_prepared:
             self.reset()
-            self.request_counter = REQUEST_COUNTER.next()
+            self.request_counter = next(REQUEST_COUNTER)
             if kwargs:
                 self.setup(**kwargs)
             if self.proxylist and self.config['proxy_auto_change']:
@@ -453,7 +457,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         if self.config['debug_post']:
             post = self.config['post'] or self.config['multipart_post']
             if isinstance(post, dict):
-                post = post.items()
+                post = list(post.items())
             if post:
                 if isinstance(post, basestring):
                     post = post[:150] + '...'
@@ -514,13 +518,13 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         # TODO: check max redirect count
         if self.config['follow_refresh']:
             url = find_refresh_url(self.response.unicode_body())
-            print 'URL', url
+            print('URL', url)
             if url is not None:
                 inc_count = old_refresh_count + 1
                 if inc_count > self.config['redirect_limit']:
                     raise error.GrabTooManyRedirectsError()
                 else:
-                    print inc_count
+                    print(inc_count)
                     return self.request(url=url, refresh_redirect_count=inc_count)
 
         return None

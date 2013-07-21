@@ -183,6 +183,15 @@ class Task(BaseTask):
     def __repr__(self):
         return '<Task: %s>' % self.url
 
+    def __lt__(self, other):
+        if self.priority and other.priority:
+            return (self.priority < other.priority)
+        else:
+            return False
+
+    def __eq__(self, other):
+        return (self.priority == other.priority)
+
 
 class NullTask(BaseTask):
     def __init__(self, name='initial', sleep=0, priority=None,

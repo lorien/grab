@@ -6,6 +6,8 @@ from .error import CaptchaError
 
 #import settings
 
+from grab.util.py3k_support import *
+
 RE_SCRIPT = re.compile(r'<script[^>]+recaptcha\.net[^>]+>', re.S)
 RE_SCRIPT2 = re.compile(r'<script[^>]+google\.com/recaptcha/api/challenge[^>]+>', re.S)
 RE_SCRIPT3 = re.compile(r'Recaptcha\.create\("([^"]+)', re.S | re.I)

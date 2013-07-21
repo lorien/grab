@@ -2,7 +2,10 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import os
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 import tempfile
 
 class CaptchaWindow(object):

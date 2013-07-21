@@ -1,5 +1,8 @@
 from unittest import TestCase
-import urllib
+try:
+    from urllib import urlopen
+except ImportError:
+    from urllib.request import urlopen
 
 from .tornado_util import SERVER
 
@@ -8,22 +11,22 @@ class TestTornadoServer(TestCase):
         SERVER.reset()
 
     def test_get(self):
-        SERVER.RESPONSE['get'] = 'zorro'
-        data = urllib.urlopen(SERVER.BASE_URL).read()
+        SERVER.RESPONSE['get'] = b'zorro'
+        data = urlopen(SERVER.BASE_URL).read()
         self.assertEqual(data, SERVER.RESPONSE['get'])
 
     def test_path(self):
-        urllib.urlopen(SERVER.BASE_URL + '/foo').read()
+        urlopen(SERVER.BASE_URL + '/foo').read()
         self.assertEqual(SERVER.REQUEST['path'], '/foo')
 
-        urllib.urlopen(SERVER.BASE_URL + '/foo?bar=1').read()
+        urlopen(SERVER.BASE_URL + '/foo?bar=1').read()
         self.assertEqual(SERVER.REQUEST['path'], '/foo')
         self.assertEqual(SERVER.REQUEST['args']['bar'], '1')
 
 
     def test_post(self):
-        SERVER.RESPONSE['post'] = 'foo'
-        data = urllib.urlopen(SERVER.BASE_URL, 'THE POST').read()
+        SERVER.RESPONSE['post'] = b'foo'
+        data = urlopen(SERVER.BASE_URL, b'THE POST').read()
         self.assertEqual(data, SERVER.RESPONSE['post'])
 
     def test_callback(self):
@@ -37,12 +40,12 @@ class TestTornadoServer(TestCase):
 
         gen = ContentGenerator()
         SERVER.RESPONSE['get'] = gen 
-        urllib.urlopen(SERVER.BASE_URL).read()
+        urlopen(SERVER.BASE_URL).read()
         self.assertEqual(gen.count, 1)
-        urllib.urlopen(SERVER.BASE_URL).read()
+        urlopen(SERVER.BASE_URL).read()
         self.assertEqual(gen.count, 2)
         # Now create POST request which should no be
         # processed with ContentGenerator which is bind to GET
         # requests
-        urllib.urlopen(SERVER.BASE_URL, 'some post').read()
+        urlopen(SERVER.BASE_URL, b'some post').read()
         self.assertEqual(gen.count, 2)

@@ -22,7 +22,7 @@ def main(*args, **kwargs):
     cols = [x[0] for x in cursor.description]
     ts = int(time.time())
     if not 'timestamp' in cols:
-        print 'Cache table does not have timestamp column. Adding it...'
+        print('Cache table does not have timestamp column. Adding it...')
         cursor.execute('''
             ALTER TABLE cache
             ADD COLUMN timestamp INT NOT NULL DEFAULT %s''' % ts)

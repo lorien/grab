@@ -5,6 +5,8 @@ from grab import Grab, DataNotFound
 from .util import GRAB_TRANSPORT
 from .tornado_util import SERVER
 
+from grab.util.py3k_support import *
+
 class LXMLExtensionTest(TestCase):
     def setUp(self):
         SERVER.reset()
@@ -30,5 +32,5 @@ class LXMLExtensionTest(TestCase):
         # Explicitly use unicode_body func
         g = Grab()
         g.go(SERVER.BASE_URL)
-        print ':::', g.response.unicode_body()
+        print(':::', g.response.unicode_body())
         self.assertTrue('&#8212;' in g.response.unicode_body())

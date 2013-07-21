@@ -18,12 +18,15 @@ from ..tools.text import normalize_space
 from ..tools.html import decode_entities
 from ..base import GLOBAL_STATE
 
+from grab.util.py3k_support import *
+
 __all__ = ['Selector', 'TextSelector', 'XpathSelector', 'PyquerySelector',
            'KitSelector']
 NULL = object()
 XPATH_CACHE = {}
 logger = logging.getLogger('grab.selector.selector')
 
+metaclass_ABCMeta = ABCMeta('metaclass_ABCMeta', (object, ), {})
 
 class SelectorList(object):
     def __init__(self, selector_list, origin_selector_class, origin_query):
@@ -144,9 +147,7 @@ class SelectorList(object):
         return result
 
 
-class BaseSelector(object):
-    __metaclass__ = ABCMeta
-
+class BaseSelector(metaclass_ABCMeta):
     def __init__(self, node):
         self.node = node
 

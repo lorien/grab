@@ -19,6 +19,8 @@ from ..response import Response
                          #normalize_http_values
 from ..tools.user_agent import random_user_agent
 
+from grab.util.py3k_support import *
+
 logger = logging.getLogger('grab.transport.ghost')
 
 class GhostTransport(object):

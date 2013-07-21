@@ -9,6 +9,8 @@ from ..tools.text import normalize_space
 from ..tools.html import decode_entities
 from ..tools.rex import rex_cache
 
+from grab.util.py3k_support import *
+
 NULL = object()
 
 class RegexpExtension(object):
@@ -46,11 +48,18 @@ class RegexpExtension(object):
         """
 
         regexp = self.normalize_regexp(regexp, flags)
+        match = None
         if byte:
-            match =  regexp.search(self.response.body)
+            if not isinstance(regexp.pattern, unicode) or not PY3K:
+                if PY3K:
+                    body = self.response.body_as_bytes()
+                else:
+                    body = self.response.body
+                match = regexp.search(body)
         else:
-            ubody = self.response.unicode_body()
-            match = regexp.search(ubody)
+            if isinstance(regexp.pattern, unicode) or not PY3K:
+                ubody = self.response.unicode_body()
+                match = regexp.search(ubody)
         if match:
             return match
         else:

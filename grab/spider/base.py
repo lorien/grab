@@ -8,15 +8,27 @@ from collections import defaultdict
 import os
 import time
 import json
-import cPickle as pickle
-import anydbm
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+try:
+    import anydbm as dbm
+except ImportError:
+    import dbm
 import multiprocessing
 import zlib
 from hashlib import sha1
-from urlparse import urljoin
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 from random import randint
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 
-import Queue
 from ..base import GLOBAL_STATE, Grab
 from .error import (SpiderError, SpiderMisuseError, FatalError,
                     StopTaskProcessing, NoTaskHandler, NoDataHandler)
@@ -27,6 +39,9 @@ from .stat  import SpiderStat
 from .transport.multicurl import MulticurlTransport
 from ..proxylist import ProxyList
 from grab.util.misc import camel_case_to_underscore
+
+from grab.util.py2old_support import *
+from grab.util.py3k_support import *
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
@@ -359,7 +374,7 @@ class Spider(SpiderPattern, SpiderStat):
                 logger_verbose.debug('Task queue contains less tasks than limit. Tryring to add new tasks')
                 try:
                     for x in xrange(min_limit - qsize):
-                        item = self.task_generator_object.next()
+                        item = next(self.task_generator_object)
                         logger_verbose.debug('Found new task. Adding it')
                         self.add_task(item)
                 except StopIteration:
@@ -392,7 +407,7 @@ class Spider(SpiderPattern, SpiderStat):
             try:
                 with self.save_timer('task_queue'):
                     return self.taskq.get()
-            except Queue.Empty:
+            except queue.Empty:
                 if self.taskq.size():
                     logger_verbose.debug('Waiting for scheduled task')
                     return True
@@ -537,9 +552,9 @@ class Spider(SpiderPattern, SpiderStat):
                         else:
                             for item in result:
                                 self.process_handler_result(item, res['task'])
-            except NoDataHandler, ex:
+            except NoDataHandler as ex:
                 raise
-            except Exception, ex:
+            except Exception as ex:
                 self.process_handler_error(handler_name, ex, res['task'])
             else:
                 self.inc_count('task-%s-ok' % res['task'].name)
@@ -765,7 +780,7 @@ class Spider(SpiderPattern, SpiderStat):
                             if task.sleep:
                                 logger.debug('Got NullTask with sleep instruction. Sleeping for %.2f seconds' % task.sleep)
                                 time.sleep(task.sleep)
-                    elif task == True:
+                    elif isinstance(task, bool) and (task == True):
                         pass
                     else:
                         if self.ng:
@@ -800,7 +815,7 @@ class Spider(SpiderPattern, SpiderStat):
 
             logger_verbose.debug('Work done')
         except KeyboardInterrupt:
-            print '\nGot ^C signal. Stopping.'
+            print('\nGot ^C signal. Stopping.')
             raise
         finally:
             # This code is executed when main cycles is breaked
@@ -873,7 +888,7 @@ class Spider(SpiderPattern, SpiderStat):
                     for something in data_result:
                         self.process_handler_result(something, task)
 
-            except Exception, ex:
+            except Exception as ex:
                 self.process_handler_error('data_%s' % result.handler_key, ex, task)
         elif result is None:
             pass
@@ -925,7 +940,7 @@ class Spider(SpiderPattern, SpiderStat):
         while should_work:
             try:
                 response = self.network_response_queue.get(True, 0.1)
-            except Queue.Empty:
+            except queue.Empty:
                 logger_verbose.debug('Response queue is empty.')
                 response = None
 

@@ -2,8 +2,8 @@
 from unittest import TestCase
 
 from grab import Grab
-from util import ignore_transport, GRAB_TRANSPORT
-from tornado_util import SERVER
+from .util import ignore_transport, GRAB_TRANSPORT
+from .tornado_util import SERVER
 
 class TestContentLimit(TestCase):
     def setUp(self):

@@ -1,6 +1,9 @@
 from grab import Grab
 from grab.tools.encoding import smart_str
-from urllib import quote
+try:
+    from urllib import quote
+except ImportError:
+    from urllib.parse import quote
 
 name = 'clck.ru'
 

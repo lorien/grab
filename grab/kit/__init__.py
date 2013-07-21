@@ -3,8 +3,8 @@ Credits:
 * https://code.google.com/p/webscraping/source/browse/webkit.py
 * https://github.com/jeanphix/Ghost.py/blob/master/ghost/ghost.py
 """
-import time 
-import sys
+#import time
+#import sys
 from PyQt4.QtCore import QEventLoop, QUrl, QEventLoop, QTimer, QByteArray, QSize
 from PyQt4.QtGui import QApplication
 from PyQt4.QtWebKit import QWebView, QWebPage
@@ -14,12 +14,17 @@ from lxml.html import fromstring
 from grab.selector import Selector
 from grab.response import Response
 import logging
-from urlparse import urlsplit
+try:
+    from urlparse import urlsplit
+except ImportError:
+    from urllib.parse import urlsplit
 
 from grab.kit.network_access_manager import KitNetworkAccessManager
 from grab.kit.network_reply import KitNetworkReply
 from grab.kit.error import KitError
-from grab.kit.network_reply import KitNetworkReply
+from grab.tools.encoding import decode_dict
+
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.kit')
 
@@ -28,8 +33,9 @@ class Resource(object):
         self.reply = reply
         self.url = str(reply.url().toString())
 
-        self.status_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)\
-                                .toInt()[0]
+        self.status_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+        if not isinstance(self.status_code, int):
+            self.status_code = self.status_code.toInt()[0]
         self.headers = {}
         for header in reply.rawHeaderList():
             self.headers[header.data()] = reply.rawHeader(header).data()
@@ -173,13 +179,32 @@ class Kit(object):
     def build_response(self, resource):
         response = Response()
         response.head = ''
-        response.runtime_body = unicode(self.page.mainFrame().toHtml()).encode('utf-8')
-        response.body = str(resource.reply.data)
         response.code = resource.status_code
-        response.url = str(resource.reply.url().toString())
+
+        runtime_body = self.page.mainFrame().toHtml()
+        body = resource.reply.data
+        url = resource.reply.url().toString()
+        headers = resource.headers
+        cookies = self.get_cookies()
+
+        # py3 hack
+        if PY3K:
+            if isinstance(body, QByteArray):
+                body = body.data()
+            headers = decode_dict(headers)
+            cookies = decode_dict(cookies)
+        else:
+            runtime_body = unicode(runtime_body)
+            body = str(body)
+            url = str(url)
+
+        response.runtime_body = runtime_body.encode('utf-8')
+        response.body = body
+        response.url = url
         response.parse(charset='utf-8')
-        response.headers = resource.headers
-        response.cookies = self.get_cookies()
+        response.headers = headers
+        response.cookies = cookies
+
         return response
 
     def __del__(self):
@@ -188,8 +213,10 @@ class Kit(object):
     def network_reply_handler(self, reply):
         status_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
         if status_code:
+            if not isinstance(status_code, int):
+                status_code = status_code.toInt()[0]
             logger.debug('Resource loaded: %s [%d]' % (reply.url().toString(),
-                                                       status_code.toInt()[0]))
+                                                       status_code))
             self.resource_list.append(Resource(reply))
 
 
@@ -199,6 +226,6 @@ if __name__ == '__main__':
     br = Kit(gui=False)
     #resp = br.request('http://httpbin.org/post', method='post', cookies={'foo': 'bar'},
                       #data='foo=bar')
-    #print resp.body
+    #print(resp.body)
     resp = br.request('http://ya.ru/')
-    print unicode(br.page.mainFrame().documentElement().findFirst('title').toPlainText())
+    print(unicode(br.page.mainFrame().documentElement().findFirst('title').toPlainText()))

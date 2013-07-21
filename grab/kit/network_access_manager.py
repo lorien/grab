@@ -7,6 +7,8 @@ from grab.kit.const import NETWORK_ERROR
 from grab.kit.network_reply import KitNetworkReply
 from grab.kit.error import KitError
 
+from grab.util.py3k_support import *
+
 logger = logging.getLogger('grab.kit.network_access_manager')
 
 class KitNetworkAccessManager(QNetworkAccessManager):
@@ -54,7 +56,7 @@ class KitNetworkAccessManager(QNetworkAccessManager):
         if isinstance(request.originatingObject(), QWebFrame):
             try:
                 reply.setRawHeader(QByteArray('Base-Url'), QByteArray('').append(request.originatingObject().page().mainFrame().baseUrl().toString()))
-            except Exception, e:
+            except Exception as e:
                 logger.debug(e)
 
         return reply

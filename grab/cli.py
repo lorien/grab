@@ -4,7 +4,10 @@ import logging
 from grab.tools.lock import assert_lock
 from grab.tools.logs import default_logging
 import sys 
+
 from grab.util.config import build_global_config
+
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.cli')
 
@@ -12,7 +15,12 @@ config = build_global_config()
 
 if config and config['GRAB_ACTIVATE_VIRTUALENV']:
     activate_script = os.path.join(config['GRAB_ACTIVATE_VIRTUALENV'], 'bin/activate_this.py')
-    execfile(activate_script, dict(__file__=activate_script))
+    # py3 hack
+    if PY3K:
+        exec(compile(open(activate_script).read(), activate_script, 'exec'),
+             dict(__file__=activate_script))
+    else:
+        execfile(activate_script, dict(__file__=activate_script))
 
 if config and config['GRAB_DJANGO_SETTINGS']:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
@@ -86,7 +94,7 @@ def process_command_line():
     try:
         # First, try to import script from the grab package
         action_mod = __import__('grab.script.%s' % action_name, None, None, ['foo'])
-    except ImportError, ex:
+    except ImportError as ex:
         if (ex.message.startswith('No module named') and
             action_name in ex.message):
             pass
@@ -96,7 +104,7 @@ def process_command_line():
         # try to import it from the current project
         try:
             action_mod = __import__('script.%s' % action_name, None, None, ['foo'])
-        except ImportError, ex:
+        except ImportError as ex:
             logging.error('', exc_info=ex)
             sys.stderr.write('Could not import %s script' % action_name)
             sys.exit(1)
@@ -124,5 +132,5 @@ def process_command_line():
     logger.debug('Execution %s action' % action_name)
     try:
         action_mod.main(**vars(args))
-    except Exception, ex:
+    except Exception as ex:
         logging.error('Unexpected exception from action handler:', exc_info=ex)

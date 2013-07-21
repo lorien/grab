@@ -1,5 +1,8 @@
 # coding: utf-8
-import urllib
+try:
+    from urllib import quote #, unquote_plus
+except ImportError:
+    from urllib.parse import quote #, unquote_plus
 from grab.tools.lxml_tools import get_node_text
 import logging
 
@@ -31,7 +34,7 @@ def build_search_url(query, page=1, per_page=None, lang='en', filter=True,
 
     query = smart_str(query)
     url = 'http://yandex.ru/yandsearch?text=%s&lr=%s' % (
-        urllib.quote(query), region)
+        quote(query), region)
     if kwargs:
         url += '&' + urlencode(kwargs)
     url += '&p=%d' % (page - 1)
@@ -95,7 +98,7 @@ def parse_search_results(grab, parse_index_size=False, strict_query=False):
                     item['url'] = title_elem.get('href')
                     #if url.startswith('/url?'):
                         #url = url.split('?q=')[1].split('&')[0]
-                        #url = urllib.unquote_plus(url)
+                        #url = unquote_plus(url)
 
                     item['position'] = int(elem.xpath(
                         './/h2/b[contains(@class, "b-serp-item__number")]/text()')[0])
@@ -106,10 +109,10 @@ def parse_search_results(grab, parse_index_size=False, strict_query=False):
                     item['snippet'] = snippet
 
                     results.append(item)
-            except Exception, ex:
+            except Exception as ex:
                 logging.error('', exc_info=ex)
 
         return results
     else:
-        print 'parsing error'
+        print('parsing error')
         raise ParsingError('Could not identify yandex page format')
