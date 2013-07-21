@@ -6,6 +6,7 @@ from grab import Grab, GrabMisuseError
 GRAB_TRANSPORT = 'grab.transport.kit.KitTransport'
 
 class KitLiveSitesTestCase(TestCase):
+    pass
     #def test_dumpz_copyright(self):
         #g = Grab(transport=GRAB_TRANSPORT)
         #g.go('http://dumpz.org')

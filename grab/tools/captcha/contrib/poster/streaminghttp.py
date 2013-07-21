@@ -26,8 +26,17 @@ Example usage:
         {'Content-Length': len(s)})
 """
 
-import httplib, urllib2, socket
-from httplib import NotConnected
+import socket
+try:
+    import urllib2
+    from urllib2 import HTTPError
+except ImportError:
+    import urllib.request as urllib2
+    from urllib.error import HTTPError
+try:
+    import httplib
+except ImportError:
+    import http.client as httplib
 
 __all__ = ['StreamingHTTPConnection', 'StreamingHTTPRedirectHandler',
         'StreamingHTTPHandler', 'register_openers']
@@ -50,7 +59,7 @@ class _StreamingHTTPMixin:
             if self.auto_open:
                 self.connect()
             else:
-                raise NotConnected()
+                raise httplib.NotConnected()
 
         # send the data to the server. if we get a broken pipe, then close
         # the socket. we want to reconnect when somebody tries to send again.
@@ -58,24 +67,24 @@ class _StreamingHTTPMixin:
         # NOTE: we DO propagate the error, though, because we cannot simply
         #       ignore the error... the caller will know if they can retry.
         if self.debuglevel > 0:
-            print "send:", repr(value)
+            print("send:", repr(value))
         try:
             blocksize = 8192
             if hasattr(value, 'read') :
                 if self.debuglevel > 0:
-                    print "sendIng a read()able"
+                    print("sendIng a read()able")
                 data = value.read(blocksize)
                 while data:
                     self.sock.sendall(data)
                     data = value.read(blocksize)
             elif hasattr(value, 'next'):
                 if self.debuglevel > 0:
-                    print "sendIng an iterable"
+                    print("sendIng an iterable")
                 for data in value:
                     self.sock.sendall(data)
             else:
                 self.sock.sendall(value)
-        except socket.error, v:
+        except socket.error as v:
             if v[0] == 32:      # Broken pipe
                 self.close()
             raise
@@ -125,7 +134,7 @@ class StreamingHTTPRedirectHandler(urllib2.HTTPRedirectHandler):
                            origin_req_host=req.get_origin_req_host(),
                            unverifiable=True)
         else:
-            raise urllib2.HTTPError(req.get_full_url(), code, msg, headers, fp)
+            raise HTTPError(req.get_full_url(), code, msg, headers, fp)
 
 class StreamingHTTPHandler(urllib2.HTTPHandler):
     """Subclass of `urllib2.HTTPHandler` that uses

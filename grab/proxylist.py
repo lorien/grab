@@ -30,6 +30,9 @@ except ImportError:
 
 from .error import GrabError, GrabNetworkError, GrabMisuseError
 
+from grab.util.py2old_support import *
+from grab.util.py3k_support import *
+
 logger = logging.getLogger('grab.proxylist')
 
 READ_TIMEOUT = 60 * 10
@@ -71,8 +74,9 @@ class ProxySource(object):
         """
 
         for proxy in proxies:
-            if isinstance(proxy, unicode):
-                proxy = proxy.encode("utf8")
+            if not PY3K and isinstance(proxy, unicode):
+                # Convert to string (py2.x)
+                proxy = proxy.encode('utf-8')
             proxy = proxy.strip().replace(' ', '')
             if proxy:
                 host, port, user, pwd = parse_proxyline(proxy)
@@ -83,8 +87,9 @@ class ProxySource(object):
                 yield server, user_pwd
 
     def get_server_list(self, proxylist):
-        if isinstance(proxylist, unicode):
-            proxylist = proxylist.encode("utf8")
+        if not PY3K and isinstance(proxylist, unicode):
+            # Convert to string (py2.x)
+            proxylist = proxylist.encode('utf-8')
         if isinstance(proxylist, str):
             proxylist = proxylist.split()
         servers = []
@@ -244,4 +249,4 @@ class ProxyList(object):
 
         logger.debug('Changing proxy')
         self.source.reload()
-        return self.source.server_list_iterator.next()
+        return next(self.source.server_list_iterator)

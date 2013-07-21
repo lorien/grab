@@ -1,7 +1,12 @@
 from multiprocessing import Process, Queue
 import time
-from Queue import Empty
+try:
+    from Queue import Empty
+except ImportError:
+    from queue import Empty
 import logging
+
+from grab.util.py3k_support import *
 
 class Stop(object):
     pass
@@ -25,7 +30,7 @@ class Worker(Process):
                 try:
                     res = self.callback(task)
                     self.resultq.put(res)
-                except Exception, ex:
+                except Exception as ex:
                     if self.ignore_exceptions:
                         logging.error('', exc_info=ex)
                     else:

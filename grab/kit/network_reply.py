@@ -3,6 +3,8 @@ I really have no idea how it works ;-)
 """
 from PyQt4.QtNetwork import QNetworkReply, QNetworkRequest
 
+from grab.util.py3k_support import *
+
 class KitNetworkReply(QNetworkReply):
     """
     Override QNetworkReply so can save the original data
@@ -100,4 +102,8 @@ class KitNetworkReply(QNetworkReply):
 
         size = min(size, len(self.buffer))
         data, self.buffer = self.buffer[:size], self.buffer[size:]
-        return str(data)
+        # py3 hack
+        if PY3K:
+            return bytes(data)
+        else:
+            return str(data)

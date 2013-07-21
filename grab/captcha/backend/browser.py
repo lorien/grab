@@ -6,6 +6,8 @@ import os
 from grab import Grab
 from .base import CaptchaBackend
 
+from grab.util.py3k_support import *
+
 class BrowserBackend(CaptchaBackend):
     def get_submit_captcha_request(self, data):
         fd, path = tempfile.mkstemp()

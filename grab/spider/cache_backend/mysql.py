@@ -20,7 +20,32 @@ import time
 
 from grab.response import Response
 
+from grab.util.py3k_support import *
+
 logger = logging.getLogger('grab.spider.cache_backend.mysql')
+
+# py3 hack
+if PY3K:
+    import re
+    from functools import reduce
+
+    RE_HEXS = re.compile('0x[a-fA-F0-9]{2}')
+
+    def _str_to_hexbytes(val):
+        val = val.replace('\\x', '0x')
+        # Finds all hexadecimals
+        xs = re.findall(RE_HEXS, val)
+        xc = [chr(int(s, 16)) for s in xs]
+        # Plus escape sequences
+        xs += ['\\\\', "\\'", '\\"', '\\a', '\\b', '\\f', '\\n', '\\r', '\\t', '\\v', '_\\\\_']
+        xc += ['_\\\\_', "\'", '\"', '\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\']
+        # Replaces all
+        val = reduce(lambda acc, args: acc.replace(*args), zip(xs, xc), val)
+        # Converts to bytes
+        return val.encode('raw_unicode_escape')
+
+    def _hexbytes_to_str(val):
+        return str(val)[2:-1]
 
 
 class CacheBackend(object):
@@ -67,16 +92,30 @@ class CacheBackend(object):
             else:
                 ts = int(time.time()) - timeout
                 query = " AND timestamp > %d" % ts
-            res = self.cursor.execute('''
-                SELECT data
-                FROM cache
-                WHERE id = x%%s %(query)s
-                ''' % {'query': query},
-                (_hash,))
+            # py3 hack
+            if PY3K:
+                sql = '''
+                      SELECT data
+                      FROM cache
+                      WHERE id = x{0} %(query)s
+                      ''' % {'query': query}
+            else:
+                sql = '''
+                      SELECT data
+                      FROM cache
+                      WHERE id = x%%s %(query)s
+                      ''' % {'query': query}
+            res = self.cursor.execute(sql, (_hash,))
             row = self.cursor.fetchone()
             self.cursor.execute('COMMIT')
         if row:
-            return self.unpack_database_value(row[0])
+            data = row[0]
+            # py3 hack
+            if PY3K:
+                # A temporary solution for MySQLdb (Py3k port)
+                # [https://github.com/davispuh/MySQL-for-Python-3]
+                data = _str_to_hexbytes(data)
+            return self.unpack_database_value(data)
         else:
             return None
 
@@ -142,13 +181,27 @@ class CacheBackend(object):
     def set_item(self, url, item):
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
+        # py3 hack
+        if PY3K:
+            # A temporary solution for MySQLdb (Py3k port)
+            # [https://github.com/davispuh/MySQL-for-Python-3]
+            data = _hexbytes_to_str(data)
         self.cursor.execute('BEGIN')
         ts = int(time.time())
-        res = self.cursor.execute('''
-            INSERT INTO cache (id, timestamp, data)
-            VALUES(x%s, %s, %s)
-            ON DUPLICATE KEY UPDATE timestamp = %s, data = %s
-        ''', (_hash, ts, data, ts, data))
+        # py3 hack
+        if PY3K:
+            sql = '''
+                  INSERT INTO cache (id, timestamp, data)
+                  VALUES(x{0}, {1}, {2})
+                  ON DUPLICATE KEY UPDATE timestamp = {3}, data = {4}
+                  '''
+        else:
+            sql = '''
+                  INSERT INTO cache (id, timestamp, data)
+                  VALUES(x%s, %s, %s)
+                  ON DUPLICATE KEY UPDATE timestamp = %s, data = %s
+                  '''
+        res = self.cursor.execute(sql, (_hash, ts, data, ts, data))
         self.cursor.execute('COMMIT')
 
     def pack_database_value(self, val):

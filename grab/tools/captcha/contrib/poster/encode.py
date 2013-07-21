@@ -21,17 +21,23 @@ except ImportError:
         bits = random.getrandbits(160)
         return sha.new(str(bits)).hexdigest()
 
-import urllib, re, os, mimetypes
+try:
+    from urllib import quote_plus
+except ImportError:
+    from urllib.parse import quote_plus
+import re, os, mimetypes
+
+from grab.util.py3k_support import *
 
 def encode_and_quote(data):
-    """If ``data`` is unicode, return urllib.quote_plus(data.encode("utf-8"))
-    otherwise return urllib.quote_plus(data)"""
+    """If ``data`` is unicode, return quote_plus(data.encode("utf-8"))
+    otherwise return quote_plus(data)"""
     if data is None:
         return None
 
     if isinstance(data, unicode):
         data = data.encode("utf-8")
-    return urllib.quote_plus(data)
+    return quote_plus(data)
 
 def _strify(s):
     """If s is a unicode string, encode it to UTF-8 and return the results,
@@ -273,7 +279,7 @@ def get_headers(params, boundary):
     """Returns a dictionary with Content-Type and Content-Length headers
     for the multipart/form-data encoding of ``params``."""
     headers = {}
-    boundary = urllib.quote_plus(boundary)
+    boundary = quote_plus(boundary)
     headers['Content-Type'] = "multipart/form-data; boundary=%s" % boundary
     headers['Content-Length'] = get_body_size(params, boundary)
     return headers
@@ -316,7 +322,7 @@ def multipart_encode(params, boundary=None):
     if boundary is None:
         boundary = gen_boundary()
     else:
-        boundary = urllib.quote_plus(boundary)
+        boundary = quote_plus(boundary)
 
     headers = get_headers(params, boundary)
     params = MultipartParam.from_params(params)

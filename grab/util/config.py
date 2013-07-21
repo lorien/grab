@@ -11,7 +11,7 @@ from grab.util.module import import_string
 def is_dict_interface(obj):
     try:
         obj['o_O']
-        obj.keys()
+        list(obj.keys())
     except (TypeError, AttributeError):
         return False
     except Exception:

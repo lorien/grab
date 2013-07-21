@@ -3,12 +3,17 @@ import logging
 import pymongo
 from multiprocessing import Manager, Queue, Event, active_children
 import time
-from urlparse import urlsplit
+try:
+    from urlparse import urlsplit
+except ImportError:
+    from urllib.parse import urlsplit
 import os
 
 from grab.spider import Spider, Task, Data
 from grab.spider.base import logger_verbose
 from grab.spider.queue_backend.redis import QueueBackend
+
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('ng')
 
@@ -27,9 +32,9 @@ class SimpleParserSpider(Spider):
             yield res
 
     def task_page(self, grab, task):
-        print task.url
+        print(task.url)
         title = grab.doc.select('//title').text(default=None)
-        print 'TITLE:', title, 'PID:', os.getpid()
+        print('TITLE:', title, 'PID:', os.getpid())
         host = urlsplit(task.url).netloc
         if not task.get('secondary'):
             yield Task('page', url='http://%s/robots.txt' % host, secondary=True)
@@ -81,8 +86,8 @@ def start_spider(spider_cls):
 
         while True:
             time.sleep(2)
-            print 'task size', taskq.size()
-            print 'response size', network_response_queue.qsize()
+            print('task size', taskq.size())
+            print('response size', network_response_queue.qsize())
             if (downloader_waiting_shutdown_event.is_set() and
                 all(x.is_set() for x in events)):
                 shutdown_event.set()
@@ -90,7 +95,7 @@ def start_spider(spider_cls):
 
         time.sleep(1)
 
-        print 'done'
+        print('done')
     finally:
         for child in active_children():
             logging.debug('Killing child process (pid=%d)' % child.pid)

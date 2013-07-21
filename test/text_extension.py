@@ -6,6 +6,8 @@ import re
 from .util import GRAB_TRANSPORT
 from .tornado_util import SERVER
 
+from grab.util.py3k_support import *
+
 # TODO: split on two tests: text extension and rex extension
 
 HTML = u"""
@@ -52,8 +54,12 @@ class TextExtensionTest(TestCase):
     def test_search_usage_errors(self):
         self.assertRaises(GrabMisuseError,
             lambda: self.g.search(u'фыва', byte=True))
+        anchor = 'фыва'
+        # py3 hack
+        if PY3K:
+            anchor = anchor.encode('utf-8')
         self.assertRaises(GrabMisuseError,
-            lambda: self.g.search('фыва'))
+            lambda: self.g.search(anchor))
 
     def test_rex(self):
         # Search unicode rex in unicode body - default case
@@ -65,7 +71,11 @@ class TextExtensionTest(TestCase):
         self.assertEqual(u'фыва'.encode('cp1251'), self.g.rex(rex, byte=True).group(1))
 
         ## Search for non-unicode rex in unicode body shuld fail
-        rex = re.compile('(фыва)')
+        pattern = '(фыва)'
+        # py3 hack
+        if PY3K:
+            pattern = pattern.encode('utf-8')
+        rex = re.compile(pattern)
         self.assertRaises(DataNotFound, lambda: self.g.rex(rex))
 
         ## Search for unicode rex in byte-string body shuld fail

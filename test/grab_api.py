@@ -2,9 +2,11 @@
 from unittest import TestCase
 
 from grab import Grab, GrabMisuseError
-from util import GRAB_TRANSPORT, ignore_transport, only_transport
-from tornado_util import SERVER
+from .util import GRAB_TRANSPORT, ignore_transport, only_transport
+from .tornado_util import SERVER
 from grab.extension import register_extensions
+
+from grab.util.py3k_support import *
 
 class GrabApiTestCase(TestCase):
     def setUp(self):

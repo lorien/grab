@@ -19,13 +19,16 @@ except ImportError:
 import tempfile
 import webbrowser
 import codecs
+
 from grab.tools import encoding as encoding_tools
 
 from .tools.files import hashed_path
 
-RE_XML_DECLARATION = re.compile(r'^[^<]{,100}<\?xml[^>]+\?>', re.I)
-RE_DECLARATION_ENCODING = re.compile(r'encoding\s*=\s*["\']([^"\']+)["\']')
-RE_META_CHARSET = re.compile(r'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)',
+from grab.util.py3k_support import *
+
+RE_XML_DECLARATION = re.compile(br'^[^<]{,100}<\?xml[^>]+\?>', re.I)
+RE_DECLARATION_ENCODING = re.compile(br'encoding\s*=\s*["\']([^"\']+)["\']')
+RE_META_CHARSET = re.compile(br'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)',
                              re.I)
 
 # Bom processing logic was copied from
@@ -110,7 +113,10 @@ class Response(object):
             #self.cookies[cookie.name] = cookie.value
 
         if charset is None:
-            self.detect_charset()
+            if isinstance(self.body, unicode):
+                self.charset = 'utf-8'
+            else:
+                self.detect_charset()
         else:
             self.charset = charset
 
@@ -163,7 +169,7 @@ class Response(object):
 
             # Try to process XML declaration
             if not charset:
-                if body_chunk.startswith('<?xml'):
+                if body_chunk.startswith(b'<?xml'):
                     match = RE_XML_DECLARATION.search(body_chunk)
                     if match:
                         enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
@@ -177,6 +183,9 @@ class Response(object):
                     charset = self.headers['Content-Type'][(pos + 8):]
 
         if charset:
+            if not isinstance(charset, str):
+                # Convert to unicode (py2.x) or string (py3.x)
+                charset = charset.decode('utf-8')
             # Check that python knows such charset
             try:
                 codecs.lookup(charset)
@@ -187,16 +196,21 @@ class Response(object):
                 self.charset = charset
 
     def process_unicode_body(self, body, bom, charset, ignore_errors, fix_special_entities):
+        if isinstance(body, unicode):
+            #if charset in ('utf-8', 'utf8'):
+            #    return body.strip()
+            #else:
+            #    body = body.encode('utf-8')
+            #
+            body = body.encode('utf-8')
+        if bom:
+            body = body[len(self.bom):]
+        if fix_special_entities:
+            body = encoding_tools.fix_special_entities(body)
         if ignore_errors:
             errors = 'ignore'
         else:
             errors = 'strict'
-        if bom:
-            body = body[len(self.bom):]
-        else:
-            body = body
-        if fix_special_entities:
-            body = encoding_tools.fix_special_entities(body)
         return body.decode(charset, errors).strip()
 
     def unicode_body(self, ignore_errors=True, fix_special_entities=True):
@@ -204,9 +218,10 @@ class Response(object):
         Return response body as unicode string.
         """
 
+        self._check_body()
         if not self._unicode_body:
             self._unicode_body = self.process_unicode_body(
-                self.body, self.bom, self.charset,
+                self._body, self.bom, self.charset,
                 ignore_errors, fix_special_entities)
         return self._unicode_body
 
@@ -252,7 +267,10 @@ class Response(object):
                 pass
 
         with open(path, 'wb') as out:
-            out.write(self.body)
+            if isinstance(self._body, unicode):
+                out.write(self._body.encode('utf-8'))
+            else:
+                out.write(self._body)
 
     def save_hash(self, location, basedir, ext=None):
         """
@@ -281,6 +299,8 @@ class Response(object):
         returns save_to + path
         """
 
+        if isinstance(location, unicode):
+            location = location.encode('utf-8')
         rel_path = hashed_path(location, ext=ext)
         path = os.path.join(basedir, rel_path)
         if not os.path.exists(path):
@@ -290,7 +310,10 @@ class Response(object):
             except OSError:
                 pass
             with open(path, 'wb') as out:
-                out.write(self.body)
+                if isinstance(self._body, unicode):
+                    out.write(self._body.encode('utf-8'))
+                else:
+                    out.write(self._body)
         return rel_path
 
     @property
@@ -324,25 +347,40 @@ class Response(object):
         self.save(path)
         webbrowser.open('file://' + path)
 
-    def _read_body(self):
+    def _check_body(self):
         if not self._body:
             if self.body_path:
                 with open(self.body_path, 'rb') as inp:
                     self._body = inp.read()
+
+    def _read_body(self):
+        # py3 hack
+        if PY3K:
+            return self.unicode_body()
+
+        self._check_body()
         return self._body
 
     def _write_body(self, body):
         self._body = body
+        self._unicode_body = None
 
     body = property(_read_body, _write_body)
 
     def _read_runtime_body(self):
         if self._runtime_body is None:
-            return self.body
+            return self._body
         else:
             return self._runtime_body
 
     def _write_runtime_body(self, body):
         self._runtime_body = body
+        self._unicode_runtime_body = None
 
     runtime_body = property(_read_runtime_body, _write_runtime_body)
+
+    def body_as_bytes(self, encode=False):
+        self._check_body()
+        if encode:
+            return self.body.encode(self.charset)
+        return self._body

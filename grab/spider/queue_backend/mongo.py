@@ -1,7 +1,13 @@
 from __future__ import absolute_import
-import Queue
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 from time import time
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 import uuid
 from bson import Binary
 import logging
@@ -53,7 +59,7 @@ class QueueBackend(QueueInterface):
             remove=True
         )
         if item is None:
-            raise Queue.Empty()
+            raise queue.Empty()
         else:
             return pickle.loads(item['task'])
 

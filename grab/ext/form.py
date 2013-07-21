@@ -277,7 +277,7 @@ class FormExtension(object):
                 for key, obj in self._file_fields.items():
                     post[key] = obj
 
-        post_items = post.items()
+        post_items = list(post.items())
         del post
 
         if extra_post:

@@ -5,7 +5,10 @@ from __future__ import absolute_import
 
 from redis import StrictRedis
 from qr import PriorityQueue
-import Queue
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 import random
 
 from .base import QueueInterface
@@ -35,7 +38,7 @@ class QueueBackend(QueueInterface):
     def get(self):
         task = self.queue_object.pop()
         if task is None:
-            raise Queue.Empty()
+            raise queue.Empty()
         else:
             return task
 
@@ -48,5 +51,5 @@ class QueueBackend(QueueInterface):
         #try:
             #while True:
                 #self.get()
-        #except Queue.Empty:
+        #except queue.Empty:
             #pass

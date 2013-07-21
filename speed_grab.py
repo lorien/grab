@@ -5,7 +5,9 @@ from grab.tools.work import make_work
 from grab.tools.logs import default_logging
 import time
 import logging
-import urllib
+#import urllib
+
+from grab.util.py3k_support import *
 
 #logging.basicConfig(level=logging.DEBUG)
 
@@ -18,7 +20,7 @@ def timer(func):
         start = time.time()
         result = func(*args, **kwargs)
         total = time.time() - start
-        print 'Time: %.2f sec.' % total
+        print('Time: %.2f sec.' % total)
         return result
     return inner
 

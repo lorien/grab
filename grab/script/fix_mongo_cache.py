@@ -17,4 +17,4 @@ def main(*args, **kwargs):
         bot.cache.db.cache.update({'_id': item['_id']},
                                   {'$set': {'timestamp': ts}})
         count += 1
-    print 'Records updated: %d' % count
+    print('Records updated: %d' % count)

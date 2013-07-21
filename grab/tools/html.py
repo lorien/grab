@@ -11,6 +11,8 @@ import logging
 
 from .text import normalize_space as normalize_space_func
 
+from grab.util.py3k_support import *
+
 RE_TAG = re.compile(r'<[^>]+>')
 RE_REFRESH_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']*Refresh[^>]+', re.I)
 RE_REFRESH_URL = re.compile(r'''

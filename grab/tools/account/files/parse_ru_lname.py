@@ -1,4 +1,7 @@
-import urllib
+try:
+    from urllib import urlopen
+except ImportError:
+    from urllib.request import urlopen
 import re
 
 urls = """
@@ -38,11 +41,11 @@ re_lname = re.compile(r'<FONT face=Calibri color=#000000 size=3>([^\d][^<]+)</FO
 outfile = file('ru_lname.txt', 'w')
 
 for url in urls:
-    print url
-    data = urllib.urlopen(url).read().decode('cp1251')
+    print(url)
+    data = urlopen(url).read().decode('cp1251')
 
     items = []
     for lname in re_lname.findall(data):
         lname = lname.lower().capitalize()
         outfile.write(lname.encode('utf-8') + '\n')
-        print lname
+        print(lname)

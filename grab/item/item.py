@@ -13,10 +13,10 @@ class ItemBuilder(type):
         namespace['_fields'] = fields
         return super(ItemBuilder, cls).__new__(cls, name, base, namespace)
 
+metaclass_ItemBuilder = ItemBuilder('metaclass_ItemBuilder', (object, ), {})
 
-class Item(object):
-    __metaclass__ = ItemBuilder
 
+class Item(metaclass_ItemBuilder):
     def __init__(self, tree, **kwargs):
         self._cache = {}
         self._meta = kwargs

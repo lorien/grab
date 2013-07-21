@@ -4,6 +4,8 @@ from grab.tools.tinyurl import clck
 import logging
 import os
 
+from grab.util.py3k_support import *
+
 MODULES = {}
 logger = logging.getLogger('grab.tools.tinyurl')
 
@@ -20,7 +22,7 @@ def load_modules():
 def get_tiny_url(url, service=None, try_count=10):
     for x in xrange(try_count):
         if service is None:
-            module = choice(MODULES.values())
+            module = choice(list(MODULES.values()))
         else:
             module = MODULES[service]
         try:

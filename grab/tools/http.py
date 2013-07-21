@@ -1,11 +1,19 @@
-import urllib
-from urlparse import urlsplit, urlunsplit
+try:
+    import urllib.parse as urllib
+except ImportError:
+    import urllib
+try:
+    from urlparse import urlsplit, urlunsplit
+except ImportError:
+    from urllib.parse import urlsplit, urlunsplit
 import re
 import logging
 
 from ..base import UploadFile, UploadContent
 from ..error import GrabMisuseError
-from .encoding import smart_str, smart_unicode
+from .encoding import smart_str, smart_unicode, decode_pairs
+
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.tools.http')
 RE_NON_ASCII = re.compile(r'[^-.a-zA-Z0-9]')
@@ -50,6 +58,11 @@ def encode_cookies(items, join=True, charset='utf-8'):
     if isinstance(items, dict):
         items = items.items()
     items = normalize_http_values(items, charset=charset)
+
+    # py3 hack
+    if PY3K:
+        items = decode_pairs(items, charset)
+
     tokens = []
     for key, value in items:
         tokens.append('%s=%s' % (encode(key), encode(value)))
@@ -93,7 +106,7 @@ def normalize_http_values(items, charset='utf-8'):
 
         return key, value
 
-    items =  map(process, items)
+    items =  list(map(process, items))
     #items = sorted(items, key=lambda x: x[0])
     return items
 
@@ -119,7 +132,7 @@ def quote(data):
 def normalize_url(url):
     parts = list(urlsplit(url))
     if RE_NON_ASCII.search(parts[1]):
-        parts[1] = smart_unicode(parts[1]).encode('idna')
+        parts[1] = str(smart_unicode(parts[1]).encode('idna').decode())
         url = urlunsplit(parts)
         return url
     else:

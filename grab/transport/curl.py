@@ -4,7 +4,7 @@
 from __future__ import absolute_import
 import email
 import logging
-import urllib
+#import urllib
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -25,6 +25,9 @@ from ..response import Response
 from ..tools.http import encode_cookies, smart_urlencode, normalize_unicode,\
                          normalize_http_values, normalize_post_data
 from ..tools.user_agent import random_user_agent
+from ..tools.encoding import smart_str, smart_unicode, decode_list, decode_pairs
+
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.transport.curl')
 
@@ -173,11 +176,8 @@ class CurlTransport(object):
         request_url = grab.config['url']
 
         # py3 hack
-        try:
-            if isinstance(request_url, unicode):
-                request_url = request_url.encode('utf-8')
-        except NameError:
-            pass
+        if not PY3K:
+            request_url = smart_str(request_url)
 
         self.curl.setopt(pycurl.URL, request_url)
 
@@ -233,26 +233,40 @@ class CurlTransport(object):
                     raise error.GrabMisuseError('multipart_post option could not be a string')
                 post_items = normalize_http_values(grab.config['multipart_post'],
                                                    charset=grab.config['charset'])
+                # py3 hack
+                if PY3K:
+                    post_items = decode_pairs(post_items, grab.config['charset'])
                 #import pdb; pdb.set_trace()
                 self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif grab.config['post']:
                 post_data = normalize_post_data(grab.config['post'], grab.config['charset'])
+                # py3 hack
+                if PY3K:
+                    post_data = smart_unicode(post_data, grab.config['charset'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
             else:
                 self.curl.setopt(pycurl.POSTFIELDS, '')
         elif grab.request_method == 'PUT':
             data = grab.config['post']
             if isinstance(data, unicode) or not isinstance(data, basestring):
-                raise error.GrabMisuseError('Value of post option could be only '\
-                                            'byte string if PUT method is used')
+                # py3 hack
+                if PY3K:
+                    data = data.encode('utf-8')
+                else:
+                    raise error.GrabMisuseError('Value of post option could be only '\
+                                                'byte string if PUT method is used')
             self.curl.setopt(pycurl.UPLOAD, 1)
             self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read) 
             self.curl.setopt(pycurl.INFILESIZE, len(data))
         elif grab.request_method == 'PATCH':
             data = grab.config['post']
             if isinstance(data, unicode) or not isinstance(data, basestring):
-                raise error.GrabMisuseError('Value of post option could be only byte '\
-                                            'string if PATCH method is used')
+                # py3 hack
+                if PY3K:
+                    data = data.encode('utf-8')
+                else:
+                    raise error.GrabMisuseError('Value of post option could be only byte '\
+                                                'string if PATCH method is used')
             self.curl.setopt(pycurl.UPLOAD, 1)
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'PATCH')
             self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read) 
@@ -357,24 +371,28 @@ class CurlTransport(object):
             # Also this error is raised when curl receives KeyboardInterrupt
             # while it is processing some callback function
             # (WRITEFUNCTION, HEADERFUNCTIO, etc)
-            if 23 == ex[0]:
+            if 23 == ex.args[0]:
                 if getattr(self.curl, '_callback_interrupted', None) == True:
                     self.curl._callback_interrupted = False
                 else:
-                    raise error.GrabNetworkError(ex[0], ex[1])
+                    raise error.GrabNetworkError(ex.args[0], ex.args[1])
             else:
-                if ex[0] == 28:
-                    raise error.GrabTimeoutError(ex[0], ex[1])
-                elif ex[0] == 7:
-                    raise error.GrabConnectionError(ex[0], ex[1])
-                elif ex[0] == 67:
-                    raise error.GrabAuthError(ex[0], ex[1])
-                elif ex[0] == 47:
-                    raise error.GrabTooManyRedirectsError(ex[0], ex[1])
+                if ex.args[0] == 28:
+                    raise error.GrabTimeoutError(ex.args[0], ex.args[1])
+                elif ex.args[0] == 7:
+                    raise error.GrabConnectionError(ex.args[0], ex.args[1])
+                elif ex.args[0] == 67:
+                    raise error.GrabAuthError(ex.args[0], ex.args[1])
+                elif ex.args[0] == 47:
+                    raise error.GrabTooManyRedirectsError(ex.args[0], ex.args[1])
                 else:
-                    raise error.GrabNetworkError(ex[0], ex[1])
+                    raise error.GrabNetworkError(ex.args[0], ex.args[1])
 
     def prepare_response(self, grab):
+        # py3 hack
+        if PY3K:
+            self.response_head_chunks = decode_list(self.response_head_chunks)
+
         if self.body_file:
             self.body_file.close()
         response = Response()
@@ -382,7 +400,7 @@ class CurlTransport(object):
         if self.body_path:
             response.body_path = self.body_path
         else:
-            response.body = ''.join(self.response_body_chunks)
+            response.body = b''.join(self.response_body_chunks)
 
         # Clear memory
         self.response_head_chunks = []

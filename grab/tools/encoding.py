@@ -1,6 +1,8 @@
 import re
 
-RE_SPECIAL_ENTITY = re.compile('&#(1[2-6][0-9]);')
+from grab.util.py3k_support import *
+
+RE_SPECIAL_ENTITY = re.compile(b'&#(1[2-6][0-9]);')
 
 def smart_str(value, encoding='utf-8'):
     """
@@ -8,6 +10,7 @@ def smart_str(value, encoding='utf-8'):
     """
 
     if isinstance(value, unicode):
+        # Convert to string (py2.x) or bytes (py3.x)
         value = value.encode(encoding)
     return value
 
@@ -18,6 +21,7 @@ def smart_unicode(value, encoding='utf-8'):
     """
 
     if not isinstance(value, unicode):
+        # Convert to unicode (py2.x and py3.x)
         value = value.decode(encoding)
     return value
 
@@ -26,7 +30,8 @@ def special_entity_handler(match):
     num = int(match.group(1))
     if 128 <= num <= 160:
         try:
-            return '&#%d;' % ord(chr(num).decode('cp1252'))
+            num = unichr(num).encode('utf-8')
+            return smart_str('&#%d;' % ord(num.decode('cp1252')[1]))
         except UnicodeDecodeError:
             return match.group(0)
     else:
@@ -35,3 +40,22 @@ def special_entity_handler(match):
 
 def fix_special_entities(body):
     return RE_SPECIAL_ENTITY.sub(special_entity_handler, body)
+
+
+def decode_list(values, encoding='utf-8'):
+    if not isinstance(values, list):
+        raise TypeError('unsupported values type: %s' % type(values))
+    return [smart_unicode(value, encoding) for value in values]
+
+
+def decode_dict(values, encoding='utf-8'):
+    if not isinstance(values, dict):
+        raise TypeError('unsupported values type: %s' % type(values))
+    return dict(decode_pairs(values.items(), encoding))
+
+
+def decode_pairs(pairs, encoding='utf-8'):
+    def decode(value):
+        return smart_unicode(value, encoding)
+
+    return [(decode(pair[0]), decode(pair[1])) for pair in pairs]

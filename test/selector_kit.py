@@ -6,10 +6,12 @@ from unittest import TestCase
 #root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 #sys.path.insert(0, root)
 
-from util import GRAB_TRANSPORT, ignore_transport, only_transport
-from tornado_util import SERVER
+from .util import GRAB_TRANSPORT, ignore_transport, only_transport
+from .tornado_util import SERVER
 from grab.selector import KitSelector
 from grab import Grab
+
+from grab.util.py3k_support import *
 
 HTML = """
 <html>

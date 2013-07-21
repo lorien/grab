@@ -1,7 +1,14 @@
 import os.path
-from string import letters, digits, ascii_lowercase, ascii_uppercase
+try:
+    from string import letters
+except ImportError:
+    from string import ascii_letters as letters
+from string import digits, ascii_lowercase, ascii_uppercase
 from random import choice, randint
 from datetime import date
+from functools import reduce
+
+from grab.util.py3k_support import *
 
 SAFE_CHARS = letters + digits
 S_CHARS = 'bcdfghjklmnpqrstvwxz'
@@ -28,7 +35,7 @@ def random_password(min_length=8, max_length=10):
     """
 
     chars = ''.join(map(choice, (ascii_lowercase, ascii_uppercase, digits)))
-    length = range(randint(min_length, max_length) - len(chars))
+    length = list(range(randint(min_length, max_length) - len(chars)))
     return reduce(lambda a, b: a + choice(SAFE_CHARS), length, chars)
 
 

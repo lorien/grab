@@ -4,8 +4,11 @@
 from __future__ import absolute_import
 import email
 import logging
-import urllib
-from StringIO import StringIO
+#import urllib
+#try:
+#    from StringIO import StringIO
+#except ImportError:
+#    from io import StringIO
 import threading
 import random
 import time
@@ -15,6 +18,8 @@ import json
 from ..response import Response
 from ..error import GrabError, GrabMisuseError
 from ..base import UploadContent, UploadFile
+
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab')
 
@@ -413,7 +418,7 @@ class SeleniumTransportExtension(object):
             else:
                 self.browser.get(self.config['url'])
                 time.sleep(self.config['wait'])
-        except Exception, ex:
+        except Exception as ex:
             logging.error('', exc_info=ex)
             raise GrabError(999, 'Error =8-[ ]')
         #try:

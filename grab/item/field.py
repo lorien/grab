@@ -7,12 +7,12 @@ from .decorator import default, empty, cached, bind_item
 from .const import NULL
 from .error import ChoiceFieldError
 
-class Field(object):
+metaclass_ABCMeta = ABCMeta('metaclass_ABCMeta', (object, ), {})
+
+class Field(metaclass_ABCMeta):
     """
     All custom fields should extend this class, and override the get method.
     """
-
-    __metaclass__ = ABCMeta
 
     def __init__(self, xpath=None, default=NULL, empty_default=NULL,
                  processor=None, **kwargs):
