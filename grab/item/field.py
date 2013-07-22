@@ -203,3 +203,11 @@ class FuncField(Field):
         else:
             val = self.func(item._selector)
         return self.process(val)
+
+
+class BooleanField(Field):
+    @cached
+    @default
+    @bind_item
+    def __get__(self, item, itemtype):
+        return item._selector.select(self.xpath_exp).exists()

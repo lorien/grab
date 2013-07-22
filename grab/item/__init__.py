@@ -28,7 +28,7 @@ import collections
 
 from .field import (StringField, IntegerField, DateTimeField,
                     HTMLField, FuncField, NullField, ChoiceField,
-                    RegexField, ItemListField)
+                    RegexField, ItemListField, BooleanField)
 from .item import Item
 from ..error import GrabMisuseError
 
