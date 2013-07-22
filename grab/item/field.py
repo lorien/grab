@@ -175,7 +175,7 @@ class RegexField(Field):
 
 
 class DateTimeField(Field):
-    def __init__(self, xpath, datetime_format, *args, **kwargs):
+    def __init__(self, xpath, datetime_format='Y-m-d', *args, **kwargs):
         self.datetime_format = datetime_format
         super(DateTimeField, self).__init__(xpath, *args, **kwargs)
 
