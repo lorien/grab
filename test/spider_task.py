@@ -249,3 +249,18 @@ class TestSpider(TestCase):
         bot.add_task(Task('page', url=SERVER.BASE_URL))
         bot.run()
         self.assertEqual(bot.tokens, ['fallback', 'task', 'fallback2'])
+
+    def test_task_url_and_grab_options(self):
+        class TestSpider(Spider):
+            def setup(self):
+                self.done = False
+
+            def task_page(self, grab, task):
+                self.done = True
+
+        bot = TestSpider()
+        bot.setup_queue()
+        g = Grab()
+        g.setup(url=SERVER.BASE_URL)
+        self.assertRaises(SpiderMisuseError, 
+            lambda: bot.add_task(Task('page', grab=g, url=SERVER.BASE_URL)))
