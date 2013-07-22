@@ -689,20 +689,27 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         self.config['cookies'] = {}
 
-    def load_cookies(self, path):
+    def load_cookies(self, path, file_required=True):
         """
         Load cookies from the file.
 
         Content of file should be a JSON-serialized dict of keys and values.
         """
 
-        with open(path) as inf:
-            data = inf.read()
-            if data:
-                cookies = json.loads(data)
+        try:
+            with open(path) as inf:
+                data = inf.read()
+                if data:
+                    cookies = json.loads(data)
+                else:
+                    cookies = {}
+        except IOError:
+            if file_required:
+                raise
             else:
-                cookies = {}
-        self.config['cookies'].update(cookies)
+                pass
+        else:
+            self.config['cookies'].update(cookies)
 
     def dump_cookies(self, path):
         """
