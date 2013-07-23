@@ -117,7 +117,7 @@ def build_spider_registry(config):
                 #mod_path = path[:-3].replace('/', '.')
                 #try:
                     #mod = __import__
-    for path in config.get('GRAB_SPIDER_MODULES'):
+    for path in config.get('GRAB_SPIDER_MODULES', []):
         if ':' in path:
             path, cls_name = path.split(':')
         else:
