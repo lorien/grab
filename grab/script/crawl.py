@@ -15,7 +15,7 @@ def setup_arg_parser(parser):
     parser.add_argument('--slave', action='store_true', default=False)
     #parser.add_argument('--force-url', type=str)
     parser.add_argument('spider_name', type=str)
-    parser.add_argument('--propagate-network-logger', action='store_true',
+    parser.add_argument('--network-logs', action='store_true',
                         default=False)
     parser.add_argument('--save-result', action='store_true', default=False)
 
@@ -23,7 +23,7 @@ def setup_arg_parser(parser):
 @save_result
 def main(spider_name, thread_number=None, slave=False, force_url=None,
          settings='settings', *args, **kwargs):
-    default_logging(propagate_network_logger=kwargs['propagate_network_logger'])
+    default_logging(propagate_network_logger=kwargs['network_logs'])
 
     lock_key = None
     if not slave:

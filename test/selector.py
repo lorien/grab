@@ -6,7 +6,7 @@ import sys
 root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(0, root)
 
-from grab.selector import XpathSelector, TextSelector
+from grab.selector import XpathSelector, TextSelector, JsonSelector
 from lxml.html import fromstring
 
 HTML = """
@@ -97,3 +97,47 @@ class TestSelectorList(TestCase):
 
         sel = XpathSelector(self.tree).select('//ul/li[5]')
         self.assertEquals(False, sel.exists())
+
+
+class TestJsonSelector(TestCase):
+    def setUp(self):
+        self.tree = [
+            {'name': 'Earth', 'cities': ['Moscow', 'Paris', 'Tokio'], 'population': 7000000000},
+            {'name': 'Mars', 'cities': [], 'population': 0},
+        ]
+
+    def test_it_works(self):
+        sel = JsonSelector(self.tree)
+
+    def test_select_node(self):
+        self.assertEquals({'name': 'Mars', 'cities': [], 'population': 0},
+                          JsonSelector(self.tree).select('$[1]')[0].node.value)
+
+    def test_html(self):
+        sel = JsonSelector(self.tree)
+        self.assertRaises(NotImplementedError, sel.html)
+
+    def test_text(self):
+        self.assertEquals('Mars',
+                          JsonSelector(self.tree).select('$[1].name').text())
+
+    def test_population(self):
+        self.assertEquals(7000000000,
+                          JsonSelector(self.tree).select('$..population').number())
+
+    def test_select_select(self):
+        root = JsonSelector(self.tree)
+        self.assertEquals('Mars', root.select('$[1]').select('name').text())
+
+    #def test_text_list(self):
+        #root = XpathSelector(self.tree)
+        #self.assertEquals(set(['one', 'yet one']),
+                          #set(root.select('//ul/li[1]').text_list()),
+                          #)
+
+    #def test_attr_list(self):
+        #root = XpathSelector(self.tree)
+        #self.assertEquals(set(['li-1', 'li-2']),
+                          #set(root.select('//ul[@id="second-list"]/li')\
+                                  #.attr_list('class'))
+                          #)

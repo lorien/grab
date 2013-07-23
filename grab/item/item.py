@@ -1,5 +1,7 @@
 from .field import Field, ItemListField
 from ..selector import XpathSelector
+from ..selector import JsonSelector
+from ..error import GrabMisuseError
 
 class ItemBuilder(type):
     def __new__(cls, name, base, namespace):
@@ -17,16 +19,20 @@ metaclass_ItemBuilder = ItemBuilder('metaclass_ItemBuilder', (object, ), {})
 
 
 class Item(metaclass_ItemBuilder):
-    def __init__(self, tree, **kwargs):
+    def __init__(self, tree, selector_type='xpath', **kwargs):
         self._cache = {}
         self._meta = kwargs
-        self._selector = XpathSelector(tree)
+        if selector_type == 'xpath':
+            self._selector = XpathSelector(tree)
+        elif selector_type == 'json':
+            self._selector = JsonSelector(tree)
+        else:
+            raise GrabMisuseError('Unknown selector type: %s' % selector_type)
 
     @classmethod
     def find(cls, root, **kwargs):
         for count, sel in enumerate(root.select(getattr(cls.Meta, 'find_selector', '.'))):
             item = cls(sel.node, **kwargs)
-            #item._parse(**kwargs)
             item._position = count
             yield item
 
@@ -34,9 +40,6 @@ class Item(metaclass_ItemBuilder):
     @classmethod
     def find_one(cls, *args, **kwargs):
         return list(cls.find(*args, **kwargs))[0]
-
-    #def _parse(self, url=None, **kwargs):
-        #pass
 
     def _render(self, exclude=(), prefix=''):
         out = []

@@ -161,3 +161,12 @@ class ItemTestCase(TestCase):
             return TestItem(fromstring('<div></div>')).foo
 
         self.assertEqual('test', foo())
+
+    def test_unknown_selector_type(self):
+        class TestItem(Item):
+            pass
+
+        TestItem(None)
+
+        self.assertRaises(GrabMisuseError,
+            lambda: TestItem(None, selector_type='Batman Selector'))
