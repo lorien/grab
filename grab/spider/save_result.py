@@ -22,11 +22,11 @@ def save_result(func):
                 if not hasattr(spider, '_log_task_timer') or now - spider._log_task_timer  > 60:
                     spider._log_task_timer = now
                     elapsed = datetime.now() - task.start_time
-                    work_time = (elapsed.days * 3600 * 24) + elapsed.seconds
+                    elapsed_time = (elapsed.days * 3600 * 24) + elapsed.seconds
                     Task.objects.filter(pk=task.pk)\
                         .update(spider_stats=spider.render_stats(timing=False),
                                 spider_timing=spider.render_timing(),
-                                work_time=work_time)
+                                elapsed_time=elapsed_time)
 
             kwargs['dump_spider_stats'] = dump_spider_stats
 
@@ -43,6 +43,6 @@ def save_result(func):
                 task.is_done = True
                 task.end_time = datetime.now()
                 elapsed = task.end_time - task.start_time
-                task.work_time = (elapsed.days * 3600 * 24) + elapsed.seconds
+                task.elapsed_time = (elapsed.days * 3600 * 24) + elapsed.seconds
                 task.save()
     return decorated

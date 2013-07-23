@@ -12,7 +12,7 @@ class Task(models.Model):
     error_traceback = models.TextField(blank=True)    
     spider_stats = models.TextField(blank=True)
     spider_timing = models.TextField(blank=True)
-    work_time = models.IntegerField(null=True, blank=True)
+    elapsed_time = models.IntegerField(blank=True, default=0)
     pid = models.IntegerField(null=True, blank=True)
 
     def __unicode__(self):
