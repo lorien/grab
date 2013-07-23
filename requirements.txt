@@ -1,3 +1,18 @@
+# You probably need these packages
 lxml
 pycurl
 cssselect
+
+# Optional packages required to use some part of Grab
+redis
+qr
+pymongo
+mysql-python
+jsonpath_rw
+tornado
+
+# Python3 alternate packages
+# mysql:
+# https://github.com/davispuh/MySQL-for-Python-3/archive/master.zip
+# pycurl:
+# https://github.com/lorien/pycurl/archive/master.zip
