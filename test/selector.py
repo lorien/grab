@@ -129,15 +129,22 @@ class TestJsonSelector(TestCase):
         root = JsonSelector(self.tree)
         self.assertEquals('Mars', root.select('$[1]').select('name').text())
 
-    #def test_text_list(self):
-        #root = XpathSelector(self.tree)
-        #self.assertEquals(set(['one', 'yet one']),
-                          #set(root.select('//ul/li[1]').text_list()),
-                          #)
+    def test_text_list(self):
+        root = JsonSelector(self.tree)
+        self.assertEquals(['7000000000', '0'],
+                          root.select('$..population').text_list())
 
-    #def test_attr_list(self):
-        #root = XpathSelector(self.tree)
-        #self.assertEquals(set(['li-1', 'li-2']),
-                          #set(root.select('//ul[@id="second-list"]/li')\
-                                  #.attr_list('class'))
-                          #)
+    def test_html(self):
+        root = JsonSelector(self.tree)
+        self.assertRaises(NotImplementedError,
+            lambda: root.select('$..population')[0].html())
+
+    def test_attr(self):
+        root = JsonSelector(self.tree)
+        self.assertRaises(NotImplementedError,
+            lambda: root.select('$..population').attr('bar'))
+
+    def test_attr_list(self):
+        root = JsonSelector(self.tree)
+        self.assertRaises(NotImplementedError,
+            lambda: root.select('$..population').attr_list('bar'))
