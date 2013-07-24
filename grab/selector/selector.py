@@ -82,7 +82,7 @@ class SelectorList(object):
             else:
                 return default
         else:
-            return render_html(sel.node, encoding=encoding)
+            return sel.html(encoding=encoding)
 
     def number(self, default=NULL, ignore_spaces=False,
                smart=False, make_int=True):
@@ -325,9 +325,7 @@ class JsonSelector(BaseSelector):
         raise NotImplementedError
 
     def attr(self, key, default=NULL):
-        # TODO: implement defaut or maybe raise NotImplementedError
-        # for whole `attr` method
-        return self.node.value[key]
+        raise NotImplementedError
 
     def text(self, smart=False, normalize_space=True):
         return unicode(self.node.value)

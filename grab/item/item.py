@@ -1,7 +1,12 @@
+import logging
+
 from .field import Field, ItemListField
 from ..selector import XpathSelector
 from ..selector import JsonSelector
 from ..error import GrabMisuseError
+from ..ext.doc import DocInterface
+
+logger = logging.getLogger('grab.item.item')
 
 class ItemBuilder(type):
     def __new__(cls, name, base, namespace):
@@ -22,17 +27,38 @@ class Item(metaclass_ItemBuilder):
     def __init__(self, tree, selector_type='xpath', **kwargs):
         self._cache = {}
         self._meta = kwargs
+        self._selector = Item._build_selector(tree, selector_type)
+
+    @classmethod
+    def _build_selector(self, tree, selector_type):
         if selector_type == 'xpath':
-            self._selector = XpathSelector(tree)
+            return XpathSelector(tree)
         elif selector_type == 'json':
-            self._selector = JsonSelector(tree)
+            return JsonSelector(tree)
         else:
             raise GrabMisuseError('Unknown selector type: %s' % selector_type)
 
     @classmethod
-    def find(cls, root, **kwargs):
-        for count, sel in enumerate(root.select(getattr(cls.Meta, 'find_selector', '.'))):
-            item = cls(sel.node, **kwargs)
+    def find(cls, tree, **kwargs):
+        # Backward Compatibility
+        # First implementations of Item module required
+        # `grab.doc` to be passed in `tree` option
+        if isinstance(tree, DocInterface):
+            tree = tree.grab.tree
+
+        if 'selector_type' in kwargs:
+            selector_type = kwargs.pop('selector_type')
+        else:
+            selector_type = getattr(cls.Meta, 'selector_type', 'xpath')
+        root_selector = Item._build_selector(tree, selector_type)
+
+        fallback_find_query = getattr(cls.Meta, 'find_selector', '.')
+        if hasattr(cls.Meta, 'find_selector'):
+            logger.error('Meta.find_selector attribute is deprecated. Please use Meta.find_query attribute instead.')
+        find_query = getattr(cls.Meta, 'find_query', fallback_find_query)
+
+        for count, sel in enumerate(root_selector.select(find_query)):
+            item = cls(sel.node, selector_type=selector_type, **kwargs)
             item._position = count
             yield item
 

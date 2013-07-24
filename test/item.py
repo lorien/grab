@@ -28,6 +28,10 @@ XML = """<?xml version='1.0' encoding='utf-8'?>
         <dmi>14300</dmi>
         <comment>abc</comment>
         <comment_cdata><![CDATA[abc]]></comment_cdata>
+        <games>
+            <game name="quake1"></game>
+            <game name="quake2"></game>
+        </games>
     </player>
 </bbapi>
 """
@@ -64,6 +68,13 @@ class Player(Item):
         return sel.select('//height').number()
 
     height2 = FuncField(lambda sel: sel.select('//height').number())
+
+
+class GameItem(Item):
+    class Meta:
+        find_query = '//games/game'
+
+    name = StringField('@name')
 
 
 class ItemTestCase(TestCase):
@@ -170,3 +181,52 @@ class ItemTestCase(TestCase):
 
         self.assertRaises(GrabMisuseError,
             lambda: TestItem(None, selector_type='Batman Selector'))
+
+    def test_find(self):
+        grab = Grab(transport=GRAB_TRANSPORT)
+        grab.fake_response(XML)
+        games = list(GameItem.find(grab.doc))
+        self.assertEqual(['quake1', 'quake2'],
+                         [x.name for x in games])
+
+
+class JsonSelectorTestCase(TestCase):
+    class PlanetItem(Item):
+        class Meta:
+            find_query = '$..planets[*]'
+            selector_type = 'json'
+
+        name = StringField('name')
+
+    def setUp(self):
+        self.data = {
+            'existence': {
+                'worldA': {
+                    'id': 1,
+                    'planets': [
+                        {'name': 'Earth', 'cities': ['Moscow', 'Paris', 'Tokio'],
+                         'population': 7000000000},
+                        {'name': 'Mars', 'cities': [], 'population': 0},
+                    ],
+                },
+                'worldB': {
+                    'id': 2,
+                    'planets': [
+                        {'name': 'Onyx', 'cities': ['Oyyx', 'Yiiix'], 'population': 8000000},
+                    ],
+                },
+            },
+        }
+
+    def it_just_works(self):
+        item = self.PlanetItem(self.data, selector_type='json')
+
+    def test_find(self):
+        planets = list(self.PlanetItem.find(self.data))
+        self.assertEqual(len(planets), 3)
+
+    def test_string_field(self):
+        planets = list(self.PlanetItem.find(self.data))
+        self.assertEqual(set(['Earth', 'Mars', 'Onyx']),
+                         set(x.name for x in planets))
+
