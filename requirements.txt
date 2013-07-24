@@ -2,14 +2,14 @@
 lxml
 pycurl
 cssselect
+jsonpath_rw
 
 # Optional packages required to use some part of Grab
-redis
-qr
-pymongo
-mysql-python
-jsonpath_rw
-tornado
+#redis
+#qr
+#pymongo
+#mysql-python
+#tornado
 
 # Python3 alternate packages
 # mysql:
