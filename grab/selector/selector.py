@@ -308,6 +308,8 @@ class KitSelector(BaseSelector):
 
 
 class JsonSelector(BaseSelector):
+    # TODO: It seems there is perfomance problem
+    # see finnetrix, media_list.json
     def __init__(self, node):
         """
         `node` is deserialized JSON i.e. it is a native python structure

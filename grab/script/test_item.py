@@ -24,7 +24,8 @@ def main(item_path, **kwargs):
             print(ex)
         else:
             print('URL: %s' % url )
-            for count, item in enumerate(cls.find(g.doc, url=g.response.url)):
+            for count, item in enumerate(cls.find(cls.extract_document_data(g),
+                                                  url=g.response.url)):
                 print('%s #%d' % (cls.__name__, count))
                 print(item._render())
                 print('----------')

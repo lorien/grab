@@ -39,6 +39,10 @@ class Item(metaclass_ItemBuilder):
             raise GrabMisuseError('Unknown selector type: %s' % selector_type)
 
     @classmethod
+    def _get_selector_type(cls, default='xpath'):
+        return getattr(cls.Meta, 'selector_type', default)
+
+    @classmethod
     def find(cls, tree, **kwargs):
         # Backward Compatibility
         # First implementations of Item module required
@@ -46,10 +50,7 @@ class Item(metaclass_ItemBuilder):
         if isinstance(tree, DocInterface):
             tree = tree.grab.tree
 
-        if 'selector_type' in kwargs:
-            selector_type = kwargs.pop('selector_type')
-        else:
-            selector_type = getattr(cls.Meta, 'selector_type', 'xpath')
+        selector_type = cls._get_selector_type(kwargs.pop('selector_type', 'xpath'))
         root_selector = Item._build_selector(tree, selector_type)
 
         fallback_find_query = getattr(cls.Meta, 'find_selector', '.')
@@ -126,3 +127,18 @@ class Item(metaclass_ItemBuilder):
         state = self.__dict__.copy()
         state['_selector'] = None
         return state
+
+    @classmethod
+    def extract_document_data(cls, grab):
+        """
+        Extract document data from grab object in format that is
+        suitable to pass to `cls` Item constructor.
+        """
+
+        sel_type = cls._get_selector_type()
+        if sel_type == 'xpath':
+            return grab.tree
+        elif sel_type == 'json':
+            return grab.response.json
+        else:
+            raise GrabMisuseError('Unknown selector type: %s' % sel_type)
