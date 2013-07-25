@@ -14,7 +14,7 @@ logger = logging.getLogger('grab.cli')
 config = build_global_config()
 
 def activate_env(env_path):
-    activate_script = os.path.join(config['GRAB_ACTIVATE_VIRTUALENV'], 'bin/activate_this.py')
+    activate_script = os.path.join(env_path, 'bin/activate_this.py')
     # py3 hack
     if PY3K:
         exec(compile(open(activate_script).read(), activate_script, 'exec'),
