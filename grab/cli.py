@@ -92,6 +92,9 @@ def process_command_line():
     config = build_global_config()
     if config and config['GRAB_DJANGO_SETTINGS']:
         os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+        # Turn off DEBUG to prevent memory leaks
+        from django.conf import settings
+        settings.DEBUG = False
 
     # Setup logging
     logging_level = getattr(logging, args.logging_level.upper())
