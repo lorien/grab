@@ -8,7 +8,7 @@ def save_result(func):
         if not kwargs.get('save_result', False):
             return func(spider_name, *args, **kwargs)
         else:
-            from grab.django.grabstat.models import Task
+            from grab.djangoui.grabstat.models import Task
 
             task = Task(
                 task_name=spider_name,
