@@ -11,8 +11,6 @@ from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.cli')
 
-config = build_global_config()
-
 def activate_env(env_path):
     activate_script = os.path.join(env_path, 'bin/activate_this.py')
     # py3 hack
