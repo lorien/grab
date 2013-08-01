@@ -98,6 +98,7 @@ SPIDER_TEST_LIST = (
     'test.spider_proxy',
     'test.spider_queue',
     'test.spider_misc',
+    'test.spider_meta',
 )
 
 SPIDER_EXTRA_TEST_LIST = (

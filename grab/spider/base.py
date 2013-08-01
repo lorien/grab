@@ -28,6 +28,7 @@ try:
     import Queue as queue
 except ImportError:
     import queue
+from copy import deepcopy
 
 from ..base import GLOBAL_STATE, Grab
 from .error import (SpiderError, SpiderMisuseError, FatalError,
@@ -53,7 +54,42 @@ logger_verbose = logging.getLogger('grab.spider.base.verbose')
 # change logging level of that logger
 logger_verbose.setLevel(logging.FATAL)
 
-class Spider(SpiderPattern, SpiderStat):
+class SpiderMetaClass(type):
+    """
+    This meta class does following things::
+    
+    * It creates Meta attribute if it does not defined in Spider descendant class by
+        copying parent's Meta attribute
+    * It reset Meta.abstract to False if Meta is copied from parent class
+    * If defined Meta does not contains `abstract` attribute then define it and set to False
+    """
+
+    def __new__(cls, name, bases, namespace):
+        if not 'Meta' in namespace:
+            for base in bases:
+                if hasattr(base, 'Meta'):
+                    # copy contents of base Meta
+                    meta = type('Meta', (object,), dict(base.Meta.__dict__))
+                    # reset abstract attribute
+                    meta.abstract = False
+                    namespace['Meta'] = meta
+                    break
+
+        # Process special case (SpiderMetaClassMixin)
+        if not 'Meta' in namespace:
+            namespace['Meta'] = type('Meta', (object,), {})
+
+        if not hasattr(namespace['Meta'], 'abstract'):
+            namespace['Meta'].abstract = False
+
+        return super(SpiderMetaClass, cls).__new__(cls, name, bases, namespace)
+
+
+# See http://mikewatkins.ca/2008/11/29/python-2-and-3-metaclasses/
+SpiderMetaClassMixin = SpiderMetaClass('SpiderMetaClassMixin', (object,), {})
+
+
+class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
     """
     Asynchronious scraping framework.
     """
@@ -74,6 +110,13 @@ class Spider(SpiderPattern, SpiderStat):
     middleware_points = {
         'response': [],
     }
+
+    class Meta:
+        # Meta.abstract means that this class whil not be
+        # collected to spider registry by `grab crawl` CLI command.
+        # The Meta is inherited by descendant classes BUT
+        # Meta.abstract is reset to False in each desendant
+        abstract = True
 
     def __init__(self, thread_number=3,
                  network_try_limit=10, task_try_limit=10,
