@@ -188,6 +188,20 @@ class DateTimeField(Field):
                                  self.datetime_format)
 
 
+class DateField(Field):
+    def __init__(self, xpath, date_format='Y-m-d', *args, **kwargs):
+        self.date_format = date_format
+        super(DateField, self).__init__(xpath, *args, **kwargs)
+
+    @cached
+    @default
+    @bind_item
+    def __get__(self, item, itemtype):
+        value = item._selector.select(self.xpath_exp).text()
+        return datetime.strptime(self.process(value),
+                                 self.date_format).date()
+
+
 class FuncField(Field):
     def __init__(self, func, pass_item=False, *args, **kwargs):
         self.func = func
