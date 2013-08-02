@@ -59,6 +59,7 @@ def main(spider_name, thread_number=None, slave=False, force_url=None,
     # Dirty hack
     # FIXIT: REMOVE
     bot.dump_spider_stats = kwargs.get('dump_spider_stats')
+    bot.stats_object = kwargs.get('stats_object')
 
     try:
         bot.run()
