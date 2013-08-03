@@ -40,13 +40,13 @@ class Worker(Process):
 def make_work(callback, tasks, limit, ignore_exceptions=True,
               taskq_size=50):
     """
-    Run up to "limit" threads, do tasks and yield results.
+    Run up to "limit" processes, do tasks and yield results.
 
     :param callback:  the function that will process single task
     :param tasks:  the sequence or iterator or queue of tasks, each task
         in turn is sequence of arguments, if task is just signle argument
         it should be wrapped into list or tuple
-    :param limit: the maximum number of threads
+    :param limit: the maximum number of processes
     """
     
     # If tasks is number convert it to the list of number
@@ -56,22 +56,22 @@ def make_work(callback, tasks, limit, ignore_exceptions=True,
     # Ensure that tasks sequence is iterator
     tasks = iter(tasks)    
 
-    taskq= Queue(taskq_size)
+    taskq = Queue(taskq_size)
 
     # Here results of task processing will be saved
-    resultq= Queue()
+    resultq = Queue()
 
-    # Prepare and run up to "limit" threads
-    threads = []
+    # Prepare and run up to "limit" processes
+    processes = []
     for x in xrange(limit):
-        thread = Worker(callback, taskq, resultq, ignore_exceptions)
-        thread.daemon = True
-        thread.start()
-        threads.append(thread)
+        process = Worker(callback, taskq, resultq, ignore_exceptions)
+        process.daemon = True
+        process.start()
+        processes.append(process)
 
     # Put tasks from tasks iterator to taskq queue
     # until tasks iterator ends
-    # Do it in separate thread
+    # Do it in separate process
     def task_processor(task_iter, task_queue, limit):
         try:
             for task in task_iter:
@@ -89,7 +89,7 @@ def make_work(callback, tasks, limit, ignore_exceptions=True,
             yield resultq.get(True, 0.2)
         except Empty:
             pass
-        if not any(x.is_alive() for x in threads):
+        if not any(x.is_alive() for x in processes):
             break
 
     while True:
@@ -125,9 +125,9 @@ if __name__ == '__main__':
 
     def main():
         for res in make_work(worker, tasks(), 2):
-            logging.debug('Result %s received from thread %s' % (res[1], res[0]))
+            logging.debug('Result %s received from process %s' % (res[1], res[0]))
 
 
     if __name__ == '__main__':
-        logging.basicConfig(level=logging.DEBUG, format='%(threadName)s %(message)s')
+        logging.basicConfig(level=logging.DEBUG, format='%(processName)s %(message)s')
         main()
