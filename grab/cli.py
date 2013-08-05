@@ -21,11 +21,13 @@ def activate_env(env_path):
         execfile(activate_script, dict(__file__=activate_script))
 
 
-def setup_logging(action, level):
+def setup_logging(action, level, clear_handlers=False):
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
-    #for hdl in root.handlers:
-    #    root.removeHandler(hdl)
+
+    if clear_handlers:
+        for hdl in root.handlers:
+            root.removeHandler(hdl)
 
     hdl = logging.StreamHandler()
     hdl.setLevel(level)
@@ -101,7 +103,7 @@ def process_command_line():
     #else:
         #command_key = args.action
     # TODO: enable logs
-    setup_logging(args.action, logging_level)
+    setup_logging(args.action, logging_level, clear_handlers=True)
 
     # Setup action handler
     action_name = args.action
@@ -143,7 +145,7 @@ def process_command_line():
         #print 'Trying to lock file: %s' % lock_path
         #assert_lock(lock_path)
 
-    logger.debug('Execution %s action' % action_name)
+    logger.debug('Executing %s action' % action_name)
     try:
         action_mod.main(**vars(args))
     except Exception as ex:
