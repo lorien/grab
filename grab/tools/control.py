@@ -22,7 +22,8 @@ def sleep(lower_limit, upper_limit):
     time.sleep(sleep_time)
 
 
-def repeat(func, limit=3, args=None, kwargs=None, fatal_exceptions=()):
+def repeat(func, limit=3, args=None, kwargs=None,
+           fatal_exceptions=(), valid_exceptions=()):
     """
     Return value of execution `func` function.
 
@@ -43,10 +44,12 @@ def repeat(func, limit=3, args=None, kwargs=None, fatal_exceptions=()):
         except Exception as ex:
             if isinstance(ex, fatal_exceptions):
                 raise
+            elif valid_exceptions and not isinstance(ex, valid_exceptions):
+                raise
             else:
                 logging.error('', exc_info=ex)
                 if try_count >= limit:
-                    logger.debug('Too many errors while executing function %s' % func.__name__)
+                    logger.error('Too many errors while executing function %s' % func.__name__)
                     raise
         else:
             return res

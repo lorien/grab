@@ -37,4 +37,3 @@ class CaptchaService(object):
         g = self.backend.get_check_solution_request(captcha_id)
         g.request()
         return self.backend.parse_check_solution_response(g.response)
-
