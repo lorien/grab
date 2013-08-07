@@ -29,6 +29,7 @@ def save_result(func):
                                 elapsed_time=elapsed_time)
 
             kwargs['dump_spider_stats'] = dump_spider_stats
+            kwargs['stats_object'] = task
 
             try:
                 func_res = func(spider_name, *args, **kwargs)
