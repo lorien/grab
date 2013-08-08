@@ -183,9 +183,9 @@ class Task(BaseTask):
             task.setup_grab_config(kwargs['grab_config'])
             del kwargs['grab_config']
         elif kwargs.get('url'):
-            task.url = url
+            task.url = kwargs['url']
             if task.grab_config:
-                task.grab_config['url'] = url
+                task.grab_config['url'] = kwargs['url']
             del kwargs['url']
 
         for key, value in kwargs.items():

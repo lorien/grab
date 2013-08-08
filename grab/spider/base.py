@@ -357,7 +357,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                     if task.grab_config:
                         task.grab_config['url'] = task.url
 
-        if self.config.get('TASK_REFRESH_CACHE', {}).get(task.name, False):
+        if self.config.get('GRAB_TASK_REFRESH_CACHE', {}).get(task.name, False):
             task.refresh_cache = True
             is_valid = False
 
