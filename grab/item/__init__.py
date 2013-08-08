@@ -28,7 +28,8 @@ import collections
 
 from .field import (StringField, IntegerField, DateTimeField,
                     HTMLField, FuncField, NullField, ChoiceField,
-                    RegexField, ItemListField, BooleanField, DateField)
+                    RegexField, ItemListField, BooleanField, DateField,
+                    DecimalField)
 from .item import Item
 from ..error import GrabMisuseError
 
