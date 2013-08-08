@@ -1,5 +1,6 @@
 import logging
 import os
+from argparse import ArgumentParser
 
 from grab.util.config import build_spider_config, build_global_config
 from grab.util.module import load_spider_class
@@ -10,20 +11,22 @@ from grab.spider.save_result import save_result
 logger = logging.getLogger('grab.script.crawl')
 
 def setup_arg_parser(parser):
-    parser.add_argument('-t', '--thread-number', help='Number of network threads',
-                        default=None, type=int)
-    parser.add_argument('--slave', action='store_true', default=False)
-    #parser.add_argument('--force-url', type=str)
     parser.add_argument('spider_name', type=str)
-    parser.add_argument('--network-logs', action='store_true',
-                        default=False)
-    parser.add_argument('--save-result', action='store_true', default=False)
+    parser.add_argument('-t', '--thread-number', default=None, type=int,
+                        help='Number of network threads')
+    parser.add_argument('--slave', action='store_true', default=False,
+                        help='Enable the slave-mode')
+    parser.add_argument('--network-logs', action='store_true', default=False,
+                        help='Dump to console details about network requests')
+    parser.add_argument('--save-result', action='store_true', default=False,
+                        help='Save crawling state to database')
 
 
 @save_result
-def main(spider_name, thread_number=None, slave=False, force_url=None,
-         settings='settings', *args, **kwargs):
-    default_logging(propagate_network_logger=kwargs['network_logs'])
+def main(spider_name, thread_number=None, slave=False,
+         settings='settings', network_logs=False,
+         *args, **kwargs):
+    default_logging(propagate_network_logger=network_logs)
 
     lock_key = None
     if not slave:
@@ -36,6 +39,12 @@ def main(spider_name, thread_number=None, slave=False, force_url=None,
     config = build_global_config(settings)
     spider_class = load_spider_class(config, spider_name)
     spider_config = build_spider_config(spider_class, config)
+
+    if hasattr(spider_class, 'setup_extra_args'):
+        parser = ArgumentParser()
+        spider_class.setup_extra_args(parser)
+        extra_args, trash = parser.parse_known_args()
+        spider_config['extra_args'] = vars(extra_args)
 
     if thread_number is None:
         thread_number = spider_config.getint('GRAB_THREAD_NUMBER')
