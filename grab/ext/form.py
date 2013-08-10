@@ -8,7 +8,7 @@ except ImportError:
     from urllib.parse import urljoin
 
 from ..error import DataNotFound, GrabMisuseError
-from ..tools.http import urlencode
+from ..tools.http import smart_urlencode
 
 # TODO: refactor this hell
 
@@ -302,7 +302,7 @@ class FormExtension(object):
             self.setup(url=action_url)
 
         else:
-            url = action_url.split('?')[0] + '?' + urlencode(post_items)
+            url = action_url.split('?')[0] + '?' + smart_urlencode(post_items)
             self.setup(url=url)
 
         if make_request:

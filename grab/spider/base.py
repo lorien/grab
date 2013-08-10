@@ -39,6 +39,7 @@ from .pattern import SpiderPattern
 from .stat  import SpiderStat
 from .transport.multicurl import MulticurlTransport
 from ..proxylist import ProxyList
+from .command_controller import CommandController
 from grab.util.misc import camel_case_to_underscore
 
 from grab.util.py2old_support import *
@@ -225,6 +226,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
         # FIXIT: REMOVE
         self.dump_spider_stats = None
+
+        self.controller = CommandController(self)
 
     def setup_middleware(self, middleware_list):
         for item in middleware_list:
@@ -866,6 +869,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                                 self.cache.save_response(result['task'].url, result['grab'])
                     self.process_network_result(result)
                     self.inc_count('request')
+
+                if self.controller.enabled:
+                    self.controller.process_commands()
 
             logger_verbose.debug('Work done')
         except KeyboardInterrupt:
