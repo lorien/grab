@@ -64,6 +64,9 @@ def main(spider_name, thread_number=None, slave=False,
         bot.setup_cache(**spider_config['GRAB_CACHE'])
     if spider_config.get('GRAB_PROXY_LIST'):
         bot.load_proxylist(**spider_config['GRAB_PROXY_LIST'])
+    if spider_config.get('GRAB_COMMAND_INTERFACES'):
+        for iface_config in spider_config['GRAB_COMMAND_INTERFACES']:
+            bot.controller.add_interface(**iface_config)
 
     # Dirty hack
     # FIXIT: REMOVE

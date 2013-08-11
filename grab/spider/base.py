@@ -202,10 +202,12 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             raise SpiderMisuseError('Value of priority_mode option should be "random" or "const"')
         else:
             self.priority_mode = priority_mode
+
         try:
             signal.signal(signal.SIGUSR1, self.sigusr1_handler)
         except (ValueError, AttributeError):
             pass
+
         try:
             signal.signal(signal.SIGUSR2, self.sigusr2_handler)
         except (ValueError, AttributeError):
@@ -788,6 +790,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 if self.dump_spider_stats:
                     self.dump_spider_stats(self)
 
+                if self.controller.enabled:
+                    self.controller.process_commands()
+
                 if not self.ng:
                     # NG
                     self.start_timer('task_generator')
@@ -869,9 +874,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                                 self.cache.save_response(result['task'].url, result['grab'])
                     self.process_network_result(result)
                     self.inc_count('request')
-
-                if self.controller.enabled:
-                    self.controller.process_commands()
 
             logger_verbose.debug('Work done')
         except KeyboardInterrupt:
@@ -1066,3 +1068,15 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         #finally:
             ## This code is executed when main cycles is breaked
             #self.shutdown()
+                
+    def command_get_stats(self, command):
+        return {'data': self.render_stats()}
+
+    @classmethod
+    def get_available_command_names(cls):
+        spider = cls()
+        clist = []
+        for key in dir(spider):
+            if key.startswith('command_'):
+                clist.append(key.split('command_', 1)[1])
+        return sorted(clist)
