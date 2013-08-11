@@ -4,7 +4,6 @@ try:
 except ImportError:
     import queue
 import logging
-import redis
 import uuid
 import pickle
 
@@ -12,6 +11,8 @@ from .error import SpiderMisuseError
 
 class RedisCommandInterface(object):
     def __init__(self, spider_name, **kwargs):
+        import redis
+
         self.redisdb = redis.StrictRedis()
         self.spider_name = spider_name
         self.input_queue_name = 'command_input_%s' % spider_name
