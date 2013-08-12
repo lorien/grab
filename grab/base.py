@@ -499,7 +499,7 @@ class Grab(
         else:
             self.response = self.transport.prepare_response(self)
 
-        self.response.done_time = now
+        self.response.timestamp = now
 
         self.config['charset'] = self.response.charset
 
@@ -595,7 +595,9 @@ class Grab(
         res.parse(charset=kwargs.get('document_charset'))
         res.cookies = {}
         res.code = 200
-        res.time = 0
+        res.total_time = 0
+        res.connect_time = 0
+        res.name_lookup_time = 0
         res.url = ''
 
         for key, value in kwargs.items():

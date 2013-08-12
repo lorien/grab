@@ -7,6 +7,7 @@ import os
 from contextlib import contextmanager
 
 from grab.util.py3k_support import *
+from ..tools import metric
 
 logger = logging.getLogger('grab.spider.stat')
 
@@ -59,6 +60,8 @@ class SpiderStat(object):
         items = sorted(items, key=lambda x: x[1], reverse=True)
         out.append('  %s' % '\n  '.join('%s: %s' % x for x in items))
 
+        if 'download-size' in self.counters:
+            out.append('Network download: %s' % metric.format_traffic_value(self.counters['download-size']))
         if hasattr(self.taskq, 'qsize'):
             out.append('Queue size: %d' % self.taskq.qsize())
         else:
@@ -88,7 +91,7 @@ class SpiderStat(object):
             path = os.path.join(dir_path, '%s.txt' % key)
             self.save_list(key, path)
 
-    def inc_count(self, key, display=False, count=1):
+    def inc_count(self, key, count=1):
         """
         You can call multiply time this method in process of parsing.
 
@@ -101,8 +104,6 @@ class SpiderStat(object):
         """
 
         self.counters[key] += count
-        if display:
-            logger.debug(key)
         return self.counters[key]
 
     def start_timer(self, key):

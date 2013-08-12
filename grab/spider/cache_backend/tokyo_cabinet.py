@@ -77,7 +77,9 @@ class CacheBackend(object):
             response.head = cache_item['head']
             response.body = body
             response.code = cache_item['response_code']
-            response.time = 0
+            response.download_size = len(body)
+            response.upload_size = 0
+            response.download_speed = 0
 
             # Hack for deprecated behaviour
             if 'response_url' in cache_item:

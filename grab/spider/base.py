@@ -175,7 +175,11 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         self.slave = slave
 
         self.max_task_generator_chunk = max_task_generator_chunk
-        self.timers = {}
+        self.timers = {
+            'network-name-lookup': 0,
+            'network-connect': 0,
+            'network-total': 0,
+        }
         self.time_points = {}
         self.start_timer('total')
         if config is not None:
@@ -638,7 +642,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             else:
                 return handler
 
-    def process_network_result(self, res):
+    def process_network_result(self, res, from_cache=False):
         """
         Handle result received from network transport of
         from the cache layer.
@@ -653,6 +657,18 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if (res['task'].network_try_count == 1 and
             res['task'].task_try_count == 1):
             self.inc_count('task-%s-initial' % res['task'].name)
+
+        # Update traffic statistics
+        if res['grab'] and res['grab'].response:
+            self.timers['network-name-lookup'] += res['grab'].response.name_lookup_time
+            self.timers['network-connect'] += res['grab'].response.connect_time
+            self.timers['network-total'] += res['grab'].response.total_time
+            if not from_cache:
+                self.inc_count('download-size', res['grab'].response.download_size)
+                self.inc_count('upload-size', res['grab'].response.upload_size)
+            self.inc_count('download-size-with-cache', res['grab'].response.download_size)
+            self.inc_count('upload-size-with-cache', res['grab'].response.upload_size)
+        #self.inc_count('traffic-in
 
         # NG
         # FIX: Understand how it should work in NG spider
@@ -721,7 +737,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
         if cache_result:
             logger_verbose.debug('Task data is loaded from the cache. Yielding task result.')
-            self.process_network_result(cache_result)
+            self.process_network_result(cache_result, from_cache=True)
             self.inc_count('task-%s-cache' % task.name)
         else:
             if self.only_cache:
