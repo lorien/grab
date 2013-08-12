@@ -29,6 +29,8 @@ logger = logging.getLogger('grab.selector.selector')
 metaclass_ABCMeta = ABCMeta('metaclass_ABCMeta', (object, ), {})
 
 class SelectorList(object):
+    __slots__ = ('selector_list', 'origin_selector_class', 'origin_query')
+
     def __init__(self, selector_list, origin_selector_class, origin_query):
         self.selector_list = selector_list
         self.origin_selector_class = origin_selector_class
@@ -148,6 +150,8 @@ class SelectorList(object):
 
 
 class BaseSelector(metaclass_ABCMeta):
+    __slots__ = ('node')
+
     def __init__(self, node):
         self.node = node
 
@@ -197,6 +201,8 @@ class BaseSelector(metaclass_ABCMeta):
 
 
 class LxmlNodeBaseSelector(BaseSelector):
+    __slots__ = ()
+
     def html(self, encoding='unicode'):
         return render_html(self.node, encoding=encoding)
 
@@ -237,6 +243,8 @@ class LxmlNodeBaseSelector(BaseSelector):
 
 
 class RexResultList(object):
+    __slots__ = ('items', 'source_rex')
+
     def __init__(self, items, source_rex):
         self.items = items
         self.source_rex = source_rex
@@ -252,6 +260,8 @@ class RexResultList(object):
 
 
 class TextSelector(LxmlNodeBaseSelector):
+    __slots__ = ()
+
     def select(self, xpath=None):
         raise GrabMisuseError('TextSelector does not allow select method') 
 
@@ -263,6 +273,8 @@ class TextSelector(LxmlNodeBaseSelector):
 
 
 class XpathSelector(LxmlNodeBaseSelector):
+    __slots__ = ()
+
     def process_query(self, query):
         from lxml.etree import XPath
 
@@ -275,6 +287,8 @@ class XpathSelector(LxmlNodeBaseSelector):
 
 
 class PyquerySelector(LxmlNodeBaseSelector):
+    __slots__ = ()
+
     def pyquery_node(self):
         return PyQuery(self.node)
 
@@ -283,6 +297,8 @@ class PyquerySelector(LxmlNodeBaseSelector):
 
 
 class KitSelector(BaseSelector):
+    __slots__ = ()
+
     def process_query(self, query):
         return self.node.findAll(query)
 
@@ -308,6 +324,8 @@ class KitSelector(BaseSelector):
 
 
 class JsonSelector(BaseSelector):
+    __slots__ = ()
+
     # TODO: It seems there is perfomance problem
     # see finnetrix, media_list.json
     def __init__(self, node):
@@ -338,6 +356,8 @@ class JsonSelector(BaseSelector):
 # ****************
 
 class Selector(XpathSelector):
+    __slots__ = ()
+
     def __init__(self, *args, **kwargs):
         super(Selector, self).__init__(*args, **kwargs)
         warn('Selector class is deprecated. Please use XpathSelector class instead.')
