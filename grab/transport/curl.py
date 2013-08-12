@@ -405,6 +405,7 @@ class CurlTransport(object):
         # Clear memory
         self.response_head_chunks = []
         self.response_body_chunks = []
+
         response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
         response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)

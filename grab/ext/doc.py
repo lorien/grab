@@ -15,6 +15,9 @@ class DocInterface(object):
 
 
 class DocExtension(object):
+    __slots__ = ()
+    # SLOTS: _doc
+
     def extra_reset(self):
         self._doc = None
 

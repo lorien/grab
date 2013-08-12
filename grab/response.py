@@ -62,6 +62,11 @@ class Response(object):
     HTTP Response.
     """
 
+    __slots__ = ('status', 'code', 'head', '_body', '_runtime_body',
+                 'body_path', 'headers', 'time', 'url', 'cookies',
+                 'charset', '_unicode_body', '_unicode_runtime_body',
+                 'bom', 'done_time')
+
     def __init__(self):
         self.status = None
         self.code = None

@@ -14,6 +14,8 @@ from grab.util.py3k_support import *
 NULL = object()
 
 class RegexpExtension(object):
+    __slots__ = ()
+
     def rex_text(self, regexp, flags=0, byte=False, default=NULL):
         """
         Search regular expression in response body and return content of first

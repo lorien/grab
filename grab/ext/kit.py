@@ -16,6 +16,9 @@ class KitInterface(object):
 
 
 class KitExtension(object):
+    __slots__ = ()
+    # SLOTS: _kit
+
     def extra_reset(self):
         self._kit = None
 

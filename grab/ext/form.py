@@ -13,6 +13,9 @@ from ..tools.http import smart_urlencode
 # TODO: refactor this hell
 
 class FormExtension(object):
+    __slots__ = ()
+    # SLOTS: _lxml_form, _file_fields
+
     def extra_reset(self):
         self._lxml_form = None
         self._file_fields = {}

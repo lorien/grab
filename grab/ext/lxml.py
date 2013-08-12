@@ -41,6 +41,9 @@ RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode('utf-8
     #return html
 
 class LXMLExtension(object):
+    __slots__ = ()
+    # SLOTS: _lxml_tree, _strict_lxml_tree
+
     def extra_reset(self):
         self._lxml_tree = None
         self._strict_lxml_tree = None

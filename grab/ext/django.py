@@ -8,6 +8,8 @@ except ImportError:
     from urllib.parse import urlsplit
 
 class DjangoExtension(object):
+    __slots__ = ()
+
     def django_file(self, name=None):
         """
         Convert content of response into django `ContentFile` object.
