@@ -118,7 +118,7 @@ class Item(metaclass_ItemBuilder):
         """
         Delete `self._selector` object because it is not
         possible to picklize lxml-tree.
-        Also calculate all fields becuase after deserialization
+        Also calculate all fields as after deserialization
         it will not be possible to calculate any field.
         """
         for key in self._fields.keys():

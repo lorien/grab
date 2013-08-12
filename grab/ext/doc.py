@@ -2,11 +2,13 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: MIT
 from __future__ import absolute_import
+import weakref
+
 from grab.selector import XpathSelector
 
 class DocInterface(object):
     def __init__(self, grab):
-        self.grab = grab
+        self.grab = weakref.proxy(grab)
 
     def select(self, *args, **kwargs):
         return XpathSelector(self.grab.tree).select(*args, **kwargs)
