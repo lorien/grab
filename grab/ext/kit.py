@@ -2,11 +2,13 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: MIT
 from __future__ import absolute_import
+import weakref
+
 from grab.selector import KitSelector
 
 class KitInterface(object):
     def __init__(self, grab):
-        self.grab = grab
+        self.grab = weakref.proxy(grab)
 
     def select(self, *args, **kwargs):
         qt_doc = self.grab.transport.kit.page.mainFrame().documentElement()
@@ -14,6 +16,9 @@ class KitInterface(object):
 
 
 class KitExtension(object):
+    __slots__ = ()
+    # SLOTS: _kit
+
     def extra_reset(self):
         self._kit = None
 

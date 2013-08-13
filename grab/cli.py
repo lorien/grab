@@ -77,11 +77,7 @@ def process_command_line():
 
     parser = ArgumentParser()
     parser.add_argument('action', type=str)
-    #parser.add_argument('positional_args', nargs='*')
-    #parser.add_argument('-t', '--thread-number', help='Number of network threads',
-                        #default=1, type=int)
     parser.add_argument('--logging-level', default='debug')
-    #parser.add_argument('--slave', action='store_true', default=False)
     parser.add_argument('--lock-key')
     parser.add_argument('--ignore-lock', action='store_true', default=False)
     parser.add_argument('--settings', type=str, default='settings')
@@ -127,7 +123,7 @@ def process_command_line():
 
     if hasattr(action_mod, 'setup_arg_parser'):
         action_mod.setup_arg_parser(parser)
-    args = parser.parse_args()
+    args, trash = parser.parse_known_args()
 
     # TODO: enable lock-file processing
     #lock_key = None

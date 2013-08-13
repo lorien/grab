@@ -3,6 +3,8 @@
 # License: BSD
 
 class PyqueryExtension(object):
+    __slots__ = ()
+
     def extra_reset(self):
         self._pyquery = None
 

@@ -39,6 +39,7 @@ from .pattern import SpiderPattern
 from .stat  import SpiderStat
 from .transport.multicurl import MulticurlTransport
 from ..proxylist import ProxyList
+from .command_controller import CommandController
 from grab.util.misc import camel_case_to_underscore
 
 from grab.util.py2old_support import *
@@ -174,7 +175,11 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         self.slave = slave
 
         self.max_task_generator_chunk = max_task_generator_chunk
-        self.timers = {}
+        self.timers = {
+            'network-name-lookup': 0,
+            'network-connect': 0,
+            'network-total': 0,
+        }
         self.time_points = {}
         self.start_timer('total')
         if config is not None:
@@ -201,10 +206,12 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             raise SpiderMisuseError('Value of priority_mode option should be "random" or "const"')
         else:
             self.priority_mode = priority_mode
+
         try:
             signal.signal(signal.SIGUSR1, self.sigusr1_handler)
         except (ValueError, AttributeError):
             pass
+
         try:
             signal.signal(signal.SIGUSR2, self.sigusr2_handler)
         except (ValueError, AttributeError):
@@ -225,6 +232,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
         # FIXIT: REMOVE
         self.dump_spider_stats = None
+
+        self.controller = CommandController(self)
 
     def setup_middleware(self, middleware_list):
         for item in middleware_list:
@@ -347,8 +356,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             task.priority_is_custom = True
 
         if not isinstance(task, NullTask):
-            if (not task.url.startswith('http://') and not task.url.startswith('https://')
-                and not task.url.startswith('ftp://')):
+            if not task.url.startswith(('http://', 'https://', 'ftp://', 'file://')):
                 if self.base_url is None:
                     raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified. Task: %s, URL: %s' % (task.name, task.url))
                 else:
@@ -357,7 +365,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                     if task.grab_config:
                         task.grab_config['url'] = task.url
 
-        if self.config.get('TASK_REFRESH_CACHE', {}).get(task.name, False):
+        if self.config.get('GRAB_TASK_REFRESH_CACHE', {}).get(task.name, False):
             task.refresh_cache = True
             is_valid = False
 
@@ -634,7 +642,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             else:
                 return handler
 
-    def process_network_result(self, res):
+    def process_network_result(self, res, from_cache=False):
         """
         Handle result received from network transport of
         from the cache layer.
@@ -649,6 +657,18 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if (res['task'].network_try_count == 1 and
             res['task'].task_try_count == 1):
             self.inc_count('task-%s-initial' % res['task'].name)
+
+        # Update traffic statistics
+        if res['grab'] and res['grab'].response:
+            self.timers['network-name-lookup'] += res['grab'].response.name_lookup_time
+            self.timers['network-connect'] += res['grab'].response.connect_time
+            self.timers['network-total'] += res['grab'].response.total_time
+            if not from_cache:
+                self.inc_count('download-size', res['grab'].response.download_size)
+                self.inc_count('upload-size', res['grab'].response.upload_size)
+            self.inc_count('download-size-with-cache', res['grab'].response.download_size)
+            self.inc_count('upload-size-with-cache', res['grab'].response.upload_size)
+        #self.inc_count('traffic-in
 
         # NG
         # FIX: Understand how it should work in NG spider
@@ -717,7 +737,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
         if cache_result:
             logger_verbose.debug('Task data is loaded from the cache. Yielding task result.')
-            self.process_network_result(cache_result)
+            self.process_network_result(cache_result, from_cache=True)
             self.inc_count('task-%s-cache' % task.name)
         else:
             if self.only_cache:
@@ -784,6 +804,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 # info about current scraping process
                 if self.dump_spider_stats:
                     self.dump_spider_stats(self)
+
+                if self.controller.enabled:
+                    self.controller.process_commands()
 
                 if not self.ng:
                     # NG
@@ -1060,3 +1083,15 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         #finally:
             ## This code is executed when main cycles is breaked
             #self.shutdown()
+                
+    def command_get_stats(self, command):
+        return {'data': self.render_stats()}
+
+    @classmethod
+    def get_available_command_names(cls):
+        spider = cls()
+        clist = []
+        for key in dir(spider):
+            if key.startswith('command_'):
+                clist.append(key.split('command_', 1)[1])
+        return sorted(clist)

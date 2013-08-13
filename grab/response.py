@@ -19,12 +19,15 @@ except ImportError:
 import tempfile
 import webbrowser
 import codecs
+from datetime import datetime
 
 from grab.tools import encoding as encoding_tools
 
 from .tools.files import hashed_path
 
 from grab.util.py3k_support import *
+
+logger = logging.getLogger('grab.response')
 
 RE_XML_DECLARATION = re.compile(br'^[^<]{,100}<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(br'encoding\s*=\s*["\']([^"\']+)["\']')
@@ -62,6 +65,14 @@ class Response(object):
     HTTP Response.
     """
 
+    __slots__ = ('status', 'code', 'head', '_body', '_runtime_body',
+                 'body_path', 'headers', 'url', 'cookies',
+                 'charset', '_unicode_body', '_unicode_runtime_body',
+                 'bom', 'timestamp',
+                 'name_lookup_time', 'connect_time', 'total_time',
+                 'download_size', 'upload_size', 'download_speed',
+                 )
+
     def __init__(self):
         self.status = None
         self.code = None
@@ -71,7 +82,6 @@ class Response(object):
         #self.runtime_body = None
         self.body_path = None
         self.headers =None
-        self.time = None
         self.url = None
         self.cookies = {}
         #self.cookiejar = None
@@ -79,7 +89,13 @@ class Response(object):
         self._unicode_body = None
         self._unicode_runtime_body = None
         self.bom = None
-        self.done_time = None
+        self.timestamp = datetime.now()
+        self.name_lookup_time = 0
+        self.connect_time = 0
+        self.total_time = 0
+        self.download_size = 0
+        self.upload_size = 0
+        self.download_speed = 0
 
     def parse(self, charset=None):
         """
@@ -190,7 +206,7 @@ class Response(object):
             try:
                 codecs.lookup(charset)
             except LookupError:
-                logging.error('Unknown charset found: %s' % charset)
+                logger.error('Unknown charset found: %s' % charset)
                 self.charset = 'utf-8'
             else:
                 self.charset = charset
@@ -243,7 +259,8 @@ class Response(object):
 
         obj = Response()
 
-        copy_keys = ('status', 'code', 'head', 'body', 'time',
+        copy_keys = ('status', 'code', 'head', 'body', 'total_time',
+                     'connect_time', 'name_lookup_time',
                      'url', 'charset', '_unicode_body')
         for key in copy_keys:
             setattr(obj, key, getattr(self, key))
@@ -384,3 +401,8 @@ class Response(object):
         if encode:
             return self.body.encode(self.charset)
         return self._body
+
+    @property
+    def time(self):
+        logger.error('Attribute Response.time is deprecated. Use Response.total_time instead.')
+        return self.total_time

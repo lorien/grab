@@ -34,7 +34,7 @@ class TestTransportTestCase(TestCase):
         g.go(SERVER.BASE_URL)
         self.assertEqual(g.response.body, 'XYZ')
 
-        g2_data = pickle.dumps(g2)
+        g2_data = pickle.dumps(g2, pickle.HIGHEST_PROTOCOL)
         g3 = pickle.loads(g2_data)
         g3.go(SERVER.BASE_URL)
         self.assertEqual(g3.response.body, 'XYZ')
@@ -47,7 +47,7 @@ class TestTransportTestCase(TestCase):
         g.go(SERVER.BASE_URL)
         self.assertEqual(g.response.body, 'Faked XYZ')
 
-        g2_data = pickle.dumps(g2)
+        g2_data = pickle.dumps(g2, pickle.HIGHEST_PROTOCOL)
         g3 = pickle.loads(g2_data)
         g3.go(SERVER.BASE_URL)
         self.assertEqual(g3.response.body, 'Faked XYZ')

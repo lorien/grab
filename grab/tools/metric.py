@@ -40,3 +40,14 @@ def parse_size(size, unit='mb'):
                 val = int(float(size) * mult)
                 return in_unit(val, unit)
         return 0
+
+
+def format_traffic_value(num):
+    if num < KB:
+        return '%s B' % in_unit(num, 'b')
+    elif num < MB:
+        return '%s KB' % in_unit(num, 'kb')
+    elif num < GB:
+        return '%s MB' % in_unit(num, 'mb')
+    else:
+        return '%s GB' % in_unit(num, 'gb')

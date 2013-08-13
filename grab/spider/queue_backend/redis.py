@@ -10,6 +10,7 @@ try:
 except ImportError:
     import queue
 import random
+import logging
 
 from .base import QueueInterface
 from ..error import SpiderMisuseError
@@ -22,6 +23,7 @@ class QueueBackend(QueueInterface):
             queue_name = 'task_queue_%s' % spider_name
         self.queue_name = queue_name
         self.queue_object = PriorityQueue(queue_name)
+        logging.debug('Redis queue key: %s' % self.queue_name)
 
     def put(self, task, priority, schedule_time=None):
         # Add attribute with random value

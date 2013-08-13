@@ -65,7 +65,9 @@ class MockTransport(object):
         ))
 
         response.code = 200
-        response.time = 0
+        response.total_time = 0
+        response.name_lookup_time = 0
+        response.connect_time = 0
         response.url = self.request_url
         response.parse()
         response.cookies = self.extract_cookies()

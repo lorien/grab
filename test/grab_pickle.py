@@ -22,7 +22,7 @@ class TestGrab(TestCase):
         SERVER.RESPONSE['get'] = '<form><textarea name="text">the cat</textarea></form>'
         g.go(SERVER.BASE_URL)
         g.set_input('text', 'foobar')
-        data = pickle.dumps(g)
+        data = pickle.dumps(g, pickle.HIGHEST_PROTOCOL)
 
         def func(pickled_grab, resultq):
             g2 = pickle.loads(pickled_grab)

@@ -33,7 +33,7 @@ def save_result(func):
 
             try:
                 func_res = func(spider_name, *args, **kwargs)
-            except Exception, ex:
+            except Exception as ex:
                 task.error_traceback = format_exc()
                 task.is_ok = False
                 raise

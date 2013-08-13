@@ -405,8 +405,15 @@ class CurlTransport(object):
         # Clear memory
         self.response_head_chunks = []
         self.response_body_chunks = []
+
         response.code = self.curl.getinfo(pycurl.HTTP_CODE)
-        response.time = self.curl.getinfo(pycurl.TOTAL_TIME)
+        response.total_time = self.curl.getinfo(pycurl.TOTAL_TIME)
+        response.connect_time = self.curl.getinfo(pycurl.CONNECT_TIME)
+        response.name_lookup_time = self.curl.getinfo(pycurl.NAMELOOKUP_TIME)
+        response.download_size = self.curl.getinfo(pycurl.SIZE_DOWNLOAD)
+        response.upload_size = self.curl.getinfo(pycurl.SIZE_UPLOAD)
+        response.download_speed = self.curl.getinfo(pycurl.SPEED_DOWNLOAD)
+
         response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
 
         if grab.config['document_charset'] is not None:

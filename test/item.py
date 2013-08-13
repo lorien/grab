@@ -75,6 +75,7 @@ class GameItem(Item):
         find_query = '//games/game'
 
     name = StringField('@name')
+    names = StringField('@name', multiple=True)
 
 
 class ItemTestCase(TestCase):
@@ -188,6 +189,16 @@ class ItemTestCase(TestCase):
         games = list(GameItem.find(grab.doc))
         self.assertEqual(['quake1', 'quake2'],
                          [x.name for x in games])
+
+    def test_stringfield_multiple(self):
+        grab = Grab(transport=GRAB_TRANSPORT)
+        grab.fake_response(XML)
+
+        class GameItem(Item):
+            names = StringField('//game/@name', multiple=True)
+
+        game = GameItem(grab.tree)
+        self.assertEqual(['quake1', 'quake2'], game.names)
 
 
 class JsonSelectorTestCase(TestCase):

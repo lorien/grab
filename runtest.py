@@ -106,6 +106,7 @@ SPIDER_EXTRA_TEST_LIST = (
     'test.spider_redis_queue',
     'test.spider_mongo_cache',
     'test.spider_mysql_cache',
+    'test.spider_command_controller',
 )
 
 

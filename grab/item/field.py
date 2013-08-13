@@ -1,5 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
+try:
+    from cdecimal import Decimal
+except ImportError:
+    from decimal import Decimal
 
 from ..tools.lxml_tools import clean_html
 from ..tools.text import find_number, drop_space
@@ -107,9 +111,43 @@ class IntegerField(Field):
             return int(self.process(value).strip())
 
 
+class DecimalField(Field):
+    def __init__(self, *args, **kwargs):
+        self.multiple = kwargs.get('multiple', False)
+        super(DecimalField, self).__init__(*args, **kwargs)
+
+    def get_raw_values(self, item):
+        return item._selector.select(self.xpath_exp).text_list()
+
+    def get_raw_value(self, item):
+        return item._selector.select(self.xpath_exp).text()
+
+    @cached
+    @default
+    @empty
+    @bind_item
+    def __get__(self, item, itemtype):
+        if self.multiple:
+            result = []
+            for raw_value in self.get_raw_values(item):
+                result.append(self.process_raw_value(raw_value))
+            return result
+        else:
+            raw_value = self.get_raw_value(item)
+            return self.process_raw_value(raw_value)
+
+    def process_raw_value(self, value):
+        if self.empty_default is not NULL:
+            if value == "":
+                return self.empty_default
+
+        return Decimal(self.process(value).strip())
+
+
 class StringField(Field):
     def __init__(self, *args, **kwargs):
         self.normalize_space = kwargs.pop('normalize_space', True)
+        self.multiple = kwargs.get('multiple', False)
         super(StringField, self).__init__(*args, **kwargs)
 
     @cached
@@ -117,9 +155,27 @@ class StringField(Field):
     @empty
     @bind_item
     def __get__(self, item, itemtype):
-        value = item._selector.select(self.xpath_exp)\
-                    .text(normalize_space=self.normalize_space)
+        #value = item._selector.select(self.xpath_exp)\
+                    #.text(normalize_space=self.normalize_space)
+        #return self.process(value)
+
+        if self.multiple:
+            result = []
+            for raw_value in self.get_raw_values(item):
+                result.append(self.process_raw_value(raw_value))
+            return result
+        else:
+            raw_value = self.get_raw_value(item)
+            return self.process_raw_value(raw_value)
+
+    def process_raw_value(self, value):
         return self.process(value)
+
+    def get_raw_values(self, item):
+        return item._selector.select(self.xpath_exp).text_list()
+
+    def get_raw_value(self, item):
+        return item._selector.select(self.xpath_exp).text()
 
 
 class HTMLField(Field):

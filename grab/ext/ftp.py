@@ -9,6 +9,8 @@ import os.path
 import os
 
 class FTPExtension(object):
+    __slots__ = ()
+
     def ftp_upload_file(self, server, local_path, remote_path, userpwd=None,
                         make_request=True):
         import pycurl

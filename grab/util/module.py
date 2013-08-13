@@ -117,6 +117,9 @@ def build_spider_registry(config):
                 #mod_path = path[:-3].replace('/', '.')
                 #try:
                     #mod = __import__
+
+    SPIDER_REGISTRY.clear()
+    module_mapping = {}
     for path in config.get('GRAB_SPIDER_MODULES', []):
         if ':' in path:
             path, cls_name = path.split(':')
@@ -141,10 +144,15 @@ def build_spider_registry(config):
                             logger.debug('Module `%s`, found spider `%s` with name `%s`' % (
                                 path, val.__name__, spider_name))
                             if spider_name in SPIDER_REGISTRY:
-                                raise SpiderInternalError('There are two different spiders with the '\
-                                                        'same name "%s"' % spider_name)
+                                raise SpiderInternalError(
+                                    'There are two different spiders with the '\
+                                    'same name "%s". Modules: %s and %s' % (
+                                        spider_name,
+                                        SPIDER_REGISTRY[spider_name].__module__,
+                                        val.__module__))
                             else:
                                 SPIDER_REGISTRY[spider_name] = val
+    return SPIDER_REGISTRY
 
 
 def load_spider_class(config, spider_name):

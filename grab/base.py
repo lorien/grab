@@ -191,9 +191,24 @@ def default_config():
     )
 
 
-class Grab(LXMLExtension, FormExtension, PyqueryExtension,
+class Grab(
+           LXMLExtension, FormExtension, PyqueryExtension,
            DjangoExtension, TextExtension, RegexpExtension,
-           FTPExtension, DocExtension, KitExtension):
+           FTPExtension, DocExtension, KitExtension,
+           ):
+
+    __slots__ = ('request_head', 'request_log', 'request_body',
+                 'proxylist', 'config', '_request_prepared',
+                 'clone_counter', 'response', 'transport',
+                 'transport_param', 'request_method', 'request_counter',
+                 '__weakref__',
+
+                 # Dirst hack to make it possbile to inherit Grab from
+                 # multiple base classes with __slots__
+                 '_lxml_form', '_file_fields',
+                 '_lxml_tree', '_strict_lxml_tree',
+                 '_pyquery', '_doc', '_kit',
+                 )
 
     # Points which could be handled in extension classes
     extension_points = ('config', 'init', 'reset')
@@ -484,7 +499,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         else:
             self.response = self.transport.prepare_response(self)
 
-        self.response.done_time = now
+        self.response.timestamp = now
 
         self.config['charset'] = self.response.charset
 
@@ -580,7 +595,9 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         res.parse(charset=kwargs.get('document_charset'))
         res.cookies = {}
         res.code = 200
-        res.time = 0
+        res.total_time = 0
+        res.connect_time = 0
+        res.name_lookup_time = 0
         res.url = ''
 
         for key, value in kwargs.items():
@@ -735,11 +752,24 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
         Reset cached lxml objects which could not be pickled.
         """
-        state = self.__dict__.copy()
+        state = {}
+        for cls in type(self).mro():
+            cls_slots = getattr(cls, '__slots__', ())
+            for slot in cls_slots:
+                if slot != '__weakref__':
+                    if hasattr(self, slot):
+                        state[slot] = getattr(self, slot)
+
         state['_lxml_form'] = None
         state['_lxml_tree'] = None
         state['_strict_lxml_tree'] = None
+
         return state
+
+
+    def __setstate__(self, state):
+        for slot, value in state.items():
+            setattr(self, slot, value)
 
     @property
     def request_headers(self):
