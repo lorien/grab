@@ -145,9 +145,9 @@ def drop_node(tree, xpath, keep_content=False):
                 pos += 1
             # now replace node with its text
             node_text = (node.text or '') + (node.tail or '')
-            _replace_node_with_text(node, node_text)
+            replace_rawnode_with_text(node, node_text)
         else:
-            _replace_node_with_text(node, node.tail or '')
+            replace_rawnode_with_text(node, node.tail or '')
 
 
 
@@ -155,10 +155,10 @@ def drop_node(tree, xpath, keep_content=False):
 def replace_node_with_text(root, xpath, text):
     for node in root.xpath(xpath):
         new_text = (text + node.tail) if node.tail else text
-        _replace_node_with_text(node, new_text)
+        replace_rawnode_with_text(node, new_text)
 
 
-def _replace_node_with_text(node, text):
+def replace_rawnode_with_text(node, text):
     parent = node.getparent()
     if parent is not None:
         previous = node.getprevious()
