@@ -200,6 +200,27 @@ class ItemTestCase(TestCase):
         game = GameItem(grab.tree)
         self.assertEqual(['quake1', 'quake2'], game.names)
 
+    def test_item_inheritance(self):
+        class BaseItem(Item):
+            class Meta:
+                find_query = '//player'
+
+            name = StringField('firstname')
+            age = IntegerField('age')
+
+        class ChildItem(BaseItem):
+            name = StringField('lastname')
+
+        grab = Grab(XML)
+        items = list(BaseItem.find(grab.doc))
+        self.assertEqual(items[0].name, 'Ardeshir')
+        self.assertEqual(items[0].age, 19)
+        self.assertEqual(set(['name', 'age']), set(items[0]._fields.keys()))
+
+        items = list(ChildItem.find(grab.doc))
+        self.assertEqual(items[0].age, 19)
+        self.assertEqual(set(['name', 'age']), set(items[0]._fields.keys()))
+
 
 class JsonSelectorTestCase(TestCase):
     class PlanetItem(Item):

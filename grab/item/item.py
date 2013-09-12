@@ -9,21 +9,34 @@ from ..ext.doc import DocInterface
 logger = logging.getLogger('grab.item.item')
 
 class ItemBuilder(type):
-    def __new__(cls, name, base, namespace):
+    def __new__(cls, name, bases, namespace):
         fields = {}
+
         for attr in namespace:
             if isinstance(namespace[attr], Field):
                 field = namespace[attr]
                 field.attr_name = attr
                 namespace[attr] = field
-                fields[attr] = namespace[attr]
+                fields[attr] = field
+
+        for base in reversed(bases):
+            if hasattr(base, '_fields'):
+                for attr, field in base._fields.iteritems():
+                    if not attr in namespace:
+                        fields[attr] = field
+
         namespace['_fields'] = fields
-        return super(ItemBuilder, cls).__new__(cls, name, base, namespace)
 
-metaclass_ItemBuilder = ItemBuilder('metaclass_ItemBuilder', (object, ), {})
+        cls = super(ItemBuilder, cls).__new__(cls, name, bases, namespace)
+        #if name == 'SomeItem':
+            #import pdb; pdb.set_trace()
+        return cls
 
 
-class Item(metaclass_ItemBuilder):
+ItemBuilderMetaClass = ItemBuilder('ItemBuilderMetaClass', (object, ), {})
+
+
+class Item(ItemBuilderMetaClass):
     def __init__(self, tree, selector_type='xpath', **kwargs):
         self._cache = {}
         self._meta = kwargs
