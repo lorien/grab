@@ -235,6 +235,22 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
         self.controller = CommandController(self)
 
+        # snapshots contains information about spider's state
+        # for each 10 seconds interval
+        self.snapshots = {}
+        self.last_snapshot_values = {
+            'timestamp': 0,
+            'download-size': 0,
+            'upload-size': 0,
+            'download-size-with-cache': 0,
+            'request-count': 0,
+        }
+        self.snapshot_timestamps = []
+        self.snapshot_interval = self.config.get('GRAB_SNAPSHOT_CONFIG', {}).get('interval', 10)
+        self.snapshot_file = self.config.get('GRAB_SNAPSHOT_CONFIG', {}).get('file', None)
+        if self.snapshot_file:
+            open(self.snapshot_file, 'w').write('')
+
     def setup_middleware(self, middleware_list):
         for item in middleware_list:
             self.middlewares.append(item)
@@ -796,7 +812,28 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                     self.init_task_generator()
             self.stop_timer('task_generator')
 
+
             while self.work_allowed:
+
+                now = int(time.time())
+                if now - self.last_snapshot_values['timestamp'] > self.snapshot_interval:
+                    snapshot = {'timestamp': now}
+                    for key in ('download-size', 'upload-size',
+                                'download-size-with-cache'):
+                        snapshot[key] = self.counters[key] - self.last_snapshot_values[key]
+                        self.last_snapshot_values[key] = self.counters[key]
+
+                    snapshot['request-count'] = self.counters['request'] -\
+                        self.last_snapshot_values['request-count']
+                    self.last_snapshot_values['request-count'] = self.counters['request']
+                    self.last_snapshot_values['timestamp'] = now
+
+                    self.snapshots[now] = snapshot
+                    self.snapshot_timestamps.append(now)
+
+                    if self.snapshot_file:
+                        with open(self.snapshot_file, 'a') as out:
+                            out.write(json.dumps(snapshot) + '\n')
 
                 # FIXIT: REMOVE
                 # Run update task handler which
