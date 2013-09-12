@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import weakref
 
 from grab.selector import XpathSelector
+from grab.tools.structured import TreeInterface
 
 class DocInterface(object):
     def __init__(self, grab):
@@ -12,6 +13,9 @@ class DocInterface(object):
 
     def select(self, *args, **kwargs):
         return XpathSelector(self.grab.tree).select(*args, **kwargs)
+
+    def structure(self, *args, **kwargs):
+        return TreeInterface(self.grab.tree).structured_xpath(*args, **kwargs)
 
 
 class DocExtension(object):
