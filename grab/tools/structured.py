@@ -45,8 +45,6 @@ class Structure(object):
     def __repr__(self):
         return '<%s %s %s>' % (self._xpath, self._args, self._kwargs)
 
-x = Structure
-
 
 class TreeInterface(object):
     def __init__(self, tree):
@@ -90,11 +88,12 @@ class TreeInterface(object):
                 items.append(item)
             return items
 
+        structure = None
         if isinstance(xpath, (str, unicode)):
             structure = Structure(xpath, *args, **kwargs)
         elif isinstance(xpath, Structure):
             structure = xpath
-        else:
+        if structure is None:
             Exception('Unknown type for structured type!')
 
         return parser(
