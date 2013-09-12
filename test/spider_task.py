@@ -92,6 +92,11 @@ class TestSpider(TestCase):
         g.setup(url='zzz')
         bot.add_task(task.clone(grab_config=g.config))
 
+    def test_task_clone_with_url_param(self):
+        task = Task('baz', url='xxx')
+        task.clone(url='http://yandex.ru/')
+
+
     def test_task_useragent(self):
         bot = SimpleSpider()
         bot.setup_queue()
