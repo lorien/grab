@@ -4,6 +4,32 @@
 Change Log
 ==========
 
+0.4.13
+======
+
+Major
+-----
+* New: item.DateField
+* New: item.DecimalField
+* New: add `multiple` option to item.StringField
+* New: ability to process extra command-line arguments per each spider
+* New: new layer in Spider - command interface, that allows to pass commands
+  to live spiders.
+* New: structure extension
+* New: item classes inheritance
+
+Other
+-----
+
+* New: All commands executed via `grab` command automatically set django's settings.DEBUG to False
+* Fix: some issues raised then `grab crawl` command is building list of available spiders.
+* New: start working on new version of documentation (in docs2/ directory)
+* Fix: `grab` command reset existing logging configuration
+* New: Add `valid_exceptions` option to tools.grab.control.repeat
+* New: add __slots__ to some classes
+* New: remove firefox user-agents from the list of default user-agents
+* Fix: some memory-leaks
+
 0.4.12
 ======
 
