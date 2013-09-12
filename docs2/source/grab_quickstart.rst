@@ -3,7 +3,7 @@
 Grab Quick Start
 ================
 
-In this document we will go through multiple examples of how to use Grab to configure and submit network requests and to parse data of network responses.
+In this document we will go through multiple examples of how to use Grab to configure and submit network requests and to process data in network responses.
 
 Let's do something simple, download main page of wikipedia and print some info about response::
 
@@ -20,9 +20,10 @@ Let's do something simple, download main page of wikipedia and print some info a
     >>> g.response.total_time
     0.764033
 
-As you see, after we made a network requests with `go` method, `grab` objects got `response` attribute configured with network response data.
+As you see, after we made a network requests with `go` method, we can access data of response via `grab.resposne` attribute. Also, the `response` objects is a return value of `go` method.
 
-Now let's create more complex request. Let's try to log into github::
+Now let's create more complex request. Let's try to log into pastebin.com::
+
     >>> g = Grab()
     >>> g.setup(url='http://pastebin.com/login.php',
     ...         post={'user_name': 'foo', 'user_password': 'bar', 'submit_hidden': 'submit_hidden'})
@@ -31,9 +32,9 @@ Now let's create more complex request. Let's try to log into github::
     >>> 'There was an error with your login details' in g.response.body
     True
 
-There is no pastebin user with such credentials, we get response that contains message saying that.
+There is no pastebin user with such credentials, we got response that contains message saying that.
 
-If you want to submit some form, you do not need to build POST content manually. You can just request the page with that form, then fill only required fields and then submit the form. Grab will do all required things automatically. Let's try to log into github::
+If you want to submit some form, you do not need manually build POST content. You can just download the page with that form, then fill only required fields and then submit the form. Grab will do all necessary stuff automatically. Let's try to log into github::
 
     >>> g = Grab()
     >>> g.go('https://github.com/login')
@@ -45,7 +46,7 @@ If you want to submit some form, you do not need to build POST content manually.
     >>> 'Incorrect username or password' in g.response.body
     True
 
-See, we filled only two fields, all other form fields were processed automatically. Want to see what's going under the hood? We can pass `make_request=False` optiont to `submit` method, that allow Grab toconfigure form data that should be submitted but restrict Grab to do any network request::
+See, we filled only two fields, all other form fields were processed automatically. Want to see what's going under the hood? We can pass `make_request=False` option to `submit` method, that allows Grab toconfigure form data that should be submitted but restrict Grab to do any network request::
 
     ...
     >>> g.submit(make_request=False)
