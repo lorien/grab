@@ -20,7 +20,7 @@ Let's do something simple, download main page of wikipedia and print some info a
     >>> g.response.total_time
     0.764033
 
-As you see, after we made a network requests with `go` method, we can access data of response via `grab.resposne` attribute. Also, the `response` objects is a return value of `go` method.
+After we made a network requests with `go` method, we can access data of response via `grab.response` attribute. Also, the `response` objects is a return value of `go` method.
 
 Now let's create more complex request. Let's try to log into pastebin.com::
 
@@ -53,4 +53,48 @@ See, we filled only two fields, all other form fields were processed automatical
     >>> g.config['post']
     [('commit', 'Sign in'), ('login', 'foo'), ('password', 'bar'), ('authenticity_token', 'DtHmFiYBIWNvFW2B3yg/+NUCJR/O8B2QbgDl00Z8wKw=')]
     
- You can see that Grab automatically assigned values for all form fields that we did not processed explicitly
+ You can see that Grab automatically assigned values for all form fields that we did not processed explicitly.
+
+By default, Grab mimics the web browser. In most of cases you can just focus on logic of scraping and do not think about annoying things that is done by Grab automatically:
+
+* it remember cookies
+* it generates random User-Agent of some real web browser
+* it generates some common HTTP headers like Accepth-Charset
+* it generates Referer
+* it follows 301/302 redirects
+* it follows meta refresh redirects (disabled by default)
+* it automatically detect the charset of the document
+
+Now, let's take a quick look on proxy support. There is no much to say, Grab supports all type of proxy (thanks to pycurl power). Here is example:
+
+    >>> g = Grab()
+    >>> g.setup(proxy='*.*.147.156:1080', proxy_type='socks5', proxy_userpwd='***:***')
+    >>> g.go('http://formyip.com/')
+    <grab.response.Response object at 0x2adaae0>
+    >>> '.147.156' in g.response.body
+    True
+
+We talked enough in this tutorial about how to build network requests. Now let's talk about how to process responses. After you made a network request the main things you can work with are:
+
+* g.response.cookies - cookies
+* g.response.headers - HTTP headers of the response
+* g.response.code - HTTP code of the response
+* g.response.body - the raw content of response (only body, no headers)
+
+Of course, you can use g.response.body to search some HTML tags with regular expressions/lxml/BeautifulSoup/etc but Grab already provides interface to work with DOM of the HTML document. It is too extensive topic for this tutorial. Just some examples::
+
+    >>> g = Grab()
+    >>> g.go('http://www.reddit.com/')
+    <grab.response.Response object at 0x2adaa10>
+    >>> g.doc.select('//title').text()
+    'reddit: the front page of the internet'
+    >>> g.doc.select('//p[@class="title"]/a').text_list()[:3]
+    ['Ridiculously Photogenic Donkey', 'Reddit, how do I get to a store about 50 minutes away without a car?', 'Subreddit Discovery: Animals!']
+    >>> g.doc.select('//p[@class="title"]/a').text()
+    'Ridiculously Photogenic Donkey'
+    >>> g.doc.select('//p[@class="title"]/a').attr_list('href')[:3]
+    ['http://imgur.com/YiekPfv', '/r/AskReddit/comments/1mo3rq/reddit_how_do_i_get_to_a_store_about_50_minutes/', 'http://www.reddit.com/r/AnimalReddits/wiki/faq']
+    >>> g.doc.select('//p[@class="title"]/a/@href').text_list()[:3]
+    ['http://imgur.com/YiekPfv', '/r/AskReddit/comments/1mo3rq/reddit_how_do_i_get_to_a_store_about_50_minutes/', 'http://www.reddit.com/r/AnimalReddits/wiki/faq']
+    >>> g.doc.select('//div[contains(@class, "thing")]').select('.//p[@class="tagline"]/time/@datetime').rex('^(\d{4})-\d{2}-\d{2}').number()
+    2013
