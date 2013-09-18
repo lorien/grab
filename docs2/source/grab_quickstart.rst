@@ -34,6 +34,8 @@ Now let's create more complex request. Let's try to log into pastebin.com::
 
 There is no pastebin user with such credentials, we got response that contains message saying that.
 
+In last example we used `post` options to make POST request. If you pass dict to `post` option the Grab will applay `urllib.urlencode` to the data, if you pass just a string data then Grab will submit it without any modification. If you pass unicode-string of dict with unicode values then Grab will convert all unicode to byte strings.
+
 If you want to submit some form, you do not need manually build POST content. You can just download the page with that form, then fill only required fields and then submit the form. Grab will do all necessary stuff automatically. Let's try to log into github::
 
     >>> g = Grab()
@@ -79,9 +81,22 @@ We talked enough in this tutorial about how to build network requests. Now let's
 * g.response.cookies - cookies
 * g.response.headers - HTTP headers of the response
 * g.response.code - HTTP code of the response
+* g.response.charset - autodetected charset of response(if it is an HTML document)
 * g.response.body - the raw content of response (only body, no headers)
 
-Of course, you can use g.response.body to search some HTML tags with regular expressions/lxml/BeautifulSoup/etc but Grab already provides interface to work with DOM of the HTML document. It is too extensive topic for this tutorial. Just some examples::
+Note that g.response.body contains raw content i.e. if you requested image you can just save `g.response.body` to the file and that will be OK. For such case there is a shortcut::
+
+    >>> g.response.save('/path/to/file')
+
+Another shortcut for JSON responses::
+
+    >>> g = Grab()
+    >>> g.go(url='https://api.github.com/gitignore/templates')
+    <grab.response.Response object at 0x2adaa10>
+    >>> g.response.json[:3]
+    [u'Actionscript', u'Android', u'AppceleratorTitanium']
+
+Of course, you can process content of `g.response.body` with regular expressions/lxml/BeautifulSoup/etc but in most of times you'll be happy with builtin Grab DOM interface. It is too extensive topic for this tutorial. Just some examples::
 
     >>> g = Grab()
     >>> g.go('http://www.reddit.com/')
