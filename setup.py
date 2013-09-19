@@ -10,7 +10,7 @@ setup(
     version = version,
     description = 'Site Scraping Framework',
     long_description = open(os.path.join(ROOT, 'README.rst')).read(),
-    url = 'http://github.com/lorien/grab',
+    url = 'http://grablib.org',
     author = 'Grigory Petukhov',
     author_email = 'lorien@lorien.name',
 
@@ -18,15 +18,21 @@ setup(
     include_package_data = True,
     scripts = ('bin/grab',),
 
-    license = "BSD",
+    license = "MIT",
     keywords = "pycurl multicurl curl network parsing grabbing scraping lxml xpath",
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'Environment :: Web Environment',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
-        'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Topic :: Utilities'
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'License :: OSI Approved :: MIT License',
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Operating System :: OS Independent',
+        'Topic :: Software Development :: Libraries :: Application Frameworks',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Internet :: WWW/HTTP',
     ],
 )

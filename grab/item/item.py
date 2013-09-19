@@ -21,7 +21,7 @@ class ItemBuilder(type):
 
         for base in reversed(bases):
             if hasattr(base, '_fields'):
-                for attr, field in base._fields.iteritems():
+                for attr, field in base._fields.items():
                     if not attr in namespace:
                         fields[attr] = field
 
