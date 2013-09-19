@@ -54,7 +54,10 @@ def rex_text(body, regexp, flags=0, default=NULL):
     try:
         return normalize_space(decode_entities(match.group(1)))
     except AttributeError:
-        raise DataNotFound('Regexp not found')
+        if default is NULL:
+            raise DataNotFound('Regexp not found')
+        else:
+            return default
 
 
 def normalize_regexp(regexp, flags=0):
