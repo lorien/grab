@@ -22,13 +22,15 @@ GRAB_TEST_LIST = (
     'test.grab_api',
     'test.grab_transport',
     'test.response_class',
+    # Response processing
+    'test.grab_xml_processing',
+    'test.grab_response_body_processing',
+    #'test.grab_charset',
     # Network
     'test.grab_get_request',
     'test.grab_post_request',
     'test.grab_user_agent',
     'test.grab_cookies',
-    'test.grab_xml_processing',
-    'test.grab_response_body_processing',
     # Refactor
     'test.grab_proxy',
     'test.upload_file',
