@@ -111,6 +111,9 @@ class ProxySource(object):
             (time.time() - self.read_time) > self.read_timeout):
             logger.debug('Reloading proxy list')
             self.load()
+            return True
+        else:
+            return False
 
 
 class TextFileSource(ProxySource):
@@ -233,13 +236,42 @@ class ProxyList(object):
             raise GrabMisuseError('Unknown proxy source type: %s' % source_type)
         self.source = source_class(source, proxy_type=proxy_type, **kwargs)
         self.source.load()
+        self.filter_config = {}
+        self.geoip_resolver = None
+
+    def filter_by_country(self, code, geoip_db_path):
+        # geoip_db_path -yep, this is quick & crapy workaround
+        self.filter_config['country'] = {'code': code.lower(),
+                                         'geoip_db_path': geoip_db_path}
+        self.apply_filter()
+
+    def apply_filter(self):
+        if self.filter_config.get('country'):
+            geoip = self.get_geoip_resolver()
+            new_list = []
+            for row in self.source.server_list:
+                server, userpwd, proxy_type = row
+                host = server.split(':')[0]
+                country = geoip.country_code_by_addr(host).lower()
+                if country == self.filter_config['country']['code']:
+                    new_list.append(row)
+            self.source.server_list = row
+            self.source.server_list_iterator = itertools.cycle(self.source.server_list)
+
+    def get_geoip_resolver(self):
+        if self.geoip_resolver is None:
+            import pygeoip
+            self.geoip_resolver = pygeoip.GeoIP(self.filter_config['country']['geoip_db_path'],
+                                                pygeoip.MEMORY_CACHE)
+        return self.geoip_resolver
 
     def get_random(self):
         """
         Return random server from the list
         """
 
-        self.source.reload()
+        if self.source.reload():
+            self.apply_filter()
         return choice(self.source.server_list)
 
     def get_next(self):
@@ -248,5 +280,6 @@ class ProxyList(object):
         """
 
         logger.debug('Changing proxy')
-        self.source.reload()
+        if self.source.reload():
+            self.apply_filter()
         return next(self.source.server_list_iterator)
