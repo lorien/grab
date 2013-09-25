@@ -17,6 +17,10 @@ docs-redirect/_build
 log.html
 prof
 
+# google chrome
+docs2/libpeerconnection.log
+docs/libpeerconnection.log
+
 /log/
 /data/
 /ghost/

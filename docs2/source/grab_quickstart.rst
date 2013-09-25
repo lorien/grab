@@ -5,6 +5,9 @@ Grab Quick Start
 
 In this document we will go through multiple examples of how to use Grab to configure and submit network requests and to process data in network responses.
 
+Basic Request/Response
+----------------------
+
 Let's do something simple, download main page of wikipedia and print some info about response::
 
     >>> from grab import Grab
@@ -22,6 +25,9 @@ Let's do something simple, download main page of wikipedia and print some info a
 
 After we made a network requests with `go` method, we can access data of response via `grab.response` attribute. Also, the `response` objects is a return value of `go` method.
 
+Making a POST request
+---------------------
+
 Now let's create more complex request. Let's try to log into pastebin.com::
 
     >>> g = Grab()
@@ -35,6 +41,9 @@ Now let's create more complex request. Let's try to log into pastebin.com::
 There is no pastebin user with such credentials, we got response that contains message saying that.
 
 In last example we used `post` options to make POST request. If you pass dict to `post` option the Grab will applay `urllib.urlencode` to the data, if you pass just a string data then Grab will submit it without any modification. If you pass unicode-string of dict with unicode values then Grab will convert all unicode to byte strings.
+
+Handle Forms
+------------
 
 If you want to submit some form, you do not need manually build POST content. You can just download the page with that form, then fill only required fields and then submit the form. Grab will do all necessary stuff automatically. Let's try to log into github::
 
@@ -57,6 +66,9 @@ See, we filled only two fields, all other form fields were processed automatical
     
  You can see that Grab automatically assigned values for all form fields that we did not processed explicitly.
 
+Stuff that You Have Out of the Box
+----------------------------------
+
 By default, Grab mimics the web browser. In most of cases you can just focus on logic of scraping and do not think about annoying things that is done by Grab automatically:
 
 * it remember cookies
@@ -67,6 +79,9 @@ By default, Grab mimics the web browser. In most of cases you can just focus on 
 * it follows meta refresh redirects (disabled by default)
 * it automatically detect the charset of the document
 
+Proxy Support
+-------------
+
 Now, let's take a quick look on proxy support. There is no much to say, Grab supports all type of proxy (thanks to pycurl power). Here is example:
 
     >>> g = Grab()
@@ -75,6 +90,9 @@ Now, let's take a quick look on proxy support. There is no much to say, Grab sup
     <grab.response.Response object at 0x2adaae0>
     >>> '.147.156' in g.response.body
     True
+
+Response object
+---------------
 
 We talked enough in this tutorial about how to build network requests. Now let's talk about how to process responses. After you made a network request the main things you can work with are:
 
@@ -88,6 +106,9 @@ Note that g.response.body contains raw content i.e. if you requested image you c
 
     >>> g.response.save('/path/to/file')
 
+Handling JSON Respone
+---------------------
+
 Another shortcut for JSON responses::
 
     >>> g = Grab()
@@ -95,6 +116,9 @@ Another shortcut for JSON responses::
     <grab.response.Response object at 0x2adaa10>
     >>> g.response.json[:3]
     [u'Actionscript', u'Android', u'AppceleratorTitanium']
+
+Accesssing DOM of HTML Document
+-------------------------------
 
 Of course, you can process content of `g.response.body` with regular expressions/lxml/BeautifulSoup/etc but in most of times you'll be happy with builtin Grab DOM interface. It is too extensive topic for this tutorial. Just some examples::
 
