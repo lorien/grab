@@ -23,7 +23,7 @@ Let's do something simple, download main page of wikipedia and print some info a
     >>> g.response.total_time
     0.764033
 
-After we made a network requests with `go` method, we can access data of response via `grab.response` attribute. Also, the `response` objects is a return value of `go` method.
+After we made a network requests with `go` method, we can access data of response via `grab.response` attribute. Also, the `response` objects is returned by `go` method.
 
 Making a POST request
 ---------------------
