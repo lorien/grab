@@ -30,6 +30,7 @@ You can mix ways of specifying the options::
     >>> g.setup(cookies={'foo': 'bar'})
     >>> g.request(url='http://yahoo.com/')
 
+.. _grab_configuration_config_object:
 
 Grab Config Object
 ------------------
@@ -47,6 +48,8 @@ Every time you configure Grab instance all options goes to the special object `g
 
 The Grab config object is simply a `dict` object some of which values are also `dict` objects.
 
+.. _grab_configuration_cloning:
+
 Grab Instance Cloning
 ---------------------
 
@@ -61,3 +64,16 @@ Also, there is an `adopt` which action is opposite to `clone` method::
     >>> g2.adopt(g1)
 
 The `g2` instance receives the state of `g1` instance.
+
+.. _grab_configuration_pycurl:
+
+Setting Up the Pycurl Object
+----------------------------
+
+Sometimes you need more details control on network request thatn Grab allows. In such cases you can configure the pycurl object directly. All Grab's network features are only the interface to the pycurl library. Any available Grab option is just set some option of the pycurl object. Here is simple example of how to change the type of the HTTP authentication::
+
+    >>> import pycurl
+    >>> from grab import Grab
+    >>> g = Grab()
+    >>> g.setup(userpwd='root:123')
+    >>> g.transport.curl.setopt(pycurl.HTTPAUTH, pycurl.HTTPAUTH_NTLM)

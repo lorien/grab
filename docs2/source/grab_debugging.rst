@@ -3,6 +3,8 @@
 Debugging
 =========
 
+.. _grab_debugging_logging:
+
 Using logging module
 --------------------
 
@@ -32,6 +34,8 @@ Usage of `default_logging` function is simple::
     >>> from grab.tools.logs import default_logging
     >>> default_logging()
 
+.. _grab_debugging_logging_network:
+
 Logging messages about network request
 --------------------------------------
 
@@ -51,6 +55,8 @@ The output will be like this::
     POST request:
     foo                      : bar
     name                     : Ivan
+
+.. _grab_debugging_response_saving:
 
 Saving content of requests and responses
 ----------------------------------------
