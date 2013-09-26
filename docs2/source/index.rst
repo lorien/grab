@@ -26,10 +26,13 @@ See quick start tutorials to quickly get main ideas about how to use Grab and Gr
 
 * :ref:`grab_quickstart`
 * :ref:`spider_quickstart`
-* :ref:`installation`
+* :ref:`grab_installation`
 * :ref:`grab_configuration`
 * :ref:`grab_debugging`
 * :ref:`grab_options`
+* :ref:`grab_http_headers`
+* :ref:`grab_http_methods`
+* :ref:`grab_forms`
 
 .. toctree::
    :maxdepth: 2

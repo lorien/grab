@@ -1,4 +1,4 @@
-.. _installation:
+.. _grab_installation:
 
 Installation
 ============

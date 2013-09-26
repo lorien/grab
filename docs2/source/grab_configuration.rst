@@ -1,7 +1,7 @@
 .. _grab_configuration:
 
-Grab Configuration
-==================
+Configuration
+=============
 
 You can configure Grab instance in multiple ways.
 
@@ -32,6 +32,7 @@ You can mix ways of specifying the options::
 
 .. _grab_configuration_config_object:
 
+
 Grab Config Object
 ------------------
 
@@ -50,6 +51,7 @@ The Grab config object is simply a `dict` object some of which values are also `
 
 .. _grab_configuration_cloning:
 
+
 Grab Instance Cloning
 ---------------------
 
@@ -66,6 +68,7 @@ Also, there is an `adopt` which action is opposite to `clone` method::
 The `g2` instance receives the state of `g1` instance.
 
 .. _grab_configuration_pycurl:
+
 
 Setting Up the Pycurl Object
 ----------------------------

@@ -1,8 +1,8 @@
 .. _grab_options:
 
-============
-Grab Options
-============
+===================
+List of All Options
+===================
 
 To get info about how to setup Grab instance please go to :ref:`grab_configuration`.
 
@@ -214,7 +214,7 @@ headers
 :Default: None
 
 Extra HTTP-headers. The value of that options will be joined with headers
-that Grab generates by default. See details in :ref:`grab_request_headers`.
+that Grab generates by default. See details in :ref:`grab_http_headers`.
 
 
 .. _option_common_headers:
@@ -227,7 +227,7 @@ common_headers
 
 By default, Grab generates some common HTTP headers to mimic the behaviour of real web browser.
 If you have some troubles with these deafult headers then you can specify your own headers with
-that option. Please note that the usual way to specify some heaer is to use :ref:`option_headers` option. See details in :ref:`grab_request_headers`.
+that option. Please note that the usual way to specify some heaer is to use :ref:`option_headers` option. See details in :ref:`grab_http_headers`.
 
 .. _option_reuse_cookies:
 
