@@ -33,6 +33,7 @@ See quick start tutorials to quickly get main ideas about how to use Grab and Gr
 * :ref:`grab_http_headers`
 * :ref:`grab_http_methods`
 * :ref:`grab_forms`
+* :ref:`pycurl`
 
 .. toctree::
    :maxdepth: 2
