@@ -9,12 +9,14 @@ class MulticurlTransport(object):
         self.multi.handles = []
         self.freelist = []
         self.registry = {}
+        self.connection_count = {}
 
         # Create curl instances
         for x in xrange(self.thread_number):
             curl = pycurl.Curl()
+            self.connection_count[id(curl)] = 0
             self.freelist.append(curl)
-            self.multi.handles.append(curl)
+            #self.multi.handles.append(curl)
 
     def ready_for_task(self):
         return len(self.freelist)
@@ -22,24 +24,44 @@ class MulticurlTransport(object):
     def active_task_number(self):
         return self.thread_number - len(self.freelist)
 
+    def process_connection_count(self, curl):
+        curl_id = id(curl)
+        self.connection_count[curl_id] += 1
+        if self.connection_count[curl_id] > 100:
+            del self.connection_count[curl_id]
+            del curl
+            new_curl = pycurl.Curl()
+            self.connection_count[id(new_curl)] = 1
+            return new_curl
+        else:
+            return curl
+
     def process_task(self, task, grab, grab_config_backup):
-        curl = self.freelist.pop()
-        curl.task = task
+        curl = self.process_connection_count(self.freelist.pop())
+
         self.registry[id(curl)] = {
             'grab': grab,
             'grab_config_backup': grab_config_backup,
             'task': task,
         }
         grab.transport.curl = curl
-        grab.prepare_request()
-        grab.log_request()
-
-        # Add configured curl instance to multi-curl processor
-        self.multi.add_handle(curl)
+        try:
+            grab.prepare_request()
+            grab.log_request()
+        except Exception, ex:
+            # If some error occured while processing the request arguments
+            # then we should put curl object back to free list
+            del self.registry[id(curl)]
+            self.freelist.append(curl)
+            raise
+        else:
+            # Add configured curl instance to multi-curl processor
+            self.multi.add_handle(curl)
 
     def process_handlers(self):
         # http://curl.haxx.se/libcurl/c/curl_multi_perform.html
         while True:
+            #print '[inside PH]'
             status, active_objects = self.multi.perform()
             if status != pycurl.E_CALL_MULTI_PERFORM:
                 break
@@ -84,6 +106,12 @@ class MulticurlTransport(object):
 
                 # Free resources
                 del self.registry[curl_id]
+                grab.transport.curl = None
+
+                #if emsg and 'Operation timed out after' in emsg:
+                    #num =  int(emsg.split('Operation timed out after')[1].strip().split(' ')[0])
+                    #if num > 20000:
+                        #import pdb; pdb.set_trace()
 
                 yield {'ok': ok, 'emsg': emsg, 'grab': grab,
                        'grab_config_backup': grab_config_backup, 'task': task}
