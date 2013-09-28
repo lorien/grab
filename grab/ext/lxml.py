@@ -132,6 +132,7 @@ class LXMLExtension(object):
             self._strict_lxml_tree = fromstring(body)
         return self._strict_lxml_tree
 
+    @deprecated()
     def find_link(self, href_pattern, make_absolute=True):
         """
         Find link in response body which href value matches ``href_pattern``.
@@ -150,6 +151,7 @@ class LXMLExtension(object):
                 return link
         return None
 
+    @deprecated()
     def find_link_rex(self, rex, make_absolute=True):
         """
         Find link matched the given regular expression in response body.
@@ -169,6 +171,7 @@ class LXMLExtension(object):
                     return link
         return None
 
+    @deprecated()
     def follow_link(self, anchor=None, href=None):
         """
         Find link and follow it.
@@ -272,12 +275,14 @@ class LXMLExtension(object):
             else:
                 return default
 
+    @deprecated()
     def css(self, *args, **kwargs):
         stack = traceback.extract_stack()
         stack_call = stack[-2]
         logger.debug('Method css is depricated. Please use css_one method. Location of problem: %s::%d' % (stack_call[0], stack_call[1]))
         return self.css_one(*args, **kwargs)
 
+    @deprecated()
     def css_one(self, path, default=NULL):
         """
         Get first element which matches the given css path or raise DataNotFound.
@@ -291,6 +296,7 @@ class LXMLExtension(object):
             else:
                 return default
 
+    @deprecated()
     def css_list(self, path):
         """
         Find all elements which match given css path.
@@ -298,6 +304,7 @@ class LXMLExtension(object):
 
         return self.tree.cssselect(path)
 
+    @deprecated()
     def css_text(self, path, default=NULL, smart=False, normalize_space=True):
         """
         Get normalized text of node which matches the css path.
@@ -312,6 +319,7 @@ class LXMLExtension(object):
             else:
                 return default
 
+    @deprecated()
     def css_number(self, path, default=NULL, ignore_spaces=False, smart=False,
                    make_int=True):
         """
@@ -327,6 +335,7 @@ class LXMLExtension(object):
             else:
                 return default
 
+    @deprecated()
     def strip_tags(self, content, smart=False):
         """
         Strip tags from the HTML content.
@@ -335,6 +344,7 @@ class LXMLExtension(object):
 
         return get_node_text(fromstring(content), smart=smart)
 
+    @deprecated()
     def assert_css(self, path):
         """
         If css path is not found then raise `DataNotFound` exception.
@@ -342,6 +352,7 @@ class LXMLExtension(object):
 
         self.css_one(path)
 
+    @deprecated()
     def assert_xpath(self, path):
         """
         If xpath path is not found then raise `DataNotFound` exception.
@@ -349,6 +360,7 @@ class LXMLExtension(object):
 
         self.xpath_one(path)
 
+    @deprecated()
     def css_exists(self, path):
         """
         Return True if at least one element with specified css path exists.
