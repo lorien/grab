@@ -23,13 +23,14 @@ import re
 import json
 import email
 from datetime import datetime
+import pdb
 
 from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url
 from .response import Response
 from . import error
 from .upload import UploadContent, UploadFile
-from .tools.http import normalize_http_values, normalize_url
+from .tools.http import normalize_http_values
 from .extension import register_extensions
 
 from grab.util.py2old_support import *
@@ -136,12 +137,16 @@ def default_config():
         hammer_mode = False,
         hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
 
+        # Connection
+        connection_reuse = True,
+
         # Response processing
         nobody = False,
         body_maxsize = None,
         body_inmemory = True,
         body_storage_dir = None,
         body_storage_filename = None,
+        reject_file_size = None,
 
         # Content compression
         encoding = 'gzip',
@@ -341,7 +346,6 @@ class Grab(
         if 'url' in kwargs:
             if self.config.get('url'):
                 kwargs['url'] = self.make_url_absolute(kwargs['url'])
-            kwargs['url'] = normalize_url(kwargs['url'])
         self.config.update(kwargs)
 
     def go(self, url, **kwargs):

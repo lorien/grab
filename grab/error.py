@@ -72,6 +72,11 @@ class GrabDeprecationWarning(Warning):
     Raised when some deprecated feature is used.
     """
 
+class GrabInvalidUrl(GrabError):
+    """
+    Raised when Grab have no idea how to handle the URL or when
+    some error occured while normalizing URL e.g. IDN processing.
+    """
 
 def warn(msg):
     warnings.warn(msg, category=GrabDeprecationWarning, stacklevel=3)

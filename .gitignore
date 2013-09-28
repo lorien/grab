@@ -27,3 +27,5 @@ docs/libpeerconnection.log
 /var/
 /.tox/
 /script/
+/test.py
+/many_links_prof

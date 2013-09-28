@@ -15,6 +15,20 @@ from .encoding import smart_str, smart_unicode, decode_pairs
 
 from grab.util.py3k_support import *
 
+# I do not know, what the hell is going on, but sometimes
+# when IDN url should be requested grab fails with error
+# LookupError: unknown encoding: punycode
+# That happens in grab/base.py near by 347 line on the line::
+# kwargs['url'] = normalize_url(kwargs['url'])
+# If you try to catch the error with except and import pdb; pdb.set_trace()
+# then you'll get "no pdb module" error. WTF??
+# But if you import pdb at the top of the module then you can use it
+# So.... I import here this module and I hope that will helps
+# My idea is that some mystical shit does some thing that breaks python
+# environment,, breaks sys.path So, when special case occures and some new module
+# is need to be imported then that can't be done due to the unknown magical influence
+import encodings.punycode
+
 logger = logging.getLogger('grab.tools.http')
 RE_NON_ASCII = re.compile(r'[^-.a-zA-Z0-9]')
 

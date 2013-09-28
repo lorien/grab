@@ -209,51 +209,55 @@ class TestSpider(TestCase):
         #bot.run()
         #self.assertEqual(['func'], tokens)
 
-    def test_task_fallback(self):
-        class TestSpider(Spider):
-            def prepare(self):
-                self.tokens = []
+    # Deprecated
+    # TODO: Change to middleware then it will be ready
+    #def test_task_fallback(self):
+        #class TestSpider(Spider):
+            #def prepare(self):
+                #self.tokens = []
 
-            def task_page(self, grab, task):
-                self.tokens.append('task')
+            #def task_page(self, grab, task):
+                #self.tokens.append('task')
 
-            def task_page_fallback(self, task):
-                self.tokens.append('fallback')
+            #def task_page_fallback(self, task):
+                #self.tokens.append('fallback')
 
-        SERVER.RESPONSE['code'] = 403
-        bot = TestSpider(network_try_limit=2)
-        bot.setup_queue()
-        bot.add_task(Task('page', url=SERVER.BASE_URL))
-        bot.run()
-        self.assertEqual(bot.tokens, ['fallback'])
+        #SERVER.RESPONSE['code'] = 403
+        #bot = TestSpider(network_try_limit=2)
+        #bot.setup_queue()
+        #bot.add_task(Task('page', url=SERVER.BASE_URL))
+        #bot.run()
+        #self.assertEqual(bot.tokens, ['fallback'])
 
-    def test_task_fallback_yields_new_task(self):
-        class TestSpider(Spider):
-            def prepare(self):
-                self.tokens = []
+    # Deprecated
+    # TODO: Change to middleware then it will be ready
+    #def test_task_fallback_yields_new_task(self):
+        #class TestSpider(Spider):
+            #def prepare(self):
+                #self.tokens = []
 
-            def task_page(self, grab, task):
-                self.tokens.append('task')
-                SERVER.RESPONSE['code'] = 403
-                yield Task('page2', url=SERVER.BASE_URL)
+            #def task_page(self, grab, task):
+                #self.tokens.append('task')
+                #SERVER.RESPONSE['code'] = 403
+                #yield Task('page2', url=SERVER.BASE_URL)
 
-            def task_page_fallback(self, task):
-                self.tokens.append('fallback')
-                SERVER.RESPONSE['code'] = 200
-                self.add_task(Task('page', url=SERVER.BASE_URL))
+            #def task_page_fallback(self, task):
+                #self.tokens.append('fallback')
+                #SERVER.RESPONSE['code'] = 200
+                #self.add_task(Task('page', url=SERVER.BASE_URL))
 
-            def task_page2(self, grab, task):
-                pass
+            #def task_page2(self, grab, task):
+                #pass
 
-            def task_page2_fallback(self, task):
-                self.tokens.append('fallback2')
+            #def task_page2_fallback(self, task):
+                #self.tokens.append('fallback2')
 
-        SERVER.RESPONSE['code'] = 403
-        bot = TestSpider(network_try_limit=2)
-        bot.setup_queue()
-        bot.add_task(Task('page', url=SERVER.BASE_URL))
-        bot.run()
-        self.assertEqual(bot.tokens, ['fallback', 'task', 'fallback2'])
+        #SERVER.RESPONSE['code'] = 403
+        #bot = TestSpider(network_try_limit=2)
+        #bot.setup_queue()
+        #bot.add_task(Task('page', url=SERVER.BASE_URL))
+        #bot.run()
+        #self.assertEqual(bot.tokens, ['fallback', 'task', 'fallback2'])
 
     def test_task_url_and_grab_options(self):
         class TestSpider(Spider):

@@ -18,12 +18,13 @@ except ImportError:
 import pycurl
 import tempfile
 import os.path
+import pdb
 
 from ..base import UploadContent, UploadFile
 from .. import error
 from ..response import Response
 from ..tools.http import encode_cookies, smart_urlencode, normalize_unicode,\
-                         normalize_http_values, normalize_post_data
+                         normalize_http_values, normalize_post_data, normalize_url
 from ..tools.user_agent import random_user_agent
 from ..tools.encoding import smart_str, smart_unicode, decode_list, decode_pairs
 
@@ -173,7 +174,10 @@ class CurlTransport(object):
         self.config_nobody = grab.config['nobody']
         self.config_body_maxsize = grab.config['body_maxsize']
 
-        request_url = grab.config['url']
+        try:
+            request_url = normalize_url(grab.config['url'])
+        except Exception, ex:
+            raise error.GrabInvalidUrl(u'%s: %s' % (unicode(ex), grab.config['url']))
 
         # py3 hack
         if not PY3K:
@@ -185,6 +189,11 @@ class CurlTransport(object):
         self.curl.setopt(pycurl.MAXREDIRS, grab.config['redirect_limit'])
         self.curl.setopt(pycurl.CONNECTTIMEOUT, grab.config['connect_timeout'])
         self.curl.setopt(pycurl.TIMEOUT, grab.config['timeout'])
+        self.curl.setopt(pycurl.IPRESOLVE, pycurl.IPRESOLVE_V4)
+        #self.curl.setopt(pycurl.DNS_CACHE_TIMEOUT, 0)
+        if not grab.config['connection_reuse']:
+            self.curl.setopt(pycurl.FRESH_CONNECT, 1)
+            self.curl.setopt(pycurl.FORBID_REUSE, 1)
 
         self.curl.setopt(pycurl.NOSIGNAL, 1)
         self.curl.setopt(pycurl.HEADERFUNCTION, self.head_processor)
@@ -356,6 +365,9 @@ class CurlTransport(object):
 
         if grab.config.get('interface') is not None:
             self.curl.setopt(pycurl.INTERFACE, grab.config['interface'])
+
+        if grab.config.get('reject_file_size') is not None:
+            self.curl.setopt(pycurl.MAXFILESIZE, grab.config['reject_file_size'])
 
     def request(self):
 

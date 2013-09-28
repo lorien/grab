@@ -102,6 +102,7 @@ SPIDER_TEST_LIST = (
     'test.spider_queue',
     'test.spider_misc',
     'test.spider_meta',
+    'test.spider_error',
 )
 
 SPIDER_EXTRA_TEST_LIST = (
