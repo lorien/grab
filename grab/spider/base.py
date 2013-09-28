@@ -334,20 +334,10 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
         return is_valid
 
-    def process_task_fallback(self, task):
-        try:
-            fallback_handler = getattr(self, 'task_%s_fallback' % task.name)
-        except AttributeError:
-            pass
-        else:
-            logger.error('task_*_fallback methods are deprecated! Do not use this feature please. It will be replaced with middleware layer')
-            fallback_handler(task)
-
     def check_task_limits_deprecated(self, task):
         is_valid = self.check_task_limits(task)
 
-        if not is_valid:
-            self.process_task_fallback(task)
+        # todo: middleware TaskFails
 
         return is_valid
 
@@ -923,27 +913,39 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
                         if not self.check_task_limits(task):
                             logger_verbose.debug('Task %s is rejected due to limits' % task.name)
-                            self.process_task_fallback(task)
+                            # TODO: middleware: TaskFails
                         else:
                             self.process_new_task(task)
 
                 with self.save_timer('network_transport'):
                     logger_verbose.debug('Asking transport layer to do something')
                     # Process active handlers
+                    #print '[select]'
                     self.transport.select(0.01)
+                    #print '[done]'
+
+                    #print '[process handlers #2]'
                     self.transport.process_handlers()
+                    #print '[done]'
 
                 logger_verbose.debug('Processing network results (if any).')
                 # Iterate over network trasport ready results
                 # Each result could be valid or failed
                 # Result format: {ok, grab, grab_config_backup, task, emsg}
+                
+                #print '[transport iterate results - start]'
                 for result in self.transport.iterate_results():
                     if self.is_valid_for_cache(result):
                         with self.save_timer('cache'):
                             with self.save_timer('cache.write'):
                                 self.cache.save_response(result['task'].url, result['grab'])
+
+                    #print '[process network results]'
                     self.process_network_result(result)
+                    #print '[done]'
                     self.inc_count('request')
+
+                #print '[transport iterate results - end]'
 
             logger_verbose.debug('Work done')
         except KeyboardInterrupt:
