@@ -18,7 +18,7 @@ and to work with scraped content:
 * Flexible customization of HTTP requests
 * Automatic charset detection
 * Powerful API of extracting info from HTML documents with XPATH queries
-* Asynchronous API to make thousands of simultaneous queries
+* Asynchronous API to make thousands of simultaneous queries. This part of library called Spider and it is too big to even list its features in this README.
 * Python 3 ready
 * And much, much more
 * Grab has written by the guy who is doing site scraping since 2005
