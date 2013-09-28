@@ -71,6 +71,7 @@ class Response(object):
                  'bom', 'timestamp',
                  'name_lookup_time', 'connect_time', 'total_time',
                  'download_size', 'upload_size', 'download_speed',
+                 'error_code', 'error_msg',
                  )
 
     def __init__(self):
@@ -96,6 +97,8 @@ class Response(object):
         self.download_size = 0
         self.upload_size = 0
         self.download_speed = 0
+        self.error_code = None
+        self.error_msg = None
 
     def parse(self, charset=None):
         """

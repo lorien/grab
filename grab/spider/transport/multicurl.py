@@ -103,6 +103,8 @@ class MulticurlTransport(object):
                 grab_config_backup = self.registry[curl_id]['grab_config_backup']
 
                 grab.process_request_result()
+                grab.response.error_code = ecode
+                grab.response.error_msg = emsg
 
                 # Free resources
                 del self.registry[curl_id]
