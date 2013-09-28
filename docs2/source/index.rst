@@ -24,6 +24,9 @@ Grab is not only a tool to build network requests and download network responses
 
 See quick start tutorials to quickly get main ideas about how to use Grab and Grab::Spider:
 
+Grab User Manual
+----------------
+
 .. toctree::
     :maxdepth: 2
 
@@ -39,3 +42,19 @@ See quick start tutorials to quickly get main ideas about how to use Grab and Gr
     grab_forms
     grab_charset
     pycurl
+    changelog
+
+API Reference
+-------------
+
+Using API Reference you can get ideas about what modules, classes, methods exists,
+ what they do, what returns, what parameters accepts.
+
+Base Grab Interface
+~~~~~~~~~~~~~~~~~~~
+
+.. toctree::
+    :maxdepth: 2
+
+    api_grab_base
+    api_grab_error
