@@ -6,11 +6,26 @@ Grab
     :target: https://travis-ci.org/lorien/grab
 
 
-Grab is a python site scraping framework. Grab provides powerful interface to two libraries:
-lxml and pycurl. There are two ways how to use Grab:
-1) Use Grab to configure network requests and to process fetched documents. In this way you
-should manually control flow of you program.
-2) Use Grab::Spider to buld asynchronous site scrapers. This is how scrapy works.
+Grab is a python site scraping framework. Grab provides tons of helpful methods to scrape web sites
+and to work with scraped content:
+
+* Automatic cookies (session) support
+* HTTP and SOCKS proxy with and without authorization
+* Keep-Alive support
+* IDN support
+* Tools to work with web forms
+* Easy multipart file uploading
+* Flexible customization of HTTP requests
+* Automatic charset detection
+* Powerful API of extracting info from HTML documents with XPATH queries
+* Asynchronous API to make thousands of simultaneous queries
+* Python 3 ready
+* And much, much more
+* Grab has written by the guy who is doing site scraping since 2005
+
+Check out docs: https://github.com/lorien/grab/tree/master/docs2/source
+
+I am working hard now (Sep 2013) to complete the documentation in English.
 
 Example of Grab usage::
 
@@ -54,19 +69,22 @@ Pip is recommended way to install Grab and its dependencies::
     $ pip install pycurl
     $ pip install grab
 
+See details here https://github.com/lorien/grab/blob/master/docs2/source/grab_installation.rst
+
 
 Documentation
 =============
 
 Russian docs: http://docs.grablib.org
-English docs in progress.
 
-Discussion group (Russian or English): http://groups.google.com/group/python-grab/
+English docs in progress: https://github.com/lorien/grab/tree/master/docs2/source
+
+Mailing List (Ru/En languages): http://groups.google.com/group/python-grab/
 
 
 Contribution
 ============
 
-If you found a bug or if you want new feature please create new issue on github:
+If you have found a bug or wish a new feature please open new issue on github:
 
 * https://github.com/lorien/grab/issues
