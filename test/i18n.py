@@ -6,6 +6,7 @@ import os.path
 
 from .util import GRAB_TRANSPORT
 from .tornado_util import SERVER
+from grab.tools.http import normalize_url
 
 class TestResponse(TestCase):
     def setUp(self):
@@ -14,6 +15,4 @@ class TestResponse(TestCase):
     def test_idn(self):
         url = 'http://почта.рф/path?arg=val'
         idn_url = 'http://xn--80a1acny.xn--p1ai/path?arg=val'
-        g = Grab(transport=GRAB_TRANSPORT)
-        g.setup(url=url)
-        self.assertEqual(g.config['url'], idn_url)
+        self.assertEqual(idn_url, normalize_url(url))

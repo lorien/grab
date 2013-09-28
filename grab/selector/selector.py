@@ -283,7 +283,16 @@ class XpathSelector(LxmlNodeBaseSelector):
             XPATH_CACHE[query] = obj
         xpath_obj = XPATH_CACHE[query]
 
-        return xpath_obj(self.node)
+        result = xpath_obj(self.node)
+
+        # If you query XPATH like //some/crap/@foo="bar" then xpath function
+        # returns boolean value instead of list of something.
+        # To work around this problem I just returns empty list.
+        # This is not great solutions but it produces less confusing error.
+        if isinstance(result, bool):
+            result = []
+
+        return result
 
 
 class PyquerySelector(LxmlNodeBaseSelector):

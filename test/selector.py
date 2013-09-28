@@ -98,6 +98,20 @@ class TestSelectorList(TestCase):
         sel = XpathSelector(self.tree).select('//ul/li[5]')
         self.assertEquals(False, sel.exists())
 
+    def test_incorrect_xpath(self):
+        # The lxml xpath function return boolean for following xpath
+        # This breaks selector internal logic that assumes that only
+        # list could be returnsed
+        # So it was fixed and this test was crated
+        sel = XpathSelector(self.tree).select('//ul/li/text()="oops"')
+        self.assertEquals(False, sel.exists())
+
+        # Selector list is always empty in this special case
+        # Even if the xpath return True on lxml level
+        self.assertEquals(True, self.tree.xpath('//ul[1]/li[1]/text()="one"'))
+        sel = XpathSelector(self.tree).select('//ul[1]/li[1]/text()="one"')
+        self.assertEquals(False, sel.exists())
+
 
 class TestJsonSelector(TestCase):
     def setUp(self):
