@@ -23,13 +23,14 @@ import re
 import json
 import email
 from datetime import datetime
+import pdb
 
 from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url
 from .response import Response
 from . import error
 from .upload import UploadContent, UploadFile
-from .tools.http import normalize_http_values, normalize_url
+from .tools.http import normalize_http_values
 from .extension import register_extensions
 
 from grab.util.py2old_support import *
@@ -345,7 +346,6 @@ class Grab(
         if 'url' in kwargs:
             if self.config.get('url'):
                 kwargs['url'] = self.make_url_absolute(kwargs['url'])
-            kwargs['url'] = normalize_url(kwargs['url'])
         self.config.update(kwargs)
 
     def go(self, url, **kwargs):

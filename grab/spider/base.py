@@ -31,6 +31,7 @@ except ImportError:
 from copy import deepcopy
 
 from ..base import GLOBAL_STATE, Grab
+from ..error import GrabInvalidUrl
 from .error import (SpiderError, SpiderMisuseError, FatalError,
                     StopTaskProcessing, NoTaskHandler, NoDataHandler)
 from .task import Task, NullTask
@@ -445,8 +446,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 try:
                     for x in xrange(min_limit - qsize):
                         item = next(self.task_generator_object)
-                        logger_verbose.debug('Found new task. Adding it')
-                        self.add_task(item)
+                        logger_verbose.debug('Got new item from generator. Processing it.')
+                        #self.add_task(item)
+                        self.process_handler_result(item)
                 except StopIteration:
                     # If generator have no values to yield
                     # then disable it
@@ -582,8 +584,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             except TypeError:
                 ex_str = str(ex)
 
+        task_url = task.url if task is not None else None
         self.add_item('fatal', '%s|%s|%s|%s' % (
-            func_name, ex.__class__.__name__, ex_str, task.url))
+            func_name, ex.__class__.__name__, ex_str, task_url))
         if isinstance(ex, FatalError):
             raise
 
@@ -634,6 +637,13 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 msg = res['emsg'] = 'HTTP %s' % res['grab'].response.code
             else:
                 msg = res['emsg']
+
+                # TODO: REMOVE
+                #if 'Operation timed out after' in msg:
+                    #num =  int(msg.split('Operation timed out after')[1].strip().split(' ')[0])
+                    #if num > 20000:
+                        #import pdb; pdb.set_trace()
+
             self.inc_count('network-error-%s' % res['emsg'][:20])
             logger.error(msg)
 
@@ -764,9 +774,17 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 self.change_proxy(task, grab)
                 with self.save_timer('network_transport'):
                     logger_verbose.debug('Submitting task to the transport layer')
-                    self.transport.process_task(task, grab, grab_config_backup)
-                    logger_verbose.debug('Asking transport layer to do something')
-                    self.transport.process_handlers()
+                    try:
+                        self.transport.process_task(task, grab, grab_config_backup)
+                    except GrabInvalidUrl, ex:
+                        logger.debug('Task %s has invalid URL: %s' % (
+                            task.name, task.url))
+                        self.add_item('invalid-url', task.url)
+                    else:
+                        logger_verbose.debug('Asking transport layer to do something')
+
+                        #print '[process handlers #1]'
+                        self.transport.process_handlers()
 
     def is_valid_for_cache(self, res):
         """
@@ -980,7 +998,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             yield ':-)'
         return
 
-    def process_handler_result(self, result, task):
+    def process_handler_result(self, result, task=None):
         """
         Process result received from the task handler.
 

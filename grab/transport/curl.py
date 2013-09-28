@@ -18,12 +18,13 @@ except ImportError:
 import pycurl
 import tempfile
 import os.path
+import pdb
 
 from ..base import UploadContent, UploadFile
 from .. import error
 from ..response import Response
 from ..tools.http import encode_cookies, smart_urlencode, normalize_unicode,\
-                         normalize_http_values, normalize_post_data
+                         normalize_http_values, normalize_post_data, normalize_url
 from ..tools.user_agent import random_user_agent
 from ..tools.encoding import smart_str, smart_unicode, decode_list, decode_pairs
 
@@ -173,7 +174,10 @@ class CurlTransport(object):
         self.config_nobody = grab.config['nobody']
         self.config_body_maxsize = grab.config['body_maxsize']
 
-        request_url = grab.config['url']
+        try:
+            request_url = normalize_url(grab.config['url'])
+        except Exception, ex:
+            raise error.GrabInvalidUrl(u'%s: %s' % (unicode(ex), grab.config['url']))
 
         # py3 hack
         if not PY3K:
