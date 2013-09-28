@@ -21,6 +21,7 @@ class ServerState(object):
         self.REQUEST.update({
             'args': {},
             'headers': {},
+            'cookies': None,
             'path': None,
             'method': None,
             'charset': 'utf-8',
@@ -37,6 +38,7 @@ class ServerState(object):
             'get': None,
             'post': None,
             'code': None,
+            'cookies': None,
         })
         self.SLEEP.update({
             'get': 0,
@@ -61,6 +63,7 @@ class MainHandler(tornado.web.RequestHandler):
         SERVER.REQUEST['headers'] = self.request.headers
         SERVER.REQUEST['path'] = self.request.path
         SERVER.REQUEST['method'] = self.request.method
+        SERVER.REQUEST['cookies'] = self.request.cookies
         charset = SERVER.REQUEST['charset']
         # py3 hack
         if PY3K and (charset not in ('utf-8', 'utf8')):
@@ -80,9 +83,16 @@ class MainHandler(tornado.web.RequestHandler):
             else:
                 self.set_status(SERVER.RESPONSE['code'])
 
-            if SERVER.RESPONSE['cookies']:
-                for name, value in sorted(SERVER.RESPONSE['cookies'].items()):
-                    self.set_header('Set-Cookie', '%s=%s' % (name, value))
+            if SERVER.RESPONSE_ONCE['cookies']:
+                for name, value in sorted(SERVER.RESPONSE_ONCE['cookies'].items()):
+                    # Set-Cookie: name=newvalue; expires=date; path=/; domain=.example.org.
+                    self.add_header('Set-Cookie', '%s=%s' % (name, value))
+                SERVER.RESPONSE_ONCE['cookies'] = None
+            else:
+                if SERVER.RESPONSE['cookies']:
+                    for name, value in sorted(SERVER.RESPONSE['cookies'].items()):
+                        # Set-Cookie: name=newvalue; expires=date; path=/; domain=.example.org.
+                        self.add_header('Set-Cookie', '%s=%s' % (name, value))
 
             if SERVER.RESPONSE['headers']:
                 for name, value in SERVER.RESPONSE['headers']:
