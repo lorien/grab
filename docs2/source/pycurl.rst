@@ -6,7 +6,7 @@ Pycurl Hints
 Grab can use different network libraries to send and receieve network queries. At the moment only pycurl is fully supported. In this document I want to share some things that can help you to get more from pycurl and from Grab.
 
 Asynchronous DNS Resolving
-==========================
+--------------------------
 
 Pycurl allows you to drive network requests asynchronously with multicurl interface. Unfortunatelly, by default multicurl do not handle DNS requests asynchronously. Than means that every DNS request block other network activity. You can manage it with building curl library from the source and configuring it to use ares library that knows how to do async. DNS requests.
 
@@ -38,7 +38,7 @@ You can manually check that you use curl lib with ares support::
 You should see something like "c-ares/1.10.0" if you made things well done.
 
 Supported Protocols
-===================
+-------------------
 
 By default, pycurl support tons of protocols including STMP, POP3, SSH, media streams, FTP. If you do not need all this crap you can disable it on the configure stage. Here is example of what you can do::
 
@@ -54,7 +54,7 @@ To see all aviable options just run the command::
 
 
 Python 3 Support
-================
+----------------
 
 If you are Ubuntu user then you can just use pycurl that is installed by you package manager. If you are a user of another linux distribution then (as far as I know) the only way for you to use pycurl in py3k is to download patched pycurl sources and install it manually. Good news, it is quite easy::
 
@@ -64,6 +64,6 @@ This command download patched pycurl and install it in to your system. I've just
 
 
 Multicurl and SOCKS proxy
-=========================
+-------------------------
 
 This combination just does not work. Use HTTP procies with multicurl.

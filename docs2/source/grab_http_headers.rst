@@ -33,3 +33,8 @@ Referer header
 --------------
 
 To specify content of Referer header use :ref:`option_referer` option. By default, Grab use the URL of previously request document as value of Referer header. If you do not like this behaviour, you can turn it off with :ref:`option_reuse_referer` option.
+
+HTTP Authentication
+-------------------
+
+To send HTTP authentication headers use :ref:`option_userpwd` option with value of format "username:password".

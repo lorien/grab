@@ -24,17 +24,18 @@ Grab is not only a tool to build network requests and download network responses
 
 See quick start tutorials to quickly get main ideas about how to use Grab and Grab::Spider:
 
-* :ref:`grab_quickstart`
-* :ref:`spider_quickstart`
-* :ref:`grab_installation`
-* :ref:`grab_configuration`
-* :ref:`grab_debugging`
-* :ref:`grab_options`
-* :ref:`grab_http_headers`
-* :ref:`grab_http_methods`
-* :ref:`grab_redirect`
-* :ref:`grab_forms`
-* :ref:`pycurl`
-
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
+
+    grab_quickstart
+    grab_installation
+    grab_configuration
+    grab_debugging
+    grab_options
+    grab_http_headers
+    grab_http_methods
+    grab_response_body
+    grab_redirect
+    grab_forms
+    grab_charset
+    pycurl
