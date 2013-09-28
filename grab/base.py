@@ -136,12 +136,16 @@ def default_config():
         hammer_mode = False,
         hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
 
+        # Connection
+        connection_reuse = True,
+
         # Response processing
         nobody = False,
         body_maxsize = None,
         body_inmemory = True,
         body_storage_dir = None,
         body_storage_filename = None,
+        reject_file_size = None,
 
         # Content compression
         encoding = 'gzip',

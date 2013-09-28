@@ -185,6 +185,11 @@ class CurlTransport(object):
         self.curl.setopt(pycurl.MAXREDIRS, grab.config['redirect_limit'])
         self.curl.setopt(pycurl.CONNECTTIMEOUT, grab.config['connect_timeout'])
         self.curl.setopt(pycurl.TIMEOUT, grab.config['timeout'])
+        self.curl.setopt(pycurl.IPRESOLVE, pycurl.IPRESOLVE_V4)
+        #self.curl.setopt(pycurl.DNS_CACHE_TIMEOUT, 0)
+        if not grab.config['connection_reuse']:
+            self.curl.setopt(pycurl.FRESH_CONNECT, 1)
+            self.curl.setopt(pycurl.FORBID_REUSE, 1)
 
         self.curl.setopt(pycurl.NOSIGNAL, 1)
         self.curl.setopt(pycurl.HEADERFUNCTION, self.head_processor)
@@ -356,6 +361,9 @@ class CurlTransport(object):
 
         if grab.config.get('interface') is not None:
             self.curl.setopt(pycurl.INTERFACE, grab.config['interface'])
+
+        if grab.config.get('reject_file_size') is not None:
+            self.curl.setopt(pycurl.MAXFILESIZE, grab.config['reject_file_size'])
 
     def request(self):
 
