@@ -365,7 +365,11 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if not isinstance(task, NullTask):
             if not task.url.startswith(('http://', 'https://', 'ftp://', 'file://')):
                 if self.base_url is None:
-                    raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified. Task: %s, URL: %s' % (task.name, task.url))
+                    #raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified. Task: %s, URL: %s' % (task.name, task.url))
+                    msg = 'Could not resolve relative URL because base_url is not specified. Task: %s, URL: %s' % (task.name, task.url)
+                    logger.error(msg)
+                    self.add_item('task-with-invalid-url', task.url)
+                    return False
                 else:
                     task.url = urljoin(self.base_url, task.url)
                     # If task has grab_config object then update it too
