@@ -64,6 +64,9 @@ class CookieManager(object):
         else:
             self.cookiejar = CookieJar()
 
+    def set(self, name, value, **kwargs):
+        self.cookiejar.set_cookie(create_cookie(name, value, **kwargs))
+
     def update(self, cookies):
         if isinstance(cookies, CookieJar):
             for cookie in cookies:

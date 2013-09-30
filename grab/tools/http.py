@@ -135,8 +135,10 @@ def normalize_unicode(value, charset='utf-8'):
     """
 
     if not isinstance(value, unicode):
-        raise GrabMisuseError('normalize_unicode function accepts only unicode values')
-    return value.encode(charset, 'ignore')
+        return value
+    else:
+        #raise GrabMisuseError('normalize_unicode function accepts only unicode values')
+        return value.encode(charset, 'ignore')
 
 
 def quote(data):

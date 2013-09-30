@@ -182,11 +182,6 @@ class CurlTransport(object):
         except Exception as ex:
             raise error.GrabInvalidUrl(u'%s: %s' % (unicode(ex), grab.config['url']))
 
-        request_host = urlsplit(request_url).netloc.split(':')[0]
-        request_host_nowww = request_host
-        if request_host_nowww.startswith('www.'):
-            request_host_nowww = request_host_nowww[4:]
-
         # py3 hack
         if not PY3K:
             request_url = smart_str(request_url)
@@ -306,41 +301,7 @@ class CurlTransport(object):
                          in headers.items()]
         self.curl.setopt(pycurl.HTTPHEADER, header_tuples)
 
-        # `cookiefile` option should be processed before `cookies` option
-        # because `load_cookies` updates `cookies` option
-        if grab.config['cookiefile']:
-            grab.load_cookies(grab.config['cookiefile'])
-
-        if grab.config['cookies']:
-            if not isinstance(grab.config['cookies'], dict):
-                raise error.GrabMisuseError('cookies option shuld be a dict')
-            items = encode_cookies(grab.config['cookies'], join=False,
-                                   charset=grab.config['charset'])
-            self.curl.setopt(pycurl.COOKIELIST, 'ALL')
-            for item in items:
-                if request_host_nowww != 'localhost' and cookie.domain:
-                    tail = '; domain=%s' % cookie.domain
-                else:
-                    tail = ''
-                self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s%s' % (
-                    item, tail))
-            # TODO: put cookies from `grab.cookiejar` into request
-
-        else:
-            # Turn on cookies engine anyway
-            # To correctly support cookies in 302-redirects
-            self.curl.setopt(pycurl.COOKIEFILE, '')
-
-        for cookie in grab.cookies.cookiejar:
-            if not cookie.domain or request_host_nowww in cookie.domain:
-                if request_host_nowww != 'localhost' and cookie.domain:
-                    tail = '; domain=%s' % cookie.domain
-                else:
-                    tail = ''
-                encoded = encode_cookies({cookie.name: cookie.value}, join=True,
-                                         charset=grab.config['charset'])
-                self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s%s' % (
-                    encoded, tail))
+        self.process_cookie_options(grab, request_url)
 
         if grab.config['referer']:
             self.curl.setopt(pycurl.REFERER, str(grab.config['referer']))
@@ -371,6 +332,51 @@ class CurlTransport(object):
 
         if grab.config.get('reject_file_size') is not None:
             self.curl.setopt(pycurl.MAXFILESIZE, grab.config['reject_file_size'])
+
+    def process_cookie_options(self, grab, request_url):
+
+        host = urlsplit(request_url).netloc.split(':')[0]
+        host_nowww = host
+        if host_nowww.startswith('www.'):
+            host_nowww = host_nowww[4:]
+
+        # `cookiefile` option should be processed before `cookies` option
+        # because `load_cookies` updates `cookies` option
+        if grab.config['cookiefile']:
+            grab.cookies.load_from_file(grab.config['cookiefile'])
+
+        if grab.config['cookies']:
+            if not isinstance(grab.config['cookies'], dict):
+                raise error.GrabMisuseError('cookies option shuld be a dict')
+            for name, value in grab.config['cookies'].items():
+                if '.' in host_nowww:
+                    domain = host_nowww
+                else:
+                    domain = ''
+                grab.cookies.set(
+                    name=normalize_unicode(name, grab.config['charset']),
+                    value=normalize_unicode(value, grab.config['charset']),
+                    domain=domain
+                )
+
+        # Erase known cookies stored in pycurl handler
+        self.curl.setopt(pycurl.COOKIELIST, 'ALL')
+
+        # Enable pycurl cookie processing mode
+        self.curl.setopt(pycurl.COOKIELIST, '')
+
+        # TODO: At this point we should use cookielib magic
+        # to pick up cookies for the current requests
+        for cookie in grab.cookies.cookiejar:
+            if not cookie.domain or host_nowww in cookie.domain:
+                if '.' in host_nowww:
+                    tail = '; domain=%s' % cookie.domain
+                else:
+                    tail = ''
+                encoded = encode_cookies({cookie.name: cookie.value}, join=True,
+                                         charset=grab.config['charset'])
+                self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s%s' % (
+                    encoded, tail))
 
     def request(self):
 
