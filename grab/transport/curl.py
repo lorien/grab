@@ -22,6 +22,7 @@ import pdb
 from cookielib import CookieJar
 from urlparse import urlsplit
 
+from ..cookie import create_cookie, CookieManager
 from ..upload import UploadContent, UploadFile
 from .. import error
 from ..response import Response
@@ -29,7 +30,6 @@ from ..tools.http import encode_cookies, smart_urlencode, normalize_unicode,\
                          normalize_http_values, normalize_post_data, normalize_url
 from ..tools.user_agent import random_user_agent
 from ..tools.encoding import smart_str, smart_unicode, decode_list, decode_pairs
-from ..cookie import create_cookie
 
 from grab.util.py3k_support import *
 
@@ -306,26 +306,6 @@ class CurlTransport(object):
                          in headers.items()]
         self.curl.setopt(pycurl.HTTPHEADER, header_tuples)
 
-
-        # CURLOPT_COOKIELIST
-        # Pass a char * to a cookie string. Cookie can be either in
-        # Netscape / Mozilla format or just regular HTTP-style
-        # header (Set-Cookie: ...) format.
-        # If cURL cookie engine was not enabled it will enable its cookie
-        # engine.
-        # Passing a magic string "ALL" will erase all cookies known by cURL.
-        # (Added in 7.14.1)
-        # Passing the special string "SESS" will only erase all session
-        # cookies known by cURL. (Added in 7.15.4)
-        # Passing the special string "FLUSH" will write all cookies known by
-        # cURL to the file specified by CURLOPT_COOKIEJAR. (Added in 7.17.1)
-
-        # CURLOPT_COOKIE
-        # Pass a pointer to a zero terminated string as parameter. It will be used to set a cookie in the http request. The format of the string should be NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie should contain.
-        # If you need to set multiple cookies, you need to set them all using a single option and thus you need to concatenate them all in one single string. Set multiple cookies in one string like this: "name1=content1; name2=content2;" etc.
-        # Note that this option sets the cookie header explictly in the outgoing request(s). If multiple requests are done due to authentication, followed redirections or similar, they will all get this cookie passed on.
-        # Using this option multiple times will only make the latest string override the previous ones. 
-
         # `cookiefile` option should be processed before `cookies` option
         # because `load_cookies` updates `cookies` option
         if grab.config['cookiefile']:
@@ -351,14 +331,16 @@ class CurlTransport(object):
             # To correctly support cookies in 302-redirects
             self.curl.setopt(pycurl.COOKIEFILE, '')
 
-        for cookie in grab.cookiejar:
+        for cookie in grab.cookies.cookiejar:
             if not cookie.domain or request_host_nowww in cookie.domain:
                 if request_host_nowww != 'localhost' and cookie.domain:
                     tail = '; domain=%s' % cookie.domain
                 else:
                     tail = ''
-                self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s=%s%s' % (
-                    cookie.name, cookie.value, tail))
+                encoded = encode_cookies({cookie.name: cookie.value}, join=True,
+                                         charset=grab.config['charset'])
+                self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s%s' % (
+                    encoded, tail))
 
         if grab.config['referer']:
             self.curl.setopt(pycurl.REFERER, str(grab.config['referer']))
@@ -370,9 +352,6 @@ class CurlTransport(object):
 
         if grab.config['proxy_userpwd']:
             self.curl.setopt(pycurl.PROXYUSERPWD, str(grab.config['proxy_userpwd']))
-
-        # PROXYTYPE
-        # Pass a long with this option to set type of the proxy. Available options for this are CURLPROXY_HTTP, CURLPROXY_HTTP_1_0 (added in 7.19.4), CURLPROXY_SOCKS4 (added in 7.15.2), CURLPROXY_SOCKS5, CURLPROXY_SOCKS4A (added in 7.18.0) and CURLPROXY_SOCKS5_HOSTNAME (added in 7.18.0). The HTTP type is default. (Added in 7.10) 
 
         if grab.config['proxy_type']:
             ptype = getattr(pycurl, 'PROXYTYPE_%s' % grab.config['proxy_type'].upper())
@@ -457,7 +436,7 @@ class CurlTransport(object):
         else:
             response.parse()
 
-        response.cookiejar = self.extract_cookiejar()
+        response.cookies = CookieManager(self.extract_cookiejar())
 
         # We do not need anymore cookies stored in the
         # curl instance so drop them

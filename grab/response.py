@@ -5,7 +5,6 @@ import re
 from copy import copy
 import logging
 import email
-from cookielib import CookieJar
 try:
     from urllib2 import Request
 except ImportError:
@@ -21,10 +20,9 @@ import webbrowser
 import codecs
 from datetime import datetime
 
-from grab.tools import encoding as encoding_tools
-
+import grab.tools.encoding
+from .cookie import CookieManager
 from .tools.files import hashed_path
-
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.response')
@@ -66,7 +64,7 @@ class Response(object):
     """
 
     __slots__ = ('status', 'code', 'head', '_body', '_runtime_body',
-                 'body_path', 'headers', 'url', 'cookiejar',
+                 'body_path', 'headers', 'url', 'cookies',
                  'charset', '_unicode_body', '_unicode_runtime_body',
                  'bom', 'timestamp',
                  'name_lookup_time', 'connect_time', 'total_time',
@@ -85,7 +83,7 @@ class Response(object):
         self.headers =None
         self.url = None
         #self.cookies = {}
-        self.cookiejar = CookieJar()
+        self.cookies = CookieManager()
         self.charset = 'utf-8'
         self._unicode_body = None
         self._unicode_runtime_body = None
@@ -126,10 +124,6 @@ class Response(object):
                         valid_lines.append(line)
 
         self.headers = email.message_from_string('\n'.join(valid_lines))
-        #self.cookiejar = CookieJar()
-        #self.cookiejar._extract_cookies(self, Request(self.url))
-        #for cookie in self.cookiejar:
-            #self.cookies[cookie.name] = cookie.value
 
         if charset is None:
             if isinstance(self.body, unicode):
@@ -141,14 +135,13 @@ class Response(object):
 
         self._unicode_body = None
 
-    def info(self):
-        """
-        This method need for using Response instance in
-        ``Cookiejar.extract_cookies`` method.
-        """
+    #def info(self):
+        #"""
+        #This method need for using Response instance in
+        #``Cookiejar.extract_cookies`` method.
+        #"""
 
-        return self.headers
-
+        #return self.headers
 
     def detect_charset(self):
         """
@@ -225,7 +218,7 @@ class Response(object):
         if bom:
             body = body[len(self.bom):]
         if fix_special_entities:
-            body = encoding_tools.fix_special_entities(body)
+            body = grab.tools.encoding.fix_special_entities(body)
         if ignore_errors:
             errors = 'ignore'
         else:
@@ -269,8 +262,8 @@ class Response(object):
             setattr(obj, key, getattr(self, key))
 
         obj.headers = copy(self.headers)
-        obj.cookiejar = copy(self.cookiejar)
-        #obj.cookiejar = copy(self.cookiejar)
+        # TODO: Maybe, deepcopy?
+        obj.cookies = copy(self.cookies)
 
         return obj
 
@@ -409,35 +402,3 @@ class Response(object):
     def time(self):
         logger.error('Attribute Response.time is deprecated. Use Response.total_time instead.')
         return self.total_time
-
-    @property
-    def cookies(self):
-        # TODO: iterate only over cookies belongs to the current response
-        reg = {}
-        for cookie in self.cookiejar:
-            reg[cookie.name] = cookie.value
-        return reg
-
-    def __getstate__(self):
-        state = {}
-        for cls in type(self).mro():
-            cls_slots = getattr(cls, '__slots__', ())
-            for slot in cls_slots:
-                if slot != '__weakref__':
-                    if hasattr(self, slot):
-                        state[slot] = getattr(self, slot)
-
-        state['_cookiejar_cookies'] = list(self.cookiejar)
-        del state['cookiejar']
-
-        return state
-
-    def __setstate__(self, state):
-        state['cookiejar'] = CookieJar()
-        for cookie in state['_cookiejar_cookies']:
-            state['cookiejar'].set_cookie(cookie)
-        del state['_cookiejar_cookies']
-
-        for slot, value in state.items():
-            print slot, '-->', value
-            setattr(self, slot, value)

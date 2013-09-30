@@ -28,6 +28,7 @@ from .response import Response
 from . import error
 from .tools.http import normalize_http_values
 from .extension import register_extensions
+from .cookie import CookieManager, create_cookie
 
 from grab.util.py2old_support import *
 from grab.util.py3k_support import *
@@ -202,7 +203,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                  'proxylist', 'config', '_request_prepared',
                  'clone_counter', 'response', 'transport',
                  'transport_param', 'request_method', 'request_counter',
-                 '__weakref__', 'cookiejar',
+                 '__weakref__', 'cookies',
 
                  # Dirst hack to make it possbile to inherit Grab from
                  # multiple base classes with __slots__
@@ -217,7 +218,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     # Attributes which should be processed when clone
     # of Grab instance is creating
     clonable_attributes = ('request_head', 'request_log', 'request_body',
-                           'proxylist', 'cookiejar')
+                           'proxylist', 'cookies')
 
     # Complex config items which points to mutable objects
     mutable_config_keys = copy(MUTABLE_CONFIG_KEYS)
@@ -237,7 +238,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.trigger_extensions('config')
         self.trigger_extensions('init')
         self._request_prepared = False
-        self.cookiejar = CookieJar()
+        self.cookies = CookieManager()
 
         self.setup_transport(transport)
 
@@ -500,16 +501,16 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         else:
             self.response = self.transport.prepare_response(self)
 
-        self.merge_cookiejar(self.response.cookiejar)
+        self.cookies.update(self.response.cookies)
 
         self.response.timestamp = now
 
         self.config['charset'] = self.response.charset
 
-        if self.config['reuse_cookies']:
-            # Copy cookies from response into config object
-            for name, value in self.response.cookies.items():
-                self.config['cookies'][name] = value
+        #if self.config['reuse_cookies']:
+            ## Copy cookies from response into config object
+            #for name, value in self.response.cookies.items():
+                #self.config['cookies'][name] = value
 
         # TODO: raise GrabWarning if self.config['http_warnings']
         #if 400 <= self.response_code:
@@ -707,7 +708,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         self.config['cookies'] = {}
-        self.cookiejar = CookieJar()
+        self.cookies.clear()
 
     def load_cookies(self, path, file_required=True):
         """
@@ -729,7 +730,10 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             else:
                 pass
         else:
-            self.config['cookies'].update(cookies)
+            jar = CookieJar()
+            for name, value in cookies.items():
+                jar.set_cookie(create_cookie(name, value))
+            self.cookies.update(jar)
 
     def dump_cookies(self, path):
         """
@@ -739,7 +743,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         with open(path, 'w') as out:
-            out.write(json.dumps(self.config['cookies']))
+            out.write(json.dumps(dict(self.cookies.items())))
 
     def setup_with_proxyline(self, line, proxy_type='http'):
         # TODO: remove from base class
@@ -767,17 +771,9 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         state['_lxml_tree'] = None
         state['_strict_lxml_tree'] = None
 
-        state['_cookiejar_cookies'] = list(self.cookiejar)
-        del state['cookiejar']
-
         return state
 
     def __setstate__(self, state):
-        state['cookiejar'] = CookieJar()
-        for cookie in state['_cookiejar_cookies']:
-            state['cookiejar'].set_cookie(cookie)
-        del state['_cookiejar_cookies']
-
         for slot, value in state.items():
             setattr(self, slot, value)
 
@@ -797,10 +793,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         except Exception as ex:
             logging.error('Could not parse request headers', exc_info=ex)
             return {}
-
-    def merge_cookiejar(self, cjar):
-        for cookie in cjar:
-            self.cookiejar.set_cookie(cookie)
 
 
 register_extensions(Grab)

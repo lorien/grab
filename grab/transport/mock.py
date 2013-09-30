@@ -6,12 +6,9 @@ import logging
 from cookielib import CookieJar
 
 from ..base import Grab
-#from .. import error
 from ..response import Response
-#from ..tools.http import encode_cookies, urlencode, normalize_unicode,\
-                         #normalize_http_values
-#from ..tools.user_agent import random_user_agent
 from ..error import GrabNetworkError
+from ..cookie import CookieManager
 
 class GrabMockNotFoundError(GrabNetworkError):
     """
@@ -72,7 +69,7 @@ class MockTransport(object):
         response.connect_time = 0
         response.url = self.request_url
         response.parse()
-        response.cookiejar = self.extract_cookiejar()
+        response.cookies = CookieManager(self.extract_cookiejar())
 
         return response
 

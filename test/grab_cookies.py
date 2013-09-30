@@ -77,6 +77,7 @@ class TestCookies(TestCase):
         g = Grab(transport=GRAB_TRANSPORT)
         cookies = {'foo': 'bar', 'spam': 'ham'}
         g.setup(cookies=cookies)
+        g.go(SERVER.BASE_URL)
         g.dump_cookies(TMP_FILE)
         self.assertEqual(set(cookies.items()), set(json.load(open(TMP_FILE)).items()))
 
@@ -84,6 +85,7 @@ class TestCookies(TestCase):
         g = Grab(transport=GRAB_TRANSPORT)
         cookies = {'foo': 'bar', 'spam': u'бегемот'}
         g.setup(cookies=cookies)
+        g.go(SERVER.BASE_URL)
         g.dump_cookies(TMP_FILE)
         self.assertEqual(set(cookies.items()), set(json.load(open(TMP_FILE)).items()))
 
@@ -92,7 +94,7 @@ class TestCookies(TestCase):
         cookies = {'foo': 'bar', 'spam': u'бегемот'}
         json.dump(cookies, open(TMP_FILE, 'w'))
         g.load_cookies(TMP_FILE)
-        self.assertEqual(set(g.config['cookies'].items()), set(cookies.items()))
+        self.assertEqual(set(g.cookies.items()), set(cookies.items()))
 
     def test_cookiefile(self):
         g = Grab(transport=GRAB_TRANSPORT)
@@ -115,9 +117,9 @@ class TestCookies(TestCase):
         # This is correct reslt of combining two cookies
         MERGED_COOKIES = {'godzilla': 'monkey', 'spam': 'ham'}
 
-        # g.config should contains merged cookies
+        # g.cookies should contains merged cookies
         self.assertEqual(set(MERGED_COOKIES.items()),
-                         set(g.config['cookies'].items()))
+                         set(g.cookies.items()))
 
         # `cookiefile` file should contains merged cookies
         self.assertEqual(set(MERGED_COOKIES.items()),
