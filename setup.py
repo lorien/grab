@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-import re
 import os
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
@@ -11,7 +10,7 @@ setup(
     description = 'Site Scraping Framework',
     long_description = open(os.path.join(ROOT, 'README.rst')).read(),
     url = 'http://grablib.org',
-    author = 'Grigory Petukhov',
+    author = 'Gregory Petukhov',
     author_email = 'lorien@lorien.name',
 
     packages = find_packages(),
@@ -19,8 +18,9 @@ setup(
     scripts = ('bin/grab',),
 
     license = "MIT",
-    keywords = "pycurl multicurl curl network parsing grabbing scraping lxml xpath",
-    classifiers=[
+    keywords = "pycurl multicurl curl network parsing grabbing scraping"\
+               " lxml xpath data mining",
+    classifiers = (
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
@@ -34,5 +34,5 @@ setup(
         'Topic :: Software Development :: Libraries :: Application Frameworks',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Internet :: WWW/HTTP',
-    ],
+    ),
 )

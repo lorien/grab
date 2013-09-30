@@ -48,7 +48,7 @@ class MulticurlTransport(object):
         try:
             grab.prepare_request()
             grab.log_request()
-        except Exception, ex:
+        except Exception as ex:
             # If some error occured while processing the request arguments
             # then we should put curl object back to free list
             del self.registry[id(curl)]

@@ -8,8 +8,7 @@ The core of grab package: the Grab class.
 from __future__ import absolute_import
 import logging
 import os
-#import urllib
-from random import randint, choice
+from random import randint
 from copy import copy
 import threading
 import itertools
@@ -18,18 +17,14 @@ try:
     from urlparse import urljoin
 except ImportError:
     from urllib.parse import urljoin
-import time
-import re
 import json
 import email
 from datetime import datetime
-import pdb
 
 from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url
 from .response import Response
 from . import error
-from .upload import UploadContent, UploadFile
 from .tools.http import normalize_http_values
 from .extension import register_extensions
 
@@ -62,7 +57,7 @@ from .ext.ftp import FTPExtension
 from .ext.doc import DocExtension
 from .ext.kit import KitExtension
 
-__all__ = ('Grab', 'UploadContent', 'UploadFile')
+__all__ = ('Grab',)
 
 MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies',
                        'hammer_timeouts']
@@ -73,6 +68,7 @@ logger = logging.getLogger('grab.base')
 # It is separate logger to allow you easily
 # control network logging separately from other grab logs
 logger_network = logging.getLogger('grab.network')
+
 
 def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
     """
@@ -105,7 +101,7 @@ def default_config():
 
         # Only for selenium transport
         webdriver = 'firefox',
-        selenium_wait = 1, # in seconds
+        selenium_wait = 1,  # in seconds
 
         # Proxy
         proxy = None,
@@ -196,8 +192,7 @@ def default_config():
     )
 
 
-class Grab(
-           LXMLExtension, FormExtension, PyqueryExtension,
+class Grab(LXMLExtension, FormExtension, PyqueryExtension,
            DjangoExtension, TextExtension, RegexpExtension,
            FTPExtension, DocExtension, KitExtension,
            ):
@@ -261,7 +256,7 @@ class Grab(
         elif isinstance(transport_param, collections.Callable):
             self.transport = transport_param()
         else:
-            raise GrabMisuseError('Option `transport` should be string or callable. '\
+            raise GrabMisuseError('Option `transport` should be string or callable. '
                                   'Got %s' % type(transport_param))
 
     def reset(self):
@@ -435,11 +430,10 @@ class Grab(
                 self.prepare_request(**kwargs)
                 self.log_request()
                 self.transport.request()
-            except error.GrabError as ex:
+            except error.GrabError:
 
                 # In hammer mode try to use next timeouts
-                if self.config['hammer_mode']:# and isinstance(ex, (error.GrabTimeoutError,
-                                              #                    error.GrabConnectionError)):
+                if self.config['hammer_mode']:
                     # If no more timeouts
                     # then raise an error
                     if not hammer_timeouts:
@@ -449,7 +443,8 @@ class Grab(
                     else:
                         connect_timeout, total_timeout = hammer_timeouts.pop(0)
                         self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
-                        logger_network.debug('Trying another timeouts. Connect: %d sec., total: %d sec.' % (connect_timeout, total_timeout))
+                        logger_network.debug('Trying another timeouts. Connect: %d sec., '
+                                             'total: %d sec.' % (connect_timeout, total_timeout))
                         self._request_prepared = False
                 # If we are not in hammer mode
                 # Then just raise an error
@@ -519,7 +514,6 @@ class Grab(
         if self.config['log_file']:
             with open(self.config['log_file'], 'wb') as out:
                 out.write(self.response.body)
-
 
         if self.config['cookiefile']:
             self.dump_cookies(self.config['cookiefile'])
@@ -639,7 +633,8 @@ class Grab(
         """
 
         return {
-            'Accept': 'text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d' % randint(2, 5),
+            'Accept': 'text/xml,application/xml,application/xhtml+xml'
+                      ',text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d' % randint(2, 5),
             'Accept-Language': 'en-us,en;q=0.%d' % (randint(5, 9)),
             'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.%d' % randint(5, 7),
             'Keep-Alive': '300',
@@ -688,7 +683,7 @@ class Grab(
         request method will be used.
 
         Returns request method in upper case
-        
+
         This method needs simetime when process_config method
         was not executed yet.
         """
@@ -769,7 +764,6 @@ class Grab(
         state['_strict_lxml_tree'] = None
 
         return state
-
 
     def __setstate__(self, state):
         for slot, value in state.items():

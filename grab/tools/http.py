@@ -9,7 +9,7 @@ except ImportError:
 import re
 import logging
 
-from ..base import UploadFile, UploadContent
+from ..upload import UploadFile, UploadContent
 from ..error import GrabMisuseError
 from .encoding import smart_str, smart_unicode, decode_pairs
 

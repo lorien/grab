@@ -770,7 +770,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                     logger_verbose.debug('Submitting task to the transport layer')
                     try:
                         self.transport.process_task(task, grab, grab_config_backup)
-                    except GrabInvalidUrl, ex:
+                    except GrabInvalidUrl as ex:
                         logger.debug('Task %s has invalid URL: %s' % (
                             task.name, task.url))
                         self.add_item('invalid-url', task.url)

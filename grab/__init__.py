@@ -1,6 +1,6 @@
 from .error import (GrabError, DataNotFound, GrabNetworkError,
                     GrabMisuseError, GrabTimeoutError)
-from .base import UploadContent, UploadFile
+from .upload import UploadContent, UploadFile
 from .base import Grab
 from .tools.logs import default_logging
 

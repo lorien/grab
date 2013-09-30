@@ -20,7 +20,7 @@ import tempfile
 import os.path
 import pdb
 
-from ..base import UploadContent, UploadFile
+from ..upload import UploadContent, UploadFile
 from .. import error
 from ..response import Response
 from ..tools.http import encode_cookies, smart_urlencode, normalize_unicode,\
@@ -176,7 +176,7 @@ class CurlTransport(object):
 
         try:
             request_url = normalize_url(grab.config['url'])
-        except Exception, ex:
+        except Exception as ex:
             raise error.GrabInvalidUrl(u'%s: %s' % (unicode(ex), grab.config['url']))
 
         # py3 hack

@@ -1,7 +1,6 @@
 from multiprocessing import Process
 import logging
-import pymongo
-from multiprocessing import Manager, Queue, Event, active_children
+from multiprocessing import Queue, Event, active_children
 import time
 try:
     from urlparse import urlsplit
@@ -9,13 +8,13 @@ except ImportError:
     from urllib.parse import urlsplit
 import os
 
-from grab.spider import Spider, Task, Data
-from grab.spider.base import logger_verbose
+from grab.spider import Spider, Task
 from grab.spider.queue_backend.redis import QueueBackend
 
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('ng')
+
 
 class SimpleParserSpider(Spider):
     initial_urls = ['http://dumpz.org']
@@ -49,6 +48,7 @@ def start_spider(spider_cls):
         generator_done_event = Event()
         taskq = QueueBackend('ng')
 
+        #from grab.spider.base import logger_verbose
         #logger_verbose.setLevel(logging.DEBUG)
 
         kwargs = {
@@ -62,8 +62,7 @@ def start_spider(spider_cls):
 
         # Generator: OK
         generator_waiting_shutdown_event = Event()
-        bot = spider_cls(waiting_shutdown_event=generator_waiting_shutdown_event,
-                     **kwargs)
+        bot = spider_cls(waiting_shutdown_event=generator_waiting_shutdown_event, **kwargs)
         generator = Process(target=bot.run_generator)
         generator.start()
 
