@@ -6,8 +6,13 @@ RTFM:
 Some code got from https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 """
 from cookielib import Cookie, CookieJar
+import json
 
 from .error import GrabMisuseError
+
+COOKIE_ATTRS = ('name', 'value', 'version', 'port', 'domain',
+                'path', 'secure', 'expires', 'discard', 'comment',
+                'comment_url', 'rfc2109')
 
 def create_cookie(name, value, **kwargs):
     """Creates `cookielib.Cookie` instance.
@@ -106,3 +111,37 @@ class CookieManager(object):
         for cookie in self.cookiejar:
             res.append((cookie.name, cookie.value))
         return res
+
+    def load_from_file(self, path):
+        """
+        Load cookies from the file.
+
+        Content of file should be a JSON-serialized list of dicts.
+        """
+
+        with open(path) as inf:
+            data = inf.read()
+            if data:
+                items = json.loads(data)
+            else:
+                items = {}
+        jar = CookieJar()
+        for item in items:
+            jar.set_cookie(create_cookie(**item))
+        self.update(jar)
+
+    def get_dict(self):
+        res = []
+        for cookie in self.cookiejar:
+            res.append(dict((x, getattr(cookie, x)) for x in COOKIE_ATTRS))
+        return res
+
+    def save_to_file(self, path):
+        """
+        Dump all cookies to file.
+
+        Cookies are dumped as JSON-serialized dict of keys and values.
+        """
+
+        with open(path, 'w') as out:
+            out.write(json.dumps(self.get_dict()))

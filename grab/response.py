@@ -82,7 +82,6 @@ class Response(object):
         self.body_path = None
         self.headers =None
         self.url = None
-        #self.cookies = {}
         self.cookies = CookieManager()
         self.charset = 'utf-8'
         self._unicode_body = None
@@ -134,14 +133,6 @@ class Response(object):
             self.charset = charset
 
         self._unicode_body = None
-
-    #def info(self):
-        #"""
-        #This method need for using Response instance in
-        #``Cookiejar.extract_cookies`` method.
-        #"""
-
-        #return self.headers
 
     def detect_charset(self):
         """

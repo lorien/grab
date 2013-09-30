@@ -16,7 +16,7 @@ from ..base import GLOBAL_STATE
 from ..tools.text import normalize_space as normalize_space_func, find_number
 from ..tools.lxml_tools import get_node_text
 from ..response import RE_XML_DECLARATION
-from ..tools.internal import deprecated
+from ..util.misc import deprecated
 
 from grab.util.py3k_support import *
 

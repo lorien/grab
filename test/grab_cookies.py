@@ -40,15 +40,16 @@ class TestCookies(TestCase):
         g.go(SERVER.BASE_URL)
         self.assertEqual(SERVER.REQUEST['headers']['Cookie'], 'foo=bar')
 
-        # Test that Grab uses Set-Cookie header
+        # Test reuse_cookies=False
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(reuse_cookies=False)
         SERVER.RESPONSE['cookies'] = {'foo': 'baz'}
         g.go(SERVER.BASE_URL)
         self.assertEqual(g.response.cookies['foo'], 'baz')
         g.go(SERVER.BASE_URL)
-        self.assertTrue(len(SERVER.REQUEST['cookies']) > 0)
+        self.assertTrue(len(SERVER.REQUEST['cookies']) == 0)
 
+        # Test something
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(reuse_cookies=True)
         SERVER.RESPONSE['cookies'] = {'foo': 'bar'}
@@ -79,7 +80,8 @@ class TestCookies(TestCase):
         g.setup(cookies=cookies)
         g.go(SERVER.BASE_URL)
         g.dump_cookies(TMP_FILE)
-        self.assertEqual(set(cookies.items()), set(json.load(open(TMP_FILE)).items()))
+        self.assertEqual(set(cookies.items()),
+                         set((x['name'], x['value']) for x in json.load(open(TMP_FILE))))
 
         # Test non-ascii
         g = Grab(transport=GRAB_TRANSPORT)
@@ -87,14 +89,17 @@ class TestCookies(TestCase):
         g.setup(cookies=cookies)
         g.go(SERVER.BASE_URL)
         g.dump_cookies(TMP_FILE)
-        self.assertEqual(set(cookies.items()), set(json.load(open(TMP_FILE)).items()))
+        self.assertEqual(set(cookies.items()),
+                         set((x['name'], x['value']) for x in json.load(open(TMP_FILE))))
 
         # Test load cookies
         g = Grab(transport=GRAB_TRANSPORT)
-        cookies = {'foo': 'bar', 'spam': u'бегемот'}
+        cookies = [{'name': 'foo', 'value': 'bar'},
+                   {'name': 'spam', 'value': u'бегемот'}]
         json.dump(cookies, open(TMP_FILE, 'w'))
         g.load_cookies(TMP_FILE)
-        self.assertEqual(set(g.cookies.items()), set(cookies.items()))
+        self.assertEqual(set(g.cookies.items()),
+                         set((x['name'], x['value']) for x in cookies))
 
     def test_cookiefile(self):
         g = Grab(transport=GRAB_TRANSPORT)
@@ -104,7 +109,7 @@ class TestCookies(TestCase):
         g.setup(cookiefile=TMP_FILE)
         g.go(SERVER.BASE_URL)
 
-        cookies = {'spam': 'ham'}
+        cookies = [{'name': 'spam', 'value': 'ham'}]
         json.dump(cookies, open(TMP_FILE, 'w'))
 
         # One cookie are sent in server reponse
@@ -115,12 +120,12 @@ class TestCookies(TestCase):
         self.assertEqual(SERVER.REQUEST['cookies']['spam'].value, 'ham')
 
         # This is correct reslt of combining two cookies
-        MERGED_COOKIES = {'godzilla': 'monkey', 'spam': 'ham'}
+        MERGED_COOKIES = [('godzilla', 'monkey'), ('spam', 'ham')]
 
         # g.cookies should contains merged cookies
-        self.assertEqual(set(MERGED_COOKIES.items()),
+        self.assertEqual(set(MERGED_COOKIES),
                          set(g.cookies.items()))
 
         # `cookiefile` file should contains merged cookies
-        self.assertEqual(set(MERGED_COOKIES.items()),
-                         set(json.load(open(TMP_FILE)).items()))
+        self.assertEqual(set(MERGED_COOKIES),
+                         set((x['name'], x['value']) for x in json.load(open(TMP_FILE))))

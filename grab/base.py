@@ -29,9 +29,9 @@ from . import error
 from .tools.http import normalize_http_values
 from .extension import register_extensions
 from .cookie import CookieManager, create_cookie
-
-from grab.util.py2old_support import *
-from grab.util.py3k_support import *
+from .util.misc import deprecated
+from .util.py2old_support import *
+from .util.py3k_support import *
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
@@ -501,20 +501,12 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         else:
             self.response = self.transport.prepare_response(self)
 
-        self.cookies.update(self.response.cookies)
+        if self.config['reuse_cookies']:
+            self.cookies.update(self.response.cookies)
 
         self.response.timestamp = now
 
         self.config['charset'] = self.response.charset
-
-        #if self.config['reuse_cookies']:
-            ## Copy cookies from response into config object
-            #for name, value in self.response.cookies.items():
-                #self.config['cookies'][name] = value
-
-        # TODO: raise GrabWarning if self.config['http_warnings']
-        #if 400 <= self.response_code:
-            #raise IOError('Response code is %s: ' % self.response_code)
 
         if self.config['log_file']:
             with open(self.config['log_file'], 'wb') as out:
@@ -710,40 +702,13 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.config['cookies'] = {}
         self.cookies.clear()
 
+    @deprecated(use_instead='grab.cookies.load_from_file')
     def load_cookies(self, path, file_required=True):
-        """
-        Load cookies from the file.
+        self.cookies.load_from_file(path)
 
-        Content of file should be a JSON-serialized dict of keys and values.
-        """
-
-        try:
-            with open(path) as inf:
-                data = inf.read()
-                if data:
-                    cookies = json.loads(data)
-                else:
-                    cookies = {}
-        except IOError:
-            if file_required:
-                raise
-            else:
-                pass
-        else:
-            jar = CookieJar()
-            for name, value in cookies.items():
-                jar.set_cookie(create_cookie(name, value))
-            self.cookies.update(jar)
-
+    @deprecated(use_instead='grab.cookies.save_to_file')
     def dump_cookies(self, path):
-        """
-        Dump all cookies to file.
-
-        Cookies are dumped as JSON-serialized dict of keys and values.
-        """
-
-        with open(path, 'w') as out:
-            out.write(json.dumps(dict(self.cookies.items())))
+        self.cookies.save_to_file(path)
 
     def setup_with_proxyline(self, line, proxy_type='http'):
         # TODO: remove from base class
