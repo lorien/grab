@@ -1,6 +1,6 @@
 # You probably need these packages
 lxml
-pycurl
+pycurl==7.19.0
 cssselect
 jsonpath_rw
 
