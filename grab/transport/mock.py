@@ -3,6 +3,8 @@
 # License: BSD
 from datetime import datetime
 import logging
+from cookielib import CookieJar
+
 from ..base import Grab
 #from .. import error
 from ..response import Response
@@ -70,12 +72,12 @@ class MockTransport(object):
         response.connect_time = 0
         response.url = self.request_url
         response.parse()
-        response.cookies = self.extract_cookies()
+        response.cookiejar = self.extract_cookiejar()
 
         return response
 
-    def extract_cookies(self):
-        return {}
+    def extract_cookiejar(self):
+        return CookieJar()
 
 
 class GrabMock(Grab):

@@ -64,6 +64,8 @@ GRAB_TEST_LIST = (
     'test.grab_transport_mock',
     # Javascript features
     'test.grab_js',
+    # pycurl tests
+    'test.pycurl_cookie',
 )
 
 GRAB_EXTRA_TEST_LIST = ()

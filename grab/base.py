@@ -20,6 +20,7 @@ except ImportError:
 import json
 import email
 from datetime import datetime
+from cookielib import CookieJar
 
 from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url
@@ -201,7 +202,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                  'proxylist', 'config', '_request_prepared',
                  'clone_counter', 'response', 'transport',
                  'transport_param', 'request_method', 'request_counter',
-                 '__weakref__',
+                 '__weakref__', 'cookiejar',
 
                  # Dirst hack to make it possbile to inherit Grab from
                  # multiple base classes with __slots__
@@ -216,7 +217,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     # Attributes which should be processed when clone
     # of Grab instance is creating
     clonable_attributes = ('request_head', 'request_log', 'request_body',
-                           'proxylist')
+                           'proxylist', 'cookiejar')
 
     # Complex config items which points to mutable objects
     mutable_config_keys = copy(MUTABLE_CONFIG_KEYS)
@@ -236,6 +237,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.trigger_extensions('config')
         self.trigger_extensions('init')
         self._request_prepared = False
+        self.cookiejar = CookieJar()
 
         self.setup_transport(transport)
 
@@ -498,6 +500,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         else:
             self.response = self.transport.prepare_response(self)
 
+        self.merge_cookiejar(self.response.cookiejar)
+
         self.response.timestamp = now
 
         self.config['charset'] = self.response.charset
@@ -591,7 +595,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         res.status = ''
         res.head = ''
         res.parse(charset=kwargs.get('document_charset'))
-        res.cookies = {}
         res.code = 200
         res.total_time = 0
         res.connect_time = 0
@@ -704,6 +707,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         self.config['cookies'] = {}
+        self.cookiejar = CookieJar()
 
     def load_cookies(self, path, file_required=True):
         """
@@ -763,9 +767,17 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         state['_lxml_tree'] = None
         state['_strict_lxml_tree'] = None
 
+        state['_cookiejar_cookies'] = list(self.cookiejar)
+        del state['cookiejar']
+
         return state
 
     def __setstate__(self, state):
+        state['cookiejar'] = CookieJar()
+        for cookie in state['_cookiejar_cookies']:
+            state['cookiejar'].set_cookie(cookie)
+        del state['_cookiejar_cookies']
+
         for slot, value in state.items():
             setattr(self, slot, value)
 
@@ -785,6 +797,10 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         except Exception as ex:
             logging.error('Could not parse request headers', exc_info=ex)
             return {}
+
+    def merge_cookiejar(self, cjar):
+        for cookie in cjar:
+            self.cookiejar.set_cookie(cookie)
 
 
 register_extensions(Grab)

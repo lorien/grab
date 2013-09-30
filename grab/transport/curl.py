@@ -19,6 +19,8 @@ import pycurl
 import tempfile
 import os.path
 import pdb
+from cookielib import CookieJar
+from urlparse import urlsplit
 
 from ..upload import UploadContent, UploadFile
 from .. import error
@@ -27,6 +29,7 @@ from ..tools.http import encode_cookies, smart_urlencode, normalize_unicode,\
                          normalize_http_values, normalize_post_data, normalize_url
 from ..tools.user_agent import random_user_agent
 from ..tools.encoding import smart_str, smart_unicode, decode_list, decode_pairs
+from ..cookie import create_cookie
 
 from grab.util.py3k_support import *
 
@@ -179,6 +182,11 @@ class CurlTransport(object):
         except Exception as ex:
             raise error.GrabInvalidUrl(u'%s: %s' % (unicode(ex), grab.config['url']))
 
+        request_host = urlsplit(request_url).netloc.split(':')[0]
+        request_host_nowww = request_host
+        if request_host_nowww.startswith('www.'):
+            request_host_nowww = request_host_nowww[4:]
+
         # py3 hack
         if not PY3K:
             request_url = smart_str(request_url)
@@ -318,7 +326,7 @@ class CurlTransport(object):
         # Note that this option sets the cookie header explictly in the outgoing request(s). If multiple requests are done due to authentication, followed redirections or similar, they will all get this cookie passed on.
         # Using this option multiple times will only make the latest string override the previous ones. 
 
-        # `cookiefile` option shoul be processed before `cookies` option
+        # `cookiefile` option should be processed before `cookies` option
         # because `load_cookies` updates `cookies` option
         if grab.config['cookiefile']:
             grab.load_cookies(grab.config['cookiefile'])
@@ -330,11 +338,27 @@ class CurlTransport(object):
                                    charset=grab.config['charset'])
             self.curl.setopt(pycurl.COOKIELIST, 'ALL')
             for item in items:
-                self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s' % item)
+                if request_host_nowww != 'localhost' and cookie.domain:
+                    tail = '; domain=%s' % cookie.domain
+                else:
+                    tail = ''
+                self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s%s' % (
+                    item, tail))
+            # TODO: put cookies from `grab.cookiejar` into request
+
         else:
             # Turn on cookies engine anyway
             # To correctly support cookies in 302-redirects
             self.curl.setopt(pycurl.COOKIEFILE, '')
+
+        for cookie in grab.cookiejar:
+            if not cookie.domain or request_host_nowww in cookie.domain:
+                if request_host_nowww != 'localhost' and cookie.domain:
+                    tail = '; domain=%s' % cookie.domain
+                else:
+                    tail = ''
+                self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s=%s%s' % (
+                    cookie.name, cookie.value, tail))
 
         if grab.config['referer']:
             self.curl.setopt(pycurl.REFERER, str(grab.config['referer']))
@@ -433,25 +457,46 @@ class CurlTransport(object):
         else:
             response.parse()
 
-        response.cookies = self.extract_cookies()
+        response.cookiejar = self.extract_cookiejar()
 
         # We do not need anymore cookies stored in the
         # curl instance so drop them
         self.curl.setopt(pycurl.COOKIELIST, 'ALL')
         return response
 
-    def extract_cookies(self):
+    def extract_cookiejar(self):
         """
-        Extract cookies.
+        Extract cookies that pycurl instance knows.
+
+        Returns `CookieJar` object.
         """
 
         # Example of line:
         # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
-        cookies = {}
+        # Fields:
+        # * domain
+        # * whether or not all machines under that domain can read the cookie's information.
+        # * path
+        # * Secure Flag: whether or not a secure connection (HTTPS) is required to read the cookie.
+        # * exp. timestamp
+        # * name
+        # * value
+        cookiejar = CookieJar()
         for line in self.curl.getinfo(pycurl.INFO_COOKIELIST):
-            chunks = line.split('\t')
-            cookies[chunks[-2]] = chunks[-1]
-        return cookies
+            values = line.split('\t')
+            # old
+            #cookies[values[-2]] = values[-1]
+            # new
+            cookie = create_cookie(
+                name=values[5],
+                value=values[6],
+                domain=values[0],
+                path=values[2],
+                secure=values[3] == "TRUE",
+                expires=int(values[4]) if values[4] else None,
+            )
+            cookiejar.set_cookie(cookie)
+        return cookiejar
 
     def __getstate__(self):
         """
@@ -469,8 +514,6 @@ class CurlTransport(object):
 
         state['curl'] = pycurl.Curl()
         self.__dict__ = state
-
-
 
 
 #from ..base import BaseGrab

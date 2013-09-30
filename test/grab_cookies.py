@@ -28,6 +28,8 @@ class TestCookies(TestCase):
             set(['foo=1', 'bar=2']))
 
     def test_session(self):
+        # Test that if Grab gets some cookies from the server
+        # then it sends it back
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(reuse_cookies=True)
         SERVER.RESPONSE['cookies'] = {'foo': 'bar'}
@@ -38,13 +40,14 @@ class TestCookies(TestCase):
         g.go(SERVER.BASE_URL)
         self.assertEqual(SERVER.REQUEST['headers']['Cookie'], 'foo=bar')
 
+        # Test that Grab uses Set-Cookie header
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(reuse_cookies=False)
         SERVER.RESPONSE['cookies'] = {'foo': 'baz'}
         g.go(SERVER.BASE_URL)
         self.assertEqual(g.response.cookies['foo'], 'baz')
         g.go(SERVER.BASE_URL)
-        self.assertTrue('Cookie' not in SERVER.REQUEST['headers'])
+        self.assertTrue(len(SERVER.REQUEST['cookies']) > 0)
 
         g = Grab(transport=GRAB_TRANSPORT)
         g.setup(reuse_cookies=True)
@@ -53,7 +56,7 @@ class TestCookies(TestCase):
         self.assertEqual(g.response.cookies['foo'], 'bar')
         g.clear_cookies()
         g.go(SERVER.BASE_URL)
-        self.assertTrue('Cookie' not in SERVER.REQUEST['headers'])
+        self.assertTrue(len(SERVER.REQUEST['cookies']) == 0)
 
     def test_redirect_session(self):
         g = Grab(transport=GRAB_TRANSPORT)
@@ -68,7 +71,7 @@ class TestCookies(TestCase):
         SERVER.RESPONSE_ONCE['headers'].append(('Set-Cookie', 'foo=bar'))
         SERVER.RESPONSE_ONCE['code'] = 302
         g.go(SERVER.BASE_URL)
-        self.assertEqual(SERVER.REQUEST['headers']['Cookie'], 'foo=bar')
+        self.assertEqual(SERVER.REQUEST['cookies']['foo'].value, 'bar')
 
     def test_load_dump(self):
         g = Grab(transport=GRAB_TRANSPORT)
@@ -107,7 +110,7 @@ class TestCookies(TestCase):
         SERVER.RESPONSE['cookies'] = {'godzilla': 'monkey'}
         g.setup(cookiefile=TMP_FILE)
         g.go(SERVER.BASE_URL)
-        self.assertEqual(SERVER.REQUEST['headers']['Cookie'], 'spam=ham')
+        self.assertEqual(SERVER.REQUEST['cookies']['spam'].value, 'ham')
 
         # This is correct reslt of combining two cookies
         MERGED_COOKIES = {'godzilla': 'monkey', 'spam': 'ham'}
