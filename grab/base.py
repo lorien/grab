@@ -20,7 +20,10 @@ except ImportError:
 import json
 import email
 from datetime import datetime
-from cookielib import CookieJar
+try:
+    from cookielib import CookieJar
+except ImportError:
+    from http.cookiejar import CookieJar
 
 from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url

@@ -5,7 +5,10 @@ RTFM:
 
 Some code got from https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 """
-from cookielib import Cookie, CookieJar
+try:
+    from cookielib import CookieJar, Cookie
+except ImportError:
+    from http.cookiejar import CookieJar, Cookie
 import json
 
 from .error import GrabMisuseError

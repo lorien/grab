@@ -3,7 +3,10 @@
 # License: BSD
 from datetime import datetime
 import logging
-from cookielib import CookieJar
+try:
+    from cookielib import CookieJar
+except ImportError:
+    from http.cookiejar import CookieJar
 
 from ..base import Grab
 from ..response import Response

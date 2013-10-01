@@ -5,7 +5,15 @@ understand how pycurl lib works with cookies
 """
 from unittest import TestCase
 import pycurl
-from StringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import BytesIO as StringIO
+try:
+    from cookielib import CookieJar, Cookie
+except ImportError:
+    from http.cookiejar import CookieJar, Cookie
+
 
 from .tornado_util import SERVER
 from grab.cookie import create_cookie
@@ -44,9 +52,9 @@ class TestCookies(TestCase):
         c.setopt(pycurl.FOLLOWLOCATION, 1)
         c.setopt(pycurl.COOKIEFILE, "")
         c.perform()
-        self.assertEqual('foo', buf.getvalue())
+        self.assertEqual(b'foo', buf.getvalue())
 
-        print c.getinfo(pycurl.INFO_COOKIELIST)
+        print(c.getinfo(pycurl.INFO_COOKIELIST))
         self.assertEquals(2, len(c.getinfo(pycurl.INFO_COOKIELIST)))
 
         # Just make another request and check that pycurl has
@@ -127,8 +135,6 @@ class TestCookies(TestCase):
         self.assertRaises(TypeError, lambda: create_cookie('foo', 'bar', x='y'))
 
     def test_cookiejar(self):
-        from cookielib import CookieJar, Cookie
-
         c1 = create_cookie('foo', 'bar')
         c2 = create_cookie('foo', 'bar')
         self.assertFalse(c1 == c2)

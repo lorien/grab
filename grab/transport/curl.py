@@ -19,8 +19,10 @@ import pycurl
 import tempfile
 import os.path
 import pdb
-from cookielib import CookieJar
-from urlparse import urlsplit
+try:
+    from cookielib import CookieJar
+except ImportError:
+    from http.cookiejar import CookieJar
 
 from ..cookie import create_cookie, CookieManager
 from ..upload import UploadContent, UploadFile
