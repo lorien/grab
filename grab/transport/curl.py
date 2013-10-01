@@ -255,7 +255,7 @@ class CurlTransport(object):
                 # py3 hack
                 if PY3K:
                     post_data = smart_unicode(post_data, grab.config['charset'])
-                self.curl.setopt(pycurl.POSTFIELDS, post_data)
+                self.curl.setopt(pycurl.COPYPOSTFIELDS, post_data)
             else:
                 self.curl.setopt(pycurl.POSTFIELDS, '')
         elif grab.request_method == 'PUT':
