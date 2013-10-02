@@ -22,8 +22,8 @@ except ImportError:
 import time
 
 from grab.response import Response
-
 from grab.util.py3k_support import *
+from grab.cookie import CookieManager
 
 logger = logging.getLogger('grab.spider.cache_backend.mongo')
 
@@ -82,7 +82,7 @@ class CacheBackend(object):
                 response.url = cache_item['url']
 
             response.parse()
-            response.cookies = transport.extract_cookies()
+            response.cookies = CookieManager(transport.extract_cookiejar())
             return response
 
         grab.process_request_result(custom_prepare_response_func)
