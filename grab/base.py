@@ -25,7 +25,6 @@ try:
 except ImportError:
     from http.cookiejar import CookieJar
 
-from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url
 from .response import Response
 from . import error
@@ -35,6 +34,7 @@ from .cookie import CookieManager, create_cookie
 from .util.misc import deprecated
 from .util.py2old_support import *
 from .util.py3k_support import *
+from .proxy import ProxyList, parse_proxy_line
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
@@ -242,11 +242,11 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.trigger_extensions('init')
         self._request_prepared = False
         self.cookies = CookieManager()
+        self.proxylist = ProxyList()
 
         self.setup_transport(transport)
 
         self.reset()
-        self.proxylist = None
         if kwargs:
             self.setup(**kwargs)
         self.clone_counter = 0
@@ -383,7 +383,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             self.request_counter = next(REQUEST_COUNTER)
             if kwargs:
                 self.setup(**kwargs)
-            if self.proxylist and self.config['proxy_auto_change']:
+            if not self.proxylist.is_empty() and self.config['proxy_auto_change']:
                 self.change_proxy()
             self.request_method = self.detect_request_method()
             self.transport.process_config(self)
@@ -615,12 +615,12 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         Set random proxy from proxylist.
         """
 
-        if self.proxylist:
-            server, userpwd, proxy_type = self.proxylist.get_random()
-            self.setup(proxy=server, proxy_userpwd=userpwd,
-                       proxy_type=proxy_type)
+        if not self.proxylist.is_empty():
+            proxy = self.proxylist.get_random_proxy()
+            self.setup(proxy=proxy['address'], proxy_userpwd=proxy['userpwd'],
+                       proxy_type=proxy['type'])
         else:
-            logging.debug('Could not change proxy because proxy list is not loaded')
+            logging.debug('Proxy list is empty')
 
     """
     Private methods
