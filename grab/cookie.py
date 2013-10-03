@@ -68,6 +68,13 @@ class CookieManager(object):
             self.cookiejar = CookieJar()
 
     def set(self, name, value, **kwargs):
+        """Add new cookie or replace existing cookie with same parameters.
+
+        :param name: name of cookie
+        :param value: value of cookie
+        :param kwargs: extra attributes of cookie
+        """
+
         self.cookiejar.set_cookie(create_cookie(name, value, **kwargs))
 
     def update(self, cookies):
