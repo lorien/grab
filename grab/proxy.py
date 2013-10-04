@@ -32,14 +32,15 @@ def parse_proxy_line(line):
 
 
 class Proxy(object):
-    def __init__(self, server, port, user=None, password=None):
+    def __init__(self, server, port, user=None, password=None, proxy_type='http'):
         self.server = server
         self.port = port
         self.user = user
         self.password = password
+        self.proxy_type = proxy_type
 
 
-def parse_proxy_data(data, data_format='text'):
+def parse_proxy_data(data, data_format='text', proxy_type='http'):
     if data_format == 'text':
         for line in data.splitlines():
             if not PY3K and isinstance(line, unicode):
@@ -51,21 +52,23 @@ def parse_proxy_data(data, data_format='text'):
                 except GrabError as ex:
                     logging.error('Invalid proxy line: %s' % line)
                 else:
-                    yield Proxy(host, port, user, pwd)
+                    yield Proxy(host, port, user, pwd, proxy_type)
     else:
         raise GrabError('Unknown proxy data format: %s' % data_format)
 
 
 class ProxySource(object):
     def load(self):
-        return list(parse_proxy_data(self.load_data(), self.data_format))
+        return list(parse_proxy_data(self.load_data(), self.data_format,
+                                     proxy_type=self.proxy_type))
 
 
 class LocalFileSource(ProxySource):
-    def __init__(self, location, safe_load=False, data_format='text'):
+    def __init__(self, location, safe_load=False, data_format='text', proxy_type='http'):
         self.location = location
         self.data_format = data_format
         self.safe_load = False
+        self.proxy_type = proxy_type
 
     def load_data(self):
         try:
@@ -79,10 +82,11 @@ class LocalFileSource(ProxySource):
 
 
 class RemoteFileSource(ProxySource):
-    def __init__(self, url, safe_load=False, data_format='text'):
+    def __init__(self, url, safe_load=False, data_format='text', proxy_type='http'):
         self.url = url
         self.data_format = data_format
         self.safe_load = False
+        self.proxy_type = proxy_type
 
     def load_data(self):
         from grab import Grab
@@ -112,11 +116,11 @@ class ProxyList(object):
         self.source = None
         self.proxy_list_iter = None
 
-    def set_source(self, source_type='file', reload_time=600, **kwargs):
+    def set_source(self, source_type='file', reload_time=600, proxy_type='http', **kwargs):
         self.reload_time = reload_time
         if source_type in SOURCE_TYPE_ALIAS:
             source_cls = SOURCE_TYPE_ALIAS[source_type]
-            self.source = source_cls(**kwargs)
+            self.source = source_cls(proxy_type=proxy_type, **kwargs)
             self.reload(force=True)
         else:
             raise GrabError('Unknown source type: %s' % source_type)
