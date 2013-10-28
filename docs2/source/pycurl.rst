@@ -12,7 +12,7 @@ Pycurl allows you to drive network requests asynchronously with multicurl interf
 
 First, you need to download curl sources from http://curl.haxx.se/download.html. Then unpack source code and run the command::
 
-    $ ./configure.py --prefix=/opt/curl --enable-ares
+    $ ./configure --prefix=/opt/curl --enable-ares
 
 We use custom prefix because we dot not mix our custom curl lib. with curl lib that could be already installed in your system. Do not forget to install cares packages before configuring curl with ares::
 
