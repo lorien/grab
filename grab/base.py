@@ -9,7 +9,7 @@ from __future__ import absolute_import
 import logging
 import os
 from random import randint
-from copy import copy
+from copy import copy, deepcopy
 import threading
 import itertools
 import collections
@@ -20,10 +20,6 @@ except ImportError:
 import json
 import email
 from datetime import datetime
-try:
-    from cookielib import CookieJar
-except ImportError:
-    from http.cookiejar import CookieJar
 
 from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url
@@ -194,6 +190,9 @@ def default_config():
         # Strip null bytes from document body before building lXML tree
         # It does not affect `response.body`
         strip_null_bytes = True,
+
+        # Internal object to store
+        state = {},
     )
 
 
@@ -221,7 +220,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     # Attributes which should be processed when clone
     # of Grab instance is creating
     clonable_attributes = ('request_head', 'request_log', 'request_body',
-                           'proxylist', 'cookies')
+                           'proxylist')
 
     # Complex config items which points to mutable objects
     mutable_config_keys = copy(MUTABLE_CONFIG_KEYS)
@@ -299,6 +298,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             g.response = self.response.copy()
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
+        g.cookies = deepcopy(self.cookies)
         g.clone_counter = self.clone_counter + 1
 
         if kwargs:
@@ -319,6 +319,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             self.response = g.response.copy()
         for key in self.clonable_attributes:
             setattr(self, key, getattr(g, key))
+            self.cookies = deepcopy(g.cookies)
         self.clone_counter = g.clone_counter + 1
 
     def dump_config(self):
@@ -326,7 +327,11 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         Make clone of current config.
         """
 
-        return copy_config(self.config, self.mutable_config_keys)
+        conf = copy_config(self.config, self.mutable_config_keys)
+        conf['state'] = {
+            'cookiejar_cookies': list(self.cookies.cookiejar),
+        }
+        return conf
 
     def load_config(self, config):
         """
@@ -334,6 +339,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         self.config = copy_config(config, self.mutable_config_keys)
+        if 'cookiejar' in config['state']:
+            self.cookies = CookieManager.from_cookie_list(config['state']['cookiejar_cookies'])
 
     def setup(self, **kwargs):
         """

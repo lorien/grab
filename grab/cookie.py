@@ -10,6 +10,7 @@ try:
 except ImportError:
     from http.cookiejar import CookieJar, Cookie
 import json
+import dummy_threading
 
 from .error import GrabMisuseError
 
@@ -66,6 +67,10 @@ class CookieManager(object):
             self.cookiejar = cookiejar
         else:
             self.cookiejar = CookieJar()
+        #self.disable_cookiejar_lock(self.cookiejar)
+
+    #def disable_cookiejar_lock(self, cj):
+        #cj._cookies_lock = dummy_threading.RLock()
 
     def set(self, name, value, **kwargs):
         self.cookiejar.set_cookie(create_cookie(name, value, **kwargs))
@@ -80,6 +85,13 @@ class CookieManager(object):
         else:
             raise GrabMisuseError('Unknown type of cookies argument: %s' % type(cookies))
 
+    @classmethod
+    def from_cookie_list(cls, clist):
+        cj = CookieJar()
+        for cookie in cookie_list:
+            cj.set_cookie(cookie)
+        return cls(cj)
+
     def clear(self):
         self.cookiejar = CookieJar()
 
@@ -92,7 +104,6 @@ class CookieManager(object):
                     if hasattr(self, slot):
                         state[slot] = getattr(self, slot)
 
-        state['_cookiejar_cookies'] = list(self.cookiejar)
         del state['cookiejar']
 
         return state
