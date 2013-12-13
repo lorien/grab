@@ -73,6 +73,13 @@ class CookieManager(object):
         #cj._cookies_lock = dummy_threading.RLock()
 
     def set(self, name, value, **kwargs):
+        """Add new cookie or replace existing cookie with same parameters.
+
+        :param name: name of cookie
+        :param value: value of cookie
+        :param kwargs: extra attributes of cookie
+        """
+
         self.cookiejar.set_cookie(create_cookie(name, value, **kwargs))
 
     def update(self, cookies):

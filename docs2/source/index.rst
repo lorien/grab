@@ -37,6 +37,7 @@ Grab User Manual
     grab_redirect
     grab_forms
     grab_charset
+    grab_cookies
     pycurl
     changelog
 
@@ -53,3 +54,4 @@ Base Grab Interface
 
     api_grab_base
     api_grab_error
+    api_grab_cookie

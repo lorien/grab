@@ -88,3 +88,9 @@ Contribution
 If you have found a bug or wish a new feature please open new issue on github:
 
 * https://github.com/lorien/grab/issues
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/lorien/grab/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
