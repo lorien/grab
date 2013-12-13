@@ -252,8 +252,14 @@ class RexResultList(object):
     def one(self):
         return self.items[0]
 
-    def text(self):
-        return normalize_space(decode_entities(self.one().group(1)))
+    def text(self, default=NULL):
+        try:
+            return normalize_space(decode_entities(self.one().group(1)))
+        except AttributeError:
+            if default is NULL:
+                raise
+            else:
+                return default
 
     def number(self):
         return int(self.text())

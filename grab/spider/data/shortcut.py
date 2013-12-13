@@ -83,7 +83,7 @@ class MongoObjectImageSetData(Data):
                 if path != image['path']:
                     db[collection].update(
                         {'_id': obj['_id'], ('%s.url' % set_field): image['url']},
-                        {'$set': {'%s.$.path': path}})
+                        {'$set': {('%s.$.path' % set_field): path}})
             else:
                 kwargs = {}
                 if task_args:
