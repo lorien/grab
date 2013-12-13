@@ -66,7 +66,7 @@ class FormExtension(object):
                 raise DataNotFound('There is no form with number: %s' % number)
         elif xpath is not None:
             try:
-                self._lxml_form = self.xpath_one(xpath)
+                self._lxml_form = self.doc.select(xpath).node()
             except IndexError:
                 raise DataNotFound('Could not find form with xpath: %s' % xpath)
         else:

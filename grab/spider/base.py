@@ -639,7 +639,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                         #import pdb; pdb.set_trace()
 
             self.inc_count('network-error-%s' % res['emsg'][:20])
-            logger.error(msg)
+            logger.error(u'Network error: %s' % msg)
 
             # Try to repeat the same network query
             if self.network_try_limit > 0:
