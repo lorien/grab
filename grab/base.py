@@ -614,7 +614,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         else:
             raise GrabMisuseError('Unknown proxy source type: %s' % source_type)
 
-        self.proxylist.setup(auto_change=auto_change, auto_init=auto_init)
+        #self.proxylist.setup(auto_change=auto_change, auto_init=auto_init)
         self.setup(proxy_auto_change=auto_change)
         if not auto_change and auto_init:
             self.change_proxy()
@@ -626,8 +626,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         if not self.proxylist.is_empty():
             proxy = self.proxylist.get_random_proxy()
-            self.setup(proxy=proxy['address'], proxy_userpwd=proxy['userpwd'],
-                       proxy_type=proxy['type'])
+            self.setup(proxy=proxy.address, proxy_userpwd=proxy.userpwd,
+                       proxy_type=proxy.proxy_type)
         else:
             logging.debug('Proxy list is empty')
 

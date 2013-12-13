@@ -27,6 +27,10 @@ def remove_directory(path):
         for _dir in dirs:
             shutil.rmtree(os.path.join(root, _dir))
 
+def get_temp_file():
+    handler, path = tempfile.mkstemp(dir=TMP_DIR)
+    return path
+
 
 def ignore_transport(transport):
     """
