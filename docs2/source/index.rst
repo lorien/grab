@@ -38,6 +38,7 @@ Grab User Manual
     grab_forms
     grab_charset
     grab_cookies
+    grab_proxy
     pycurl
     changelog
 

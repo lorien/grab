@@ -17,6 +17,7 @@ To submit some data with PUT method use both :ref:`option_post` and :ref:`option
     >>> g = Grab()
     >>> g.setup(post={'some': 'data'}, method='put')
 
+
 POST request
 ------------
 
@@ -26,6 +27,7 @@ You can pass data to :ref:`option_post` in multiple formats:
 
 * if data is dict or sequence of pairs then it will be converted into "key1=val1&key2=val2" string.
 * if data is already a string then it is not changed and is submitted as is.
+
 
 File submition
 --------------

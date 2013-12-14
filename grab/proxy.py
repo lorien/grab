@@ -174,15 +174,15 @@ class ProxyList(object):
         self.iterator_index = 0
         self.setup(**kwargs)
 
-    def setup(self, accumulate_updates=False):
+    def setup(self, accumulate_updates=False, reload_time=600):
         self.accumulate_updates = accumulate_updates
+        self.reload_time = reload_time
 
-    def set_source(self, source_type='file', reload_time=600, proxy_type='http', **kwargs):
+    def set_source(self, source_type='file', proxy_type='http', **kwargs):
         """
         Configure proxy list source and load proxies from that source.
         """
 
-        self.reload_time = reload_time
         if source_type in SOURCE_TYPE_ALIAS:
             source_cls = SOURCE_TYPE_ALIAS[source_type]
             self.source = source_cls(proxy_type=proxy_type, **kwargs)
