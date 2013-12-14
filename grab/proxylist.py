@@ -1,4 +1,7 @@
 """
+THIS IS DEPRECATED MODULE.
+USE grab.proxy MODULE INSTEAD.
+
 Module to work with proxy list.
 
 Usage:

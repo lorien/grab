@@ -21,7 +21,6 @@ import json
 import email
 from datetime import datetime
 
-from .proxylist import ProxyList, parse_proxyline
 from .tools.html import find_refresh_url, find_base_url
 from .response import Response
 from . import error
@@ -31,6 +30,7 @@ from .cookie import CookieManager, create_cookie
 from .util.misc import deprecated
 from .util.py2old_support import *
 from .util.py3k_support import *
+from .proxy import ProxyList, parse_proxy_line
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
@@ -241,11 +241,11 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.trigger_extensions('init')
         self._request_prepared = False
         self.cookies = CookieManager()
+        self.proxylist = ProxyList()
 
         self.setup_transport(transport)
 
         self.reset()
-        self.proxylist = None
         if kwargs:
             self.setup(**kwargs)
         self.clone_counter = 0
@@ -390,7 +390,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             self.request_counter = next(REQUEST_COUNTER)
             if kwargs:
                 self.setup(**kwargs)
-            if self.proxylist and self.config['proxy_auto_change']:
+            if not self.proxylist.is_empty() and self.config['proxy_auto_change']:
                 self.change_proxy()
             self.request_method = self.detect_request_method()
             self.transport.process_config(self)
@@ -609,10 +609,19 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         self.response = res
 
+    @deprecated(use_instead='grab.proxylist.set_source')
     def load_proxylist(self, source, source_type, proxy_type='http',
                        auto_init=True, auto_change=True,
                        **kwargs):
-        self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type, **kwargs)
+        #self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type, **kwargs)
+        if source_type == 'text_file':
+            self.proxylist.set_source('file', location=source, proxy_type=proxy_type, **kwargs)
+        elif source_type == 'url':
+            self.proxylist.set_source('url', url=source, proxy_type=proxy_type, **kwargs)
+        else:
+            raise GrabMisuseError('Unknown proxy source type: %s' % source_type)
+
+        #self.proxylist.setup(auto_change=auto_change, auto_init=auto_init)
         self.setup(proxy_auto_change=auto_change)
         if not auto_change and auto_init:
             self.change_proxy()
@@ -622,12 +631,12 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         Set random proxy from proxylist.
         """
 
-        if self.proxylist:
-            server, userpwd, proxy_type = self.proxylist.get_random()
-            self.setup(proxy=server, proxy_userpwd=userpwd,
-                       proxy_type=proxy_type)
+        if not self.proxylist.is_empty():
+            proxy = self.proxylist.get_random_proxy()
+            self.setup(proxy=proxy.address, proxy_userpwd=proxy.userpwd,
+                       proxy_type=proxy.proxy_type)
         else:
-            logging.debug('Could not change proxy because proxy list is not loaded')
+            logging.debug('Proxy list is empty')
 
     """
     Private methods
