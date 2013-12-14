@@ -131,6 +131,8 @@ class RemoteFileSource(ProxySource):
     """
 
     def __init__(self, url, safe_load=False, data_format='text', proxy_type='http'):
+        if not isinstance(url, (list, tuple)):
+            url = [url]
         self.url = url
         self.data_format = data_format
         self.safe_load = False
@@ -140,16 +142,20 @@ class RemoteFileSource(ProxySource):
         from grab import Grab
 
         g = Grab()
-        try:
-            g.go(self.url)
-        except GrabNetworkError as ex:
-            if self.safe_load:
-                logger.error('', format_exc=ex)
-                return ''
+        result = []
+
+        for url in self.url:
+            try:
+                g.go(url)
+            except GrabNetworkError as ex:
+                if self.safe_load:
+                    logger.error('', format_exc=ex)
+                else:
+                    raise
             else:
-                raise
-        else:
-            return g.response.body
+                result.append(g.response.body)
+
+        return '\n'.join(result)
 
 # List of aliases that is used in `ProxyList::set_source` function
 SOURCE_TYPE_ALIAS = {
