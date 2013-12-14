@@ -1,59 +1,55 @@
 .. _misc:
 
-==============
-Other Features
-==============
+==================
+Прочие возможности
+==================
 
-Response Body Limit
-===================
+Ограничение тела ответа
+-----------------------
 
-You can disable response body processing with option :ref:`option_nobody`. The response body will be downloaded, the network connection will be interrupted immediately after receiving all http-headers of response.
+Опцией :ref:`option_nobody` вы можете запретить принимать тело ответа. Соединение будет разорвано сразу после того, как будут получены все http-заголовки ответа.
 
-Another option to control the response is :ref:`option_body_maxsize`. You can specify maximal amount of data to receive before the connection will be interrupted. When the specified number of bytes has been received, the connection is interruped, no exceptions are raised and all data that were received are available.
+Опцией :ref:`option_body_maxsize` вы можете управлять максимальным количеством информации, получаемой с сервера. В случае превышения указанного размера, соединение с сервером разрывается, никаких ислючений не генерируется, а данные, что были получены, доступны для работы.
 
+Сжатие ответа
+-------------
 
-Response Compressing
-====================
+С помощью опции :ref:`option_encoding` вы можете управлять сжатием ответа сервера. По-умолчанию, значение опции равно "gzip", что означает посылку заголовка "Accept-Encoding: gzip" и  автоматическое распаковывание ответа (если он таки пришёл в загзипованном виде).
 
-You can control the compressing with option :ref:`option_encoding`. By defaulth, the value of this option is "gzip", that means that Grab sends "Accept-Encing: gzip" header in all requests and automatically decompress gziped responses. If you want to receive uncompressed responses from the server then use empty value for the option :ref:`option_encoding`.
+HTTP-Авторизация
+----------------
 
+С помощью опции :ref:`option_userpwd` можно передать имя пользователя и пароль для прохождения http-авторизации. Значение опции - это строка вида "username:password"
 
-HTTP Authentication
-===================
+Работа с pycurl-дескриптором
+----------------------------
 
-Use :ref:`option_userpwd` option to send HTTP authentication headers. The value of the option is the string in format "username:password".
+Если вам нужно какая-либо возможность `pycurl`, интерфейс к которой отсутствует в Grab, вы можете работать с pycurl-дескриптором напрямую. Пример::
 
+    from grab import Grab
+    import pycurl
 
-Low Level Acces to Pycurl Object
-=================================
+    g = Grab()
+    g.curl.setopt(pycurl.RANGE, '100-200')
+    g.go('http://some/url')
 
-If you need to use any pycurl feature that has not interface in Grab then you can access pycurl handler directly. Example::
+301 и 302 редиректы
+-------------------
 
-    >>> from grab import Grab
-    >>> import pycurl
-    >>> g = Grab()
-    >>> g.transport.curl.setopt(pycurl.RANGE, '100-200')
-    >>> g.go('http://some/url')
-
-
-HTTP 301 and 302 Redirects
-==========================
-
-By default, HTTP responses with 301 and 302 status codes are processed automatically, Grab automatically goes to the URL specified in "Location:" header::
+По-умолчанию, ответы со статусами 301 и 302 обрабатываются автоматически т.е. происходит переход по адресу, указанному в "Location:" заголовке ответа сервера::
 
     HTTP/1.1 301 Moved Permanently
     Content-Type: text/html
     Content-Length: 174
     Location: http://www.example.org/
 
-Use option :ref:`option_follow_location` to disable automatically processing of 301/302 redirects.
+Запретить автоматический переход можно опцией :ref:`option_follow_location`.
 
+Meta Refresh редиректы
+----------------------
 
-Meta Refresh Redirect
-=====================
-
-The HTML page could contain special HTML meta tag which instructs web client to do redirect to specified URL::
+Один из способов перенаправить посетителя страницы на другой адрес - использование мета-тэга::
 
     <meta http-equiv="Refresh" content="0; url=http://some/url" />
 
-Grab can automatically process such meta tags. By default, this feature is disabled. You can turn it on with option :ref:`option_follow_refresh`.
+Grab может автоматически обрабатывать такой редирект. По-умолчанию, это поведение отключено. Включить его можно опцией :ref:`option_follow_refresh`.

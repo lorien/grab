@@ -4,35 +4,42 @@
    contain the root `toctree` directive.
 .. _home:
 
-Grab - Site Scraping Framework
-==============================
+Grab - фреймворк для парсинга сайтов
+====================================
 
-Grab is site scraping framework. Grab could be used for:
+Grab - библиотека для работы с сетевыми документами. Основные области использования Grab:
 
- * website data mining
- * work with network API
- * automation of actions performed on websites i.e. creation of profile on some site
+ * извлечение данных с веб-сайтов (site scraping)
+ * работа с сетевыми API
+ * автоматизация работы с веб-сайтами, например, регистратор профилей на каком-либо сайте
 
-Grab consists of following parts:
+Grab состоит из двух частей:
+ 
+ * Главный интерфейс Grab для создания сетевого запроса и работы с его результатом. Этот 
+   интерфейс удобно использовать в простых скриптах, где не нужна большая многопоточность,
+   или непосредственно в python-консоли.
+ * Интерфейс Spider, позволяющий разрабатывать асинхронные парсеры. Этот интерфейс позволяет,
+   во-первых, более строго описать логику парсера, во-вторых, разрабатывать парсеры с большим
+   числом сетевых потоков.
 
- * Grab interface for creating network requests and working with results of these
-   requests. This interface is good for simple scripts where is no need in multithreading.
- * Grab::Spider interface which allows to develop complex multithreaded asynchronous site scrapers. This interface has two main benefits:
-   
-  1. It restrict you spider to have clean structure
-  2. It allows to perform multiple concurrent requests without big CPU/memory consumption
+Grab сайты
+----------
+
+* Официальный сайт: http://grablib.org
+* Репозиторий на github: http://github.com/lorien/grab
+* Группа рассылки: http://groups.google.com/group/python-grab
 
 
 .. _grab_toc:
 
-Grab User Guide
----------------
+Документация Grab
+-----------------
 
 .. toctree::
     :maxdepth: 2
 
+    grab/tutorial
     grab/installation
-    grab/quickstart
     grab/customization
     grab/debugging
     grab/options
@@ -54,8 +61,10 @@ Grab User Guide
 
 .. _spider_toc:
 
-Grab::Spider User Guide
------------------------
+Документация Grab:Spider
+------------------------
+
+Асинхронный модуль для разработки сложных парсеров.
 
 .. toctree::
     :maxdepth: 2
@@ -78,12 +87,13 @@ TODO::
     
 
 
-Grab API Reference
-------------------
 
-If you are looking for information on a specific function, class or method, this part of the documentation is for you.
+API
+---
 
-Base Interface
+Вся нижеследующая информация сгенерирована из комментариев в исходном коде.  Поэтому она на английском языке. Документы из раздела API полезны тем, что они показывают описания всех аргументов каждого метода и класса библиотеки Grab.
+
+Базовый интерфейс:
 
 .. toctree::
     :maxdepth: 2
@@ -92,7 +102,7 @@ Base Interface
     api/error
     api/response
 
-Extensions:
+Расширения:
 
 .. toctree::
     :maxdepth: 2
@@ -105,7 +115,7 @@ Extensions:
     api/ext_rex
     api/ext_pquery
 
-Tools:
+Утилиты:
 
 .. toctree::
     :maxdepth: 2
@@ -115,9 +125,18 @@ Tools:
     api/upload
 
 
-Also
+Похожие проекты
+----------------
 
-.. toctree::
-    :maxdepth: 1
+* `urllib <http://docs.python.org/library/urllib.html>`_ and `urllib2 <http://docs.python.org/library/urllib2.html>`_ - для суровых python-хакеров
+* `Scrapy <http://scrapy.org>`_ - пожалуй, самый известный python фреймворк для парсинга сайтов
+* `Mechanize <http://wwwsearch.sourceforge.net/mechanize/>`_ - одна из самых старых python-библиотек парсинга сайтов
+* `Requests <http://docs.python-requests.org>`_ - простой интерфейс к стандартной urllib библиотеке
 
-    changelog.rst
+
+Всякая фигня
+------------
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
