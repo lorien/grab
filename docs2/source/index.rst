@@ -41,6 +41,7 @@ Grab User Manual
     grab_proxy
     pycurl
     changelog
+    grab_response
 
 API Reference
 -------------
