@@ -111,6 +111,7 @@ class CookieManager(object):
                     if hasattr(self, slot):
                         state[slot] = getattr(self, slot)
 
+        state['_cookiejar_cookies'] = list(self.cookiejar)
         del state['cookiejar']
 
         return state
