@@ -63,7 +63,7 @@ class Response(object):
     HTTP Response.
     """
 
-    __slots__ = ('status', 'code', 'head', '_body', '_runtime_body',
+    __slots__ = ('status', 'code', 'head', '_cached_body', '_runtime_body',
                  'body_path', 'headers', 'url', 'cookies',
                  'charset', '_unicode_body', '_unicode_runtime_body',
                  'bom', 'timestamp',
@@ -76,7 +76,7 @@ class Response(object):
         self.status = None
         self.code = None
         self.head = None
-        self._body = None
+        self._cached_body = None
         self._runtime_body = None
         #self.runtime_body = None
         self.body_path = None
@@ -154,8 +154,8 @@ class Response(object):
         if self.body_path:
             with open(self.body_path, 'rb') as inp:
                 body_chunk = inp.read(4096)
-        elif self._body:
-            body_chunk = self._body[:4096]
+        elif self._cached_body:
+            body_chunk = self._cached_body[:4096]
 
         if body_chunk:
             # Try to extract charset from http-equiv meta tag
@@ -216,15 +216,21 @@ class Response(object):
             errors = 'strict'
         return body.decode(charset, errors).strip()
 
+    def _check_cached_body(self):
+        if not self._cached_body:
+            if self.body_path:
+                with open(self.body_path, 'rb') as inp:
+                    self._cached_body = inp.read()
+
     def unicode_body(self, ignore_errors=True, fix_special_entities=True):
         """
         Return response body as unicode string.
         """
 
-        self._check_body()
+        self._check_cached_body()
         if not self._unicode_body:
             self._unicode_body = self.process_unicode_body(
-                self._body, self.bom, self.charset,
+                self._cached_body, self.bom, self.charset,
                 ignore_errors, fix_special_entities)
         return self._unicode_body
 
@@ -271,10 +277,10 @@ class Response(object):
                 pass
 
         with open(path, 'wb') as out:
-            if isinstance(self._body, unicode):
-                out.write(self._body.encode('utf-8'))
+            if isinstance(self._cached_body, unicode):
+                out.write(self._cached_body.encode('utf-8'))
             else:
-                out.write(self._body)
+                out.write(self._cached_body)
 
     def save_hash(self, location, basedir, ext=None):
         """
@@ -314,10 +320,10 @@ class Response(object):
             except OSError:
                 pass
             with open(path, 'wb') as out:
-                if isinstance(self._body, unicode):
-                    out.write(self._body.encode('utf-8'))
+                if isinstance(self._cached_body, unicode):
+                    out.write(self._cached_body.encode('utf-8'))
                 else:
-                    out.write(self._body)
+                    out.write(self._cached_body)
         return rel_path
 
     @property
@@ -351,29 +357,23 @@ class Response(object):
         self.save(path)
         webbrowser.open('file://' + path)
 
-    def _check_body(self):
-        if not self._body:
-            if self.body_path:
-                with open(self.body_path, 'rb') as inp:
-                    self._body = inp.read()
-
-    def _read_body(self):
+    def _read_cached_body(self):
         # py3 hack
         if PY3K:
             return self.unicode_body()
 
-        self._check_body()
-        return self._body
+        self._check_cached_body()
+        return self._cached_body
 
-    def _write_body(self, body):
-        self._body = body
+    def _write_cached_body(self, body):
+        self._cached_body = body
         self._unicode_body = None
 
-    body = property(_read_body, _write_body)
+    body = property(_read_cached_body, _write_cached_body)
 
     def _read_runtime_body(self):
         if self._runtime_body is None:
-            return self._body
+            return self._cached_body
         else:
             return self._runtime_body
 
@@ -384,10 +384,10 @@ class Response(object):
     runtime_body = property(_read_runtime_body, _write_runtime_body)
 
     def body_as_bytes(self, encode=False):
-        self._check_body()
+        self._check_cached_body()
         if encode:
             return self.body.encode(self.charset)
-        return self._body
+        return self._cached_body
 
     @property
     def time(self):
