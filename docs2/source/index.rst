@@ -42,6 +42,7 @@ Grab User Manual
     pycurl
     changelog
     grab_response
+    grab_what_is_inside
 
 API Reference
 -------------
