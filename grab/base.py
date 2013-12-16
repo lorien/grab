@@ -619,7 +619,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         elif source_type == 'url':
             self.proxylist.set_source('url', url=source, proxy_type=proxy_type, **kwargs)
         else:
-            raise GrabMisuseError('Unknown proxy source type: %s' % source_type)
+            raise error.GrabMisuseError('Unknown proxy source type: %s' % source_type)
 
         #self.proxylist.setup(auto_change=auto_change, auto_init=auto_init)
         self.setup(proxy_auto_change=auto_change)

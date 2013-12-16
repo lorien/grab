@@ -72,10 +72,46 @@ And that is how to load proxies from the web::
     >>> g.proxylist.set_source('remote', url='http://example.com/proxy.txt')
 
 
-Proxy Rotation
---------------
+Automatic Proxy Rotation
+------------------------
 
-Each time you call `g.proxylist.get_next_proxy` method you get next proxy from the proxy list. After you received last proxy you'll continue receiving proxies from the start of the list. Also, you can use `g.proxylist.get_random_proxy` to pick up random proxy from the proxy list.
+By default, if you set up any non-empty proxy source Grab start rotating proxies from the proxy list for each request. You can disable proxy rotation with :ref:`option_proxy_auto_change` option set to False::
+
+    >>> from grab import Grab
+    >>> import logging
+    >>> logging.basicConfig(level=logging.DEBUG)
+    >>> g = Grab()
+    >>> g.proxylist.set_source('file', location='/web/proxy.txt')
+    >>> g.go('http://yandex.ru/')
+    DEBUG:grab.network:[02] GET http://yandex.ru/ via 91.210.101.31:8080 proxy of type http with authorization
+    <grab.response.Response object at 0x109d9f0>
+    >>> g.go('http://rambler.ru/')
+    DEBUG:grab.network:[03] GET http://rambler.ru/ via 194.29.185.38:8080 proxy of type http with authorization
+    <grab.response.Response object at 0x109d9f0>
+
+Now let's see how Grab works when `proxy_auto_change` is False::
+
+    >>> from grab import Grab
+    >>> import logging
+    >>> g = Grab()
+    >>> g.proxylist.set_source('file', location='/web/proxy.txt')
+    >>> g.setup(proxy_auto_change=False)
+    >>> g.go('http://ya.ru')
+    DEBUG:grab.network:[04] GET http://ya.ru
+    <grab.response.Response object at 0x109de50>
+    >>> g.change_proxy()
+    >>> g.go('http://ya.ru')
+    DEBUG:grab.network:[05] GET http://ya.ru via 62.122.73.30:8080 proxy of type http with authorization
+    <grab.response.Response object at 0x109d9f0>
+    >>> g.go('http://ya.ru')
+    DEBUG:grab.network:[06] GET http://ya.ru via 62.122.73.30:8080 proxy of type http with authorization
+    <grab.response.Response object at 0x109d9f0>
+
+
+Getting Proxy From Proxy List
+-----------------------------
+
+Each time you call `g.proxylist.get_next_proxy` method you get next proxy from the proxy list. After you received last proxy in the list you'll continue receiving proxies from the start of the list. Also, you can use `g.proxylist.get_random_proxy` to pick up random proxy from the proxy list.
 
 
 Automatic Proxy List Reloading
