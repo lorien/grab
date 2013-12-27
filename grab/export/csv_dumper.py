@@ -1,7 +1,7 @@
 import csv
 
 class CSVDumper(object):
-    def __init__(self, path, write_header=True, fields=None):
+    def __init__(self, path, fields=None, write_header=True):
         self.path = path
         self.fields = fields
         self.write_header = write_header
@@ -10,12 +10,13 @@ class CSVDumper(object):
         if self.write_header:
             self.writer.writerow(self.normalize_row(self.fields))
 
-    def add_record(self, rec):
+    def add_record(self, rec, ignore_fields={}):
         if self.fields is None:
             raise Exception('Can not use `add_record` if `fields` is not set')
         for key in rec:
-            if not key in self.fields:
-                raise Exception('Unknown record key: %s' % key)
+            if not key in ignore_fields:
+                if not key in self.fields:
+                    raise Exception('Unknown record key: %s' % key)
         for key in self.fields:
             if not key in rec:
                 raise Exception('Missing key in record: %s' % key)
