@@ -30,7 +30,7 @@ Grab тестируется под python 2.6
 
 * lxml-2.3.3.win32-py2.6.exe  
 
-Скачайте и установите pycurl библиотеку с нашего сайта: http://grablib.org/static/pycurl-ssl-7.19.0.win32-py2.7.msi
+Скачайте и установите pycurl библиотеку с нашего сайта: http://grablib.org/static/download/pycurl-ssl-7.19.0.win32-py2.7.msi
 
 * pycurl-ssl-7.19.0.win32-py2.7.msi
 
