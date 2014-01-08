@@ -1,3 +1,6 @@
+from grab.util.py3k_support import *
+
+
 class DotDict(dict):
     def __getattr__(self, item):
         if hasattr(self, item):
@@ -31,7 +34,7 @@ class Chunk(object):
                 items
             )
         if items and self._one:
-            return items[0]
+            return list(items)[0]
         else:
             return items
 
@@ -72,8 +75,8 @@ class TreeInterface(object):
                     res = parser(element, substructure)
                     if res:
                         item.update(res[0])
-                for key, value in structure._kwargs.iteritems():
-                    if isinstance(value, (str, unicode)):
+                for key, value in structure._kwargs.items():
+                    if isinstance(value, basestring):
                         chunk = Chunk(value, apply_func=lambda item: unicode(item).strip())
                         item[key] = chunk.prepare_element(element)
                     if isinstance(value, Structure):
@@ -89,7 +92,7 @@ class TreeInterface(object):
             return items
 
         structure = None
-        if isinstance(xpath, (str, unicode)):
+        if isinstance(xpath, basestring):
             structure = Structure(xpath, *args, **kwargs)
         elif isinstance(xpath, Structure):
             structure = xpath
