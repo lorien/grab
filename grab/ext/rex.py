@@ -33,7 +33,7 @@ class RegexpExtension(object):
             else:
                 return default
         else:
-            return normalize_space(decode_entities(match.group(1)))
+            return normalize_space(decode_entities(match.group(0)))
 
     def rex(self, regexp, flags=0, byte=False, default=NULL):
         """
