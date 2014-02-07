@@ -1,12 +1,12 @@
 import csv
 
 class CSVDumper(object):
-    def __init__(self, path, fields=None, write_header=True):
+    def __init__(self, path, fields=None, write_header=True, quoting=csv.QUOTE_ALL):
         self.path = path
         self.fields = fields
         self.write_header = write_header
         self.file_handler = open(path, 'w')
-        self.writer = csv.writer(self.file_handler, quoting=csv.QUOTE_ALL)
+        self.writer = csv.writer(self.file_handler, quoting=quoting)
         if self.write_header:
             self.writer.writerow(self.normalize_row(self.fields))
 
@@ -29,13 +29,16 @@ class CSVDumper(object):
     def normalize_row(self, row):
         return map(self.normalize_value, row)
 
+    def normalize_none_value(self, val):
+        return ''
+
     def normalize_value(self, val):
         if val is None:
-            return ''
+            return self.normalize_none_value(val)
         elif isinstance(val, unicode):
             return val.encode('utf-8')
         else:
             return str(val)
 
-    def done(self):
+    def close(self):
         self.file_handler.close()
