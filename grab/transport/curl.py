@@ -17,7 +17,7 @@ except ImportError:
     from urllib.parse import urlsplit, urlunsplit
 import pycurl
 import tempfile
-import os.path
+import os
 import pdb
 try:
     from cookielib import CookieJar
@@ -81,9 +81,10 @@ class CurlTransport(object):
     def setup_body_file(self, storage_dir, storage_filename):
         if storage_filename is None:
             handle, path = tempfile.mkstemp(dir=storage_dir)
+            self.body_file = os.fdopen(handle, 'w')
         else:
             path = os.path.join(storage_dir, storage_filename)
-        self.body_file = open(path, 'wb')
+            self.body_file = open(path, 'wb')
         self.body_path = path
 
     def reset(self):
@@ -239,6 +240,7 @@ class CurlTransport(object):
         # Ignore SSL errors
         self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)
         self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)
+        self.curl.setopt(pycurl.SSLVERSION, pycurl.SSLVERSION_SSLv3)
 
         if grab.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
