@@ -13,7 +13,7 @@ RE_NOT_ENRUCHAR = re.compile(u'[^-a-zA-Zа-яА-ЯёЁ0-9]', re.U)
 RE_RUSSIAN_CHAR = re.compile(u'[а-яА-ЯёЁ]', re.U)
 RE_DASH = re.compile(r'-+')
 
-def slugify(value, limit=None, default=''):
+def slugify(value, limit=None, default='', lower=True):
     value = smart_unicode(value)
 
     # Replace all non russian/english chars with "-" char
@@ -24,7 +24,9 @@ def slugify(value, limit=None, default=''):
     value = translify(value)
 
     # Replace trash with safe "-" char
-    value = RE_NOT_ENCHAR.sub('-', value).strip('-').lower()
+    value = RE_NOT_ENCHAR.sub('-', value).strip('-')
+    if lower:
+        value = value.lower()
 
     # Replace sequences of dashes
     value = RE_DASH.sub('-', value)
