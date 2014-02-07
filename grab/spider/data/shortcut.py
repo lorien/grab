@@ -1,6 +1,8 @@
 import os
 from copy import deepcopy
 from urlparse import urlsplit
+import imghdr
+from StringIO import StringIO
 
 from .base import Data
 from grab.tools.files import hashed_path
@@ -19,7 +21,7 @@ def image_handler(grab, task):
 
     if grab.response.code == 200:
         if len(grab.response.body):
-            if not '<html' in grab.response.body:
+            if imghdr.what(StringIO(grab.response.body)):
                 grab.response.save(task.path)
                 db[task.collection].update({'_id': task.obj['_id']},
                                            {'$set': {task.path_field: task.path}})
@@ -30,7 +32,7 @@ def image_set_handler(grab, task):
 
     if grab.response.code == 200:
         if len(grab.response.body):
-            if not '<html' in grab.response.body:
+            if imghdr.what(StringIO(grab.response.body)):
                 grab.response.save(task.path)
                 db[task.collection].update(
                     {'_id': task.obj['_id'], ('%s.url' % task.set_field): task.image['url']},
