@@ -130,7 +130,7 @@ def default_config():
 
         # Timeouts
         timeout = 15,
-        connect_timeout = 10,
+        connect_timeout = 3,
         hammer_mode = False,
         hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
 

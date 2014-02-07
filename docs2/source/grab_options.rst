@@ -41,7 +41,7 @@ connect_timeout
 ---------------
 
 :Type: int
-:Default: 10
+:Default: 3
 
 Maximal time of operation of connection to remote server and getting initial response.
 If it exeeds then the GrabNetworkTimeout is raised
