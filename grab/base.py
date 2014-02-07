@@ -433,8 +433,17 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         Returns: ``Response`` objects.
         """
 
-        if self.config['hammer_mode']:
-            hammer_timeouts = list(self.config['hammer_timeouts'])
+        # We need to process hammer_timeouts value before calling to grab.prepare_request
+        # because initial hammer_timeouts value should be calculated only one time
+        if 'hammer_mode' in kwargs:
+            hammer_mode = kwargs['hammer_mode']
+        else:
+            hammer_mode = self.config['hammer_mode']
+        if hammer_mode:
+            if 'hammer_timeouts' in kwargs:
+                hammer_timeouts = list(kwargs['hammer_timeouts'])
+            else:
+                hammer_timeouts = list(self.config['hammer_timeouts'])
             connect_timeout, total_timeout = hammer_timeouts.pop(0)
             self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
 
@@ -446,7 +455,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             except error.GrabError:
 
                 # In hammer mode try to use next timeouts
-                if self.config['hammer_mode']:
+                if hammer_mode:
                     # If no more timeouts
                     # then raise an error
                     if not hammer_timeouts:
