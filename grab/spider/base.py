@@ -803,6 +803,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         to stop processing new task and shuts down.
         """
 
+        logger_verbose.debug('Method `stop` was called')
         self.work_allowed = False
 
     def run(self):
@@ -896,7 +897,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                                 else:
                                     logger_verbose.debug('Shutdown event has not been set yet')
                             else:
-                                self.stop()
+                                if not self.task_generator_enabled:
+                                    self.stop()
                         else:
                             logger_verbose.debug('Transport active tasks: %d' %
                                                  self.transport.active_task_number())
