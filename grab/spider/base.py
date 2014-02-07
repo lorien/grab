@@ -968,7 +968,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
     def get_name(self):
         if hasattr(self, 'spider_name'):
-            return name
+            return self.spider_name
         else:
             return camel_case_to_underscore(self.__class__.__name__)
 
