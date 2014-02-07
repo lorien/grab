@@ -255,7 +255,7 @@ class RexResultList(object):
     def text(self, default=NULL):
         try:
             return normalize_space(decode_entities(self.one().group(1)))
-        except AttributeError:
+        except (AttributeError, IndexError):
             if default is NULL:
                 raise
             else:
