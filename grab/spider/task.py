@@ -14,13 +14,14 @@ class Task(BaseTask):
     Task for spider.
     """
 
-    def __init__(self, name='initial', url=None, grab=None, grab_config=None,
+    def __init__(self, name=None, url=None, grab=None, grab_config=None,
                  priority=None, priority_is_custom=True,
                  network_try_count=0, task_try_count=0, 
                  disable_cache=False, refresh_cache=False,
                  valid_status=[], use_proxylist=True,
                  cache_timeout=None, delay=0,
                  raw=False, callback=None,
+                 fallback_name=None,
                  **kwargs):
         """
         Create `Task` object.
@@ -74,6 +75,8 @@ class Task(BaseTask):
                 network resposne will be passed to this callback and the usual 'task_*'
                 handler will be ignored and no error will be raised if such 'task_*' handler
                 does not exist.
+            :param fallback_name: the name of method that is called when spider gives up to
+                do the task (due to multiple network errors)
             Any non-standard named arguments passed to `Task` constructor will be saved as
             attributes of the object. You can get their values later as attributes or with
             `get` method which allows to use default value if attrubute does not exist.
@@ -110,6 +113,7 @@ class Task(BaseTask):
 
         self.process_delay_option(delay)
 
+        self.fallback_name = fallback_name
         self.priority_is_custom = priority_is_custom
         self.priority = priority
         self.network_try_count = network_try_count
@@ -206,6 +210,16 @@ class Task(BaseTask):
 
     def __eq__(self, other):
         return (self.priority == other.priority)
+
+    def get_fallback_handler(self, spider):
+        if self.fallback_name:
+            return getattr(spider, self.fallback_name)
+        elif self.name:
+            fb_name = 'task_%s_fallback' % self.name
+            if hasattr(spider, fb_name):
+                return getattr(spider, fb_name)
+        else:
+            return None
 
 
 class NullTask(BaseTask):

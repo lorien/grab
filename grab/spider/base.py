@@ -315,12 +315,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
         is_valid = True
 
-        if not self.config.get('TASK_ENABLED', {}).get(task.name, True):
-            logger.debug('Task %s disabled via config' % task.name)
-            self.inc_count('task-disabled')
-            is_valid = False
-
-        elif task.task_try_count > self.task_try_limit:
+        if task.task_try_count > self.task_try_limit:
             logger.debug('Task tries (%d) ended: %s / %s' % (
                           self.task_try_limit, task.name, task.url))
             self.add_item('too-many-task-tries', task.url)
@@ -331,13 +326,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                           self.network_try_limit, task.name, task.url))
             self.add_item('too-many-network-tries', task.url)
             is_valid = False
-
-        return is_valid
-
-    def check_task_limits_deprecated(self, task):
-        is_valid = self.check_task_limits(task)
-
-        # todo: middleware TaskFails
 
         return is_valid
 
@@ -378,14 +366,15 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
         if self.config.get('GRAB_TASK_REFRESH_CACHE', {}).get(task.name, False):
             task.refresh_cache = True
-            is_valid = False
 
-        is_valid = self.check_task_limits_deprecated(task)
-        if is_valid:
+        if not self.config.get('TASK_ENABLED', {}).get(task.name, True):
+            logger.debug('Task %s disabled via config' % task.name)
+            self.inc_count('task-disabled-via-config')
+            is_valid = False
+        else:
             # TODO: keep original task priority if it was set explicitly
             self.taskq.put(task, task.priority, schedule_time=task.schedule_time)
-        else:
-            self.add_item('task-could-not-be-added', task.url)
+            is_valid = True
         return is_valid
 
     def load_initial_urls(self):
@@ -919,6 +908,10 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
                         if not self.check_task_limits(task):
                             logger_verbose.debug('Task %s is rejected due to limits' % task.name)
+                            handler = task.get_fallback_handler(self)
+                            if handler:
+                                handler(task)
+                            # TODO: not do following line
                             # TODO: middleware: TaskFails
                         else:
                             self.process_new_task(task)
