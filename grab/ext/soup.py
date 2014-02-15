@@ -20,8 +20,9 @@ class BeautifulSoupExtension(object):
         Return BeautifulSoup descriptor.
         """
 
-        from BeautifulSoup import BeautifulSoup
+        from bs4 import BeautifulSoup
 
-        if not self._soup:
-            self._soup = BeautifulSoup(self.response.body)
+       # if not self._soup:
+        #    self._soup = BeautifulSoup(self.response.body)
+        self._soup = BeautifulSoup(self.response.body)
         return self._soup
