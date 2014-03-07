@@ -7,6 +7,7 @@ from grab.util.module import load_spider_class
 from grab.tools.logs import default_logging
 from grab.tools.lock import assert_lock
 from grab.spider.save_result import save_result
+from grab.tools.files import clear_directory
 
 logger = logging.getLogger('grab.script.crawl')
 
@@ -86,14 +87,19 @@ def main(spider_name, thread_number=None, slave=False,
     pid = os.getpid()
     logger.debug('Spider pid is %d' % pid)
 
-    if config.get('GRAB_SAVE_FATAL_ERRORS'):
-        bot.save_list('fatal', 'var/fatal-%d.txt' % pid)
-
-    if config.get('GRAB_SAVE_TASK_ADD_ERRORS'):
-        bot.save_list('task-could-not-be-added', 'var/task-add-error-%d.txt' % pid)
-
-    if config.get('GRAB_SAVE_FINAL_STATS'):
-        open('var/stats-%d.txt' % pid, 'wb').write(stats)
+    if config.get('GRAB_SAVE_REPORT'):
+        for subdir in (str(pid), 'last'):
+            dir_ = 'var/%s' % subdir
+            if not os.path.exists(dir_):
+                os.mkdir(dir_)
+            else:
+                clear_directory(dir_)
+            bot.save_list('fatal', '%s/fatal.txt' % dir_)
+            bot.save_list('task-count-rejected', '%s/task_count_rejected.txt' % dir_)
+            bot.save_list('network-count-rejected', '%s/network_count_rejected.txt' % dir_)
+            bot.save_list('task-with-invalid-url', '%s/task_with_invalid_url.txt' % dir_)
+            with open('%s/report.txt' % dir_, 'wb') as out:
+                out.write(stats)
 
     return {
         'spider_stats': bot.render_stats(timing=False),
