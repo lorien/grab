@@ -53,6 +53,14 @@ class GrabRedirectTestCase(TestCase):
         self.assertEqual(SERVER.REQUEST['path'], '/foo')
         self.assertEqual(g.response.url, meta_url)
 
+        # Test spaces in meta tag
+        SERVER.RESPONSE_ONCE['get'] = "<meta http-equiv='refresh' content='0;url= %s'>" % meta_url
+        g = Grab(transport=GRAB_TRANSPORT)
+        g.setup(follow_refresh=True)
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(SERVER.REQUEST['path'], '/foo')
+        self.assertEqual(g.response.url, meta_url)
+
     @only_transport('grab.transport.curl.CurlTransport')
     def test_redirect_limit(self):
         ctl = RedirectController(10)
