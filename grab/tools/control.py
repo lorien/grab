@@ -40,7 +40,7 @@ def repeat(func, limit=3, args=None, kwargs=None,
     """
     for try_count in xrange(1, limit + 1):
         try:
-            res = func(*(args or {}), **(kwargs or {}))
+            res = func(*(args or ()), **(kwargs or {}))
         except Exception as ex:
             if isinstance(ex, fatal_exceptions):
                 raise

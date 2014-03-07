@@ -38,3 +38,24 @@ class ControlToolsTestCase(TestCase):
         COUNTER[0] = 0
         self.assertRaises(IndexError,
                           lambda: repeat(foo, limit=2, fatal_exceptions=(IndexError,)))
+
+    def test_repeat_args(self):
+        result = []
+
+        def foo(val):
+            result.append(val)
+
+        repeat(foo, args=[1])
+
+        self.assertEqual(1, result[0])
+
+
+    def test_repeat_kwargs(self):
+        result = []
+
+        def foo(**kwargs):
+            result.append(kwargs['val'])
+
+        repeat(foo, kwargs={'val': 3})
+
+        self.assertEqual(3, result[0])
