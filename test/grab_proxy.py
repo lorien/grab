@@ -68,7 +68,7 @@ class TestProxy(TestCase):
         g.load_proxylist(TMP_FILE, 'text_file', auto_change=False,
                          auto_init=False)
         self.assertEqual(g.config['proxy_auto_change'], False)
-        g.go('http://yandex.ru')
+        g.go(SERVER.BASE_URL)
         self.assertEqual(g.config['proxy'], None)
 
     #def test_memory_proxylist(self):
