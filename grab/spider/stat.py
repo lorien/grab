@@ -46,7 +46,7 @@ class SpiderStat(object):
                     lines.append(smart_str(item))
                 else:
                     lines.append(json.dumps(item))
-            out.write('\n'.join(lines))
+            out.write('\n'.join(lines) + '\n')
 
     def render_stats(self, timing=True):
         out = []
