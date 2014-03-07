@@ -7,7 +7,7 @@ class CSVDumper(object):
         self.write_header = write_header
         self.file_handler = open(path, 'w')
         self.writer = csv.writer(self.file_handler, quoting=quoting)
-        if self.write_header:
+        if self.fields and self.write_header:
             self.writer.writerow(self.normalize_row(self.fields))
 
     def add_record(self, rec, ignore_fields={}):
