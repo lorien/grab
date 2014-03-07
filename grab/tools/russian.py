@@ -5,8 +5,9 @@ from ..tools.encoding import smart_unicode
 from pytils.translit import translify
 import re
 
-MONTH_NAMES = u'января февраля марта апреля мая июня июля августа '\
-              u'сентября октября ноября декабря'.split()
+class InvalidMonthName(Exception):
+    pass
+
 
 RE_NOT_ENCHAR = re.compile(u'[^-a-zA-Z0-9]', re.U)
 RE_NOT_ENRUCHAR = re.compile(u'[^-a-zA-Zа-яА-ЯёЁ0-9]', re.U)
@@ -39,5 +40,17 @@ def slugify(value, limit=None, default='', lower=True):
     else:
         return default
 
-def get_month_number(name):
-    return MONTH_NAMES.index(name) + 1
+def parse_ru_month(val):
+    names = (None, u'января', u'февраля', u'марта', u'апреля',
+             u'мая', u'июня', u'июля', u'августа',
+             u'сентября', u'октября', u'ноября', u'декабря')
+    names2 = (None, u'январь', u'февраль', u'март', u'апрель',
+             u'май', u'июнь', u'июль', u'август',
+             u'сентябрь', u'октябрь', u'ноябрь', u'декабрь')
+    try:
+        return names.index(val.lower())
+    except ValueError:
+        try:
+            return names2.index(val.lower())
+        except ValueError:
+            raise InvalidMonthName(u'Invalid month name: %s' % val)

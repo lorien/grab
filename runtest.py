@@ -54,6 +54,7 @@ GRAB_TEST_LIST = (
     'test.tools_account',
     'test.tools_control',
     'test.tools_content',
+    'test.tools_russian',
     # *** Item
     'test.item',
     # *** Selector
