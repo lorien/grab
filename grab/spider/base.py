@@ -309,25 +309,23 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         """
         Check that network/try counters are OK.
 
-        If one of counter is invalid then display error
-        and try to call fallback handler.
-        """
+        Returns:
+        * if success: (True, None)
+        * if error: (False, reason)
 
-        is_valid = True
+        """
 
         if task.task_try_count > self.task_try_limit:
             logger.debug('Task tries (%d) ended: %s / %s' % (
                           self.task_try_limit, task.name, task.url))
-            self.add_item('too-many-task-tries', task.url)
-            is_valid = False
+            return False, 'task-count'
 
-        elif task.network_try_count > self.network_try_limit:
+        if task.network_try_count > self.network_try_limit:
             logger.debug('Network tries (%d) ended: %s / %s' % (
                           self.network_try_limit, task.name, task.url))
-            self.add_item('too-many-network-tries', task.url)
-            is_valid = False
+            return False, 'network-count'
 
-        return is_valid
+        return True, None
 
     def generate_task_priority(self):
         if self.priority_mode == 'const':
@@ -906,8 +904,15 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                         logger_verbose.debug('Got new task from task queue: %s' % task)
                         self.process_task_counters(task)
 
-                        if not self.check_task_limits(task):
-                            logger_verbose.debug('Task %s is rejected due to limits' % task.name)
+                        is_valid, reason = self.check_task_limits(task)
+                        if not is_valid:
+                            logger_verbose.debug('Task %s is rejected due to %s limit' % (task.name, reason))
+                            if reason == 'task-count':
+                                self.add_item('task-count-rejected', task.url)
+                            elif reason == 'network-count':
+                                self.add_item('network-count-rejected', task.url)
+                            else:
+                                raise Exception('Unknown response from check_task_limits: %s' % reason)
                             handler = task.get_fallback_handler(self)
                             if handler:
                                 handler(task)
