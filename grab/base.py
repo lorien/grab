@@ -741,7 +741,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     def setup_with_proxyline(self, line, proxy_type='http'):
         # TODO: remove from base class
         # maybe to proxylist?
-        host, port, user, pwd = parse_proxyline(line)
+        host, port, user, pwd = parse_proxy_line(line)
         server_port = '%s:%s' % (host, port)
         self.setup(proxy=server_port, proxy_type=proxy_type)
         if user:
