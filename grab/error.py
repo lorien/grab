@@ -44,7 +44,7 @@ class GrabMisuseError(GrabError):
     """
 
 
-class GrabConnectionError(GrabError):
+class GrabConnectionError(GrabNetworkError):
     """
     Raised when it is not possible to establish network connection.
 
