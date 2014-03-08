@@ -129,3 +129,12 @@ class TestCookies(TestCase):
         # `cookiefile` file should contains merged cookies
         self.assertEqual(set(MERGED_COOKIES),
                          set((x['name'], x['value']) for x in json.load(open(TMP_FILE))))
+
+    #def test_manual_dns(self):
+        #import pycurl
+
+        #g = Grab(transport=GRAB_TRANSPORT)
+        #g.transport.curl.setopt(pycurl.RESOLVE, ('foo:80:127.0.0.1',))
+        #SERVER.RESPONSE['get'] = 'zzz'
+        #g.go('http://foo')
+        #self.assertEqual('zzz', g.response.body)
