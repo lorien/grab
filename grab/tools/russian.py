@@ -47,10 +47,16 @@ def parse_ru_month(val):
     names2 = (None, u'январь', u'февраль', u'март', u'апрель',
              u'май', u'июнь', u'июль', u'август',
              u'сентябрь', u'октябрь', u'ноябрь', u'декабрь')
+    names3 = (None, u'янв', u'фев', u'мар', u'апр',
+             u'май', u'июн', u'июл', u'авг',
+             u'сен', u'окт', u'ноя', u'дек')
     try:
         return names.index(val.lower())
     except ValueError:
         try:
             return names2.index(val.lower())
         except ValueError:
-            raise InvalidMonthName(u'Invalid month name: %s' % val)
+            try:
+                return names3.index(val.lower())
+            except ValueError:
+                raise InvalidMonthName(u'Invalid month name: %s' % val)
