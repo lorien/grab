@@ -36,18 +36,16 @@ class Watcher(object):
             os.wait()
         except KeyboardInterrupt:
             logging.debug('Watcher process received KeyboardInterrupt')
-            logging.debug('Sending SIGUSR2 signal to child process')
-            try:
-                os.kill(self.child, signal.SIGUSR2)
-            except OSError:
-                pass
-            logging.debug('Waiting 5 seconds before sending SIGKILL')
-            time.sleep(5)
-            logging.debug('Sending SIGKILL signal to child process')
-            try:
-                os.kill(self.child, signal.SIGKILL)
-            except OSError:
-                pass
+            signals = ('SIGUSR2', 'SIGTERM', 'SIGKILL')
+            for count, sig in enumerate(signals):
+                if count != 0:
+                    logging.debug('Waiting 1 second before sending %s' % sig)
+                    time.sleep(1)
+                logging.debug('Sending %s signal to child process' % sig)
+                try:
+                    os.kill(self.child, getattr(signal, sig))
+                except OSError:
+                    pass
         sys.exit()
 
 
