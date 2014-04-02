@@ -27,7 +27,7 @@ def in_unit(num, unit):
         return num
 
 
-def parse_size(size, unit='mb'):
+def parse_size(size, unit='b'):
     size = size.lower().strip()
     if size.isdigit():
         return int(size)
