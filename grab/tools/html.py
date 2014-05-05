@@ -23,7 +23,8 @@ RE_REFRESH_URL = re.compile(r'''
 ''', re.I | re.X)
 
 RE_ENTITY = re.compile(r'(&[a-z]+;)')
-RE_NUM_ENTITY = re.compile(r'(&#\d+;)')
+RE_NUM_ENTITY = re.compile(r'(&#[0-9]+;)')
+RE_HEX_ENTITY = re.compile(r'(&#x[a-f0-9]+;)', re.I)
 RE_BASE_URL = re.compile(r'<base[^>]+href\s*=["\']*([^\'"> ]+)', re.I)
 RE_BR = re.compile(r'<br\s*/?>', re.I)
 
@@ -60,7 +61,16 @@ def decode_entities(html):
         except ValueError:
             return entity
 
+    def process_hex_entity(match):
+        entity = match.group(1)
+        code = entity[3:-1]
+        try:
+            return unichr(int(code, 16))
+        except ValueError:
+            return entity
+
     html = RE_NUM_ENTITY.sub(process_num_entity, html)
+    html = RE_HEX_ENTITY.sub(process_hex_entity, html)
     html = RE_ENTITY.sub(process_entity, html)
     return html
 
