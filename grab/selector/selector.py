@@ -55,8 +55,15 @@ class SelectorList(object):
             else:
                 return default
 
-    def node(self):
-        return self.one().node
+    def node(self, default=NULL):
+        try:
+            return self.one().node
+        except IndexError:
+            if default is NULL:
+                raise DataNotFound('Could not get first node for %s query of class %s' % (
+                    self.origin_query, self.origin_selector_class.__name__))
+            else:
+                return default
 
     def text(self, default=NULL, smart=False, normalize_space=True):
         try:
