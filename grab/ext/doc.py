@@ -17,6 +17,9 @@ class DocInterface(object):
     #def structure(self, *args, **kwargs):
         #return TreeInterface(self.grab.tree).structured_xpath(*args, **kwargs)
 
+    def __call__(self, query):
+        return self.select(query)
+
 
 class DocExtension(object):
     __slots__ = ()
