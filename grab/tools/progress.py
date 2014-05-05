@@ -5,10 +5,12 @@ logger = logging.getLogger('grab.tools.progress')
 
 class Progress(object):
     def __init__(self, step=None, total=None, stop=None, name='items', level=logging.DEBUG):
-        if not total and not step:
+        if total is None and step is None:
             raise Exception('Both step and total arguments are None')
         if total and not step:
             step = int(total / 20) 
+        if step == 0:
+            step = total
         self.step = step
         self.count = 0 
         self.total = total
