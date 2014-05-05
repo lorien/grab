@@ -117,6 +117,16 @@ class SelectorList(object):
 
         return len(self.selector_list) > 0
 
+
+    def assert_exists(self):
+        """
+        Return True if selctor list is not empty.
+        """
+
+        if not self.exists():
+            raise DataNotFound(u'Node does not exists, query: %s, query type: %s' % (
+                self.origin_query, self.origin_selector_class.__name__))
+
     def attr(self, key, default=NULL):
         try:
             sel = self.one()
