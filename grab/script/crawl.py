@@ -17,15 +17,18 @@ def setup_arg_parser(parser):
                         help='Number of network threads')
     parser.add_argument('--slave', action='store_true', default=False,
                         help='Enable the slave-mode')
-    parser.add_argument('--network-logs', action='store_true', default=False,
+    parser.add_argument('-n', '--network-logs', action='store_true', default=False,
                         help='Dump to console details about network requests')
     parser.add_argument('--save-result', action='store_true', default=False,
                         help='Save crawling state to database')
+    parser.add_argument('--disable-proxy', action='store_true', default=False,
+                        help='Disable proxy servers')
 
 
 @save_result
 def main(spider_name, thread_number=None, slave=False,
          settings='settings', network_logs=False,
+         disable_proxy=False, 
          *args, **kwargs):
     default_logging(propagate_network_logger=network_logs)
 
@@ -64,7 +67,10 @@ def main(spider_name, thread_number=None, slave=False,
     if spider_config.get('GRAB_CACHE'):
         bot.setup_cache(**spider_config['GRAB_CACHE'])
     if spider_config.get('GRAB_PROXY_LIST'):
-        bot.load_proxylist(**spider_config['GRAB_PROXY_LIST'])
+        if disable_proxy:
+            logger.debug('Proxy servers disabled via command line')
+        else:
+            bot.load_proxylist(**spider_config['GRAB_PROXY_LIST'])
     if spider_config.get('GRAB_COMMAND_INTERFACES'):
         for iface_config in spider_config['GRAB_COMMAND_INTERFACES']:
             bot.controller.add_interface(**iface_config)
