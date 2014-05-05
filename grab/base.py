@@ -96,6 +96,7 @@ def default_config():
         log_file = None,
         log_dir = False,
         debug_post = False,
+        debug_post_limit = 150,
         # Only for curl transport
         debug = False,
         verbose_logging = False,
@@ -496,13 +497,13 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 post = list(post.items())
             if post:
                 if isinstance(post, basestring):
-                    post = post[:150] + '...'
+                    post = post[:self.config['debug_post_limit']] + '...'
                 else:
                     items = normalize_http_values(post, charset='utf-8')
                     new_items = []
                     for key, value in items:
-                        if len(value) > 150:
-                            value = value[:150] + '...'
+                        if len(value) > self.config['debug_post_limit']:
+                            value = value[:self.config['debug_post_limit']] + '...'
                         else:
                             value = value
                         new_items.append((key, value))
