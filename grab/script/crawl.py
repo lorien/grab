@@ -87,7 +87,7 @@ def main(spider_name, thread_number=None, slave=False,
 
     stats = bot.render_stats(timing=config.get('GRAB_DISPLAY_TIMING'))
 
-    if config.get('GRAB_DISPLAY_STATS'):
+    if spider_config.get('GRAB_DISPLAY_STATS'):
         logger.debug(stats)
 
     pid = os.getpid()
