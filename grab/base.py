@@ -340,7 +340,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         self.config = copy_config(config, self.mutable_config_keys)
-        if 'cookiejar' in config['state']:
+        if 'cookiejar_cookies' in config['state']:
             self.cookies = CookieManager.from_cookie_list(config['state']['cookiejar_cookies'])
 
     def setup(self, **kwargs):

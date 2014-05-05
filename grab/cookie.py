@@ -95,7 +95,7 @@ class CookieManager(object):
     @classmethod
     def from_cookie_list(cls, clist):
         cj = CookieJar()
-        for cookie in cookie_list:
+        for cookie in clist:
             cj.set_cookie(cookie)
         return cls(cj)
 
