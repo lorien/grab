@@ -22,6 +22,7 @@ GRAB_TEST_LIST = (
     'test.grab_api',
     'test.grab_transport',
     'test.response_class',
+    'test.grab_debug',
     # Response processing
     'test.grab_xml_processing',
     'test.grab_response_body_processing',
@@ -185,7 +186,6 @@ def main():
         sys.exit(0)
     else:
         sys.exit(1)
-
 
 if __name__ == '__main__':
     main()

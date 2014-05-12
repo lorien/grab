@@ -17,10 +17,10 @@ def prepare_test_environment():
 
 
 def clear_test_environment():
-    remove_directory(TMP_DIR)
+    clear_directory(TMP_DIR)
 
 
-def remove_directory(path):
+def clear_directory(path):
     for root, dirs, files in os.walk(path):
         for fname in files:
             os.unlink(os.path.join(root, fname))

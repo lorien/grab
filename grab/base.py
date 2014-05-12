@@ -71,6 +71,12 @@ logger = logging.getLogger('grab.base')
 logger_network = logging.getLogger('grab.network')
 
 
+def reset_request_counter():
+    global REQUEST_COUNTER
+
+    REQUEST_COUNTER = itertools.count(1)
+
+
 def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
     """
     Copy grab config ojection with correct handling
@@ -509,7 +515,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                         new_items.append((key, value))
                     post = '\n'.join('%-25s: %s' % x for x in new_items)
             if post:
-                logger_network.debug('POST request:\n%s\n' % post)
+                logger_network.debug('[%02d] POST request:\n%s\n' % (self.request_counter, post))
 
         # It's important to delete old POST data after request is performed.
         # If POST data is not cleared then next request will try to use them again!
@@ -676,10 +682,13 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             fname = os.path.join(self.config['log_dir'], '%02d%s.log' % (
                 self.request_counter, tname))
             with open(fname, 'w') as out:
-                out.write('Request:\n')
+                out.write('Request headers:\n')
                 out.write(self.request_head)
                 out.write('\n')
-                out.write('Response:\n')
+                out.write('Request body:\n')
+                out.write(self.request_body)
+                out.write('\n\n')
+                out.write('Response headers:\n')
                 out.write(self.response.head)
 
             fext = 'html'
