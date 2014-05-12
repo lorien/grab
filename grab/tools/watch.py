@@ -42,13 +42,17 @@ class Watcher(object):
                 ('SIGKILL', 5),
             )
             for sig, sleep_time in signals:
-                logging.debug('Sending %s signal to child process' % sig)
-                try:
-                    os.kill(self.child, getattr(signal, sig))
-                except OSError:
-                    pass
-                logging.debug('Waiting 1 second after sending %s' % sig)
-                time.sleep(sleep_time)
+                if not os.path.exists('/proc/%d' % self.child):
+                    logging.debug('Process terminated!')
+                    break
+                else:
+                    logging.debug('Sending %s signal to child process' % sig)
+                    try:
+                        os.kill(self.child, getattr(signal, sig))
+                    except OSError:
+                        pass
+                    logging.debug('Waiting 1 second after sending %s' % sig)
+                    time.sleep(sleep_time)
         sys.exit()
 
 
