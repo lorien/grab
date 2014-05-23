@@ -3,11 +3,15 @@ import shutil
 import tempfile
 import functools
 
+from grab import Grab
+
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # Global variable which is used in all tests to build
 # Grab instance with specific transport layer
-GRAB_TRANSPORT = None
+GLOBAL = {
+    'transport': None,
+}
 
 def prepare_test_environment():
     global TMP_DIR, TMP_FILE
@@ -42,7 +46,7 @@ def ignore_transport(transport):
     def wrapper(func):
         @functools.wraps(func)
         def test_method(*args, **kwargs):
-            if GRAB_TRANSPORT == transport:
+            if GLOBAL['transport'] == transport:
                 return
             else:
                 func(*args, **kwargs)
@@ -59,9 +63,23 @@ def only_transport(transport):
     def wrapper(func):
         @functools.wraps(func)
         def test_method(*args, **kwargs):
-            if GRAB_TRANSPORT == transport:
+            if GLOBAL['transport'] == transport:
                 func(*args, **kwargs)
             else:
                 return
         return test_method
     return wrapper
+
+
+def build_grab(**kwargs):
+    """
+    Build the Grab instance with default transport.
+
+    That func is used in all tests to build grab instance with default
+    transport. Default transport could be changed via command line::
+
+        ./runtest.py --transport=
+    """
+    if not 'transport' in kwargs:
+        kwargs['transport'] = GLOBAL['transport']
+    return Grab(**kwargs)

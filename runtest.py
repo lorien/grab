@@ -6,10 +6,9 @@ from optparse import OptionParser
 import logging
 from copy import copy
 
-from test.util import prepare_test_environment, clear_test_environment
-import test.util
+from test.util import prepare_test_environment, clear_test_environment, GLOBAL
+from test.server import start_server, stop_server
 from grab.tools.watch import watch
-from test.tornado_util import start_server, stop_server
 
 # **********
 # Grab Tests
@@ -19,55 +18,54 @@ from test.tornado_util import start_server, stop_server
 # **********
 GRAB_TEST_LIST = (
     # Internal API
-    'test.grab_api',
-    'test.grab_transport',
-    'test.response_class',
-    'test.grab_debug',
+    'test.case.grab_api',
+    'test.case.grab_transport',
+    'test.case.response_class',
+    'test.case.grab_debug',
     # Response processing
-    'test.grab_xml_processing',
-    'test.grab_response_body_processing',
-    #'test.grab_charset',
+    'test.case.grab_xml_processing',
+    'test.case.grab_response_body_processing',
+    #'test.case.grab_charset',
     # Network
-    'test.grab_get_request',
-    'test.grab_post_request',
-    'test.grab_user_agent',
-    'test.grab_cookies',
+    'test.case.grab_get_request',
+    'test.case.grab_post_request',
+    'test.case.grab_user_agent',
+    'test.case.grab_cookies',
     # Refactor
-    'test.grab_proxy',
-    'test.upload_file',
-    'test.limit_option',
-    'test.charset_issue',
-    'test.grab_pickle',
+    'test.case.grab_proxy',
+    'test.case.grab_upload_file',
+    'test.case.grab_limit_option',
+    'test.case.grab_charset_issue',
+    'test.case.grab_pickle',
     # *** Extension sub-system
-    'test.extension',
+    'test.case.extension',
     # *** Extensions
-    'test.text_extension',
-    'test.lxml_extension',
-    #'test.form_extension',
-    'test.doc_extension',
-    #'test.structured_extension',
+    'test.case.ext_text',
+    'test.case.ext_lxml',
+    #'test.case.ext_form',
+    'test.case.ext_doc',
+    #'test.case.structured_extension',
     # *** Tornado Test Server
-    'test.tornado_server',
+    'test.case.debug_server',
     # *** grab.tools
-    'test.text_tools',
-    'test.tools_html',
-    'test.lxml_tools',
-    'test.tools_account',
-    'test.tools_control',
-    'test.tools_content',
-    'test.tools_russian',
+    'test.case.tools_text',
+    'test.case.tools_html',
+    'test.case.tools_lxml',
+    'test.case.tools_account',
+    'test.case.tools_control',
+    'test.case.tools_content',
+    'test.case.tools_russian',
+    'test.case.tools_http',
     # *** Item
-    'test.item',
+    'test.case.item',
     # *** Selector
-    'test.selector',
-    # *** IDN
-    'test.i18n',
+    'test.case.selector',
     # *** Mock transport
-    'test.grab_transport_mock',
+    'test.case.grab_transport_mock',
     # Javascript features
-    'test.grab_js',
+    'test.case.grab_js',
     # pycurl tests
-    'test.pycurl_cookie',
+    'test.case.pycurl_cookie',
 )
 
 GRAB_EXTRA_TEST_LIST = ()
@@ -80,18 +78,18 @@ GRAB_EXTRA_TEST_LIST = ()
 
 KIT_TEST_LIST = list(GRAB_TEST_LIST)
 KIT_TEST_LIST += [
-    'test.selector_kit',
+    'test.case.selector_kit',
 ]
 for name in (
-    'test.grab_proxy',
-    'test.upload_file',
-    'test.limit_option',
+    'test.case.grab_proxy',
+    'test.case.grab_upload_file',
+    'test.case.grab_limit_option',
 ):
     KIT_TEST_LIST.remove(name)
 
 KIT_EXTRA_TEST_LIST = list(GRAB_EXTRA_TEST_LIST)
 KIT_EXTRA_TEST_LIST += [
-    'test.kit_live_sites',
+    'test.case.kit_live_sites',
 ]
 
 # ************
@@ -99,22 +97,22 @@ KIT_EXTRA_TEST_LIST += [
 # ************
 
 SPIDER_TEST_LIST = (
-    'test.spider',
+    'test.case.spider',
     #'tests.test_distributed_spider',
-    'test.spider_task',
-    'test.spider_proxy',
-    'test.spider_queue',
-    'test.spider_misc',
-    'test.spider_meta',
-    'test.spider_error',
+    'test.case.spider_task',
+    'test.case.spider_proxy',
+    'test.case.spider_queue',
+    'test.case.spider_misc',
+    'test.case.spider_meta',
+    'test.case.spider_error',
 )
 
 SPIDER_EXTRA_TEST_LIST = (
-    'test.spider_mongo_queue',
-    'test.spider_redis_queue',
-    'test.spider_mongo_cache',
-    'test.spider_mysql_cache',
-    'test.spider_command_controller',
+    'test.case.spider_mongo_queue',
+    'test.case.spider_redis_queue',
+    'test.case.spider_mongo_cache',
+    'test.case.spider_mysql_cache',
+    'test.case.spider_command_controller',
 )
 
 
@@ -136,9 +134,11 @@ def main():
                       default=False, help='Run tests for Grab with WebKit transport')
     opts, args = parser.parse_args()
 
-    test.util.GRAB_TRANSPORT = opts.transport
+    GLOBAL['transport'] = opts.transport
+
+    # Override CLI option in case of kit test
     if opts.test_kit:
-        test.util.GRAB_TRANSPORT = 'grab.transport.kit.KitTransport'
+        GLOBAL['transport'] = 'grab.transport.kit.KitTransport'
 
     prepare_test_environment()
     test_list = []
