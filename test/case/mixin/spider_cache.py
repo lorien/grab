@@ -2,7 +2,7 @@ from unittest import TestCase
 import pymongo
 
 from grab.spider import Spider, Task
-from ..tornado_util import SERVER
+from test.server import SERVER
 
 class ContentGenerator():
     def __init__(self):

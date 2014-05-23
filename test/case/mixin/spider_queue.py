@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from grab.spider import Spider, Task, Data
-from ..tornado_util import SERVER
+from test.server import SERVER
 
 from grab.util.py3k_support import *
 

@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from grab.spider import Spider, Task, Data
 from test.server import SERVER
-from .mixin.spider_queue import SpiderQueueMixin
+from test.case.mixin.spider_queue import SpiderQueueMixin
 
 class BasicSpiderTestCase(TestCase, SpiderQueueMixin):
     def setUp(self):
