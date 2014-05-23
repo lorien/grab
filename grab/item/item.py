@@ -4,7 +4,8 @@ from .field import Field, ItemListField
 from ..selector import XpathSelector
 from ..selector import JsonSelector
 from ..error import GrabMisuseError
-from ..ext.doc import DocInterface
+#from ..ext.doc import DocInterface
+from grab.document import Document
 
 logger = logging.getLogger('grab.item.item')
 
@@ -60,7 +61,7 @@ class Item(ItemBuilderMetaClass):
         # Backward Compatibility
         # First implementations of Item module required
         # `grab.doc` to be passed in `tree` option
-        if isinstance(tree, DocInterface):
+        if isinstance(tree, Document):
             tree = tree.grab.tree
 
         selector_type = cls._get_selector_type(kwargs.pop('selector_type', 'xpath'))

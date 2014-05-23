@@ -55,81 +55,81 @@ class SpiderCacheMixin(object):
 
     def test_counter(self):
         bot = SimpleSpider()
-        #self.setup_cache(bot)
-        bot.setup_cache(backend='mysql', database='spider_test',
-                        user='web', passwd='web-**')
+        self.setup_cache(bot)
+        #bot.setup_cache(backend='mysql', database='spider_test',
+                        #user='web', passwd='web-**')
         bot.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('one', SERVER.BASE_URL))
         bot.run()
         self.assertEqual([1], bot.resp_counters)
 
-    def test_bug1(self):
-        """
-        Test the bug:
-        * enable cache
-        * fetch document (it goes to cache)
-        * request same URL
-        * got exception
-        """
+    #def test_bug1(self):
+        #"""
+        #Test the bug:
+        #* enable cache
+        #* fetch document (it goes to cache)
+        #* request same URL
+        #* got exception
+        #"""
 
-        class Bug1Spider(Spider):
-            def task_foo(self, grab, task):
-                grab.setup(url=SERVER.BASE_URL)
-                yield Task('bar', grab=grab)
+        #class Bug1Spider(Spider):
+            #def task_foo(self, grab, task):
+                #grab.setup(url=SERVER.BASE_URL)
+                #yield Task('bar', grab=grab)
 
-            def task_bar(self, grab, task):
-                pass
+            #def task_bar(self, grab, task):
+                #pass
 
-        bot = Bug1Spider()
-        self.setup_cache(bot)
-        #bot.setup_cache(backend='mongo', database='spider_test')
-        bot.cache.clear()
-        bot.setup_queue()
-        bot.add_task(Task('foo', SERVER.BASE_URL))
-        bot.run()
-
-    ##def test_mysql_cache(self):
-        ##bot = SimpleSpider()
-        ##self.setup_cache(bot)
-        ###bot.setup_cache(backend='mysql', database='spider_test',
-                        ###user='web', passwd='web-**')
-        ##bot.cache.clear()
-        ##bot.setup_queue()
-        ##bot.add_task(Task('foo', SERVER.BASE_URL))
-        ##bot.run()
-        ##self.assertEqual([1, 1, 1, 2], bot.resp_counters)
-
-    def test_mongo_cache(self):
-        bot = SimpleSpider()
-        #bot.setup_cache(backend='mongo', database='spider_test')
-        self.setup_cache(bot)
-        bot.cache.clear()
-        bot.setup_queue()
-        bot.add_task(Task('foo', SERVER.BASE_URL))
-        bot.run()
-        self.assertEqual([1, 1, 1, 2], bot.resp_counters)
-
-    def test_timeout(self):
-        bot = SimpleSpider()
-        #bot.setup_cache(backend='mongo', database='spider_test')
-        self.setup_cache(bot)
-        bot.cache.clear()
-        bot.setup_queue()
-        bot.add_task(Task('one', SERVER.BASE_URL))
-        bot.add_task(Task('one', SERVER.BASE_URL))
-        bot.run()
-        self.assertEqual([1, 1], bot.resp_counters)
-
-        bot = SimpleSpider()
-        #bot.setup_cache(backend='mongo', database='spider_test')
-        self.setup_cache(bot)
-        # DO not clear the cache
+        #bot = Bug1Spider()
+        #self.setup_cache(bot)
+        ##bot.setup_cache(backend='mongo', database='spider_test')
         #bot.cache.clear()
-        bot.setup_queue()
-        bot.add_task(Task('one', SERVER.BASE_URL, priority=1))
-        bot.add_task(Task('one', SERVER.BASE_URL, priority=2, cache_timeout=0))
-        bot.add_task(Task('one', SERVER.BASE_URL, priority=3, cache_timeout=10))
-        bot.add_task(Task('one', SERVER.BASE_URL, priority=4, cache_timeout=0))
-        bot.run()
-        self.assertEqual([1, 2, 2, 3], bot.resp_counters)
+        #bot.setup_queue()
+        #bot.add_task(Task('foo', SERVER.BASE_URL))
+        #bot.run()
+
+    ###def test_mysql_cache(self):
+        ###bot = SimpleSpider()
+        ###self.setup_cache(bot)
+        ####bot.setup_cache(backend='mysql', database='spider_test',
+                        ####user='web', passwd='web-**')
+        ###bot.cache.clear()
+        ###bot.setup_queue()
+        ###bot.add_task(Task('foo', SERVER.BASE_URL))
+        ###bot.run()
+        ###self.assertEqual([1, 1, 1, 2], bot.resp_counters)
+
+    #def test_mongo_cache(self):
+        #bot = SimpleSpider()
+        ##bot.setup_cache(backend='mongo', database='spider_test')
+        #self.setup_cache(bot)
+        #bot.cache.clear()
+        #bot.setup_queue()
+        #bot.add_task(Task('foo', SERVER.BASE_URL))
+        #bot.run()
+        #self.assertEqual([1, 1, 1, 2], bot.resp_counters)
+
+    #def test_timeout(self):
+        #bot = SimpleSpider()
+        ##bot.setup_cache(backend='mongo', database='spider_test')
+        #self.setup_cache(bot)
+        #bot.cache.clear()
+        #bot.setup_queue()
+        #bot.add_task(Task('one', SERVER.BASE_URL))
+        #bot.add_task(Task('one', SERVER.BASE_URL))
+        #bot.run()
+        #self.assertEqual([1, 1], bot.resp_counters)
+
+        #bot = SimpleSpider()
+        ##bot.setup_cache(backend='mongo', database='spider_test')
+        #self.setup_cache(bot)
+        ## DO not clear the cache
+        ##bot.cache.clear()
+        #bot.setup_queue()
+        #bot.add_task(Task('one', SERVER.BASE_URL, priority=1))
+        #bot.add_task(Task('one', SERVER.BASE_URL, priority=2, cache_timeout=0))
+        #bot.add_task(Task('one', SERVER.BASE_URL, priority=3, cache_timeout=10))
+        #bot.add_task(Task('one', SERVER.BASE_URL, priority=4, cache_timeout=0))
+        #bot.run()
+        #self.assertEqual([1, 2, 2, 3], bot.resp_counters)

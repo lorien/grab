@@ -54,7 +54,6 @@ GRAB_TEST_LIST = (
     'test.case.tools_account',
     'test.case.tools_control',
     'test.case.tools_content',
-    'test.case.tools_russian',
     'test.case.tools_http',
     # *** Item
     'test.case.item',
@@ -68,7 +67,9 @@ GRAB_TEST_LIST = (
     'test.case.pycurl_cookie',
 )
 
-GRAB_EXTRA_TEST_LIST = ()
+GRAB_EXTRA_TEST_LIST = (
+    'test.case.tools_russian',
+)
 
 # *******************************************
 # Kit Tests
@@ -179,7 +180,6 @@ def main():
 
     start_server()
     result = runner.run(suite)
-    stop_server()
 
     clear_test_environment()
     if result.wasSuccessful():

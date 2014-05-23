@@ -26,6 +26,7 @@ docs/libpeerconnection.log
 /ghost/
 /var/
 /.tox/
+/.py33
 /script/
 /test.py
 /many_links_prof

@@ -34,5 +34,5 @@ class TestGrab(TestCase):
         p = Process(target=func, args=[data, result_queue])
         p.start()
 
-        text = result_queue.get()
+        text = result_queue.get(block=True, timeout=1)
         self.assertEqual(text, 'the cat')

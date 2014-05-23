@@ -1,6 +1,6 @@
 # You probably need these packages
 lxml
-pycurl==7.19.0
+pycurl
 cssselect
 jsonpath_rw
 
@@ -10,6 +10,7 @@ jsonpath_rw
 #pymongo
 #mysql-python
 #tornado
+#pytils
 
 # Python3 alternate packages
 # mysql:

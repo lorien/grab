@@ -57,7 +57,7 @@ XML = '''
 
 class StructuredExtensionTest(TestCase):
     def setUp(self):
-        self.g = build_grab(response_body=XML)
+        self.g = build_grab(document_body=XML)
 
     def test_1(self):
         result = self.g.doc.structure(

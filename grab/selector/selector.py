@@ -16,7 +16,7 @@ from ..error import GrabMisuseError, DataNotFound, warn
 from ..tools import rex as rex_tools
 from ..tools.text import normalize_space
 from ..tools.html import decode_entities
-from ..base import GLOBAL_STATE
+import grab.base
 
 from grab.util.py3k_support import *
 
@@ -176,7 +176,7 @@ class BaseSelector(metaclass_ABCMeta):
         start = time.time()
         selector_list = self.wrap_node_list(self.process_query(query), query)
         total = time.time() - start
-        GLOBAL_STATE['selector_time'] += total
+        grab.base.GLOBAL_STATE['selector_time'] += total
         return selector_list
 
     def wrap_node_list(self, nodes, query):

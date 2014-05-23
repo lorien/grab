@@ -18,7 +18,7 @@ class DocExtensionTest(TestCase):
         SERVER.reset()
 
         # Create fake grab instance with fake response
-        self.g = build_grab(response_body=HTML)
+        self.g = build_grab(document_body=HTML)
 
     def test_extension_in_general(self):
         self.assertTrue(self.g.doc)

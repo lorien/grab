@@ -23,11 +23,11 @@ class GrabXMLProcessingTestCase(TestCase):
         4. Get ValueError: Unicode strings with encoding declaration are not supported.
         """
         xml = '<?xml version="1.0" encoding="UTF-8"?><tree><leaf>text</leaf></tree>'
-        g = build_grab(response_body=xml)
+        g = build_grab(document_body=xml)
         self.assertTrue(g.search(u'text'))
         self.assertEqual(g.xpath_one('//leaf').text, u'text')
 
         # Similar bugs
-        g = build_grab(response_body=xml)
+        g = build_grab(document_body=xml)
         self.assertTrue(g.rex(u'text'))
         self.assertEqual(g.xpath_one('//leaf').text, u'text')

@@ -81,8 +81,8 @@ class MockTransport(object):
 
 
 class GrabMock(Grab):
-    def __init__(self, response_body=None, transport='grab.transport.curl.CurlTransport',
+    def __init__(self, document_body=None, transport='grab.transport.curl.CurlTransport',
                  **kwargs):
-        super(GrabMock, self).__init__(response_body=response_body,
+        super(GrabMock, self).__init__(document_body=document_body,
                                        transport='grab.transport.mock.MockTransport',
                                        **kwargs)

@@ -211,7 +211,7 @@ class ItemTestCase(TestCase):
         class ChildItem(BaseItem):
             name = StringField('lastname')
 
-        grab = build_grab(response_body=XML)
+        grab = build_grab(document_body=XML)
         items = list(BaseItem.find(grab.doc))
         self.assertEqual(items[0].name, 'Ardeshir')
         self.assertEqual(items[0].age, 19)

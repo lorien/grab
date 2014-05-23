@@ -1,6 +1,7 @@
 # coding: utf-8
 from unittest import TestCase
 
+from grab.util.py3k_support import *
 from grab import GrabMisuseError
 from test.util import ignore_transport, only_transport, build_grab
 from test.server import SERVER
@@ -25,7 +26,7 @@ class GrabApiTestCase(TestCase):
         g.go(SERVER.BASE_URL)
         self.assertTrue('Moon' in g.response.body)
         g2 = build_grab()
-        self.assertEqual(g2.response, None)
+        #self.assertEqual(g2.doc.grab, g2)
         g2 = g.clone()
         self.assertTrue('Moon' in g.response.body)
 
@@ -52,7 +53,7 @@ class GrabApiTestCase(TestCase):
 
     def test_default_content_for_fake_response(self):
         content = '<strong>test</strong>'
-        g = build_grab(response_body=content)
+        g = build_grab(document_body=content)
         self.assertEqual(g.response.body, content)
 
     def test_inheritance(self):
