@@ -268,8 +268,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         elif isinstance(transport_param, collections.Callable):
             self.transport = transport_param()
         else:
-            raise GrabMisuseError('Option `transport` should be string or callable. '
-                                  'Got %s' % type(transport_param))
+            raise error.GrabMisuseError('Option `transport` should be string or callable. '
+                                        'Got %s' % type(transport_param))
 
     def reset(self):
         """
