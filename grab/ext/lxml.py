@@ -12,20 +12,14 @@ import logging
 import traceback
 
 from ..error import DataNotFound, GrabMisuseError
-from ..base import GLOBAL_STATE
 from ..tools.text import normalize_space as normalize_space_func, find_number
 from ..tools.lxml_tools import get_node_text
-from ..response import RE_XML_DECLARATION
 from ..util.misc import deprecated
 
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.ext.lxml')
-
 NULL = object()
-NULL_BYTE = chr(0)
-
-RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode('utf-8'), re.I)
 
 #rex_script = re.compile(r'<script[^>]*>.+?</script>', re.S)
 #rex_style = re.compile(r'<style[^>]*>.+?<?style>', re.S)
@@ -44,93 +38,23 @@ class LXMLExtension(object):
     __slots__ = ()
     # SLOTS: _lxml_tree, _strict_lxml_tree
 
-    def extra_reset(self):
-        self._lxml_tree = None
-        self._strict_lxml_tree = None
-
     @property
+    @deprecated(use_instead='grab.doc.tree')
     def tree(self):
-        """
-        Return DOM tree of the document built with HTML DOM builder.
-        """
+        return self.doc.tree
 
-        if self.config['content_type'] == 'xml':
-            return self.build_xml_tree()
-        else:
-            return self.build_html_tree()
-
+    @deprecated(use_instead='grab.doc.build_html_tree')
     def build_html_tree(self):
-        from lxml.html import fromstring
-        from lxml.etree import ParserError
-
-        if self._lxml_tree is None:
-            body = self.response.unicode_runtime_body(
-                fix_special_entities=self.config['fix_special_entities']
-            ).strip()
-            #if self.config['tidy']:
-                #from tidylib import tidy_document
-                #body, errors = tidy_document(body)
-            if self.config['lowercased_tree']:
-                body = body.lower()
-            if self.config['strip_null_bytes']:
-                body = body.replace(NULL_BYTE, '')
-            # py3 hack
-            if PY3K:
-                body = RE_UNICODE_XML_DECLARATION.sub('', body)
-            else:
-                body = RE_XML_DECLARATION.sub('', body)
-            if not body:
-                # Generate minimal empty content
-                # which will not break lxml parser
-                body = '<html></html>'
-            start = time.time()
-
-            #body = simplify_html(body)
-            try:
-                self._lxml_tree = fromstring(body)
-            except Exception as ex:
-                if (isinstance(ex, ParserError)
-                    and 'Document is empty' in str(ex)
-                    and not '<html' in body):
-
-                    # Fix for "just a string" body
-                    body = '<html>%s</html>'.format(body)
-                    self._lxml_tree = fromstring(body)
-
-                elif (isinstance(ex, TypeError)
-                      and "object of type 'NoneType' has no len" in str(ex)
-                      and not '<html' in body):
-
-                    # Fix for smth like "<frameset></frameset>"
-                    body = '<html>%s</html>'.format(body)
-                    self._lxml_tree = fromstring(body)
-                else:
-                    raise
-
-            GLOBAL_STATE['dom_build_time'] += (time.time() - start)
-        return self._lxml_tree
+        return self.doc.build_html_tree()
 
     @property
+    @deprecated(use_instead='grab.doc.xml_tree')
     def xml_tree(self):
-        """
-        Return DOM-tree of the document built with XML DOM builder.
-        """
+        return self.doc.xml_tree
     
-        logger.debug('This method is deprecated. Please use `tree` property '\
-                     'and content_type="xml" option instead.')
-        return self.build_xml_tree()
-
+    @deprecated(use_instead='grab.doc.build_xml_tree()')
     def build_xml_tree(self):
-        from lxml.etree import fromstring
-
-        if self._strict_lxml_tree is None:
-            # py3 hack
-            if PY3K:
-                body = self.response.body_as_bytes(encode=True)
-            else:
-                body = self.response.body
-            self._strict_lxml_tree = fromstring(body)
-        return self._strict_lxml_tree
+        return self.doc.build_xml_tree()
 
     @deprecated()
     def find_link(self, href_pattern, make_absolute=True):
@@ -375,6 +299,3 @@ class LXMLExtension(object):
         """
 
         return len(self.xpath_list(path)) > 0
-
-if __name__ == '__main__':
-    main()

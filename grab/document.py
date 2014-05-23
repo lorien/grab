@@ -31,6 +31,34 @@ from .cookie import CookieManager
 from .tools.files import hashed_path
 from grab.util.py3k_support import *
 
+
+# LXML STARTS
+#from __future__ import absolute_import
+#try:
+    #from urlparse import urljoin
+#except ImportError:
+    #from urllib.parse import urljoin
+#import re
+import time
+#import logging
+#import traceback
+
+#from ..error import DataNotFound, GrabMisuseError
+#from ..tools.text import normalize_space as normalize_space_func, find_number
+#from ..tools.lxml_tools import get_node_text
+#from ..response import RE_XML_DECLARATION
+#from ..util.misc import deprecated
+
+#from grab.util.py3k_support import *
+
+#logger = logging.getLogger('grab.ext.lxml')
+
+NULL_BYTE = chr(0)
+
+#RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode('utf-8'), re.I)
+# LXML ENDS
+
+
 logger = logging.getLogger('grab.response')
 
 RE_XML_DECLARATION = re.compile(br'^[^<]{,100}<\?xml[^>]+\?>', re.I)
@@ -65,14 +93,7 @@ def read_bom(data):
     return None, None
 
 
-#class Response(object):
 class Document(object):
-    #def __init__(self, grab):
-        #self.grab = weakref.proxy(grab)
-
-
-    #def structure(self, *args, **kwargs):
-        #return TreeInterface(self.grab.tree).structured_xpath(*args, **kwargs)
     """
     Document (in most cases it is a network response i.e. result of network request)
     """
@@ -83,7 +104,8 @@ class Document(object):
                  'bom', 'timestamp',
                  'name_lookup_time', 'connect_time', 'total_time',
                  'download_size', 'upload_size', 'download_speed',
-                 'error_code', 'error_msg', 'grab'
+                 'error_code', 'error_msg', 'grab',
+                 '_lxml_tree', '_strict_lxml_tree',
                  )
 
     def __call__(self, query):
@@ -124,6 +146,10 @@ class Document(object):
         self.download_speed = 0
         self.error_code = None
         self.error_msg = None
+
+        self._lxml_tree = None
+        self._strict_lxml_tree = None
+
 
     def parse(self, charset=None):
         """
@@ -425,29 +451,108 @@ class Document(object):
         logger.error('Attribute Response.time is deprecated. Use Response.total_time instead.')
         return self.total_time
 
+    @property
+    def tree(self):
+        """
+        Return DOM tree of the document built with HTML DOM builder.
+        """
 
+        if self.grab.config['content_type'] == 'xml':
+            return self.build_xml_tree()
+        else:
+            return self.build_html_tree()
 
+    def build_html_tree(self):
+        from lxml.html import fromstring
+        from lxml.etree import ParserError
 
+        from grab.base import GLOBAL_STATE
 
+        if self._lxml_tree is None:
+            body = self.unicode_runtime_body(
+                fix_special_entities=self.grab.config['fix_special_entities']
+            ).strip()
+            if self.grab.config['lowercased_tree']:
+                body = body.lower()
+            if self.grab.config['strip_null_bytes']:
+                body = body.replace(NULL_BYTE, '')
+            # py3 hack
+            if PY3K:
+                body = RE_UNICODE_XML_DECLARATION.sub('', body)
+            else:
+                body = RE_XML_DECLARATION.sub('', body)
+            if not body:
+                # Generate minimal empty content
+                # which will not break lxml parser
+                body = '<html></html>'
+            start = time.time()
 
+            #body = simplify_html(body)
+            try:
+                self._lxml_tree = fromstring(body)
+            except Exception as ex:
+                if (isinstance(ex, ParserError)
+                    and 'Document is empty' in str(ex)
+                    and not '<html' in body):
 
+                    # Fix for "just a string" body
+                    body = '<html>%s</html>'.format(body)
+                    self._lxml_tree = fromstring(body)
 
+                elif (isinstance(ex, TypeError)
+                      and "object of type 'NoneType' has no len" in str(ex)
+                      and not '<html' in body):
 
+                    # Fix for smth like "<frameset></frameset>"
+                    body = '<html>%s</html>'.format(body)
+                    self._lxml_tree = fromstring(body)
+                else:
+                    raise
 
-#class DocExtension(object):
-    #__slots__ = ()
-    ## SLOTS: _doc
+            GLOBAL_STATE['dom_build_time'] += (time.time() - start)
+        return self._lxml_tree
 
-    #def extra_reset(self):
-        #self._doc = None
+    @property
+    def xml_tree(self):
+        """
+        Return DOM-tree of the document built with XML DOM builder.
+        """
+    
+        logger.debug('This method is deprecated. Please use `tree` property '\
+                     'and content_type="xml" option instead.')
+        return self.build_xml_tree()
 
-    #@property
-    #def doc(self):
-        #"""
-        #Return DocInterface object which provides some
-        #shortcuts for faster access to Selector functions.
-        #"""
-        
-        #if not self._doc:
-            #self._doc = Document(self)
-        #return self._doc
+    def build_xml_tree(self):
+        from lxml.etree import fromstring
+
+        if self._strict_lxml_tree is None:
+            # py3 hack
+            if PY3K:
+                body = self.body_as_bytes(encode=True)
+            else:
+                body = self.body
+            self._strict_lxml_tree = fromstring(body)
+        return self._strict_lxml_tree
+
+    def __getstate__(self):
+        """
+        Reset cached lxml objects which could not be pickled.
+        """
+        state = {}
+        for cls in type(self).mro():
+            cls_slots = getattr(cls, '__slots__', ())
+            for slot in cls_slots:
+                if slot != '__weakref__':
+                    if hasattr(self, slot):
+                        state[slot] = getattr(self, slot)
+
+        state['_lxml_tree'] = None
+        state['_strict_lxml_tree'] = None
+
+        #state['doc'].grab = weakref.proxy(self)
+
+        return state
+
+    def __setstate__(self, state):
+        for slot, value in state.items():
+            setattr(self, slot, value)

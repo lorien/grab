@@ -219,7 +219,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                  # Dirst hack to make it possbile to inherit Grab from
                  # multiple base classes with __slots__
                  '_lxml_form', '_file_fields',
-                 '_lxml_tree', '_strict_lxml_tree',
                  '_pyquery', '_doc', '_kit',
                  )
 
@@ -779,8 +778,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                         state[slot] = getattr(self, slot)
 
         state['_lxml_form'] = None
-        state['_lxml_tree'] = None
-        state['_strict_lxml_tree'] = None
 
         state['doc'].grab = weakref.proxy(self)
 
