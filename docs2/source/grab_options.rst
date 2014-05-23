@@ -83,7 +83,7 @@ To specify interface by its OS name use "if!***" format e.g. "if!eth0"
 To specify interface by its name or ip address use "host!***" format e.g.
 "host!127.0.0.1" or "host!localhost"
 
-Also, check out pycurl manual: http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTINTERFACE 
+Also, check out pycurl manual: http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTINTERFACE
 
 
 .. _option_redirect_limit:
@@ -337,23 +337,29 @@ encoding
 List of methods that remote server could use to compress the conten of response. By default, the value of this options is "gzip". To disable any compression method pass the empty string to that option.
 
 
+.. _option_document_charset:
+
+document_charset
+-------
+
+Character set of the document's content.
+By default :ref:`_option_document_charset` is detected automatically.
+In case character set was determined with error, you can specify it with that option. The value you specified
+will be used to convert body of the document to the character set specified in :ref:`_option_charset`. After that the converted body will be passed to lxml library to build the DOM tree. :ref:`_option_document_charset` is also used to encode non-ascii symbols in POST data.
+
+:Type: string
+:Default: None
+
 .. _option_charset:
 
 charset
 -------
 
-.. warning::
-
-    Tere is also document_charset option, WTF???
-
-Charset of content of the response. By deefault, charset is detected automatically
-If that process is failed you can speficy charset manually. The value of that option
-will be used to convert body of the document to the unicode, to pass the content to lxml lib to
-build the DOM tree and in the process of encoding non-ascii data in POST data.
+Character set to which content of the document should be converted to.
+This option is only useful in case :ref:`_option_document_charset` is something different from 'utf-8' (e.g. content is a *bytestring*). Otherwise this option won't affect the resulting content.
 
 :Type: string
-:Default: None
-
+:Default: 'utf-8'
 
 .. _option_nobody:
 
