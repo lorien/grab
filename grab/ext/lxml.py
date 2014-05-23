@@ -133,8 +133,6 @@ class LXMLExtension(object):
 
     @deprecated(use_instead='grab.doc.select()')
     def xpath(self, *args, **kwargs):
-        stack = traceback.extract_stack()
-        stack_call = stack[-2]
         return self.xpath_one(*args, **kwargs)
 
     @deprecated(use_instead='grab.doc.select().one()')
@@ -201,9 +199,6 @@ class LXMLExtension(object):
 
     @deprecated()
     def css(self, *args, **kwargs):
-        stack = traceback.extract_stack()
-        stack_call = stack[-2]
-        logger.debug('Method css is depricated. Please use css_one method. Location of problem: %s::%d' % (stack_call[0], stack_call[1]))
         return self.css_one(*args, **kwargs)
 
     @deprecated()
