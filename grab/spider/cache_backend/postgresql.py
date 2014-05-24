@@ -12,8 +12,6 @@ from __future__ import absolute_import
 from hashlib import sha1
 import zlib
 import logging
-import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_READ_COMMITTED
 import marshal
 import time
 
@@ -26,6 +24,9 @@ logger = logging.getLogger('grab.spider.cache_backend.postgresql')
 
 class CacheBackend(object):
     def __init__(self, database, use_compression=True, spider=None, **kwargs):
+        import psycopg2
+        from psycopg2.extensions import ISOLATION_LEVEL_READ_COMMITTED
+
         self.spider = spider
         self.conn = psycopg2.connect(dbname=database, **kwargs)
         self.conn.set_isolation_level(ISOLATION_LEVEL_READ_COMMITTED)
@@ -157,6 +158,8 @@ class CacheBackend(object):
         self.set_item(url, item)
 
     def set_item(self, url, item):
+        import psycopg2
+
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
         self.cursor.execute('BEGIN')

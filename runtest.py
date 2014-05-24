@@ -135,6 +135,8 @@ def main():
                       default=False, help='Run extra tests that depends on redis')
     parser.add_option('--backend-mysql', action='store_true',
                       default=False, help='Run extra tests that depends on mysql')
+    parser.add_option('--backend-postgresql', action='store_true',
+                      default=False, help='Run extra tests that depends on postgresql')
     opts, args = parser.parse_args()
 
     GLOBAL['transport'] = opts.transport
@@ -151,6 +153,9 @@ def main():
 
     if opts.backend_mysql:
         GLOBAL['backends'].append('mysql')
+
+    if opts.backend_postgresql:
+        GLOBAL['backends'].append('postgresql')
 
     prepare_test_environment()
     test_list = []
