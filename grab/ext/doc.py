@@ -1,1 +1,0 @@
-from grab.document import *

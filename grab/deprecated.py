@@ -275,3 +275,31 @@ class DeprecatedThings(object):
     @deprecated(use_instead='grab.doc.django_file()')
     def django_file(self, name=None):
         return self.doc.django_file(name=name)
+
+    # Methods from deprecated grab.ext.pquery module
+    # **********************************************
+
+    @deprecated(use_instead='grab.doc.pyquery()')
+    def pyquery(self):
+        return self.doc.pyquery()
+
+    # Response related things
+    # ***********************
+
+    # Backward compat.
+    def _get_response(self):
+        return self.doc
+
+
+    def _set_response(self, val):
+        self.doc = val
+
+
+    response = property(_get_response, _set_response)
+
+
+    @deprecated(use_instead='grab.setup_document')
+    def fake_response(self, *args, **kwargs):
+        return self.setup_document(*args, **kwargs)
+
+

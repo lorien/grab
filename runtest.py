@@ -70,7 +70,8 @@ GRAB_TEST_LIST = (
 
 GRAB_EXTRA_TEST_LIST = (
     'test.case.tools_russian',
-    'test.case.django',
+    'test.case.grab_django',
+    'test.case.ext_pyquery',
 )
 
 # *******************************************

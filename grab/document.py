@@ -244,7 +244,23 @@ class DjangoExtension(object):
         return content_file
 
 
-class Document(TextExtension, RegexpExtension, DjangoExtension):
+class PyqueryExtension(object):
+    __slots__ = ()
+
+    @property
+    def pyquery(self):
+        """
+        Returns pyquery handler.
+        """
+
+        if not self._pyquery:
+            from pyquery import PyQuery
+
+            self._pyquery = PyQuery(self.body)
+        return self._pyquery
+
+
+class Document(TextExtension, RegexpExtension, DjangoExtension, PyqueryExtension):
     """
     Document (in most cases it is a network response i.e. result of network request)
     """
@@ -256,7 +272,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension):
                  'name_lookup_time', 'connect_time', 'total_time',
                  'download_size', 'upload_size', 'download_speed',
                  'error_code', 'error_msg', 'grab',
-                 '_lxml_tree', '_strict_lxml_tree',
+                 '_lxml_tree', '_strict_lxml_tree', '_pyquery',
                  )
 
     def __call__(self, query):
@@ -303,6 +319,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension):
 
         self._lxml_tree = None
         self._strict_lxml_tree = None
+        self._pyquery = None
 
 
     def parse(self, charset=None):

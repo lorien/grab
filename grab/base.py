@@ -33,6 +33,7 @@ from .util.py2old_support import *
 from .util.py3k_support import *
 from .proxy import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
+from grab.kit.interface import GrabKitInterface
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
@@ -51,8 +52,6 @@ REQUEST_COUNTER = itertools.count(1)
 # Some extensions need GLOBAL_STATE variable
 # what's why they go after GLOBAL_STATE definition
 from .ext.form import FormExtension
-from .ext.pquery import PyqueryExtension
-from .ext.kit import KitExtension
 
 __all__ = ('Grab',)
 
@@ -199,7 +198,7 @@ def default_config():
     )
 
 
-class Grab(FormExtension, PyqueryExtension, KitExtension, DeprecatedThings
+class Grab(FormExtension, DeprecatedThings
            ):
 
     __slots__ = ('request_head', 'request_log', 'request_body',
@@ -281,6 +280,8 @@ class Grab(FormExtension, PyqueryExtension, KitExtension, DeprecatedThings
         self.request_method = None
         self.trigger_extensions('reset')
         self.transport.reset()
+
+        self._kit = None
 
     def clone(self, **kwargs):
         """
@@ -796,21 +797,16 @@ class Grab(FormExtension, PyqueryExtension, KitExtension, DeprecatedThings
             logging.error('Could not parse request headers', exc_info=ex)
             return {}
 
-
-    # Backward compat.
-    def _get_response(self):
-        return self.doc
-
-
-    def _set_response(self, val):
-        self.doc = val
-
-
-    @deprecated(use_instead='grab.setup_document')
-    def fake_response(self, *args, **kwargs):
-        return self.setup_document(*args, **kwargs)
-
-    response = property(_get_response, _set_response)
+    @property
+    def kit(self):
+        """
+        Return KitInterface object that provides some
+        methods to communicate with Kit transport.
+        """
+        
+        if not self._kit:
+            self._kit = GrabKitInterface(self)
+        return self._kit
 
 
 register_extensions(Grab)
