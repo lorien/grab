@@ -118,38 +118,23 @@ class SpiderCacheMixin(object):
         self.assertEqual([1, 2, 2, 3], bot.resp_counters)
 
 
-#from unittest import TestCase
-
-#from grab.spider import Spider, Task, Data
-#from test.server import SERVER
-#from test.case.mixin.spider_cache import SpiderCacheMixin
-
-class SpiderMongoCacheTestCase(TestCase, SpiderCacheMixin):
+class SpiderMongoCacheTestCase(SpiderCacheMixin, TestCase):
     _backend = 'mongo'
-
-    #def setUp(self):
-        #SpiderCacheMixin.setUp(self)
 
     def setup_cache(self, bot):
         bot.setup_cache(backend='mongo', database='test_spider')
 
 
-class SpiderMysqlCacheTestCase(TestCase, SpiderCacheMixin):
+class SpiderMysqlCacheTestCase(SpiderCacheMixin, TestCase):
     _backend = 'mysql'
-
-    #def setUp(self):
-        #SpiderCacheMixin.setUp(self)
 
     def setup_cache(self, bot):
         bot.setup_cache(backend='mysql', database='spider_test',
                         user='web', passwd='web-**')
 
 
-class SpiderPostgresqlCacheTestCase(TestCase, SpiderCacheMixin):
+class SpiderPostgresqlCacheTestCase(SpiderCacheMixin, TestCase):
     _backend = 'postgresql'
-
-    #def setUp(self):
-        #SpiderCacheMixin.setUp(self)
 
     def setup_cache(self, bot):
         bot.setup_cache(backend='postgresql', database='spider_test')#,
