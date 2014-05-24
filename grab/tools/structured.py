@@ -1,6 +1,5 @@
 from grab.util.py3k_support import *
 
-
 class DotDict(dict):
     def __getattr__(self, item):
         if hasattr(self, item):

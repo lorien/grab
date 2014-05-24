@@ -5,7 +5,6 @@
 """
 The core of grab package: the Grab class.
 """
-from __future__ import absolute_import
 import logging
 import os
 from random import randint
@@ -22,15 +21,15 @@ import email
 from datetime import datetime
 import weakref
 
-from .tools.html import find_refresh_url, find_base_url
+from grab.tools.html import find_refresh_url, find_base_url
 from grab.document import Document
-from . import error
-from .tools.http import normalize_http_values
-from .cookie import CookieManager, create_cookie
-from .util.misc import deprecated
-from .util.py2old_support import *
-from .util.py3k_support import *
-from .proxy import ProxyList, parse_proxy_line
+from grab import error
+from grab.tools.http import normalize_http_values
+from grab.cookie import CookieManager, create_cookie
+from grab.util.misc import deprecated
+from grab.util.py2old_support import *
+from grab.util.py3k_support import *
+from grab.proxy import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
 from grab.kit_interface import GrabKitInterface
 from grab.ext.form import FormExtension
@@ -49,12 +48,11 @@ GLOBAL_STATE = {
     'selector_time': 0,
 }
 REQUEST_COUNTER = itertools.count(1)
-MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies',
-                       'hammer_timeouts']
-logger = logging.getLogger('grab.base')
+MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies', 'hammer_timeouts']
 
+logger = logging.getLogger('grab.base')
 # Logger to handle network activity
-# It is separate logger to allow you easily
+# It is done as separate logger to allow you easily
 # control network logging separately from other grab logs
 logger_network = logging.getLogger('grab.network')
 
@@ -67,8 +65,7 @@ def reset_request_counter():
 
 def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
     """
-    Copy grab config ojection with correct handling
-    of mutable config values.
+    Copy grab config with correct handling of mutable config values.
     """
 
     cloned_config = copy(config)
@@ -191,8 +188,7 @@ def default_config():
     )
 
 
-class Grab(FormExtension, DeprecatedThings
-           ):
+class Grab(FormExtension, DeprecatedThings):
 
     __slots__ = ('request_head', 'request_log', 'request_body',
                  'proxylist', 'config', '_request_prepared',
@@ -801,4 +797,5 @@ class Grab(FormExtension, DeprecatedThings
 
 
 # For backward compatibility
+# WTF???
 BaseGrab = Grab

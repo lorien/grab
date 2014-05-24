@@ -1,7 +1,6 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-from __future__ import absolute_import
 import email
 import logging
 #import urllib
@@ -24,15 +23,14 @@ try:
 except ImportError:
     from http.cookiejar import CookieJar
 
-from ..cookie import create_cookie, CookieManager
-from ..upload import UploadContent, UploadFile
-from .. import error
-from ..response import Response
-from ..tools.http import encode_cookies, smart_urlencode, normalize_unicode,\
-                         normalize_http_values, normalize_post_data, normalize_url
-from ..tools.user_agent import random_user_agent
-from ..tools.encoding import smart_str, smart_unicode, decode_list, decode_pairs
-
+from grab.cookie import create_cookie, CookieManager
+from grab.upload import UploadContent, UploadFile
+from grab import error
+from grab.response import Response
+from grab.tools.http import (encode_cookies, smart_urlencode, normalize_unicode,
+                             normalize_http_values, normalize_post_data, normalize_url)
+from grab.tools.user_agent import random_user_agent
+from grab.tools.encoding import smart_str, smart_unicode, decode_list, decode_pairs
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.transport.curl')
@@ -509,6 +507,6 @@ class CurlTransport(object):
         self.__dict__ = state
 
 
-#from ..base import BaseGrab
+#from grab.base import BaseGrab
 #class GrabCurl(CurlTransportExtension, BaseGrab):
     #pass

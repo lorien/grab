@@ -3,8 +3,8 @@ Functions to process content of lxml nodes.
 """
 import re
 
-from .text import normalize_space as normalize_space_func, find_number
-from .encoding import smart_str, smart_unicode
+from grab.tools.text import normalize_space as normalize_space_func, find_number
+from grab.tools.encoding import smart_str, smart_unicode
 
 from grab.util.py3k_support import *
 

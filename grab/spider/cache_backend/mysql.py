@@ -10,7 +10,6 @@ CacheItem interface:
 
 TODO: WTF with cookies???
 """
-from __future__ import absolute_import
 from hashlib import sha1
 import zlib
 import logging
@@ -19,8 +18,8 @@ import marshal
 import time
 
 from grab.response import Response
-from grab.util.py3k_support import *
 from grab.cookie import CookieManager
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.spider.cache_backend.mysql')
 

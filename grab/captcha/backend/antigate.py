@@ -6,9 +6,9 @@ except ImportError:
     from urllib.parse import urlencode
 
 from grab import Grab
-from .base import CaptchaBackend
-from ..error import (CaptchaServiceError, ServiceTooBusy, BalanceTooLow,
-                     SolutionNotReady)
+from grab.catpcha.backend.base import CaptchaBackend
+from grab.captcha.error import (CaptchaServiceError, ServiceTooBusy, BalanceTooLow,
+                                SolutionNotReady)
 
 class AntigateBackend(CaptchaBackend):
     def setup(self, api_key):

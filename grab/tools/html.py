@@ -9,8 +9,7 @@ except ImportError:
     from html.entities import name2codepoint
 import logging
 
-from .text import normalize_space as normalize_space_func
-
+from grab.tools.text import normalize_space as normalize_space_func
 from grab.util.py3k_support import *
 
 RE_TAG = re.compile(r'<[^>]+>')

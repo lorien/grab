@@ -2,7 +2,6 @@ import csv
 
 from grab.export.csv_dumper import CSVDumper
 
-
 class MysqlCSVDumper(CSVDumper):
     """
     Difference from CSVDumper:

@@ -1,10 +1,8 @@
-from __future__ import absolute_import
 import re
 
-from ..error import DataNotFound
-from .text import normalize_space
-from .html import decode_entities
-
+from grab.error import DataNotFound
+from grab.tools.text import normalize_space
+from grab.tools.html import decode_entities
 from grab.util.py3k_support import *
 
 REGEXP_CACHE = {}

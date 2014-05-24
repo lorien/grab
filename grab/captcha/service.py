@@ -1,10 +1,9 @@
 import logging
 
-from ..util.module import import_string
-from .const import BACKEND_ALIAS
+from grab.util.module import import_string
+from grab.captcha.const import BACKEND_ALIAS
 
 __all__ = ('CaptchaService',)
-
 logger = logging.getLogger('grab.captcha')
 
 class CaptchaService(object):

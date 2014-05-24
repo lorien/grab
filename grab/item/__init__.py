@@ -23,15 +23,14 @@ Usage example:
     datetime.datetime(...)
 
 """
-from __future__ import absolute_import
 import collections
 
-from .field import (StringField, IntegerField, DateTimeField,
-                    HTMLField, FuncField, NullField, ChoiceField,
-                    RegexField, ItemListField, BooleanField, DateField,
-                    DecimalField)
-from .item import Item
-from ..error import GrabMisuseError
+from grab.item.field import (StringField, IntegerField, DateTimeField,
+                             HTMLField, FuncField, NullField, ChoiceField,
+                             RegexField, ItemListField, BooleanField, DateField,
+                             DecimalField)
+from grab.item.item import Item
+from grab.error import GrabMisuseError
 
 def func_field(*args, **kwargs):
     if not kwargs and len(args) == 1 and isinstance(args[0], collections.Callable):

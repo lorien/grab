@@ -2,7 +2,6 @@
 Spider task queue backend powered by redis
 """
 from __future__ import absolute_import
-
 from redis import StrictRedis
 from qr import PriorityQueue
 try:
@@ -12,8 +11,8 @@ except ImportError:
 import random
 import logging
 
-from .base import QueueInterface
-from ..error import SpiderMisuseError
+from grab.spider.queue_backend.base import QueueInterface
+from grab.spider.error import SpiderMisuseError
 
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, queue_name=None, **kwargs):

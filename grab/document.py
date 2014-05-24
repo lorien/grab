@@ -4,7 +4,6 @@
 """
 The Document class is the result of network request made with Grab instance.
 """
-from __future__ import absolute_import
 import weakref
 import re
 from copy import copy
@@ -24,51 +23,25 @@ import tempfile
 import webbrowser
 import codecs
 from datetime import datetime
+import time
 
 from grab.selector import XpathSelector
 import grab.tools.encoding
-from .cookie import CookieManager
-from .tools.files import hashed_path
-from grab.util.py3k_support import *
+from grab.cookie import CookieManager
+from grab.tools.files import hashed_path
 from grab.tools.structured import TreeInterface
 from grab.tools.text import normalize_space
 from grab.tools.html import decode_entities
 from grab.error import GrabMisuseError, DataNotFound
 from grab.tools.rex import normalize_regexp
 from grab.const import NULL
-
-
-# LXML STARTS
-#from __future__ import absolute_import
-#try:
-    #from urlparse import urljoin
-#except ImportError:
-    #from urllib.parse import urljoin
-#import re
-import time
-#import logging
-#import traceback
-
-#from ..tools.text import normalize_space as normalize_space_func, find_number
-#from ..tools.lxml_tools import get_node_text
-#from ..response import RE_XML_DECLARATION
-#from ..util.misc import deprecated
-
-#from grab.util.py3k_support import *
-
-#logger = logging.getLogger('grab.ext.lxml')
-
-NULL_BYTE = chr(0)
-
-# LXML ENDS
-
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.response')
-
+NULL_BYTE = chr(0)
 RE_XML_DECLARATION = re.compile(br'^[^<]{,100}<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(br'encoding\s*=\s*["\']([^"\']+)["\']')
-RE_META_CHARSET = re.compile(br'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)',
-                             re.I)
+RE_META_CHARSET = re.compile(br'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)', re.I)
 RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode('utf-8'), re.I)
 
 # Bom processing logic was copied from
@@ -80,7 +53,6 @@ _BOM_TABLE = [
     (codecs.BOM_UTF16_LE, 'utf-16-le'),
     (codecs.BOM_UTF8, 'utf-8')
 ]
-
 _FIRST_CHARS = set(char[0] for (char, name) in _BOM_TABLE)
 
 
@@ -97,13 +69,6 @@ def read_bom(data):
                 return encoding, bom
     return None, None
 
-
-class TextExtension(object):
-    __slots__ = ()
-
-
-
-from grab.util.py3k_support import *
 
 class TextExtension(object):
     __slots__ = ()

@@ -1,19 +1,17 @@
 # Copyright: 2012, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-from __future__ import absolute_import
-
 import logging
-from ..tools.lxml_tools import truncate_html
-from ..tools.html import strip_tags
 from hashlib import sha1
 from time import mktime
 from datetime import datetime
 import feedparser
 from lxml.html.clean import clean_html
-from grab.tools.text import remove_bom
 
-from ..error import DataNotFound, GrabMisuseError
+from grab.tools.lxml_tools import truncate_html
+from grab..tools.html import strip_tags
+from grab.tools.text import remove_bom
+from grab.error import DataNotFound, GrabMisuseError
 
 log = logging.getLogger('grab.tools.feed')
 

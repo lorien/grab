@@ -3,7 +3,7 @@ import os
 
 from django.contrib import admin
 
-from .models import Task
+from models import Task
 
 class TaskAdmin(admin.ModelAdmin):
     list_display = ['task_name', 'start_time', 'end_time', 'elapsed_time_formatted',

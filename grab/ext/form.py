@@ -1,14 +1,13 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-from __future__ import absolute_import
 try:
     from urlparse import urljoin
 except ImportError:
     from urllib.parse import urljoin
 
-from ..error import DataNotFound, GrabMisuseError
-from ..tools.http import smart_urlencode
+from grab.error import DataNotFound, GrabMisuseError
+from grab.tools.http import smart_urlencode
 
 # TODO: refactor this hell
 

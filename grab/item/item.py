@@ -1,10 +1,9 @@
 import logging
 
-from .field import Field, ItemListField
-from ..selector import XpathSelector
-from ..selector import JsonSelector
-from ..error import GrabMisuseError
-#from ..ext.doc import DocInterface
+from grab.item.field import Field, ItemListField
+from grab.selector import XpathSelector
+from grab.selector import JsonSelector
+from grab.error import GrabMisuseError
 from grab.document import Document
 
 logger = logging.getLogger('grab.item.item')
@@ -29,8 +28,6 @@ class ItemBuilder(type):
         namespace['_fields'] = fields
 
         cls = super(ItemBuilder, cls).__new__(cls, name, bases, namespace)
-        #if name == 'SomeItem':
-            #import pdb; pdb.set_trace()
         return cls
 
 

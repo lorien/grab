@@ -31,16 +31,14 @@ except ImportError:
     from urllib.request import urlopen
     from urllib.error import URLError, HTTPError
 
-from .error import GrabError, GrabNetworkError, GrabMisuseError
-
+from grab.error import GrabError, GrabNetworkError, GrabMisuseError
 from grab.util.py2old_support import *
 from grab.util.py3k_support import *
-
-logger = logging.getLogger('grab.proxylist')
 
 READ_TIMEOUT = 60 * 10
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
 RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')
+logger = logging.getLogger('grab.proxylist')
 
 
 def parse_proxyline(line):

@@ -1,7 +1,6 @@
 """
 Selector module provides high usability interface to lxml tree
 """
-from __future__ import absolute_import
 import logging
 import time
 try:
@@ -10,15 +9,14 @@ except ImportError:
     pass
 from abc import ABCMeta, abstractmethod
 
-from ..tools.lxml_tools import get_node_text, render_html
-from ..tools.text import find_number, normalize_space as normalize_space_func
-from ..error import GrabMisuseError, DataNotFound, warn
-from ..tools import rex as rex_tools
-from ..tools.text import normalize_space
-from ..tools.html import decode_entities
+from grab.tools.lxml_tools import get_node_text, render_html
+from grab.tools.text import find_number, normalize_space as normalize_space_func
+from grab.error import GrabMisuseError, DataNotFound, warn
+from grab.tools import rex as rex_tools
+from grab.tools.text import normalize_space
+from grab.tools.html import decode_entities
 import grab.base
 from grab.const import NULL
-
 from grab.util.py3k_support import *
 
 __all__ = ['Selector', 'TextSelector', 'XpathSelector', 'PyquerySelector',

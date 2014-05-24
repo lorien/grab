@@ -11,9 +11,9 @@ import time
 import logging
 import random
 
-from .error import GrabError, GrabNetworkError
-from .util.py2old_support import *
-from .util.py3k_support import *
+from grab.error import GrabError, GrabNetworkError
+from grab.util.py2old_support import *
+from grab.util.py3k_support import *
 
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
 RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')

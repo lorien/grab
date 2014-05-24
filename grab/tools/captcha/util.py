@@ -2,10 +2,7 @@ import logging
 import re
 import random
 
-from .error import CaptchaError
-
-#import settings
-
+from grab.tools.captcha.error import CaptchaError
 from grab.util.py3k_support import *
 
 RE_SCRIPT = re.compile(r'<script[^>]+recaptcha\.net[^>]+>', re.S)

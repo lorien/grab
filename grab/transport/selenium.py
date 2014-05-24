@@ -1,7 +1,6 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-from __future__ import absolute_import
 import email
 import logging
 #import urllib
@@ -15,10 +14,9 @@ import time
 import os
 import json
 
-from ..response import Response
-from ..error import GrabError, GrabMisuseError
-from ..base import UploadContent, UploadFile
-
+from grab.response import Response
+from grab.error import GrabError, GrabMisuseError
+from grab.base import UploadContent, UploadFile
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab')
@@ -504,7 +502,7 @@ class SeleniumTransportExtension(object):
         #self.curl = pycurl.Curl()
 
 
-# from ..base import BaseGrab
+# from grab.base import BaseGrab
 # class GrabSelenium(SeleniumTransportExtension, BaseGrab):
 #     def __init__(self, response_body=None):
 #         super(GrabSelenium, self).__init__(response_body, 'selenium.SeleniumTransportExtension')

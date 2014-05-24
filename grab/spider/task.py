@@ -1,9 +1,8 @@
-from __future__ import absolute_import
 from random import randint
 from datetime import datetime, timedelta
 
-from .error import SpiderMisuseError
-from ..base import copy_config
+from grab.spider.error import SpiderMisuseError
+from grab.base import copy_config
 
 class BaseTask(object):
     pass

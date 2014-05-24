@@ -1,4 +1,4 @@
-NULL = object()
+from grab.const import NULL
 
 class Data(object):
     """

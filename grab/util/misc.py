@@ -1,6 +1,4 @@
-from __future__ import absolute_import
 import re
-#import warnings
 from functools import wraps
 import logging
 #from grab.error import GrabMisuseError

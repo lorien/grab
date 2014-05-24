@@ -1,1 +1,1 @@
-from .base import Data
+from grab.spider.data.base import Data

@@ -1,9 +1,8 @@
 # coding: utf-8
-from __future__ import absolute_import
-
-from ..tools.encoding import smart_unicode
 from pytils.translit import translify
 import re
+
+from grab.tools.encoding import smart_unicode
 
 class InvalidMonthName(Exception):
     pass

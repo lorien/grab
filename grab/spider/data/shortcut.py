@@ -4,9 +4,9 @@ from urlparse import urlsplit
 import imghdr
 from StringIO import StringIO
 
-from .base import Data
+from grab.spider.data.base import Data
 from grab.tools.files import hashed_path
-from .. import Task
+from grab.spider.task import Task
 from grab import Grab
 
 def build_image_hosting_referer(url):

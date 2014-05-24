@@ -23,7 +23,6 @@ from grab.kit.network_access_manager import KitNetworkAccessManager
 from grab.kit.network_reply import KitNetworkReply
 from grab.kit.error import KitError
 from grab.tools.encoding import decode_dict
-
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.kit')

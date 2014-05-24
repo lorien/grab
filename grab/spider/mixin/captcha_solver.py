@@ -1,5 +1,6 @@
 import logging
-from ..task import Task
+
+from grab.spider.task import Task
 from grab.captcha import SolutionNotReady
 
 logger = logging.getLogger('grab.spider.mixin.captcha_solver')

@@ -1,12 +1,11 @@
 import os
 from argparse import ArgumentParser
 import logging
-from grab.tools.lock import assert_lock
-from grab.tools.logs import default_logging
 import sys 
 
+from grab.tools.lock import assert_lock
+from grab.tools.logs import default_logging
 from grab.util.config import build_global_config
-
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.cli')

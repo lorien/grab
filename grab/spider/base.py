@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import types
 import signal
 import inspect
@@ -30,19 +29,18 @@ except ImportError:
     import queue
 from copy import deepcopy
 
-from ..base import GLOBAL_STATE, Grab
-from ..error import GrabInvalidUrl
-from .error import (SpiderError, SpiderMisuseError, FatalError,
-                    StopTaskProcessing, NoTaskHandler, NoDataHandler)
-from .task import Task, NullTask
-from .data import Data
-from .pattern import SpiderPattern
-from .stat  import SpiderStat
-from .transport.multicurl import MulticurlTransport
-from ..proxylist import ProxyList
-from .command_controller import CommandController
+from grab.base import GLOBAL_STATE, Grab
+from grab.error import GrabInvalidUrl
+from grab.spider.error import (SpiderError, SpiderMisuseError, FatalError,
+                               StopTaskProcessing, NoTaskHandler, NoDataHandler)
+from grab.spider.task import Task, NullTask
+from grab.spider.data import Data
+from grab.spider.pattern import SpiderPattern
+from grab.spider.stat  import SpiderStat
+from grab.spider.transport.multicurl import MulticurlTransport
+from grab.proxylist import ProxyList
+from grab.spider.command_controller import CommandController
 from grab.util.misc import camel_case_to_underscore
-
 from grab.util.py2old_support import *
 from grab.util.py3k_support import *
 

@@ -8,10 +8,10 @@ try:
 except ImportError:
     from http.cookiejar import CookieJar
 
-from ..base import Grab
-from ..response import Response
-from ..error import GrabNetworkError
-from ..cookie import CookieManager
+from grab.base import Grab
+from grab.response import Response
+from grab.error import GrabNetworkError
+from grab.cookie import CookieManager
 
 class GrabMockNotFoundError(GrabNetworkError):
     """

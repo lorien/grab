@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 try:
     from Queue import Queue, Empty
 except ImportError:
@@ -6,9 +5,7 @@ except ImportError:
 from threading import Thread
 
 from grab.error import GrabNetworkError
-
 from grab.tools.work import make_work
-
 from grab.util.py3k_support import *
 
 STOP = object()

@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import logging
 import time
 from grab.base import GLOBAL_STATE
@@ -6,8 +5,8 @@ from grab.tools.encoding import smart_str
 import os
 from contextlib import contextmanager
 
+from grab.tools import metric
 from grab.util.py3k_support import *
-from ..tools import metric
 
 logger = logging.getLogger('grab.spider.stat')
 

@@ -7,16 +7,14 @@ CacheItem interface:
 'response_code': int,
 'cookies': None,#grab.response.cookies,
 
-TODO: WTF with cookies???
+TODO: Cookie support???
 """
-from __future__ import absolute_import
 import tc
 import os
 import logging
 import marshal
 
 from grab.response import Response
-
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.spider.cache_backend.mongo')

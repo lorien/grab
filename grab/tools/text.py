@@ -1,11 +1,9 @@
 """
 Text parsing and processing utilities.
 """
-from __future__ import absolute_import
 import re
 
-from ..error import GrabMisuseError, DataNotFound
-
+from grab.error import GrabMisuseError, DataNotFound
 from grab.util.py3k_support import *
 
 RE_NUMBER = re.compile(r'\d+')

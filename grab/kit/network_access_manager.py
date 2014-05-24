@@ -6,7 +6,6 @@ from PyQt4.QtCore import QByteArray
 from grab.kit.const import NETWORK_ERROR
 from grab.kit.network_reply import KitNetworkReply
 from grab.kit.error import KitError
-
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.kit.network_access_manager')

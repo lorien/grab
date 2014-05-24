@@ -1,9 +1,8 @@
-from __future__ import absolute_import
 import os.path
 import logging
 
-from .task import Task
-from ..tools.files import hashed_path
+from grab.spider.task import Task
+from grab.tools.files import hashed_path
 
 logger = logging.getLogger('grab.spider.pattern')
 

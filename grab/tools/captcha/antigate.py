@@ -16,10 +16,9 @@ try:
 except ImportError:
     from io import StringIO
 
-from .contrib.poster.encode import multipart_encode, MultipartParam
-from .contrib.poster.streaminghttp import register_openers
-from .error import CaptchaError
-
+from grab.tools.captcha.contrib.poster.encode import multipart_encode, MultipartParam
+from grab.tools.captcha.contrib.poster.streaminghttp import register_openers
+from grab.tools.captcha.error import CaptchaError
 from grab.util.py3k_support import *
 
 register_openers()

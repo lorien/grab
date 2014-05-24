@@ -9,9 +9,9 @@ except ImportError:
 import re
 import logging
 
-from ..upload import UploadFile, UploadContent
-from ..error import GrabMisuseError
-from .encoding import smart_str, smart_unicode, decode_pairs
+from grab.upload import UploadFile, UploadContent
+from grab.error import GrabMisuseError
+from grab.tools.encoding import smart_str, smart_unicode, decode_pairs
 
 from grab.util.py3k_support import *
 

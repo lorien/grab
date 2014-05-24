@@ -12,7 +12,7 @@ except ImportError:
 import json
 import dummy_threading
 
-from .error import GrabMisuseError
+from grab.error import GrabMisuseError
 
 COOKIE_ATTRS = ('name', 'value', 'version', 'port', 'domain',
                 'path', 'secure', 'expires', 'discard', 'comment',

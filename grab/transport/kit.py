@@ -1,7 +1,6 @@
 # Copyright: 2013, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-from __future__ import absolute_import
 #import email
 import logging
 #import urllib
@@ -19,13 +18,11 @@ import random
 #import tempfile
 #import os.path
 
-#from ..base import UploadContent, UploadFile
-#from .. import error
-from ..response import Response
-from ..tools.http import encode_cookies, smart_urlencode, normalize_unicode,\
-                         normalize_http_values, normalize_post_data
-from ..tools.user_agent import random_user_agent
-from ..base import Grab
+from grab.response import Response
+from grab.tools.http import (encode_cookies, smart_urlencode, normalize_unicode,
+                             normalize_http_values, normalize_post_data)
+from grab.tools.user_agent import random_user_agent
+from grab.base import Grab
 from grab.kit import Kit
 
 logger = logging.getLogger('grab.transport.kit')

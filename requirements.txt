@@ -15,5 +15,3 @@ jsonpath_rw
 # Python3 alternate packages
 # mysql:
 # https://github.com/davispuh/MySQL-for-Python-3/archive/master.zip
-# pycurl:
-# https://github.com/lorien/pycurl/archive/master.zip
