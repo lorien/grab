@@ -50,11 +50,7 @@ REQUEST_COUNTER = itertools.count(1)
 
 # Some extensions need GLOBAL_STATE variable
 # what's why they go after GLOBAL_STATE definition
-from .ext.lxml import LXMLExtension
 from .ext.form import FormExtension
-from .ext.django import DjangoExtension
-#from .ext.text import TextExtension
-from .ext.rex import RegexpExtension
 from .ext.pquery import PyqueryExtension
 from .ext.kit import KitExtension
 
@@ -203,9 +199,7 @@ def default_config():
     )
 
 
-class Grab(LXMLExtension, FormExtension, PyqueryExtension,
-           DjangoExtension, RegexpExtension,
-           KitExtension, DeprecatedThings
+class Grab(FormExtension, PyqueryExtension, KitExtension, DeprecatedThings
            ):
 
     __slots__ = ('request_head', 'request_log', 'request_body',

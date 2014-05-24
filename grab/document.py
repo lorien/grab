@@ -34,6 +34,8 @@ from grab.tools.structured import TreeInterface
 from grab.tools.text import normalize_space
 from grab.tools.html import decode_entities
 from grab.error import GrabMisuseError, DataNotFound
+from grab.tools.rex import normalize_regexp
+from grab.const import NULL
 
 
 # LXML STARTS
@@ -156,7 +158,93 @@ class TextExtension(object):
             raise DataNotFound(u'Substrings not found: %s' % ', '.join(anchors))
 
 
-class Document(TextExtension):
+class RegexpExtension(object):
+    __slots__ = ()
+
+    def rex_text(self, regexp, flags=0, byte=False, default=NULL):
+        """
+        Search regular expression in response body and return content of first
+        matching group.
+
+        :param byte: if False then search is performed in `response.unicode_body()`
+            else the rex is searched in `response.body`.
+        """
+
+        try:
+            match = self.rex_search(regexp, flags=flags, byte=byte)
+        except DataNotFound:
+            if default is NULL:
+                raise DataNotFound('Regexp not found')
+            else:
+                return default
+        else:
+            return normalize_space(decode_entities(match.group(1)))
+
+    def rex_search(self, regexp, flags=0, byte=False, default=NULL):
+        """
+        Search the regular expression in response body.
+
+        :param byte: if False then search is performed in `response.unicode_body()`
+            else the rex is searched in `response.body`.
+
+        Note: if you use default non-byte mode than do not forget to build your
+        regular expression with re.U flag.
+
+        Return found match object or None
+
+        """
+
+        regexp = normalize_regexp(regexp, flags)
+        match = None
+        if byte:
+            if not isinstance(regexp.pattern, unicode) or not PY3K:
+                if PY3K:
+                    body = self.body_as_bytes()
+                else:
+                    body = self.body
+                match = regexp.search(body)
+        else:
+            if isinstance(regexp.pattern, unicode) or not PY3K:
+                ubody = self.unicode_body()
+                match = regexp.search(ubody)
+        if match:
+            return match
+        else:
+            if default is NULL:
+                rstr = regexp#regexp.source if regexp.hasattr('source') else regexp
+                raise DataNotFound('Could not find regexp: %s' % regexp)
+            else:
+                return default
+
+    def rex_assert(self, rex, byte=False):
+        """
+        If `rex` expression is not found then raise `DataNotFound` exception.
+        """
+
+        self.rex_search(rex, byte=byte)
+
+
+class DjangoExtension(object):
+    def django_file(self, name=None):
+        """
+        Convert content of response into django `ContentFile` object.
+
+        :param name: specify name of file, otherwise the last segment in
+        URL path will be used as filename.
+        """
+       
+        from django.core.files.base import ContentFile
+
+        if not name:
+            path = urlsplit(self.url).path
+            name = path.rstrip('/').split('/')[-1]
+
+        content_file = ContentFile(self.body)
+        content_file.name = name
+        return content_file
+
+
+class Document(TextExtension, RegexpExtension, DjangoExtension):
     """
     Document (in most cases it is a network response i.e. result of network request)
     """

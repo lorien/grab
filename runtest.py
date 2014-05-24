@@ -41,6 +41,7 @@ GRAB_TEST_LIST = (
     'test.case.extension',
     # *** Extensions
     'test.case.ext_text',
+    'test.case.ext_rex',
     'test.case.ext_lxml',
     #'test.case.ext_form',
     'test.case.ext_doc',
@@ -69,6 +70,7 @@ GRAB_TEST_LIST = (
 
 GRAB_EXTRA_TEST_LIST = (
     'test.case.tools_russian',
+    'test.case.django',
 )
 
 # *******************************************

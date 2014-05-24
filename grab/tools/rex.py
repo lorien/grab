@@ -7,7 +7,7 @@ from .html import decode_entities
 
 from grab.util.py3k_support import *
 
-CACHE = {}
+REGEXP_CACHE = {}
 NULL = object()
 
 def extract_rex_list(rex, body):
@@ -18,14 +18,14 @@ def extract_rex_list(rex, body):
     return rex.findall(body)
 
 
-def rex_cache(rex, flags=0):
+def cache_regexp(rex, flags=0):
     key = (rex, flags)
     try:
-        return CACHE[key]
+        return REGEXP_CACHE[key]
     except KeyError:
         obj = re.compile(rex, flags)
         #obj.source = rex
-        CACHE[key] = obj
+        REGEXP_CACHE[key] = obj
         return obj
 
 
@@ -68,7 +68,7 @@ def normalize_regexp(regexp, flags=0):
     """
 
     if isinstance(regexp, basestring):
-        return rex_cache(regexp, flags)
+        return cache_regexp(regexp, flags)
     else:
         return regexp
 
@@ -80,6 +80,7 @@ def rex_list(body, rex, flags=0):
 
     rex = normalize_regexp(rex, flags)
     return list(rex.finditer(body))
+
 
 def rex_text_list(body, rex, flags=0):
     """

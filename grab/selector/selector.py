@@ -17,12 +17,12 @@ from ..tools import rex as rex_tools
 from ..tools.text import normalize_space
 from ..tools.html import decode_entities
 import grab.base
+from grab.const import NULL
 
 from grab.util.py3k_support import *
 
 __all__ = ['Selector', 'TextSelector', 'XpathSelector', 'PyquerySelector',
            'KitSelector', 'JsonSelector']
-NULL = object()
 XPATH_CACHE = {}
 logger = logging.getLogger('grab.selector.selector')
 
