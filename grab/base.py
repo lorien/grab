@@ -55,8 +55,6 @@ from .ext.django import DjangoExtension
 from .ext.text import TextExtension
 from .ext.rex import RegexpExtension
 from .ext.pquery import PyqueryExtension
-from .ext.ftp import FTPExtension
-#from .ext.doc import DocExtension
 from .ext.kit import KitExtension
 
 __all__ = ('Grab',)
@@ -206,7 +204,6 @@ def default_config():
 
 class Grab(LXMLExtension, FormExtension, PyqueryExtension,
            DjangoExtension, TextExtension, RegexpExtension,
-           FTPExtension, #DocExtension,
            KitExtension,
            ):
 
