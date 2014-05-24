@@ -30,6 +30,7 @@ import grab.tools.encoding
 from .cookie import CookieManager
 from .tools.files import hashed_path
 from grab.util.py3k_support import *
+from grab.tools.structured import TreeInterface
 
 
 # LXML STARTS
@@ -113,6 +114,9 @@ class Document(object):
 
     def select(self, *args, **kwargs):
         return XpathSelector(self.grab.tree).select(*args, **kwargs)
+
+    def structure(self, *args, **kwargs):
+        return TreeInterface(self.grab.tree).structured_xpath(*args, **kwargs)
 
     def __init__(self, grab=None):
         if grab is None:

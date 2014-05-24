@@ -44,7 +44,7 @@ GRAB_TEST_LIST = (
     'test.case.ext_lxml',
     #'test.case.ext_form',
     'test.case.ext_doc',
-    #'test.case.structured_extension',
+    'test.case.structured_extension',
     # *** Tornado Test Server
     'test.case.debug_server',
     # *** grab.tools
