@@ -106,15 +106,11 @@ SPIDER_TEST_LIST = (
     'test.case.spider_misc',
     'test.case.spider_meta',
     'test.case.spider_error',
-)
-
-SPIDER_EXTRA_TEST_LIST = (
-    'test.case.spider_mongo_queue',
-    'test.case.spider_redis_queue',
-    'test.case.spider_mongo_cache',
-    'test.case.spider_mysql_cache',
+    'test.case.spider_cache',
     'test.case.spider_command_controller',
 )
+
+SPIDER_EXTRA_TEST_LIST = ()
 
 
 def main():
@@ -133,6 +129,12 @@ def main():
                       default=False, help='Run tests for both Grab and Grab::Spider')
     parser.add_option('--test-kit', action='store_true',
                       default=False, help='Run tests for Grab with WebKit transport')
+    parser.add_option('--backend-mongo', action='store_true',
+                      default=False, help='Run extra tests that depends on mongodb')
+    parser.add_option('--backend-redis', action='store_true',
+                      default=False, help='Run extra tests that depends on redis')
+    parser.add_option('--backend-mysql', action='store_true',
+                      default=False, help='Run extra tests that depends on mysql')
     opts, args = parser.parse_args()
 
     GLOBAL['transport'] = opts.transport
@@ -140,6 +142,15 @@ def main():
     # Override CLI option in case of kit test
     if opts.test_kit:
         GLOBAL['transport'] = 'grab.transport.kit.KitTransport'
+
+    if opts.backend_mongo:
+        GLOBAL['backends'].append('mongo')
+
+    if opts.backend_redis:
+        GLOBAL['backends'].append('redis')
+
+    if opts.backend_mysql:
+        GLOBAL['backends'].append('mysql')
 
     prepare_test_environment()
     test_list = []
@@ -175,7 +186,14 @@ def main():
         __import__(path, None, None, ['foo'])
 
     loader = unittest.TestLoader()
-    suite = loader.loadTestsFromNames(test_list)
+    suite = unittest.TestSuite()
+    for path in test_list:
+        mod_suite = loader.loadTestsFromName(path)
+        for some_suite in mod_suite:
+            for test in some_suite:
+                if not hasattr(test, '_backend') or test._backend in GLOBAL['backends']:
+                    suite.addTest(test)
+
     runner = unittest.TextTestRunner()
 
     start_server()

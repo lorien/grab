@@ -11,6 +11,7 @@ TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 # Grab instance with specific transport layer
 GLOBAL = {
     'transport': None,
+    'backends': [],
 }
 
 def prepare_test_environment():
@@ -64,6 +65,23 @@ def only_transport(transport):
         @functools.wraps(func)
         def test_method(*args, **kwargs):
             if GLOBAL['transport'] == transport:
+                func(*args, **kwargs)
+            else:
+                return
+        return test_method
+    return wrapper
+
+
+def only_backend(backend):
+    """
+    If test function is wrapped into this decorator then
+    it should be called only for specified backend.
+    """
+
+    def wrapper(func):
+        @functools.wraps(func)
+        def test_method(*args, **kwargs):
+            if backend in GLOBAL['backends']:
                 func(*args, **kwargs)
             else:
                 return

@@ -5,6 +5,8 @@ from grab.spider import Spider, Task, Data
 from test.server import SERVER
 
 class MiscTest(TestCase):
+    _backend = 'redis'
+
     def setUp(self):
         SERVER.reset()
 
