@@ -2,10 +2,11 @@ language: python
 python:
   - "2.6"
   - "2.7"
+  - "3.3"
 install:
   - pip install --use-mirrors tornado
   - pip install -r requirements.txt --use-mirrors
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
   - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
 script:
-  - python runtest.py --test-all
+  - python runtest.py --test-all --extra --backend-redis --backend-mongo

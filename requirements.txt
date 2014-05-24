@@ -3,6 +3,13 @@ lxml
 pycurl
 cssselect
 jsonpath_rw
+tornado
+pytils
+pyquery
+django
+redis
+qr
+pymongo
 
 # Optional packages required to use some part of Grab
 #redis
