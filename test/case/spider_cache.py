@@ -86,16 +86,7 @@ class SpiderCacheMixin(object):
         bot.add_task(Task('foo', SERVER.BASE_URL))
         bot.run()
 
-    def test_mysql_cache(self):
-        bot = SimpleSpider()
-        self.setup_cache(bot)
-        bot.cache.clear()
-        bot.setup_queue()
-        bot.add_task(Task('foo', SERVER.BASE_URL))
-        bot.run()
-        self.assertEqual([1, 1, 1, 2], bot.resp_counters)
-
-    def test_mongo_cache(self):
+    def test_something(self):
         bot = SimpleSpider()
         self.setup_cache(bot)
         bot.cache.clear()
@@ -136,8 +127,8 @@ class SpiderCacheMixin(object):
 class SpiderMongoCacheTestCase(TestCase, SpiderCacheMixin):
     _backend = 'mongo'
 
-    def setUp(self):
-        SpiderCacheMixin.setUp(self)
+    #def setUp(self):
+        #SpiderCacheMixin.setUp(self)
 
     def setup_cache(self, bot):
         bot.setup_cache(backend='mongo', database='test_spider')
@@ -146,8 +137,8 @@ class SpiderMongoCacheTestCase(TestCase, SpiderCacheMixin):
 class SpiderMysqlCacheTestCase(TestCase, SpiderCacheMixin):
     _backend = 'mysql'
 
-    def setUp(self):
-        SpiderCacheMixin.setUp(self)
+    #def setUp(self):
+        #SpiderCacheMixin.setUp(self)
 
     def setup_cache(self, bot):
         bot.setup_cache(backend='mysql', database='spider_test',
@@ -157,8 +148,8 @@ class SpiderMysqlCacheTestCase(TestCase, SpiderCacheMixin):
 class SpiderPostgresqlCacheTestCase(TestCase, SpiderCacheMixin):
     _backend = 'postgresql'
 
-    def setUp(self):
-        SpiderCacheMixin.setUp(self)
+    #def setUp(self):
+        #SpiderCacheMixin.setUp(self)
 
     def setup_cache(self, bot):
         bot.setup_cache(backend='postgresql', database='spider_test')#,
