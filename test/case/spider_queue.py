@@ -74,14 +74,14 @@ class SpiderMemoryQueueTestCase(TestCase, SpiderQueueMixin):
         self.assertEqual(bot.numbers, [1, 3, 4, 2])
 
 
-class BasicSpiderTestCase(TestCase, SpiderQueueMixin):
+class BasicSpiderTestCase(SpiderQueueMixin, TestCase):
     _backend = 'mongo'
 
     def setup_queue(self, bot):
         bot.setup_queue(backend='mongo', database='queue_test')
 
 
-class SpiderRedisQueueTestCase(TestCase, SpiderQueueMixin):
+class SpiderRedisQueueTestCase(SpiderQueueMixin, TestCase):
     _backend = 'redis'
 
     def setup_queue(self, bot):
