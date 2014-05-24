@@ -9,4 +9,4 @@ install:
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
   - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
 script:
-  - python runtest.py --test-all --extra --backend-redis --backend-mongo
+  - python runtest.py --test-all --extra
