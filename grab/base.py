@@ -32,6 +32,7 @@ from .util.misc import deprecated
 from .util.py2old_support import *
 from .util.py3k_support import *
 from .proxy import ProxyList, parse_proxy_line
+from grab.deprecated import DeprecatedThings
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
@@ -52,7 +53,7 @@ REQUEST_COUNTER = itertools.count(1)
 from .ext.lxml import LXMLExtension
 from .ext.form import FormExtension
 from .ext.django import DjangoExtension
-from .ext.text import TextExtension
+#from .ext.text import TextExtension
 from .ext.rex import RegexpExtension
 from .ext.pquery import PyqueryExtension
 from .ext.kit import KitExtension
@@ -203,8 +204,8 @@ def default_config():
 
 
 class Grab(LXMLExtension, FormExtension, PyqueryExtension,
-           DjangoExtension, TextExtension, RegexpExtension,
-           KitExtension,
+           DjangoExtension, RegexpExtension,
+           KitExtension, DeprecatedThings
            ):
 
     __slots__ = ('request_head', 'request_log', 'request_body',

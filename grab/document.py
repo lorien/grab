@@ -31,6 +31,9 @@ from .cookie import CookieManager
 from .tools.files import hashed_path
 from grab.util.py3k_support import *
 from grab.tools.structured import TreeInterface
+from grab.tools.text import normalize_space
+from grab.tools.html import decode_entities
+from grab.error import GrabMisuseError, DataNotFound
 
 
 # LXML STARTS
@@ -44,7 +47,6 @@ import time
 #import logging
 #import traceback
 
-#from ..error import DataNotFound, GrabMisuseError
 #from ..tools.text import normalize_space as normalize_space_func, find_number
 #from ..tools.lxml_tools import get_node_text
 #from ..response import RE_XML_DECLARATION
@@ -94,7 +96,67 @@ def read_bom(data):
     return None, None
 
 
-class Document(object):
+class TextExtension(object):
+    __slots__ = ()
+
+
+
+from grab.util.py3k_support import *
+
+class TextExtension(object):
+    __slots__ = ()
+
+    def text_search(self, anchor, byte=False):
+        """
+        Search the substring in response body.
+
+        :param anchor: string to search
+        :param byte: if False then `anchor` should be the
+            unicode string, and search will be performed in `response.unicode_body()`
+            else `anchor` should be the byte-string and
+            search will be performed in `resonse.body`
+        
+        If substring is found return True else False.
+        """
+
+        if isinstance(anchor, unicode):
+            if byte:
+                raise GrabMisuseError('The anchor should be bytes string in byte mode')
+            else:
+                return anchor in self.unicode_body()
+
+        if not isinstance(anchor, unicode):
+            if byte:
+                if PY3K:
+                    return anchor in self.body_as_bytes()
+                return anchor in self.body
+            else:
+                raise GrabMisuseError('The anchor should be byte string in non-byte mode')
+
+    def text_assert(self, anchor, byte=False):
+        """
+        If `anchor` is not found then raise `DataNotFound` exception.
+        """
+
+        if not self.text_search(anchor, byte=byte): 
+            raise DataNotFound(u'Substring not found: %s' % anchor)
+
+
+    def text_assert_any(self, anchors, byte=False):
+        """
+        If no `anchors` were found then raise `DataNotFound` exception.
+        """
+
+        found = False
+        for anchor in anchors:
+            if self.text_search(anchor, byte=byte): 
+                found = True
+                break
+        if not found:
+            raise DataNotFound(u'Substrings not found: %s' % ', '.join(anchors))
+
+
+class Document(TextExtension):
     """
     Document (in most cases it is a network response i.e. result of network request)
     """
