@@ -518,10 +518,10 @@ class Document(TextExtension, RegexpExtension, DjangoExtension, PyqueryExtension
         return self.select(query)
 
     def select(self, *args, **kwargs):
-        return XpathSelector(self.grab.tree).select(*args, **kwargs)
+        return XpathSelector(self.tree).select(*args, **kwargs)
 
     def structure(self, *args, **kwargs):
-        return TreeInterface(self.grab.tree).structured_xpath(*args, **kwargs)
+        return TreeInterface(self.tree).structured_xpath(*args, **kwargs)
 
     def parse(self, charset=None):
         """
