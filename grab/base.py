@@ -26,7 +26,6 @@ from .tools.html import find_refresh_url, find_base_url
 from grab.document import Document
 from . import error
 from .tools.http import normalize_http_values
-from .extension import register_extensions
 from .cookie import CookieManager, create_cookie
 from .util.misc import deprecated
 from .util.py2old_support import *
@@ -34,7 +33,9 @@ from .util.py3k_support import *
 from .proxy import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
 from grab.kit_interface import GrabKitInterface
+from grab.ext.form import FormExtension
 
+__all__ = ('Grab',)
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
 # in names of dumps
@@ -48,16 +49,8 @@ GLOBAL_STATE = {
     'selector_time': 0,
 }
 REQUEST_COUNTER = itertools.count(1)
-
-# Some extensions need GLOBAL_STATE variable
-# what's why they go after GLOBAL_STATE definition
-from .ext.form import FormExtension
-
-__all__ = ('Grab',)
-
 MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies',
                        'hammer_timeouts']
-
 logger = logging.getLogger('grab.base')
 
 # Logger to handle network activity
@@ -213,9 +206,6 @@ class Grab(FormExtension, DeprecatedThings
                  '_pyquery', '_doc', '_kit',
                  )
 
-    # Points which could be handled in extension classes
-    extension_points = ('config', 'init', 'reset')
-
     # Attributes which should be processed when clone
     # of Grab instance is creating
     clonable_attributes = ('request_head', 'request_log', 'request_body',
@@ -236,8 +226,6 @@ class Grab(FormExtension, DeprecatedThings
 
         self.config = default_config()
         self.config['common_headers'] = self.common_headers()
-        self.trigger_extensions('config')
-        self.trigger_extensions('init')
         self._request_prepared = False
         self.cookies = CookieManager()
         self.proxylist = ProxyList()
@@ -278,10 +266,14 @@ class Grab(FormExtension, DeprecatedThings
         self.request_body = None
 
         self.request_method = None
-        self.trigger_extensions('reset')
         self.transport.reset()
 
+        # KIT
         self._kit = None
+        # Form extension
+        self._lxml_form = None
+        self._file_fields = {}
+
 
     def clone(self, **kwargs):
         """
@@ -605,7 +597,6 @@ class Grab(FormExtension, DeprecatedThings
         All ``**kwargs`` will be passed to `Document` constructor.
         """
 
-        # Trigger reset
         self.reset()
 
         # Configure Document instance
@@ -808,8 +799,6 @@ class Grab(FormExtension, DeprecatedThings
             self._kit = GrabKitInterface(self)
         return self._kit
 
-
-register_extensions(Grab)
 
 # For backward compatibility
 BaseGrab = Grab
