@@ -81,7 +81,7 @@ class CurlTransport(object):
     def setup_body_file(self, storage_dir, storage_filename):
         if storage_filename is None:
             handle, path = tempfile.mkstemp(dir=storage_dir)
-            self.body_file = os.fdopen(handle, 'w')
+            self.body_file = os.fdopen(handle, 'wb')
         else:
             path = os.path.join(storage_dir, storage_filename)
             self.body_file = open(path, 'wb')
@@ -257,20 +257,20 @@ class CurlTransport(object):
             elif grab.config['post']:
                 post_data = normalize_post_data(grab.config['post'], grab.config['charset'])
                 # py3 hack
-                if PY3K:
-                    post_data = smart_unicode(post_data, grab.config['charset'])
+                #if PY3K:
+                #    post_data = smart_unicode(post_data, grab.config['charset'])
                 self.curl.setopt(pycurl.COPYPOSTFIELDS, post_data)
             else:
                 self.curl.setopt(pycurl.POSTFIELDS, '')
         elif grab.request_method == 'PUT':
             data = grab.config['post']
-            if isinstance(data, unicode) or not isinstance(data, basestring):
+            if isinstance(data, unicode) or (not PY3K and not isinstance(data, basestring)):
                 # py3 hack
-                if PY3K:
-                    data = data.encode('utf-8')
-                else:
-                    raise error.GrabMisuseError('Value of post option could be only '\
-                                                'byte string if PUT method is used')
+                #if PY3K:
+                #    data = data.encode('utf-8')
+                #else:
+                raise error.GrabMisuseError('Value of post option could be only '\
+                                            'byte string if PUT method is used')
             self.curl.setopt(pycurl.UPLOAD, 1)
             self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read) 
             self.curl.setopt(pycurl.INFILESIZE, len(data))
@@ -358,8 +358,10 @@ class CurlTransport(object):
                 else:
                     domain = ''
                 grab.cookies.set(
-                    name=normalize_unicode(name, grab.config['charset']),
-                    value=normalize_unicode(value, grab.config['charset']),
+                    #name=normalize_unicode(name, grab.config['charset']),
+                    #value=normalize_unicode(value, grab.config['charset']),
+                    name=name,
+                    value=value,
                     domain=domain
                 )
 
@@ -377,13 +379,12 @@ class CurlTransport(object):
                 cookie_domain = cookie_domain.replace('#httponly_', '')
             if not cookie_domain or host_nowww in cookie_domain:
                 if '.' in host_nowww:
-                    tail = '; domain=%s' % cookie_domain
+                    tail = b'; domain=%s' % cookie_domain
                 else:
-                    tail = ''
+                    tail = b''
                 encoded = encode_cookies({cookie.name: cookie.value}, join=True,
                                          charset=grab.config['charset'])
-                self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s%s' % (
-                    encoded, tail))
+                self.curl.setopt(pycurl.COOKIELIST, b'Set-Cookie: ' + encoded + tail)
 
     def request(self):
 

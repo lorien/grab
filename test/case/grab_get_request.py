@@ -16,13 +16,13 @@ class GrabSimpleTestCase(TestCase):
         SERVER.RESPONSE['get'] = 'Final Countdown'
         g = build_grab()
         g.go(SERVER.BASE_URL)
-        self.assertTrue('Final Countdown' in g.response.body)
+        self.assertTrue(b'Final Countdown' in g.response.body)
 
     def test_body_content(self):
         SERVER.RESPONSE['get'] = 'Simple String'
         g = build_grab()
         g.go(SERVER.BASE_URL)
-        self.assertEqual('Simple String', g.response.body)
+        self.assertEqual(b'Simple String', g.response.body)
         #self.assertEqual('Simple String' in g.response.runtime_body)
 
     def test_status_code(self):

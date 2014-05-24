@@ -60,7 +60,6 @@ import time
 
 NULL_BYTE = chr(0)
 
-#RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode('utf-8'), re.I)
 # LXML ENDS
 
 
@@ -70,6 +69,7 @@ RE_XML_DECLARATION = re.compile(br'^[^<]{,100}<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(br'encoding\s*=\s*["\']([^"\']+)["\']')
 RE_META_CHARSET = re.compile(br'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)',
                              re.I)
+RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode('utf-8'), re.I)
 
 # Bom processing logic was copied from
 # https://github.com/scrapy/w3lib/blob/master/w3lib/encoding.py
@@ -129,8 +129,8 @@ class TextExtension(object):
 
         if not isinstance(anchor, unicode):
             if byte:
-                if PY3K:
-                    return anchor in self.body_as_bytes()
+                #if PY3K:
+                    #return anchor in self.body_as_bytes()
                 return anchor in self.body
             else:
                 raise GrabMisuseError('The anchor should be byte string in non-byte mode')
@@ -198,11 +198,11 @@ class RegexpExtension(object):
         match = None
         if byte:
             if not isinstance(regexp.pattern, unicode) or not PY3K:
-                if PY3K:
-                    body = self.body_as_bytes()
-                else:
-                    body = self.body
-                match = regexp.search(body)
+                #if PY3K:
+                    #body = self.body_as_bytes()
+                #else:
+                    #body = self.body
+                match = regexp.search(self.body)
         else:
             if isinstance(regexp.pattern, unicode) or not PY3K:
                 ubody = self.unicode_body()
@@ -260,7 +260,205 @@ class PyqueryExtension(object):
         return self._pyquery
 
 
-class Document(TextExtension, RegexpExtension, DjangoExtension, PyqueryExtension):
+class BodyExtension(object):
+    __slots__ = ()
+
+    #def unicode_runtime_body(self, ignore_errors=True, fix_special_entities=True):
+        #"""
+        #Return response body as unicode string.
+        #"""
+
+        #if not self._unicode_runtime_body:
+            #self._unicode_runtime_body = self.convert_body_to_unicode(
+                #body=self.runtime_body,
+                #bom=None,
+                #charset=self.charset,
+                #ingore_errors=ignore_errors,
+                #fix_special_entities=fix_special_entities,
+            #)
+        #return self._unicode_runtime_body
+
+    #def _read_runtime_body(self):
+        #if self._runtime_body is None:
+            #return self._cached_body
+        #else:
+            #return self._runtime_body
+
+    #def _write_runtime_body(self, body):
+        #self._runtime_body = body
+        #self._unicode_runtime_body = None
+
+    #runtime_body = property(_read_runtime_body, _write_runtime_body)
+
+    def get_body_chunk(self):
+        body_chunk = None
+        if self.body_path:
+            with open(self.body_path, 'rb') as inp:
+                body_chunk = inp.read(4096)
+        elif self._cached_body:
+            body_chunk = self._cached_body[:4096]
+        return body_chunk
+
+    def convert_body_to_unicode(self, body, bom, charset, ignore_errors, fix_special_entities):
+        # How could it be unicode???
+        #if isinstance(body, unicode):
+            #body = body.encode('utf-8')
+        if bom:
+            body = body[len(self.bom):]
+        if fix_special_entities:
+            body = grab.tools.encoding.fix_special_entities(body)
+        if ignore_errors:
+            errors = 'ignore'
+        else:
+            errors = 'strict'
+        return body.decode(charset, errors).strip()
+
+    def _check_cached_body(self):
+        """
+        WTF???
+        """
+        if not self._cached_body:
+            if self.body_path:
+                self._cached_body = self.read_body_from_file()
+
+    def read_body_from_file(self):
+        with open(self.body_path, 'rb') as inp:
+            return inp.read()
+
+    def unicode_body(self, ignore_errors=True, fix_special_entities=True):
+        """
+        Return response body as unicode string.
+        """
+
+        #self._check_cached_body()
+        if not self._unicode_body:
+            self._unicode_body = self.convert_body_to_unicode(
+                body=self.body,#_cached_body,
+                bom=self.bom,
+                charset=self.charset,
+                ignore_errors=ignore_errors,
+                fix_special_entities=fix_special_entities,
+            )
+        return self._unicode_body
+
+    def _read_body(self):
+        # py3 hack
+        #if PY3K:
+            #return self.unicode_body()
+
+        #self._check_cached_body()
+        if self.body_path:
+            return self.read_body_from_file()
+        else:
+            return self._cached_body
+
+    def _write_body(self, body):
+        if self.body_path:
+            with open(self.body_path, 'wb') as out:
+                out.write(body)
+            self._cached_body = None
+        else:
+            self._cached_body = body
+        self._unicode_body = None
+
+    body = property(_read_body, _write_body)
+
+    #def body_as_bytes(self, encode=False):
+        #self._check_cached_body()
+        #if encode:
+            #return self.body.encode(self.charset)
+        #return self._cached_body
+
+
+class DomTreeExtension(object):
+    __slots__ = ()
+
+    @property
+    def tree(self):
+        """
+        Return DOM tree of the document built with HTML DOM builder.
+        """
+
+        if self.grab.config['content_type'] == 'xml':
+            return self.build_xml_tree()
+        else:
+            return self.build_html_tree()
+
+    def build_html_tree(self):
+        from lxml.html import fromstring
+        from lxml.etree import ParserError
+
+        from grab.base import GLOBAL_STATE
+
+        if self._lxml_tree is None:
+            #body = self.unicode_runtime_body(
+            body = self.unicode_body(
+                fix_special_entities=self.grab.config['fix_special_entities']).strip()
+            if self.grab.config['lowercased_tree']:
+                body = body.lower()
+            if self.grab.config['strip_null_bytes']:
+                body = body.replace(NULL_BYTE, '')
+            # py3 hack
+            if PY3K:
+                body = RE_UNICODE_XML_DECLARATION.sub('', body)
+            else:
+                body = RE_XML_DECLARATION.sub('', body)
+            if not body:
+                # Generate minimal empty content
+                # which will not break lxml parser
+                body = '<html></html>'
+            start = time.time()
+
+            #body = simplify_html(body)
+            try:
+                self._lxml_tree = fromstring(body)
+            except Exception as ex:
+                if (isinstance(ex, ParserError)
+                    and 'Document is empty' in str(ex)
+                    and not '<html' in body):
+
+                    # Fix for "just a string" body
+                    body = '<html>%s</html>'.format(body)
+                    self._lxml_tree = fromstring(body)
+
+                elif (isinstance(ex, TypeError)
+                      and "object of type 'NoneType' has no len" in str(ex)
+                      and not '<html' in body):
+
+                    # Fix for smth like "<frameset></frameset>"
+                    body = '<html>%s</html>'.format(body)
+                    self._lxml_tree = fromstring(body)
+                else:
+                    raise
+
+            GLOBAL_STATE['dom_build_time'] += (time.time() - start)
+        return self._lxml_tree
+
+    @property
+    def xml_tree(self):
+        """
+        Return DOM-tree of the document built with XML DOM builder.
+        """
+    
+        logger.debug('This method is deprecated. Please use `tree` property '\
+                     'and content_type="xml" option instead.')
+        return self.build_xml_tree()
+
+    def build_xml_tree(self):
+        from lxml.etree import fromstring
+
+        if self._strict_lxml_tree is None:
+            # py3 hack
+            #if PY3K:
+                #body = self.body_as_bytes(encode=True)
+            #else:
+                #body = self.body
+            self._strict_lxml_tree = fromstring(self.body)
+        return self._strict_lxml_tree
+
+
+class Document(TextExtension, RegexpExtension, DjangoExtension, PyqueryExtension,
+               BodyExtension, DomTreeExtension):
     """
     Document (in most cases it is a network response i.e. result of network request)
     """
@@ -275,15 +473,6 @@ class Document(TextExtension, RegexpExtension, DjangoExtension, PyqueryExtension
                  '_lxml_tree', '_strict_lxml_tree', '_pyquery',
                  )
 
-    def __call__(self, query):
-        return self.select(query)
-
-    def select(self, *args, **kwargs):
-        return XpathSelector(self.grab.tree).select(*args, **kwargs)
-
-    def structure(self, *args, **kwargs):
-        return TreeInterface(self.grab.tree).structured_xpath(*args, **kwargs)
-
     def __init__(self, grab=None):
         if grab is None:
             self.grab = None
@@ -296,16 +485,10 @@ class Document(TextExtension, RegexpExtension, DjangoExtension, PyqueryExtension
         self.status = None
         self.code = None
         self.head = None
-        self._cached_body = None
-        self._runtime_body = None
-        #self.runtime_body = None
-        self.body_path = None
         self.headers =None
         self.url = None
         self.cookies = CookieManager()
         self.charset = 'utf-8'
-        self._unicode_body = None
-        self._unicode_runtime_body = None
         self.bom = None
         self.timestamp = datetime.now()
         self.name_lookup_time = 0
@@ -317,10 +500,28 @@ class Document(TextExtension, RegexpExtension, DjangoExtension, PyqueryExtension
         self.error_code = None
         self.error_msg = None
 
+        # Body
+        self.body_path = None
+        self._cached_body = None
+        self._unicode_body = None
+        self._runtime_body = None
+        self._unicode_runtime_body = None
+
+        # DOM Tree
         self._lxml_tree = None
         self._strict_lxml_tree = None
+
+        # Pyquery
         self._pyquery = None
 
+    def __call__(self, query):
+        return self.select(query)
+
+    def select(self, *args, **kwargs):
+        return XpathSelector(self.grab.tree).select(*args, **kwargs)
+
+    def structure(self, *args, **kwargs):
+        return TreeInterface(self.grab.tree).structured_xpath(*args, **kwargs)
 
     def parse(self, charset=None):
         """
@@ -375,12 +576,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension, PyqueryExtension
 
         charset = None
 
-        body_chunk = None
-        if self.body_path:
-            with open(self.body_path, 'rb') as inp:
-                body_chunk = inp.read(4096)
-        elif self._cached_body:
-            body_chunk = self._cached_body[:4096]
+        body_chunk = self.get_body_chunk()
 
         if body_chunk:
             # Try to extract charset from http-equiv meta tag
@@ -422,53 +618,6 @@ class Document(TextExtension, RegexpExtension, DjangoExtension, PyqueryExtension
                 self.charset = 'utf-8'
             else:
                 self.charset = charset
-
-    def process_unicode_body(self, body, bom, charset, ignore_errors, fix_special_entities):
-        if isinstance(body, unicode):
-            #if charset in ('utf-8', 'utf8'):
-            #    return body.strip()
-            #else:
-            #    body = body.encode('utf-8')
-            #
-            body = body.encode('utf-8')
-        if bom:
-            body = body[len(self.bom):]
-        if fix_special_entities:
-            body = grab.tools.encoding.fix_special_entities(body)
-        if ignore_errors:
-            errors = 'ignore'
-        else:
-            errors = 'strict'
-        return body.decode(charset, errors).strip()
-
-    def _check_cached_body(self):
-        if not self._cached_body:
-            if self.body_path:
-                with open(self.body_path, 'rb') as inp:
-                    self._cached_body = inp.read()
-
-    def unicode_body(self, ignore_errors=True, fix_special_entities=True):
-        """
-        Return response body as unicode string.
-        """
-
-        self._check_cached_body()
-        if not self._unicode_body:
-            self._unicode_body = self.process_unicode_body(
-                self._cached_body, self.bom, self.charset,
-                ignore_errors, fix_special_entities)
-        return self._unicode_body
-
-    def unicode_runtime_body(self, ignore_errors=True, fix_special_entities=True):
-        """
-        Return response body as unicode string.
-        """
-
-        if not self._unicode_runtime_body:
-            self._unicode_runtime_body = self.process_unicode_body(
-                self.runtime_body, None, self.charset,
-                ignore_errors, fix_special_entities)
-        return self._unicode_runtime_body
 
     def copy(self, new_grab=None):
         """
@@ -585,125 +734,10 @@ class Document(TextExtension, RegexpExtension, DjangoExtension, PyqueryExtension
         self.save(path)
         webbrowser.open('file://' + path)
 
-    def _read_cached_body(self):
-        # py3 hack
-        if PY3K:
-            return self.unicode_body()
-
-        self._check_cached_body()
-        return self._cached_body
-
-    def _write_cached_body(self, body):
-        self._cached_body = body
-        self._unicode_body = None
-
-    body = property(_read_cached_body, _write_cached_body)
-
-    def _read_runtime_body(self):
-        if self._runtime_body is None:
-            return self._cached_body
-        else:
-            return self._runtime_body
-
-    def _write_runtime_body(self, body):
-        self._runtime_body = body
-        self._unicode_runtime_body = None
-
-    runtime_body = property(_read_runtime_body, _write_runtime_body)
-
-    def body_as_bytes(self, encode=False):
-        self._check_cached_body()
-        if encode:
-            return self.body.encode(self.charset)
-        return self._cached_body
-
     @property
     def time(self):
         logger.error('Attribute Response.time is deprecated. Use Response.total_time instead.')
         return self.total_time
-
-    @property
-    def tree(self):
-        """
-        Return DOM tree of the document built with HTML DOM builder.
-        """
-
-        if self.grab.config['content_type'] == 'xml':
-            return self.build_xml_tree()
-        else:
-            return self.build_html_tree()
-
-    def build_html_tree(self):
-        from lxml.html import fromstring
-        from lxml.etree import ParserError
-
-        from grab.base import GLOBAL_STATE
-
-        if self._lxml_tree is None:
-            body = self.unicode_runtime_body(
-                fix_special_entities=self.grab.config['fix_special_entities']
-            ).strip()
-            if self.grab.config['lowercased_tree']:
-                body = body.lower()
-            if self.grab.config['strip_null_bytes']:
-                body = body.replace(NULL_BYTE, '')
-            # py3 hack
-            if PY3K:
-                body = RE_UNICODE_XML_DECLARATION.sub('', body)
-            else:
-                body = RE_XML_DECLARATION.sub('', body)
-            if not body:
-                # Generate minimal empty content
-                # which will not break lxml parser
-                body = '<html></html>'
-            start = time.time()
-
-            #body = simplify_html(body)
-            try:
-                self._lxml_tree = fromstring(body)
-            except Exception as ex:
-                if (isinstance(ex, ParserError)
-                    and 'Document is empty' in str(ex)
-                    and not '<html' in body):
-
-                    # Fix for "just a string" body
-                    body = '<html>%s</html>'.format(body)
-                    self._lxml_tree = fromstring(body)
-
-                elif (isinstance(ex, TypeError)
-                      and "object of type 'NoneType' has no len" in str(ex)
-                      and not '<html' in body):
-
-                    # Fix for smth like "<frameset></frameset>"
-                    body = '<html>%s</html>'.format(body)
-                    self._lxml_tree = fromstring(body)
-                else:
-                    raise
-
-            GLOBAL_STATE['dom_build_time'] += (time.time() - start)
-        return self._lxml_tree
-
-    @property
-    def xml_tree(self):
-        """
-        Return DOM-tree of the document built with XML DOM builder.
-        """
-    
-        logger.debug('This method is deprecated. Please use `tree` property '\
-                     'and content_type="xml" option instead.')
-        return self.build_xml_tree()
-
-    def build_xml_tree(self):
-        from lxml.etree import fromstring
-
-        if self._strict_lxml_tree is None:
-            # py3 hack
-            if PY3K:
-                body = self.body_as_bytes(encode=True)
-            else:
-                body = self.body
-            self._strict_lxml_tree = fromstring(body)
-        return self._strict_lxml_tree
 
     def __getstate__(self):
         """

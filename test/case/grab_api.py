@@ -24,11 +24,11 @@ class GrabApiTestCase(TestCase):
         g = build_grab()
         SERVER.RESPONSE['get'] = 'Moon'
         g.go(SERVER.BASE_URL)
-        self.assertTrue('Moon' in g.response.body)
+        self.assertTrue(b'Moon' in g.response.body)
         g2 = build_grab()
         #self.assertEqual(g2.doc.grab, g2)
         g2 = g.clone()
-        self.assertTrue('Moon' in g.response.body)
+        self.assertTrue(b'Moon' in g.response.body)
 
     @ignore_transport('ghost.GhostTransport')
     def test_empty_clone(self):
@@ -43,7 +43,7 @@ class GrabApiTestCase(TestCase):
         g2 = build_grab()
         self.assertEqual(g2.config['url'], None)
         g2.adopt(g)
-        self.assertTrue('Moon' in g2.response.body)
+        self.assertTrue(b'Moon' in g2.response.body)
         self.assertEqual(g2.config['url'], SERVER.BASE_URL)
 
     def test_empty_adopt(self):

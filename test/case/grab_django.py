@@ -15,7 +15,7 @@ class GrabDjangoTestCase(TestCase):
         g.go(SERVER.BASE_URL)
         the_file = g.doc.django_file()
         self.assertTrue(isinstance(the_file, ContentFile))
-        self.assertEqual('zzz', the_file.read())
+        self.assertEqual(b'zzz', the_file.read())
         self.assertEqual('', the_file.name)
 
     def test_response_django_file_with_name(self):
@@ -25,4 +25,5 @@ class GrabDjangoTestCase(TestCase):
         g = build_grab()
         g.go(SERVER.BASE_URL)
         the_file = g.doc.django_file(name='movie.flv')
+        self.assertEqual(b'zzz', the_file.read())
         self.assertEqual('movie.flv', the_file.name)

@@ -15,7 +15,7 @@ class TestContentLimit(TestCase):
         g.setup(nobody=True)
         SERVER.RESPONSE['get'] = 'foo'
         g.go(SERVER.BASE_URL)
-        self.assertEqual('', g.response.body)
+        self.assertEqual(b'', g.response.body)
         self.assertTrue(len(g.response.head) > 0)
 
     @ignore_transport('grab.transport.requests.RequestsTransport')

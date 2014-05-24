@@ -21,7 +21,7 @@ class BasicSpiderTestCase(TestCase):
         sp.setup_queue()
         sp.add_task(Task('baz', SERVER.BASE_URL))
         sp.run()
-        self.assertEqual('Hello spider!', sp.SAVED_ITEM)
+        self.assertEqual(b'Hello spider!', sp.SAVED_ITEM)
 
     def test_network_limit(self):
         SERVER.RESPONSE['get'] = 'Hello spider!'
@@ -65,7 +65,7 @@ class BasicSpiderTestCase(TestCase):
         sp.setup_queue()
         sp.add_task(Task('baz', SERVER.BASE_URL))
         sp.run()
-        self.assertEqual('xxx', sp.SAVED_ITEM)
+        self.assertEqual(b'xxx', sp.SAVED_ITEM)
 
     def test_setup_grab(self):
         """

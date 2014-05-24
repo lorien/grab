@@ -22,7 +22,7 @@ class TestProxy(TestCase):
         SERVER.RESPONSE['get'] = '123'
 
         g.go('http://yandex.ru')
-        self.assertEqual('123', g.response.body)
+        self.assertEqual(b'123', g.response.body)
         self.assertEqual('yandex.ru', SERVER.REQUEST['headers']['host'])
 
     def test_deprecated_setup_proxylist(self):
@@ -32,7 +32,7 @@ class TestProxy(TestCase):
         SERVER.RESPONSE['get'] = '123'
         g.change_proxy()
         g.go('http://yandex.ru')
-        self.assertEqual('123', g.response.body)
+        self.assertEqual(b'123', g.response.body)
         self.assertEqual('yandex.ru', SERVER.REQUEST['headers']['host'])
 
     def test_load_proxylist(self):

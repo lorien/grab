@@ -33,7 +33,7 @@ from .util.py2old_support import *
 from .util.py3k_support import *
 from .proxy import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
-from grab.kit.interface import GrabKitInterface
+from grab.kit_interface import GrabKitInterface
 
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used

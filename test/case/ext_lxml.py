@@ -32,7 +32,7 @@ HTML = u"""
 """.encode('cp1251')
 
 
-XML = """
+XML = b"""
 <root>
     <man>
         <age>25</age>

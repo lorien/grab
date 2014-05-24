@@ -5,7 +5,7 @@ from grab import Grab, DataNotFound
 from test.util import build_grab
 from test.server import SERVER
 
-HTML = u"""
+HTML = b"""
 <html>
     <body>
         <h1>test</h1>

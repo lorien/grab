@@ -66,22 +66,22 @@ def encode_cookies(items, join=True, charset='utf-8'):
         In cookie value only ",", " ", "\t" and ";" should be encoded
         """
 
-        return val.replace(' ', '%20').replace('\t', '%09')\
-                  .replace(';', '%3B').replace(',', '%2C')
+        return val.replace(b' ', b'%20').replace(b'\t', b'%09')\
+                  .replace(b';', b'%3B').replace(b',', b'%2C')
 
     if isinstance(items, dict):
         items = items.items()
     items = normalize_http_values(items, charset=charset)
 
     # py3 hack
-    if PY3K:
-        items = decode_pairs(items, charset)
+    #if PY3K:
+    #    items = decode_pairs(items, charset)
 
     tokens = []
     for key, value in items:
-        tokens.append('%s=%s' % (encode(key), encode(value)))
+        tokens.append(b'='.join((encode(key), encode(value))))
     if join:
-        return '; '.join(tokens)
+        return b'; '.join(tokens)
     else:
         return tokens
 

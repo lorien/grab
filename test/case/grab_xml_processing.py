@@ -10,7 +10,7 @@ class GrabXMLProcessingTestCase(TestCase):
         SERVER.reset()
 
     def test_xml_with_declaration(self):
-        SERVER.RESPONSE['get'] = '<?xml version="1.0" encoding="UTF-8"?><root><foo>foo</foo></root>'
+        SERVER.RESPONSE['get'] = b'<?xml version="1.0" encoding="UTF-8"?><root><foo>foo</foo></root>'
         g = build_grab()
         g.go(SERVER.BASE_URL)
         self.assertTrue(g.xpath_one('//foo').text == 'foo')
@@ -22,7 +22,7 @@ class GrabXMLProcessingTestCase(TestCase):
         3. Call xpath
         4. Get ValueError: Unicode strings with encoding declaration are not supported.
         """
-        xml = '<?xml version="1.0" encoding="UTF-8"?><tree><leaf>text</leaf></tree>'
+        xml = b'<?xml version="1.0" encoding="UTF-8"?><tree><leaf>text</leaf></tree>'
         g = build_grab(document_body=xml)
         self.assertTrue(g.search(u'text'))
         self.assertEqual(g.xpath_one('//leaf').text, u'text')

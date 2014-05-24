@@ -67,11 +67,7 @@ class MainHandler(tornado.web.RequestHandler):
         SERVER.REQUEST['method'] = self.request.method
         SERVER.REQUEST['cookies'] = self.request.cookies
         charset = SERVER.REQUEST['charset']
-        # py3 hack
-        if PY3K and (charset not in ('utf-8', 'utf8')):
-            SERVER.REQUEST['post'] = self.request.body.decode('utf-8').encode(charset)
-        else:
-            SERVER.REQUEST['post'] = self.request.body
+        SERVER.REQUEST['post'] = self.request.body
 
         callback_name = '%s_callback' % method_name
         if SERVER.RESPONSE.get(callback_name) is not None:

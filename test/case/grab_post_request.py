@@ -129,7 +129,7 @@ class TestPostFeature(TestCase):
 
     def test_put(self):
         g = build_grab()
-        g.setup(post='abc', url=SERVER.BASE_URL, method='put', debug=True)
+        g.setup(post=b'abc', url=SERVER.BASE_URL, method='put', debug=True)
         SERVER.REQUEST['debug'] = True
         g.request()
         self.assertEqual(SERVER.REQUEST['method'], 'PUT')

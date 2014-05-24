@@ -17,7 +17,7 @@ from grab.tools.lxml_tools import get_node_text, parse_html
 from grab.selector import XpathSelector
 from grab.error import GrabMisuseError
 
-XML = """<?xml version='1.0' encoding='utf-8'?>
+XML = b"""<?xml version='1.0' encoding='utf-8'?>
 <bbapi version='1'>
     <player id='26982032' retrieved='2012-09-11T07:38:44Z'>
         <firstName>Ardeshir</firstName>
