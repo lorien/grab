@@ -527,7 +527,7 @@ class Grab(FormExtension, DeprecatedThings):
                 out.write(self.doc.body)
 
         if self.config['cookiefile']:
-            self.dump_cookies(self.config['cookiefile'])
+            self.cookies.save_to_file(self.config['cookiefile'])
 
         if self.config['reuse_referer']:
             self.config['referer'] = self.doc.url
@@ -726,14 +726,6 @@ class Grab(FormExtension, DeprecatedThings):
 
         self.config['cookies'] = {}
         self.cookies.clear()
-
-    @deprecated(use_instead='grab.cookies.load_from_file')
-    def load_cookies(self, path, file_required=True):
-        self.cookies.load_from_file(path)
-
-    @deprecated(use_instead='grab.cookies.save_to_file')
-    def dump_cookies(self, path):
-        self.cookies.save_to_file(path)
 
     def setup_with_proxyline(self, line, proxy_type='http'):
         # TODO: remove from base class

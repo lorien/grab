@@ -301,3 +301,12 @@ class DeprecatedThings(object):
         return self.setup_document(*args, **kwargs)
 
 
+    # Cookies
+    # *******
+    @deprecated(use_instead='grab.cookies.load_from_file')
+    def load_cookies(self, path, file_required=True):
+        self.cookies.load_from_file(path)
+
+    @deprecated(use_instead='grab.cookies.save_to_file')
+    def dump_cookies(self, path):
+        self.cookies.save_to_file(path)
