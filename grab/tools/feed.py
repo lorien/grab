@@ -9,7 +9,7 @@ import feedparser
 from lxml.html.clean import clean_html
 
 from grab.tools.lxml_tools import truncate_html
-from grab..tools.html import strip_tags
+from grab.tools.html import strip_tags
 from grab.tools.text import remove_bom
 from grab.error import DataNotFound, GrabMisuseError
 
