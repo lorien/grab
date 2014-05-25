@@ -16,6 +16,7 @@ docs-redirect/_build
 # misc
 log.html
 prof
+prof.kcache
 
 # google chrome
 docs2/libpeerconnection.log

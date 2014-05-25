@@ -3,6 +3,8 @@ from tornado.ioloop import IOLoop
 import tornado.web
 import time
 import collections
+import tornado.gen
+import itertools
 
 from grab.util.py3k_support import *
 
@@ -15,6 +17,7 @@ class ServerState(object):
     RESPONSE = {}
     RESPONSE_ONCE = {'headers': []}
     SLEEP = {}
+    TIMEOUT_ITERATOR = itertools.cycle([0])
 
     def reset(self):
         self.BASE_URL = 'http://localhost:%d' % self.PORT
@@ -55,6 +58,8 @@ class MainHandler(tornado.web.RequestHandler):
     def decode_argument(self, value, **kwargs):
         return value.decode(SERVER.REQUEST['charset'])
 
+    @tornado.web.asynchronous
+    @tornado.gen.engine
     def method_handler(self):
         method_name = self.request.method.lower()
 
@@ -117,6 +122,9 @@ class MainHandler(tornado.web.RequestHandler):
                     self.write(resp())
                 else:
                     self.write(resp)
+            yield tornado.gen.Task(IOLoop.instance().add_timeout,
+                                   time.time() + SERVER.TIMEOUT_ITERATOR.next())
+            self.finish()
 
     get = method_handler
     post = method_handler

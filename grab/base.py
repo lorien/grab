@@ -220,6 +220,7 @@ class Grab(FormExtension, DeprecatedThings):
         Create Grab instance
         """
 
+        self._doc = None
         self.config = default_config()
         self.config['common_headers'] = self.common_headers()
         self._request_prepared = False
@@ -229,11 +230,22 @@ class Grab(FormExtension, DeprecatedThings):
         self.setup_transport(transport)
 
         self.reset()
+
         if kwargs:
             self.setup(**kwargs)
         self.clone_counter = 0
         if document_body is not None:
             self.setup_document(document_body)
+
+    def _get_doc(self):
+        if self._doc is None:
+            self._doc = Document(self)
+        return self._doc
+
+    def _set_doc(self, obj):
+        self._doc = obj
+
+    doc = property(_get_doc, _set_doc)
 
     def setup_transport(self, transport_param):
         self.transport_param = transport_param
@@ -254,8 +266,6 @@ class Grab(FormExtension, DeprecatedThings):
 
         This methods is automatically called before each network request.
         """
-
-        self.doc = Document(grab=self)
 
         self.request_head = None
         self.request_log = None
@@ -375,7 +385,7 @@ class Grab(FormExtension, DeprecatedThings):
         tranposrt extension.
         """
 
-        # Reset the state setted by previous request
+        # Reset the state set by previous request
         if not self._request_prepared:
             self.reset()
             self.request_counter = next(REQUEST_COUNTER)
@@ -705,8 +715,8 @@ class Grab(FormExtension, DeprecatedThings):
 
         Returns request method in upper case
 
-        This method needs simetime when process_config method
-        was not executed yet.
+        This method needs simetime when `process_config` method
+        was not called yet.
         """
 
         method = self.config['method']
