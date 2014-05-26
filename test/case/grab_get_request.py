@@ -36,3 +36,12 @@ class GrabSimpleTestCase(TestCase):
         g = build_grab()
         g.go(SERVER.BASE_URL)
         self.assertTrue(g.response.headers['Hello'] == 'Grab')
+
+    def test_depreated_hammer_mode_options(self):
+        SERVER.RESPONSE['get'] = 'foo'
+        g = build_grab()
+        g.setup(hammer_mode=True)
+        g.go(SERVER.BASE_URL)
+
+        g.setup(hammer_timeouts=((1, 1), (2, 2)))
+        g.go(SERVER.BASE_URL)

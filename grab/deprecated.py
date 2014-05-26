@@ -3,6 +3,7 @@ from grab.const import NULL
 from grab.error import DataNotFound, GrabMisuseError
 from grab.tools.text import find_number
 from grab.tools.lxml_tools import get_node_text
+from grab import error
 
 class DeprecatedThings(object):
     """
@@ -310,3 +311,20 @@ class DeprecatedThings(object):
     @deprecated(use_instead='grab.cookies.save_to_file')
     def dump_cookies(self, path):
         self.cookies.save_to_file(path)
+
+    @deprecated(use_instead='grab.proxylist.set_source')
+    def load_proxylist(self, source, source_type, proxy_type='http',
+                       auto_init=True, auto_change=True,
+                       **kwargs):
+        #self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type, **kwargs)
+        if source_type == 'text_file':
+            self.proxylist.set_source('file', location=source, proxy_type=proxy_type, **kwargs)
+        elif source_type == 'url':
+            self.proxylist.set_source('url', url=source, proxy_type=proxy_type, **kwargs)
+        else:
+            raise error.GrabMisuseError('Unknown proxy source type: %s' % source_type)
+
+        #self.proxylist.setup(auto_change=auto_change, auto_init=auto_init)
+        self.setup(proxy_auto_change=auto_change)
+        if not auto_change and auto_init:
+            self.change_proxy()

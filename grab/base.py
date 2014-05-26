@@ -16,7 +16,6 @@ try:
     from urlparse import urljoin
 except ImportError:
     from urllib.parse import urljoin
-import json
 import email
 from datetime import datetime
 import weakref
@@ -25,14 +24,14 @@ from grab.tools.html import find_refresh_url, find_base_url
 from grab.document import Document
 from grab import error
 from grab.tools.http import normalize_http_values
-from grab.cookie import CookieManager, create_cookie
-from grab.util.misc import deprecated
-from grab.util.py2old_support import *
-from grab.util.py3k_support import *
+from grab.cookie import CookieManager
 from grab.proxy import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
 from grab.kit_interface import GrabKitInterface
 from grab.ext.form import FormExtension
+
+from grab.util.py2old_support import *
+from grab.util.py3k_support import *
 
 __all__ = ('Grab',)
 # This counter will used in enumerating network queries.
@@ -40,15 +39,16 @@ __all__ = ('Grab',)
 # in names of dumps
 # I use mutable module variable to allow different
 # instances of Grab maintain single counter
-# This could be helpful in debuggin when your script
+# This could be helpful in debugging when your script
 # creates multiple Grab instances - in case of shared counter
 # grab instances do not overwrite dump logs
+REQUEST_COUNTER = itertools.count(1)
+
 GLOBAL_STATE = {
     'dom_build_time': 0,
     'selector_time': 0,
 }
-REQUEST_COUNTER = itertools.count(1)
-MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies', 'hammer_timeouts']
+MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies']
 
 logger = logging.getLogger('grab.base')
 # Logger to handle network activity
@@ -76,9 +76,9 @@ def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
 
 
 def default_config():
-    # TODO: it seems config should be splitted into two entities:
+    # TODO: Maybe config should be splitted into two entities:
     # 1) config which is not changed during request
-    # 2) changable config
+    # 2) changable settings
     return dict(
         # Common
         url = None,
@@ -123,8 +123,6 @@ def default_config():
         # Timeouts
         timeout = 15,
         connect_timeout = 3,
-        hammer_mode = False,
-        hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
 
         # Connection
         connection_reuse = True,
@@ -348,6 +346,14 @@ class Grab(FormExtension, DeprecatedThings):
         Setting up Grab instance configuration.
         """
 
+        if 'hammer_mode' in kwargs:
+            logging.error('Option hammer_mode is deprecated. Grab does not support hammer mode anymore.')
+            del kwargs['hammer_mode']
+
+        if 'hammer_timeouts' in kwargs:
+            logging.error('Option hammer_timeouts is deprecated. Grab does not support hammer mode anymore.')
+            del kwargs['hammer_timeouts']
+
         for key in kwargs:
             if not key in self.config.keys():
                 raise error.GrabMisuseError('Unknown option: %s' % key)
@@ -434,55 +440,19 @@ class Grab(FormExtension, DeprecatedThings):
         Returns: ``Document`` objects.
         """
 
-        # We need to process hammer_timeouts value before calling to grab.prepare_request
-        # because initial hammer_timeouts value should be calculated only one time
-        if 'hammer_mode' in kwargs:
-            hammer_mode = kwargs['hammer_mode']
+        self.prepare_request(**kwargs)
+        self.log_request()
+
+        try:
+            self.transport.request()
+        except error.GrabError:
+            self._request_prepared = False
+            self.save_failed_dump()
+            raise
         else:
-            hammer_mode = self.config['hammer_mode']
-        if hammer_mode:
-            if 'hammer_timeouts' in kwargs:
-                hammer_timeouts = list(kwargs['hammer_timeouts'])
-            else:
-                hammer_timeouts = list(self.config['hammer_timeouts'])
-            connect_timeout, total_timeout = hammer_timeouts.pop(0)
-            self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
-
-        while True:
-            try:
-                self.prepare_request(**kwargs)
-                self.log_request()
-                self.transport.request()
-            except error.GrabError:
-
-                # In hammer mode try to use next timeouts
-                if hammer_mode:
-                    # If no more timeouts
-                    # then raise an error
-                    if not hammer_timeouts:
-                        self._request_prepared = False
-                        self.save_failed_dump()
-                        raise
-                    else:
-                        connect_timeout, total_timeout = hammer_timeouts.pop(0)
-                        self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
-                        logger_network.debug('Trying another timeouts. Connect: %d sec., '
-                                             'total: %d sec.' % (connect_timeout, total_timeout))
-                        self._request_prepared = False
-                # If we are not in hammer mode
-                # Then just raise an error
-                else:
-                    self._request_prepared = False
-                    self.save_failed_dump()
-                    raise
-            else:
-                # Break the infinite loop in case of success response
-                break
-
-        # It will configure `self.doc`
-        self.process_request_result()
-
-        return self.doc
+            # That builds `self.doc`
+            self.process_request_result()
+            return self.doc
 
     def process_request_result(self, prepare_response_func=None):
         """
@@ -621,23 +591,6 @@ class Grab(FormExtension, DeprecatedThings):
             setattr(doc, key, value)
 
         self.doc = doc
-
-    @deprecated(use_instead='grab.proxylist.set_source')
-    def load_proxylist(self, source, source_type, proxy_type='http',
-                       auto_init=True, auto_change=True,
-                       **kwargs):
-        #self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type, **kwargs)
-        if source_type == 'text_file':
-            self.proxylist.set_source('file', location=source, proxy_type=proxy_type, **kwargs)
-        elif source_type == 'url':
-            self.proxylist.set_source('url', url=source, proxy_type=proxy_type, **kwargs)
-        else:
-            raise error.GrabMisuseError('Unknown proxy source type: %s' % source_type)
-
-        #self.proxylist.setup(auto_change=auto_change, auto_init=auto_init)
-        self.setup(proxy_auto_change=auto_change)
-        if not auto_change and auto_init:
-            self.change_proxy()
 
     def change_proxy(self):
         """
