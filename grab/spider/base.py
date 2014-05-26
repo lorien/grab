@@ -762,9 +762,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                     else:
                         logger_verbose.debug('Asking transport layer to do something')
 
-                        #print '[process handlers #1]'
-                        self.transport.process_handlers()
-
     def is_valid_for_cache(self, res):
         """
         Check if network transport result could
@@ -918,12 +915,13 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                             # TODO: middleware: TaskFails
                         else:
                             self.process_new_task(task)
+                            self.transport.process_handlers()
 
                 with self.save_timer('network_transport'):
                     logger_verbose.debug('Asking transport layer to do something')
                     # Process active handlers
                     #print '[select]'
-                    self.transport.select(0.01)
+                    #self.transport.select(0.01)
                     #print '[done]'
 
                     #print '[process handlers #2]'

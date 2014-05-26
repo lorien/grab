@@ -49,6 +49,7 @@ GLOBAL_STATE = {
     'selector_time': 0,
 }
 MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies']
+TRANSPORT_CACHE = {}
 
 logger = logging.getLogger('grab.base')
 # Logger to handle network activity
@@ -249,8 +250,13 @@ class Grab(FormExtension, DeprecatedThings):
         self.transport_param = transport_param
         if isinstance(transport_param, basestring):
             mod_path, cls_name = transport_param.rsplit('.', 1)
-            mod = __import__(mod_path, globals(), locals(), ['foo'])
-            self.transport = getattr(mod, cls_name)()
+            try:
+                cls = TRANSPORT_CACHE[(mod_path, cls_name)]
+            except KeyError:
+                mod = __import__(mod_path, globals(), locals(), ['foo'])
+                cls = getattr(mod, cls_name)
+                TRANSPORT_CACHE[(mod_path, cls_name)] = cls
+            self.transport = cls()
         elif isinstance(transport_param, collections.Callable):
             self.transport = transport_param()
         else:
@@ -425,10 +431,10 @@ class Grab(FormExtension, DeprecatedThings):
             proxy_info = ''
         if extra:
             extra = '[%s] ' % extra
-        logger_network.debug('[%02d%s] %s%s %s%s' % (
+        logger_network.debug('[%02d%s] %s%s %s%s',
             self.request_counter, tname,
             extra, self.request_method or 'GET',
-            self.config['url'], proxy_info))
+            self.config['url'], proxy_info)
 
     def request(self, **kwargs):
         """

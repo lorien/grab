@@ -15,7 +15,7 @@ def timeout_iterator():
 
 class TestSpider(Spider):
     def task_generator(self):
-        for x in range(500):
+        for x in range(1000):
             yield Task('page', url=SERVER.BASE_URL)
 
     def task_page(self, grab, task):
@@ -28,7 +28,7 @@ def main():
     SERVER.TIMEOUT_ITERATOR = timeout_iterator()
     SERVER.RESPONSE['get'] = 'foo'
 
-    bot = TestSpider(thread_number=500)
+    bot = TestSpider(thread_number=1000)
     bot.run()
     print(bot.render_stats())
 

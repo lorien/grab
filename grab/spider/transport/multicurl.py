@@ -60,6 +60,9 @@ class MulticurlTransport(object):
 
     def process_handlers(self):
         # http://curl.haxx.se/libcurl/c/curl_multi_perform.html
+        #res = self.multi.select(0.0001)
+        #if res == -1:
+            #return
         while True:
             #print '[inside PH]'
             status, active_objects = self.multi.perform()

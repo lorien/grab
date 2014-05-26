@@ -63,7 +63,8 @@ class MainHandler(tornado.web.RequestHandler):
     def method_handler(self):
         method_name = self.request.method.lower()
 
-        time.sleep(SERVER.SLEEP['get'])
+        if SERVER.SLEEP.get(method_name, None):
+            time.sleep(SERVER.SLEEP[method_name])
         SERVER.REQUEST['args'] = {}
         for key in self.request.arguments.keys():
             SERVER.REQUEST['args'][key] = self.get_argument(key)
@@ -163,7 +164,7 @@ def start_server():
     th = Thread(target=func)
     th.daemon = True
     th.start()
-    time.sleep(0.5)
+    time.sleep(0.1)
 
 
 def stop_server():

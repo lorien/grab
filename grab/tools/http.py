@@ -31,6 +31,7 @@ import encodings.punycode
 
 logger = logging.getLogger('grab.tools.http')
 RE_NON_ASCII = re.compile(r'[^-.a-zA-Z0-9]')
+RE_NOT_SAFE_URL = re.compile(r'[^-.:/?&;#a-zA-Z0-9]')
 
 def urlencode(*args, **kwargs):
     logger.debug('Method grab.tools.http.urlencode is deprecated. Please use grab.tools.http.smart_urlencode')
@@ -146,13 +147,16 @@ def quote(data):
 
 
 def normalize_url(url):
-    parts = list(urlsplit(url))
-    if RE_NON_ASCII.search(parts[1]):
-        parts[1] = str(smart_unicode(parts[1]).encode('idna').decode())
-        url = urlunsplit(parts)
-        return url
-    else:
-        return url
+    # The idea is to quick check that URL contains only safe chars
+    # If whole URL is safe then there is no need to extract hostname part
+    # and check if it is IDN
+    if RE_NOT_SAFE_URL.search(url):
+        parts = list(urlsplit(url))
+        if RE_NON_ASCII.search(parts[1]):
+            parts[1] = str(smart_unicode(parts[1]).encode('idna').decode())
+            url = urlunsplit(parts)
+            return url
+    return url
 
 def normalize_post_data(data, charset):
     if isinstance(data, basestring):

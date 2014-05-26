@@ -336,7 +336,6 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.MAXFILESIZE, grab.config['reject_file_size'])
 
     def process_cookie_options(self, grab, request_url):
-
         host = urlsplit(request_url).netloc.split(':')[0]
         host_nowww = host
         if host_nowww.startswith('www.'):
