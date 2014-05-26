@@ -17,7 +17,7 @@ class ServerState(object):
     RESPONSE = {}
     RESPONSE_ONCE = {'headers': []}
     SLEEP = {}
-    TIMEOUT_ITERATOR = itertools.cycle([0])
+    TIMEOUT_ITERATOR = None
 
     def reset(self):
         self.BASE_URL = 'http://localhost:%d' % self.PORT
@@ -122,8 +122,10 @@ class MainHandler(tornado.web.RequestHandler):
                     self.write(resp())
                 else:
                     self.write(resp)
-            yield tornado.gen.Task(IOLoop.instance().add_timeout,
-                                   time.time() + SERVER.TIMEOUT_ITERATOR.next())
+
+            if SERVER.TIMEOUT_ITERATOR:
+                yield tornado.gen.Task(IOLoop.instance().add_timeout,
+                                       time.time() + next(SERVER.TIMEOUT_ITERATOR))
             self.finish()
 
     get = method_handler

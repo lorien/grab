@@ -190,7 +190,7 @@ class Grab(FormExtension, DeprecatedThings):
 
     __slots__ = ('request_head', 'request_log', 'request_body',
                  'proxylist', 'config', '_request_prepared',
-                 'clone_counter', 'doc', 'transport',
+                 'clone_counter', 'transport',
                  'transport_param', 'request_method', 'request_counter',
                  '__weakref__', 'cookies',
 
@@ -714,7 +714,8 @@ class Grab(FormExtension, DeprecatedThings):
 
         state['_lxml_form'] = None
 
-        state['doc'].grab = weakref.proxy(self)
+        if state['_doc']:
+            state['_doc'].grab = weakref.proxy(self)
 
         return state
 
