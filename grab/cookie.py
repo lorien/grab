@@ -54,7 +54,7 @@ def create_cookie(name, value, **kwargs):
 
 class CookieManager(object):
     """
-    The instance of that class operates with cookies of one Grab instance.
+    Each Grab instance has `cookies` attribute that is instance of `CookieManager` class.
 
     That class contains helpful methods to create, load, save cookies from/to
     different places.

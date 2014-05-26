@@ -16,9 +16,9 @@ To send some custom cookies use :ref:`option_cookies` option. The value of that 
 Loading/dumping cookies
 -----------------------
 
-To dump current cookies to the file use :ref:`grab_cookies_save_to_file` method.
+To dump current cookies to the file use :py:meth:`grab.cookie.CookieManager.save_to_file` method.
 
-To load cookies from the file use `grab.cookies.load_from_file` method.
+To load cookies from the file use :py:meth:`grab.cookie.CookieManager.load_from_file` method.
 
 Permanent file to load/store cookies
 ------------------------------------

@@ -35,10 +35,12 @@ Grab User Manual
     grab_http_methods
     grab_response_body
     grab_redirect
+    grab_network_errors
     grab_forms
     grab_charset
     grab_cookies
     grab_proxy
+    grab_response_search
     pycurl
     changelog
     grab_response
@@ -58,3 +60,33 @@ Base Grab Interface
     api_grab_base
     api_grab_error
     api_grab_cookie
+
+
+Tools Package
+~~~~~~~~~~~~~
+
+.. toctree::
+    :maxdepth: 3
+
+    api_tools_html
+    api_tools_work
+    api_tools_pwork
+    api_tools_lock
+    api_tools_logs
+    api_tools_files
+    api_tools_lxml_tools
+    api_tools_rex
+    api_tools_text
+    api_tools_http
+    api_tools_content
+    api_tools_control
+    api_tools_debug
+    api_tools_encoding
+    api_tools_feed
+    api_tools_metric
+    api_tools_parser
+    api_tools_russian
+    api_tools_progress
+    api_tools_user_agent
+    api_tools_watch
+    api_tools_system

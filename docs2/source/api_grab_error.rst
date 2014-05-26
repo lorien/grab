@@ -8,6 +8,9 @@ Custom Grab Exception Classes
 .. module:: grab.error
 
 .. autoclass:: GrabError
+
+.. grab_network_error:
+
 .. autoclass:: GrabNetworkError
 .. autoclass:: GrabTimeoutError
 .. autoclass:: DataNotFound
