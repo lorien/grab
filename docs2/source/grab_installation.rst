@@ -15,35 +15,49 @@ To gain access to all power of grab you should install lxml and pycurl libraries
 Installation in Linux
 ---------------------
 
-If you use python 2.x then install lxml and pycurl::
+1) Install lxml::
 
     pip install lxml
+
+If you have build issues try to install dependencies (debian/ubuntu example)::
+
+    sudo apt-get install libxml2-dev libxslt-dev
+
+2) Install pycurl::
+
     pip install pycurl
 
-If you use python 3.x then install lxml and custom version of pycurl::
-
-    pip install lxml
-    pip install pip install git+https://github.com/lorien/pycurl
-
-What is the custom pycurl? It is just a pycurl that Ubunty guyes ported to python 3. I've just copied their launchpad.net repo to the github.
-
-After all dependencies has installed you can install the Grab::
+3) Finally, install Grab::
 
     pip install Grab
 
 Installation in Windows
 -----------------------
 
-If you use python 2.x then install lxml and custom version of pycurl.
+1) Install lxml
 
-* You can get lxml package here http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
-* Custom pycurl is here: https://github.com/lorien/grab-files/raw/master/pycurl/pycurl-ssl-7.19.0.win32-py2.7.msi Do not use pycurl from any other source because it could contains a bug that corrupts content of POST requests. I do no know the reason, but then we just compiled pycurl from the source on windows, the resulted package worked fine and did not put trasn in POST requests
+You can get lxml package here http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 
-If you use python 3.x on Windows then bad news for you: there is no pycurl package for windows python 3 yet. Consider to use linux or python 2 on windows.
+2) Install pycurl
 
-After all dependencies has installed you can install the Grab. Download the Grab package from the https://pypi.python.org/pypi/grab, unpack it and run::
+You can get pycurl package here http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
+
+3) Install Grab
+
+Download the Grab package from the https://pypi.python.org/pypi/grab, unpack it and run::
 
     python setup.py install
+
+If you use python of 2.X version then you could get an error while using `python setup.py install`. There is a bug in python 2.7.6 version. Delete it, download python of 2.7.5 version and try to install Grab again.
+
+Also you can install Grab via pip. If you have no pip installed, install pip first. Download file get-pip.py from https://bootstrap.pypa.io/get-pip.py and then run command::
+
+    python get-pip.py
+
+Now you can install Grab via pip with command::
+
+    python -m pip install grab
+
 
 Installation on FreeBSD
 -----------------------
