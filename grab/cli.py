@@ -140,7 +140,7 @@ def process_command_line():
         #print 'Trying to lock file: %s' % lock_path
         #assert_lock(lock_path)
 
-    logger.debug('Executing %s action' % action_name)
+    #logger.debug('Executing %s action' % action_name)
     try:
         action_mod.main(**vars(args))
     except Exception as ex:

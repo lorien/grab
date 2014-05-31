@@ -197,7 +197,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         self.only_cache = only_cache
         self.thread_number = thread_number
         self.counters = defaultdict(int)
-        self.grab_config = {}
+        self._grab_config = {}
         self.items = {}
         self.task_try_limit = task_try_limit
         self.network_try_limit = network_try_limit
@@ -250,6 +250,19 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if self.snapshot_file:
             open(self.snapshot_file, 'w').write('')
 
+    def get_grab_config(self):
+        logger.error('Using `grab_config` attribute is deprecated. Override `create_grab_instance method instead.')
+        return self._grab_config
+
+
+    def set_grab_config(self, val):
+        logger.error('Using `grab_config` attribute is deprecated. Override `create_grab_instance method instead.')
+        self._grab_config = val
+
+
+    grab_config = property(get_grab_config, set_grab_config)
+
+
     def setup_middleware(self, middleware_list):
         for item in middleware_list:
             self.middlewares.append(item)
@@ -301,6 +314,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         self.stop()
 
     def setup_grab(self, **kwargs):
+        logging.error('This method is deprecated. Instead override `create_grab_instance` method in you spider sub-class')
         self.grab_config.update(**kwargs)
 
     def check_task_limits(self, task):
@@ -488,8 +502,17 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if task.task_try_count == 0:
             task.task_try_count = 1
 
-    def create_grab_instance(self):
-        return Grab(**self.grab_config)
+    def create_grab_instance(self, **kwargs):
+        # Back-ward compatibility for deprecated `grab_config` attribute
+        # Use _grab_config to not trigger warning messages
+        if self._grab_config and kwargs:
+            merged_config = deepcopy(self._grab_config)
+            merged_config.update(kwargs)
+            return Grab(**merged_config)
+        elif self._grab_config and not kwargs:
+            return Grab(**self._grab_config)
+        else:
+            return Grab(**kwargs)
 
     def setup_grab_for_task(self, task):
         grab = self.create_grab_instance()
