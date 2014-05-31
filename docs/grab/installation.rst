@@ -4,19 +4,16 @@
 Установка библиотеки Grab
 =========================
 
-Зависимости
-===========
-
-Grab нуждается в двух библиотеках: lxml и pycurl
-
-Grab тестируется под python 2.6
-
 Установка под Linux
 ===================
 
 Установите зависимости любым удобным для вас способом. Вы можете воспользоваться пакетным менеджером либо утилитами `easy_install` или `pip`::
 
     pip install pycurl lxml
+
+Если у вас есть проблемы при установке lxml, возможно, вам нужно установить дополнительные пакеты. Пример для Debian/Ubuntu систем::
+
+    sudo apt-get install libxml2-dev libxslt-dev
 
 Далее установите Grab::
 
@@ -26,20 +23,14 @@ Grab тестируется под python 2.6
 Установка под Windows
 =====================
 
-Скачайте и установите lxml библиотеку с сайта http://www.lfd.uci.edu/~gohlke/pythonlibs/:
+Скачайте и установите lxml библиотеку с сайта http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml:
 
-* lxml-2.3.3.win32-py2.6.exe  
-
-Скачайте и установите pycurl библиотеку с нашего сайта: http://grablib.org/static/download/pycurl-ssl-7.19.0.win32-py2.7.msi
-
-* pycurl-ssl-7.19.0.win32-py2.7.msi
-
-.. warning::
-
-    Не используйте библиотеку pycurl, установленную из другого источника, в ней может быть баг, при котором неправильно формируются POST-запросы.
+Скачайте и установите pycurl библиотеку с сайта http://www.lfd.uci.edu/~gohlke/pythonlibs/#pycurl:
 
 Скачайте и установите grab с http://pypi.python.org/pypi/grab:
 
 * качаем tar.gz архив
 * распаковываем
 * запускаем команду python.exe setup.py install
+
+Если у вас python 2.7.6, то команда `python setup.py install` выполнится с ошибкой из-за бага в версии python 27.6. Вам нужно удалить Python версии 2.7.6 и установить версию 2.7.5
