@@ -1,1 +1,1 @@
-from grab.tools.catpcha.util import CaptchaSolver
+from grab.tools.captcha.util import CaptchaSolver
