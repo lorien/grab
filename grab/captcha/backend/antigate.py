@@ -6,7 +6,7 @@ except ImportError:
     from urllib.parse import urlencode
 
 from grab import Grab
-from grab.catpcha.backend.base import CaptchaBackend
+from grab.captcha.backend.base import CaptchaBackend
 from grab.captcha.error import (CaptchaServiceError, ServiceTooBusy, BalanceTooLow,
                                 SolutionNotReady)
 
