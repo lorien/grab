@@ -1,4 +1,6 @@
 import pycurl
+import select
+import time
 
 from grab.util.py3k_support import *
 
@@ -59,12 +61,15 @@ class MulticurlTransport(object):
             self.multi.add_handle(curl)
 
     def process_handlers(self):
-        # http://curl.haxx.se/libcurl/c/curl_multi_perform.html
-        #res = self.multi.select(0.0001)
-        #if res == -1:
-            #return
+        rlist, wlist, xlist = self.multi.fdset()
+        if rlist or wlist or xlist:
+            timeout = self.multi.timeout()
+            if timeout:
+                select.select(rlist, wlist, xlist, timeout / 1000.0)
+        else:
+            time.sleep(0.1)
+
         while True:
-            #print '[inside PH]'
             status, active_objects = self.multi.perform()
             if status != pycurl.E_CALL_MULTI_PERFORM:
                 break
@@ -126,6 +131,3 @@ class MulticurlTransport(object):
 
             if not queued_messages:
                 break
-
-    def select(self, timeout=0.01):
-        return self.multi.select(timeout)

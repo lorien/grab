@@ -942,14 +942,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
                 with self.save_timer('network_transport'):
                     logger_verbose.debug('Asking transport layer to do something')
-                    # Process active handlers
-                    #print '[select]'
-                    #self.transport.select(0.01)
-                    #print '[done]'
-
-                    #print '[process handlers #2]'
                     self.transport.process_handlers()
-                    #print '[done]'
 
                 logger_verbose.debug('Processing network results (if any).')
                 # Iterate over network trasport ready results
