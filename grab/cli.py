@@ -81,6 +81,7 @@ def process_command_line():
     parser.add_argument('--ignore-lock', action='store_true', default=False)
     parser.add_argument('--settings', type=str, default='settings')
     parser.add_argument('--env', type=str)
+    parser.add_argument('--profile', action='store_true', default=False)
 
     args, trash = parser.parse_known_args()
 
@@ -142,6 +143,21 @@ def process_command_line():
 
     #logger.debug('Executing %s action' % action_name)
     try:
-        action_mod.main(**vars(args))
+        if args.profile:
+            import cProfile
+            import pyprof2calltree
+            import pstats
+
+            profile_file = 'var/%s.prof' % action_name
+            profile_tree_file = 'var/%s.prof.out' % action_name
+
+            prof = cProfile.Profile()
+            prof.runctx('action_mod.main(**vars(args))',
+                        globals(), locals())
+            stats = pstats.Stats(prof)
+            stats.strip_dirs()
+            pyprof2calltree.convert(stats, profile_tree_file)
+        else:
+            action_mod.main(**vars(args))
     except Exception as ex:
         logging.error('Unexpected exception from action handler:', exc_info=ex)
