@@ -372,16 +372,21 @@ class CurlTransport(object):
         # to pick up cookies for the current requests
         for cookie in grab.cookies.cookiejar:
             cookie_domain = cookie.domain
-            if cookie_domain.startswith('#httponly_'):
+            http_only = cookie_domain.startswith('#httponly_')
+            if http_only:
                 cookie_domain = cookie_domain.replace('#httponly_', '')
             if not cookie_domain or host_nowww in cookie_domain:
-                if '.' in host_nowww:
-                    tail = b'; domain=%s' % cookie_domain
-                else:
-                    tail = b''
                 encoded = encode_cookies({cookie.name: cookie.value}, join=True,
                                          charset=grab.config['charset'])
-                self.curl.setopt(pycurl.COOKIELIST, b'Set-Cookie: ' + encoded + tail)
+                cookie_string = b'Set-Cookie: ' + encoded
+                if len(cookie.path) != 0:
+                    cookie_string += b'; path=' + cookie.path
+                if '.' in host_nowww:
+                    cookie_string += b'; domain=' + cookie_domain
+                if http_only:
+                    cookie_string += b'; HttpOnly'
+                self.curl.setopt(pycurl.COOKIELIST, cookie_string)
+
 
     def request(self):
 
