@@ -191,7 +191,7 @@ class Grab(FormExtension, DeprecatedThings):
 
     __slots__ = ('request_head', 'request_log', 'request_body',
                  'proxylist', 'config',
-                 'clone_counter', 'transport',
+                 'transport',
                  'transport_param', 'request_method', 'request_counter',
                  '__weakref__', 'cookies',
 
@@ -228,10 +228,9 @@ class Grab(FormExtension, DeprecatedThings):
         self.setup_transport(transport)
 
         self.reset()
-
         if kwargs:
             self.setup(**kwargs)
-        self.clone_counter = 0
+
         if document_body is not None:
             self.setup_document(document_body)
 
@@ -302,7 +301,6 @@ class Grab(FormExtension, DeprecatedThings):
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
         g.cookies = deepcopy(self.cookies)
-        g.clone_counter = self.clone_counter + 1
 
         if kwargs:
             g.setup(**kwargs)
@@ -324,7 +322,6 @@ class Grab(FormExtension, DeprecatedThings):
         for key in self.clonable_attributes:
             setattr(self, key, getattr(g, key))
             self.cookies = deepcopy(g.cookies)
-        self.clone_counter = g.clone_counter + 1
 
     def dump_config(self):
         """

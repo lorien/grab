@@ -7,9 +7,6 @@ RE_SCRIPT3 = re.compile(r'Recaptcha\.create\("([^"]+)', re.S | re.I)
 RE_SRC = re.compile(r'src="([^"]+)"')
 
     #def solve_captcha(self, g, url=None, data=None):
-        #if not g.clone_counter:
-            #logging.error('Warning: maybe you forgot to make the clone of Grab instance')
-
         #if url:
             #logging.debug('Downloading captcha')
             #g.request(url=url)
@@ -23,9 +20,6 @@ RE_SRC = re.compile(r'src="([^"]+)"')
 
 
     #def solve_recaptcha(self, g):
-        #if not g.clone_counter:
-            #logging.error('Warning: maybe you forgot to make the clone of Grab instance')
-
         #def fetch_challenge():
             #for x in xrange(5):
                 #url = None

@@ -18,9 +18,6 @@ class CaptchaSolver(object):
         self.key = key
 
     def solve_captcha(self, g, url=None, data=None):
-        if not g.clone_counter:
-            logging.error('Warning: maybe you forgot to make the clone of Grab instance')
-
         if url:
             logging.debug('Downloading captcha')
             g.request(url=url)
@@ -34,9 +31,6 @@ class CaptchaSolver(object):
 
 
     def solve_recaptcha(self, g):
-        if not g.clone_counter:
-            logging.error('Warning: maybe you forgot to make the clone of Grab instance')
-
         def fetch_challenge():
             for x in xrange(5):
                 url = None
