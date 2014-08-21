@@ -60,7 +60,7 @@ class FormExtension(object):
                 raise DataNotFound('There is no form with name: %s' % name)
         elif number is not None:
             try:
-                self._lxml_form = self.tree.forms[number]
+                self._lxml_form = self.doc.tree.forms[number]
             except IndexError:
                 raise DataNotFound('There is no form with number: %s' % number)
         elif xpath is not None:
@@ -94,7 +94,7 @@ class FormExtension(object):
         """
 
         if self._lxml_form is None:
-            forms = [(idx, len(list(x.fields))) for idx, x in enumerate(self.tree.forms)]
+            forms = [(idx, len(list(x.fields))) for idx, x in enumerate(self.doc.tree.forms)]
             if len(forms):
                 idx = sorted(forms, key=lambda x: x[1], reverse=True)[0][0]
                 self.choose_form(idx)
@@ -169,7 +169,7 @@ class FormExtension(object):
         :param value: value which should be set to element
         """
 
-        elem = self.tree.xpath(xpath)[0]
+        elem = self.doc.tree.xpath(xpath)[0]
 
         if self._lxml_form is None:
             # Explicitly set the default form 
@@ -349,7 +349,7 @@ class FormExtension(object):
         return fields
 
     def choose_form_by_element(self, xpath):
-        forms = self.tree.xpath('//form')
+        forms = self.doc.tree.xpath('//form')
         found_form = None
         for form in forms:
             if len(form.xpath(xpath)):
