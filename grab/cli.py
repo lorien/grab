@@ -78,7 +78,7 @@ def process_command_line():
     parser.add_argument('action', type=str)
     parser.add_argument('--logging-level', default='debug')
     parser.add_argument('--lock-key')
-    parser.add_argument('--ignore-lock', action='store_true', default=False)
+    #parser.add_argument('--ignore-lock', action='store_true', default=False)
     parser.add_argument('--settings', type=str, default='settings')
     parser.add_argument('--env', type=str)
     parser.add_argument('--profile', action='store_true', default=False)
