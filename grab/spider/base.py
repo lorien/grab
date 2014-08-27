@@ -127,6 +127,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                  config=None,
                  slave=False,
                  max_task_generator_chunk=None,
+                 args=None,
                  # New options start here
                  waiting_shutdown_event=None,
                  taskq=None,
@@ -152,6 +153,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         * meta - arbitrary user data
         * retry_rebuid_user_agent - generate new random user-agent for each
             network request which is performed again due to network error
+        * args - command line arguments parsed with `setup_arg_parser` method
         New options:
         * waiting_shutdown_event=None,
         * taskq=None,
@@ -170,6 +172,11 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         self.network_response_queue = network_response_queue
         self.ng = ng
         # New options ends
+
+        if args is None:
+            self.args = {}
+        else:
+            self.args = args
 
         self.slave = slave
 
@@ -1042,7 +1049,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             return camel_case_to_underscore(cls.__name__)
 
     @classmethod
-    def update_spider_config(cls, config):
+    def setup_spider_config(cls, config):
         pass
 
     # ***********

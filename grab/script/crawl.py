@@ -26,6 +26,32 @@ def setup_arg_parser(parser):
     parser.add_argument('--ignore-lock', action='store_true', default=False)
 
 
+#def get_spider_setting(spider_config, key, deprecated_key=None, key_type=None,
+                       #default=None): 
+    #"""
+    #Get setting's value from the config that could be either in
+    #deprecated or in actual format.
+    #"""
+    ## try actual format
+    #try:
+        #value = spider_config[key]
+    #except TypeError:
+        #raise
+        ##import pdb; pdb.set_trace()
+    #except KeyError:
+        #if deprecated_key is not None:
+            #try:
+                #value = spider_config[deprecated_key]
+            #except KeyError:
+                #value = default
+        #else:
+            #value = default
+    #if key_type is None:
+        #return value
+    #elif key_type == 'int':
+        #return int(value)
+
+
 @save_result
 def main(spider_name, thread_number=None, slave=False,
          settings='settings', network_logs=False,
@@ -46,14 +72,15 @@ def main(spider_name, thread_number=None, slave=False,
     spider_class = load_spider_class(config, spider_name)
     spider_config = build_spider_config(spider_class, config)
 
-    if hasattr(spider_class, 'setup_extra_args'):
+    spider_args = None
+    if hasattr(spider_class, 'setup_arg_parser'):
         parser = ArgumentParser()
-        spider_class.setup_extra_args(parser)
-        extra_args, trash = parser.parse_known_args()
-        spider_config['extra_args'] = vars(extra_args)
+        spider_class.setup_arg_parser(parser)
+        opts, trash = parser.parse_known_args()
+        spider_args = vars(opts)
 
     if thread_number is None:
-        thread_number = spider_config.getint('GRAB_THREAD_NUMBER')
+        thread_number = int(spider_config.get('thread_number', deprecated_key='GRAB_THREAD_NUMBER'))
 
     stat_task_object = kwargs.get('stat_task_object', None)
 
@@ -61,20 +88,30 @@ def main(spider_name, thread_number=None, slave=False,
         thread_number=thread_number,
         slave=slave,
         config=spider_config,
-        network_try_limit=spider_config.getint('GRAB_NETWORK_TRY_LIMIT'),
-        task_try_limit=spider_config.getint('GRAB_TASK_TRY_LIMIT'),
+        network_try_limit=int(spider_config.get('network_try_limit',
+                                                deprecated_key='GRAB_NETWORK_TRY_LIMIT')),
+        task_try_limit=int(spider_config.get('task_try_limit',
+                                             deprecated_key='GRAB_TASK_TRY_LIMIT')),
+        args=spider_args,
     )
-    if spider_config.get('GRAB_QUEUE'):
-        bot.setup_queue(**spider_config['GRAB_QUEUE'])
-    if spider_config.get('GRAB_CACHE'):
-        bot.setup_cache(**spider_config['GRAB_CACHE'])
-    if spider_config.get('GRAB_PROXY_LIST'):
+    opt_queue = spider_config.get('queue', deprecated_key='GRAB_QUEUE')
+    if opt_queue:
+        bot.setup_queue(**opt_queue)
+
+    opt_cache = spider_config.get('cache', deprecated_key='GRAB_CACHE')
+    if opt_cache:
+        bot.setup_cache(**opt_cache)
+
+    opt_proxy_list = spider_config.get('proxy_list', deprecated_key='GRAB_PROXY_LIST')
+    if opt_proxy_list:
         if disable_proxy:
             logger.debug('Proxy servers disabled via command line')
         else:
-            bot.load_proxylist(**spider_config['GRAB_PROXY_LIST'])
-    if spider_config.get('GRAB_COMMAND_INTERFACES'):
-        for iface_config in spider_config['GRAB_COMMAND_INTERFACES']:
+            bot.load_proxylist(**opt_proxy_list)
+
+    opt_ifaces = spider_config.get('command_interfaces', deprecated_key='GRAB_COMMAND_INTERFACES')
+    if opt_ifaces:
+        for iface_config in opt_ifaces:
             bot.controller.add_interface(**iface_config)
 
     # Dirty hack
@@ -87,15 +124,15 @@ def main(spider_name, thread_number=None, slave=False,
     except KeyboardInterrupt:
         pass
 
-    stats = bot.render_stats(timing=config.get('GRAB_DISPLAY_TIMING'))
+    stats = bot.render_stats(timing=spider_config.get('display_timing', deprecated_key='GRAB_DISPLAY_TIMING'))
 
-    if spider_config.get('GRAB_DISPLAY_STATS'):
+    if spider_config.get('display_stats', deprecated_key='GRAB_DISPLAY_STATS'):
         logger.debug(stats)
 
     pid = os.getpid()
     logger.debug('Spider pid is %d' % pid)
 
-    if config.get('GRAB_SAVE_REPORT'):
+    if spider_config.get('save_report', deprecated_key='GRAB_SAVE_REPORT'):
         for subdir in (str(pid), 'last'):
             dir_ = 'var/%s' % subdir
             if not os.path.exists(dir_):
