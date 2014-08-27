@@ -50,12 +50,12 @@ class FormExtension(object):
 
         if id is not None:
             try:
-                self._lxml_form = self.css_one('form[id="%s"]' % id)
+                self._lxml_form = self.doc('//form[@id="%s"]' % id).node()
             except IndexError:
                 raise DataNotFound("There is no form with id: %s" % id)
         elif name is not None:
             try:
-                self._lxml_form = self.css_one('form[name="%s"]' % name)
+                self._lxml_form = self.doc('//form[@name="%s"]' % name).node()
             except IndexError:
                 raise DataNotFound('There is no form with name: %s' % name)
         elif number is not None:
