@@ -139,10 +139,9 @@ def main(spider_name, thread_number=None, slave=False,
                 os.mkdir(dir_)
             else:
                 clear_directory(dir_)
-            bot.save_list('fatal', '%s/fatal.txt' % dir_)
-            bot.save_list('task-count-rejected', '%s/task_count_rejected.txt' % dir_)
-            bot.save_list('network-count-rejected', '%s/network_count_rejected.txt' % dir_)
-            bot.save_list('task-with-invalid-url', '%s/task_with_invalid_url.txt' % dir_)
+            for key, lst in bot.items.iteritems():
+                fname_key = key.replace('-', '_')
+                bot.save_list(key, '%s/%s.txt' % (dir_, fname_key))
             with open('%s/report.txt' % dir_, 'wb') as out:
                 out.write(stats)
 
