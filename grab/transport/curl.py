@@ -238,7 +238,9 @@ class CurlTransport(object):
         # Ignore SSL errors
         self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)
         self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)
-        self.curl.setopt(pycurl.SSLVERSION, pycurl.SSLVERSION_SSLv3)
+
+        # Disabled to avoid SSL3_READ_BYTES:sslv3 alert handshake failure error
+        #self.curl.setopt(pycurl.SSLVERSION, pycurl.SSLVERSION_SSLv3)
 
         if grab.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
