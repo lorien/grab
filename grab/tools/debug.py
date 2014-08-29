@@ -28,7 +28,7 @@ def memory_usage(since=0, render=True, pid=None):
             metric = metrics.pop(0)
             for x in xrange(3):
                 if mem > 1024:
-                    mem = mem / 1024.0
+                    mem /= 1024.0
                     metric = metrics.pop(0)
             return '%s %s' % (str(round(mem, 2)), metric)
         else:

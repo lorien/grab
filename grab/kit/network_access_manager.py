@@ -12,7 +12,9 @@ logger = logging.getLogger('grab.kit.network_access_manager')
 
 
 class KitNetworkAccessManager(QNetworkAccessManager):
-    def __init__(self, forbidden_extensions=[]):
+    def __init__(self, forbidden_extensions=None):
+        if forbidden_extensions is None:
+            forbidden_extensions = []
         QNetworkAccessManager.__init__(self)
         self.forbidden_extensions = forbidden_extensions
 

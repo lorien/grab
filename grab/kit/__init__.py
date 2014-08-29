@@ -110,8 +110,12 @@ class Kit(object):
             cookies[cookie.name().data()] = cookie.value().data()
         return cookies
 
-    def request(self, url, user_agent='Mozilla', cookies={}, timeout=15,
-                method='get', data=None, headers={}):
+    def request(self, url, user_agent='Mozilla', cookies=None, timeout=15,
+                method='get', data=None, headers=None):
+        if cookies is None:
+            cookies = {}
+        if headers is None:
+            headers = {}
         url_info = urlsplit(url)
 
         self.resource_list = []
