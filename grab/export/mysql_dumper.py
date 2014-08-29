@@ -2,6 +2,7 @@ import csv
 
 from grab.export.csv_dumper import CSVDumper
 
+
 class MysqlCSVDumper(CSVDumper):
     """
     Difference from CSVDumper:
@@ -11,8 +12,10 @@ class MysqlCSVDumper(CSVDumper):
     * \ symbols are converted to \\
     """
 
-    def __init__(self, path, fields=None, write_header=False, quoting=csv.QUOTE_MINIMAL):
-        super(MysqlCSVDumper, self).__init__(path, fields=fields, write_header=write_header,
+    def __init__(self, path, fields=None, write_header=False,
+                 quoting=csv.QUOTE_MINIMAL):
+        super(MysqlCSVDumper, self).__init__(path, fields=fields,
+                                             write_header=write_header,
                                              quoting=quoting)
 
     def normalize_none_value(self, val):

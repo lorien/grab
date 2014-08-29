@@ -1,5 +1,5 @@
 """
-Custom exception which could generate Grab instance.
+Custom exception which Grab instance could generate.
 
 Taxonomy:
 
@@ -11,6 +11,7 @@ Exception
 
 """
 import warnings
+
 
 class GrabError(Exception):
     """
@@ -34,7 +35,7 @@ class GrabTimeoutError(GrabNetworkError):
 
 class DataNotFound(IndexError, GrabError):
     """
-    Indictes that required data is not found.
+    Indicates that required data is not found.
     """
 
 
@@ -72,11 +73,13 @@ class GrabDeprecationWarning(Warning):
     Raised when some deprecated feature is used.
     """
 
+
 class GrabInvalidUrl(GrabError):
     """
     Raised when Grab have no idea how to handle the URL or when
-    some error occured while normalizing URL e.g. IDN processing.
+    some error occurred while normalizing URL e.g. IDN processing.
     """
+
 
 def warn(msg):
     warnings.warn(msg, category=GrabDeprecationWarning, stacklevel=3)

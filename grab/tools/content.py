@@ -1,6 +1,8 @@
 import re
 
-from grab.tools.text import normalize_space as normalize_space_func, find_number
+from grab.tools.text import (normalize_space as normalize_space_func,
+                             find_number)
+
 
 def find_content_blocks(tree, min_length=None):
     """
@@ -45,6 +47,7 @@ def find_content_blocks(tree, min_length=None):
                     if not any(len(x) > 50 for x in words):
                         blocks.append(block)
     return blocks
+
 
 def _trash_ratio(text):
     """

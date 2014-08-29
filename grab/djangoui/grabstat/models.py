@@ -2,6 +2,7 @@
 from django.db import models
 from django.core.urlresolvers import reverse
 
+
 class Task(models.Model):
     task_name = models.CharField(max_length=40, blank=True)
     record_date = models.DateTimeField(auto_now_add=True, db_index=True)

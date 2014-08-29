@@ -6,6 +6,7 @@ from grab.captcha.const import BACKEND_ALIAS
 __all__ = ('CaptchaService',)
 logger = logging.getLogger('grab.captcha')
 
+
 class CaptchaService(object):
     """
     This class implements API to communicate with
@@ -24,7 +25,6 @@ class CaptchaService(object):
         g = self.backend.get_submit_captcha_request(data, **kwargs)
         g.request()
         return self.backend.parse_submit_captcha_response(g.response)
-
 
     def check_solution(self, captcha_id):
         """

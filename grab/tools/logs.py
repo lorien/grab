@@ -1,5 +1,6 @@
 import logging
 
+
 def default_logging(grab_log='/tmp/grab.log', level=logging.DEBUG, mode='a',
                     propagate_network_logger=False,
                     network_log='/tmp/grab.network.log'):

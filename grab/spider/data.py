@@ -1,5 +1,6 @@
 from grab.const import NULL
 
+
 class Data(object):
     """
     Task handlers should return instances of that class.

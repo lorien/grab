@@ -48,8 +48,9 @@ class SelectorList(object):
             return self.selector_list[0]
         except IndexError:
             if default is NULL:
-                raise DataNotFound('Could not get first item for %s query of class %s' % (
-                    self.origin_query, self.origin_selector_class.__name__))
+                m = 'Could not get first item for %s query of class %s'\
+                    % (self.origin_query, self.origin_selector_class.__name__)
+                raise DataNotFound(m)
             else:
                 return default
 
@@ -58,8 +59,9 @@ class SelectorList(object):
             return self.one().node
         except IndexError:
             if default is NULL:
-                raise DataNotFound('Could not get first node for %s query of class %s' % (
-                    self.origin_query, self.origin_selector_class.__name__))
+                m = 'Could not get first item for %s query of class %s'\
+                    % (self.origin_query, self.origin_selector_class.__name__)
+                raise DataNotFound(m)
             else:
                 return default
 
@@ -110,15 +112,14 @@ class SelectorList(object):
 
     def exists(self):
         """
-        Return True if selctor list is not empty.
+        Return True if selector list is not empty.
         """
 
         return len(self.selector_list) > 0
 
-
     def assert_exists(self):
         """
-        Return True if selctor list is not empty.
+        Return True if selector list is not empty.
         """
 
         if not self.exists():
@@ -201,7 +202,8 @@ class BaseSelector(metaclass_ABCMeta):
     def number(self, default=NULL, ignore_spaces=False,
                smart=False, make_int=True):
         try:
-            return find_number(self.text(smart=smart), ignore_spaces=ignore_spaces,
+            return find_number(self.text(smart=smart),
+                               ignore_spaces=ignore_spaces,
                                make_int=make_int)
         except IndexError:
             if default is NULL:
@@ -238,12 +240,14 @@ class LxmlNodeBaseSelector(BaseSelector):
             else:
                 return elem
         else:
-            return get_node_text(elem, smart=smart, normalize_space=normalize_space)
+            return get_node_text(elem, smart=smart,
+                                 normalize_space=normalize_space)
 
     def number(self, default=NULL, ignore_spaces=False,
                smart=False, make_int=True):
         try:
-            return find_number(self.text(smart=smart), ignore_spaces=ignore_spaces,
+            return find_number(self.text(smart=smart),
+                               ignore_spaces=ignore_spaces,
                                make_int=make_int)
         except IndexError:
             if default is NULL:
@@ -390,4 +394,5 @@ class Selector(XpathSelector):
 
     def __init__(self, *args, **kwargs):
         super(Selector, self).__init__(*args, **kwargs)
-        warn('Selector class is deprecated. Please use XpathSelector class instead.')
+        warn('Selector class is deprecated. '
+             'Please use XpathSelector class instead.')

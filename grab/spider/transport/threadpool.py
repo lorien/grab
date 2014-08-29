@@ -10,6 +10,7 @@ from grab.util.py3k_support import *
 
 STOP = object()
 
+
 class Worker(Thread):
     def __init__(self, taskq, resultq, *args, **kwargs):
         self.taskq = taskq

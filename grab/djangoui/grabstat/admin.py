@@ -5,6 +5,7 @@ from django.contrib import admin
 
 from models import Task
 
+
 class TaskAdmin(admin.ModelAdmin):
     list_display = ['task_name', 'start_time', 'end_time', 'elapsed_time_formatted',
                     'is_done', 'is_ok', 'is_process_live', 'pid']
@@ -29,7 +30,6 @@ class TaskAdmin(admin.ModelAdmin):
         else:
             return 'no'
     is_process_live.short_description = 'Proc. live'
-
 
 
 admin.site.register(Task, TaskAdmin)

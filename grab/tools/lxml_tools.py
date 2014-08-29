@@ -10,6 +10,7 @@ from grab.util.py3k_support import *
 
 RE_TAG_START = re.compile(r'<[a-z]')
 
+
 def get_node_text(node, smart=False, normalize_space=True):
     """
     Extract text content of the `node` and all its descendants.
@@ -41,6 +42,7 @@ def get_node_text(node, smart=False, normalize_space=True):
     if normalize_space:
         value = normalize_space_func(value)
     return value
+
 
 def find_node_number(node, ignore_spaces=False, make_int=True):
     """

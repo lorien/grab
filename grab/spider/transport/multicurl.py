@@ -4,6 +4,7 @@ import time
 
 from grab.util.py3k_support import *
 
+
 class MulticurlTransport(object):
     def __init__(self, thread_number):
         self.thread_number = thread_number

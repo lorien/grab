@@ -11,6 +11,7 @@ from grab.tools.files import clear_directory
 
 logger = logging.getLogger('grab.script.crawl')
 
+
 def setup_arg_parser(parser):
     parser.add_argument('spider_name', type=str)
     parser.add_argument('-t', '--thread-number', default=None, type=int,
@@ -80,7 +81,9 @@ def main(spider_name, thread_number=None, slave=False,
         spider_args = vars(opts)
 
     if thread_number is None:
-        thread_number = int(spider_config.get('thread_number', deprecated_key='GRAB_THREAD_NUMBER'))
+        thread_number = \
+            int(spider_config.get('thread_number',
+                                  deprecated_key='GRAB_THREAD_NUMBER'))
 
     stat_task_object = kwargs.get('stat_task_object', None)
 
@@ -88,10 +91,10 @@ def main(spider_name, thread_number=None, slave=False,
         thread_number=thread_number,
         slave=slave,
         config=spider_config,
-        network_try_limit=int(spider_config.get('network_try_limit',
-                                                deprecated_key='GRAB_NETWORK_TRY_LIMIT')),
-        task_try_limit=int(spider_config.get('task_try_limit',
-                                             deprecated_key='GRAB_TASK_TRY_LIMIT')),
+        network_try_limit=int(spider_config.get(
+            'network_try_limit', deprecated_key='GRAB_NETWORK_TRY_LIMIT')),
+        task_try_limit=int(spider_config.get(
+            'task_try_limit', deprecated_key='GRAB_TASK_TRY_LIMIT')),
         args=spider_args,
     )
     opt_queue = spider_config.get('queue', deprecated_key='GRAB_QUEUE')
@@ -102,14 +105,16 @@ def main(spider_name, thread_number=None, slave=False,
     if opt_cache:
         bot.setup_cache(**opt_cache)
 
-    opt_proxy_list = spider_config.get('proxy_list', deprecated_key='GRAB_PROXY_LIST')
+    opt_proxy_list = spider_config.get(
+        'proxy_list', deprecated_key='GRAB_PROXY_LIST')
     if opt_proxy_list:
         if disable_proxy:
             logger.debug('Proxy servers disabled via command line')
         else:
             bot.load_proxylist(**opt_proxy_list)
 
-    opt_ifaces = spider_config.get('command_interfaces', deprecated_key='GRAB_COMMAND_INTERFACES')
+    opt_ifaces = spider_config.get(
+        'command_interfaces', deprecated_key='GRAB_COMMAND_INTERFACES')
     if opt_ifaces:
         for iface_config in opt_ifaces:
             bot.controller.add_interface(**iface_config)
@@ -124,7 +129,9 @@ def main(spider_name, thread_number=None, slave=False,
     except KeyboardInterrupt:
         pass
 
-    stats = bot.render_stats(timing=spider_config.get('display_timing', deprecated_key='GRAB_DISPLAY_TIMING'))
+    stats = bot.render_stats(
+        timing=spider_config.get('display_timing',
+                                 deprecated_key='GRAB_DISPLAY_TIMING'))
 
     if spider_config.get('display_stats', deprecated_key='GRAB_DISPLAY_STATS'):
         logger.debug(stats)

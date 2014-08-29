@@ -9,6 +9,7 @@ from grab.tools.files import hashed_path
 from grab.spider.task import Task
 from grab import Grab
 
+
 def build_image_hosting_referer(url):
     from database import db
 
@@ -38,7 +39,6 @@ def image_set_handler(grab, task):
                     {'_id': task.obj['_id'], ('%s.url' % task.set_field): task.image['url']},
                     {'$set': {('%s.$.path' % task.set_field): task.path}}
                 )   
-
 
 
 class MongoObjectImageData(Data):

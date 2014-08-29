@@ -17,6 +17,7 @@ from grab.spider.error import SpiderMisuseError
 
 logger = logging.getLogger('grab.spider.queue_backend.mongo')
 
+
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, database=None, queue_name=None,
                  **kwargs):
@@ -45,7 +46,8 @@ class QueueBackend(QueueInterface):
 
     def put(self, task, priority, schedule_time=None):
         if schedule_time is not None:
-            raise SpiderMisuseError('Mongo task queue does not support delayed task') 
+            raise SpiderMisuseError('Mongo task queue does not support'
+                                    ' delayed task')
         item = {
             'task': Binary(pickle.dumps(task)),
             'priority': priority,

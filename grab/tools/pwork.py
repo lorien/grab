@@ -8,10 +8,12 @@ import logging
 
 from grab.util.py3k_support import *
 
+
 class Stop(object):
     pass
 
 STOP = Stop()
+
 
 class Worker(Process):
     def __init__(self, callback, taskq, resultq, ignore_exceptions, *args, **kwargs):
@@ -99,7 +101,6 @@ def make_work(callback, tasks, limit, ignore_exceptions=True,
             break
 
 
-
 if __name__ == '__main__':
     """
     Usage example
@@ -115,18 +116,15 @@ if __name__ == '__main__':
         time.sleep(random())
         return (current_process().name, arg)
 
-
     def tasks():
         for x in xrange(3):
             logging.debug('Generating task #%d' % x)
             time.sleep(random())
             yield (x,)
 
-
     def main():
         for res in make_work(worker, tasks(), 2):
             logging.debug('Result %s received from process %s' % (res[1], res[0]))
-
 
     if __name__ == '__main__':
         logging.basicConfig(level=logging.DEBUG, format='%(processName)s %(message)s')

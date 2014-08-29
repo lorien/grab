@@ -16,6 +16,7 @@ from django import forms
 from common.pagination import paginate
 from common.decorators import ajax_get
 
+
 class ControlForm(forms.Form):
     spider = forms.ChoiceField(required=False)
     command = forms.ChoiceField(required=False)

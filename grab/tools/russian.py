@@ -4,6 +4,7 @@ import re
 
 from grab.tools.encoding import smart_unicode
 
+
 class InvalidMonthName(Exception):
     pass
 

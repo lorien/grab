@@ -8,6 +8,7 @@ import logging
 
 from grab.tools.encoding import smart_str
 
+
 class CaptchaError(Exception):
     """
     Raised when yandex shows captcha.

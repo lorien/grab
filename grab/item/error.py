@@ -1,5 +1,6 @@
 from grab.error import GrabError
 
+
 class ItemError(GrabError):
     pass
 

@@ -14,6 +14,7 @@ from random import randint
 
 from grab.util.py3k_support import *
 
+
 def delete_dir(path):
     """
     Delete directory.
@@ -118,7 +119,6 @@ def create_profile(path=None, user_agent=None, accept_language=None,
         csv = ', '.join(no_proxy_hosts)
         profile.set_preference('network.proxy.no_proxies_on',
                                'localhost, 127.0.0.1, %s' % csv)
-
 
     if download_directory is not None and download_content_type is not None:
         profile.set_preference("browser.download.folderList", 2)

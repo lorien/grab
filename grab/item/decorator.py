@@ -5,6 +5,7 @@ from grab.error import DataNotFound
 # Internal decorators
 # *******************
 
+
 def cached(func):
     def internal(self, item, itemtype):
         if self.attr_name in item._cache:

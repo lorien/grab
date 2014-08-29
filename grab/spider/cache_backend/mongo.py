@@ -77,7 +77,10 @@ class CacheBackend(object):
             if 'response_url' in cache_item:
                 response.url = cache_item['response_url']
             else:
-                logger.debug('You cache contains items without `response_url` key. It is depricated data format. Please re-download you cache or build manually `response_url` keys.')
+                logger.debug('You cache contains items without `response_url` '
+                             'key. It is depricated data format. Please '
+                             're-download you cache or build manually '
+                             '`response_url` keys.')
                 response.url = cache_item['url']
 
             response.parse()
@@ -107,8 +110,8 @@ class CacheBackend(object):
             self.db.cache.save(item, safe=True)
         except Exception as ex:
             if 'document too large' in unicode(ex):
-                logging.error('Document too large. It was not saved into mongo '\
-                              'cache. Url: %s' % url)
+                logging.error('Document too large. It was not saved into mongo'
+                              ' cache. Url: %s' % url)
             else:
                 raise
 

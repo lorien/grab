@@ -1,5 +1,6 @@
 from grab import Grab
 
+
 def setup_arg_parser(parser):
     parser.add_argument('item_path')
     parser.add_argument('--all', action='store_true', default=False)

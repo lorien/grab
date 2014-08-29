@@ -91,16 +91,20 @@ class Task(BaseTask):
         self.name = name
 
         if url is None and grab is None and grab_config is None:
-            raise SpiderMisuseError('Either url, grab or grab_config argument of Task constructor should not be None')
+            raise SpiderMisuseError('Either url, grab or grab_config argument '
+                                    'of Task constructor should not be None')
 
         if url is not None and grab is not None:
-            raise SpiderMisuseError('Options url and grab could not be used together')
+            raise SpiderMisuseError('Options url and grab could not be used '
+                                    'together')
 
         if url is not None and grab_config is not None:
-            raise SpiderMisuseError('Options url and grab_config could not be used together')
+            raise SpiderMisuseError('Options url and grab_config could not be '
+                                    'used together')
 
         if grab is not None and grab_config is not None:
-            raise SpiderMisuseError('Options grab and grab_config could not be used together')
+            raise SpiderMisuseError('Options grab and grab_config could not be '
+                                    'used together')
 
         if grab:
             self.setup_grab_config(grab.dump_config())
@@ -171,13 +175,16 @@ class Task(BaseTask):
             task.disable_cache = False
 
         if kwargs.get('url') is not None and kwargs.get('grab') is not None:
-            raise SpiderMisuseError('Options url and grab could not be used together')
+            raise SpiderMisuseError('Options url and grab could not be '
+                                    'used together')
 
         if kwargs.get('url') is not None and kwargs.get('grab_config') is not None:
-            raise SpiderMisuseError('Options url and grab_config could not be used together')
+            raise SpiderMisuseError('Options url and grab_config could not '
+                                    'be used together')
 
         if kwargs.get('grab') is not None and kwargs.get('grab_config') is not None:
-            raise SpiderMisuseError('Options grab and grab_config could not be used together')
+            raise SpiderMisuseError('Options grab and grab_config could not '
+                                    'be used together')
 
         if kwargs.get('grab'):
             task.setup_grab_config(kwargs['grab'].dump_config())

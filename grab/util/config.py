@@ -10,6 +10,7 @@ NULL = object()
 #SPIDER_KEYS = ['GRAB_QUEUE', 'GRAB_CACHE', 'GRAB_PROXY_LIST', 'GRAB_THREAD_NUMBER',
                #'GRAB_NETWORK_TRY_LIMIT', 'GRAB_TASK_TRY_LIMIT']
 
+
 def is_dict_interface(obj):
     try:
         obj['o_O']

@@ -4,6 +4,7 @@ from grab.util.py3k_support import *
 
 RE_SPECIAL_ENTITY = re.compile(b'&#(1[2-6][0-9]);')
 
+
 def make_str(value, encoding='utf-8'):
     """
     Normalize unicode/byte string to byte string.

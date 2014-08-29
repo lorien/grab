@@ -1,7 +1,9 @@
 import csv
 
+
 class CSVDumper(object):
-    def __init__(self, path, fields=None, write_header=True, quoting=csv.QUOTE_ALL):
+    def __init__(self, path, fields=None, write_header=True,
+                 quoting=csv.QUOTE_ALL):
         self.path = path
         self.fields = fields
         self.write_header = write_header

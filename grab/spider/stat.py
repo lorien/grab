@@ -10,6 +10,7 @@ from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.spider.stat')
 
+
 class SpiderStat(object):
     """
     This base-class defines methods to use for

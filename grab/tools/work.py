@@ -96,7 +96,6 @@ def make_work(callback, tasks, limit, ignore_exceptions=True,
             break
 
 
-
 if __name__ == '__main__':
     """
     Usage example
@@ -112,18 +111,15 @@ if __name__ == '__main__':
         time.sleep(random())
         return (currentThread().name, arg)
 
-
     def tasks():
         for x in xrange(10):
             logging.debug('Generating task #%d' % x)
             time.sleep(random())
             yield (x,)
 
-
     def main():
         for res in make_work(worker, tasks(), 3):
             logging.debug('Result %s received from thread %s' % (res[1], res[0]))
-
 
     if __name__ == '__main__':
         logging.basicConfig(level=logging.DEBUG, format='%(threadName)s %(message)s')

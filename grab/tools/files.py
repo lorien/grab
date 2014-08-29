@@ -1,5 +1,5 @@
 """
-Miscelanius utilities which are helpful sometime.
+Miscellaneous utilities which are helpful sometime.
 """
 import logging
 try:
@@ -9,6 +9,7 @@ except ImportError:
 from hashlib import sha1
 import os
 import shutil
+
 
 def unique_file(path):
     """

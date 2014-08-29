@@ -6,6 +6,7 @@ from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.tools.control')
 
+
 def sleep(lower_limit, upper_limit):
     """
     Sleep for random number of seconds in interval

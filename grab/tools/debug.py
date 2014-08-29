@@ -5,6 +5,7 @@ from grab.util.py3k_support import *
 SCALE = {'kB': 1024.0, 'mB': 1024.0 * 1024.0,
          'KB': 1024.0, 'MB': 1024.0 * 1024.0}
 
+
 def memory_usage(since=0, render=True, pid=None):
     """
     Return resident memory usage in bytes.

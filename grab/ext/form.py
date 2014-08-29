@@ -11,6 +11,7 @@ from grab.tools.http import smart_urlencode
 
 # TODO: refactor this hell
 
+
 class FormExtension(object):
     __slots__ = ()
     # SLOTS: _lxml_form, _file_fields
@@ -94,7 +95,8 @@ class FormExtension(object):
         """
 
         if self._lxml_form is None:
-            forms = [(idx, len(list(x.fields))) for idx, x in enumerate(self.doc.tree.forms)]
+            forms = [(idx, len(list(x.fields)))
+                     for idx, x in enumerate(self.doc.tree.forms)]
             if len(forms):
                 idx = sorted(forms, key=lambda x: x[1], reverse=True)[0][0]
                 self.choose_form(idx)
@@ -131,7 +133,8 @@ class FormExtension(object):
         
         if not processed:
             # We need to remember original values of file fields
-            # Because lxml will convert UploadContent/UploadFile object to string
+            # Because lxml will convert UploadContent/UploadFile object to
+            # string
             if getattr(elem, 'type', '').lower() == 'file':
                 self._file_fields[name] = value
             elem.value = value
@@ -182,7 +185,6 @@ class FormExtension(object):
                     break
 
         return self.set_input(elem.get('name'), value)
-
 
     # TODO:
     # Remove set_input_by_id
@@ -268,7 +270,6 @@ class FormExtension(object):
             action_url = urljoin(self.response.url, url)
         else:
             action_url = urljoin(self.response.url, self.form.action)
-
 
         # Values from `extra_post` should override values in form
         # `extra_post` allows multiple value of one key

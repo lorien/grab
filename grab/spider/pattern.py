@@ -6,6 +6,7 @@ from grab.tools.files import hashed_path
 
 logger = logging.getLogger('grab.spider.pattern')
 
+
 class SpiderPattern(object):
     """
     This is base class for Spider class which contains
@@ -26,14 +27,12 @@ class SpiderPattern(object):
                                image_field=image_field,
                                collection=collection, base_dir=base_dir, ext=ext))
 
-
     def generic_task_image(self, grab, task):
         relpath = grab.response.save_hash(task.url, task.base_dir, ext=task.ext)
         path = os.path.join(task.base_dir, relpath)
         task.collection.update({'_id': task.obj['_id']},
                               {'$set': {'%s_path' % task.image_field: path,
                                         '%s_url' % task.image_field: task.url}})
-
 
     def process_next_page(self, grab, task, xpath, resolve_base=False, **kwargs):
         """
@@ -95,7 +94,8 @@ class SpiderPattern(object):
         was found.
         """
 
-        logger.error('Method next_page_task is deprecated. Use process_next_page method instead.')
+        logger.error('Method next_page_task is deprecated. '
+                     'Use process_next_page method instead.')
         nav = grab.xpath_one(xpath, None)
         if nav is not None:
             url = grab.make_url_absolute(nav.get('href'))
@@ -116,7 +116,8 @@ class SpiderPattern(object):
 
             self.follow_links(grab, '//div[@class="topic"]/a/@href', 'topic')
         """
-        logger.error('Method follow_links is deprecated. Use process_links method instead.')
+        logger.error('Method follow_links is deprecated. '
+                     'Use process_links method instead.')
 
         urls = []
         for url in grab.xpath_list(xpath):

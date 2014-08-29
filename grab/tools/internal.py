@@ -3,6 +3,7 @@ from functools import wraps
 import logging
 #from grab.error import GrabMisuseError
 
+
 # from https://github.com/scrapy/scrapy/blob/master/scrapy/utils/decorator.py
 def deprecated(use_instead=None):
     """This is a decorator which can be used to mark functions

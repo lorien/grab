@@ -2,16 +2,17 @@ __all__ = ('SpiderError', 'SpiderMisuseError', 'FatalError',
            'StopTaskProcessing', 'SpiderInternalError',
            'NoTaskHandler', 'NoDataHandler')
 
+
 class SpiderError(Exception):
-    "Base class for Spider exceptions"
+    """Base class for Spider exceptions"""
 
 
 class SpiderMisuseError(SpiderError):
-    "Improper usage of Spider framework"
+    """Improper usage of Spider framework"""
 
 
 class FatalError(SpiderError):
-    "Fatal error which should stop parsing process"
+    """Fatal error which should stop parsing process"""
 
 
 class StopTaskProcessing(SpiderError):

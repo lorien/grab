@@ -3,6 +3,7 @@ import logging
 
 logger = logging.getLogger('grab.tools.progress')
 
+
 class Progress(object):
     def __init__(self, step=None, total=None, stop=None, name='items', level=logging.DEBUG):
         if total is None and step is None:
@@ -17,7 +18,7 @@ class Progress(object):
         self.stop = stop
         self.name = name
         self.logging_level = level
-    
+
     def tick(self):
         self.count += 1
         if not self.count % self.step:

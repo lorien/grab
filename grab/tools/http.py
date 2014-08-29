@@ -33,8 +33,10 @@ logger = logging.getLogger('grab.tools.http')
 RE_NON_ASCII = re.compile(r'[^-.a-zA-Z0-9]')
 RE_NOT_SAFE_URL = re.compile(r'[^-.:/?&;#a-zA-Z0-9]')
 
+
 def urlencode(*args, **kwargs):
-    logger.debug('Method grab.tools.http.urlencode is deprecated. Please use grab.tools.http.smart_urlencode')
+    logger.debug('Method grab.tools.http.urlencode is deprecated. '
+                 'Please use grab.tools.http.smart_urlencode')
     return smart_urlencode(*args, **kwargs)
 
 
@@ -157,6 +159,7 @@ def normalize_url(url):
             url = urlunsplit(parts)
             return url
     return url
+
 
 def normalize_post_data(data, charset):
     if isinstance(data, basestring):

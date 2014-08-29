@@ -11,7 +11,7 @@ class UploadContent(str):
     def field_tuple(self):
         # TODO: move to transport extension
         import pycurl
-        return (pycurl.FORM_CONTENTS, self.raw_value)
+        return pycurl.FORM_CONTENTS, self.raw_value
 
 
 class UploadFile(str):
@@ -27,6 +27,6 @@ class UploadFile(str):
     def field_tuple(self):
         # move to transport extension
         import pycurl
-        return (pycurl.FORM_FILE, self.path)
+        return pycurl.FORM_FILE, self.path
 
 

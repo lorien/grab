@@ -5,6 +5,7 @@ from grab.captcha import SolutionNotReady
 
 logger = logging.getLogger('grab.spider.mixin.captcha_solver')
 
+
 class CaptchaSolverInterface(object):
     def task_download_captcha(self, grab, task):
         logger.debug('Got captcha image')

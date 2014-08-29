@@ -1,5 +1,6 @@
 from grab.selector import XpathSelector
 
+
 class Reference(object):
     def __init__(self, node, query=None, query_args=None):
         self._node = node
