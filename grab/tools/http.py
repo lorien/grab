@@ -25,7 +25,7 @@ from grab.util.py3k_support import *
 # But if you import pdb at the top of the module then you can use it
 # So.... I import here this module and I hope that will helps
 # My idea is that some mystical shit does some thing that breaks python
-# environment,, breaks sys.path So, when special case occures and some new module
+# environment,, breaks sys.path So, when special case occurs and some new module
 # is need to be imported then that can't be done due to the unknown magical influence
 import encodings.punycode
 

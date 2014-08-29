@@ -172,7 +172,7 @@ class Kit(object):
             if request_resource:
                 return self.build_response(request_resource)
             else:
-                raise KitError('Request was successfull but it is not possible'
+                raise KitError('Request was successful but it is not possible'
                                ' to associate the request to one of received'
                                ' responses')
         else:

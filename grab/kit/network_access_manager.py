@@ -43,7 +43,7 @@ class KitNetworkAccessManager(QNetworkAccessManager):
             if not self.is_request_allowed(request):
                 request.setUrl(QUrl('forbidden://localhost/'))
             else:
-                logger.debug(u'Quering URL: %s' % request.url().toString())
+                logger.debug(u'Querying URL: %s' % request.url().toString())
         
         request.setAttribute(QNetworkRequest.CacheLoadControlAttribute,
                              QNetworkRequest.PreferCache)
@@ -73,7 +73,7 @@ class KitNetworkAccessManager(QNetworkAccessManager):
                 ext = path.rsplit('.', 1)[-1].lower()
 
         if self.forbidden_extensions and ext in self.forbidden_extensions:
-            logger.debug('Url %s is not allowed because ext %s is forbiddend'
+            logger.debug('Url %s is not allowed because ext %s is forbidden'
                          % url, ext)
             return False
 

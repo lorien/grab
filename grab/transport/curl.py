@@ -350,7 +350,7 @@ class CurlTransport(object):
 
         if grab.config['cookies']:
             if not isinstance(grab.config['cookies'], dict):
-                raise error.GrabMisuseError('cookies option shuld be a dict')
+                raise error.GrabMisuseError('cookies option should be a dict')
             for name, value in grab.config['cookies'].items():
                 if '.' in host_nowww:
                     domain = host_nowww
@@ -394,7 +394,7 @@ class CurlTransport(object):
             # An error occurred when writing received data to a local file, or
             # an error was returned to libcurl from a write callback.
             # This exception should be ignored if _callback_interrupted flag
-            # is enabled (this happens when nohead or nobody options enabeld)
+            # is enabled (this happens when nohead or nobody options enabled)
             #
             # Also this error is raised when curl receives KeyboardInterrupt
             # while it is processing some callback function
@@ -500,7 +500,7 @@ class CurlTransport(object):
 
     def __setstate__(self, state):
         """
-        Create pycurl instance after Grag instance was restored
+        Create pycurl instance after Grab instance was restored
         from pickled state.
         """
 

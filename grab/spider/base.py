@@ -92,7 +92,7 @@ SpiderMetaClassMixin = SpiderMetaClass('SpiderMetaClassMixin', (object,), {})
 
 class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
     """
-    Asynchronious scraping framework.
+    Asynchronous scraping framework.
     """
 
     # You can define here some urls and initial tasks
@@ -113,10 +113,10 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
     }
 
     class Meta:
-        # Meta.abstract means that this class whil not be
+        # Meta.abstract means that this class will not be
         # collected to spider registry by `grab crawl` CLI command.
         # The Meta is inherited by descendant classes BUT
-        # Meta.abstract is reset to False in each desendant
+        # Meta.abstract is reset to False in each descendant
         abstract = True
 
     def __init__(self, thread_number=3,
@@ -142,17 +142,17 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         Arguments:
         * thread-number - Number of concurrent network streams
         * network_try_limit - How many times try to send request
-            again if network error was occuried, use 0 to disable
+            again if network error was occurred, use 0 to disable
         * network_try_limit - Limit of tries to execute some task
             this is not the same as network_try_limit
             network try limit limits the number of tries which
-            are performed automaticall in case of network timeout
+            are performed automatically in case of network timeout
             of some other physical error
             but task_try_limit limits the number of attempts which
             are scheduled manually in the spider business logic
         * priority_mode - could be "random" or "const"
         * meta - arbitrary user data
-        * retry_rebuid_user_agent - generate new random user-agent for each
+        * retry_rebuild_user_agent - generate new random user-agent for each
             network request which is performed again due to network error
         * args - command line arguments parsed with `setup_arg_parser` method
         New options:
@@ -192,7 +192,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if config is not None:
             self.config = config
         else:
-            # Fix curcular import error
+            # Fix circular import error
             from grab.util.config import Config
             self.config = Config()
 
@@ -441,7 +441,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 min_limit = self.thread_number * 10
             if qsize < min_limit:
                 logger_verbose.debug('Task queue contains less tasks than '
-                                     'limit. Tryring to add new tasks')
+                                     'limit. Trying to add new tasks')
                 try:
                     for x in xrange(min_limit - qsize):
                         item = next(self.task_generator_object)
@@ -488,11 +488,11 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                     logger_verbose.debug('Task queue is empty.')
                     return None
                 else:
-                    # Temporarly hack which force slave crawler
+                    # Temporarily hack which force slave crawler
                     # to wait 5 seconds for new tasks, this solves
                     # the problem that sometimes slave crawler stop
                     # its work because it could not receive new
-                    # tasks immediatelly
+                    # tasks immediately
                     if not self.transport.active_task_number():
                         if time.time() - start < 5:
                             time.sleep(0.1)
@@ -534,14 +534,14 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         return grab
 
     def is_task_cacheable(self, task, grab):
-        if (# cache is disabled for all tasks
-            not self.cache_enabled
-            # cache data should be refreshed
-            or task.get('refresh_cache', False)
-            # cache could not be used
-            or task.get('disable_cache', False)
-            # request type is not cacheable
-            or grab.detect_request_method() != 'GET'):
+        if (    # cache is disabled for all tasks
+                not self.cache_enabled
+                # cache data should be refreshed
+                or task.get('refresh_cache', False)
+                # cache could not be used
+                or task.get('disable_cache', False)
+                # request type is not cacheable
+                or grab.detect_request_method() != 'GET'):
             return False
         else:
             return True
@@ -1143,7 +1143,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
     # TODO:
     # Develop Manager Process which contains logic of accepting or rejecting
-    # task objects recivied from Parser Processes
+    # task objects received from Parser Processes
     # Maybe Manager Process also should controls the Data flow
     # TODO2:
     # Data handler process

@@ -52,7 +52,7 @@ class MulticurlTransport(object):
             grab.prepare_request()
             grab.log_request()
         except Exception as ex:
-            # If some error occured while processing the request arguments
+            # If some error occurred while processing the request arguments
             # then we should put curl object back to free list
             del self.registry[id(curl)]
             self.freelist.append(curl)
@@ -62,7 +62,7 @@ class MulticurlTransport(object):
             self.multi.add_handle(curl)
 
     def process_handlers(self):
-        # Ok, francly I have real bad understanding of
+        # Ok, frankly I have real bad understanding of
         # how to deal with multicurl sockets ;-)
         # It is a sort of miracle that Grab is used by some people
         # and they managed to get job done

@@ -76,7 +76,8 @@ def hashed_path(url, ext='jpg', base_dir=None):
 
 # Alias for back-ward compatibility
 def hash_path(*args, **kwargs):
-    logging.debug('This function name is depricated. Please use hashed_path function')
+    logging.debug('This function name is deprecated. '
+                  'Please use hashed_path function')
     return hashed_path(*args, **kwargs)
 
 

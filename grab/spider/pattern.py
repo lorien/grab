@@ -90,7 +90,7 @@ class SpiderPattern(object):
         """
         DEPRECATED, WILL BE REMOVED
 
-        Return new `Task` object if link that mathes the given `xpath`
+        Return new `Task` object if link that matches the given `xpath`
         was found.
         """
 

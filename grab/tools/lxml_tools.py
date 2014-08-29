@@ -179,7 +179,7 @@ def clean_html(html, safe_attrs=('src', 'href'),
 
     from lxml.html.clean import Cleaner
 
-    # Conver HTML to Unicode
+    # Convert HTML to Unicode
     html = render_html(parse_html(html, encoding=input_encoding), make_unicode=True)
 
     # Strip some shit with default lxml tools

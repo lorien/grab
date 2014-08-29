@@ -11,7 +11,7 @@ Usage:
     server, userpwd = pl.get_random()
     g.setup(proxy=server, userpwd=userpwd)
 
-Or you can do even simplier:
+Or you can do even simpler:
 
     g = Grab()
     g.setup(proxylist=('var/proxy.txt', 'socks5'))

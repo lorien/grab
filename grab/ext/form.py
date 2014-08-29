@@ -25,14 +25,14 @@ class FormExtension(object):
         Set the default form.
         
         :param number: number of form (starting from zero)
-        :param id: value of "id" atrribute
+        :param id: value of "id" attribute
         :param name: value of "name" attribute
         :param xpath: XPath query
         :raises: :class:`DataNotFound` if form not found
         :raises: :class:`GrabMisuseError` if method is called without parameters
 
-        Selected form will be available via `form` atribute of `Grab`
-        instance. All form methods will work with defalt form.
+        Selected form will be available via `form` attribute of `Grab`
+        instance. All form methods will work with default form.
 
         Examples::
 
@@ -196,12 +196,12 @@ class FormExtension(object):
         """
         Submit default form.
 
-        :param submit_name: name of buton which should be "clicked" to
+        :param submit_name: name of button which should be "clicked" to
             submit form
         :param make_request: if `False` then grab instance will be
             configured with form post data but request will not be
             performed
-        :param url: explicitly specifi form action url
+        :param url: explicitly specify form action url
         :param extra_post: (dict or list of pairs) additional form data which
             will override data automatically extracted from the form.
 
@@ -212,7 +212,7 @@ class FormExtension(object):
         * radio - ???
         * checkbox - ???
 
-        Multipart forms are corectly recognized by grab library.
+        Multipart forms are correctly recognized by grab library.
 
         Example::
 
@@ -225,7 +225,7 @@ class FormExtension(object):
             g.submit()
             
             # or we can just fill the form
-            # and do manu submition
+            # and do manual submission
             g.set_input('foo', 'bar')
             g.submit(make_request=False)
             g.request()

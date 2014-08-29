@@ -84,10 +84,10 @@ class ThreadPoolTransport(object):
     def repair_grab(self, grab):
         # `curl` attribute should not be None
         # If it is None (which could be if we fire Task
-        # object with grab object which was recevied in
+        # object with grab object which was received in
         # as input argument of response handler function)
         # then `prepare_request` method will failed
-        # because it asssumes that Grab instance
+        # because it assumes that Grab instance
         # has valid `curl` attribute
         # TODO: Looks strange
         # Maybe refactor prepare_request method

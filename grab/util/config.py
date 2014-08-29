@@ -104,7 +104,7 @@ def build_spider_config(spider_class, global_config=None):
         spider_config = Config()
 
     # Inject keys from global config into spider config
-    # Inejct only new keys (that do not exist in spider config)
+    # Inject only new keys (that do not exist in spider config)
     spider_config.update_with_object(global_config['global'], only_new_keys=True,
                                      allowed_keys=None, only_uppercase_keys=False)#SPIDER_KEYS)
 

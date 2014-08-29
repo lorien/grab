@@ -73,7 +73,7 @@ class KitTransport(object):
 
         if grab.config['cookies']:
             if not isinstance(grab.config['cookies'], dict):
-                raise error.GrabMisuseError('cookies option shuld be a dict')
+                raise error.GrabMisuseError('cookies option should be a dict')
             self.request_object['cookies'] = grab.config['cookies']
 
         if grab.request_method == 'POST':
@@ -127,7 +127,7 @@ class KitTransport(object):
 
     def __setstate__(self, state):
         """
-        Create pycurl instance after Grag instance was restored
+        Create pycurl instance after Grab instance was restored
         from pickled state.
         """
 

@@ -154,14 +154,14 @@ def default_config():
         # Character set to which any unicode data should be encoded
         # before get placed in request
         # This setting is overwritten after each request with
-        # charset of rertreived document
+        # charset of retrieved document
         charset='utf-8',
 
         # Charset to use for converting content of response
         # into unicode, by default it is detected automatically
         document_charset=None,
 
-        # Conent type control how DOM are built
+        # Content type control how DOM are built
         # For html type HTML DOM builder is used
         # For xml type XML DOM builder is used
         content_type='html',
@@ -170,11 +170,11 @@ def default_config():
         # Such entities are parsed by modern browsers as
         # windows-1251 entities independently of the real charset of
         # the document, If this option is True then such entities
-        # will be replaced with correct unicode entitites e.g.:
+        # will be replaced with correct unicode entities e.g.:
         # &#151; ->  &#8212;
         fix_special_entities=True,
 
-        # Convert document body to lower case before bulding LXML tree
+        # Convert document body to lower case before building LXML tree
         # It does not affect `self.doc.body`
         lowercased_tree=False,
 
@@ -195,7 +195,7 @@ class Grab(FormExtension, DeprecatedThings):
                  'transport_param', 'request_method', 'request_counter',
                  '__weakref__', 'cookies',
 
-                 # Dirst hack to make it possbile to inherit Grab from
+                 # Dirty hack to make it possible to inherit Grab from
                  # multiple base classes with __slots__
                  '_lxml_form', '_file_fields',
                  '_pyquery', '_doc', '_kit',

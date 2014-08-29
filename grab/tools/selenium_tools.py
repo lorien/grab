@@ -165,9 +165,9 @@ def mouse_move(browser, sleep=0.1, absolute=False, x=None, y=None):
     """
 
     # This thing is disabled because it seems selenium do not want to
-    # maximize window utill the page is loaded completely
+    # maximize window until the page is loaded completely
     # It is enabled again because it anyway wait for something to
-    # get window size and cooridinates ))
+    # get window size and coordinates ))
     logging.debug('Maximizing window')
     browser.maximize_window()
 
@@ -203,7 +203,7 @@ def mouse_move(browser, sleep=0.1, absolute=False, x=None, y=None):
         x += view_x
         y += view_y
 
-    # Get HTML document which position probably alwasy is 0
+    # Get HTML document which position probably always is 0
     html_element = browser.find_element_by_xpath('//html')
 
     # Use move_to_element_with_offset instead move_by_offset
@@ -217,7 +217,7 @@ def mouse_move(browser, sleep=0.1, absolute=False, x=None, y=None):
 def click(browser, elem=None):
     """
     Just click at current cursor position.
-    If `elem` is geven then move cursor to its location and
+    If `elem` is given then move cursor to its location and
     then click on it.
     """
 

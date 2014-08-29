@@ -19,7 +19,7 @@ class RedisCommandInterface(object):
         self.output_hash_name = 'command_output_%s' % spider_name
         logging.debug('Command input queue redis key: %s'
                       % self.input_queue_name)
-        logging.debug('Command ouput hash redis key: %s'
+        logging.debug('Command output hash redis key: %s'
                       % self.output_hash_name)
 
     def put_command(self, command):

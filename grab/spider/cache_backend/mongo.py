@@ -78,7 +78,7 @@ class CacheBackend(object):
                 response.url = cache_item['response_url']
             else:
                 logger.debug('You cache contains items without `response_url` '
-                             'key. It is depricated data format. Please '
+                             'key. It is deprecated data format. Please '
                              're-download you cache or build manually '
                              '`response_url` keys.')
                 response.url = cache_item['url']

@@ -11,7 +11,7 @@ Usage example:
     >>>     date = DateTimeField('//path/to/@datetime', '%Y-%m-%d %H:%M:%S')
 
     >>> grab = Grab()
-    >>> grab.go('http://exmaple.com')
+    >>> grab.go('http://example.com')
 
     >>> structure = SomeStructure(grab.tree)
 
