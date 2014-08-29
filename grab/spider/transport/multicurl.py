@@ -99,7 +99,7 @@ class MulticurlTransport(object):
                 # while it is processing some callback function
                 # (WRITEFUNCTION, HEADERFUNCTIO, etc)
                 if ecode == 23:
-                    if getattr(curl, '_callback_interrupted', None) == True:
+                    if getattr(curl, '_callback_interrupted', None) is True:
                         curl._callback_interrupted = False
                         ecode = None
                         emsge = None

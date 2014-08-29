@@ -27,7 +27,7 @@ class Config(dict):
         is_dict = is_dict_interface(obj)
         keys = obj.keys() if is_dict else dir(obj)
         for key in keys:
-            if key.isupper() or only_uppercase_keys == False:
+            if key.isupper() or not only_uppercase_keys:
                 if not key.startswith('_'):
                     if not only_new_keys or not key in self:
                         if allowed_keys is None or key in allowed_keys:

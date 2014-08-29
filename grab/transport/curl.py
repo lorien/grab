@@ -400,7 +400,7 @@ class CurlTransport(object):
             # while it is processing some callback function
             # (WRITEFUNCTION, HEADERFUNCTIO, etc)
             if 23 == ex.args[0]:
-                if getattr(self.curl, '_callback_interrupted', None) == True:
+                if getattr(self.curl, '_callback_interrupted', None) is True:
                     self.curl._callback_interrupted = False
                 else:
                     raise error.GrabNetworkError(ex.args[0], ex.args[1])
