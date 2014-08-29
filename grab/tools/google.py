@@ -16,7 +16,7 @@ Generic search algorithm:
 
 Module contents:
 
-* CaptchaError
+* CaptchaFound
 * ParsingError
 * build_search_url
 * parse_index_size
@@ -38,9 +38,21 @@ from grab.tools.http import urlencode
 from grab.tools.encoding import smart_str
 from grab.tools.text import find_number
 
-class CaptchaError(Exception):
+class CaptchaFound(Exception):
     """
     Raised when google fucks you with captcha.
+    """
+
+
+class CaptchaError(CaptchaFound):
+    """
+    TODO: display deprecation warning
+    """
+
+
+class AccessDenied(Exception):
+    """
+    Raised when HTTP 403 code is received.
     """
 
 
@@ -182,10 +194,12 @@ def parse_search_results(grab, parse_index_size=False, strict_query=False):
     """
 
     #elif grab.search(u'please type the characters below'):
-    if grab.search(u'src="/sorry/image'):
+    if grab.response.code == 403:
+        raise AccessDenied('Access denied (HTTP 403)')
+    elif grab.search(u'src="/sorry/image'):
 
         # Captcha!!!
-        raise CaptchaError('Captcha found')
+        raise CaptchaFound('Captcha found')
 
     elif grab.css_exists('#ires'):
         if (strict_query and (

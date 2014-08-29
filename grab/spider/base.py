@@ -127,6 +127,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                  config=None,
                  slave=False,
                  max_task_generator_chunk=None,
+                 args=None,
                  # New options start here
                  waiting_shutdown_event=None,
                  taskq=None,
@@ -152,6 +153,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         * meta - arbitrary user data
         * retry_rebuid_user_agent - generate new random user-agent for each
             network request which is performed again due to network error
+        * args - command line arguments parsed with `setup_arg_parser` method
         New options:
         * waiting_shutdown_event=None,
         * taskq=None,
@@ -170,6 +172,11 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         self.network_response_queue = network_response_queue
         self.ng = ng
         # New options ends
+
+        if args is None:
+            self.args = {}
+        else:
+            self.args = args
 
         self.slave = slave
 
@@ -330,12 +337,12 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if task.task_try_count > self.task_try_limit:
             logger.debug('Task tries (%d) ended: %s / %s' % (
                           self.task_try_limit, task.name, task.url))
-            return False, 'task-count'
+            return False, 'task-try-count'
 
         if task.network_try_count > self.network_try_limit:
             logger.debug('Network tries (%d) ended: %s / %s' % (
                           self.network_try_limit, task.name, task.url))
-            return False, 'network-count'
+            return False, 'network-try-count'
 
         return True, None
 
@@ -348,8 +355,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
     def add_task(self, task):
         """
         Add task to the task queue.
-
-        Abort the task which was restarted too many times.
         """
 
         if self.taskq is None:
@@ -363,7 +368,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if not isinstance(task, NullTask):
             if not task.url.startswith(('http://', 'https://', 'ftp://', 'file://')):
                 if self.base_url is None:
-                    #raise SpiderMisuseError('Could not resolve relative URL because base_url is not specified. Task: %s, URL: %s' % (task.name, task.url))
                     msg = 'Could not resolve relative URL because base_url is not specified. Task: %s, URL: %s' % (task.name, task.url)
                     logger.error(msg)
                     self.add_item('task-with-invalid-url', task.url)
@@ -374,17 +378,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                     if task.grab_config:
                         task.grab_config['url'] = task.url
 
-        if self.config.get('GRAB_TASK_REFRESH_CACHE', {}).get(task.name, False):
-            task.refresh_cache = True
-
-        if not self.config.get('TASK_ENABLED', {}).get(task.name, True):
-            logger.debug('Task %s disabled via config' % task.name)
-            self.inc_count('task-disabled-via-config')
-            is_valid = False
-        else:
-            # TODO: keep original task priority if it was set explicitly
-            self.taskq.put(task, task.priority, schedule_time=task.schedule_time)
-            is_valid = True
+        # TODO: keep original task priority if it was set explicitly
+        self.taskq.put(task, task.priority, schedule_time=task.schedule_time)
+        is_valid = True
         return is_valid
 
     def load_initial_urls(self):
@@ -925,9 +921,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                         is_valid, reason = self.check_task_limits(task)
                         if not is_valid:
                             logger_verbose.debug('Task %s is rejected due to %s limit' % (task.name, reason))
-                            if reason == 'task-count':
+                            if reason == 'task-try-count':
                                 self.add_item('task-count-rejected', task.url)
-                            elif reason == 'network-count':
+                            elif reason == 'network-try-count':
                                 self.add_item('network-count-rejected', task.url)
                             else:
                                 raise Exception('Unknown response from check_task_limits: %s' % reason)
@@ -1053,7 +1049,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             return camel_case_to_underscore(cls.__name__)
 
     @classmethod
-    def update_spider_config(cls, config):
+    def setup_spider_config(cls, config):
         pass
 
     # ***********

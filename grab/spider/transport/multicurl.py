@@ -61,13 +61,19 @@ class MulticurlTransport(object):
             self.multi.add_handle(curl)
 
     def process_handlers(self):
+        # Ok, francly I have real bad understanding of
+        # how to deal with multicurl sockets ;-)
+        # It is a sort of miracle that Grab is used by some people
+        # and they managed to get job done
         rlist, wlist, xlist = self.multi.fdset()
         if rlist or wlist or xlist:
             timeout = self.multi.timeout()
-            if timeout:
+            if timeout and timeout > 0:
                 select.select(rlist, wlist, xlist, timeout / 1000.0)
         else:
-            time.sleep(0.1)
+            pass
+            #time.sleep(0.1)
+            # Ok, that that was a bad idea :D
 
         while True:
             status, active_objects = self.multi.perform()

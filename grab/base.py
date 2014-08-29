@@ -190,8 +190,8 @@ def default_config():
 class Grab(FormExtension, DeprecatedThings):
 
     __slots__ = ('request_head', 'request_log', 'request_body',
-                 'proxylist', 'config', '_request_prepared',
-                 'clone_counter', 'transport',
+                 'proxylist', 'config',
+                 'transport',
                  'transport_param', 'request_method', 'request_counter',
                  '__weakref__', 'cookies',
 
@@ -222,17 +222,15 @@ class Grab(FormExtension, DeprecatedThings):
         self._doc = None
         self.config = default_config()
         self.config['common_headers'] = self.common_headers()
-        self._request_prepared = False
         self.cookies = CookieManager()
         self.proxylist = ProxyList()
 
         self.setup_transport(transport)
 
         self.reset()
-
         if kwargs:
             self.setup(**kwargs)
-        self.clone_counter = 0
+
         if document_body is not None:
             self.setup_document(document_body)
 
@@ -303,7 +301,6 @@ class Grab(FormExtension, DeprecatedThings):
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
         g.cookies = deepcopy(self.cookies)
-        g.clone_counter = self.clone_counter + 1
 
         if kwargs:
             g.setup(**kwargs)
@@ -325,7 +322,6 @@ class Grab(FormExtension, DeprecatedThings):
         for key in self.clonable_attributes:
             setattr(self, key, getattr(g, key))
             self.cookies = deepcopy(g.cookies)
-        self.clone_counter = g.clone_counter + 1
 
     def dump_config(self):
         """
@@ -397,17 +393,14 @@ class Grab(FormExtension, DeprecatedThings):
         tranposrt extension.
         """
 
-        # Reset the state set by previous request
-        if not self._request_prepared:
-            self.reset()
-            self.request_counter = next(REQUEST_COUNTER)
-            if kwargs:
-                self.setup(**kwargs)
-            if not self.proxylist.is_empty() and self.config['proxy_auto_change']:
-                self.change_proxy()
-            self.request_method = self.detect_request_method()
-            self.transport.process_config(self)
-            self._request_prepared = True
+        self.reset()
+        self.request_counter = next(REQUEST_COUNTER)
+        if kwargs:
+            self.setup(**kwargs)
+        if not self.proxylist.is_empty() and self.config['proxy_auto_change']:
+            self.change_proxy()
+        self.request_method = self.detect_request_method()
+        self.transport.process_config(self)
 
     def log_request(self, extra=''):
         """
@@ -452,7 +445,6 @@ class Grab(FormExtension, DeprecatedThings):
         try:
             self.transport.request()
         except error.GrabError:
-            self._request_prepared = False
             self.save_failed_dump()
             raise
         else:
@@ -522,8 +514,6 @@ class Grab(FormExtension, DeprecatedThings):
 
         # Should be called after `copy_request_data`
         self.save_dumps()
-
-        self._request_prepared = False
 
         # TODO: check max redirect count
         if self.config['follow_refresh']:

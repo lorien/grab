@@ -150,8 +150,6 @@ def drop_node(tree, xpath, keep_content=False):
             replace_rawnode_with_text(node, node.tail or '')
 
 
-
-
 def replace_node_with_text(root, xpath, text):
     for node in root.xpath(xpath):
         new_text = (text + node.tail) if node.tail else text

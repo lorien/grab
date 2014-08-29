@@ -159,7 +159,7 @@ class Task(BaseTask):
             del attr_copy['url']
         task = Task(**attr_copy)
 
-        # Reset some task properties if the have not
+        # Reset some task properties if they have not
         # been set explicitly in kwargs
         if not 'network_try_count' in kwargs:
             task.network_try_count = 0
@@ -194,6 +194,10 @@ class Task(BaseTask):
         for key, value in kwargs.items():
             setattr(task, key, value)
 
+        # WTF?
+        # The `Task` object can't has `delay` attribute
+        # I think in next line the `process_delay_option` method
+        # always gets None as input argument
         task.process_delay_option(task.get('delay', None))
 
         return task

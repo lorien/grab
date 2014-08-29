@@ -10,16 +10,6 @@ from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.cli')
 
-def activate_env(env_path):
-    activate_script = os.path.join(env_path, 'bin/activate_this.py')
-    # py3 hack
-    if PY3K:
-        exec(compile(open(activate_script).read(), activate_script, 'exec'),
-             dict(__file__=activate_script))
-    else:
-        execfile(activate_script, dict(__file__=activate_script))
-
-
 def setup_logging(action, level, clear_handlers=False):
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
@@ -30,41 +20,7 @@ def setup_logging(action, level, clear_handlers=False):
 
     hdl = logging.StreamHandler()
     hdl.setLevel(level)
-    #hdl.setFormatter(logging.Formatter('%(message)s'))
-    #hdl.setFormatter(logging.Formatter('%(asctime)s: [%(name)s] %(message)s'))
     root.addHandler(hdl)
-
-    # debug log
-    #fname = 'var/log/%s.debug.log' % action
-    #hdl = logging.FileHandler(fname, 'a')
-    #hdl.setFormatter(logging.Formatter('%(asctime)s: [%(name)s] %(message)s'))
-    #hdl.setLevel(logging.DEBUG)
-    #root.addHandler(hdl)
-
-    # error log
-    #fname = 'var/log/%s.error.log' % action
-    #hdl = logging.FileHandler(fname, 'a')
-    #hdl.setFormatter(logging.Formatter('%(asctime)s: [%(name)s] %(message)s'))
-    #hdl.setLevel(logging.ERROR)
-    #root.addHandler(hdl)
-
-    # common error log
-    #fname = 'var/log/error.log'
-    #hdl = logging.FileHandler(fname, 'a')
-    #hdl.setFormatter(logging.Formatter('%(asctime)s: [%(name)s] %(message)s'))
-    #hdl.setLevel(logging.ERROR)
-    #root.addHandler(hdl)
-
-    #root.setLevel(logging.DEBUG)
-    #default_logging(level=level)
-
-
-def process_env_option():
-    parser = ArgumentParser()
-    parser.add_argument('--env')
-    args, trash = parser.parse_known_args()
-    if args.env:
-        activate_env(args.env)
 
 
 def process_command_line():
@@ -72,13 +28,11 @@ def process_command_line():
     cur_dir = os.path.realpath(os.getcwd())
     sys.path.insert(0, cur_dir)
 
-    process_env_option()
-
     parser = ArgumentParser()
     parser.add_argument('action', type=str)
     parser.add_argument('--logging-level', default='debug')
     parser.add_argument('--lock-key')
-    parser.add_argument('--ignore-lock', action='store_true', default=False)
+    #parser.add_argument('--ignore-lock', action='store_true', default=False)
     parser.add_argument('--settings', type=str, default='settings')
     parser.add_argument('--env', type=str)
     parser.add_argument('--profile', action='store_true', default=False)

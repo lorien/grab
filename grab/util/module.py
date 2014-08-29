@@ -119,7 +119,14 @@ def build_spider_registry(config):
 
     SPIDER_REGISTRY.clear()
     module_mapping = {}
-    for path in config.get('GRAB_SPIDER_MODULES', []):
+
+    opt_modules = []
+    try:
+        opt_modules = config['global']['spider_modules']
+    except KeyError:
+        opt_modules = config.get('GRAB_SPIDER_MODULES', [])
+
+    for path in opt_modules:
         if ':' in path:
             path, cls_name = path.split(':')
         else:
