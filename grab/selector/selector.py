@@ -166,7 +166,7 @@ class SelectorList(object):
 
 
 class BaseSelector(metaclass_ABCMeta):
-    __slots__ = ('node')
+    __slots__ = ('node',)
 
     def __init__(self, node):
         self.node = node
@@ -360,7 +360,7 @@ class KitSelector(BaseSelector):
 class JsonSelector(BaseSelector):
     __slots__ = ()
 
-    # TODO: It seems there is perfomance problem
+    # TODO: It seems there is performance problem
     # see finnetrix, media_list.json
     def __init__(self, node):
         """

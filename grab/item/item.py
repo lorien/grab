@@ -42,7 +42,7 @@ class Item(ItemBuilderMetaClass):
         self._selector = Item._build_selector(tree, selector_type)
 
     @classmethod
-    def _build_selector(self, tree, selector_type):
+    def _build_selector(cls, tree, selector_type):
         if selector_type == 'xpath':
             return XpathSelector(tree)
         elif selector_type == 'json':

@@ -5,7 +5,7 @@ from extension super-classes and cache all extension handlers.
 from copy import copy
 
 
-class ExtensionSystemError(object):
+class ExtensionSystemError(Exception):
     pass
 
 

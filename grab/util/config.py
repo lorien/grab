@@ -13,7 +13,7 @@ NULL = object()
 
 def is_dict_interface(obj):
     try:
-        obj['o_O']
+        _ = obj['o_O']
         list(obj.keys())
     except (TypeError, AttributeError):
         return False

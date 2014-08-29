@@ -114,7 +114,7 @@ if __name__ == '__main__':
     def worker(arg):
         logging.debug('Processing %s' % arg)
         time.sleep(random())
-        return (current_process().name, arg)
+        return current_process().name, arg
 
     def tasks():
         for x in xrange(3):

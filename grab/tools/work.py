@@ -109,7 +109,7 @@ if __name__ == '__main__':
     def worker(arg):
         logging.debug('Processing %s' % arg)
         time.sleep(random())
-        return (currentThread().name, arg)
+        return currentThread().name, arg
 
     def tasks():
         for x in xrange(10):
