@@ -52,21 +52,31 @@ def setup_arg_parser(parser):
         #return int(value)
 
 
+def get_lock_key(spider_name, lock_key=None, ignore_lock=False, slave=False, **kwargs):
+    # --ignore-lock has highest precedence
+    if ignore_lock:
+        return None
+
+    # If --lock-key is specified explicitly use it
+    if lock_key is not None:
+        return lock_key
+
+    # Do not lock --slave spiders
+    if slave:
+        return None
+
+    # As fallback, if no information has been given about locking
+    # generate lock key from the spider name and use it
+    lock_key = 'crawl.%s' % spider_name
+    return lock_key
+
+
 @save_result
 def main(spider_name, thread_number=None, slave=False,
          settings='settings', network_logs=False,
          disable_proxy=False, ignore_lock=False, 
          *args, **kwargs):
     default_logging(propagate_network_logger=network_logs)
-
-    if not ignore_lock:
-        lock_key = None
-        if not slave:
-            lock_key = 'crawl.%s' % spider_name
-        if lock_key is not None:
-            lock_path = 'var/run/%s.lock' % lock_key
-            logger.debug('Trying to lock file: %s' % lock_path)
-            assert_lock(lock_path)
 
     config = build_global_config(settings)
     spider_class = load_spider_class(config, spider_name)
