@@ -366,7 +366,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             task.priority_is_custom = True
 
         if not isinstance(task, NullTask):
-            if not task.url.startswith(('http://', 'https://', 'ftp://', 'file://')):
+            if not task.url.startswith(('http://', 'https://', 'ftp://', 'file://', 'feed://')):
                 if self.base_url is None:
                     msg = 'Could not resolve relative URL because base_url is not specified. Task: %s, URL: %s' % (task.name, task.url)
                     logger.error(msg)
