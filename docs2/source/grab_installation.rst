@@ -3,12 +3,12 @@
 Installation
 ============
 
-To use grab you need to install Grab package and all its dependencies. Although python distribution system allows to specify dependcy list to install automatically, you need to install depencies manually, they will not be installed automatically when you just install one Grab package. The reason is that you need to install different version of libraries for different python branches. Also none of dependencies are mandatory.
+To use grab you need to install the Grab package and all its dependencies. Although the Python distribution system allows you to specify a list of dependencies to install automatically, you need to install Grab's dependencies manually; they will not be installed automatically when you just install the Grab package. The reason is that you need to install different versions of libraries for different python branches. Also, none of the dependencies are mandatory.
 
 Recommended dependency list
 ---------------------------
 
-To gain access to all power of grab you should install lxml and pycurl libraries. See the section below corresponding to your OS
+To gain access to all the power of Grab, you should install the lxml and pycurl libraries. See the section below corresponding to your OS.
 
 .. _installation_linux:
 
@@ -19,7 +19,7 @@ Installation in Linux
 
     pip install lxml
 
-If you have build issues try to install dependencies (debian/ubuntu example)::
+If you have build issues try to install the dependencies (Debian/Ubuntu example)::
 
     sudo apt-get install libxml2-dev libxslt-dev
 
@@ -36,25 +36,25 @@ Installation in Windows
 
 1) Install lxml
 
-You can get lxml package here http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
+You can get lxml here: http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 
 2) Install pycurl
 
-You can get pycurl package here http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
+You can get pycurl here: http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 
 3) Install Grab
 
-Download the Grab package from the https://pypi.python.org/pypi/grab, unpack it and run::
+Download the Grab package from https://pypi.python.org/pypi/grab, unpack it and run::
 
     python setup.py install
 
-If you use python of 2.X version then you could get an error while using `python setup.py install`. There is a bug in python 2.7.6 version. Delete it, download python of 2.7.5 version and try to install Grab again.
+If you use python 2.x, then you might get an error while using `python setup.py install`. There is a bug in python 2.7.6. Delete it, download python 2.7.5 and try to install Grab again.
 
-Also you can install Grab via pip. If you have no pip installed, install pip first. Download file get-pip.py from https://bootstrap.pypa.io/get-pip.py and then run command::
+You can also install Grab via pip. If you don't have pip installed, install pip first. Download the file get-pip.py from https://bootstrap.pypa.io/get-pip.py and then run this command::
 
     python get-pip.py
 
-Now you can install Grab via pip with command::
+Now you can install Grab via pip with this command::
 
     python -m pip install grab
 
@@ -77,7 +77,7 @@ See :ref:`installation_linux`
 Dependencies to run tests
 -------------------------
 
-If you want to run test suit then you have to install extra dependencies::
+If you want to run the test suite, then you have to install extra dependencies::
 
     pip install tornado
     pip install cssselect
