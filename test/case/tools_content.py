@@ -10,12 +10,14 @@ class GrabSimpleTestCase(TestCase):
         redis = u'редис ' * 100
         html = ('<div>%s</div><p>%s' % (porno, redis))
         tree = fromstring(html)
-        blocks = list(find_content_blocks(tree))
+        blocks = list(find_content_blocks(tree, min_length=100))
         #print '>>>'
         #print blocks[0]
+        #print len(blocks[0])
         #print '<<<'
         #print ')))'
         #print porno.strip()
+        #print len(porno.strip())
         #print '((('
-        self.assertEqual(blocks[0], porno.strip())
-        #self.assertEqual(blocks[1], redis.strip())
+        self.assertEqual(blocks[0], porno)
+        self.assertEqual(blocks[1], redis)
