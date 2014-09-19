@@ -5,7 +5,7 @@ import sys
 
 from grab.tools.lock import assert_lock
 from grab.tools.logs import default_logging
-from grab.util.config import build_global_config
+from grab.util.config import build_root_config
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.cli')
@@ -39,7 +39,7 @@ def process_command_line():
 
     args, trash = parser.parse_known_args()
 
-    config = build_global_config()
+    config = build_root_config()
     if config and config['GRAB_DJANGO_SETTINGS']:
         os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
         # Turn off DEBUG to prevent memory leaks

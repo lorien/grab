@@ -2,7 +2,7 @@ import logging
 import os
 from argparse import ArgumentParser
 
-from grab.util.config import build_spider_config, build_global_config
+from grab.util.config import build_spider_config, build_root_config
 from grab.util.module import load_spider_class
 from grab.tools.logs import default_logging
 from grab.tools.lock import assert_lock
@@ -78,9 +78,9 @@ def main(spider_name, thread_number=None, slave=False,
          *args, **kwargs):
     default_logging(propagate_network_logger=network_logs)
 
-    config = build_global_config(settings)
-    spider_class = load_spider_class(config, spider_name)
-    spider_config = build_spider_config(spider_class, config)
+    root_config = build_root_config(settings)
+    spider_class = load_spider_class(root_config, spider_name)
+    spider_config = build_spider_config(spider_class, root_config)
 
     spider_args = None
     if hasattr(spider_class, 'setup_arg_parser'):

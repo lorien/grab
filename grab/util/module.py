@@ -121,10 +121,12 @@ def build_spider_registry(config):
     module_mapping = {}
 
     opt_modules = []
-    try:
-        opt_modules = config['global']['spider_modules']
-    except KeyError:
-        opt_modules = config.get('GRAB_SPIDER_MODULES', [])
+    opt_modules = config['global'].get('spider_modules', deprecated_key='GRAB_SPIDER_MODULES',
+                                       default=[])
+    #try:
+        #opt_modules = config['global']['spider_modules']
+    #except KeyError:
+        #opt_modules = config.get('GRAB_SPIDER_MODULES', [])
 
     for path in opt_modules:
         if ':' in path:

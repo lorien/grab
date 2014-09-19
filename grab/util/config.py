@@ -60,7 +60,7 @@ class Config(dict):
         return result
 
 
-def build_global_config(settings_mod_path='settings'):
+def build_root_config(settings_mod_path='settings'):
     config = Config()
     try:
         config.update_with_path(settings_mod_path)
@@ -73,6 +73,7 @@ def build_global_config(settings_mod_path='settings'):
         else:
             raise
     else:
+        """
         # Try to read config in modern setting
         if 'GRAB_SPIDER_CONFIG' in config:
             # Need to do that because in ideal way we just need to read only
@@ -90,22 +91,44 @@ def build_global_config(settings_mod_path='settings'):
         config['global'].update_with_object(default_config.default_config, only_new_keys=True)
 
         return config
+        """
+        if 'GRAB_SPIDER_CONFIG' in config:
+            root_config = Config()
+            root_config.update_with_object(deepcopy(config['GRAB_SPIDER_CONFIG']),
+                                           only_uppercase_keys=False)
+        else:
+            root_config = Config()
+            root_config['global'] = Config()
+            root_config['global'].update_with_object(config)
 
+        # Make root_config['global'] the smart config object
+        # because we need to update it
+        if 'global' in root_config:
+            if not isinstance(root_config['global'], Config):
+                root_config['global'] = Config(root_config['global'])
+        else:
+            root_config['global'] = Config()
 
-def build_spider_config(spider_class, global_config=None):
-    if global_config is None:
-        global_config = build_global_config()
+        #root_config.update_with_object(default_config.default_config, only_new_keys=True)
+        root_config['global'].update_with_object(default_config.default_config, only_new_keys=True)
+        
+        return root_config
+
+def build_spider_config(spider_class, root_config=None):
+    if root_config is None:
+        root_config = build_root_config()
 
     spider_name = spider_class.get_spider_name()
-    if spider_name in global_config:
-        spider_config = Config(global_config[spider_name])
+    if spider_name in root_config:
+        spider_config = Config(root_config[spider_name])
     else:
         spider_config = Config()
 
     # Inject keys from global config into spider config
     # Inejct only new keys (that do not exist in spider config)
-    spider_config.update_with_object(global_config['global'], only_new_keys=True,
+    spider_config.update_with_object(root_config['global'], only_new_keys=True,
                                      allowed_keys=None, only_uppercase_keys=False)#SPIDER_KEYS)
+
 
     # Apply any customization defined in spider class
     # By default this method does nothing
