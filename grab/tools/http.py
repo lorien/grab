@@ -114,6 +114,8 @@ def normalize_http_values(items, charset='utf-8'):
             value = normalize_unicode(value, charset=charset)
         elif value is None:
             value = ''
+        else:
+            value = str(value)
 
         # normalize key
         if isinstance(key, unicode):

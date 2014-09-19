@@ -88,3 +88,17 @@ class TestCookies(TestCase):
         log_file_content = open(os.path.join(TMP_DIR, '01.log')).read()
         self.assertTrue('X-Name' in log_file_content)
         self.assertTrue('xxx=Post' in log_file_content)
+
+    def test_debug_post(self):
+        g = build_grab(debug_post=True)
+        g.setup(post={'foo': 'bar'})
+        SERVER.RESPONSE['post'] = 'x'
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(b'x', g.doc.body)
+
+    def test_debug_post_integer_bug(self):
+        g = build_grab(debug_post=True)
+        g.setup(post={'foo': 3})
+        SERVER.RESPONSE['post'] = 'x'
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(b'x', g.doc.body)
