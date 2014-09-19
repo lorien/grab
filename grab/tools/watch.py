@@ -4,6 +4,7 @@ import sys
 import logging
 import time
 
+
 class Watcher(object):
     """this class solves two problems with multithreaded
     programs in Python, (1) a signal might be delivered

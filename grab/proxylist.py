@@ -11,7 +11,7 @@ Usage:
     server, userpwd = pl.get_random()
     g.setup(proxy=server, userpwd=userpwd)
 
-Or you can do even simplier:
+Or you can do even simpler:
 
     g = Grab()
     g.setup(proxylist=('var/proxy.txt', 'socks5'))
@@ -66,12 +66,11 @@ class ProxySource(object):
         self.proxy_type = proxy_type
         self.read_time = None
 
-
     def parse_lines(self, proxies):
         """
         Parse each line from proxies list step by step.
         Returns tuple with server (host:port) and user_pwd (user:password)
-        :param lines: list which contains proxy servers
+        :param proxies: list which contains proxy servers
         """
 
         for proxy in proxies:
@@ -109,7 +108,7 @@ class ProxySource(object):
         """
         
         if (self.read_time is None or
-            (time.time() - self.read_time) > self.read_timeout):
+                (time.time() - self.read_time) > self.read_timeout):
             logger.debug('Reloading proxy list')
             self.load()
             return True
@@ -151,7 +150,8 @@ class URLSource(ProxySource):
         try:
             proxylist = urlopen(self.source).readlines()
         except (URLError, HTTPError):
-            raise GrabNetworkError("Can't load proxies from URL (%s)" % self.source)
+            raise GrabNetworkError("Can't load proxies from URL (%s)"
+                                   % self.source)
 
         self.read_time = time.time()
         self.server_list = self.get_server_list(proxylist)
@@ -192,13 +192,13 @@ class StringSource(ProxySource):
         """
 
         if not isinstance(self.source, (str, unicode)):
-            raise GrabMisuseError("Given proxy list isn't a string or unicode type")
+            raise GrabMisuseError("Given proxy list isn't a string or unicode "
+                                  "type")
         self.server_list = self.get_server_list(self.source)
         self.server_list_iterator = itertools.cycle(self.server_list)
 
     def reload(self):
         pass
-
 
 
 SOURCE_LIST = {
@@ -224,9 +224,10 @@ class ProxyList(object):
 
         :param source: source of the project (file name, string or some object)
         :param source_type: type of proxy source
-        :param proxy_type: default type of proxy (if proxy source does not provide
-            this information)
-        :param **kwargs: any additional aruguments goes to specific proxy load method 
+        :param proxy_type: default type of proxy (if proxy source does not
+        provide this information)
+        :param **kwargs: any additional arguments goes to specific proxy load
+        method
         """
 
         self.init_kwargs = deepcopy(kwargs)
@@ -234,7 +235,8 @@ class ProxyList(object):
         try:
             source_class = SOURCE_LIST[source_type]
         except AttributeError:
-            raise GrabMisuseError('Unknown proxy source type: %s' % source_type)
+            raise GrabMisuseError('Unknown proxy source type: %s'
+                                  % source_type)
         self.source = source_class(source, proxy_type=proxy_type, **kwargs)
         self.source.load()
         self.filter_config = {}
@@ -257,13 +259,15 @@ class ProxyList(object):
                 if country == self.filter_config['country']['code']:
                     new_list.append(row)
             self.source.server_list = row
-            self.source.server_list_iterator = itertools.cycle(self.source.server_list)
+            self.source.server_list_iterator = \
+                itertools.cycle(self.source.server_list)
 
     def get_geoip_resolver(self):
         if self.geoip_resolver is None:
             import pygeoip
-            self.geoip_resolver = pygeoip.GeoIP(self.filter_config['country']['geoip_db_path'],
-                                                pygeoip.MEMORY_CACHE)
+            self.geoip_resolver = \
+                pygeoip.GeoIP(self.filter_config['country']['geoip_db_path'],
+                              pygeoip.MEMORY_CACHE)
         return self.geoip_resolver
 
     def get_random(self):

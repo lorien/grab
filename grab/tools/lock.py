@@ -10,6 +10,7 @@ import os
 logger = logging.getLogger('grab.tools.lock')
 fh = None
 
+
 def set_lock(fname):
     """
     Try to lock file and write PID.

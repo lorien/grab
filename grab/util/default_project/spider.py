@@ -7,6 +7,7 @@ import logging
 
 from database import db
 
+
 class {{ PROJECT_NAME_CAMELCASE }}Spider(Spider):
     def task_generator(self):
         yield Task('initial', url='')

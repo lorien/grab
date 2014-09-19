@@ -41,8 +41,10 @@ logger = logging.getLogger('grab.response')
 NULL_BYTE = chr(0)
 RE_XML_DECLARATION = re.compile(br'^[^<]{,100}<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(br'encoding\s*=\s*["\']([^"\']+)["\']')
-RE_META_CHARSET = re.compile(br'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)', re.I)
-RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode('utf-8'), re.I)
+RE_META_CHARSET =\
+    re.compile(br'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)', re.I)
+RE_UNICODE_XML_DECLARATION =\
+    re.compile(RE_XML_DECLARATION.pattern.decode('utf-8'), re.I)
 
 # Bom processing logic was copied from
 # https://github.com/scrapy/w3lib/blob/master/w3lib/encoding.py
@@ -79,16 +81,17 @@ class TextExtension(object):
 
         :param anchor: string to search
         :param byte: if False then `anchor` should be the
-            unicode string, and search will be performed in `response.unicode_body()`
-            else `anchor` should be the byte-string and
-            search will be performed in `resonse.body`
+            unicode string, and search will be performed in
+            `response.unicode_body()` else `anchor` should be the byte-string
+            and search will be performed in `response.body`
         
         If substring is found return True else False.
         """
 
         if isinstance(anchor, unicode):
             if byte:
-                raise GrabMisuseError('The anchor should be bytes string in byte mode')
+                raise GrabMisuseError('The anchor should be bytes string in '
+                                      'byte mode')
             else:
                 return anchor in self.unicode_body()
 
@@ -98,7 +101,8 @@ class TextExtension(object):
                     #return anchor in self.body_as_bytes()
                 return anchor in self.body
             else:
-                raise GrabMisuseError('The anchor should be byte string in non-byte mode')
+                raise GrabMisuseError('The anchor should be byte string in '
+                                      'non-byte mode')
 
     def text_assert(self, anchor, byte=False):
         """
@@ -107,7 +111,6 @@ class TextExtension(object):
 
         if not self.text_search(anchor, byte=byte): 
             raise DataNotFound(u'Substring not found: %s' % anchor)
-
 
     def text_assert_any(self, anchors, byte=False):
         """
@@ -120,7 +123,8 @@ class TextExtension(object):
                 found = True
                 break
         if not found:
-            raise DataNotFound(u'Substrings not found: %s' % ', '.join(anchors))
+            raise DataNotFound(u'Substrings not found: %s'
+                               % ', '.join(anchors))
 
 
 class RegexpExtension(object):
@@ -131,8 +135,8 @@ class RegexpExtension(object):
         Search regular expression in response body and return content of first
         matching group.
 
-        :param byte: if False then search is performed in `response.unicode_body()`
-            else the rex is searched in `response.body`.
+        :param byte: if False then search is performed in
+        `response.unicode_body()` else the rex is searched in `response.body`.
         """
 
         try:
@@ -149,8 +153,8 @@ class RegexpExtension(object):
         """
         Search the regular expression in response body.
 
-        :param byte: if False then search is performed in `response.unicode_body()`
-            else the rex is searched in `response.body`.
+        :param byte: if False then search is performed in
+        `response.unicode_body()` else the rex is searched in `response.body`.
 
         Note: if you use default non-byte mode than do not forget to build your
         regular expression with re.U flag.

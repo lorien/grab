@@ -10,6 +10,7 @@ from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.cli')
 
+
 def setup_logging(action, level, clear_handlers=False):
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
@@ -59,17 +60,19 @@ def process_command_line():
     action_name = args.action
     try:
         # First, try to import script from the grab package
-        action_mod = __import__('grab.script.%s' % action_name, None, None, ['foo'])
+        action_mod = __import__('grab.script.%s' % action_name, None, None,
+                                ['foo'])
     except ImportError as ex:
         if (unicode(ex).startswith('No module named') and
-            action_name in unicode(ex)):
+                    action_name in unicode(ex)):
             pass
         else:
             logging.error('', exc_info=ex)
         # If grab does not provides the script
         # try to import it from the current project
         try:
-            action_mod = __import__('script.%s' % action_name, None, None, ['foo'])
+            action_mod = __import__('script.%s' % action_name, None, None,
+                                    ['foo'])
         except ImportError as ex:
             logging.error('', exc_info=ex)
             sys.stderr.write('Could not import %s script' % action_name)

@@ -11,6 +11,7 @@ from grab.tools.http import smart_urlencode
 
 # TODO: refactor this hell
 
+
 class FormExtension(object):
     __slots__ = ()
     # SLOTS: _lxml_form, _file_fields
@@ -24,14 +25,14 @@ class FormExtension(object):
         Set the default form.
         
         :param number: number of form (starting from zero)
-        :param id: value of "id" atrribute
+        :param id: value of "id" attribute
         :param name: value of "name" attribute
         :param xpath: XPath query
         :raises: :class:`DataNotFound` if form not found
         :raises: :class:`GrabMisuseError` if method is called without parameters
 
-        Selected form will be available via `form` atribute of `Grab`
-        instance. All form methods will work with defalt form.
+        Selected form will be available via `form` attribute of `Grab`
+        instance. All form methods will work with default form.
 
         Examples::
 
@@ -94,7 +95,8 @@ class FormExtension(object):
         """
 
         if self._lxml_form is None:
-            forms = [(idx, len(list(x.fields))) for idx, x in enumerate(self.doc.tree.forms)]
+            forms = [(idx, len(list(x.fields)))
+                     for idx, x in enumerate(self.doc.tree.forms)]
             if len(forms):
                 idx = sorted(forms, key=lambda x: x[1], reverse=True)[0][0]
                 self.choose_form(idx)
@@ -131,7 +133,8 @@ class FormExtension(object):
         
         if not processed:
             # We need to remember original values of file fields
-            # Because lxml will convert UploadContent/UploadFile object to string
+            # Because lxml will convert UploadContent/UploadFile object to
+            # string
             if getattr(elem, 'type', '').lower() == 'file':
                 self._file_fields[name] = value
             elem.value = value
@@ -183,7 +186,6 @@ class FormExtension(object):
 
         return self.set_input(elem.get('name'), value)
 
-
     # TODO:
     # Remove set_input_by_id
     # Remove set_input_by_number
@@ -194,12 +196,12 @@ class FormExtension(object):
         """
         Submit default form.
 
-        :param submit_name: name of buton which should be "clicked" to
+        :param submit_name: name of button which should be "clicked" to
             submit form
         :param make_request: if `False` then grab instance will be
             configured with form post data but request will not be
             performed
-        :param url: explicitly specifi form action url
+        :param url: explicitly specify form action url
         :param extra_post: (dict or list of pairs) additional form data which
             will override data automatically extracted from the form.
 
@@ -210,7 +212,7 @@ class FormExtension(object):
         * radio - ???
         * checkbox - ???
 
-        Multipart forms are corectly recognized by grab library.
+        Multipart forms are correctly recognized by grab library.
 
         Example::
 
@@ -223,7 +225,7 @@ class FormExtension(object):
             g.submit()
             
             # or we can just fill the form
-            # and do manu submition
+            # and do manual submission
             g.set_input('foo', 'bar')
             g.submit(make_request=False)
             g.request()
@@ -268,7 +270,6 @@ class FormExtension(object):
             action_url = urljoin(self.response.url, url)
         else:
             action_url = urljoin(self.response.url, self.form.action)
-
 
         # Values from `extra_post` should override values in form
         # `extra_post` allows multiple value of one key

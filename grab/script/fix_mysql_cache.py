@@ -2,6 +2,7 @@ import time
 
 from grab.spider import Spider
 
+
 def setup_arg_parser(parser):
     parser.add_argument('--user')
     parser.add_argument('--passwd')

@@ -38,6 +38,7 @@ from grab.tools.http import urlencode
 from grab.tools.encoding import smart_str
 from grab.tools.text import find_number
 
+
 class CaptchaFound(Exception):
     """
     Raised when google fucks you with captcha.
@@ -62,7 +63,8 @@ class ParsingError(Exception):
     """
 
 
-def build_search_url(query, page=None, per_page=None, lang=None, filter=None, **kwargs):
+def build_search_url(query, page=None, per_page=None, lang=None,
+                     filter=None, **kwargs):
     """
     Build google search url with specified query and pagination options.
 
@@ -202,8 +204,9 @@ def parse_search_results(grab, parse_index_size=False, strict_query=False):
         raise CaptchaFound('Captcha found')
 
     elif grab.css_exists('#ires'):
-        if (strict_query and (
-            grab.search(u'Нет результатов для') or grab.search(u'No results found for'))):
+        if strict_query and \
+                grab.search(u'Нет результатов для') or \
+                grab.search(u'No results found for'):
             pass
             logging.debug('Query modified')
         else:

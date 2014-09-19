@@ -6,6 +6,7 @@ except ImportError:
 
 from grab.spider.queue_backend.base import QueueInterface
 
+
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, **kwargs):
         super(QueueInterface, self).__init__(**kwargs)

@@ -79,111 +79,111 @@ def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
 def default_config():
     # TODO: Maybe config should be splitted into two entities:
     # 1) config which is not changed during request
-    # 2) changable settings
+    # 2) changeable settings
     return dict(
         # Common
-        url = None,
+        url=None,
 
         # Debugging
-        log_file = None,
-        log_dir = False,
-        debug_post = False,
-        debug_post_limit = 150,
+        log_file=None,
+        log_dir=False,
+        debug_post=False,
+        debug_post_limit=150,
         # Only for curl transport
-        debug = False,
-        verbose_logging = False,
+        debug=False,
+        verbose_logging=False,
 
         # Only for selenium transport
-        webdriver = 'firefox',
-        selenium_wait = 1,  # in seconds
+        webdriver='firefox',
+        selenium_wait=1,  # in seconds
 
         # Proxy
-        proxy = None,
-        proxy_type = None,
-        proxy_userpwd = None,
-        proxy_auto_change = True,
+        proxy=None,
+        proxy_type=None,
+        proxy_userpwd=None,
+        proxy_auto_change=True,
 
         # Method, Post
-        method = None,
-        post = None,
-        multipart_post = None,
+        method=None,
+        post=None,
+        multipart_post=None,
 
         # Headers, User-Agent, Referer
-        headers = {},
-        common_headers = {},
-        user_agent = None,
-        user_agent_file = None,
-        referer = None,
-        reuse_referer = True,
+        headers={},
+        common_headers={},
+        user_agent=None,
+        user_agent_file=None,
+        referer=None,
+        reuse_referer=True,
 
         # Cookies
-        cookies = {},
-        reuse_cookies = True,
-        cookiefile = None,
+        cookies={},
+        reuse_cookies=True,
+        cookiefile=None,
 
         # Timeouts
-        timeout = 15,
-        connect_timeout = 3,
+        timeout=15,
+        connect_timeout=3,
 
         # Connection
-        connection_reuse = True,
+        connection_reuse=True,
 
         # Response processing
-        nobody = False,
-        body_maxsize = None,
-        body_inmemory = True,
-        body_storage_dir = None,
-        body_storage_filename = None,
-        reject_file_size = None,
+        nobody=False,
+        body_maxsize=None,
+        body_inmemory=True,
+        body_storage_dir=None,
+        body_storage_filename=None,
+        reject_file_size=None,
 
         # Content compression
-        encoding = 'gzip',
+        encoding='gzip',
 
         # Network interface
-        interface = None,
+        interface=None,
 
         # Redirects
-        follow_refresh = False,
-        follow_location = True,
-        refresh_redirect_count = 0,
-        redirect_limit = 10,
+        follow_refresh=False,
+        follow_location=True,
+        refresh_redirect_count=0,
+        redirect_limit=10,
 
         # Authentication
-        userpwd = None,
+        userpwd=None,
 
         # Character set to which any unicode data should be encoded
         # before get placed in request
         # This setting is overwritten after each request with
-        # charset of rertreived document
-        charset = 'utf-8',
+        # charset of retrieved document
+        charset='utf-8',
 
         # Charset to use for converting content of response
         # into unicode, by default it is detected automatically
-        document_charset = None,
+        document_charset=None,
 
-        # Conent type control how DOM are built
+        # Content type control how DOM are built
         # For html type HTML DOM builder is used
         # For xml type XML DOM builder is used
-        content_type = 'html',
+        content_type='html',
 
         # Fix &#X; entities, where X between 128 and 160
         # Such entities are parsed by modern browsers as
         # windows-1251 entities independently of the real charset of
         # the document, If this option is True then such entities
-        # will be replaced with correct unicode entitites e.g.:
+        # will be replaced with correct unicode entities e.g.:
         # &#151; ->  &#8212;
-        fix_special_entities = True,
+        fix_special_entities=True,
 
-        # Convert document body to lower case before bulding LXML tree
+        # Convert document body to lower case before building LXML tree
         # It does not affect `self.doc.body`
-        lowercased_tree = False,
+        lowercased_tree=False,
 
         # Strip null bytes from document body before building lXML tree
         # It does not affect `self.doc.body`
-        strip_null_bytes = True,
+        strip_null_bytes=True,
 
         # Internal object to store
-        state = {},
+        state={},
     )
 
 
@@ -195,7 +195,7 @@ class Grab(FormExtension, DeprecatedThings):
                  'transport_param', 'request_method', 'request_counter',
                  '__weakref__', 'cookies',
 
-                 # Dirst hack to make it possbile to inherit Grab from
+                 # Dirty hack to make it possible to inherit Grab from
                  # multiple base classes with __slots__
                  '_lxml_form', '_file_fields',
                  '_pyquery', '_doc', '_kit',
@@ -213,8 +213,8 @@ class Grab(FormExtension, DeprecatedThings):
     Public methods
     """
 
-    def __init__(self, document_body=None, transport='grab.transport.curl.CurlTransport',
-                 **kwargs):
+    def __init__(self, document_body=None,
+                 transport='grab.transport.curl.CurlTransport', **kwargs):
         """
         Create Grab instance
         """
@@ -258,8 +258,9 @@ class Grab(FormExtension, DeprecatedThings):
         elif isinstance(transport_param, collections.Callable):
             self.transport = transport_param()
         else:
-            raise error.GrabMisuseError('Option `transport` should be string or callable. '
-                                        'Got %s' % type(transport_param))
+            raise error.GrabMisuseError('Option `transport` should be string '
+                                        'or callable. Got %s'
+                                        % type(transport_param))
 
     def reset(self):
         """
@@ -282,12 +283,12 @@ class Grab(FormExtension, DeprecatedThings):
         self._lxml_form = None
         self._file_fields = {}
 
-
     def clone(self, **kwargs):
         """
         Create clone of Grab instance.
 
-        Cloned instance will have the same state: cookies, referer, response document data
+        Cloned instance will have the same state: cookies, referrer, response
+        document data
 
         :param **kwargs: overrides settings of cloned grab instance
         """
@@ -341,7 +342,8 @@ class Grab(FormExtension, DeprecatedThings):
 
         self.config = copy_config(config, self.mutable_config_keys)
         if 'cookiejar_cookies' in config['state']:
-            self.cookies = CookieManager.from_cookie_list(config['state']['cookiejar_cookies'])
+            self.cookies = CookieManager.from_cookie_list(
+                config['state']['cookiejar_cookies'])
 
     def setup(self, **kwargs):
         """
@@ -349,15 +351,17 @@ class Grab(FormExtension, DeprecatedThings):
         """
 
         if 'hammer_mode' in kwargs:
-            logging.error('Option hammer_mode is deprecated. Grab does not support hammer mode anymore.')
+            logging.error('Option hammer_mode is deprecated. Grab does not '
+                          'support hammer mode anymore.')
             del kwargs['hammer_mode']
 
         if 'hammer_timeouts' in kwargs:
-            logging.error('Option hammer_timeouts is deprecated. Grab does not support hammer mode anymore.')
+            logging.error('Option hammer_timeouts is deprecated. Grab does not'
+                          ' support hammer mode anymore.')
             del kwargs['hammer_timeouts']
 
         for key in kwargs:
-            if not key in self.config.keys():
+            if key not in self.config.keys():
                 raise error.GrabMisuseError('Unknown option: %s' % key)
 
         if 'url' in kwargs:
@@ -370,8 +374,8 @@ class Grab(FormExtension, DeprecatedThings):
         Go to ``url``
 
         Args:
-            :url: could be absolute or relative. If relative then t will be appended to the
-                absolute URL of previous request.
+            :url: could be absolute or relative. If relative then t will be
+            appended to the absolute URL of previous request.
         """
 
         return self.request(url=url, **kwargs)
@@ -390,7 +394,7 @@ class Grab(FormExtension, DeprecatedThings):
         """
         Configure all things to make real network request.
         This method is called before doing real request via
-        tranposrt extension.
+        transport extension.
         """
 
         self.reset()
@@ -407,11 +411,11 @@ class Grab(FormExtension, DeprecatedThings):
         Send request details to logging system.
         """
 
-        tname = threading.currentThread().getName().lower()
-        if tname == 'mainthread':
-            tname = ''
+        thread_name = threading.currentThread().getName().lower()
+        if thread_name == 'mainthread':
+            thread_name = ''
         else:
-            tname = '-%s' % tname
+            thread_name = '-%s' % thread_name
 
         if self.config['proxy']:
             if self.config['proxy_userpwd']:
@@ -425,9 +429,9 @@ class Grab(FormExtension, DeprecatedThings):
         if extra:
             extra = '[%s] ' % extra
         logger_network.debug('[%02d%s] %s%s %s%s',
-            self.request_counter, tname,
-            extra, self.request_method or 'GET',
-            self.config['url'], proxy_info)
+                             self.request_counter, thread_name,
+                             extra, self.request_method or 'GET',
+                             self.config['url'], proxy_info)
 
     def request(self, **kwargs):
         """
@@ -471,16 +475,19 @@ class Grab(FormExtension, DeprecatedThings):
                     new_items = []
                     for key, value in items:
                         if len(value) > self.config['debug_post_limit']:
-                            value = value[:self.config['debug_post_limit']] + '...'
+                            value = value[
+                                :self.config['debug_post_limit']] + '...'
                         else:
                             value = value
                         new_items.append((key, value))
                     post = '\n'.join('%-25s: %s' % x for x in new_items)
             if post:
-                logger_network.debug('[%02d] POST request:\n%s\n' % (self.request_counter, post))
+                logger_network.debug('[%02d] POST request:\n%s\n'
+                                     % (self.request_counter, post))
 
         # It's important to delete old POST data after request is performed.
-        # If POST data is not cleared then next request will try to use them again!
+        # If POST data is not cleared then next request will try to use them
+        # again!
         old_refresh_count = self.config['refresh_redirect_count']
         self.reset_temporary_options()
 
@@ -489,7 +496,7 @@ class Grab(FormExtension, DeprecatedThings):
         else:
             self.doc = self.transport.prepare_response(self)
 
-        # Warkaround
+        # Workaround
         if self.doc.grab is None:
             self.doc.grab = weakref.proxy(self)
 
@@ -525,7 +532,8 @@ class Grab(FormExtension, DeprecatedThings):
                     raise error.GrabTooManyRedirectsError()
                 else:
                     print(inc_count)
-                    return self.request(url=url, refresh_redirect_count=inc_count)
+                    return self.request(url=url,
+                                        refresh_redirect_count=inc_count)
 
         return None
 
@@ -611,23 +619,25 @@ class Grab(FormExtension, DeprecatedThings):
 
         return {
             'Accept': 'text/xml,application/xml,application/xhtml+xml'
-                      ',text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d' % randint(2, 5),
+                      ',text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d'
+                      % randint(2, 5),
             'Accept-Language': 'en-us,en;q=0.%d' % (randint(5, 9)),
-            'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.%d' % randint(5, 7),
+            'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.%d'
+                              % randint(5, 7),
             'Keep-Alive': '300',
             'Expect': '',
         }
 
     def save_dumps(self):
         if self.config['log_dir']:
-            tname = threading.currentThread().getName().lower()
-            if tname == 'mainthread':
-                tname = ''
+            thread_name = threading.currentThread().getName().lower()
+            if thread_name == 'mainthread':
+                thread_name = ''
             else:
-                tname = '-%s' % tname
-            fname = os.path.join(self.config['log_dir'], '%02d%s.log' % (
-                self.request_counter, tname))
-            with open(fname, 'w') as out:
+                thread_name = '-%s' % thread_name
+            file_name = os.path.join(self.config['log_dir'], '%02d%s.log' % (
+                self.request_counter, thread_name))
+            with open(file_name, 'w') as out:
                 out.write('Request headers:\n')
                 out.write(self.request_head)
                 out.write('\n')
@@ -637,10 +647,10 @@ class Grab(FormExtension, DeprecatedThings):
                 out.write('Response headers:\n')
                 out.write(self.doc.head)
 
-            fext = 'html'
-            fname = os.path.join(self.config['log_dir'], '%02d%s.%s' % (
-                self.request_counter, tname, fext))
-            self.doc.save(fname)
+            file_extension = 'html'
+            file_name = os.path.join(self.config['log_dir'], '%02d%s.%s' % (
+                self.request_counter, thread_name, file_extension))
+            self.doc.save(file_name)
 
     def make_url_absolute(self, url, resolve_base=False):
         """
@@ -659,7 +669,7 @@ class Grab(FormExtension, DeprecatedThings):
 
     def detect_request_method(self):
         """
-        Analize request config and find which
+        Analyze request config and find which
         request method will be used.
 
         Returns request method in upper case
@@ -742,7 +752,7 @@ class Grab(FormExtension, DeprecatedThings):
         Return KitInterface object that provides some
         methods to communicate with Kit transport.
         """
-        
+
         if not self._kit:
             self._kit = GrabKitInterface(self)
         return self._kit

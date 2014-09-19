@@ -10,9 +10,10 @@ NULL = object()
 #SPIDER_KEYS = ['GRAB_QUEUE', 'GRAB_CACHE', 'GRAB_PROXY_LIST', 'GRAB_THREAD_NUMBER',
                #'GRAB_NETWORK_TRY_LIMIT', 'GRAB_TASK_TRY_LIMIT']
 
+
 def is_dict_interface(obj):
     try:
-        obj['o_O']
+        _ = obj['o_O']
         list(obj.keys())
     except (TypeError, AttributeError):
         return False
@@ -26,7 +27,7 @@ class Config(dict):
         is_dict = is_dict_interface(obj)
         keys = obj.keys() if is_dict else dir(obj)
         for key in keys:
-            if key.isupper() or only_uppercase_keys == False:
+            if key.isupper() or not only_uppercase_keys:
                 if not key.startswith('_'):
                     if not only_new_keys or not key in self:
                         if allowed_keys is None or key in allowed_keys:
@@ -128,7 +129,6 @@ def build_spider_config(spider_class, root_config=None):
     # Inejct only new keys (that do not exist in spider config)
     spider_config.update_with_object(root_config['global'], only_new_keys=True,
                                      allowed_keys=None, only_uppercase_keys=False)#SPIDER_KEYS)
-
 
     # Apply any customization defined in spider class
     # By default this method does nothing

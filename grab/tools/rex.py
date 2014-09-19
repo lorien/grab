@@ -8,6 +8,7 @@ from grab.util.py3k_support import *
 REGEXP_CACHE = {}
 NULL = object()
 
+
 def extract_rex_list(rex, body):
     """
     Return found matches.

@@ -18,6 +18,7 @@ COOKIE_ATTRS = ('name', 'value', 'version', 'port', 'domain',
                 'path', 'secure', 'expires', 'discard', 'comment',
                 'comment_url', 'rfc2109')
 
+
 def create_cookie(name, value, **kwargs):
     """Creates `cookielib.Cookie` instance.
     """
@@ -54,7 +55,8 @@ def create_cookie(name, value, **kwargs):
 
 class CookieManager(object):
     """
-    Each Grab instance has `cookies` attribute that is instance of `CookieManager` class.
+    Each Grab instance has `cookies` attribute that is instance of
+    `CookieManager` class.
 
     That class contains helpful methods to create, load, save cookies from/to
     different places.
@@ -90,7 +92,8 @@ class CookieManager(object):
             for cookie in cookies.cookiejar:
                 self.cookiejar.set_cookie(cookie)
         else:
-            raise GrabMisuseError('Unknown type of cookies argument: %s' % type(cookies))
+            raise GrabMisuseError('Unknown type of cookies argument: %s'
+                                  % type(cookies))
 
     @classmethod
     def from_cookie_list(cls, clist):

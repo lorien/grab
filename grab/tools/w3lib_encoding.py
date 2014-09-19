@@ -3,7 +3,9 @@ Functions for handling encoding of web pages
 
 Original code is https://github.com/scrapy/w3lib/blob/master/w3lib/encoding.py
 """
-import re, codecs, encodings
+import re
+import codecs
+import encodings
 
 # Python decoder doesn't follow unicode standard when handling
 # bad utf-8 encoded strings. see http://bugs.python.org/issue8271

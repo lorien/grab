@@ -2,6 +2,7 @@ import time
 
 from grab.spider import Spider
 
+
 def setup_arg_parser(parser):
     parser.add_argument('--database')
 
@@ -13,7 +14,8 @@ def main(*args, **kwargs):
 
     ts = int(time.time())
     count = 0
-    for item in bot.cache.db.cache.find({'timestamp': {'$exists': False}}, timeout=False):
+    for item in bot.cache.db.cache.find({'timestamp': {'$exists': False}},
+                                        timeout=False):
         bot.cache.db.cache.update({'_id': item['_id']},
                                   {'$set': {'timestamp': ts}})
         count += 1

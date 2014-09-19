@@ -23,7 +23,7 @@ def find_content_blocks(tree, min_length=None):
     # Remove links
     strip_tags(tree, 'a')
 
-    # Drop inlines tags
+    # Drop inline tags
     inline_tags = ('br', 'hr', 'p', 'b', 'i', 'strong', 'em', 'a',
                    'span', 'font')
     strip_tags(tree, *inline_tags)

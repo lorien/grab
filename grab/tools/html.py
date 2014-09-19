@@ -27,6 +27,7 @@ RE_HEX_ENTITY = re.compile(r'(&#x[a-f0-9]+;)', re.I)
 RE_BASE_URL = re.compile(r'<base[^>]+href\s*=["\']*([^\'"> ]+)', re.I)
 RE_BR = re.compile(r'<br\s*/?>', re.I)
 
+
 def decode_entities(html):
     """
     Convert all HTML entities into their unicode
@@ -42,7 +43,6 @@ def decode_entities(html):
         →ABC R©
     """
 
-
     def process_entity(match):
         entity = match.group(1)
         name = entity[1:-1]
@@ -51,7 +51,6 @@ def decode_entities(html):
         else:
             return entity
 
-    
     def process_num_entity(match):
         entity = match.group(1)
         num = entity[2:-1]

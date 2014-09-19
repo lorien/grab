@@ -134,7 +134,10 @@ class CacheBackend(object):
             if 'response_url' in cache_item:
                 response.url = cache_item['response_url']
             else:
-                logger.debug('You cache contains items without `response_url` key. It is depricated data format. Please re-download you cache or build manually `response_url` keys.')
+                logger.debug('You cache contains items without '
+                             '`response_url` key. It is deprecated data '
+                             'format. Please re-download you cache or '
+                             'build manually `response_url` keys.')
                 response.url = cache_item['url']
 
             response.parse()
@@ -176,7 +179,9 @@ class CacheBackend(object):
                   INSERT INTO cache (id, timestamp, data)
                   SELECT %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM cache WHERE id = %s);
                   '''
-        res = self.cursor.execute(sql, (ts, psycopg2.Binary(data), _hash, _hash, ts, psycopg2.Binary(data), _hash))
+        res = self.cursor.execute(sql, (ts, psycopg2.Binary(data), _hash,
+                                        _hash, ts, psycopg2.Binary(data),
+                                        _hash))
         self.cursor.execute('COMMIT')
 
     def pack_database_value(self, val):

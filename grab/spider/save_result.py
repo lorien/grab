@@ -3,6 +3,7 @@ from traceback import format_exc
 import os
 import time
 
+
 def save_result(func):
     def decorated(spider_name, *args, **kwargs):
         if not kwargs.get('save_result', False):
@@ -19,7 +20,8 @@ def save_result(func):
 
             def dump_spider_stats(spider):
                 now = time.time()
-                if not hasattr(spider, '_log_task_timer') or now - spider._log_task_timer  > 60:
+                if not hasattr(spider, '_log_task_timer') \
+                        or now - spider._log_task_timer  > 60:
                     spider._log_task_timer = now
                     elapsed = datetime.now() - task.start_time
                     elapsed_time = (elapsed.days * 3600 * 24) + elapsed.seconds

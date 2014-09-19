@@ -4,7 +4,8 @@ from extension super-classes and cache all extension handlers.
 """
 from copy import copy
 
-class ExtensionSystemError(object):
+
+class ExtensionSystemError(Exception):
     pass
 
 
@@ -28,7 +29,8 @@ def register_extensions(cls):
                 break
 
     if not points:
-        raise ExtensionSystemError('Could not find extension_points attribute nor in class neither in his parents')
+        raise ExtensionSystemError('Could not find extension_points attribute '
+                                   'nor in class neither in his parents')
 
     if not hasattr(cls, 'extension_points'):
         cls.extension_points = copy(points)

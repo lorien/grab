@@ -14,12 +14,14 @@ SPIDER_REGISTRY = {}
 string_types = (str, unicode)
 logger = logging.getLogger('grab.util.module')
 
+
 def reraise(tp, value, tb=None):
     if sys.version_info < (3,):
         from grab.util import py2x_support
         py2x_support.reraise(tp, value, tb)
     else:
         raise tp(value).with_traceback(tb)
+
 
 class ImportStringError(ImportError):
     """Provides information about a failed :func:`import_string` attempt."""
@@ -107,6 +109,7 @@ def import_string(import_name, silent=False):
                 ImportStringError,
                 ImportStringError(import_name, e),
                 sys.exc_info()[2])
+
 
 def build_spider_registry(config):
     # TODO: make smart spider class searching

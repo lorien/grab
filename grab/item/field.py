@@ -13,6 +13,7 @@ from grab.item.error import ChoiceFieldError
 
 metaclass_ABCMeta = ABCMeta('metaclass_ABCMeta', (object, ), {})
 
+
 class Field(metaclass_ABCMeta):
     """
     All custom fields should extend this class, and override the get method.
@@ -99,7 +100,8 @@ class IntegerField(Field):
                 return self.empty_default
 
         if self.find_number or self.ignore_spaces or self.ignore_chars:
-            return find_number(self.process(value), ignore_spaces=self.ignore_spaces,
+            return find_number(self.process(value),
+                               ignore_spaces=self.ignore_spaces,
                                ignore_chars=self.ignore_chars)
         else:
             # TODO: process ignore_chars and ignore_spaces in this case too

@@ -6,6 +6,7 @@ from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.tools.control')
 
+
 def sleep(lower_limit, upper_limit):
     """
     Sleep for random number of seconds in interval
@@ -13,7 +14,7 @@ def sleep(lower_limit, upper_limit):
     """
 
     # Doing this math calculations
-    # to call randint function with integer arugments
+    # to call randint function with integer arguments
     # There is no random function which accepts float arguments
     lower_limit_float = int(lower_limit * 1000)
     upper_limit_float = int(upper_limit * 1000)

@@ -25,7 +25,7 @@ from grab.util.py3k_support import *
 # But if you import pdb at the top of the module then you can use it
 # So.... I import here this module and I hope that will helps
 # My idea is that some mystical shit does some thing that breaks python
-# environment,, breaks sys.path So, when special case occures and some new module
+# environment,, breaks sys.path So, when special case occurs and some new module
 # is need to be imported then that can't be done due to the unknown magical influence
 import encodings.punycode
 
@@ -33,8 +33,10 @@ logger = logging.getLogger('grab.tools.http')
 RE_NON_ASCII = re.compile(r'[^-.a-zA-Z0-9]')
 RE_NOT_SAFE_URL = re.compile(r'[^-.:/?&;#a-zA-Z0-9]')
 
+
 def urlencode(*args, **kwargs):
-    logger.debug('Method grab.tools.http.urlencode is deprecated. Please use grab.tools.http.smart_urlencode')
+    logger.debug('Method grab.tools.http.urlencode is deprecated. '
+                 'Please use grab.tools.http.smart_urlencode')
     return smart_urlencode(*args, **kwargs)
 
 
@@ -159,6 +161,7 @@ def normalize_url(url):
             url = urlunsplit(parts)
             return url
     return url
+
 
 def normalize_post_data(data, charset):
     if isinstance(data, basestring):

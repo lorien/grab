@@ -19,6 +19,7 @@ from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.spider.cache_backend.mongo')
 
+
 def tc_open(path, mode='a+', compress=True, makedirs=True):
     if makedirs:
         try:
@@ -53,7 +54,8 @@ class CacheBackend(object):
         """
 
         if timeout is None:
-            raise NotImplemented('timeout option for tokyo cabinet cache backend is not supported')
+            raise NotImplemented('timeout option for tokyo cabinet cache '
+                                 'backend is not supported')
         try:
             dump = self.db[self.build_key(url)]
         except KeyError:
@@ -83,7 +85,10 @@ class CacheBackend(object):
             if 'response_url' in cache_item:
                 response.url = cache_item['response_url']
             else:
-                logger.debug('You cache contains items without `response_url` key. It is depricated data format. Please re-download you cache or build manually `response_url` keys.')
+                logger.debug('You cache contains items without `response_url` '
+                             'key. It is deprecated data format. Please '
+                             're-download you cache or build manually '
+                             '`response_url` keys.')
                 response.url = cache_item['url']
 
             response.parse()

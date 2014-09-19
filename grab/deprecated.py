@@ -5,6 +5,7 @@ from grab.tools.text import find_number
 from grab.tools.lxml_tools import get_node_text
 from grab import error
 
+
 class DeprecatedThings(object):
     """
     This super-class contains all deprecated things that are

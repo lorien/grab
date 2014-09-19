@@ -28,6 +28,7 @@ http://rpc.weblogs.com/RPC2
 http://xping.pubsub.com/ping
 """.strip().splitlines()
 
+
 def ping(name, url, grab, thread_number=10):
     """
     Do XMLRPC ping of given site.
