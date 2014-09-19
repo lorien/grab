@@ -160,3 +160,14 @@ class TestCookies(TestCase):
         SERVER.RESPONSE['cookies'] = {'bar': 'bar'}
         g.go('http://bar:%d' % SERVER.PORT)
         self.assertEqual(dict(g.response.cookies.items()), {'bar': 'bar'})
+
+    def test_cookie_domain(self):
+        import pycurl
+
+        g = Grab()
+        names = [
+            'example.com:%d:127.0.0.1' % SERVER.PORT,
+        ]
+        g.transport.curl.setopt(pycurl.RESOLVE, names)
+        g.cookies.set('foo', 'bar', domain='example.com')
+        g.go('http://example.com:%d/' % SERVER.PORT)

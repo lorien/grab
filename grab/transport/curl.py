@@ -378,12 +378,12 @@ class CurlTransport(object):
                 cookie_domain = cookie_domain.replace('#httponly_', '')
             if not cookie_domain or host_nowww in cookie_domain:
                 if '.' in host_nowww:
-                    tail = b'; domain=%s' % cookie_domain
+                    tail = '; domain=%s' % cookie_domain
                 else:
-                    tail = b''
+                    tail = ''
                 encoded = encode_cookies({cookie.name: cookie.value}, join=True,
                                          charset=grab.config['charset'])
-                self.curl.setopt(pycurl.COOKIELIST, b'Set-Cookie: ' + encoded + tail)
+                self.curl.setopt(pycurl.COOKIELIST, b'Set-Cookie: ' + encoded + tail.encode('ascii'))
 
     def request(self):
 
