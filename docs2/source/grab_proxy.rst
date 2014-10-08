@@ -6,21 +6,21 @@ Proxy Server Support
 Basic Usage
 -----------
 
-To make Grab send requests via proxy server use :ref:`option_proxy` option::
+To make Grab send requests through a proxy server, use the :ref:`option_proxy` option::
 
     g.setup(proxy='example.com:8080')
 
-If the proxy server requires authentication use :ref:`option_proxy_usrpwd` option
-to specify the username and the password::
+If the proxy server requires authentication, use the :ref:`option_proxy_usrpwd` option
+to specify the username and password::
 
     g.setup(proxy='example.com:8080', proxy_userpwd='root:777')
 
-Also you can specify the type of proxy server: "http", "socks4" or "socks5". By default,
-Grab assumes that proxy is of "http" type::
+You can also specify the type of proxy server: "http", "socks4" or "socks5". By default,
+Grab assumes that proxy is of type "http"::
 
     g.setup(proxy='example.com:8080', proxy_userpwd='root:777', proxy_type='socks5')
 
-You can always see what proxy is used at the moment in `g.config['proxy']`::
+You can always see which proxy is used at the moment in `g.config['proxy']`::
 
     >>> g = Grab()
     >>> g.setup(proxy='example.com:8080')
@@ -30,8 +30,8 @@ You can always see what proxy is used at the moment in `g.config['proxy']`::
 Proxy List Support
 ------------------
 
-Grab supports work with multiple proxy list. Use `g.proxylist`
-attribute to get access to proxy manager. By default, proxy manager is created and initialized with empty proxy list::
+Grab supports working with a list of multiple proxies. Use the `g.proxylist`
+attribute to get access to the proxy manager. By default, the proxy manager is created and initialized with an empty proxy list::
 
     >>> g = Grab()
     >>> g.proxylist
@@ -43,10 +43,10 @@ attribute to get access to proxy manager. By default, proxy manager is created a
 Proxy List Source
 -----------------
 
-You need to setup proxy list manager with details of source that
-manager will load proxies from. Use `g.proxylist.set_source` method those first
+You need to setup the proxy list manager with details of the source that
+manager will load proxies from. Using the `g.proxylist.set_source` method, the first
 positional argument defines the type of source. Currently, two types are supported: 
-"file" and "remote"
+"file" and "remote".
 
 Example of loading proxies from local file::
 
@@ -66,7 +66,7 @@ Example of loading proxies from local file::
     1000
 
 
-And that is how to load proxies from the web::
+And here is how to load proxies from the web::
 
     >>> g = Grab()
     >>> g.proxylist.set_source('remote', url='http://example.com/proxy.txt')
@@ -75,7 +75,7 @@ And that is how to load proxies from the web::
 Automatic Proxy Rotation
 ------------------------
 
-By default, if you set up any non-empty proxy source Grab start rotating proxies from the proxy list for each request. You can disable proxy rotation with :ref:`option_proxy_auto_change` option set to False::
+By default, if you set up any non-empty proxy source, Grab starts rotating through proxies from the proxy list for each request. You can disable proxy rotation with :ref:`option_proxy_auto_change` option set to False::
 
     >>> from grab import Grab
     >>> import logging
@@ -111,13 +111,14 @@ Now let's see how Grab works when `proxy_auto_change` is False::
 Getting Proxy From Proxy List
 -----------------------------
 
-Each time you call `g.proxylist.get_next_proxy` method you get next proxy from the proxy list. After you received last proxy in the list you'll continue receiving proxies from the start of the list. Also, you can use `g.proxylist.get_random_proxy` to pick up random proxy from the proxy list.
+Each time you call `g.proxylist.get_next_proxy`, you get the next proxy from the proxy list. When you receive the last proxy in the list, you'll continue receiving proxies from the beginning of the list. You can also use `g.proxylist.get_random_proxy` to pick a random proxy from the proxy list.
 
 
 Automatic Proxy List Reloading
 ------------------------------
 
-Grab automatically reread the proxy source each `g.proxylist.reload_time` seconds. You can control this value in this way::
+Grab automatically rereads the proxy source each `g.proxylist.reload_time`
+seconds. You can set the value of this option as follows::
 
     >>> g = Grab()
     >>> g.proxylist.setup(reload_time=3600) # reload proxy list one time per hour
@@ -126,7 +127,7 @@ Grab automatically reread the proxy source each `g.proxylist.reload_time` second
 Proxy Accumulating
 ------------------
 
-Be default, Grab overwrite proxy list each time it reloads the proxy source. You can change that behaviuour::
+Be default, Grab overwrites the proxy list each time it reloads the proxy source. You can change that behaviour::
 
     >>> g.proxylist.setup(accumulate_updates=True)
 

@@ -6,10 +6,10 @@ Work With Network Response
 Response Object
 ---------------
 
-The result of doing network request via Grab is `Response` object.
+The result of doing a network request via Grab is a `Response` object.
 
-You get response object as a result of calling to `g.go`, `g.request` and `g.submit` methods.
-Also you can access to response object of recent network query via `g.response` attribute::
+You get a Response object as a result of calling to `g.go`, `g.request` and `g.submit` methods.
+You can also access the response object of a recent network query via the `g.response` attribute::
 
     >>> from grab import Grab
     >>> g = Grab()
@@ -18,15 +18,15 @@ Also you can access to response object of recent network query via `g.response` 
     >>> g.response
     <grab.response.Response object at 0x2cff9f0>
 
-You can find full list of response attributes in Response API document. Here are the most
-important things you should now:
+You can find a full list of response attributes in the Response API document. Here are the most
+important things you should know:
 
 :body: original body contents of HTTP response
 :code: HTTP status of response
 :headers: HTTP headers of response
 :charset: charset of the response
 :cookies: cookies in the response
-:url: the URL of the response document. In case of some automatically processed redirect the
+:url: the URL of the response document. In case of some automatically processed redirect, the
     `url` attribute contains the final URL.
 :name_lookup_time: time spent to resolve host name
 :connect_time: time spent to connect to remote server
@@ -34,7 +34,7 @@ important things you should now:
 :download_size: size of received data
 :upload_size: size of uploaded data except the HTTP headers
 
-Now, real example::
+Now, a real example::
 
     >>> from grab import Grab
     >>> g = Grab()
@@ -63,11 +63,11 @@ Now, real example::
     >>> g.response.upload_size
     0.0
 
-Now let's see some useful methods available in response object:
+Now let's see some useful methods available in the response object:
 
-:unicode_body(): this method returns body of response converted to unicode
-:copy(): returns clone of the response object
-:save(path): saves response object to given location
-:json: treats response content as json-serialized data and de-serializes it into python structure. Actually, this is not a method, it is a property.
-:url_details(): return result of `urlparse.urlsplit` call with `response.url` as argument
-:query_param(name): extracts value of `key` argument from query string of `response.url`
+:unicode_body(): this method returns the response body converted to unicode
+:copy(): returns a clone of the response object
+:save(path): saves the response object to the given location
+:json: treats the response content as json-serialized data and de-serializes it into a python object. Actually, this is not a method, it is a property.
+:url_details(): return the result of calling `urlparse.urlsplit` with `response.url` as an argument.
+:query_param(name): extracts the value of the `key` argument from the query string of `response.url`.
