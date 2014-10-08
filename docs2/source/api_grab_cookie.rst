@@ -5,7 +5,7 @@
 Module grab.cookie
 ==================
 
-This modules contains some classes to operate cookies.
+This module contains some classes to work with cookies.
 
 .. autofunction:: create_cookie
 
