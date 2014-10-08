@@ -6,20 +6,20 @@ Network Errors Handling
 Network Errors
 --------------
 
-If network request fails Grab raise :py:class:`grab.error.GrabNetworkError` exception.
-There are two cases when network error exception raises:
+If a network request fails, Grab raises :py:class:`grab.error.GrabNetworkError`.
+There are two situations when a network error exception will raise:
 
-* server broke connection, connection timed out,
-* any HTTP status code that is not 2XX or 404
+* the server broke connection or the connection timed out
+* the response had any HTTP status code that is not 2XX or 404
 
-Pay attention that 404 is valid status code and exception is not raised.
+Note particularly that 404 is a valid status code, and does not cause an exception to be raised.
 
 Network Timeout
 ---------------
 
-You can configure timeouts with options:
+You can configure timeouts with the following options:
 
 * connect to server timeout with :ref:`option_connect_timeout` option
 * whole request/response operation timeout with :ref:`option_timeout` option
 
-In case of time out Grab raises :py:class:`grab.error.GrabTimeoutError` exception.
+In case of a timeout, Grab raises :py:class:`grab.error.GrabTimeoutError`.

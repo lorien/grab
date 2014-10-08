@@ -5,7 +5,7 @@
 Module grab.base
 ================
 
-Here is the heart of library, Grab class.
+Here is the heart of the library, the Grab class.
 
 .. autoclass:: Grab
 

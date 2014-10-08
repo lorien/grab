@@ -1,18 +1,18 @@
 .. _grab_response_search:
 
-Search in response document body
-================================
+Searchng the response body
+==========================
 
 String search
 -------------
 
-With `doc.text_search` method you can find out if the response document body contains certain string or not::
+With the `doc.text_search` method, you can find out if the response body contains a certain string or not::
 
     >>> g = Grab('<h1>test</h1>')
     >>> g.doc.text_search(u'tes')
     True
 
-If you prefer to raise exception if string was not found then use `doc.text_assert` method::
+If you prefer to raise an exception if string was not found, then use the `doc.text_assert` method::
 
     >>> g = Grab('<h1>test</h1>')
     >>> g.doc.text_assert(u'tez')
@@ -22,7 +22,10 @@ If you prefer to raise exception if string was not found then use `doc.text_asse
         raise DataNotFound(u'Substring not found: %s' % anchor)
     grab.error.DataNotFound: Substring not found: tez
 
-By default all text search methods operates with unicde i.e. you should pass unicode arguments to these methods and these methods search inside document's body converted to unicode. There is an option to work with bytes, just add `byte=True` to any method::
+By default, all text search methods operate with unicode; i.e., you should pass
+unicode arguments to these methods and these methods will search inside document's
+body converted to unicode. There is an option to work with raw bytes, just pass
+`byte=True` to any method::
 
     >>> g = Grab('<h1>test</h1>')
     >>> g.doc.text_search(b'tez', byte=True)
@@ -31,20 +34,20 @@ By default all text search methods operates with unicde i.e. you should pass uni
 Regexp Search
 -------------
 
-You can search for regular expression with `doc.rex_search` method that accepts compiled regexp object or just a text of regular expression::
+You can search for a regular expression with `doc.rex_search` method that accepts compiled regexp object or just a text of regular expression::
 
     >>> g = Grab('<h1>test</h1>')
     >>> g.doc.rex_search('<.+?>').group(0)
     u'<h1>'
 
-Method `doc.rex_text` returns you text contents of `.group(1)` of found match object::
+Method `doc.rex_text` returns you text contents of `.group(1)` of the found match object::
 
     >>> g = Grab('<h1>test</h1>')
     >>> g.doc.rex_text('<.+?>(.+)<')
     u'test'
     
 
-Method `doc.rex_assert` raises `DataNotFound` exception if match is not found::
+Method `doc.rex_assert` raises `DataNotFound` exception if no match is found::
 
     >>> g = Grab('<h1>test</h1>')
     >>> g.doc.rex_assert('\w{10}')

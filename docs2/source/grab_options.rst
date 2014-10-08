@@ -4,7 +4,7 @@
 List of All Options
 ===================
 
-To get info about how to setup Grab instance please go to :ref:`grab_configuration`.
+To learn how to setup Grab instances, please go to :ref:`grab_configuration`.
 
 Network options
 ===============
@@ -17,9 +17,9 @@ url
 :Type: string
 :Default: None
 
-The URL of requested web page. You can use relative URLS, in that case Grab will build
+The URL of the requested web page. You can use relative URLS, in which case Grab will build
 the absolute url by joining the relative URL with the URL or previously requested document.
-Be aware, that Grab does not automatically escapes the unsafe characters in the URL. This is a design feature. You can use `urllib.quote` and `urllib.quote_plus` functions to make your URLs safe.
+Be aware that Grab does not automatically escape unsafe characters in the URL. This is a design feature. You can use `urllib.quote` and `urllib.quote_plus` functions to make your URLs safe.
 
 More info about valid URLs is in `RFC 2396 <http://www.ietf.org/rfc/rfc2396.txt>`_.
 
@@ -32,7 +32,7 @@ timeout
 :Type: int
 :Default: 15
 
-Maximal time to network operation. If it exeeds the GrabNetworkTimeout is raised.
+Maximum time for a network operation. If it is exceeded, GrabNetworkTimeout is raised.
 
 
 .. _option_connect_timeout:
@@ -43,8 +43,8 @@ connect_timeout
 :Type: int
 :Default: 3
 
-Maximal time of operation of connection to remote server and getting initial response.
-If it exeeds then the GrabNetworkTimeout is raised
+Maximum time for connection to the remote server and receipt of an initial
+response. If it is exceeded, GrabNetworkTimeout is raised.
 
 
 .. _option_follow_refresh:
@@ -55,7 +55,7 @@ follow_refresh
 :Type: bool
 :Default: False
 
-Automatically follow the URL specified in <meta http-equiv="refresh"> tag
+Automatically follow the URL specified in <meta http-equiv="refresh"> tag.
 
 
 .. _option_follow_location:
@@ -77,13 +77,13 @@ interface
 :Type: string
 :Default: None
 
-Network interface via that the request should be submitted.
+The network interface through which the request should be submitted.
 
-To specify interface by its OS name use "if!***" format e.g. "if!eth0"
-To specify interface by its name or ip address use "host!***" format e.g.
-"host!127.0.0.1" or "host!localhost"
+To specify the interface by its OS name, use "if!***" format, e.g. "if!eth0".
+To specify the interface by its name or ip address, use "host!***" format, e.g.
+"host!127.0.0.1" or "host!localhost".
 
-Also, check out pycurl manual: http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTINTERFACE
+See also the pycurl manual: http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTINTERFACE
 
 
 .. _option_redirect_limit:
@@ -94,7 +94,9 @@ redirect_limit
 :Type: int
 :Default: 10
 
-Set the maximal number of redirects that Grab could do for one request. Redirects are following the "Location" header in 301/302 network responses and following the url specified in meta refresh tags.
+Set the maximum number of redirects that Grab will do for one request.
+Redirects follow the "Location" header in 301/302 network responses, and
+also follow the URL specified in meta refresh tags.
 
 
 .. _option_hammer_mode:
@@ -105,7 +107,7 @@ hammer_mode
 :Type: bool
 :Default: False
 
-The special mode that forces Grab to repeat the network request in case of network error.
+The special mode that forces Grab to repeat the network request in case of network errors.
 See details in :ref:`grab_hammer_mode`.
 
 
@@ -117,7 +119,7 @@ hammer_timeouts
 :Type: list
 :Default: ((2, 5), (5, 10), (10, 20), (15, 30))
 
-Settings of timeouts in hammer mode.
+Sets timeouts in hammer mode.
 
 
 .. _option_userpwd:
@@ -129,7 +131,7 @@ userpwd
 :Type: string
 :Default: None
 
-The username and the password  to pass HTTP authorization. THe value of that options is the string of format "username:password".
+The username and the password to send during HTTP authorization. The value of that options is the string of format "username:password".
 
 
 HTTP Options
@@ -143,8 +145,8 @@ user_agent
 :Type: string
 :Default: see below
 
-The content of "User-Agent" HTTP-header. By-default, Grab randomly chooses a user agent
-from the list of real user agents that is built into Grab package.
+Sets the content of the "User-Agent" HTTP-header. By default, Grab randomly chooses a user agent
+from the list of real user agents that is built into Grab itself.
 
 
 .. _option_user_agent_file:
@@ -155,8 +157,8 @@ user_agent_file
 :Type: string
 :Default: None
 
-Path to the text file with User-Agent strings. If that options is specified then
-grab randomly choose one line from that file.
+Path to the text file with User-Agent strings. If this option is specified, then
+Grab randomly chooses one line from that file.
 
 
 .. _option_method:
@@ -168,8 +170,8 @@ method
 :Default: "GET"
 :Possible values: "GET", "POST", "PUT", "DELETE"
 
-The method of HTTP-request. By default, the GET method is used. If you specify `post` or
-`multipart_post` option then Grab automatically changes method to POST.
+The HTTP request method to use. By default, GET is used. If you specify `post` or
+`multipart_post` options, then Grab automatically changes the method to POST.
 
 
 .. _option_post:
@@ -180,16 +182,16 @@ post
 :Type: sequence of pairs or dict or string
 :Default: None
 
-Data to be send with POST request. Depends on the type of data the corresponding method
-of handling that data is choosed. Default type of POST request is "application/x-www-form-ulencoded".
+Data to be sent with the POST request. Depending on the type of data, the corresponding method
+of handling that data is selected. The default type for POST requests is "application/x-www-form-ulencoded".
 
-In case of `dict` or sequence of pairs the following alogo is applyed to each value:
+In case of `dict` or sequence of pairs, the following algorithm is applied to each value:
 
 * objects of `grab.upload.UploadFile` class are converted into pycurl structures
 * unicode strings are converted into byte strings
 * None values are converted into empty strings
 
-If `post` value is just a string then it is placed into network request without any modification.
+If `post` value is just a string, then it is placed into the network request without any modification.
 
 
 .. _option_multipart_post:
@@ -200,7 +202,7 @@ multipart_post
 :Type: sequence of pairs or dict
 :Default: None
 
-Data to be send with POST request. This option forces the POST request to be
+Data to be sent with the POST request. This option forces the POST request to be
 in "multipart/form-data" form.
 
 
@@ -213,7 +215,7 @@ headers
 :Type: dict
 :Default: None
 
-Extra HTTP-headers. The value of that options will be joined with headers
+Additional HTTP-headers. The value of this option will be added to headers
 that Grab generates by default. See details in :ref:`grab_http_headers`.
 
 
@@ -225,9 +227,9 @@ common_headers
 :Type: dict
 :Default: None
 
-By default, Grab generates some common HTTP headers to mimic the behaviour of real web browser.
-If you have some troubles with these deafult headers then you can specify your own headers with
-that option. Please note that the usual way to specify some heaer is to use :ref:`option_headers` option. See details in :ref:`grab_http_headers`.
+By default, Grab generates some common HTTP headers to mimic the behaviour of a real web browser.
+If you have trouble with these deafult headers, you can specify your own headers with
+this option. Please note that the usual way to specify a header is to use the :ref:`option_headers` option. See details in :ref:`grab_http_headers`.
 
 .. _option_reuse_cookies:
 
@@ -237,8 +239,8 @@ reuse_cookies
 :Type: bool
 :Default: True
 
-If that option is enabled then all cookies in each network response are remembered and
-sent back in furher requests to the server.
+If this option is enabled, then all cookies in each network response are stored
+locally and sent back with further requests to the same server.
 
 .. _option_cookies:
 
@@ -248,8 +250,8 @@ cookies
 :Type: dict
 :Default: None
 
-Cookies to send to the server. If the option :ref:`option_reuse_cookies` is also enabled
-then cookies from the `cookies` option will be joined with remembered cookies.
+Cookies to send to the server. If the option :ref:`option_reuse_cookies` is also enabled,
+then cookies from the `cookies` option will be joined with stored cookies.
 
 
 .. _option_cookiefile:
@@ -260,8 +262,8 @@ cookiefile
 :Type: string
 :Defaul: None
 
-Before each request Grab willl read cookies from that file and join them with remembered cookies. After each response Grab will save all cookies to that file.
-Format of data in the file: JSON serialized dict.
+Before each request, Grab will read cookies from this file and join them with stored cookies. After each response, Grab will save all cookies to that file.
+The data stored in the file is a dict serialized as JSON.
 
 
 .. _option_referer:
@@ -272,8 +274,8 @@ referer
 :Type: string
 :Default: see below
 
-The content of "Referer" HTTP-header. By default, Grab build this header with the URL
-of previously requested document.
+The content of the "Referer" HTTP-header. By default, Grab builds this header with the URL
+of the previously requested document.
 
 
 .. _option_reuse_referer:
@@ -284,8 +286,8 @@ reuse_referer
 :Type: bool
 :Default: True
 
-If that options is enabled, then Grab uses URL of previously requested documen to build
-the content of "Referer" HTTP header.
+If this option is enabled, then Grab uses the URL of the previously requested document to build
+the content of the "Referer" HTTP header.
 
 
 Proxy Options
@@ -299,7 +301,7 @@ proxy
 :Type: string
 :Default: None
 
-The address of the proxy server in format of "domain:port" or "ip:port".
+The address of the proxy server, in either "domain:port" or "ip:port" format.
 
 
 .. _option_proxy_userpwd:
@@ -310,8 +312,8 @@ proxy_userpwd
 :Type: string
 :Default: None
 
-Security data to submit to the proxy if it requires authenication.
-Forma of data is "username:password"
+Security data to submit to the proxy if it requires authentication.
+Form of data is "username:password"
 
 .. _option_proxy_type:
 
@@ -334,7 +336,8 @@ encoding
 :Type: string
 :Default: "gzip"
 
-List of methods that remote server could use to compress the conten of response. By default, the value of this options is "gzip". To disable any compression method pass the empty string to that option.
+List of methods that the remote server could use to compress the content of its response. The default value of this option is "gzip". To disable all
+compression, pass the empty string to this option.
 
 
 .. _option_document_charset:
@@ -343,9 +346,8 @@ document_charset
 -------
 
 Character set of the document's content.
-By default :ref:`_option_document_charset` is detected automatically.
-In case character set was determined with error, you can specify it with that option. The value you specified
-will be used to convert body of the document to the character set specified in :ref:`_option_charset`. After that the converted body will be passed to lxml library to build the DOM tree. :ref:`_option_document_charset` is also used to encode non-ascii symbols in POST data.
+By default, :ref:`_option_document_charset` is detected automatically.
+In case the character set is incorrectly determined, you can specify it with this option. The value you specified will be used to convert the bytes in the body of the document to the character set specified in :ref:`_option_charset`. After that the converted body will be passed to lxml to build the DOM tree. :ref:`_option_document_charset` is also used to encode non-ascii symbols in POST data.
 
 :Type: string
 :Default: None
@@ -355,8 +357,8 @@ will be used to convert body of the document to the character set specified in :
 charset
 -------
 
-Character set to which content of the document should be converted to.
-This option is only useful in case :ref:`_option_document_charset` is something different from 'utf-8' (e.g. content is a *bytestring*). Otherwise this option won't affect the resulting content.
+Character set that the content of the document should be converted to.
+This option is only useful in case :ref:`_option_document_charset` is not 'utf-8' (e.g., if content is a *bytestring*). Otherwise, this option won't affect the resulting content.
 
 :Type: string
 :Default: 'utf-8'
@@ -369,9 +371,9 @@ nobody
 :Type: bool
 :Default: False
 
-Ignoring the body of network response. When this option is enable the connection is
-abandoned at the moment when remote server transfered all headers of response and
-started transfer the body of the response. You can use this option with any HTTP method.
+Ignore the body of the network response. When this option is enabled, the connection is
+abandoned at the moment when remote server transfers all response headers and
+begins to transfer the body of the response. You can use this option with any HTTP method.
 
 
 .. _option_body_maxsize:
@@ -382,9 +384,9 @@ body_maxsize
 :Type: int
 :Default: None
 
-The limit on the maximum size of data that should be received from the remote server.
-If limit is reached the connection is abandoned and you can work with data that
-were received so far.
+A limit on the maximum size of data that should be received from the remote server.
+If the limit is reached, the connection is abandoned and you can work with the data 
+received so far.
 
 
 .. _option_lowercased_tree:
@@ -395,7 +397,7 @@ lowercased_tree
 :type: bool
 :Default: False
 
-Conver content of document to lowercase before passing it to the lxml library to build the DOM tree. This option does not affect on the content of `response.body` that always stores original data.
+Convert the content of the document to lowercase before passing it to the lxml library to build the DOM tree. This option does not affect the content of `response.body`, which always stores the original data.
 
 
 .. _option_strip_null_bytes:
@@ -406,7 +408,7 @@ strip_null_bytes
 :Type: bool
 :Default: True
 
-Control the removing of null bytes from the body of HTML documents before it is passed to lxml library to build DOM tree. The lxml library stop processing HTML documents at the first places where it founds null byte. To avoid such issued Grab, by default, removes null bytes from the document body. This option does not affect on the content of `response.body` that always stores original data.
+Control the removal of null bytes from the body of HTML documents before they a re passed to lxml to build a DOM tree. lxml stops processing HTML documents at the first place where it finds a null byte. To avoid such issues Grab, removes null bytes from the document body by default. This option does not affect the content of `response.body` that always stores the original data.
 
 
 .. _option_body_inmemory:
@@ -417,7 +419,7 @@ body_inmemory
 :Type: bool
 :Default: True
 
-Control the method of downloading the network response. By default, Grab download data into memory. In case of large file, you can set `body_inmemory=False` to download network response directly to the disk.
+Control the way the network response is received. By default, Grab downloads data into memory. To handle large files, you can set `body_inmemory=False` to download the network response directly to the disk.
 
 
 .. _option_storage_dir:
@@ -439,7 +441,7 @@ body_storage_filename
 :Type: string
 :Default: None
 
-If you use `body_inmemory=False`, then you can let Grab automatically choose names for files where is save network responses. By default, Grab build randomly unique names for files. With the `body_storage_filename` options you can choose exactly file name to save response. Note, that Grab will save every response to that file, so you need to change the `body_storage_filename` option before each new request or set it to None to enable default randomly geneated file names.
+If you use `body_inmemory=False`, you can let Grab automatically choose names for the files where it saves network responses. By default, Grab randomly builds unique names for files. With the `body_storage_filename` option, you can choose the exact file name to save response to. Note that Grab will save every response to that file, so you need to change the `body_storage_filename` option before each new request, or set it to None to enable default randomly generated file names.
 
 
 .. _option_content_type:
@@ -451,7 +453,7 @@ content_type
 :Default: "html"
 :Available values: "html" and "xml"
 
-This option controls what lxml parser is used to process the body of the response. By default, html parsed is used. If you want to parse XML then you sometimes need to change this option to "xml" to force using XML parser that does not strip content of CDATA nodes.
+This option controls which lxml parser is used to process the body of the response. By default, the html parser is used. If you want to parse XML, then you may need to change this option to "xml" to force the use of an XML parser which does not strip the content of CDATA nodes.
 
 
 .. _option_fix_special_entities:
@@ -462,10 +464,10 @@ fix_special_entities
 :Type: bool
 :Default: True
 
-Fix &#X; entities, where X between 128 and 160 Such entities are parsed by modern
-browsers as windows-1251 entities independently of the real charset of
-the document, If this option is True then such entities
-will be replaced with correct unicode entitites e.g.: &#151; ->  &#8212;
+Fix &#X; entities, where X between 128 and 160. Such entities are parsed by modern
+browsers as windows-1251 entities, independently of the real charset of
+the document. If this option is True, then such entities
+will be replaced with appropriate unicode entities, e.g.: &#151; ->  &#8212;
 
 Debugging
 =========
@@ -478,7 +480,7 @@ log_file
 :Type: string
 :Default: None
 
-Path to the file where the body of recent network response will be saved.
+Path to the file where the body of the recent network response will be saved.
 See details at :ref:`grab_debugging_response_saving`.
 
 
@@ -490,7 +492,7 @@ log_dir
 :Type: string
 :Default: None
 
-Directory to save content of each response. Each response will be saved to the unique file.
+Directory to save the content of each response in. Each response will be saved to a unique file.
 See details at :ref:`grab_debugging_response_saving`.
 
 
@@ -502,7 +504,7 @@ verbose_logging
 :Type: bool
 :Default: False
 
-That option enables the print to console all detailed debug info about each pycul action. Sometimes that could be useful.
+This option enables printing to console of all detailed debug info about each pycurl action. Sometimes this can be useful.
 
 
 .. _option_debug_post:
@@ -513,6 +515,6 @@ debug_post
 :Type: bool
 :Default: False
 
-Enable logging of content of POST requests.
+Enable logging of POST request content.
 
 

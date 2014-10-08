@@ -3,7 +3,7 @@
 Module grab.error
 =================
 
-Custom Grab Exception Classes
+Custom exception classes for Grab.
 
 .. module:: grab.error
 
