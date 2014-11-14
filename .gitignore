@@ -32,5 +32,8 @@ docs/libpeerconnection.log
 /test.py
 /many_links_prof
 /prof.compiled
+/.venv/
+/settings.py
+/spider.py
 
 .idea/

@@ -25,6 +25,7 @@ def setup_arg_parser(parser):
     parser.add_argument('--disable-proxy', action='store_true', default=False,
                         help='Disable proxy servers')
     parser.add_argument('--ignore-lock', action='store_true', default=False)
+    parser.add_argument('--disable-report', action='store_true', default=False)
 
 
 #def get_spider_setting(spider_config, key, deprecated_key=None, key_type=None,
@@ -76,6 +77,7 @@ def get_lock_key(spider_name, lock_key=None, ignore_lock=False, slave=False, **k
 def main(spider_name, thread_number=None, slave=False,
          settings='settings', network_logs=False,
          disable_proxy=False, ignore_lock=False, 
+         disable_report=False,
          *args, **kwargs):
     default_logging(propagate_network_logger=network_logs)
 
@@ -149,18 +151,19 @@ def main(spider_name, thread_number=None, slave=False,
     pid = os.getpid()
     logger.debug('Spider pid is %d' % pid)
 
-    if spider_config.get('save_report', deprecated_key='GRAB_SAVE_REPORT'):
-        for subdir in (str(pid), 'last'):
-            dir_ = 'var/%s' % subdir
-            if not os.path.exists(dir_):
-                os.mkdir(dir_)
-            else:
-                clear_directory(dir_)
-            for key, lst in bot.items.iteritems():
-                fname_key = key.replace('-', '_')
-                bot.save_list(key, '%s/%s.txt' % (dir_, fname_key))
-            with open('%s/report.txt' % dir_, 'wb') as out:
-                out.write(stats)
+    if not disable_report:
+        if spider_config.get('save_report', deprecated_key='GRAB_SAVE_REPORT'):
+            for subdir in (str(pid), 'last'):
+                dir_ = 'var/%s' % subdir
+                if not os.path.exists(dir_):
+                    os.mkdir(dir_)
+                else:
+                    clear_directory(dir_)
+                for key, lst in bot.items.iteritems():
+                    fname_key = key.replace('-', '_')
+                    bot.save_list(key, '%s/%s.txt' % (dir_, fname_key))
+                with open('%s/report.txt' % dir_, 'wb') as out:
+                    out.write(stats)
 
     return {
         'spider_stats': bot.render_stats(timing=False),
