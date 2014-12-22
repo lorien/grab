@@ -5,7 +5,7 @@ from Queue import PriorityQueue
 
 class QueueBackend(QueueInterface):
     def __init__(self, unique=False, **kwargs):
-        super(QueueInterface, self).__init__(**kwargs)
+        super(QueueBackend, self).__init__(**kwargs)
         self.queue_object = PriorityQueue()
         self.unique = unique
         self.unique_dict = {}

@@ -9,7 +9,7 @@ import Queue
 
 class QueueBackend(QueueInterface):
     def __init__(self, **kwargs):
-        super(QueueInterface, self).__init__(**kwargs)
+        super(QueueBackend, self).__init__(**kwargs)
         self.queue_object = PriorityQueue('request_queue')
 
     def put(self, task, priority):
