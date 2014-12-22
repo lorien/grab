@@ -36,8 +36,7 @@ class QueueBackend(QueueInterface):
 
         self.collection.ensure_index('priority')
 
-        super(QueueBackend, self).__init__(database, queue_name, clear_on_init,
-                                           clear_on_exit, **kwargs)
+        super(QueueBackend, self).__init__(database, **kwargs)
 
     def __del__(self):
         if self.clear_on_exit:
