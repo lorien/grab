@@ -1,3 +1,5 @@
+import logging
+
 from grab.util.misc import deprecated
 from grab.const import NULL
 from grab.error import DataNotFound, GrabMisuseError
@@ -7,6 +9,8 @@ from grab import error
 
 
 class DeprecatedThings(object):
+    __slots__ = ()
+
     """
     This super-class contains all deprecated things that are
     still in Grab class for back-ward compatibility.
@@ -329,3 +333,46 @@ class DeprecatedThings(object):
         self.setup(proxy_auto_change=auto_change)
         if not auto_change and auto_init:
             self.change_proxy()
+
+    # Methods from deprecated grab.ext.form module
+    # **********************************************
+
+    @deprecated(use_instead='grab.doc.choose_form')
+    def choose_form(self, number=None, id=None, name=None, xpath=None):
+        return self.doc.choose_form(number=number, id=id, name=name, xpath=xpath)
+                
+    @property
+    def form(self):
+        logging.error('This attribut is deprecated. Use grab.doc.form instead.')
+        return self.doc.form
+
+    @deprecated(use_instead='grab.doc.set_input')
+    def set_input(self, name, value):
+        return self.doc.set_input(name, value)
+
+    @deprecated(use_instead='grab.doc.set_input_by_id')
+    def set_input_by_id(self, _id, value):
+        return self.doc.set_input_by_id(_id, value)
+
+    @deprecated(use_instead='grab.doc.set_input_by_number')
+    def set_input_by_number(self, number, value):
+        return self.doc.set_input_by_number(number, value)
+
+    @deprecated(use_instead='grab.doc.set_input_by_xpath')
+    def set_input_by_xpath(self, xpath, value):
+        return self.doc.set_input_by_xpath(xpath, value)
+
+
+    @deprecated(use_instead='grab.doc.submit')
+    def submit(self, submit_name=None, make_request=True,
+               url=None, extra_post=None):
+        return self.doc.submit(submit_name=submit_name, make_request=make_request,
+                               url=url, extra_post=extra_post)
+
+    @deprecated(use_instead='grab.doc.form_fields')
+    def form_fields(self):
+        return self.doc.form_fields()
+
+    @deprecated(use_instead='grab.doc.choose_form_by_element')
+    def choose_form_by_element(self, xpath):
+        return self.doc.choose_form_by_element(xpath)

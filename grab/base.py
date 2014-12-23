@@ -187,7 +187,7 @@ def default_config():
     )
 
 
-class Grab(FormExtension, DeprecatedThings):
+class Grab(DeprecatedThings):
 
     __slots__ = ('request_head', 'request_log', 'request_body',
                  'proxylist', 'config',
@@ -197,8 +197,7 @@ class Grab(FormExtension, DeprecatedThings):
 
                  # Dirty hack to make it possible to inherit Grab from
                  # multiple base classes with __slots__
-                 '_lxml_form', '_file_fields',
-                 '_pyquery', '_doc', '_kit',
+                 '_doc', '_kit',
                  )
 
     # Attributes which should be processed when clone
@@ -279,9 +278,6 @@ class Grab(FormExtension, DeprecatedThings):
 
         # KIT
         self._kit = None
-        # Form extension
-        self._lxml_form = None
-        self._file_fields = {}
 
     def clone(self, **kwargs):
         """
@@ -717,8 +713,6 @@ class Grab(FormExtension, DeprecatedThings):
                 if slot != '__weakref__':
                     if hasattr(self, slot):
                         state[slot] = getattr(self, slot)
-
-        state['_lxml_form'] = None
 
         if state['_doc']:
             state['_doc'].grab = weakref.proxy(self)

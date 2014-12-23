@@ -222,6 +222,7 @@ class ItemTestCase(TestCase):
         self.assertEqual(set(['name', 'age']), set(items[0]._fields.keys()))
 
 
+"""
 class JsonSelectorTestCase(TestCase):
     class PlanetItem(Item):
         class Meta:
@@ -262,3 +263,4 @@ class JsonSelectorTestCase(TestCase):
         self.assertEqual(set(['Earth', 'Mars', 'Onyx']),
                          set(x.name for x in planets))
 
+"""
