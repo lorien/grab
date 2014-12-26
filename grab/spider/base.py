@@ -934,7 +934,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                                              ' %.2f seconds' % task.sleep)
                                 time.sleep(task.sleep)
                     elif isinstance(task, bool) and (task is True):
-                        pass
+                        # Take some sleep to not load CPU
+                        if not self.transport.active_task_number():
+                            time.sleep(0.1)
                     else:
                         if self.ng:
                             if self.waiting_shutdown_event.is_set():
