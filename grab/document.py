@@ -682,9 +682,9 @@ class FormExtension(object):
                         del post[name]
 
         if url:
-            action_url = urljoin(self.response.url, url)
+            action_url = urljoin(self.url, url)
         else:
-            action_url = urljoin(self.response.url, self.form.action)
+            action_url = urljoin(self.url, self.form.action)
 
         # Values from `extra_post` should override values in form
         # `extra_post` allows multiple value of one key
@@ -714,17 +714,17 @@ class FormExtension(object):
 
         if self.form.method == 'POST':
             if 'multipart' in self.form.get('enctype', ''):
-                self.setup(multipart_post=post_items)
+                self.grab.setup(multipart_post=post_items)
             else:
-                self.setup(post=post_items)
-            self.setup(url=action_url)
+                self.grab.setup(post=post_items)
+            self.grab.setup(url=action_url)
 
         else:
             url = action_url.split('?')[0] + '?' + smart_urlencode(post_items)
-            self.setup(url=url)
+            self.grab.setup(url=url)
 
         if make_request:
-            return self.request()
+            return self.grab.request()
         else:
             return None
 
