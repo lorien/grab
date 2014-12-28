@@ -521,13 +521,11 @@ class Grab(DeprecatedThings):
         # TODO: check max redirect count
         if self.config['follow_refresh']:
             url = find_refresh_url(self.doc.unicode_body())
-            print('URL', url)
             if url is not None:
                 inc_count = old_refresh_count + 1
                 if inc_count > self.config['redirect_limit']:
                     raise error.GrabTooManyRedirectsError()
                 else:
-                    print(inc_count)
                     return self.request(url=url,
                                         refresh_redirect_count=inc_count)
 
