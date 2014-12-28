@@ -749,6 +749,12 @@ class Grab(DeprecatedThings):
             self._kit = GrabKitInterface(self)
         return self._kit
 
+    def dump(self):
+        """
+        Shortcut for real-time debugging.
+        """
+        self.doc.save('/tmp/x.html')
+
 
 # For backward compatibility
 # WTF???
