@@ -38,7 +38,7 @@ __all__ = ('Grab',)
 # Its value will be displayed in logging messages and also used
 # in names of dumps
 # I use mutable module variable to allow different
-# instances of Grab maintain single counter
+# instances of Grab to maintain single counter
 # This could be helpful in debugging when your script
 # creates multiple Grab instances - in case of shared counter
 # grab instances do not overwrite dump logs
@@ -445,6 +445,7 @@ class Grab(DeprecatedThings):
         try:
             self.transport.request()
         except error.GrabError:
+            self.reset_temporary_options()
             self.save_failed_dump()
             raise
         else:
