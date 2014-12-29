@@ -37,6 +37,7 @@ class Watcher(object):
             os.wait()
         except KeyboardInterrupt:
             logging.debug('Watcher process received KeyboardInterrupt')
+            """
             signals = (
                 ('SIGTERM', 1),
                 ('SIGKILL', 2),
@@ -56,9 +57,19 @@ class Watcher(object):
                         time.sleep(sleep_time / 10.0)
                         if not os.path.exists('/proc/%d' % self.child):
                             break
+            """
+            wait_time = 1
+            for x in xrange(10):
+                os.kill(self.child, signal.SIGKILL)
+                if not os.path.exists('/proc/%d' % self.child):
+                    break
+                else:
+                    time.sleep(wait_time / 10.0)
 
+        """
         if os.path.exists('/proc/%d' % self.child):
             logging.error('Process pid=%d still exists' % self.child)
+        """
         sys.exit()
 
 
