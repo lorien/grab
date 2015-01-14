@@ -2,6 +2,7 @@ import pycurl
 import select
 import time
 
+from grab.error import GrabTooManyRedirectsError
 from grab.util.py3k_support import *
 
 
@@ -120,7 +121,11 @@ class MulticurlTransport(object):
                 grab = self.registry[curl_id]['grab']
                 grab_config_backup = self.registry[curl_id]['grab_config_backup']
 
-                grab.process_request_result()
+                try:
+                    grab.process_request_result()
+                except GrabTooManyRedirectsError:
+                    ecode = -1
+                    emsg = 'Too many meta refresh redirects'
                 grab.response.error_code = ecode
                 grab.response.error_msg = emsg
 

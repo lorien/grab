@@ -18,8 +18,8 @@ RE_REFRESH_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']*Refresh[^>]+', re
 RE_REFRESH_URL = re.compile(r'''
     content \s* = \s*
     ["\']* \d+
-    (?: ; \s* url \s* = \s*)?
     ;
+    (?: ; \s* url \s* = \s*)?
     ["\']* ([^\'"> ]*)
 ''', re.I | re.X)
 
