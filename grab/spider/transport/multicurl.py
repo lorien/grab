@@ -24,6 +24,9 @@ class MulticurlTransport(object):
     def ready_for_task(self):
         return len(self.freelist)
 
+    def get_free_threads_number(self):
+        return len(self.freelist)
+
     def active_task_number(self):
         return self.thread_number - len(self.freelist)
 

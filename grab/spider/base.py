@@ -440,8 +440,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             else:
                 min_limit = self.thread_number * 10
             if qsize < min_limit:
-                logger_verbose.debug('Task queue contains less tasks than '
-                                     'limit. Trying to add new tasks')
+                logger_verbose.debug('Task queue contains less tasks (%d) than '
+                                     'allowed limit (%d). Trying to add '
+                                     'new tasks.' % (qsize, min_limit))
                 try:
                     for x in xrange(min_limit - qsize):
                         item = next(self.task_generator_object)
@@ -481,8 +482,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 with self.save_timer('task_queue'):
                     return self.taskq.get()
             except queue.Empty:
-                if self.taskq.size():
-                    logger_verbose.debug('Waiting for scheduled task')
+                qsize = self.taskq.size()
+                if qsize:
+                    logger_verbose.debug('No ready-to-go tasks, Waiting for scheduled tasks (%d)' % qsize)
                     return True
                 if not self.slave:
                     logger_verbose.debug('Task queue is empty.')
@@ -887,9 +889,10 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                         self.process_task_generator()
                     self.stop_timer('task_generator')
 
-                if self.transport.ready_for_task():
-                    logger_verbose.debug('Transport has free resources. '
-                                         'Trying to add new task (if exists)')
+                free_threads = self.transport.get_free_threads_number()
+                if free_threads:
+                    logger_verbose.debug('Transport has free resources (%d). '
+                                         'Trying to add new task (if exists).' % free_threads)
 
                     # Try five times to get new task and proces task generator
                     # because slave parser could agressively consume
