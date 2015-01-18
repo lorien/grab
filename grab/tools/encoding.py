@@ -5,14 +5,14 @@ from grab.util.py3k_support import *
 RE_SPECIAL_ENTITY = re.compile(b'&#(1[2-6][0-9]);')
 
 
-def make_str(value, encoding='utf-8'):
+def make_str(value, encoding='utf-8', errors='strict'):
     """
     Normalize unicode/byte string to byte string.
     """
 
     if isinstance(value, unicode):
         # Convert to string (py2.x) or bytes (py3.x)
-        value = value.encode(encoding)
+        value = value.encode(encoding, errors=errors)
     elif isinstance(value, str):
         pass
     else:
@@ -20,14 +20,14 @@ def make_str(value, encoding='utf-8'):
     return value
 
 
-def make_unicode(value, encoding='utf-8'):
+def make_unicode(value, encoding='utf-8', errors='strict'):
     """
     Normalize unicode/byte string to unicode string.
     """
 
     if not isinstance(value, unicode):
         # Convert to unicode (py2.x and py3.x)
-        value = value.decode(encoding)
+        value = value.decode(encoding, errors=errors)
     return value
 
 

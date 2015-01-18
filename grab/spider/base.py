@@ -43,6 +43,7 @@ from grab.spider.command_controller import CommandController
 from grab.util.misc import camel_case_to_underscore
 from grab.util.py2old_support import *
 from grab.util.py3k_support import *
+from grab.tools.encoding import make_str, make_unicode
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
@@ -658,8 +659,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                     #if num > 20000:
                         #import pdb; pdb.set_trace()
 
-            self.inc_count('network-error-%s' % res['emsg'][:20])
-            logger.error(u'Network error: %s' % msg)
+            self.inc_count('network-error-%s' % make_str(res['emsg'][:20], errors='ignore'))
+            logger.error(u'Network error: %s' % make_unicode(msg, errors='ignore'))
 
             # Try to repeat the same network query
             if self.network_try_limit > 0:
