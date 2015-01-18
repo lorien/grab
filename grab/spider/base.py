@@ -519,11 +519,20 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if self._grab_config and kwargs:
             merged_config = deepcopy(self._grab_config)
             merged_config.update(kwargs)
-            return Grab(**merged_config)
+            grab = Grab(**merged_config)
         elif self._grab_config and not kwargs:
-            return Grab(**self._grab_config)
+            grab = Grab(**self._grab_config)
         else:
-            return Grab(**kwargs)
+            grab = Grab(**kwargs)
+        self.update_grab_instance(grab)
+        return grab
+
+    def update_grab_instance(self, grab):
+        """
+        Use this method to automatically update config of any
+        `Grab` instance created by the spider.
+        """
+        pass
 
     def setup_grab_for_task(self, task):
         grab = self.create_grab_instance()
