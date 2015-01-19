@@ -445,6 +445,7 @@ class CurlTransport(object):
         response.download_size = self.curl.getinfo(pycurl.SIZE_DOWNLOAD)
         response.upload_size = self.curl.getinfo(pycurl.SIZE_UPLOAD)
         response.download_speed = self.curl.getinfo(pycurl.SPEED_DOWNLOAD)
+        response.remote_ip = self.curl.getinfo(pycurl.PRIMARY_IP)
 
         response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
 
