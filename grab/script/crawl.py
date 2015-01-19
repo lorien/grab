@@ -145,6 +145,7 @@ def main(spider_name, thread_number=None, slave=False,
     stats = bot.render_stats(
         timing=spider_config.get('display_timing',
                                  deprecated_key='GRAB_DISPLAY_TIMING'))
+    stats_with_time = bot.render_stats(timing=True)
 
     if spider_config.get('display_stats', deprecated_key='GRAB_DISPLAY_STATS'):
         logger.debug(stats)
@@ -164,7 +165,7 @@ def main(spider_name, thread_number=None, slave=False,
                     fname_key = key.replace('-', '_')
                     bot.save_list(key, '%s/%s.txt' % (dir_, fname_key))
                 with open('%s/report.txt' % dir_, 'wb') as out:
-                    out.write(stats)
+                    out.write(stats_with_time)
 
     return {
         'spider_stats': bot.render_stats(timing=False),
