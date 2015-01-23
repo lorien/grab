@@ -9,7 +9,7 @@ from grab.spider.error import SpiderInternalError
 from grab.util.misc import camel_case_to_underscore
 from grab.util.py3k_support import *
 
-PY2 = True
+PY2 = not PY3K
 SPIDER_REGISTRY = {}
 string_types = (str, unicode)
 logger = logging.getLogger('grab.util.module')
@@ -20,7 +20,7 @@ def reraise(tp, value, tb=None):
         from grab.util import py2x_support
         py2x_support.reraise(tp, value, tb)
     else:
-        raise tp(value).with_traceback(tb)
+        raise value.with_traceback(tb)
 
 
 class ImportStringError(ImportError):
@@ -95,6 +95,8 @@ def import_string(import_name, silent=False):
         # if the module is a package
         if PY2 and isinstance(obj, unicode):
             obj = obj.encode('utf-8')
+        if PY3K and isinstance(obj, bytes):
+            obj = obj.decode('utf-8')
         try:
             return getattr(__import__(module, None, None, [obj]), obj)
         except (ImportError, AttributeError):

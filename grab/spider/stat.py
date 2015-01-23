@@ -40,14 +40,14 @@ class SpiderStat(object):
         Save items from list to the file.
         """
 
-        with open(path, 'w') as out:
+        with open(path, 'wb') as out:
             lines = []
             for item in self.items.get(list_name, []):
                 if isinstance(item, basestring):
                     lines.append(smart_str(item))
                 else:
                     lines.append(json.dumps(item))
-            out.write('\n'.join(lines) + '\n')
+            out.write(b'\n'.join(lines) + b'\n')
 
     def render_stats(self, timing=True):
         out = []

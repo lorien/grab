@@ -8,6 +8,7 @@ from grab.tools.logs import default_logging
 from grab.tools.lock import assert_lock
 from grab.spider.save_result import save_result
 from grab.tools.files import clear_directory
+from grab.tools.encoding import make_str
 
 logger = logging.getLogger('grab.script.crawl')
 
@@ -161,11 +162,11 @@ def main(spider_name, thread_number=None, slave=False,
                     os.mkdir(dir_)
                 else:
                     clear_directory(dir_)
-                for key, lst in bot.items.iteritems():
+                for key, lst in bot.items.items():
                     fname_key = key.replace('-', '_')
                     bot.save_list(key, '%s/%s.txt' % (dir_, fname_key))
                 with open('%s/report.txt' % dir_, 'wb') as out:
-                    out.write(stats_with_time)
+                    out.write(make_str(stats_with_time))
 
     return {
         'spider_stats': bot.render_stats(timing=False),

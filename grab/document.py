@@ -1031,7 +1031,10 @@ class Document(TextExtension, RegexpExtension, DjangoExtension, PyqueryExtension
         Return response body deserialized into JSON object.
         """
 
-        return json.loads(self.body)
+        if PY3K:
+            return json.loads(self.body.decode(self.charset))
+        else:
+            return json.loads(self.body)
 
     def url_details(self):
         """
