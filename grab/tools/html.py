@@ -17,9 +17,9 @@ RE_REFRESH_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']*Refresh[^>]+', re
 # <meta http-equiv='REFRESH' content='0;url= http://www.bk55.ru/mc2/news/article/855'>
 RE_REFRESH_URL = re.compile(r'''
     content \s* = \s*
-    ["\']* \d+
+    ["\']* \s* \d+ \s*
     ;
-    (?: ; \s* url \s* = \s*)?
+    (?: \s* url \s* = \s*)?
     ["\']* ([^\'"> ]*)
 ''', re.I | re.X)
 
