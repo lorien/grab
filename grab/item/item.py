@@ -2,7 +2,6 @@ import logging
 
 from grab.item.field import Field, ItemListField
 from grab.selector import XpathSelector
-from grab.selector import JsonSelector
 from grab.error import GrabMisuseError
 from grab.document import Document
 
@@ -45,8 +44,6 @@ class Item(ItemBuilderMetaClass):
     def _build_selector(cls, tree, selector_type):
         if selector_type == 'xpath':
             return XpathSelector(tree)
-        elif selector_type == 'json':
-            return JsonSelector(tree)
         else:
             raise GrabMisuseError('Unknown selector type: %s' % selector_type)
 

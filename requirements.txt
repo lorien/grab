@@ -2,7 +2,6 @@
 lxml
 pycurl
 cssselect
-jsonpath_rw
 tornado
 pytils
 pyquery

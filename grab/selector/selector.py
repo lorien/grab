@@ -20,7 +20,7 @@ from grab.const import NULL
 from grab.util.py3k_support import *
 
 __all__ = ['Selector', 'TextSelector', 'XpathSelector', 'PyquerySelector',
-           'KitSelector', 'JsonSelector']
+           'KitSelector']
 XPATH_CACHE = {}
 logger = logging.getLogger('grab.selector.selector')
 
@@ -355,34 +355,6 @@ class KitSelector(BaseSelector):
 
     def text(self, smart=False, normalize_space=True):
         return unicode(self.node.toPlainText())
-
-
-class JsonSelector(BaseSelector):
-    __slots__ = ()
-
-    # TODO: It seems there is performance problem
-    # see finnetrix, media_list.json
-    def __init__(self, node):
-        """
-        `node` is deserialized JSON i.e. it is a native python structure
-        """
-        import jsonpath_rw
-
-        self.node = jsonpath_rw.parse('`this`').find(node)[0]
-
-    def process_query(self, query):
-        import jsonpath_rw
-
-        return jsonpath_rw.parse(query).find(self.node)
-
-    def html(self, encoding='unicode'):
-        raise NotImplementedError
-
-    def attr(self, key, default=NULL):
-        raise NotImplementedError
-
-    def text(self, smart=False, normalize_space=True):
-        return unicode(self.node.value)
 
 
 # ****************
