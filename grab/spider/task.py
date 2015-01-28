@@ -136,6 +136,7 @@ class Task(BaseTask):
         self.use_proxylist = use_proxylist
         self.cache_timeout = cache_timeout
         self.raw = raw
+        self.origin_task_generator = None
         self.callback = callback
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -251,3 +252,13 @@ class NullTask(BaseTask):
         self.priority_is_custom = False
         self.network_try_count = network_try_count
         self.task_try_count = task_try_count
+
+
+def inline_task(f):
+    def wrap(self, grab, task):
+        origin_task_generator = f(self, grab, task)
+        new_task = origin_task_generator.send(None)
+        new_task.origin_task_generator = origin_task_generator
+        self.add_task(new_task)
+    return wrap
+

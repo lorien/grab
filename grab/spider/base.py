@@ -33,7 +33,7 @@ from grab.base import GLOBAL_STATE, Grab
 from grab.error import GrabInvalidUrl
 from grab.spider.error import (SpiderError, SpiderMisuseError, FatalError,
                                StopTaskProcessing, NoTaskHandler, NoDataHandler)
-from grab.spider.task import Task, NullTask
+from grab.spider.task import Task, NullTask, inline_task
 from grab.spider.data import Data
 from grab.spider.pattern import SpiderPattern
 from grab.spider.stat  import SpiderStat
@@ -681,6 +681,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             # TODO: allow to write error handlers
     
     def find_task_handler(self, task):
+        if task.origin_task_generator is not None:
+            return self.handler_for_inline_task
         callback = task.get('callback')
         if callback:
             return callback
@@ -692,6 +694,14 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                                     'task %s' % task.name)
             else:
                 return handler
+
+    def handler_for_inline_task(self, grab, task):
+        try:
+            new_task = task.origin_task_generator.send(grab)
+            new_task.origin_task_generator = task.origin_task_generator
+            self.add_task(new_task)
+        except StopIteration:
+            pass
 
     def process_network_result(self, res, from_cache=False):
         """

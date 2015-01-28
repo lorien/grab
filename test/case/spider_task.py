@@ -7,6 +7,7 @@ from unittest import TestCase
 import grab.spider.base
 from grab import Grab
 from grab.spider import Spider, Task, Data, SpiderMisuseError, NoTaskHandler
+from grab.spider import inline_task
 
 from test.server import SERVER
 
@@ -182,6 +183,41 @@ class TestSpider(TestCase):
         bot.run()
         self.assertEqual(['0_handler', '1_func', '1_func', '1_func'],
                          sorted(tokens))
+
+    def test_inline_task(self):
+
+        class TestSpider(Spider):
+            calls = []
+            responses = []
+
+            def task_generator(self):
+                yield Task('inline', url=SERVER.BASE_URL)
+
+            @inline_task
+            def task_inline(self, grab, task):
+                self.calls.append('generator')
+
+                for x in xrange(3):
+                    url = SERVER.BASE_URL + '/?foo=%s' % x
+                    grab.setup(url=url)
+                    grab = yield Task(grab=grab)
+                    self.responses.append(SERVER.REQUEST['args'])
+                    self.calls.append('inline%s' % x)
+
+                self.add_task(Task('yield', url=SERVER.BASE_URL))
+
+            def task_yield(self, grab, task):
+                self.calls.append('yield')
+                yield Task('end', url=SERVER.BASE_URL)
+
+            def task_end(self, grab, task):
+                self.calls.append('end')
+
+        bot = TestSpider()
+        bot.run()
+        self.assertEqual([{'foo': u'0'}, {'foo': u'1'}, {'foo': u'2'}], bot.responses)
+        self.assertEqual(['generator', 'inline0', 'inline1', 'inline2', 'yield', 'end'],
+                         bot.calls)
 
 
     #def test_task_callback_serialization(self):
