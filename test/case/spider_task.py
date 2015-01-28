@@ -197,7 +197,7 @@ class TestSpider(TestCase):
             def task_inline(self, grab, task):
                 self.calls.append('generator')
 
-                for x in xrange(3):
+                for x in range(3):
                     url = SERVER.BASE_URL + '/?foo=%s' % x
                     grab.setup(url=url)
                     grab = yield Task(grab=grab)
