@@ -696,12 +696,43 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 return handler
 
     def handler_for_inline_task(self, grab, task):
-        try:
-            new_task = task.origin_task_generator.send(grab)
-            new_task.origin_task_generator = task.origin_task_generator
-            self.add_task(new_task)
-        except StopIteration:
-            pass
+        # It can be subroutine for the first call,
+        # So we should check it
+        if isinstance(task, types.GeneratorType):
+            coroutines_stack = []
+            sendval = None
+            origin_task_generator = task
+            target = origin_task_generator
+        else:
+            coroutines_stack = task.coroutines_stack
+            sendval = grab
+            origin_task_generator = task.origin_task_generator
+            target = origin_task_generator
+
+        while True:
+            try:
+                result = target.send(sendval)
+                # If it is subroutine we have to initialize it and
+                # save coroutine in the coroutines stack
+                if isinstance(result, types.GeneratorType):
+                    coroutines_stack.append(target)
+                    sendval = None
+                    target = result
+                    origin_task_generator = target
+                else:
+                    new_task = result
+                    new_task.origin_task_generator = origin_task_generator
+                    new_task.coroutines_stack = coroutines_stack
+                    self.add_task(new_task)
+                    return
+            except StopIteration:
+                # If coroutine is over we should check coroutines stack,
+                # may be it is subroutine
+                if coroutines_stack:
+                    target = coroutines_stack.pop()
+                    origin_task_generator = target
+                else:
+                    return
 
     def process_network_result(self, res, from_cache=False):
         """
