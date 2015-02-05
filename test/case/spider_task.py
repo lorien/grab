@@ -188,37 +188,83 @@ class TestSpider(TestCase):
 
     def test_inline_task(self):
 
+        def callback(self):
+            self.write(self.request.uri)
+            self.finish()
+        SERVER.RESPONSE['get_callback'] = callback
+
         class TestSpider(Spider):
             calls = []
             responses = []
 
+            def add_response(self, grab):
+                self.responses.append(grab.doc.unicode_body())
+
             def task_generator(self):
-                yield Task('inline', url=SERVER.BASE_URL)
+                url = SERVER.BASE_URL + '/?foo=start'
+                yield Task('inline', url=url)
+
+            def subroutine_task(self, grab):
+
+                for x in xrange(2):
+                    url = SERVER.BASE_URL + '/?foo=subtask%s' % x
+                    grab.setup(url=url)
+                    grab = yield Task(grab=grab)
+                    self.add_response(grab)
+                    self.calls.append('subinline%s' % x)
 
             @inline_task
             def task_inline(self, grab, task):
+                self.add_response(grab)
                 self.calls.append('generator')
 
                 for x in xrange(3):
                     url = SERVER.BASE_URL + '/?foo=%s' % x
                     grab.setup(url=url)
                     grab = yield Task(grab=grab)
-                    self.responses.append(SERVER.REQUEST['args'])
+
+                    self.add_response(grab)
                     self.calls.append('inline%s' % x)
 
-                self.add_task(Task('yield', url=SERVER.BASE_URL))
+                    grab = yield self.subroutine_task(grab)
+                    # In this case the grab body will be the same
+                    # as is in subroutine task:  /?foo=subtask1
+                    self.add_response(grab)
+
+
+                url = SERVER.BASE_URL + '/?foo=yield'
+                self.add_task(Task('yield', url=url))
 
             def task_yield(self, grab, task):
+                self.add_response(grab)
                 self.calls.append('yield')
-                yield Task('end', url=SERVER.BASE_URL)
+
+                url = SERVER.BASE_URL + '/?foo=end'
+                yield Task('end', url=url)
 
             def task_end(self, grab, task):
+                self.add_response(grab)
                 self.calls.append('end')
 
         bot = TestSpider()
         bot.run()
-        self.assertEqual([{'foo': u'0'}, {'foo': u'1'}, {'foo': u'2'}], bot.responses)
-        self.assertEqual(['generator', 'inline0', 'inline1', 'inline2', 'yield', 'end'],
+
+        self.assertEqual(['/?foo=start',
+                          '/?foo=0',
+                                '/?foo=subtask0', '/?foo=subtask1', '/?foo=subtask1',
+                          '/?foo=1',
+                                '/?foo=subtask0', '/?foo=subtask1', '/?foo=subtask1',
+                          '/?foo=2',
+                                '/?foo=subtask0', '/?foo=subtask1', '/?foo=subtask1',
+                          '/?foo=yield', '/?foo=end'], bot.responses)
+        self.assertEqual(['generator',
+                          'inline0',
+                                'subinline0', 'subinline1',
+                          'inline1',
+                                'subinline0', 'subinline1',
+                          'inline2',
+                                'subinline0', 'subinline1',
+                          'yield', 'end'],
                          bot.calls)
 
 

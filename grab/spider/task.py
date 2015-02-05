@@ -138,6 +138,7 @@ class Task(BaseTask):
         self.raw = raw
         self.origin_task_generator = None
         self.callback = callback
+        self.coroutines_stack = []
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -257,8 +258,6 @@ class NullTask(BaseTask):
 def inline_task(f):
     def wrap(self, grab, task):
         origin_task_generator = f(self, grab, task)
-        new_task = origin_task_generator.send(None)
-        new_task.origin_task_generator = origin_task_generator
-        self.add_task(new_task)
+        self.handler_for_inline_task(None, origin_task_generator)
     return wrap
 
