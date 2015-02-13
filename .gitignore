@@ -35,5 +35,5 @@ docs/libpeerconnection.log
 /.venv/
 /settings.py
 /spider.py
-
 .idea/
+/.coverage
