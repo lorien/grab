@@ -2,11 +2,11 @@
 Grab
 ====
 
-.. image:: https://travis-ci.org/lorien/grab.png?branch=master
-    :target: https://travis-ci.org/lorien/grab?branch=master
+.. image:: https://travis-ci.org/lorien/grab.png?branch=v06
+    :target: https://travis-ci.org/lorien/grab?branch=v06
 
-.. image:: https://coveralls.io/repos/lorien/grab/badge.svg?branch=master
-    :target: https://coveralls.io/r/lorien/grab?branch=master
+.. image:: https://coveralls.io/repos/lorien/grab/badge.svg?branch=v06
+    :target: https://coveralls.io/r/lorien/grab?branch=v06
 
 .. image:: https://pypip.in/download/grab/badge.svg?period=month
     :target: https://pypi.python.org/pypi/grab
@@ -14,8 +14,8 @@ Grab
 .. image:: https://pypip.in/version/grab/badge.svg
     :target: https://pypi.python.org/pypi/grab
 
-.. image:: https://landscape.io/github/lorien/grab/master/landscape.png
-   :target: https://landscape.io/github/lorien/grab/master
+.. image:: https://landscape.io/github/lorien/grab/v06/landscape.png
+   :target: https://landscape.io/github/lorien/grab/v06
 
 
 Grab is a python web scraping framework. Grab provides tons of helpful methods to scrape web sites
