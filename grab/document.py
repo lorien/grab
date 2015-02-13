@@ -28,8 +28,8 @@ try:
     from urlparse import urljoin
 except ImportError:
     from urllib.parse import urljoin
+from selection import XpathSelector
 
-from grab.selector import XpathSelector
 import grab.tools.encoding
 from grab.cookie import CookieManager
 from grab.tools.files import hashed_path

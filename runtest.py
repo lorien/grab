@@ -58,8 +58,6 @@ GRAB_TEST_LIST = (
     'test.case.tools_http',
     # *** Item
     'test.case.item',
-    # *** Selector
-    'test.case.selector',
     # *** Mock transport
     'test.case.grab_transport_mock',
     # Javascript features

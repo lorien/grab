@@ -37,3 +37,4 @@ docs/libpeerconnection.log
 /spider.py
 .idea/
 /.coverage
+/.env/

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 """
 Custom exception which Grab instance could generate.
 
@@ -6,11 +7,14 @@ Taxonomy:
 Exception
 |-> GrabError
     |-> GrabNetworkError <- IOError 
-    |-> DataNotFound <- IndexError
     |-> Grab*Error
 
+Exception
+| -> tools.error.ToolsError
+     |-> DataNotFound <- IndexError
 """
 import warnings
+from tools.error import DataNotFound
 
 
 class GrabError(Exception):
@@ -30,12 +34,6 @@ class GrabTimeoutError(GrabNetworkError):
     Raises when configured time is outed for the request.
 
     In curl transport it is CURLE_OPERATION_TIMEDOUT (28)
-    """
-
-
-class DataNotFound(IndexError, GrabError):
-    """
-    Indicates that required data is not found.
     """
 
 
