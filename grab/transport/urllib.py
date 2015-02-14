@@ -4,7 +4,6 @@
 """
 AHTUNG: VERY OLD CODE :)
 """
-from __future__ import absolute_import
 import logging
 try:
     import urllib2
@@ -18,8 +17,7 @@ except ImportError:
     import http.cookiejar as cookielib
 import socket
 
-from ..base import GrabError
-
+from grab.base import GrabError
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab')

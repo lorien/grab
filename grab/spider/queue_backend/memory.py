@@ -1,11 +1,11 @@
-from __future__ import absolute_import
 from datetime import datetime
-
-from .base import QueueInterface
 try:
     from Queue import PriorityQueue, Empty
 except ImportError:
     from queue import PriorityQueue, Empty
+
+from grab.spider.queue_backend.base import QueueInterface
+
 
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, **kwargs):

@@ -4,4 +4,4 @@
 # * pip install  pyprof2calltree
 rm prof
 python -m cProfile -o prof $1
-pyprof2calltree -i prof -k
+pyprof2calltree -i prof -o prof.kcache

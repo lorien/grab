@@ -36,7 +36,6 @@ def main(project_name, template, **kwargs):
         template_path = template
 
     if os.path.exists(project_dir):
-        logger.error
         raise Exception('Directory %s already exists' % project_dir)
     else:
         logger.debug('Copying %s to %s' % (template_path, project_dir))

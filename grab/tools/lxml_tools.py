@@ -3,12 +3,13 @@ Functions to process content of lxml nodes.
 """
 import re
 
-from .text import normalize_space as normalize_space_func, find_number
-from .encoding import smart_str, smart_unicode
+from grab.tools.text import normalize_space as normalize_space_func, find_number
+from grab.tools.encoding import smart_str, smart_unicode
 
 from grab.util.py3k_support import *
 
 RE_TAG_START = re.compile(r'<[a-z]')
+
 
 def get_node_text(node, smart=False, normalize_space=True):
     """
@@ -41,6 +42,7 @@ def get_node_text(node, smart=False, normalize_space=True):
     if normalize_space:
         value = normalize_space_func(value)
     return value
+
 
 def find_node_number(node, ignore_spaces=False, make_int=True):
     """
@@ -150,8 +152,6 @@ def drop_node(tree, xpath, keep_content=False):
             replace_rawnode_with_text(node, node.tail or '')
 
 
-
-
 def replace_node_with_text(root, xpath, text):
     for node in root.xpath(xpath):
         new_text = (text + node.tail) if node.tail else text
@@ -179,7 +179,7 @@ def clean_html(html, safe_attrs=('src', 'href'),
 
     from lxml.html.clean import Cleaner
 
-    # Conver HTML to Unicode
+    # Convert HTML to Unicode
     html = render_html(parse_html(html, encoding=input_encoding), make_unicode=True)
 
     # Strip some shit with default lxml tools

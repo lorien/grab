@@ -7,20 +7,21 @@ import sys
 from grab.spider.base import Spider
 from grab.spider.error import SpiderInternalError
 from grab.util.misc import camel_case_to_underscore
-
 from grab.util.py3k_support import *
 
-PY2 = True
+PY2 = not PY3K
 SPIDER_REGISTRY = {}
 string_types = (str, unicode)
 logger = logging.getLogger('grab.util.module')
+
 
 def reraise(tp, value, tb=None):
     if sys.version_info < (3,):
         from grab.util import py2x_support
         py2x_support.reraise(tp, value, tb)
     else:
-        raise tp(value).with_traceback(tb)
+        raise value.with_traceback(tb)
+
 
 class ImportStringError(ImportError):
     """Provides information about a failed :func:`import_string` attempt."""
@@ -94,6 +95,8 @@ def import_string(import_name, silent=False):
         # if the module is a package
         if PY2 and isinstance(obj, unicode):
             obj = obj.encode('utf-8')
+        if PY3K and isinstance(obj, bytes):
+            obj = obj.decode('utf-8')
         try:
             return getattr(__import__(module, None, None, [obj]), obj)
         except (ImportError, AttributeError):
@@ -109,6 +112,7 @@ def import_string(import_name, silent=False):
                 ImportStringError(import_name, e),
                 sys.exc_info()[2])
 
+
 def build_spider_registry(config):
     # TODO: make smart spider class searching
     #for mask in config.SPIDER_LOCATIONS:
@@ -120,7 +124,16 @@ def build_spider_registry(config):
 
     SPIDER_REGISTRY.clear()
     module_mapping = {}
-    for path in config.get('GRAB_SPIDER_MODULES', []):
+
+    opt_modules = []
+    opt_modules = config['global'].get('spider_modules', deprecated_key='GRAB_SPIDER_MODULES',
+                                       default=[])
+    #try:
+        #opt_modules = config['global']['spider_modules']
+    #except KeyError:
+        #opt_modules = config.get('GRAB_SPIDER_MODULES', [])
+
+    for path in opt_modules:
         if ':' in path:
             path, cls_name = path.split(':')
         else:

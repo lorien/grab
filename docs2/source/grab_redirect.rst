@@ -5,15 +5,15 @@ Redirect Handling
 
 Grab supports two types of redirects:
 
-* HTTP redirect with 301 and 302 code
-* HTML redirect with <meta> tag
+* HTTP redirects with HTTP 301 and 302 status codes
+* HTML redirects with the <meta> HTML tag
 
 HTTP 301/302 Redirect
 ---------------------
 
-By default, Grab follows any 301 or 302 redirect. You can control maximum number
-of redirects per one network query with :ref:`option_redirect_limit` option. To completely
-disable handling of HTTP redirects set :ref:`option_follow_location` to False.
+By default, Grab follows any 301 or 302 redirect. You can control the maximum number
+of redirects per network query with the :ref:`option_redirect_limit` option. To completely
+disable handling of HTTP redirects, set :ref:`option_follow_location` to False.
 
 Let's see how it works::
 
@@ -36,17 +36,17 @@ Let's see how it works::
 Meta Refresh Redirect
 ---------------------
 
-HTML Page could contains special tag that instructs browser to go at specified URL::
+An HTML Page could contain special tags that instructs the browser to go to a specified URL::
 
     <meta http-equiv="Refresh" content="0; url=http://some/url" />
 
-By default, Grab ignores such inststructions. If you want automatically follow meta refresh
-tags then set :ref:`option_follow_refresh` to True.
+By default, Grab ignores such instructions. If you want automatically follow meta refresh
+tags, then set :ref:`option_follow_refresh` to True.
 
 Original and Destination URLs
 -----------------------------
 
-You can always get information about what URl you've requested intially and what URL you've got::
+You can always get information about what URL you've requested intially and what URL you ended up with::
 
     >>> g = Grab()
     >>> g.go('http://google.com')
@@ -56,9 +56,9 @@ You can always get information about what URl you've requested intially and what
     >>> g.response.url
     'http://www.google.ru/?gws_rd=cr&ei=8spFUo32Huem4gT6ooDwAg'
 
-Initial URL is stored at the config object. The destination URL is writed into `response` object.
+The initial URL is stored on the config object. The destination URL is writed into `response` object.
 
-You can even to track redirect history with `response.head`::
+You can even track redirect history with `response.head`::
 
     >>> print g.response.head
     HTTP/1.1 301 Moved Permanently

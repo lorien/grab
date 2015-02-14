@@ -5,7 +5,6 @@
 """
 The core of grab package: the Grab class.
 """
-from __future__ import absolute_import
 import logging
 import os
 from random import randint
@@ -17,64 +16,57 @@ try:
     from urlparse import urljoin
 except ImportError:
     from urllib.parse import urljoin
-import json
 import email
 from datetime import datetime
+import weakref
 
-from .tools.html import find_refresh_url, find_base_url
-from .response import Response
-from . import error
-from .tools.http import normalize_http_values
-from .extension import register_extensions
-from .cookie import CookieManager, create_cookie
-from .util.misc import deprecated
-from .util.py2old_support import *
-from .util.py3k_support import *
-from .proxy import ProxyList, parse_proxy_line
+from grab.tools.html import find_refresh_url, find_base_url
+from grab.document import Document
+from grab import error
+from grab.tools.http import normalize_http_values
+from grab.cookie import CookieManager
+from grab.proxy import ProxyList, parse_proxy_line
+from grab.deprecated import DeprecatedThings
+from grab.kit_interface import GrabKitInterface
+from grab.ext.form import FormExtension
 
+from grab.util.py2old_support import *
+from grab.util.py3k_support import *
+
+__all__ = ('Grab',)
 # This counter will used in enumerating network queries.
 # Its value will be displayed in logging messages and also used
 # in names of dumps
 # I use mutable module variable to allow different
-# instances of Grab maintain single counter
-# This could be helpful in debuggin when your script
+# instances of Grab to maintain single counter
+# This could be helpful in debugging when your script
 # creates multiple Grab instances - in case of shared counter
 # grab instances do not overwrite dump logs
+REQUEST_COUNTER = itertools.count(1)
+
 GLOBAL_STATE = {
     'dom_build_time': 0,
     'selector_time': 0,
 }
-REQUEST_COUNTER = itertools.count(1)
-
-# Some extensions need GLOBAL_STATE variable
-# what's why they go after GLOBAL_STATE definition
-from .ext.lxml import LXMLExtension
-from .ext.form import FormExtension
-from .ext.django import DjangoExtension
-from .ext.text import TextExtension
-from .ext.rex import RegexpExtension
-from .ext.pquery import PyqueryExtension
-from .ext.ftp import FTPExtension
-from .ext.doc import DocExtension
-from .ext.kit import KitExtension
-
-__all__ = ('Grab',)
-
-MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies',
-                       'hammer_timeouts']
+MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies']
+TRANSPORT_CACHE = {}
 
 logger = logging.getLogger('grab.base')
-
 # Logger to handle network activity
-# It is separate logger to allow you easily
+# It is done as separate logger to allow you easily
 # control network logging separately from other grab logs
 logger_network = logging.getLogger('grab.network')
 
 
+def reset_request_counter():
+    global REQUEST_COUNTER
+
+    REQUEST_COUNTER = itertools.count(1)
+
+
 def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
     """
-    Copy grab config ojection with correct handling
-    of mutable config values.
+    Copy grab config with correct handling of mutable config values.
     """
 
     cloned_config = copy(config)
@@ -85,137 +77,128 @@ def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
 
 
 def default_config():
-    # TODO: it seems config should be splitted into two entities:
+    # TODO: Maybe config should be splitted into two entities:
     # 1) config which is not changed during request
-    # 2) changable config
+    # 2) changeable settings
     return dict(
         # Common
-        url = None,
+        url=None,
 
         # Debugging
-        log_file = None,
-        log_dir = False,
-        debug_post = False,
+        log_file=None,
+        log_dir=False,
+        debug_post=False,
+        debug_post_limit=150,
         # Only for curl transport
-        debug = False,
-        verbose_logging = False,
+        debug=False,
+        verbose_logging=False,
 
         # Only for selenium transport
-        webdriver = 'firefox',
-        selenium_wait = 1,  # in seconds
+        webdriver='firefox',
+        selenium_wait=1,  # in seconds
 
         # Proxy
-        proxy = None,
-        proxy_type = None,
-        proxy_userpwd = None,
-        proxy_auto_change = True,
+        proxy=None,
+        proxy_type=None,
+        proxy_userpwd=None,
+        proxy_auto_change=True,
 
         # Method, Post
-        method = None,
-        post = None,
-        multipart_post = None,
+        method=None,
+        post=None,
+        multipart_post=None,
 
         # Headers, User-Agent, Referer
-        headers = {},
-        common_headers = {},
-        user_agent = None,
-        user_agent_file = None,
-        referer = None,
-        reuse_referer = True,
+        headers={},
+        common_headers={},
+        user_agent=None,
+        user_agent_file=None,
+        referer=None,
+        reuse_referer=True,
 
         # Cookies
-        cookies = {},
-        reuse_cookies = True,
-        cookiefile = None,
+        cookies={},
+        reuse_cookies=True,
+        cookiefile=None,
 
         # Timeouts
-        timeout = 15,
-        connect_timeout = 3,
-        hammer_mode = False,
-        hammer_timeouts = ((2, 5), (5, 10), (10, 20), (15, 30)),
+        timeout=15,
+        connect_timeout=3,
 
         # Connection
-        connection_reuse = True,
+        connection_reuse=True,
 
         # Response processing
-        nobody = False,
-        body_maxsize = None,
-        body_inmemory = True,
-        body_storage_dir = None,
-        body_storage_filename = None,
-        reject_file_size = None,
+        nobody=False,
+        body_maxsize=None,
+        body_inmemory=True,
+        body_storage_dir=None,
+        body_storage_filename=None,
+        reject_file_size=None,
 
         # Content compression
-        encoding = 'gzip',
+        encoding='gzip',
 
         # Network interface
-        interface = None,
+        interface=None,
 
         # Redirects
-        follow_refresh = False,
-        follow_location = True,
-        refresh_redirect_count = 0,
-        redirect_limit = 10,
+        follow_refresh=False,
+        follow_location=True,
+        refresh_redirect_count=0,
+        redirect_limit=10,
 
         # Authentication
-        userpwd = None,
+        userpwd=None,
 
         # Character set to which any unicode data should be encoded
         # before get placed in request
         # This setting is overwritten after each request with
-        # charset of rertreived document
-        charset = 'utf-8',
+        # charset of retrieved document
+        charset='utf-8',
 
         # Charset to use for converting content of response
         # into unicode, by default it is detected automatically
-        document_charset = None,
+        document_charset=None,
 
-        # Conent type control how DOM are built
+        # Content type control how DOM are built
         # For html type HTML DOM builder is used
         # For xml type XML DOM builder is used
-        content_type = 'html',
+        content_type='html',
 
         # Fix &#X; entities, where X between 128 and 160
         # Such entities are parsed by modern browsers as
         # windows-1251 entities independently of the real charset of
         # the document, If this option is True then such entities
-        # will be replaced with correct unicode entitites e.g.:
+        # will be replaced with correct unicode entities e.g.:
         # &#151; ->  &#8212;
-        fix_special_entities = True,
+        fix_special_entities=True,
 
-        # Convert document body to lower case before bulding LXML tree
-        # It does not affect `response.body`
-        lowercased_tree = False,
+        # Convert document body to lower case before building LXML tree
+        # It does not affect `self.doc.body`
+        lowercased_tree=False,
 
         # Strip null bytes from document body before building lXML tree
-        # It does not affect `response.body`
-        strip_null_bytes = True,
+        # It does not affect `self.doc.body`
+        strip_null_bytes=True,
 
         # Internal object to store
-        state = {},
+        state={},
     )
 
 
-class Grab(LXMLExtension, FormExtension, PyqueryExtension,
-           DjangoExtension, TextExtension, RegexpExtension,
-           FTPExtension, DocExtension, KitExtension,
-           ):
+class Grab(DeprecatedThings):
 
     __slots__ = ('request_head', 'request_log', 'request_body',
-                 'proxylist', 'config', '_request_prepared',
-                 'clone_counter', 'response', 'transport',
+                 'proxylist', 'config',
+                 'transport',
                  'transport_param', 'request_method', 'request_counter',
                  '__weakref__', 'cookies',
 
-                 # Dirst hack to make it possbile to inherit Grab from
+                 # Dirty hack to make it possible to inherit Grab from
                  # multiple base classes with __slots__
-                 '_lxml_form', '_file_fields',
-                 '_lxml_tree', '_strict_lxml_tree',
-                 '_pyquery', '_doc', '_kit',
+                 '_doc', '_kit',
                  )
-
-    # Points which could be handled in extension classes
-    extension_points = ('config', 'init', 'reset')
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
@@ -229,17 +212,15 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
     Public methods
     """
 
-    def __init__(self, response_body=None, transport='grab.transport.curl.CurlTransport',
-                 **kwargs):
+    def __init__(self, document_body=None,
+                 transport='grab.transport.curl.CurlTransport', **kwargs):
         """
         Create Grab instance
         """
 
+        self._doc = None
         self.config = default_config()
         self.config['common_headers'] = self.common_headers()
-        self.trigger_extensions('config')
-        self.trigger_extensions('init')
-        self._request_prepared = False
         self.cookies = CookieManager()
         self.proxylist = ProxyList()
 
@@ -248,21 +229,37 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.reset()
         if kwargs:
             self.setup(**kwargs)
-        self.clone_counter = 0
-        if response_body is not None:
-            self.fake_response(response_body)
+
+        if document_body is not None:
+            self.setup_document(document_body)
+
+    def _get_doc(self):
+        if self._doc is None:
+            self._doc = Document(self)
+        return self._doc
+
+    def _set_doc(self, obj):
+        self._doc = obj
+
+    doc = property(_get_doc, _set_doc)
 
     def setup_transport(self, transport_param):
         self.transport_param = transport_param
         if isinstance(transport_param, basestring):
             mod_path, cls_name = transport_param.rsplit('.', 1)
-            mod = __import__(mod_path, globals(), locals(), ['foo'])
-            self.transport = getattr(mod, cls_name)()
+            try:
+                cls = TRANSPORT_CACHE[(mod_path, cls_name)]
+            except KeyError:
+                mod = __import__(mod_path, globals(), locals(), ['foo'])
+                cls = getattr(mod, cls_name)
+                TRANSPORT_CACHE[(mod_path, cls_name)] = cls
+            self.transport = cls()
         elif isinstance(transport_param, collections.Callable):
             self.transport = transport_param()
         else:
-            raise GrabMisuseError('Option `transport` should be string or callable. '
-                                  'Got %s' % type(transport_param))
+            raise error.GrabMisuseError('Option `transport` should be string '
+                                        'or callable. Got %s'
+                                        % type(transport_param))
 
     def reset(self):
         """
@@ -272,21 +269,22 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         This methods is automatically called before each network request.
         """
 
-        self.response = None
-
         self.request_head = None
         self.request_log = None
         self.request_body = None
 
         self.request_method = None
-        self.trigger_extensions('reset')
         self.transport.reset()
+
+        # KIT
+        self._kit = None
 
     def clone(self, **kwargs):
         """
         Create clone of Grab instance.
 
-        Cloned instance will have the same state: cookies, referer, response data
+        Cloned instance will have the same state: cookies, referrer, response
+        document data
 
         :param **kwargs: overrides settings of cloned grab instance
         """
@@ -294,12 +292,12 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         g = Grab(transport=self.transport_param)
         g.config = self.dump_config()
 
-        if self.response is not None:
-            g.response = self.response.copy()
+        g.doc = self.doc.copy()
+        g.doc.grab = weakref.proxy(g)
+
         for key in self.clonable_attributes:
             setattr(g, key, getattr(self, key))
         g.cookies = deepcopy(self.cookies)
-        g.clone_counter = self.clone_counter + 1
 
         if kwargs:
             g.setup(**kwargs)
@@ -315,12 +313,12 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         self.load_config(g.config)
-        if g.response is not None:
-            self.response = g.response.copy()
+
+        self.doc = g.doc.copy(new_grab=self)
+
         for key in self.clonable_attributes:
             setattr(self, key, getattr(g, key))
             self.cookies = deepcopy(g.cookies)
-        self.clone_counter = g.clone_counter + 1
 
     def dump_config(self):
         """
@@ -339,16 +337,27 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         """
 
         self.config = copy_config(config, self.mutable_config_keys)
-        if 'cookiejar' in config['state']:
-            self.cookies = CookieManager.from_cookie_list(config['state']['cookiejar_cookies'])
+        if 'cookiejar_cookies' in config['state']:
+            self.cookies = CookieManager.from_cookie_list(
+                config['state']['cookiejar_cookies'])
 
     def setup(self, **kwargs):
         """
         Setting up Grab instance configuration.
         """
 
+        if 'hammer_mode' in kwargs:
+            logging.error('Option hammer_mode is deprecated. Grab does not '
+                          'support hammer mode anymore.')
+            del kwargs['hammer_mode']
+
+        if 'hammer_timeouts' in kwargs:
+            logging.error('Option hammer_timeouts is deprecated. Grab does not'
+                          ' support hammer mode anymore.')
+            del kwargs['hammer_timeouts']
+
         for key in kwargs:
-            if not key in self.config.keys():
+            if key not in self.config.keys():
                 raise error.GrabMisuseError('Unknown option: %s' % key)
 
         if 'url' in kwargs:
@@ -361,8 +370,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         Go to ``url``
 
         Args:
-            :url: could be absolute or relative. If relative then t will be appended to the
-                absolute URL of previous request.
+            :url: could be absolute or relative. If relative then t will be
+            appended to the absolute URL of previous request.
         """
 
         return self.request(url=url, **kwargs)
@@ -372,40 +381,37 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         Fetch document located at ``url`` and save to to ``location``.
         """
 
-        response = self.go(url, **kwargs)
+        doc = self.go(url, **kwargs)
         with open(location, 'wb') as out:
-            out.write(response.body)
-        return len(response.body)
+            out.write(doc.body)
+        return len(doc.body)
 
     def prepare_request(self, **kwargs):
         """
         Configure all things to make real network request.
         This method is called before doing real request via
-        tranposrt extension.
+        transport extension.
         """
 
-        # Reset the state setted by previous request
-        if not self._request_prepared:
-            self.reset()
-            self.request_counter = next(REQUEST_COUNTER)
-            if kwargs:
-                self.setup(**kwargs)
-            if not self.proxylist.is_empty() and self.config['proxy_auto_change']:
-                self.change_proxy()
-            self.request_method = self.detect_request_method()
-            self.transport.process_config(self)
-            self._request_prepared = True
+        self.reset()
+        self.request_counter = next(REQUEST_COUNTER)
+        if kwargs:
+            self.setup(**kwargs)
+        if not self.proxylist.is_empty() and self.config['proxy_auto_change']:
+            self.change_proxy()
+        self.request_method = self.detect_request_method()
+        self.transport.process_config(self)
 
     def log_request(self, extra=''):
         """
         Send request details to logging system.
         """
 
-        tname = threading.currentThread().getName().lower()
-        if tname == 'mainthread':
-            tname = ''
+        thread_name = threading.currentThread().getName().lower()
+        if thread_name == 'mainthread':
+            thread_name = ''
         else:
-            tname = '-%s' % tname
+            thread_name = '-%s' % thread_name
 
         if self.config['proxy']:
             if self.config['proxy_userpwd']:
@@ -418,10 +424,10 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             proxy_info = ''
         if extra:
             extra = '[%s] ' % extra
-        logger_network.debug('[%02d%s] %s%s %s%s' % (
-            self.request_counter, tname,
-            extra, self.request_method or 'GET',
-            self.config['url'], proxy_info))
+        logger_network.debug('[%02d%s] %s%s %s%s',
+                             self.request_counter, thread_name,
+                             extra, self.request_method or 'GET',
+                             self.config['url'], proxy_info)
 
     def request(self, **kwargs):
         """
@@ -430,58 +436,22 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         You can specify grab settings in ``**kwargs``.
         Any keyword argument will be passed to ``self.config``.
 
-        Returns: ``Response`` objects.
+        Returns: ``Document`` objects.
         """
 
-        # We need to process hammer_timeouts value before calling to grab.prepare_request
-        # because initial hammer_timeouts value should be calculated only one time
-        if 'hammer_mode' in kwargs:
-            hammer_mode = kwargs['hammer_mode']
+        self.prepare_request(**kwargs)
+        self.log_request()
+
+        try:
+            self.transport.request()
+        except error.GrabError:
+            self.reset_temporary_options()
+            self.save_failed_dump()
+            raise
         else:
-            hammer_mode = self.config['hammer_mode']
-        if hammer_mode:
-            if 'hammer_timeouts' in kwargs:
-                hammer_timeouts = list(kwargs['hammer_timeouts'])
-            else:
-                hammer_timeouts = list(self.config['hammer_timeouts'])
-            connect_timeout, total_timeout = hammer_timeouts.pop(0)
-            self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
-
-        while True:
-            try:
-                self.prepare_request(**kwargs)
-                self.log_request()
-                self.transport.request()
-            except error.GrabError:
-
-                # In hammer mode try to use next timeouts
-                if hammer_mode:
-                    # If no more timeouts
-                    # then raise an error
-                    if not hammer_timeouts:
-                        self._request_prepared = False
-                        self.save_failed_dump()
-                        raise
-                    else:
-                        connect_timeout, total_timeout = hammer_timeouts.pop(0)
-                        self.setup(connect_timeout=connect_timeout, timeout=total_timeout)
-                        logger_network.debug('Trying another timeouts. Connect: %d sec., '
-                                             'total: %d sec.' % (connect_timeout, total_timeout))
-                        self._request_prepared = False
-                # If we are not in hammer mode
-                # Then just raise an error
-                else:
-                    self._request_prepared = False
-                    self.save_failed_dump()
-                    raise
-            else:
-                # Break the infinite loop in case of success response
-                break
-
-        # It will configure `self.response`
-        self.process_request_result()
-
-        return self.response
+            # That builds `self.doc`
+            self.process_request_result()
+            return self.doc
 
     def process_request_result(self, prepare_response_func=None):
         """
@@ -496,65 +466,69 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                 post = list(post.items())
             if post:
                 if isinstance(post, basestring):
-                    post = post[:150] + '...'
+                    post = post[:self.config['debug_post_limit']] + '...'
                 else:
                     items = normalize_http_values(post, charset='utf-8')
                     new_items = []
                     for key, value in items:
-                        if len(value) > 150:
-                            value = value[:150] + '...'
+                        if len(value) > self.config['debug_post_limit']:
+                            value = value[
+                                :self.config['debug_post_limit']] + '...'
                         else:
                             value = value
                         new_items.append((key, value))
                     post = '\n'.join('%-25s: %s' % x for x in new_items)
             if post:
-                logger_network.debug('POST request:\n%s\n' % post)
+                logger_network.debug('[%02d] POST request:\n%s\n'
+                                     % (self.request_counter, post))
 
         # It's important to delete old POST data after request is performed.
-        # If POST data is not cleared then next request will try to use them again!
+        # If POST data is not cleared then next request will try to use them
+        # again!
         old_refresh_count = self.config['refresh_redirect_count']
         self.reset_temporary_options()
 
         if prepare_response_func:
-            self.response = prepare_response_func(self.transport, self)
+            self.doc = prepare_response_func(self.transport, self)
         else:
-            self.response = self.transport.prepare_response(self)
+            self.doc = self.transport.prepare_response(self)
+
+        # Workaround
+        if self.doc.grab is None:
+            self.doc.grab = weakref.proxy(self)
 
         if self.config['reuse_cookies']:
-            self.cookies.update(self.response.cookies)
+            self.cookies.update(self.doc.cookies)
 
-        self.response.timestamp = now
+        self.doc.timestamp = now
 
-        self.config['charset'] = self.response.charset
+        self.config['charset'] = self.doc.charset
 
         if self.config['log_file']:
             with open(self.config['log_file'], 'wb') as out:
-                out.write(self.response.body)
+                out.write(self.doc.body)
 
         if self.config['cookiefile']:
-            self.dump_cookies(self.config['cookiefile'])
+            self.cookies.save_to_file(self.config['cookiefile'])
 
         if self.config['reuse_referer']:
-            self.config['referer'] = self.response.url
+            self.config['referer'] = self.doc.url
 
         self.copy_request_data()
 
         # Should be called after `copy_request_data`
         self.save_dumps()
 
-        self._request_prepared = False
-
         # TODO: check max redirect count
         if self.config['follow_refresh']:
-            url = find_refresh_url(self.response.unicode_body())
-            print('URL', url)
+            url = find_refresh_url(self.doc.unicode_body())
             if url is not None:
                 inc_count = old_refresh_count + 1
                 if inc_count > self.config['redirect_limit']:
                     raise error.GrabTooManyRedirectsError()
                 else:
-                    print(inc_count)
-                    return self.request(url=url, refresh_redirect_count=inc_count)
+                    return self.request(url=url,
+                                        refresh_redirect_count=inc_count)
 
         return None
 
@@ -577,7 +551,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         # I put it inside try/except to not break
         # live spiders
         try:
-            self.response = self.transport.prepare_response(self)
+            self.doc = self.transport.prepare_response(self)
             self.copy_request_data()
             self.save_dumps()
         except Exception as ex:
@@ -589,51 +563,33 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
         self.request_body = self.transport.request_body
         self.request_log = self.transport.request_log
 
-    def fake_response(self, content, **kwargs):
+    def setup_document(self, content, **kwargs):
         """
         Setup `response` object without real network requests.
 
         Useful for testing and debuging.
 
-        All ``**kwargs`` will be passed to `Response` constructor.
+        All ``**kwargs`` will be passed to `Document` constructor.
         """
 
-        # Trigger reset
         self.reset()
 
-        # Configure fake response object
-        res = Response()
-        res.body = content
-        res.status = ''
-        res.head = ''
-        res.parse(charset=kwargs.get('document_charset'))
-        res.code = 200
-        res.total_time = 0
-        res.connect_time = 0
-        res.name_lookup_time = 0
-        res.url = ''
+        # Configure Document instance
+        doc = Document(grab=self)
+        doc.body = content
+        doc.status = ''
+        doc.head = ''
+        doc.parse(charset=kwargs.get('document_charset'))
+        doc.code = 200
+        doc.total_time = 0
+        doc.connect_time = 0
+        doc.name_lookup_time = 0
+        doc.url = ''
 
         for key, value in kwargs.items():
-            setattr(res, key, value)
+            setattr(doc, key, value)
 
-        self.response = res
-
-    @deprecated(use_instead='grab.proxylist.set_source')
-    def load_proxylist(self, source, source_type, proxy_type='http',
-                       auto_init=True, auto_change=True,
-                       **kwargs):
-        #self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type, **kwargs)
-        if source_type == 'text_file':
-            self.proxylist.set_source('file', location=source, proxy_type=proxy_type, **kwargs)
-        elif source_type == 'url':
-            self.proxylist.set_source('url', url=source, proxy_type=proxy_type, **kwargs)
-        else:
-            raise error.GrabMisuseError('Unknown proxy source type: %s' % source_type)
-
-        #self.proxylist.setup(auto_change=auto_change, auto_init=auto_init)
-        self.setup(proxy_auto_change=auto_change)
-        if not auto_change and auto_init:
-            self.change_proxy()
+        self.doc = doc
 
     def change_proxy(self):
         """
@@ -658,33 +614,38 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         return {
             'Accept': 'text/xml,application/xml,application/xhtml+xml'
-                      ',text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d' % randint(2, 5),
+                      ',text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d'
+                      % randint(2, 5),
             'Accept-Language': 'en-us,en;q=0.%d' % (randint(5, 9)),
-            'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.%d' % randint(5, 7),
+            'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.%d'
+                              % randint(5, 7),
             'Keep-Alive': '300',
             'Expect': '',
         }
 
     def save_dumps(self):
         if self.config['log_dir']:
-            tname = threading.currentThread().getName().lower()
-            if tname == 'mainthread':
-                tname = ''
+            thread_name = threading.currentThread().getName().lower()
+            if thread_name == 'mainthread':
+                thread_name = ''
             else:
-                tname = '-%s' % tname
-            fname = os.path.join(self.config['log_dir'], '%02d%s.log' % (
-                self.request_counter, tname))
-            with open(fname, 'w') as out:
-                out.write('Request:\n')
+                thread_name = '-%s' % thread_name
+            file_name = os.path.join(self.config['log_dir'], '%02d%s.log' % (
+                self.request_counter, thread_name))
+            with open(file_name, 'w') as out:
+                out.write('Request headers:\n')
                 out.write(self.request_head)
                 out.write('\n')
-                out.write('Response:\n')
-                out.write(self.response.head)
+                out.write('Request body:\n')
+                out.write(self.request_body)
+                out.write('\n\n')
+                out.write('Response headers:\n')
+                out.write(self.doc.head)
 
-            fext = 'html'
-            fname = os.path.join(self.config['log_dir'], '%02d%s.%s' % (
-                self.request_counter, tname, fext))
-            self.response.save(fname)
+            file_extension = 'html'
+            file_name = os.path.join(self.config['log_dir'], '%02d%s.%s' % (
+                self.request_counter, thread_name, file_extension))
+            self.doc.save(file_name)
 
     def make_url_absolute(self, url, resolve_base=False):
         """
@@ -693,7 +654,7 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         if self.config['url']:
             if resolve_base:
-                ubody = self.response.unicode_body()
+                ubody = self.doc.unicode_body()
                 base_url = find_base_url(ubody)
                 if base_url:
                     return urljoin(base_url, url)
@@ -703,13 +664,13 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
     def detect_request_method(self):
         """
-        Analize request config and find which
+        Analyze request config and find which
         request method will be used.
 
         Returns request method in upper case
 
-        This method needs simetime when process_config method
-        was not executed yet.
+        This method needs simetime when `process_config` method
+        was not called yet.
         """
 
         method = self.config['method']
@@ -729,14 +690,6 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
 
         self.config['cookies'] = {}
         self.cookies.clear()
-
-    @deprecated(use_instead='grab.cookies.load_from_file')
-    def load_cookies(self, path, file_required=True):
-        self.cookies.load_from_file(path)
-
-    @deprecated(use_instead='grab.cookies.save_to_file')
-    def dump_cookies(self, path):
-        self.cookies.save_to_file(path)
 
     def setup_with_proxyline(self, line, proxy_type='http'):
         # TODO: remove from base class
@@ -760,9 +713,8 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
                     if hasattr(self, slot):
                         state[slot] = getattr(self, slot)
 
-        state['_lxml_form'] = None
-        state['_lxml_tree'] = None
-        state['_strict_lxml_tree'] = None
+        if state['_doc']:
+            state['_doc'].grab = weakref.proxy(self)
 
         return state
 
@@ -787,8 +739,24 @@ class Grab(LXMLExtension, FormExtension, PyqueryExtension,
             logging.error('Could not parse request headers', exc_info=ex)
             return {}
 
+    @property
+    def kit(self):
+        """
+        Return KitInterface object that provides some
+        methods to communicate with Kit transport.
+        """
 
-register_extensions(Grab)
+        if not self._kit:
+            self._kit = GrabKitInterface(self)
+        return self._kit
+
+    def dump(self):
+        """
+        Shortcut for real-time debugging.
+        """
+        self.doc.save('/tmp/x.html')
+
 
 # For backward compatibility
+# WTF???
 BaseGrab = Grab

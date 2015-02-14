@@ -6,7 +6,8 @@ except ImportError:
 from grab.tools.lxml_tools import get_node_text
 import logging
 
-from .encoding import smart_str
+from grab.tools.encoding import smart_str
+
 
 class CaptchaError(Exception):
     """

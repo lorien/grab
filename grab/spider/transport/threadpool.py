@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 try:
     from Queue import Queue, Empty
 except ImportError:
@@ -6,12 +5,11 @@ except ImportError:
 from threading import Thread
 
 from grab.error import GrabNetworkError
-
 from grab.tools.work import make_work
-
 from grab.util.py3k_support import *
 
 STOP = object()
+
 
 class Worker(Thread):
     def __init__(self, taskq, resultq, *args, **kwargs):
@@ -86,10 +84,10 @@ class ThreadPoolTransport(object):
     def repair_grab(self, grab):
         # `curl` attribute should not be None
         # If it is None (which could be if we fire Task
-        # object with grab object which was recevied in
+        # object with grab object which was received in
         # as input argument of response handler function)
         # then `prepare_request` method will failed
-        # because it asssumes that Grab instance
+        # because it assumes that Grab instance
         # has valid `curl` attribute
         # TODO: Looks strange
         # Maybe refactor prepare_request method

@@ -1,7 +1,6 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-from __future__ import absolute_import
 import email
 import logging
 #import urllib
@@ -13,11 +12,10 @@ import threading
 import random
 import requests 
 
-from ..error import GrabError, GrabMisuseError
-from ..base import UploadContent, UploadFile
-from ..response import Response
-from ..tools.http import urlencode, normalize_http_values, normalize_unicode
-
+from grab.error import GrabError, GrabMisuseError
+from grab.base import UploadContent, UploadFile
+from grab.response import Response
+from grab.tools.http import urlencode, normalize_http_values, normalize_unicode
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.transport.requests')
@@ -322,6 +320,6 @@ class RequestsTransport(object):
         #self.curl = pycurl.Curl()
 
 
-#from ..base import BaseGrab
+#from grab.base import BaseGrab
 #class GrabRequests(RequestsTransportExtension, BaseGrab):
     #pass

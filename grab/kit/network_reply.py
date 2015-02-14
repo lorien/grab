@@ -5,6 +5,7 @@ from PyQt4.QtNetwork import QNetworkReply, QNetworkRequest
 
 from grab.util.py3k_support import *
 
+
 class KitNetworkReply(QNetworkReply):
     """
     Override QNetworkReply so can save the original data
@@ -29,7 +30,6 @@ class KitNetworkReply(QNetworkReply):
         self.original_reply.uploadProgress.connect(self.uploadProgress)
         self.original_reply.downloadProgress.connect(self.downloadProgress)
 
-    
     def __getattribute__(self, attr):
         """Send undefined methods straight through to proxied reply
         """
@@ -42,7 +42,7 @@ class KitNetworkReply(QNetworkReply):
         return value
     
     def abort(self):
-        pass # qt requires that this be defined
+        pass  # qt requires that this be defined
     
     def isSequential(self):
         return True

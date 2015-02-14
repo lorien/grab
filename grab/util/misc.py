@@ -1,9 +1,8 @@
-from __future__ import absolute_import
 import re
-#import warnings
 from functools import wraps
 import logging
 #from grab.error import GrabMisuseError
+
 
 def camel_case_to_underscore(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)

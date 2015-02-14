@@ -1,6 +1,10 @@
 import pycurl
+import select
+import time
 
+from grab.error import GrabTooManyRedirectsError
 from grab.util.py3k_support import *
+
 
 class MulticurlTransport(object):
     def __init__(self, thread_number):
@@ -19,6 +23,9 @@ class MulticurlTransport(object):
             #self.multi.handles.append(curl)
 
     def ready_for_task(self):
+        return len(self.freelist)
+
+    def get_free_threads_number(self):
         return len(self.freelist)
 
     def active_task_number(self):
@@ -49,7 +56,7 @@ class MulticurlTransport(object):
             grab.prepare_request()
             grab.log_request()
         except Exception as ex:
-            # If some error occured while processing the request arguments
+            # If some error occurred while processing the request arguments
             # then we should put curl object back to free list
             del self.registry[id(curl)]
             self.freelist.append(curl)
@@ -59,9 +66,21 @@ class MulticurlTransport(object):
             self.multi.add_handle(curl)
 
     def process_handlers(self):
-        # http://curl.haxx.se/libcurl/c/curl_multi_perform.html
+        # Ok, frankly I have real bad understanding of
+        # how to deal with multicurl sockets ;-)
+        # It is a sort of miracle that Grab is used by some people
+        # and they managed to get job done
+        rlist, wlist, xlist = self.multi.fdset()
+        if rlist or wlist or xlist:
+            timeout = self.multi.timeout()
+            if timeout and timeout > 0:
+                select.select(rlist, wlist, xlist, timeout / 1000.0)
+        else:
+            pass
+            #time.sleep(0.1)
+            # Ok, that that was a bad idea :D
+
         while True:
-            #print '[inside PH]'
             status, active_objects = self.multi.perform()
             if status != pycurl.E_CALL_MULTI_PERFORM:
                 break
@@ -84,7 +103,7 @@ class MulticurlTransport(object):
                 # while it is processing some callback function
                 # (WRITEFUNCTION, HEADERFUNCTIO, etc)
                 if ecode == 23:
-                    if getattr(curl, '_callback_interrupted', None) == True:
+                    if getattr(curl, '_callback_interrupted', None) is True:
                         curl._callback_interrupted = False
                         ecode = None
                         emsge = None
@@ -102,7 +121,11 @@ class MulticurlTransport(object):
                 grab = self.registry[curl_id]['grab']
                 grab_config_backup = self.registry[curl_id]['grab_config_backup']
 
-                grab.process_request_result()
+                try:
+                    grab.process_request_result()
+                except GrabTooManyRedirectsError:
+                    ecode = -1
+                    emsg = 'Too many meta refresh redirects'
                 grab.response.error_code = ecode
                 grab.response.error_msg = emsg
 
@@ -123,6 +146,3 @@ class MulticurlTransport(object):
 
             if not queued_messages:
                 break
-
-    def select(self, timeout=0.01):
-        return self.multi.select(timeout)

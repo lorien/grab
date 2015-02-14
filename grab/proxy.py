@@ -11,9 +11,9 @@ import time
 import logging
 import random
 
-from .error import GrabError, GrabNetworkError
-from .util.py2old_support import *
-from .util.py3k_support import *
+from grab.error import GrabError, GrabNetworkError
+from grab.util.py2old_support import *
+from grab.util.py3k_support import *
 
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
 RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')
@@ -46,7 +46,8 @@ class Proxy(object):
     Represents single proxy server.
     """
 
-    def __init__(self, server, port, username=None, password=None, proxy_type='http'):
+    def __init__(self, server, port, username=None, password=None,
+                 proxy_type='http'):
         self.server = server
         self.port = port
         self.username = username
@@ -108,7 +109,8 @@ class LocalFileSource(ProxySource):
     Proxy source that loads data from the file in local file system.
     """
 
-    def __init__(self, location, safe_load=False, data_format='text', proxy_type='http'):
+    def __init__(self, location, safe_load=False, data_format='text',
+                 proxy_type='http'):
         self.location = location
         self.data_format = data_format
         self.safe_load = False
@@ -130,7 +132,8 @@ class RemoteFileSource(ProxySource):
     Proxy source that loads data from the remote document.
     """
 
-    def __init__(self, url, safe_load=False, data_format='text', proxy_type='http'):
+    def __init__(self, url, safe_load=False, data_format='text',
+                 proxy_type='http'):
         self.url = url
         self.data_format = data_format
         self.safe_load = False
@@ -166,8 +169,8 @@ class ProxyList(object):
     def __init__(self, **kwargs):
         """
         Args:
-            accumulate_updates: if it is True, then update existing proxy list with
-                new proxy list when do reloading
+            accumulate_updates: if it is True, then update existing proxy list
+            with new proxy list when do reloading
         """
         self.source = None
         self.proxy_list = []

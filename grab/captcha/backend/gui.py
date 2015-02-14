@@ -10,7 +10,7 @@ except ImportError:
     from io import StringIO
 
 from grab import Grab
-from .base import CaptchaBackend
+from grab.captcha.backend.base import CaptchaBackend
 
 pygtk.require('2.0')
 

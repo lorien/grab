@@ -4,6 +4,7 @@ import sys
 import logging
 import time
 
+
 class Watcher(object):
     """this class solves two problems with multithreaded
     programs in Python, (1) a signal might be delivered
@@ -36,18 +37,39 @@ class Watcher(object):
             os.wait()
         except KeyboardInterrupt:
             logging.debug('Watcher process received KeyboardInterrupt')
-            logging.debug('Sending SIGUSR2 signal to child process')
-            try:
-                os.kill(self.child, signal.SIGUSR2)
-            except OSError:
-                pass
-            logging.debug('Waiting 5 seconds before sending SIGKILL')
-            time.sleep(5)
-            logging.debug('Sending SIGKILL signal to child process')
-            try:
+            """
+            signals = (
+                ('SIGTERM', 1),
+                ('SIGKILL', 2),
+            )
+            for sig, sleep_time in signals:
+                if not os.path.exists('/proc/%d' % self.child):
+                    logging.debug('Process terminated!')
+                    break
+                else:
+                    logging.debug('Sending %s signal to child process' % sig)
+                    try:
+                        os.kill(self.child, getattr(signal, sig))
+                    except OSError:
+                        pass
+                    logging.debug('Waiting %s second after sending %s' % (sleep_time, sig))
+                    for x in xrange(10):
+                        time.sleep(sleep_time / 10.0)
+                        if not os.path.exists('/proc/%d' % self.child):
+                            break
+            """
+            wait_time = 1
+            for x in xrange(10):
                 os.kill(self.child, signal.SIGKILL)
-            except OSError:
-                pass
+                if not os.path.exists('/proc/%d' % self.child):
+                    break
+                else:
+                    time.sleep(wait_time / 10.0)
+
+        """
+        if os.path.exists('/proc/%d' % self.child):
+            logging.error('Process pid=%d still exists' % self.child)
+        """
         sys.exit()
 
 

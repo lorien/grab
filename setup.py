@@ -7,7 +7,7 @@ version = __import__('grab').__version__
 setup(
     name = 'grab',
     version = version,
-    description = 'Site Scraping Framework',
+    description = 'Web Scraping Framework',
     long_description = open(os.path.join(ROOT, 'README.rst')).read(),
     url = 'http://grablib.org',
     author = 'Gregory Petukhov',
@@ -22,7 +22,6 @@ setup(
                " lxml xpath data mining",
     classifiers = (
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: Implementation :: CPython',

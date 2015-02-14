@@ -9,8 +9,7 @@ except ImportError:
     from html.entities import name2codepoint
 import logging
 
-from .text import normalize_space as normalize_space_func
-
+from grab.tools.text import normalize_space as normalize_space_func
 from grab.util.py3k_support import *
 
 RE_TAG = re.compile(r'<[^>]+>')
@@ -18,14 +17,18 @@ RE_REFRESH_TAG = re.compile(r'<meta[^>]+http-equiv\s*=\s*["\']*Refresh[^>]+', re
 # <meta http-equiv='REFRESH' content='0;url= http://www.bk55.ru/mc2/news/article/855'>
 RE_REFRESH_URL = re.compile(r'''
     content \s* = \s*
-    ["\']* \d+
-    (?: ; \s* url \s* = \s*)? ["\']* ([^\'"> ]*)
+    ["\']* \s* \d+ \s*
+    ;
+    (?: \s* url \s* = \s*)?
+    ["\']* ([^\'"> ]*)
 ''', re.I | re.X)
 
 RE_ENTITY = re.compile(r'(&[a-z]+;)')
-RE_NUM_ENTITY = re.compile(r'(&#\d+;)')
+RE_NUM_ENTITY = re.compile(r'(&#[0-9]+;)')
+RE_HEX_ENTITY = re.compile(r'(&#x[a-f0-9]+;)', re.I)
 RE_BASE_URL = re.compile(r'<base[^>]+href\s*=["\']*([^\'"> ]+)', re.I)
 RE_BR = re.compile(r'<br\s*/?>', re.I)
+
 
 def decode_entities(html):
     """
@@ -42,7 +45,6 @@ def decode_entities(html):
         →ABC R©
     """
 
-
     def process_entity(match):
         entity = match.group(1)
         name = entity[1:-1]
@@ -51,7 +53,6 @@ def decode_entities(html):
         else:
             return entity
 
-    
     def process_num_entity(match):
         entity = match.group(1)
         num = entity[2:-1]
@@ -60,7 +61,16 @@ def decode_entities(html):
         except ValueError:
             return entity
 
+    def process_hex_entity(match):
+        entity = match.group(1)
+        code = entity[3:-1]
+        try:
+            return unichr(int(code, 16))
+        except ValueError:
+            return entity
+
     html = RE_NUM_ENTITY.sub(process_num_entity, html)
+    html = RE_HEX_ENTITY.sub(process_hex_entity, html)
     html = RE_ENTITY.sub(process_entity, html)
     return html
 

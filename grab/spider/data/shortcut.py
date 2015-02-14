@@ -4,10 +4,11 @@ from urlparse import urlsplit
 import imghdr
 from StringIO import StringIO
 
-from .base import Data
+from grab.spider.data.base import Data
 from grab.tools.files import hashed_path
-from .. import Task
+from grab.spider.task import Task
 from grab import Grab
+
 
 def build_image_hosting_referer(url):
     from database import db
@@ -40,7 +41,6 @@ def image_set_handler(grab, task):
                 )   
 
 
-
 class MongoObjectImageData(Data):
     def handler(self, url, collection, obj, path_field, base_dir, task_args=None,
                 grab_args=None, callback=None):
@@ -57,9 +57,9 @@ class MongoObjectImageData(Data):
 
             g = Grab()
             g.setup(url=url)
+            g.setup(referer=build_image_hosting_referer(url))
             if grab_args:
                 g.setup(**grab_args)
-            g.setup(referer=build_image_hosting_referer(url))
 
             yield Task(
                 callback=callback or image_handler,
@@ -93,9 +93,9 @@ class MongoObjectImageSetData(Data):
 
                 g = Grab()
                 g.setup(url=image['url'])
+                g.setup(referer=build_image_hosting_referer(image['url']))
                 if grab_args:
                     g.setup(**grab_args)
-                g.setup(referer=build_image_hosting_referer(image['url']))
 
                 yield Task(
                     callback=callback or image_set_handler,

@@ -1,2 +1,2 @@
-from .service import CaptchaService
-from .error import *
+from grab.captcha.service import CaptchaService
+from grab.captcha.error import *

@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 try:
     import Queue as queue
 except ImportError:
@@ -13,10 +12,11 @@ from bson import Binary
 import logging
 import pymongo
 
-from .base import QueueInterface
-from ..error import SpiderMisuseError
+from grab.spider.queue_backend.base import QueueInterface
+from grab.spider.error import SpiderMisuseError
 
 logger = logging.getLogger('grab.spider.queue_backend.mongo')
+
 
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, database=None, queue_name=None,
@@ -46,7 +46,8 @@ class QueueBackend(QueueInterface):
 
     def put(self, task, priority, schedule_time=None):
         if schedule_time is not None:
-            raise SpiderMisuseError('Mongo task queue does not support delayed task') 
+            raise SpiderMisuseError('Mongo task queue does not support'
+                                    ' delayed task')
         item = {
             'task': Binary(pickle.dumps(task)),
             'priority': priority,

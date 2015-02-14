@@ -6,13 +6,15 @@ from PyQt4.QtCore import QByteArray
 from grab.kit.const import NETWORK_ERROR
 from grab.kit.network_reply import KitNetworkReply
 from grab.kit.error import KitError
-
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.kit.network_access_manager')
 
+
 class KitNetworkAccessManager(QNetworkAccessManager):
-    def __init__(self, forbidden_extensions=[]):
+    def __init__(self, forbidden_extensions=None):
+        if forbidden_extensions is None:
+            forbidden_extensions = []
         QNetworkAccessManager.__init__(self)
         self.forbidden_extensions = forbidden_extensions
 
@@ -43,7 +45,7 @@ class KitNetworkAccessManager(QNetworkAccessManager):
             if not self.is_request_allowed(request):
                 request.setUrl(QUrl('forbidden://localhost/'))
             else:
-                logger.debug(u'Quering URL: %s' % request.url().toString())
+                logger.debug(u'Querying URL: %s' % request.url().toString())
         
         request.setAttribute(QNetworkRequest.CacheLoadControlAttribute,
                              QNetworkRequest.PreferCache)
@@ -55,7 +57,10 @@ class KitNetworkAccessManager(QNetworkAccessManager):
         # WTF?
         if isinstance(request.originatingObject(), QWebFrame):
             try:
-                reply.setRawHeader(QByteArray('Base-Url'), QByteArray('').append(request.originatingObject().page().mainFrame().baseUrl().toString()))
+                reply.setRawHeader(
+                    QByteArray('Base-Url'),
+                    QByteArray('').append(request.originatingObject().page()
+                                          .mainFrame().baseUrl().toString()))
             except Exception as e:
                 logger.debug(e)
 
@@ -70,7 +75,8 @@ class KitNetworkAccessManager(QNetworkAccessManager):
                 ext = path.rsplit('.', 1)[-1].lower()
 
         if self.forbidden_extensions and ext in self.forbidden_extensions:
-            logger.debug('Url %s is not allowed because ext %s is forbiddend' % url, ext)
+            logger.debug('Url %s is not allowed because ext %s is forbidden'
+                         % url, ext)
             return False
 
         return True
@@ -81,5 +87,6 @@ class KitNetworkAccessManager(QNetworkAccessManager):
         """
 
         if eid not in (5, 301):
-            logger.error('Error %d: %s (%s)' % (eid, NETWORK_ERROR.get(eid, 'unknown error'),
-                                                self.sender().url().toString()))
+            logger.error('Error %d: %s (%s)'
+                         % (eid, NETWORK_ERROR.get(eid, 'unknown error'),
+                            self.sender().url().toString()))

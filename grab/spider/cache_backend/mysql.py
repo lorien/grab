@@ -10,7 +10,6 @@ CacheItem interface:
 
 TODO: WTF with cookies???
 """
-from __future__ import absolute_import
 from hashlib import sha1
 import zlib
 import logging
@@ -19,8 +18,8 @@ import marshal
 import time
 
 from grab.response import Response
-from grab.util.py3k_support import *
 from grab.cookie import CookieManager
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.spider.cache_backend.mysql')
 
@@ -158,7 +157,10 @@ class CacheBackend(object):
             if 'response_url' in cache_item:
                 response.url = cache_item['response_url']
             else:
-                logger.debug('You cache contains items without `response_url` key. It is depricated data format. Please re-download you cache or build manually `response_url` keys.')
+                logger.debug('You cache contains items without `response_url` '
+                             'key. It is deprecated data format. Please '
+                             're-download you cache or build manually '
+                             '`response_url` keys.')
                 response.url = cache_item['url']
 
             response.parse()

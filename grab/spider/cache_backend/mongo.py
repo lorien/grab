@@ -10,7 +10,6 @@ CacheItem interface:
 
 TODO: WTF with cookies???
 """
-from __future__ import absolute_import
 from hashlib import sha1
 import zlib
 import logging
@@ -22,8 +21,8 @@ except ImportError:
 import time
 
 from grab.response import Response
-from grab.util.py3k_support import *
 from grab.cookie import CookieManager
+from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.spider.cache_backend.mongo')
 
@@ -78,17 +77,21 @@ class CacheBackend(object):
             if 'response_url' in cache_item:
                 response.url = cache_item['response_url']
             else:
-                logger.debug('You cache contains items without `response_url` key. It is depricated data format. Please re-download you cache or build manually `response_url` keys.')
+                logger.debug('You cache contains items without `response_url` '
+                             'key. It is deprecated data format. Please '
+                             're-download you cache or build manually '
+                             '`response_url` keys.')
                 response.url = cache_item['url']
 
             response.parse()
             response.cookies = CookieManager(transport.extract_cookiejar())
+
             return response
 
         grab.process_request_result(custom_prepare_response_func)
 
     def save_response(self, url, grab):
-        body = grab.response.body_as_bytes()
+        body = grab.response.body
         if self.use_compression:
             body = zlib.compress(body)
 
@@ -107,8 +110,8 @@ class CacheBackend(object):
             self.db.cache.save(item, safe=True)
         except Exception as ex:
             if 'document too large' in unicode(ex):
-                logging.error('Document too large. It was not saved into mongo '\
-                              'cache. Url: %s' % url)
+                logging.error('Document too large. It was not saved into mongo'
+                              ' cache. Url: %s' % url)
             else:
                 raise
 

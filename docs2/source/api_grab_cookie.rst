@@ -5,7 +5,7 @@
 Module grab.cookie
 ==================
 
-This modules contains some classes to operate cookies.
+This module contains some classes to work with cookies.
 
 .. autofunction:: create_cookie
 
@@ -20,6 +20,6 @@ This modules contains some classes to operate cookies.
         Implements dict interface, allows to get cookie value by its name.
 
     .. automethod:: items
-    .. automethod:: load_from_file
     .. automethod:: get_dict
+    .. automethod:: load_from_file
     .. automethod:: save_to_file

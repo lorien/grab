@@ -9,9 +9,9 @@ except ImportError:
 import re
 import logging
 
-from ..upload import UploadFile, UploadContent
-from ..error import GrabMisuseError
-from .encoding import smart_str, smart_unicode, decode_pairs
+from grab.upload import UploadFile, UploadContent
+from grab.error import GrabMisuseError
+from grab.tools.encoding import smart_str, smart_unicode, decode_pairs
 
 from grab.util.py3k_support import *
 
@@ -25,15 +25,18 @@ from grab.util.py3k_support import *
 # But if you import pdb at the top of the module then you can use it
 # So.... I import here this module and I hope that will helps
 # My idea is that some mystical shit does some thing that breaks python
-# environment,, breaks sys.path So, when special case occures and some new module
+# environment,, breaks sys.path So, when special case occurs and some new module
 # is need to be imported then that can't be done due to the unknown magical influence
 import encodings.punycode
 
 logger = logging.getLogger('grab.tools.http')
 RE_NON_ASCII = re.compile(r'[^-.a-zA-Z0-9]')
+RE_NOT_SAFE_URL = re.compile(r'[^-.:/?&;#a-zA-Z0-9]')
+
 
 def urlencode(*args, **kwargs):
-    logger.debug('Method grab.tools.http.urlencode is deprecated. Please use grab.tools.http.smart_urlencode')
+    logger.debug('Method grab.tools.http.urlencode is deprecated. '
+                 'Please use grab.tools.http.smart_urlencode')
     return smart_urlencode(*args, **kwargs)
 
 
@@ -66,22 +69,22 @@ def encode_cookies(items, join=True, charset='utf-8'):
         In cookie value only ",", " ", "\t" and ";" should be encoded
         """
 
-        return val.replace(' ', '%20').replace('\t', '%09')\
-                  .replace(';', '%3B').replace(',', '%2C')
+        return val.replace(b' ', b'%20').replace(b'\t', b'%09')\
+                  .replace(b';', b'%3B').replace(b',', b'%2C')
 
     if isinstance(items, dict):
         items = items.items()
     items = normalize_http_values(items, charset=charset)
 
     # py3 hack
-    if PY3K:
-        items = decode_pairs(items, charset)
+    #if PY3K:
+    #    items = decode_pairs(items, charset)
 
     tokens = []
     for key, value in items:
-        tokens.append('%s=%s' % (encode(key), encode(value)))
+        tokens.append(b'='.join((encode(key), encode(value))))
     if join:
-        return '; '.join(tokens)
+        return b'; '.join(tokens)
     else:
         return tokens
 
@@ -113,6 +116,8 @@ def normalize_http_values(items, charset='utf-8'):
             value = normalize_unicode(value, charset=charset)
         elif value is None:
             value = ''
+        else:
+            value = str(value)
 
         # normalize key
         if isinstance(key, unicode):
@@ -146,13 +151,17 @@ def quote(data):
 
 
 def normalize_url(url):
-    parts = list(urlsplit(url))
-    if RE_NON_ASCII.search(parts[1]):
-        parts[1] = str(smart_unicode(parts[1]).encode('idna').decode())
-        url = urlunsplit(parts)
-        return url
-    else:
-        return url
+    # The idea is to quick check that URL contains only safe chars
+    # If whole URL is safe then there is no need to extract hostname part
+    # and check if it is IDN
+    if RE_NOT_SAFE_URL.search(url):
+        parts = list(urlsplit(url))
+        if RE_NON_ASCII.search(parts[1]):
+            parts[1] = str(smart_unicode(parts[1]).encode('idna').decode())
+            url = urlunsplit(parts)
+            return url
+    return url
+
 
 def normalize_post_data(data, charset):
     if isinstance(data, basestring):

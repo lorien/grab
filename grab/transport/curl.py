@@ -1,7 +1,6 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-from __future__ import absolute_import
 import email
 import logging
 #import urllib
@@ -24,15 +23,14 @@ try:
 except ImportError:
     from http.cookiejar import CookieJar
 
-from ..cookie import create_cookie, CookieManager
-from ..upload import UploadContent, UploadFile
-from .. import error
-from ..response import Response
-from ..tools.http import encode_cookies, smart_urlencode, normalize_unicode,\
-                         normalize_http_values, normalize_post_data, normalize_url
-from ..tools.user_agent import random_user_agent
-from ..tools.encoding import smart_str, smart_unicode, decode_list, decode_pairs
-
+from grab.cookie import create_cookie, CookieManager
+from grab.upload import UploadContent, UploadFile
+from grab import error
+from grab.response import Response
+from grab.tools.http import (encode_cookies, smart_urlencode, normalize_unicode,
+                             normalize_http_values, normalize_post_data, normalize_url)
+from grab.tools.user_agent import random_user_agent
+from grab.tools.encoding import smart_str, smart_unicode, decode_list, decode_pairs
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.transport.curl')
@@ -81,7 +79,7 @@ class CurlTransport(object):
     def setup_body_file(self, storage_dir, storage_filename):
         if storage_filename is None:
             handle, path = tempfile.mkstemp(dir=storage_dir)
-            self.body_file = os.fdopen(handle, 'w')
+            self.body_file = os.fdopen(handle, 'wb')
         else:
             path = os.path.join(storage_dir, storage_filename)
             self.body_file = open(path, 'wb')
@@ -240,7 +238,9 @@ class CurlTransport(object):
         # Ignore SSL errors
         self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)
         self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)
-        self.curl.setopt(pycurl.SSLVERSION, pycurl.SSLVERSION_SSLv3)
+
+        # Disabled to avoid SSL3_READ_BYTES:sslv3 alert handshake failure error
+        #self.curl.setopt(pycurl.SSLVERSION, pycurl.SSLVERSION_SSLv3)
 
         if grab.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
@@ -257,20 +257,20 @@ class CurlTransport(object):
             elif grab.config['post']:
                 post_data = normalize_post_data(grab.config['post'], grab.config['charset'])
                 # py3 hack
-                if PY3K:
-                    post_data = smart_unicode(post_data, grab.config['charset'])
+                #if PY3K:
+                #    post_data = smart_unicode(post_data, grab.config['charset'])
                 self.curl.setopt(pycurl.COPYPOSTFIELDS, post_data)
             else:
                 self.curl.setopt(pycurl.POSTFIELDS, '')
         elif grab.request_method == 'PUT':
             data = grab.config['post']
-            if isinstance(data, unicode) or not isinstance(data, basestring):
+            if isinstance(data, unicode) or (not PY3K and not isinstance(data, basestring)):
                 # py3 hack
-                if PY3K:
-                    data = data.encode('utf-8')
-                else:
-                    raise error.GrabMisuseError('Value of post option could be only '\
-                                                'byte string if PUT method is used')
+                #if PY3K:
+                #    data = data.encode('utf-8')
+                #else:
+                raise error.GrabMisuseError('Value of post option could be only '\
+                                            'byte string if PUT method is used')
             self.curl.setopt(pycurl.UPLOAD, 1)
             self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read) 
             self.curl.setopt(pycurl.INFILESIZE, len(data))
@@ -338,7 +338,6 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.MAXFILESIZE, grab.config['reject_file_size'])
 
     def process_cookie_options(self, grab, request_url):
-
         host = urlsplit(request_url).netloc.split(':')[0]
         host_nowww = host
         if host_nowww.startswith('www.'):
@@ -351,15 +350,17 @@ class CurlTransport(object):
 
         if grab.config['cookies']:
             if not isinstance(grab.config['cookies'], dict):
-                raise error.GrabMisuseError('cookies option shuld be a dict')
+                raise error.GrabMisuseError('cookies option should be a dict')
             for name, value in grab.config['cookies'].items():
                 if '.' in host_nowww:
                     domain = host_nowww
                 else:
                     domain = ''
                 grab.cookies.set(
-                    name=normalize_unicode(name, grab.config['charset']),
-                    value=normalize_unicode(value, grab.config['charset']),
+                    #name=normalize_unicode(name, grab.config['charset']),
+                    #value=normalize_unicode(value, grab.config['charset']),
+                    name=name,
+                    value=value,
                     domain=domain
                 )
 
@@ -373,17 +374,20 @@ class CurlTransport(object):
         # to pick up cookies for the current requests
         for cookie in grab.cookies.cookiejar:
             cookie_domain = cookie.domain
-            if cookie_domain.startswith('#httponly_'):
+            http_only = cookie_domain.startswith('#httponly_')
+            if http_only:
                 cookie_domain = cookie_domain.replace('#httponly_', '')
             if not cookie_domain or host_nowww in cookie_domain:
-                if '.' in host_nowww:
-                    tail = '; domain=%s' % cookie_domain
-                else:
-                    tail = ''
                 encoded = encode_cookies({cookie.name: cookie.value}, join=True,
                                          charset=grab.config['charset'])
-                self.curl.setopt(pycurl.COOKIELIST, 'Set-Cookie: %s%s' % (
-                    encoded, tail))
+                cookie_string = b'Set-Cookie: ' + encoded
+                if len(cookie.path) != 0:
+                    cookie_string += b'; path=' + cookie.path.encode('ascii')
+                if '.' in host_nowww:
+                    cookie_string += b'; domain=' + cookie_domain.encode('ascii')
+                if http_only:
+                    cookie_string += b'; HttpOnly'
+                self.curl.setopt(pycurl.COOKIELIST, cookie_string)
 
     def request(self):
 
@@ -394,13 +398,13 @@ class CurlTransport(object):
             # An error occurred when writing received data to a local file, or
             # an error was returned to libcurl from a write callback.
             # This exception should be ignored if _callback_interrupted flag
-            # is enabled (this happens when nohead or nobody options enabeld)
+            # is enabled (this happens when nohead or nobody options enabled)
             #
             # Also this error is raised when curl receives KeyboardInterrupt
             # while it is processing some callback function
             # (WRITEFUNCTION, HEADERFUNCTIO, etc)
             if 23 == ex.args[0]:
-                if getattr(self.curl, '_callback_interrupted', None) == True:
+                if getattr(self.curl, '_callback_interrupted', None) is True:
                     self.curl._callback_interrupted = False
                 else:
                     raise error.GrabNetworkError(ex.args[0], ex.args[1])
@@ -441,6 +445,7 @@ class CurlTransport(object):
         response.download_size = self.curl.getinfo(pycurl.SIZE_DOWNLOAD)
         response.upload_size = self.curl.getinfo(pycurl.SIZE_UPLOAD)
         response.download_speed = self.curl.getinfo(pycurl.SPEED_DOWNLOAD)
+        response.remote_ip = self.curl.getinfo(pycurl.PRIMARY_IP)
 
         response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
 
@@ -500,7 +505,7 @@ class CurlTransport(object):
 
     def __setstate__(self, state):
         """
-        Create pycurl instance after Grag instance was restored
+        Create pycurl instance after Grab instance was restored
         from pickled state.
         """
 
@@ -508,6 +513,6 @@ class CurlTransport(object):
         self.__dict__ = state
 
 
-#from ..base import BaseGrab
+#from grab.base import BaseGrab
 #class GrabCurl(CurlTransportExtension, BaseGrab):
     #pass

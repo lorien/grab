@@ -7,7 +7,7 @@ import logging
 import uuid
 import pickle
 
-from .error import SpiderMisuseError
+from grab.spider.error import SpiderMisuseError
 
 class RedisCommandInterface(object):
     def __init__(self, spider_name, **kwargs):
@@ -17,8 +17,10 @@ class RedisCommandInterface(object):
         self.spider_name = spider_name
         self.input_queue_name = 'command_input_%s' % spider_name
         self.output_hash_name = 'command_output_%s' % spider_name
-        logging.debug('Command input queue redis key: %s' % self.input_queue_name)
-        logging.debug('Command ouput hash redis key: %s' % self.output_hash_name)
+        logging.debug('Command input queue redis key: %s'
+                      % self.input_queue_name)
+        logging.debug('Command output hash redis key: %s'
+                      % self.output_hash_name)
 
     def put_command(self, command):
         command['uid'] = str(uuid.uuid4())
@@ -64,11 +66,10 @@ class CommandController(object):
             self.enabled = True
             return iface
         else:
-            import pdb; pdb.set_trace()
             raise SpiderMisuseError('Unknown command interface: %s' % backend)
 
     def process_commands(self):
-        for iface in self.ifaces.itervalues():
+        for iface in self.ifaces.values():
             command = iface.pop_command()
             if command is not None:
                 iface.put_result(command['uid'], self.process_command(command))

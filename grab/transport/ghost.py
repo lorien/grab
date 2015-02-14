@@ -1,7 +1,6 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-from __future__ import absolute_import
 #import email
 import logging
 #import urllib
@@ -12,13 +11,8 @@ import logging
 #import pycurl
 from ghost import Ghost
 
-#from ..base import UploadContent, UploadFile
-#from .. import error
-from ..response import Response
-#from ..tools.http import encode_cookies, urlencode, normalize_unicode,\
-                         #normalize_http_values
-from ..tools.user_agent import random_user_agent
-
+from grab.response import Response
+from grab.tools.user_agent import random_user_agent
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.transport.ghost')
@@ -320,6 +314,6 @@ class GhostTransport(object):
 
 
 
-#from ..base import BaseGrab
+#from grab.base import BaseGrab
 #class GrabCurl(CurlTransportExtension, BaseGrab):
     #pass

@@ -23,17 +23,18 @@ from grab.kit.network_access_manager import KitNetworkAccessManager
 from grab.kit.network_reply import KitNetworkReply
 from grab.kit.error import KitError
 from grab.tools.encoding import decode_dict
-
 from grab.util.py3k_support import *
 
 logger = logging.getLogger('grab.kit')
+
 
 class Resource(object):
     def __init__(self, reply):
         self.reply = reply
         self.url = str(reply.url().toString())
 
-        self.status_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+        self.status_code = \
+            reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
         if not isinstance(self.status_code, int):
             self.status_code = self.status_code.toInt()[0]
         self.headers = {}
@@ -109,9 +110,12 @@ class Kit(object):
             cookies[cookie.name().data()] = cookie.value().data()
         return cookies
 
-
-    def request(self, url, user_agent='Mozilla', cookies={}, timeout=15,
-                method='get', data=None, headers={}):
+    def request(self, url, user_agent='Mozilla', cookies=None, timeout=15,
+                method='get', data=None, headers=None):
+        if cookies is None:
+            cookies = {}
+        if headers is None:
+            headers = {}
         url_info = urlsplit(url)
 
         self.resource_list = []
@@ -139,7 +143,8 @@ class Kit(object):
         self.cookie_jar.setAllCookies(cookie_obj_list)
 
         # Method
-        method_obj = getattr(QNetworkAccessManager, '%sOperation' % method.capitalize())
+        method_obj = getattr(QNetworkAccessManager, '%sOperation'
+                             % method.capitalize())
 
         # Ensure that Content-Type is correct if method is post
         if method == 'post':
@@ -171,8 +176,9 @@ class Kit(object):
             if request_resource:
                 return self.build_response(request_resource)
             else:
-                raise KitError('Request was successfull but it is not possible '\
-                               'to associate the request to one of received responses')
+                raise KitError('Request was successful but it is not possible'
+                               ' to associate the request to one of received'
+                               ' responses')
         else:
             raise KitError('Timeout while loading %s' % url)
 

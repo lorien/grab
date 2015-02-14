@@ -16,6 +16,7 @@ docs-redirect/_build
 # misc
 log.html
 prof
+prof.kcache
 
 # google chrome
 docs2/libpeerconnection.log
@@ -26,6 +27,13 @@ docs/libpeerconnection.log
 /ghost/
 /var/
 /.tox/
+/.py33
 /script/
 /test.py
 /many_links_prof
+/prof.compiled
+/.venv/
+/settings.py
+/spider.py
+.idea/
+/.coverage

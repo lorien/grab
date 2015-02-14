@@ -5,24 +5,24 @@ Debugging
 
 .. _grab_debugging_logging:
 
-Using logging module
---------------------
+Using the logging module
+------------------------
 
-The most easy way to see what is going on is to enable DEBUG logging messages. Write
-the following code at every start of your program::
+The easiest way to see what is going on is to enable DEBUG logging messages. Write
+the following code at every entry point to your program::
 
     >>> import logging
     >>> logging.basicConfig(level=logging.DEBUG)
 
-That logging configuration will output to console all logging message, not only from
-Grab module but from other modules too. If you are interested only in Grab messages then::
+That logging configuration will output all logging messages to console, not just from
+Grab but from other modules too. If you are interested only in Grab's messages::
 
     >>> import logging
     >>> logger = logging.getLogger('grab')
     >>> logger.addHandler(logging.StreamHandler())
     >>> logger.setLevel(logging.DEBUG)
 
-Also you can use a `default_logging` function that configures logging as follows:
+You can also use a `default_logging` function that configures logging as follows:
 
 * all messages of any level except from Grab modules are printed to console
 * all "grab*" messages with level INFO or higher are printed to console
@@ -39,13 +39,13 @@ Usage of `default_logging` function is simple::
 Logging messages about network request
 --------------------------------------
 
-For each network request Grab generates the "grab.network" logging message with level DEBUG. Let's look at example::
+For each network request, Grab generates the "grab.network" logging message with level DEBUG. Let's look at an example::
 
     [5864] GET http://www.kino-govno.com/movies/rusichi via 188.120.244.68:8080 proxy of type http with authorization    
 
-We can see the requested URL and also that request has 5864 ID, that the HTTP method is GET, that request is passed via proxy with authorization. For each network request Grab uses next ID value from the sequence that is shared by all Grab instances. That does mean that even different Grab instances will generates network loggging messages with unique ID. 
+We can see the requested URL and also that request has ID 5864, that the HTTP method is GET, and that the request goes through a proxy with authorization. For each network request Grab uses the next ID value from the sequence that is shared by all Grab instances. That does mean that even different Grab instances will generates network logging messages with unique ID. 
 
-Also you can turn on logging of content of POST requests. Use `debug_post` option::
+You can also turn on logging of POST request content. Use the `debug_post` option::
 
     >>> g.setup(debug_post=True)
 
@@ -58,18 +58,15 @@ The output will be like this::
 
 .. _grab_debugging_response_saving:
 
-Saving content of requests and responses
-----------------------------------------
+Saving the content of requests and responses
+--------------------------------------------
 
 You can ask Grab to save the content of each network response to the file
-located at the path that is value of `log_file` option::
+located at the path passed as the `log_file` option::
 
     >>> g.setup(log_file='log.html')
 
-Of course, each new resposne will overwrite the content of previous response.
+Of course, each new resposne will overwrite the content of the previous response.
 
-If you want to log all traffic then consider to use `log_dir` option that tells Grab to
-save contents of all responses to files inside the specified directory. Not that each such
-file will contains request ID in its filename. For each response there will be two files XXX.log
-and XXX.html. The file XXX.html contains the raw response. If you requested the image or porn movie you'll get its raw content in that file. The file XXX.log contains headers of network response. 
-If you configure Grab with `debug=True` option, the file XXX.log will contains also a headers of request.
+If you want to log all traffic, then consider using the `log_dir` option, which tells Grab to save the contents of all responses to files inside the specified directory. Note that each such file will contain a request ID in its filename. For each response, there will be two files: XXX.log and XXX.html. The file XXX.html contains the raw response. Even if you requested an image or large movie, you'll get its raw content in that file. The file XXX.log contains headers of network response. 
+If you configure Grab with `debug=True`, the file XXX.log will also contain request headers.

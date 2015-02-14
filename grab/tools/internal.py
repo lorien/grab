@@ -1,8 +1,8 @@
-from __future__ import absolute_import
 import warnings
 from functools import wraps
 import logging
 #from grab.error import GrabMisuseError
+
 
 # from https://github.com/scrapy/scrapy/blob/master/scrapy/utils/decorator.py
 def deprecated(use_instead=None):

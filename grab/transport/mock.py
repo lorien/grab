@@ -8,10 +8,10 @@ try:
 except ImportError:
     from http.cookiejar import CookieJar
 
-from ..base import Grab
-from ..response import Response
-from ..error import GrabNetworkError
-from ..cookie import CookieManager
+from grab.base import Grab
+from grab.response import Response
+from grab.error import GrabNetworkError
+from grab.cookie import CookieManager
 
 class GrabMockNotFoundError(GrabNetworkError):
     """
@@ -81,8 +81,8 @@ class MockTransport(object):
 
 
 class GrabMock(Grab):
-    def __init__(self, response_body=None, transport='grab.transport.curl.CurlTransport',
+    def __init__(self, document_body=None, transport='grab.transport.curl.CurlTransport',
                  **kwargs):
-        super(GrabMock, self).__init__(response_body=response_body,
+        super(GrabMock, self).__init__(document_body=document_body,
                                        transport='grab.transport.mock.MockTransport',
                                        **kwargs)

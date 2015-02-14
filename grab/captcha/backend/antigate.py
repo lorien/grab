@@ -6,9 +6,10 @@ except ImportError:
     from urllib.parse import urlencode
 
 from grab import Grab
-from .base import CaptchaBackend
-from ..error import (CaptchaServiceError, ServiceTooBusy, BalanceTooLow,
-                     SolutionNotReady)
+from grab.captcha.backend.base import CaptchaBackend
+from grab.captcha.error import (CaptchaServiceError, ServiceTooBusy,
+                                BalanceTooLow, SolutionNotReady)
+
 
 class AntigateBackend(CaptchaBackend):
     def setup(self, api_key):
@@ -16,7 +17,7 @@ class AntigateBackend(CaptchaBackend):
 
     def get_submit_captcha_request(self, data, **kwargs):
         g = Grab()
-        post={
+        post = {
             'key': self.api_key,
             'method': 'base64',
             'body': b64encode(data),

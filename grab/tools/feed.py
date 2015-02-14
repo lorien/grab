@@ -1,21 +1,20 @@
 # Copyright: 2012, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-from __future__ import absolute_import
-
 import logging
-from ..tools.lxml_tools import truncate_html
-from ..tools.html import strip_tags
 from hashlib import sha1
 from time import mktime
 from datetime import datetime
 import feedparser
 from lxml.html.clean import clean_html
-from grab.tools.text import remove_bom
 
-from ..error import DataNotFound, GrabMisuseError
+from grab.tools.lxml_tools import truncate_html
+from grab.tools.html import strip_tags
+from grab.tools.text import remove_bom
+from grab.error import DataNotFound, GrabMisuseError
 
 log = logging.getLogger('grab.tools.feed')
+
 
 def parse_entry_date(entry):
     date_fields = ('published', 'created', 'updated', 'modified')
@@ -29,7 +28,7 @@ def parse_entry_date(entry):
 
 
 def parse_entry_tags(entry):
-    "Return a list of tag objects of the entry"
+    """Return a list of tag objects of the entry"""
 
     tags = set()
 
@@ -104,13 +103,14 @@ def parse_entry(entry, feed, teaser_size):
         'url': entry.link,
         'title': strip_tags(entry.title),
         'content': build_entry_content(entry),
-        'teaser': build_entry_content(entry, teaser=True, teaser_size=teaser_size),
+        'teaser': build_entry_content(entry, teaser=True,
+                                      teaser_size=teaser_size),
         'date': parse_entry_date(entry),
         'tags': parse_entry_tags(entry),
     }
 
     guid_token = (entry.get('id') or entry.link).encode('utf-8')
-    details['guid']  = sha1(guid_token).hexdigest()
+    details['guid'] = sha1(guid_token).hexdigest()
 
     if not details['date']:
         raise Exception('Entry %s does not has publication date' % entry.link)

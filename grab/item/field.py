@@ -5,13 +5,14 @@ try:
 except ImportError:
     from decimal import Decimal
 
-from ..tools.lxml_tools import clean_html
-from ..tools.text import find_number, drop_space
-from .decorator import default, empty, cached, bind_item
-from .const import NULL
-from .error import ChoiceFieldError
+from grab.tools.lxml_tools import clean_html
+from grab.tools.text import find_number, drop_space
+from grab.item.decorator import default, empty, cached, bind_item
+from grab.const import NULL
+from grab.item.error import ChoiceFieldError
 
 metaclass_ABCMeta = ABCMeta('metaclass_ABCMeta', (object, ), {})
+
 
 class Field(metaclass_ABCMeta):
     """
@@ -99,7 +100,8 @@ class IntegerField(Field):
                 return self.empty_default
 
         if self.find_number or self.ignore_spaces or self.ignore_chars:
-            return find_number(self.process(value), ignore_spaces=self.ignore_spaces,
+            return find_number(self.process(value),
+                               ignore_spaces=self.ignore_spaces,
                                ignore_chars=self.ignore_chars)
         else:
             # TODO: process ignore_chars and ignore_spaces in this case too

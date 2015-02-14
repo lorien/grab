@@ -2,12 +2,7 @@
 import os
 import sys
 
-# Hack to activate current virtualenv
-if 'VIRTUAL_ENV' in os.environ:
-    venv_dir = os.environ['VIRTUAL_ENV']
-    activate_this = os.path.join(venv_dir, 'bin/activate_this.py')
-    execfile(activate_this, dict(__file__=activate_this))
-
+# Remove???
 cur_dir = os.path.realpath(os.getcwd())
 if not cur_dir in sys.path:
     sys.path.insert(0, cur_dir)

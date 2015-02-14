@@ -3,47 +3,61 @@
 Installation
 ============
 
-To use grab you need to install Grab package and all its dependencies. Although python distribution system allows to specify dependcy list to install automatically, you need to install depencies manually, they will not be installed automatically when you just install one Grab package. The reason is that you need to install different version of libraries for different python branches. Also none of dependencies are mandatory.
+To use grab, you need to install the Grab package and all its dependencies. Although the Python distribution system allows you to specify a list of dependencies to install automatically, you need to install Grab's dependencies manually; they will not be installed automatically when you just install the Grab package. The reason is that you need to install different versions of libraries for different Python branches. Also, none of the dependencies are mandatory.
 
 Recommended dependency list
 ---------------------------
 
-To gain access to all power of grab you should install lxml and pycurl libraries. See the section below corresponding to your OS
+To use the full power of Grab, you should install the lxml and pycurl libraries. See the section below corresponding to your OS.
 
 .. _installation_linux:
 
 Installation in Linux
 ---------------------
 
-If you use python 2.x then install lxml and pycurl::
+1) Install lxml::
 
     pip install lxml
+
+If you have build issues, try to install the dependencies (Debian/Ubuntu example)::
+
+    sudo apt-get install libxml2-dev libxslt-dev
+
+2) Install pycurl::
+
     pip install pycurl
 
-If you use python 3.x then install lxml and custom version of pycurl::
-
-    pip install lxml
-    pip install pip install git+https://github.com/lorien/pycurl
-
-What is the custom pycurl? It is just a pycurl that Ubunty guyes ported to python 3. I've just copied their launchpad.net repo to the github.
-
-After all dependencies has installed you can install the Grab::
+3) Finally, install Grab::
 
     pip install Grab
 
 Installation in Windows
 -----------------------
 
-If you use python 2.x then install lxml and custom version of pycurl.
+1) Install lxml
 
-* You can get lxml package here http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
-* Custom pycurl is here: https://github.com/lorien/grab-files/raw/master/pycurl/pycurl-ssl-7.19.0.win32-py2.7.msi Do not use pycurl from any other source because it could contains a bug that corrupts content of POST requests. I do no know the reason, but then we just compiled pycurl from the source on windows, the resulted package worked fine and did not put trasn in POST requests
+You can get lxml here: http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 
-If you use python 3.x on Windows then bad news for you: there is no pycurl package for windows python 3 yet. Consider to use linux or python 2 on windows.
+2) Install pycurl
 
-After all dependencies has installed you can install the Grab. Download the Grab package from the https://pypi.python.org/pypi/grab, unpack it and run::
+You can get pycurl here: http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
+
+3) Install Grab
+
+Download the Grab package from https://pypi.python.org/pypi/grab, unpack it and run::
 
     python setup.py install
+
+If you use Python 2.x, then you might get an error while using `python setup.py install`. There is a bug in python 2.7.6. Delete it, download python 2.7.5 and try to install Grab again.
+
+You can also install Grab via pip. If you don't have pip installed, install pip first. Download the file get-pip.py from https://bootstrap.pypa.io/get-pip.py and then run this command::
+
+    python get-pip.py
+
+Now you can install Grab via pip with this command::
+
+    python -m pip install grab
+
 
 Installation on FreeBSD
 -----------------------
@@ -63,7 +77,7 @@ See :ref:`installation_linux`
 Dependencies to run tests
 -------------------------
 
-If you want to run test suit then you have to install extra dependencies::
+If you want to run the test suite, then you have to install these additional test dependencies::
 
     pip install tornado
     pip install cssselect

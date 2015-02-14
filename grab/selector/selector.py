@@ -1,7 +1,6 @@
 """
 Selector module provides high usability interface to lxml tree
 """
-from __future__ import absolute_import
 import logging
 import time
 try:
@@ -10,19 +9,18 @@ except ImportError:
     pass
 from abc import ABCMeta, abstractmethod
 
-from ..tools.lxml_tools import get_node_text, render_html
-from ..tools.text import find_number, normalize_space as normalize_space_func
-from ..error import GrabMisuseError, DataNotFound, warn
-from ..tools import rex as rex_tools
-from ..tools.text import normalize_space
-from ..tools.html import decode_entities
-from ..base import GLOBAL_STATE
-
+from grab.tools.lxml_tools import get_node_text, render_html
+from grab.tools.text import find_number, normalize_space as normalize_space_func
+from grab.error import GrabMisuseError, DataNotFound, warn
+from grab.tools import rex as rex_tools
+from grab.tools.text import normalize_space
+from grab.tools.html import decode_entities
+import grab.base
+from grab.const import NULL
 from grab.util.py3k_support import *
 
 __all__ = ['Selector', 'TextSelector', 'XpathSelector', 'PyquerySelector',
-           'KitSelector', 'JsonSelector']
-NULL = object()
+           'KitSelector']
 XPATH_CACHE = {}
 logger = logging.getLogger('grab.selector.selector')
 
@@ -50,13 +48,22 @@ class SelectorList(object):
             return self.selector_list[0]
         except IndexError:
             if default is NULL:
-                raise DataNotFound('Could not get first item for %s query of class %s' % (
-                    self.origin_query, self.origin_selector_class.__name__))
+                m = 'Could not get first item for %s query of class %s'\
+                    % (self.origin_query, self.origin_selector_class.__name__)
+                raise DataNotFound(m)
             else:
                 return default
 
-    def node(self):
-        return self.one().node
+    def node(self, default=NULL):
+        try:
+            return self.one().node
+        except IndexError:
+            if default is NULL:
+                m = 'Could not get first item for %s query of class %s'\
+                    % (self.origin_query, self.origin_selector_class.__name__)
+                raise DataNotFound(m)
+            else:
+                return default
 
     def text(self, default=NULL, smart=False, normalize_space=True):
         try:
@@ -105,10 +112,19 @@ class SelectorList(object):
 
     def exists(self):
         """
-        Return True if selctor list is not empty.
+        Return True if selector list is not empty.
         """
 
         return len(self.selector_list) > 0
+
+    def assert_exists(self):
+        """
+        Return True if selector list is not empty.
+        """
+
+        if not self.exists():
+            raise DataNotFound(u'Node does not exists, query: %s, query type: %s' % (
+                self.origin_query, self.origin_selector_class.__name__))
 
     def attr(self, key, default=NULL):
         try:
@@ -150,7 +166,7 @@ class SelectorList(object):
 
 
 class BaseSelector(metaclass_ABCMeta):
-    __slots__ = ('node')
+    __slots__ = ('node',)
 
     def __init__(self, node):
         self.node = node
@@ -159,7 +175,7 @@ class BaseSelector(metaclass_ABCMeta):
         start = time.time()
         selector_list = self.wrap_node_list(self.process_query(query), query)
         total = time.time() - start
-        GLOBAL_STATE['selector_time'] += total
+        grab.base.GLOBAL_STATE['selector_time'] += total
         return selector_list
 
     def wrap_node_list(self, nodes, query):
@@ -186,7 +202,8 @@ class BaseSelector(metaclass_ABCMeta):
     def number(self, default=NULL, ignore_spaces=False,
                smart=False, make_int=True):
         try:
-            return find_number(self.text(smart=smart), ignore_spaces=ignore_spaces,
+            return find_number(self.text(smart=smart),
+                               ignore_spaces=ignore_spaces,
                                make_int=make_int)
         except IndexError:
             if default is NULL:
@@ -223,12 +240,14 @@ class LxmlNodeBaseSelector(BaseSelector):
             else:
                 return elem
         else:
-            return get_node_text(elem, smart=smart, normalize_space=normalize_space)
+            return get_node_text(elem, smart=smart,
+                                 normalize_space=normalize_space)
 
     def number(self, default=NULL, ignore_spaces=False,
                smart=False, make_int=True):
         try:
-            return find_number(self.text(smart=smart), ignore_spaces=ignore_spaces,
+            return find_number(self.text(smart=smart),
+                               ignore_spaces=ignore_spaces,
                                make_int=make_int)
         except IndexError:
             if default is NULL:
@@ -338,34 +357,6 @@ class KitSelector(BaseSelector):
         return unicode(self.node.toPlainText())
 
 
-class JsonSelector(BaseSelector):
-    __slots__ = ()
-
-    # TODO: It seems there is perfomance problem
-    # see finnetrix, media_list.json
-    def __init__(self, node):
-        """
-        `node` is deserialized JSON i.e. it is a native python structure
-        """
-        import jsonpath_rw
-
-        self.node = jsonpath_rw.parse('`this`').find(node)[0]
-
-    def process_query(self, query):
-        import jsonpath_rw
-
-        return jsonpath_rw.parse(query).find(self.node)
-
-    def html(self, encoding='unicode'):
-        raise NotImplementedError
-
-    def attr(self, key, default=NULL):
-        raise NotImplementedError
-
-    def text(self, smart=False, normalize_space=True):
-        return unicode(self.node.value)
-
-
 # ****************
 # Deprecated Stuff
 # ****************
@@ -375,4 +366,5 @@ class Selector(XpathSelector):
 
     def __init__(self, *args, **kwargs):
         super(Selector, self).__init__(*args, **kwargs)
-        warn('Selector class is deprecated. Please use XpathSelector class instead.')
+        warn('Selector class is deprecated. '
+             'Please use XpathSelector class instead.')

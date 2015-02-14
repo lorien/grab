@@ -3,11 +3,14 @@
 Module grab.error
 =================
 
-Custom Grab Exception Classes
+Custom exception classes for Grab.
 
 .. module:: grab.error
 
 .. autoclass:: GrabError
+
+.. grab_network_error:
+
 .. autoclass:: GrabNetworkError
 .. autoclass:: GrabTimeoutError
 .. autoclass:: DataNotFound

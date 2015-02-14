@@ -1,10 +1,10 @@
 from grab import Grab
 import logging
 import os
+
 from grab.tools import html
 from grab.tools.pwork import make_work
 from grab.tools.encoding import smart_str
-
 from grab.util.py3k_support import *
 
 PING_XML = """<?xml version="1.0"?>
@@ -27,6 +27,7 @@ http://ping.myblog.jp/
 http://rpc.weblogs.com/RPC2
 http://xping.pubsub.com/ping
 """.strip().splitlines()
+
 
 def ping(name, url, grab, thread_number=10):
     """

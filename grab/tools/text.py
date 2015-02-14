@@ -1,11 +1,9 @@
 """
 Text parsing and processing utilities.
 """
-from __future__ import absolute_import
 import re
 
-from ..error import GrabMisuseError, DataNotFound
-
+from grab.error import GrabMisuseError, DataNotFound
 from grab.util.py3k_support import *
 
 RE_NUMBER = re.compile(r'\d+')
@@ -13,13 +11,14 @@ RE_NUMBER_WITH_SPACES = re.compile(r'\d[\s\d]*', re.U)
 RE_SPACE = re.compile(r'\s+', re.U)
 BOM_TOKEN = '\xef\xbb\xbf'
 
+
 def find_number(text, ignore_spaces=False, make_int=True,
                 ignore_chars=None):
     """
     Find the number in the `text`.
 
     :param text: unicode or byte-string text
-    :param ignore_spacess: if True then groups of digits delimited
+    :param ignore_spaces: if True then groups of digits delimited
         by spaces are considered as one number
     :raises: :class:`DataNotFound` if number was not found.
     """

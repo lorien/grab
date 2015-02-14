@@ -1,0 +1,18 @@
+Grab Inteface
+=============
+* Работа с формами
+    * Автоматическая обработка форм
+    * Отправка формы
+    * Отправка файлов
+* Другие расширения
+    * Django расширение
+    * PyQuery расширение
+* grab.selector
+* grab.item
+* grab.captcha
+* grab.export
+
+Spider Interface
+================
+
+Everything :(

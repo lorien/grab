@@ -2,12 +2,16 @@
 Grab
 ====
 
-.. image:: https://travis-ci.org/lorien/grab.png
-    :target: https://travis-ci.org/lorien/grab
+.. image:: https://travis-ci.org/lorien/grab.png?branch=master
+    :target: https://travis-ci.org/lorien/grab?branch=master
 
 
-Grab is a python site scraping framework. Grab provides tons of helpful methods to scrape web sites
-and to work with scraped content:
+.. image:: https://coveralls.io/repos/lorien/grab/badge.svg?branch=master
+    :target: https://coveralls.io/r/lorien/grab?branch=master
+
+
+Grab is a python web scraping framework. Grab provides tons of helpful methods to scrape web sites
+and to process the scraped content:
 
 * Automatic cookies (session) support
 * HTTP and SOCKS proxy with and without authorization
@@ -23,9 +27,8 @@ and to work with scraped content:
 * And much, much more
 * Grab has written by the guy who is doing site scraping since 2005
 
-Check out docs: https://github.com/lorien/grab/tree/master/docs2/source
-
-I am working hard now (Sep 2013) to complete the documentation in English.
+Check out docs (RU): https://github.com/lorien/grab/tree/master/docs
+Check out docs (EN): https://github.com/lorien/grab/tree/master/docs2/source
 
 Example of Grab usage::
 
@@ -65,8 +68,6 @@ Installation
 
 Pip is recommended way to install Grab and its dependencies::
 
-    $ pip install lxml
-    $ pip install pycurl
     $ pip install grab
 
 See details here https://github.com/lorien/grab/blob/master/docs2/source/grab_installation.rst
@@ -88,9 +89,3 @@ Contribution
 If you have found a bug or wish a new feature please open new issue on github:
 
 * https://github.com/lorien/grab/issues
-
-
-.. image:: https://d2weczhvl823v0.cloudfront.net/lorien/grab/trend.png
-   :alt: Bitdeli badge
-   :target: https://bitdeli.com/free
-

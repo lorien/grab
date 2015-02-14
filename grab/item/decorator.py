@@ -1,9 +1,10 @@
-from .const import NULL
-from ..error import DataNotFound
+from grab.const import NULL
+from grab.error import DataNotFound
 
 # *******************
 # Internal decorators
 # *******************
+
 
 def cached(func):
     def internal(self, item, itemtype):

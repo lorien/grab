@@ -1,12 +1,12 @@
 import logging
 
-from .field import Field, ItemListField
-from ..selector import XpathSelector
-from ..selector import JsonSelector
-from ..error import GrabMisuseError
-from ..ext.doc import DocInterface
+from grab.item.field import Field, ItemListField
+from grab.selector import XpathSelector
+from grab.error import GrabMisuseError
+from grab.document import Document
 
 logger = logging.getLogger('grab.item.item')
+
 
 class ItemBuilder(type):
     def __new__(cls, name, bases, namespace):
@@ -28,8 +28,6 @@ class ItemBuilder(type):
         namespace['_fields'] = fields
 
         cls = super(ItemBuilder, cls).__new__(cls, name, bases, namespace)
-        #if name == 'SomeItem':
-            #import pdb; pdb.set_trace()
         return cls
 
 
@@ -43,11 +41,9 @@ class Item(ItemBuilderMetaClass):
         self._selector = Item._build_selector(tree, selector_type)
 
     @classmethod
-    def _build_selector(self, tree, selector_type):
+    def _build_selector(cls, tree, selector_type):
         if selector_type == 'xpath':
             return XpathSelector(tree)
-        elif selector_type == 'json':
-            return JsonSelector(tree)
         else:
             raise GrabMisuseError('Unknown selector type: %s' % selector_type)
 
@@ -60,22 +56,23 @@ class Item(ItemBuilderMetaClass):
         # Backward Compatibility
         # First implementations of Item module required
         # `grab.doc` to be passed in `tree` option
-        if isinstance(tree, DocInterface):
+        if isinstance(tree, Document):
             tree = tree.grab.tree
 
-        selector_type = cls._get_selector_type(kwargs.pop('selector_type', 'xpath'))
+        selector_type = cls._get_selector_type(kwargs.pop('selector_type',
+                                                          'xpath'))
         root_selector = Item._build_selector(tree, selector_type)
 
         fallback_find_query = getattr(cls.Meta, 'find_selector', '.')
         if hasattr(cls.Meta, 'find_selector'):
-            logger.error('Meta.find_selector attribute is deprecated. Please use Meta.find_query attribute instead.')
+            logger.error('Meta.find_selector attribute is deprecated. Please '
+                         'use Meta.find_query attribute instead.')
         find_query = getattr(cls.Meta, 'find_query', fallback_find_query)
 
         for count, sel in enumerate(root_selector.select(find_query)):
             item = cls(sel.node, selector_type=selector_type, **kwargs)
             item._position = count
             yield item
-
 
     @classmethod
     def find_one(cls, *args, **kwargs):
@@ -135,7 +132,7 @@ class Item(ItemBuilderMetaClass):
         it will not be possible to calculate any field.
         """
         for key in self._fields.keys():
-            # trigger fields' content calcualation
+            # trigger fields' content calculation
             getattr(self, key)
         state = self.__dict__.copy()
         state['_selector'] = None
