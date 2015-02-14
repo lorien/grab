@@ -17,7 +17,7 @@ def repr_value(val):
 
 
 def print_dict(dic):
-    print '[---'
+    print('[---')
     for key, val in sorted(dic.items(), key=lambda x: x[0]):
-        print key, ':', repr_value(val)
-    print '---]'
+        print(key, ':', repr_value(val))
+    print ('---]')
