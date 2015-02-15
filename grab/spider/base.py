@@ -261,6 +261,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if self.snapshot_file:
             open(self.snapshot_file, 'w').write('')
 
+        self.interrupted = False
+
     def get_grab_config(self):
         logger.error('Using `grab_config` attribute is deprecated. Override '
                      '`create_grab_instance method instead.')
@@ -1049,6 +1051,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             logger_verbose.debug('Work done')
         except KeyboardInterrupt:
             print('\nGot ^C signal. Stopping.')
+            self.interrupted = True
             raise
         finally:
             # This code is executed when main cycles is breaked
