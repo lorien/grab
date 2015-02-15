@@ -2,7 +2,7 @@
 from unittest import TestCase
 
 from grab import Grab, GrabMisuseError
-from test.util import build_grab, ignore_transport, only_transport
+from test.util import build_grab, only_transport
 from test.server import SERVER
 
 
@@ -19,7 +19,6 @@ class GrabSimpleTestCase(TestCase):
         g.go(SERVER.BASE_URL)
         self.assertEqual(SERVER.REQUEST['headers'].get('user-agent', ''), '')
 
-    @ignore_transport('ghost.GhostTransport')
     def test_useragent_simple(self):
         g = build_grab()
 
@@ -28,7 +27,6 @@ class GrabSimpleTestCase(TestCase):
         g.go(SERVER.BASE_URL)
         self.assertEqual(SERVER.REQUEST['headers']['user-agent'], 'foo')
 
-    @ignore_transport('ghost.GhostTransport')
     def test_useragent(self):
         g = build_grab()
 

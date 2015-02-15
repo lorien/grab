@@ -6,7 +6,7 @@ except ImportError:
     from urllib.parse import parse_qsl
 
 from grab import Grab, DataNotFound, GrabMisuseError
-from test.util import ignore_transport, build_grab
+from test.util import build_grab
 from test.server import SERVER
 
 FORMS = u"""

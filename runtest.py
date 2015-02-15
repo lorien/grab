@@ -58,8 +58,6 @@ GRAB_TEST_LIST = (
     'test.case.tools_http',
     # *** Item
     'test.case.item',
-    # *** Mock transport
-    'test.case.grab_transport_mock',
     # pycurl tests
     'test.case.pycurl_cookie',
 )

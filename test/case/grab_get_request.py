@@ -3,7 +3,7 @@ from unittest import TestCase
 import os
 
 from grab import Grab, GrabMisuseError
-from test.util import TMP_DIR, ignore_transport, only_transport, build_grab
+from test.util import TMP_DIR, build_grab
 from test.server import SERVER
 from grab.extension import register_extensions
 

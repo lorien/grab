@@ -7,7 +7,7 @@ from unittest import TestCase
 import json
 
 from grab import Grab, GrabMisuseError
-from test.util import ignore_transport, only_transport, build_grab
+from test.util import build_grab
 from test.server import SERVER
 from grab.extension import register_extensions
 

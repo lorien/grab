@@ -2,7 +2,7 @@
 from unittest import TestCase
 
 from grab import Grab
-from test.util import ignore_transport, only_transport, build_grab
+from test.util import build_grab
 from test.server import SERVER
 
 class GrabXMLProcessingTestCase(TestCase):
