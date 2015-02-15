@@ -4,4 +4,4 @@ from grab.upload import UploadContent, UploadFile
 from grab.base import Grab
 from tools.logs import default_logging
 
-__version__ = '0.5.1'
+__version__ = '0.6.0'
