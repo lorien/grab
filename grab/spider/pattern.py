@@ -2,7 +2,7 @@ import os.path
 import logging
 
 from grab.spider.task import Task
-from grab.tools.files import hashed_path
+from tools.files import hashed_path
 
 logger = logging.getLogger('grab.spider.pattern')
 

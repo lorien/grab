@@ -5,8 +5,8 @@ try:
 except ImportError:
     from decimal import Decimal
 
-from grab.tools.lxml_tools import clean_html
-from grab.tools.text import find_number, drop_space
+from tools.etree import clean_html
+from tools.text import find_number, drop_space
 from grab.item.decorator import default, empty, cached, bind_item
 from grab.const import NULL
 from grab.item.error import ChoiceFieldError

@@ -7,7 +7,7 @@ except ImportError:
     from urllib.parse import urljoin
 
 from grab.error import DataNotFound, GrabMisuseError
-from grab.tools.http import smart_urlencode
+from tools.http import smart_urlencode
 
 # TODO: refactor this hell
 

@@ -13,7 +13,7 @@ from grab import Grab, DataNotFound
 from grab.item import (Item, IntegerField, StringField, DateTimeField, func_field,
                        FuncField)
 from test.util import build_grab
-from grab.tools.lxml_tools import get_node_text, parse_html
+from tools.etree import get_node_text, parse_html
 from grab.selector import XpathSelector
 from grab.error import GrabMisuseError
 

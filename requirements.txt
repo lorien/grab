@@ -3,7 +3,6 @@ lxml
 pycurl
 cssselect
 tornado
-pytils
 pyquery
 django
 redis
@@ -16,7 +15,6 @@ pymongo
 #pymongo
 #mysql-python
 #tornado
-#pytils
 
 # Python3 alternate packages
 # mysql:

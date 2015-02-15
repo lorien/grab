@@ -5,7 +5,7 @@ except ImportError:
 from threading import Thread
 
 from grab.error import GrabNetworkError
-from grab.tools.work import make_work
+from tools.work import make_work
 from grab.util.py3k_support import *
 
 STOP = object()

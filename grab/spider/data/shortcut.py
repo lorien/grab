@@ -5,7 +5,7 @@ import imghdr
 from StringIO import StringIO
 
 from grab.spider.data.base import Data
-from grab.tools.files import hashed_path
+from tools.files import hashed_path
 from grab.spider.task import Task
 from grab import Grab
 

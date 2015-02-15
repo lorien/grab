@@ -4,11 +4,11 @@ from argparse import ArgumentParser
 
 from grab.util.config import build_spider_config, build_root_config
 from grab.util.module import load_spider_class
-from grab.tools.logs import default_logging
-from grab.tools.lock import assert_lock
+from tools.logs import default_logging
+from tools.lock import assert_lock
 from grab.spider.save_result import save_result
-from grab.tools.files import clear_directory
-from grab.tools.encoding import make_str
+from tools.files import clear_directory
+from tools.encoding import make_str
 
 logger = logging.getLogger('grab.script.crawl')
 

@@ -8,13 +8,12 @@ from copy import copy
 
 from test.util import prepare_test_environment, clear_test_environment, GLOBAL
 from test.server import start_server, stop_server
-from grab.tools.watch import watch
+from tools.watch import watch
 
 # **********
 # Grab Tests
 # * pycurl transport
 # * extensions
-# * tools
 # **********
 GRAB_TEST_LIST = (
     # Internal API
@@ -48,13 +47,6 @@ GRAB_TEST_LIST = (
     'test.case.ext_structured',
     # *** Tornado Test Server
     'test.case.debug_server',
-    # *** grab.tools
-    'test.case.tools_text',
-    'test.case.tools_html',
-    'test.case.tools_lxml',
-    'test.case.tools_control',
-    'test.case.tools_content',
-    'test.case.tools_http',
     # *** Item
     'test.case.item',
     # pycurl tests
@@ -62,7 +54,6 @@ GRAB_TEST_LIST = (
 )
 
 GRAB_EXTRA_TEST_LIST = (
-    'test.case.tools_russian',
     'test.case.grab_django',
     'test.case.ext_pyquery',
 )

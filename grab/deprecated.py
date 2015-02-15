@@ -1,10 +1,11 @@
+from __future__ import absolute_import
 import logging
+from tools.etree import get_node_text
+from tools.text import find_number
 
 from grab.util.misc import deprecated
 from grab.const import NULL
 from grab.error import DataNotFound, GrabMisuseError
-from grab.tools.text import find_number
-from grab.tools.lxml_tools import get_node_text
 from grab import error
 
 

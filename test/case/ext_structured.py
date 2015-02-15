@@ -4,7 +4,7 @@ from json import loads
 from unittest import TestCase
 
 from grab import Grab
-from grab.tools.structured import Structure as x
+from tools.structured import Structure as x
 
 from test.util import build_grab
 from test.server import SERVER
