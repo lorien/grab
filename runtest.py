@@ -52,7 +52,6 @@ GRAB_TEST_LIST = (
     'test.case.tools_text',
     'test.case.tools_html',
     'test.case.tools_lxml',
-    'test.case.tools_account',
     'test.case.tools_control',
     'test.case.tools_content',
     'test.case.tools_http',
