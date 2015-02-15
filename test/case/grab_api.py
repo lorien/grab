@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from grab.util.py3k_support import *
 from grab import GrabMisuseError
-from test.util import ignore_transport, only_transport, build_grab
+from test.util import build_grab
 from test.server import SERVER
 
 #from grab.util.py3k_support import *
@@ -17,7 +17,6 @@ class GrabApiTestCase(TestCase):
         self.assertRaises(GrabMisuseError,
             lambda: g.setup(save_the_word=True))
 
-    @ignore_transport('ghost.GhostTransport')
     # Ghost test was disabled because of strange error
     # that appear when multiple Ghost instances are created
     def test_clone(self):
@@ -30,12 +29,10 @@ class GrabApiTestCase(TestCase):
         g2 = g.clone()
         self.assertTrue(b'Moon' in g.response.body)
 
-    @ignore_transport('ghost.GhostTransport')
     def test_empty_clone(self):
         g = build_grab()
         g.clone()
 
-    @ignore_transport('ghost.GhostTransport')
     def test_adopt(self):
         g = build_grab()
         SERVER.RESPONSE['get'] = 'Moon'
@@ -93,7 +90,6 @@ class GrabApiTestCase(TestCase):
         #g = VeryCustomGrab()
         #self.assertEqual(SimpleExtension.get_data()['counter'], 2)
 
-    @ignore_transport('grab.transport.kit.KitTransport')
     def test_request_counter(self):
         import grab.base
         import itertools

@@ -60,8 +60,6 @@ GRAB_TEST_LIST = (
     'test.case.item',
     # *** Mock transport
     'test.case.grab_transport_mock',
-    # Javascript features
-    'test.case.grab_js',
     # pycurl tests
     'test.case.pycurl_cookie',
 )
@@ -71,28 +69,6 @@ GRAB_EXTRA_TEST_LIST = (
     'test.case.grab_django',
     'test.case.ext_pyquery',
 )
-
-# *******************************************
-# Kit Tests
-# * All Grab tests with enabled Kit Transport
-# * Kit Selectors
-# *******************************************
-
-KIT_TEST_LIST = list(GRAB_TEST_LIST)
-KIT_TEST_LIST += [
-    'test.case.selector_kit',
-]
-for name in (
-    'test.case.grab_proxy',
-    'test.case.grab_upload_file',
-    'test.case.grab_limit_option',
-):
-    KIT_TEST_LIST.remove(name)
-
-KIT_EXTRA_TEST_LIST = list(GRAB_EXTRA_TEST_LIST)
-KIT_EXTRA_TEST_LIST += [
-    'test.case.kit_live_sites',
-]
 
 # ************
 # Spider Tests
@@ -128,8 +104,6 @@ def main():
                       default=False, help='Run tests for Grab')
     parser.add_option('--test-all', action='store_true',
                       default=False, help='Run tests for both Grab and Grab::Spider')
-    parser.add_option('--test-kit', action='store_true',
-                      default=False, help='Run tests for Grab with WebKit transport')
     parser.add_option('--backend-mongo', action='store_true',
                       default=False, help='Run extra tests that depends on mongodb')
     parser.add_option('--backend-redis', action='store_true',
@@ -141,10 +115,6 @@ def main():
     opts, args = parser.parse_args()
 
     GLOBAL['transport'] = opts.transport
-
-    # Override CLI option in case of kit test
-    if opts.test_kit:
-        GLOBAL['transport'] = 'grab.transport.kit.KitTransport'
 
     if opts.backend_mongo:
         GLOBAL['backends'].append('mongo')
@@ -172,11 +142,6 @@ def main():
         test_list += GRAB_TEST_LIST
         if opts.extra:
             test_list += GRAB_EXTRA_TEST_LIST
-
-    if opts.test_kit:
-        test_list += KIT_TEST_LIST
-        if opts.extra:
-            test_list += KIT_EXTRA_TEST_LIST
 
     if opts.test_spider:
         test_list += SPIDER_TEST_LIST

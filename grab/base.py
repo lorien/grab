@@ -27,7 +27,6 @@ from grab.tools.http import normalize_http_values
 from grab.cookie import CookieManager
 from grab.proxy import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
-from grab.kit_interface import GrabKitInterface
 from grab.ext.form import FormExtension
 
 from grab.util.py2old_support import *
@@ -197,7 +196,7 @@ class Grab(DeprecatedThings):
 
                  # Dirty hack to make it possible to inherit Grab from
                  # multiple base classes with __slots__
-                 '_doc', '_kit',
+                 '_doc',
                  )
 
     # Attributes which should be processed when clone
@@ -275,9 +274,6 @@ class Grab(DeprecatedThings):
 
         self.request_method = None
         self.transport.reset()
-
-        # KIT
-        self._kit = None
 
     def clone(self, **kwargs):
         """
@@ -738,17 +734,6 @@ class Grab(DeprecatedThings):
         except Exception as ex:
             logging.error('Could not parse request headers', exc_info=ex)
             return {}
-
-    @property
-    def kit(self):
-        """
-        Return KitInterface object that provides some
-        methods to communicate with Kit transport.
-        """
-
-        if not self._kit:
-            self._kit = GrabKitInterface(self)
-        return self._kit
 
     def dump(self):
         """

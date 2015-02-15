@@ -3,7 +3,7 @@ from unittest import TestCase
 import os
 
 from grab import Grab, GrabMisuseError
-from test.util import TMP_DIR, ignore_transport, only_transport, build_grab
+from test.util import TMP_DIR, build_grab
 from test.server import SERVER
 
 
@@ -11,7 +11,6 @@ class GrabSimpleTestCase(TestCase):
     def setUp(self):
         SERVER.reset()
 
-    @ignore_transport('grab.transport.kit.KitTransport')
     def test_body_inmemory(self):
         g = build_grab()
         g.setup(body_inmemory=False)
