@@ -5,7 +5,7 @@ from grab import Grab, DataNotFound, GrabMisuseError
 from test.util import build_grab
 from test.server import SERVER
 
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 HTML = u"""
 <head>

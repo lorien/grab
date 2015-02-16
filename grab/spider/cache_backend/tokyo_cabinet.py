@@ -15,7 +15,7 @@ import logging
 import marshal
 
 from grab.response import Response
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 logger = logging.getLogger('grab.spider.cache_backend.mongo')
 

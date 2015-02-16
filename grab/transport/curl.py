@@ -31,7 +31,7 @@ from tools.http import (encode_cookies, smart_urlencode, normalize_unicode,
                              normalize_http_values, normalize_post_data, normalize_url)
 from tools.user_agent import random_user_agent
 from tools.encoding import smart_str, smart_unicode, decode_list, decode_pairs
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 logger = logging.getLogger('grab.transport.curl')
 

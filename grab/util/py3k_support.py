@@ -1,6 +1,6 @@
 """
     Python 3.x support module
-    Usage: from grab.util.py3k_support import *
+    Usage: from grab.util.py3k_support import * # noqa
 """
 
 import sys

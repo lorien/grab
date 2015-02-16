@@ -5,7 +5,7 @@ from grab import Grab, GrabMisuseError
 from test.util import build_grab, TMP_FILE
 from test.server import SERVER
 
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 PROXY1 = 'localhost:%d' % SERVER.PORT
 PROXY2 = 'localhost:%d' % SERVER.EXTRA_PORT1

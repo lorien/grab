@@ -11,7 +11,7 @@ from test.util import build_grab
 from test.server import SERVER
 from grab.extension import register_extensions
 
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 
 class GrabCharsetDetectionTestCase(TestCase):

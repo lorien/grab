@@ -8,7 +8,7 @@ from contextlib import contextmanager
 import json
 
 from tools import metric
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 logger = logging.getLogger('grab.spider.stat')
 

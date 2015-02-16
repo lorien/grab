@@ -3,7 +3,7 @@ from unittest import TestCase
 from grab.spider import Spider, Task, Data
 from test.server import SERVER
 
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 
 class SpiderMetaTestCase(TestCase):

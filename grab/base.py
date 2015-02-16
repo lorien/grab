@@ -30,8 +30,8 @@ from grab.proxy import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
 from grab.ext.form import FormExtension
 
-from grab.util.py2old_support import *
-from grab.util.py3k_support import *
+from grab.util.py2old_support import * # noqa
+from grab.util.py3k_support import * # noqa
 
 __all__ = ('Grab',)
 # This counter will used in enumerating network queries.

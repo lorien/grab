@@ -35,7 +35,7 @@ watch
 
 MODULE_CONTENT_TPL = """
 from __future__ import absolute_import
-from tools.%(target_module)s import *
+from tools.%(target_module)s import * # noqa # noqa
 import logging
 
 logging.error('Module `grab.tools.%(origin_module)s` is deprecated. '

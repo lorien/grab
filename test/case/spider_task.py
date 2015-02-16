@@ -8,7 +8,7 @@ import grab.spider.base
 from grab import Grab
 from grab.spider import Spider, Task, Data, SpiderMisuseError, NoTaskHandler
 from grab.spider import inline_task
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 
 from test.server import SERVER

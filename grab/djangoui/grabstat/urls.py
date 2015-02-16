@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls import *
+from django.conf.urls import * # noqa
 
 urlpatterns = patterns('grab.djangoui.grabstat.views',
     url(r'admin/grab_control$', 'grab_control', name='grab_control'),

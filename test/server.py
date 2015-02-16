@@ -6,7 +6,7 @@ import collections
 import tornado.gen
 import itertools
 
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 
 class ServerState(object):

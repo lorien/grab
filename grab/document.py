@@ -40,7 +40,7 @@ from tools.html import decode_entities
 from grab.error import GrabMisuseError, DataNotFound
 from tools.rex import normalize_regexp
 from grab.const import NULL
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 from tools.http import smart_urlencode
 
 logger = logging.getLogger('grab.response')

@@ -19,7 +19,7 @@ import time
 
 from grab.response import Response
 from grab.cookie import CookieManager
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 logger = logging.getLogger('grab.spider.cache_backend.mysql')
 

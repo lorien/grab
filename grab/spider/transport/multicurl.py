@@ -3,7 +3,7 @@ import select
 import time
 
 from grab.error import GrabTooManyRedirectsError
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 
 class MulticurlTransport(object):

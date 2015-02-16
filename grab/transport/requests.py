@@ -16,7 +16,7 @@ from grab.error import GrabError, GrabMisuseError
 from grab.base import UploadContent, UploadFile
 from grab.response import Response
 from tools.http import urlencode, normalize_http_values, normalize_unicode
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 logger = logging.getLogger('grab.transport.requests')
 

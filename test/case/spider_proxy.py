@@ -4,7 +4,7 @@ from grab import Grab
 from grab.spider import Spider, Task, Data
 from test.server import SERVER
 
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 
 PROXY1 = 'localhost:%d' % SERVER.PORT
 PROXY2 = 'localhost:%d' % SERVER.EXTRA_PORT1

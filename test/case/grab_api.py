@@ -1,7 +1,7 @@
 # coding: utf-8
 from unittest import TestCase
 
-from grab.util.py3k_support import *
+from grab.util.py3k_support import * # noqa
 from grab import GrabMisuseError
 from test.util import build_grab
 from test.server import SERVER
