@@ -1,0 +1,19 @@
+lxml
+pycurl
+selection
+tools
+cssselect
+tornado
+pyquery
+django
+redis
+qr
+pymongo
+mysql-python # python 2.x
+coverage
+coveralls
+flake8
+bumpversion
+
+# Python 3.x mysql package
+# https://github.com/davispuh/MySQL-for-Python-3/archive/master.zip

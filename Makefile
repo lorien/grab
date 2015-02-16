@@ -5,7 +5,10 @@ flake_verbose:
 	flake8 grab test --show-pep8
 
 test:
-	./runtest.py --test-all
+	tox -e py27
+
+test_all:
+	tox -e py27_all,py34_all
 
 coverage:
 	coverage erase
