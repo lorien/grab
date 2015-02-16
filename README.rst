@@ -5,9 +5,17 @@ Grab
 .. image:: https://travis-ci.org/lorien/grab.png?branch=master
     :target: https://travis-ci.org/lorien/grab?branch=master
 
-
 .. image:: https://coveralls.io/repos/lorien/grab/badge.svg?branch=master
     :target: https://coveralls.io/r/lorien/grab?branch=master
+
+.. image:: https://pypip.in/download/grab/badge.svg?period=month
+    :target: https://pypi.python.org/pypi/grab
+
+.. image:: https://pypip.in/version/grab/badge.svg
+    :target: https://pypi.python.org/pypi/grab
+
+.. image:: https://landscape.io/github/lorien/grab/master/landscape.png
+   :target: https://landscape.io/github/lorien/grab/master
 
 
 Grab is a python web scraping framework. Grab provides tons of helpful methods to scrape web sites

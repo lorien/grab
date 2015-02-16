@@ -17,3 +17,6 @@ install:
 
 script:
   - coverage run --source=grab runtest.py --test-all --extra
+
+after_success:
+  - coveralls
