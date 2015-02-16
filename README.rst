@@ -50,7 +50,7 @@ Example of Grab usage:
     g.set_input('password', '***')
     g.submit()
     for elem in g.doc.select('//ul[@id="repo_listing"]/li/a'):
-        print '%s: %s' % (elem.text(), elem.attr('href'))
+        print('%s: %s' % (elem.text(), elem.attr('href')))
 
 
 Example of Grab::Spider usage:
@@ -67,7 +67,7 @@ Example of Grab::Spider usage:
                 yield Task('search', url=url)
         
         def task_search(self, grab, task):
-            print grab.doc.select('//div[@class="s"]//cite').text()
+            print(grab.doc.select('//div[@class="s"]//cite').text())
 
 
     logging.basicConfig(level=logging.DEBUG)
