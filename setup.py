@@ -2,11 +2,10 @@ from setuptools import setup, find_packages
 import os
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
-version = __import__('grab').__version__
 
 setup(
     name = 'grab',
-    version = version,
+    version = '0.5.0',
     description = 'Web Scraping Framework',
     long_description = open(os.path.join(ROOT, 'README.rst')).read(),
     url = 'http://grablib.org',
