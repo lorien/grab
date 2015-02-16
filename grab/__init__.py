@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from grab.error import (GrabError, DataNotFound, GrabNetworkError,
                         GrabMisuseError, GrabTimeoutError)
 from grab.upload import UploadContent, UploadFile

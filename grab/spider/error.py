@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+
+
 __all__ = ('SpiderError', 'SpiderMisuseError', 'FatalError',
            'StopTaskProcessing', 'SpiderInternalError',
            'NoTaskHandler', 'NoDataHandler')

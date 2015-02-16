@@ -4,6 +4,7 @@
 """
 The Document class is the result of network request made with Grab instance.
 """
+from __future__ import absolute_import
 import weakref
 import re
 from copy import copy

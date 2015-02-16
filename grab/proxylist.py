@@ -18,6 +18,7 @@ Or you can do even simpler:
     g.change_proxy()
 
 """
+from __future__ import absolute_import
 import itertools
 from random import choice
 import re

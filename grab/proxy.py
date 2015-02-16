@@ -5,6 +5,7 @@ Module contents:
 * `LocalFileSource` contains logic to load list of proxies from local file
 * `RemoteFileSource contains logic to load list of proxies from remote document.
 """
+from __future__ import absolute_import
 import re
 import itertools
 import time

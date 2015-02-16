@@ -5,6 +5,7 @@ RTFM:
 
 Some code got from https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 """
+from __future__ import absolute_import
 try:
     from cookielib import CookieJar, Cookie
 except ImportError:

@@ -5,6 +5,7 @@
 """
 The core of grab package: the Grab class.
 """
+from __future__ import absolute_import
 import logging
 import os
 from random import randint
