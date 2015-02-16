@@ -30,32 +30,6 @@ def setup_arg_parser(parser):
     parser.add_argument('--settings-module', type=str, default='settings')
 
 
-#def get_spider_setting(spider_config, key, deprecated_key=None, key_type=None,
-                       #default=None): 
-    #"""
-    #Get setting's value from the config that could be either in
-    #deprecated or in actual format.
-    #"""
-    ## try actual format
-    #try:
-        #value = spider_config[key]
-    #except TypeError:
-        #raise
-        ##import pdb; pdb.set_trace()
-    #except KeyError:
-        #if deprecated_key is not None:
-            #try:
-                #value = spider_config[deprecated_key]
-            #except KeyError:
-                #value = default
-        #else:
-            #value = default
-    #if key_type is None:
-        #return value
-    #elif key_type == 'int':
-        #return int(value)
-
-
 def get_lock_key(spider_name, lock_key=None, ignore_lock=False, slave=False, **kwargs):
     # --ignore-lock has highest precedence
     if ignore_lock:

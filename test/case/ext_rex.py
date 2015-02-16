@@ -53,7 +53,7 @@ class ExtensionRexTestCase(TestCase):
         rex = re.compile(u'(фыва)'.encode('cp1251'))
         self.assertEqual(u'фыва'.encode('cp1251'), self.g.rex(rex, byte=True).group(1))
 
-        ## Search for non-unicode rex in unicode body shuld fail
+        # # Search for non-unicode rex in unicode body shuld fail
         pattern = '(фыва)'
         # py3 hack
         if PY3K:
@@ -61,19 +61,17 @@ class ExtensionRexTestCase(TestCase):
         rex = re.compile(pattern)
         self.assertRaises(DataNotFound, lambda: self.g.rex(rex))
 
-        ## Search for unicode rex in byte-string body shuld fail
+        # # Search for unicode rex in byte-string body shuld fail
         rex = re.compile(u'фыва', re.U)
         self.assertRaises(DataNotFound, lambda: self.g.rex(rex, byte=True))
 
-        ## Search for unexesting fragment
+        # # Search for unexesting fragment
         rex = re.compile(u'(фыва2)', re.U)
         self.assertRaises(DataNotFound, lambda: self.g.rex(rex))
 
     def test_assert_rex(self):
         self.g.assert_rex(re.compile(u'фыва'))
         self.g.assert_rex(re.compile(u'фыва'.encode('cp1251')), byte=True)
-        #self.assertRaises(DataNotFound,
-            #lambda: self.g.assert_rex(re.compile(u'фыва2')))
 
     def test_assert_rex_text(self):
         self.assertEqual(u'ха', self.g.rex_text('<em id="fly-em">([^<]+)'))

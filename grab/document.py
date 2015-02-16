@@ -103,8 +103,8 @@ class TextExtension(object):
 
         if not isinstance(anchor, unicode):
             if byte:
-                #if PY3K:
-                    #return anchor in self.body_as_bytes()
+                # if PY3K:
+                    # return anchor in self.body_as_bytes()
                 return anchor in self.body
             else:
                 raise GrabMisuseError('The anchor should be byte string in '
@@ -173,10 +173,10 @@ class RegexpExtension(object):
         match = None
         if byte:
             if not isinstance(regexp.pattern, unicode) or not PY3K:
-                #if PY3K:
-                    #body = self.body_as_bytes()
-                #else:
-                    #body = self.body
+                # if PY3K:
+                    # body = self.body_as_bytes()
+                # else:
+                    # body = self.body
                 match = regexp.search(self.body)
         else:
             if isinstance(regexp.pattern, unicode) or not PY3K:
@@ -238,33 +238,6 @@ class PyqueryExtension(object):
 class BodyExtension(object):
     __slots__ = ()
 
-    #def unicode_runtime_body(self, ignore_errors=True, fix_special_entities=True):
-        #"""
-        #Return response body as unicode string.
-        #"""
-
-        #if not self._unicode_runtime_body:
-            #self._unicode_runtime_body = self.convert_body_to_unicode(
-                #body=self.runtime_body,
-                #bom=None,
-                #charset=self.charset,
-                #ingore_errors=ignore_errors,
-                #fix_special_entities=fix_special_entities,
-            #)
-        #return self._unicode_runtime_body
-
-    #def _read_runtime_body(self):
-        #if self._runtime_body is None:
-            #return self._cached_body
-        #else:
-            #return self._runtime_body
-
-    #def _write_runtime_body(self, body):
-        #self._runtime_body = body
-        #self._unicode_runtime_body = None
-
-    #runtime_body = property(_read_runtime_body, _write_runtime_body)
-
     def get_body_chunk(self):
         body_chunk = None
         if self.body_path:
@@ -276,8 +249,8 @@ class BodyExtension(object):
 
     def convert_body_to_unicode(self, body, bom, charset, ignore_errors, fix_special_entities):
         # How could it be unicode???
-        #if isinstance(body, unicode):
-            #body = body.encode('utf-8')
+        # if isinstance(body, unicode):
+            # body = body.encode('utf-8')
         if bom:
             body = body[len(self.bom):]
         if fix_special_entities:
@@ -305,7 +278,7 @@ class BodyExtension(object):
         Return response body as unicode string.
         """
 
-        #self._check_cached_body()
+        # self._check_cached_body()
         if not self._unicode_body:
             self._unicode_body = self.convert_body_to_unicode(
                 body=self.body,#_cached_body,
@@ -318,10 +291,10 @@ class BodyExtension(object):
 
     def _read_body(self):
         # py3 hack
-        #if PY3K:
-            #return self.unicode_body()
+        # if PY3K:
+            # return self.unicode_body()
 
-        #self._check_cached_body()
+        # self._check_cached_body()
         if self.body_path:
             return self.read_body_from_file()
         else:
@@ -337,13 +310,6 @@ class BodyExtension(object):
         self._unicode_body = None
 
     body = property(_read_body, _write_body)
-
-    #def body_as_bytes(self, encode=False):
-        #self._check_cached_body()
-        #if encode:
-            #return self.body.encode(self.charset)
-        #return self._cached_body
-
 
 class DomTreeExtension(object):
     __slots__ = ()
@@ -366,7 +332,7 @@ class DomTreeExtension(object):
         from grab.base import GLOBAL_STATE
 
         if self._lxml_tree is None:
-            #body = self.unicode_runtime_body(
+            # body = self.unicode_runtime_body(
             body = self.unicode_body(
                 fix_special_entities=self.grab.config['fix_special_entities']).strip()
             if self.grab.config['lowercased_tree']:
@@ -384,7 +350,7 @@ class DomTreeExtension(object):
                 body = '<html></html>'
             start = time.time()
 
-            #body = simplify_html(body)
+            # body = simplify_html(body)
             try:
                 self._lxml_tree = fromstring(body)
             except Exception as ex:
@@ -424,10 +390,10 @@ class DomTreeExtension(object):
 
         if self._strict_lxml_tree is None:
             # py3 hack
-            #if PY3K:
-                #body = self.body_as_bytes(encode=True)
-            #else:
-                #body = self.body
+            # if PY3K:
+                # body = self.body_as_bytes(encode=True)
+            # else:
+                # body = self.body
             self._strict_lxml_tree = fromstring(self.body)
         return self._strict_lxml_tree
 
@@ -1081,7 +1047,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension, PyqueryExtension
         state['_strict_lxml_tree'] = None
         state['_lxml_form'] = None
 
-        #state['doc'].grab = weakref.proxy(self)
+        # state['doc'].grab = weakref.proxy(self)
 
         return state
 

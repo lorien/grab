@@ -36,8 +36,8 @@ class SpiderErrorTestCase(TestCase):
             def task_page(self, grab, task):
                 pass
 
-        #from grab.spider.base import logger_verbose
-        #logger_verbose.setLevel(logging.DEBUG)
+        # from grab.spider.base import logger_verbose
+        # logger_verbose.setLevel(logging.DEBUG)
         SERVER.RESPONSE_ONCE['code'] = 301
         SERVER.RESPONSE_ONCE['headers'].append(
             ('Location', INVALID_URL),

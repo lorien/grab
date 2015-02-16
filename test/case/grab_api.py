@@ -6,7 +6,7 @@ from grab import GrabMisuseError
 from test.util import build_grab
 from test.server import SERVER
 
-#from grab.util.py3k_support import *
+# from grab.util.py3k_support import *
 
 class GrabApiTestCase(TestCase):
     def setUp(self):
@@ -25,7 +25,7 @@ class GrabApiTestCase(TestCase):
         g.go(SERVER.BASE_URL)
         self.assertTrue(b'Moon' in g.response.body)
         g2 = build_grab()
-        #self.assertEqual(g2.doc.grab, g2)
+        # self.assertEqual(g2.doc.grab, g2)
         g2 = g.clone()
         self.assertTrue(b'Moon' in g.response.body)
 
@@ -59,9 +59,6 @@ class GrabApiTestCase(TestCase):
         class SimpleExtension(object):
             data = {'counter': 0}
 
-            #def extra_init(self):
-                #self.get_data()['counter'] += 1
-
             @classmethod
             def get_data(cls):
                 return cls.data
@@ -71,24 +68,14 @@ class GrabApiTestCase(TestCase):
 
         SimpleExtension.get_data()['counter'] = 0
         g = CustomGrab()
-        #self.assertEqual(SimpleExtension.get_data()['counter'], 1)
+        # self.assertEqual(SimpleExtension.get_data()['counter'], 1)
 
         class VeryCustomGrab(CustomGrab):
             pass
 
         SimpleExtension.get_data()['counter'] = 0
         g = VeryCustomGrab()
-        #self.assertEqual(SimpleExtension.get_data()['counter'], 1)
-
-
-        # TODO: what did I mean? :)
-        # Anyway it does not work now :)
-        #class VeryCustomGrab(CustomGrab, SimpleExtension):
-            #pass
-
-        #SimpleExtension.get_data()['counter'] = 0
-        #g = VeryCustomGrab()
-        #self.assertEqual(SimpleExtension.get_data()['counter'], 2)
+        # self.assertEqual(SimpleExtension.get_data()['counter'], 1)
 
     def test_request_counter(self):
         import grab.base

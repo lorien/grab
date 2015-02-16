@@ -49,8 +49,3 @@ class QueueBackend(QueueInterface):
     def clear(self):
         con = StrictRedis()
         con.delete(self.queue_name)
-        #try:
-            #while True:
-                #self.get()
-        #except queue.Empty:
-            #pass

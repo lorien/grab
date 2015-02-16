@@ -7,8 +7,8 @@ from grab.util.module import import_string
 NULL = object()
 
 # Temporary disabled, spider config are mixed with all global config keys
-#SPIDER_KEYS = ['GRAB_QUEUE', 'GRAB_CACHE', 'GRAB_PROXY_LIST', 'GRAB_THREAD_NUMBER',
-               #'GRAB_NETWORK_TRY_LIMIT', 'GRAB_TASK_TRY_LIMIT']
+# SPIDER_KEYS = ['GRAB_QUEUE', 'GRAB_CACHE', 'GRAB_PROXY_LIST', 'GRAB_THREAD_NUMBER',
+#                'GRAB_NETWORK_TRY_LIMIT', 'GRAB_TASK_TRY_LIMIT']
 
 
 def is_dict_interface(obj):
@@ -110,7 +110,7 @@ def build_root_config(settings_mod_path='settings'):
         else:
             root_config['global'] = Config()
 
-        #root_config.update_with_object(default_config.default_config, only_new_keys=True)
+        # root_config.update_with_object(default_config.default_config, only_new_keys=True)
         root_config['global'].update_with_object(default_config.default_config, only_new_keys=True)
         
         return root_config

@@ -71,16 +71,6 @@ class TestProxy(TestCase):
         g.go(SERVER.BASE_URL)
         self.assertEqual(g.config['proxy'], None)
 
-    #def test_memory_proxylist(self):
-        #g = build_grab()
-        #server_list = ['localhost:%d' % PORT1]
-        #g.setup_proxylist(server_list=server_list, proxy_type='http',
-                          #auto_init=True)
-        #SERVER.RESPONSE['get'] = '123'
-        #g.go('http://yandex.ru')
-        #self.assertEqual('123', g.response.body)
-        #self.assertEqual('yandex.ru', SERVER.REQUEST['headers']['host'])
-
     def test_change_proxy(self):
         g = build_grab()
         with open(TMP_FILE, 'w') as out:
@@ -98,5 +88,3 @@ class TestProxy(TestCase):
 
     def test_proxylist_api(self):
         g = build_grab()
-        #self.assertRaises(GrabMisuseError,
-                          #lambda: g.setup_proxylist(proxy_file='foo', server_list=[]))

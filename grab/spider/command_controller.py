@@ -45,8 +45,8 @@ class RedisCommandInterface(object):
         else:
             return pickle.loads(result_dump)
 
-    #def size(self):
-        #return len(self.queue_object)
+    # def size(self):
+        # return len(self.queue_object)
 
     def clear(self):
         self.redisdb.delete(self.input_queue_name)

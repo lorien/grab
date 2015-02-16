@@ -452,7 +452,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                         item = next(self.task_generator_object)
                         logger_verbose.debug('Got new item from generator. '
                                              'Processing it.')
-                        #self.add_task(item)
+                        # self.add_task(item)
                         self.process_handler_result(item)
                 except StopIteration:
                     # If generator have no values to yield
@@ -665,12 +665,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             else:
                 msg = res['emsg']
 
-                # TODO: REMOVE
-                #if 'Operation timed out after' in msg:
-                    #num =  int(msg.split('Operation timed out after')[1].strip().split(' ')[0])
-                    #if num > 20000:
-                        #import pdb; pdb.set_trace()
-
             self.inc_count('network-error-%s' % make_str(res['emsg'][:20], errors='ignore'))
             logger.error(u'Network error: %s' % make_unicode(msg, errors='ignore'))
 
@@ -763,7 +757,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 self.inc_count('upload-size', res['grab'].response.upload_size)
             self.inc_count('download-size-with-cache', res['grab'].response.download_size)
             self.inc_count('upload-size-with-cache', res['grab'].response.upload_size)
-        #self.inc_count('traffic-in
+        # self.inc_count('traffic-in
 
         # NG
         # FIX: Understand how it should work in NG spider
@@ -1034,7 +1028,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 # Each result could be valid or failed
                 # Result format: {ok, grab, grab_config_backup, task, emsg}
                 
-                #print '[transport iterate results - start]'
+                # print '[transport iterate results - start]'
                 for result in self.transport.iterate_results():
                     if self.is_valid_for_cache(result):
                         with self.save_timer('cache'):
@@ -1042,12 +1036,12 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                                 self.cache.save_response(result['task'].url,
                                                          result['grab'])
 
-                    #print '[process network results]'
+                    # print '[process network results]'
                     self.process_network_result(result)
-                    #print '[done]'
+                    # print '[done]'
                     self.inc_count('request')
 
-                #print '[transport iterate results - end]'
+                # print '[transport iterate results - end]'
 
             logger_verbose.debug('Work done')
         except KeyboardInterrupt:
@@ -1201,50 +1195,52 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
         logger_verbose.debug('Work done')
 
-    # TODO:
-    # Develop Manager Process which contains logic of accepting or rejecting
-    # task objects received from Parser Processes
-    # Maybe Manager Process also should controls the Data flow
-    # TODO2:
-    # Data handler process
-    #def run_manager(self):
-        #try:
-            #self.start_time = time.time()
-            #self.prepare()
-            #res_count = 0
+    """
+    TODO:
+    Develop Manager Process which contains logic of accepting or rejecting
+    task objects received from Parser Processes
+    Maybe Manager Process also should controls the Data flow
+    TODO2:
+    Data handler process
+    def run_manager(self):
+        try:
+            self.start_time = time.time()
+            self.prepare()
+            res_count = 0
 
-            #while True:
-                #try:
-                    #res = self.result_queue.get(block=True, timeout=2)
-                #except Queue.Empty:
-                    ##pass
-                    #res = None
+            while True:
+                try:
+                    res = self.result_queue.get(block=True, timeout=2)
+                except Queue.Empty:
+                    #pass
+                    res = None
 
-                #if res is None:
-                    #logging.error('res is None: stopping')
-                    #break
+                if res is None:
+                    logging.error('res is None: stopping')
+                    break
 
-                #if self.should_stop:
-                    #break
+                if self.should_stop:
+                    break
 
-                #if self.task_generator_enabled:
-                    #self.process_task_generator()
+                if self.task_generator_enabled:
+                    self.process_task_generator()
 
-                #for task, original_task in res['task_list']:
-                    #logging.debug('Processing task items from result queue')
-                    #self.process_handler_result(task)
+                for task, original_task in res['task_list']:
+                    logging.debug('Processing task items from result queue')
+                    self.process_handler_result(task)
 
-                ##for data, original_task in res['data_list']:
-                    ##logging.debug('Processing data items from result queue')
-                    ##self.process_handler_result(data)
+                #for data, original_task in res['data_list']:
+                    #logging.debug('Processing data items from result queue')
+                    #self.process_handler_result(data)
 
-        #except KeyboardInterrupt:
-            #print '\nGot ^C signal. Stopping.'
-            #print self.render_stats()
-            #raise
-        #finally:
-            ## This code is executed when main cycles is breaked
-            #self.shutdown()
+        except KeyboardInterrupt:
+            print '\nGot ^C signal. Stopping.'
+            print self.render_stats()
+            raise
+        finally:
+            This code is executed when main cycles is breaked
+            self.shutdown()
+    """
                 
     def command_get_stats(self, command):
         return {'data': self.render_stats()}

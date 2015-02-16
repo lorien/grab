@@ -82,9 +82,9 @@ class TestPostFeature(TestCase):
         # Few values with non-ascii data
         # TODO: understand and fix
         # AssertionError: 'foo=bar&gaz=%D0%94%D0%B5%D0%BB%D1%8C%D1%84%D0%B8%D0%BD&abc=' != 'foo=bar&gaz=\xd0\x94\xd0\xb5\xd0\xbb\xd1\x8c\xd1\x84\xd0\xb8\xd0\xbd&abc='
-        #g.setup(post=({'foo': 'bar', 'gaz': u'Дельфин', 'abc': None}))
-        #g.request()
-        #self.assertEqual(SERVER.REQUEST['post'], 'foo=bar&gaz=Дельфин&abc=')
+        # g.setup(post=({'foo': 'bar', 'gaz': u'Дельфин', 'abc': None}))
+        # g.request()
+        # self.assertEqual(SERVER.REQUEST['post'], 'foo=bar&gaz=Дельфин&abc=')
 
         # Multipart data could not be string
         g.setup(multipart_post='asdf')

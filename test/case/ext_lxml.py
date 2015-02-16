@@ -149,7 +149,7 @@ class LXMLExtensionTest(TestCase):
         self.assertEqual(None, g.tree.xpath('//weight')[0].text)
 
         # But XML DOM builder produces valid result
-        #self.assertEqual(None, g.xpath_one('//weight').text)
+        # self.assertEqual(None, g.xpath_one('//weight').text)
         self.assertEqual('30', g.xml_tree.xpath('//weight')[0].text)
 
         # Use `content_type` option to change default DOM builder

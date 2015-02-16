@@ -49,7 +49,7 @@ class SpiderPattern(object):
             self.follow_links(grab, 'topic', '//div[@class="topic"]/a/@href')
         """
         try:
-            #next_url = grab.xpath_text(xpath)
+            # next_url = grab.xpath_text(xpath)
             next_url = grab.doc.select(xpath).text()
         except IndexError:
             return False
@@ -122,7 +122,7 @@ class SpiderPattern(object):
 
         urls = []
         for url in grab.xpath_list(xpath):
-            #if not url.startswith('http') and self.base_url is None:
+            # if not url.startswith('http') and self.base_url is None:
             #    raise SpiderError('You should define `base_url` attribute to resolve relative urls')
             url = urljoin(grab.config['url'], url)
             if not url in urls:

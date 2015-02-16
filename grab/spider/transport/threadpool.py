@@ -79,7 +79,7 @@ class ThreadPoolTransport(object):
 
     def select(self):
         pass
-        #self.multi.select(0.01)
+        # self.multi.select(0.01)
 
     def repair_grab(self, grab):
         # `curl` attribute should not be None

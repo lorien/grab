@@ -1,6 +1,6 @@
 # coding: utf-8
 from unittest import TestCase
-#import string
+# import string
 import json
 
 from grab import Grab, GrabMisuseError

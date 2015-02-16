@@ -20,7 +20,7 @@ class MulticurlTransport(object):
             curl = pycurl.Curl()
             self.connection_count[id(curl)] = 0
             self.freelist.append(curl)
-            #self.multi.handles.append(curl)
+            # self.multi.handles.append(curl)
 
     def ready_for_task(self):
         return len(self.freelist)
@@ -77,7 +77,7 @@ class MulticurlTransport(object):
                 select.select(rlist, wlist, xlist, timeout / 1000.0)
         else:
             pass
-            #time.sleep(0.1)
+            # time.sleep(0.1)
             # Ok, that that was a bad idea :D
 
         while True:
@@ -132,11 +132,6 @@ class MulticurlTransport(object):
                 # Free resources
                 del self.registry[curl_id]
                 grab.transport.curl = None
-
-                #if emsg and 'Operation timed out after' in emsg:
-                    #num =  int(emsg.split('Operation timed out after')[1].strip().split(' ')[0])
-                    #if num > 20000:
-                        #import pdb; pdb.set_trace()
 
                 yield {'ok': ok, 'emsg': emsg, 'grab': grab,
                        'grab_config_backup': grab_config_backup, 'task': task}

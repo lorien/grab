@@ -105,30 +105,6 @@ class TestCookies(TestCase):
         c.perform()
         self.assertEquals(2, len(SERVER.REQUEST['cookies']))
 
-    #def test_some_thing(self):
-        #SERVER.RESPONSE['headers'].append(
-            #('Set-Cookie', 'x=y; expires=Fri, 31 Dec 2020 23:59:59 GMT;'
-                           #' path=/; domain=.foo.bar'),
-        #)
-        #SERVER.RESPONSE['get'] = 'foo'
-
-        #buf = StringIO()
-        #header_buf = StringIO()
-        #cfile = StringIO()
-
-        ## Configure pycurl instance
-        ## Usually all these crap is automatically handled by the Grab
-        #c = pycurl.Curl()
-        #c.setopt(pycurl.URL, 'http://foo.bar:9876')#SERVER.BASE_URL)
-        #c.setopt(pycurl.WRITEFUNCTION, buf.write)
-        #c.setopt(pycurl.HEADERFUNCTION, header_buf.write)
-        #c.setopt(pycurl.FOLLOWLOCATION, 1)
-        #c.setopt(pycurl.COOKIEFILE, "")
-        #c.perform()
-
-        #print header_buf.getvalue()
-        #print c.getinfo(pycurl.INFO_COOKIELIST)#[0]#.split('\t')
-
     def test_cookie(self):
         c = create_cookie('foo', 'bar')
 

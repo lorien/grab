@@ -70,10 +70,10 @@ class CookieManager(object):
             self.cookiejar = cookiejar
         else:
             self.cookiejar = CookieJar()
-        #self.disable_cookiejar_lock(self.cookiejar)
+        # self.disable_cookiejar_lock(self.cookiejar)
 
-    #def disable_cookiejar_lock(self, cj):
-        #cj._cookies_lock = dummy_threading.RLock()
+    # def disable_cookiejar_lock(self, cj):
+        # cj._cookies_lock = dummy_threading.RLock()
 
     def set(self, name, value, **kwargs):
         """Add new cookie or replace existing cookie with same parameters.

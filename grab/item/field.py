@@ -157,9 +157,9 @@ class StringField(Field):
     @empty
     @bind_item
     def __get__(self, item, itemtype):
-        #value = item._selector.select(self.xpath_exp)\
-                    #.text(normalize_space=self.normalize_space)
-        #return self.process(value)
+        # value = item._selector.select(self.xpath_exp)\
+                    # .text(normalize_space=self.normalize_space)
+        # return self.process(value)
 
         if self.multiple:
             result = []

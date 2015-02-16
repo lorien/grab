@@ -3,7 +3,7 @@
 # License: BSD
 import email
 import logging
-#import urllib
+# import urllib
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -43,14 +43,14 @@ logger = logging.getLogger('grab.transport.curl')
 # http://curl.haxx.se/mail/curlpython-2005-06/0004.html
 # http://curl.haxx.se/mail/lib-2010-03/0114.html
 
-#CURLOPT_NOSIGNAL
-#Pass a long. If it is 1, libcurl will not use any functions that install
+# CURLOPT_NOSIGNAL
+# Pass a long. If it is 1, libcurl will not use any functions that install
 # signal handlers or any functions that cause signals to be sent to the
 # process. This option is mainly here to allow multi-threaded unix applications
 # to still set/use all timeout options etc, without risking getting signals.
 # (Added in 7.10)
 
-#If this option is set and libcurl has been built with the standard name
+# If this option is set and libcurl has been built with the standard name
 # resolver, timeouts will not occur while the name resolve takes place.
 # Consider building libcurl with c-ares support to enable asynchronous DNS 
 # lookups, which enables nice timeouts for name resolves without signals.
@@ -103,8 +103,6 @@ class CurlTransport(object):
         Process head of response.
         """
 
-        #if self.config['nohead']:
-            #return 0
         self.response_head_chunks.append(chunk)
         # Returning None implies that all bytes were written
         return None
@@ -153,10 +151,12 @@ class CurlTransport(object):
         if _type == pycurl.INFOTYPE_DATA_OUT:
             self.request_body += text
 
-        #if _type == pycurl.INFOTYPE_TEXT:
-            #if self.request_log is None:
-                #self.request_log = ''
-            #self.request_log += text
+        """
+        if _type == pycurl.INFOTYPE_TEXT:
+            if self.request_log is None:
+                self.request_log = ''
+            self.request_log += text
+        """
 
         if self.verbose_logging:
             if _type in (pycurl.INFOTYPE_TEXT, pycurl.INFOTYPE_HEADER_IN,
@@ -194,7 +194,7 @@ class CurlTransport(object):
         self.curl.setopt(pycurl.CONNECTTIMEOUT, grab.config['connect_timeout'])
         self.curl.setopt(pycurl.TIMEOUT, grab.config['timeout'])
         self.curl.setopt(pycurl.IPRESOLVE, pycurl.IPRESOLVE_V4)
-        #self.curl.setopt(pycurl.DNS_CACHE_TIMEOUT, 0)
+        # self.curl.setopt(pycurl.DNS_CACHE_TIMEOUT, 0)
         if not grab.config['connection_reuse']:
             self.curl.setopt(pycurl.FRESH_CONNECT, 1)
             self.curl.setopt(pycurl.FORBID_REUSE, 1)
@@ -240,7 +240,7 @@ class CurlTransport(object):
         self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)
 
         # Disabled to avoid SSL3_READ_BYTES:sslv3 alert handshake failure error
-        #self.curl.setopt(pycurl.SSLVERSION, pycurl.SSLVERSION_SSLv3)
+        # self.curl.setopt(pycurl.SSLVERSION, pycurl.SSLVERSION_SSLv3)
 
         if grab.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
@@ -252,12 +252,12 @@ class CurlTransport(object):
                 # py3 hack
                 if PY3K:
                     post_items = decode_pairs(post_items, grab.config['charset'])
-                #import pdb; pdb.set_trace()
+                # import pdb; pdb.set_trace()
                 self.curl.setopt(pycurl.HTTPPOST, post_items) 
             elif grab.config['post']:
                 post_data = normalize_post_data(grab.config['post'], grab.config['charset'])
                 # py3 hack
-                #if PY3K:
+                # if PY3K:
                 #    post_data = smart_unicode(post_data, grab.config['charset'])
                 self.curl.setopt(pycurl.COPYPOSTFIELDS, post_data)
             else:
@@ -266,9 +266,9 @@ class CurlTransport(object):
             data = grab.config['post']
             if isinstance(data, unicode) or (not PY3K and not isinstance(data, basestring)):
                 # py3 hack
-                #if PY3K:
+                # if PY3K:
                 #    data = data.encode('utf-8')
-                #else:
+                # else:
                 raise error.GrabMisuseError('Value of post option could be only '\
                                             'byte string if PUT method is used')
             self.curl.setopt(pycurl.UPLOAD, 1)
@@ -357,8 +357,8 @@ class CurlTransport(object):
                 else:
                     domain = ''
                 grab.cookies.set(
-                    #name=normalize_unicode(name, grab.config['charset']),
-                    #value=normalize_unicode(value, grab.config['charset']),
+                    # name=normalize_unicode(name, grab.config['charset']),
+                    # value=normalize_unicode(value, grab.config['charset']),
                     name=name,
                     value=value,
                     domain=domain
@@ -482,7 +482,7 @@ class CurlTransport(object):
         for line in self.curl.getinfo(pycurl.INFO_COOKIELIST):
             values = line.split('\t')
             # old
-            #cookies[values[-2]] = values[-1]
+            # cookies[values[-2]] = values[-1]
             # new
             cookie = create_cookie(
                 name=values[5],
@@ -513,6 +513,6 @@ class CurlTransport(object):
         self.__dict__ = state
 
 
-#from grab.base import BaseGrab
-#class GrabCurl(CurlTransportExtension, BaseGrab):
-    #pass
+# from grab.base import BaseGrab
+# class GrabCurl(CurlTransportExtension, BaseGrab):
+    # pass

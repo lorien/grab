@@ -26,9 +26,9 @@ def reraise(tp, value, tb=None):
 class ImportStringError(ImportError):
     """Provides information about a failed :func:`import_string` attempt."""
 
-    #: String in dotted notation that failed to be imported.
+    # : String in dotted notation that failed to be imported.
     import_name = None
-    #: Wrapped exception.
+    # : Wrapped exception.
     exception = None
 
     def __init__(self, import_name, exception):
@@ -80,7 +80,7 @@ def import_string(import_name, silent=False):
     :return: imported object
     """
 
-    #XXX: py3 review needed
+    # XXX: py3 review needed
     assert isinstance(import_name, string_types)
     # force the import name to automatically convert to strings
     import_name = str(import_name)
@@ -115,12 +115,12 @@ def import_string(import_name, silent=False):
 
 def build_spider_registry(config):
     # TODO: make smart spider class searching
-    #for mask in config.SPIDER_LOCATIONS:
-        #for path in glob.glob(mask):
-            #if path.endswith('.py'):
-                #mod_path = path[:-3].replace('/', '.')
-                #try:
-                    #mod = __import__
+    # for mask in config.SPIDER_LOCATIONS:
+        # for path in glob.glob(mask):
+            # if path.endswith('.py'):
+                # mod_path = path[:-3].replace('/', '.')
+                # try:
+                    # mod = __import__
 
     SPIDER_REGISTRY.clear()
     module_mapping = {}
@@ -128,10 +128,6 @@ def build_spider_registry(config):
     opt_modules = []
     opt_modules = config['global'].get('spider_modules', deprecated_key='GRAB_SPIDER_MODULES',
                                        default=[])
-    #try:
-        #opt_modules = config['global']['spider_modules']
-    #except KeyError:
-        #opt_modules = config.get('GRAB_SPIDER_MODULES', [])
 
     for path in opt_modules:
         if ':' in path:

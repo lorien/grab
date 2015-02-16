@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # coding: utf-8
 from grab.spider import Spider, Task
 from tools.logs import default_logging

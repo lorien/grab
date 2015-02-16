@@ -108,7 +108,7 @@ class SpiderCacheMixin(object):
         bot = SimpleSpider()
         self.setup_cache(bot)
         # DO not clear the cache
-        #bot.cache.clear()
+        # bot.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('one', SERVER.BASE_URL, priority=1))
         bot.add_task(Task('one', SERVER.BASE_URL, priority=2, cache_timeout=0, delay=1))
@@ -137,5 +137,4 @@ class SpiderPostgresqlCacheTestCase(SpiderCacheMixin, TestCase):
     _backend = 'postgresql'
 
     def setup_cache(self, bot):
-        bot.setup_cache(backend='postgresql', database='spider_test')#,
-                        #user='web', passwd='web-**')
+        bot.setup_cache(backend='postgresql', database='spider_test')
