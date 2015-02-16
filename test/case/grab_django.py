@@ -3,6 +3,7 @@ from unittest import TestCase
 from test.server import SERVER
 from test.util import build_grab
 
+
 class GrabDjangoTestCase(TestCase):
     def setUp(self):
         SERVER.reset()

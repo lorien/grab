@@ -29,6 +29,7 @@ from grab.cookie import create_cookie
 # * name
 # * value
 
+
 class TestCookies(TestCase):
     def setUp(self):
         SERVER.reset()

@@ -13,6 +13,7 @@ DEFAULT_PLIST_DATA = \
     '1.1.1.1:8080\n'\
     '1.1.1.2:8080\n'
 
+
 class GrabProxyTestCase(TestCase):
     def setUp(self):
         SERVER.reset()

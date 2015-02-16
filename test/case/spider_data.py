@@ -5,6 +5,7 @@ from grab.spider import Spider, Task, Data, NoDataHandler, SpiderMisuseError
 
 from test.server import SERVER
 
+
 class TestSpider(TestCase):
     def setUp(self):
         SERVER.reset()

@@ -7,6 +7,7 @@ from test.server import SERVER
 
 from grab.util.py3k_support import *
 
+
 class LXMLExtensionTest(TestCase):
     def setUp(self):
         SERVER.reset()

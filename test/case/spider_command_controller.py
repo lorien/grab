@@ -4,6 +4,7 @@ from grab import Grab
 from grab.spider import Spider, Task, Data
 from test.server import SERVER
 
+
 class MiscTest(TestCase):
     _backend = 'redis'
 

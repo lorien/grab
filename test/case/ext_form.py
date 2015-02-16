@@ -70,6 +70,7 @@ DISABLED_RADIO_HTML = """
 </form>
 """
 
+
 class TestHtmlForms(TestCase):
     def setUp(self):
         SERVER.reset()

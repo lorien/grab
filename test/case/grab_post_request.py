@@ -13,6 +13,7 @@ try:
 except ImportError:
     from urllib.parse import parse_qsl
 
+
 class TestPostFeature(TestCase):
     def setUp(self):
         SERVER.reset()

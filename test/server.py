@@ -8,6 +8,7 @@ import itertools
 
 from grab.util.py3k_support import *
 
+
 class ServerState(object):
     PORT = 9876
     EXTRA_PORT1 = 9877

@@ -7,13 +7,16 @@ from test.util import TMP_DIR
 from grab.util.config import Config, build_global_config, build_spider_config
 from grab.util import default_config
 
+
 class SomeSettings(object):
     VAR1 = 'val1'
     VAR2 = 'val2'
     trash = 'xxx'
 
+
 SOME_DICT = {'VAR1': 'val1', 'VAR2': 'val2', 'trash': 'xxx'}
 SETTINGS_COUNTER = 1
+
 
 def setup_settings_file(settings):
     global SETTINGS_COUNTER

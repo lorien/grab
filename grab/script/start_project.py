@@ -5,6 +5,7 @@ import re
 
 logger = logging.getLogger('grab.script.start_project')
 
+
 def setup_arg_parser(parser):
     parser.add_argument('project_name')
     parser.add_argument('--template')

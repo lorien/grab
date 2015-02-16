@@ -10,6 +10,7 @@ PROXY1 = 'localhost:%d' % SERVER.PORT
 PROXY2 = 'localhost:%d' % SERVER.EXTRA_PORT1
 PROXY3 = 'localhost:%d' % SERVER.EXTRA_PORT2
 
+
 class SimpleSpider(Spider):
     def prepare(self):
         self.ports = set()
@@ -17,6 +18,7 @@ class SimpleSpider(Spider):
     def task_baz(self, grab, task):
         print(grab.request_headers)
         self.ports.add(int(grab.response.headers.get('Listen-Port', 0)))
+
 
 class TestSpider(TestCase):
     def setUp(self):

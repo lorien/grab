@@ -5,6 +5,7 @@ from grab import Grab
 from test.server import SERVER
 from grab.transport.curl import CurlTransport
 
+
 class FakeTransport(CurlTransport):
     def prepare_response(self, grab):
         resp = super(FakeTransport, self).prepare_response(grab)

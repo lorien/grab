@@ -14,6 +14,7 @@ GLOBAL = {
     'backends': [],
 }
 
+
 def prepare_test_environment():
     global TMP_DIR, TMP_FILE
 
@@ -31,6 +32,7 @@ def clear_directory(path):
             os.unlink(os.path.join(root, fname))
         for _dir in dirs:
             shutil.rmtree(os.path.join(root, _dir))
+
 
 def get_temp_file():
     handler, path = tempfile.mkstemp(dir=TMP_DIR)

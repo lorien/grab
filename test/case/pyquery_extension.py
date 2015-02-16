@@ -28,6 +28,7 @@ HTML = u"""
     </ul>
 """.encode('cp1251')
 
+
 class PyqueryExtensionTest(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response

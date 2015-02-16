@@ -13,6 +13,7 @@ Hello world
 
 IMG_FILE = os.path.join(TEST_DIR, 'files', 'yandex.png')
 
+
 class TestResponse(TestCase):
     def setUp(self):
         SERVER.reset()

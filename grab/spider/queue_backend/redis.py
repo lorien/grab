@@ -14,6 +14,7 @@ import logging
 from grab.spider.queue_backend.base import QueueInterface
 from grab.spider.error import SpiderMisuseError
 
+
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, queue_name=None, **kwargs):
         super(QueueInterface, self).__init__(**kwargs)

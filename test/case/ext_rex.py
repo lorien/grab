@@ -36,6 +36,7 @@ HTML = u"""
     </ul>
 """.encode('cp1251')
 
+
 class ExtensionRexTestCase(TestCase):
     def setUp(self):
         SERVER.reset()

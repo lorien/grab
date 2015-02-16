@@ -7,6 +7,7 @@ from grab import Grab, GrabMisuseError
 from test.util import TMP_FILE, build_grab
 from test.server import SERVER
 
+
 class TestCookies(TestCase):
     def setUp(self):
         SERVER.reset()

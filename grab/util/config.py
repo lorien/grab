@@ -115,6 +115,7 @@ def build_root_config(settings_mod_path='settings'):
         
         return root_config
 
+
 def build_spider_config(spider_class, root_config=None):
     if root_config is None:
         root_config = build_root_config()

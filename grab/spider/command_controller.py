@@ -9,6 +9,7 @@ import pickle
 
 from grab.spider.error import SpiderMisuseError
 
+
 class RedisCommandInterface(object):
     def __init__(self, spider_name, **kwargs):
         import redis

@@ -5,6 +5,7 @@ from test.server import SERVER
 
 from grab.util.py3k_support import *
 
+
 class SpiderMetaTestCase(TestCase):
 
     def test_root_spider_class(self):

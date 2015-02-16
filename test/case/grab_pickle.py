@@ -10,6 +10,7 @@ from grab import Grab
 from test.server import SERVER
 from test.util import build_grab
 
+
 class TestGrab(TestCase):
     def setUp(self):
         SERVER.reset()

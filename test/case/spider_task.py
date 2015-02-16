@@ -13,11 +13,13 @@ from grab.util.py3k_support import *
 
 from test.server import SERVER
 
+
 class SimpleSpider(Spider):
     base_url = 'http://google.com'
 
     def task_baz(self, grab, task):
         self.SAVED_ITEM = grab.response.body
+
 
 class TestSpider(TestCase):
     def setUp(self):

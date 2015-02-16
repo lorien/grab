@@ -5,6 +5,7 @@ from test.server import SERVER
 
 from grab.util.py3k_support import *
 
+
 class BasicSpiderTestCase(TestCase):
 
     class SimpleSpider(Spider):

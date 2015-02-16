@@ -13,6 +13,7 @@ from grab.extension import register_extensions
 
 from grab.util.py3k_support import *
 
+
 class GrabCharsetDetectionTestCase(TestCase):
     def setUp(self):
         SERVER.reset()

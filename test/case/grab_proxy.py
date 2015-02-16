@@ -11,6 +11,7 @@ PROXY1 = 'localhost:%d' % SERVER.PORT
 PROXY2 = 'localhost:%d' % SERVER.EXTRA_PORT1
 PROXY3 = 'localhost:%d' % SERVER.EXTRA_PORT2
 
+
 class TestProxy(TestCase):
     def setUp(self):
         SERVER.reset()

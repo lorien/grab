@@ -18,8 +18,8 @@ from grab.response import Response
 from grab.cookie import CookieManager
 from grab.util.py3k_support import *
 
-
 logger = logging.getLogger('grab.spider.cache_backend.postgresql')
+
 
 class CacheBackend(object):
     def __init__(self, database, use_compression=True, spider=None, **kwargs):

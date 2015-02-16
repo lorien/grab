@@ -4,13 +4,16 @@ from unittest import TestCase
 
 GLOBAL = {}
 
+
 class ExtensionA(object):
     def extra_foo(self):
         GLOBAL['items'].append('a')
 
+
 class ExtensionB(object):
     def extra_foo(self):
         GLOBAL['items'].append('b')
+
 
 class Worker(ExtensionA,  ExtensionB):
     extension_points = ('foo',)

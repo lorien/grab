@@ -311,6 +311,7 @@ class BodyExtension(object):
 
     body = property(_read_body, _write_body)
 
+
 class DomTreeExtension(object):
     __slots__ = ()
 

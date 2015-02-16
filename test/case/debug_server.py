@@ -6,6 +6,7 @@ except ImportError:
 
 from test.server import SERVER
 
+
 class TestTornadoServer(TestCase):
     def setUp(self):
         SERVER.reset()

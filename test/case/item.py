@@ -36,6 +36,7 @@ XML = b"""<?xml version='1.0' encoding='utf-8'?>
 </bbapi>
 """
 
+
 def calculated_func2(item, sel):
     if not hasattr(item, 'count2'):
         item.count2 = 1

@@ -35,6 +35,7 @@ FORMS = u"""
 </body>
 """.encode('utf-8')
 
+
 class TestUploadContent(TestCase):
     def setUp(self):
         SERVER.reset()

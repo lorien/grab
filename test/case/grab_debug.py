@@ -8,6 +8,7 @@ from test.server import SERVER
 from test.util import TMP_FILE, TMP_DIR, clear_directory, build_grab
 from grab.base import reset_request_counter
 
+
 class TestCookies(TestCase):
     def setUp(self):
         SERVER.reset()

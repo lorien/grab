@@ -5,6 +5,7 @@ from grab.error import GrabTooManyRedirectsError
 from test.server import SERVER
 from test.util import GRAB_TRANSPORT, only_transport
 
+
 class RedirectController(object):
     def __init__(self, counter):
         self.setup_counter(counter)

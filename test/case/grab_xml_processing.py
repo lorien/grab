@@ -5,6 +5,7 @@ from grab import Grab
 from test.util import build_grab
 from test.server import SERVER
 
+
 class GrabXMLProcessingTestCase(TestCase):
     def setUp(self):
         SERVER.reset()

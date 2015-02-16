@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from grab.spider.error import SpiderMisuseError
 from grab.base import copy_config
 
+
 class BaseTask(object):
     pass
 

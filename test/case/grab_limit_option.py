@@ -5,6 +5,7 @@ from grab import Grab
 from test.util import ignore_transport, build_grab
 from test.server import SERVER
 
+
 class TestContentLimit(TestCase):
     def setUp(self):
         SERVER.reset()

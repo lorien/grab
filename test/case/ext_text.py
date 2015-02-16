@@ -35,6 +35,7 @@ HTML = u"""
     </ul>
 """.encode('cp1251')
 
+
 class TextExtensionTest(TestCase):
     def setUp(self):
         SERVER.reset()

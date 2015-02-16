@@ -13,6 +13,7 @@ HTML = b"""
 </html>
 """
 
+
 class DocExtensionTest(TestCase):
     def setUp(self):
         SERVER.reset()

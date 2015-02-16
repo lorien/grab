@@ -6,7 +6,6 @@ from grab import GrabMisuseError
 from test.util import build_grab
 from test.server import SERVER
 
-# from grab.util.py3k_support import *
 
 class GrabApiTestCase(TestCase):
     def setUp(self):

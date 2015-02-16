@@ -4,6 +4,7 @@ from grab.spider import Spider, Task
 from test.server import SERVER
 from test.util import only_backend
 
+
 class ContentGenerator():
     def __init__(self):
         self.counter = 0
