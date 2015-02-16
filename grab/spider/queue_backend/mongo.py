@@ -2,12 +2,10 @@ try:
     import Queue as queue
 except ImportError:
     import queue
-from time import time
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
-import uuid
 from bson import Binary
 import logging
 import pymongo

@@ -1,6 +1,5 @@
-from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
-from django.db.models import F
+from django.db.models.signals import post_save
+from django.dispatch import receive # noqa
 
 
 @receiver(post_save, sender=Foo)

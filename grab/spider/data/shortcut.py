@@ -11,8 +11,6 @@ from grab import Grab
 
 
 def build_image_hosting_referer(url):
-    from database import db
-
     host = urlsplit(url).netloc
     return '.'.join(host.split('.')[-2:])
 

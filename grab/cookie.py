@@ -11,7 +11,6 @@ try:
 except ImportError:
     from http.cookiejar import CookieJar, Cookie
 import json
-import dummy_threading
 
 from grab.error import GrabMisuseError
 

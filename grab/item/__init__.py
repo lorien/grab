@@ -25,11 +25,11 @@ Usage example:
 """
 import collections
 
-from grab.item.field import (StringField, IntegerField, DateTimeField,
+from grab.item.field import (StringField, IntegerField, DateTimeField, # noqa
                              HTMLField, FuncField, NullField, ChoiceField,
                              RegexField, ItemListField, BooleanField,
                              DateField, DecimalField)
-from grab.item.item import Item
+from grab.item.item import Item # noqa
 from grab.error import GrabMisuseError
 
 

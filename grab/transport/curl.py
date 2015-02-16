@@ -1,36 +1,32 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-import email
 import logging
 # import urllib
 try:
     from cStringIO import StringIO
 except ImportError:
     from io import BytesIO as StringIO
-import threading
 import random
 try:
-    from urlparse import urlsplit, urlunsplit
+    from urlparse import urlsplit
 except ImportError:
-    from urllib.parse import urlsplit, urlunsplit
+    from urllib.parse import urlsplit
 import pycurl
 import tempfile
 import os
-import pdb
 try:
     from cookielib import CookieJar
 except ImportError:
     from http.cookiejar import CookieJar
 
 from grab.cookie import create_cookie, CookieManager
-from grab.upload import UploadContent, UploadFile
 from grab import error
 from grab.response import Response
-from tools.http import (encode_cookies, smart_urlencode, normalize_unicode,
-                             normalize_http_values, normalize_post_data, normalize_url)
+from tools.http import (encode_cookies, normalize_http_values,
+                        normalize_post_data, normalize_url)
 from tools.user_agent import random_user_agent
-from tools.encoding import smart_str, smart_unicode, decode_list, decode_pairs
+from tools.encoding import smart_str, decode_list, decode_pairs
 from grab.util.py3k_support import * # noqa
 
 logger = logging.getLogger('grab.transport.curl')
@@ -357,8 +353,6 @@ class CurlTransport(object):
                 else:
                     domain = ''
                 grab.cookies.set(
-                    # name=normalize_unicode(name, grab.config['charset']),
-                    # value=normalize_unicode(value, grab.config['charset']),
                     name=name,
                     value=value,
                     domain=domain

@@ -1,19 +1,11 @@
 # -*- coding: utf-8 -*-
-import logging
 from grab.spider import Spider
 from grab.util.module import build_spider_registry, load_spider_class
 from grab.util.config import build_root_config
 
-from django.shortcuts import redirect, get_object_or_404, render
-from django.core.urlresolvers import reverse
-from django.template.loader import render_to_string
-from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render
 from django import forms
 
-from common.pagination import paginate
 from common.decorators import ajax_get
 
 

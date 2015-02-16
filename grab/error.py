@@ -14,7 +14,7 @@ Exception
      |-> DataNotFound <- IndexError
 """
 import warnings
-from tools.error import DataNotFound
+from tools.error import DataNotFound # noqa
 
 
 class GrabError(Exception):

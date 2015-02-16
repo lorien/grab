@@ -4,8 +4,6 @@ from argparse import ArgumentParser
 import logging
 import sys 
 
-from tools.lock import assert_lock
-from tools.logs import default_logging
 from grab.util.config import build_root_config
 from grab.util.py3k_support import * # noqa
 

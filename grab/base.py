@@ -28,7 +28,6 @@ from tools.http import normalize_http_values
 from grab.cookie import CookieManager
 from grab.proxy import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
-from grab.ext.form import FormExtension
 
 from grab.util.py2old_support import * # noqa
 from grab.util.py3k_support import * # noqa

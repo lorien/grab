@@ -10,10 +10,6 @@ import re
 from copy import copy
 import logging
 import email
-try:
-    from urllib2 import Request
-except ImportError:
-    from urllib.request import Request
 import os
 import json
 try:

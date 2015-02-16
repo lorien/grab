@@ -2,11 +2,11 @@
 This is obsoleted module. Use selection package instead.
 """
 
-from selection.selector import BaseSelector
-from selection.selector_list import SelectorList, RexResultList
+from selection.selector import BaseSelector # noqa
+from selection.selector_list import SelectorList, RexResultList # noqa
 from selection.backend.xpath import XpathSelector as XpathSelectorOrigin
-from selection.backend.text import TextSelector
-from selection.backend.pyquery import PyquerySelector
+from selection.backend.text import TextSelector # noqa
+from selection.backend.pyquery import PyquerySelector # noqa
 from grab.error import warn
 
 

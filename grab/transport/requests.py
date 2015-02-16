@@ -1,19 +1,11 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-import email
 import logging
-# import urllib
-# try:
-#    from StringIO import StringIO
-# except ImportError:
-#    from io import StringIO
-import threading
 import random
 import requests 
 
 from grab.error import GrabError, GrabMisuseError
-from grab.base import UploadContent, UploadFile
 from grab.response import Response
 from tools.http import urlencode, normalize_http_values, normalize_unicode
 from grab.util.py3k_support import * # noqa

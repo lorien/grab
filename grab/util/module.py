@@ -6,7 +6,6 @@ import sys
 
 from grab.spider.base import Spider
 from grab.spider.error import SpiderInternalError
-from grab.util.misc import camel_case_to_underscore
 from grab.util.py3k_support import * # noqa
 
 PY2 = not PY3K

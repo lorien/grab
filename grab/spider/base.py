@@ -1,24 +1,10 @@
 from __future__ import absolute_import
 import types
 import signal
-import inspect
-import traceback
 import logging
 from collections import defaultdict
-import os
 import time
 import json
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-try:
-    import anydbm as dbm
-except ImportError:
-    import dbm
-import multiprocessing
-import zlib
-from hashlib import sha1
 try:
     from urlparse import urljoin
 except ImportError:
@@ -30,11 +16,11 @@ except ImportError:
     import queue
 from copy import deepcopy
 
-from grab.base import GLOBAL_STATE, Grab
+from grab.base import Grab
 from grab.error import GrabInvalidUrl
 from grab.spider.error import (SpiderError, SpiderMisuseError, FatalError,
                                StopTaskProcessing, NoTaskHandler, NoDataHandler)
-from grab.spider.task import Task, NullTask, inline_task
+from grab.spider.task import Task, NullTask
 from grab.spider.data import Data
 from grab.spider.pattern import SpiderPattern
 from grab.spider.stat  import SpiderStat

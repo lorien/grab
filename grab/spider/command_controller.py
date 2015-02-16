@@ -1,8 +1,3 @@
-import random
-try:
-    import Queue as queue
-except ImportError:
-    import queue
 import logging
 import uuid
 import pickle

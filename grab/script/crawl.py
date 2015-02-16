@@ -5,7 +5,6 @@ from argparse import ArgumentParser
 from grab.util.config import build_spider_config, build_root_config
 from grab.util.module import load_spider_class
 from tools.logs import default_logging
-from tools.lock import assert_lock
 from grab.spider.save_result import save_result
 from tools.files import clear_directory
 from tools.encoding import make_str

@@ -1,6 +1,5 @@
 import pycurl
 import select
-import time
 
 from grab.error import GrabTooManyRedirectsError
 from grab.util.py3k_support import * # noqa
@@ -77,8 +76,6 @@ class MulticurlTransport(object):
                 select.select(rlist, wlist, xlist, timeout / 1000.0)
         else:
             pass
-            # time.sleep(0.1)
-            # Ok, that that was a bad idea :D
 
         while True:
             status, active_objects = self.multi.perform()
