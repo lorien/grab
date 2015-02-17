@@ -11,7 +11,6 @@ from test.server import SERVER
 # That URLs breaks Grab's URL normalization process with error "label empty or too long"
 INVALID_URL = 'http://13354&altProductId=6423589&productId=6423589&altProductStoreId=13713&catalogId=10001&categoryId=28678&productStoreId=13713http://www.textbooksnow.com/webapp/wcs/stores/servlet/ProductDisplay?langId=-1&storeId='
 
-
 class SpiderErrorTestCase(TestCase):
     def setUp(self):
         SERVER.reset()
@@ -45,3 +44,28 @@ class SpiderErrorTestCase(TestCase):
         )
         bot = SomeSpider(network_try_limit=1)
         bot.run()
+
+    def test_call_fallback_method_exist(self):
+
+        class SomeSpider(Spider):
+            def prepare(self):
+                self.fallback_called = False
+                self.exception = None
+
+            def task_generator(self):
+                yield Task('page', url=INVALID_URL, fallback_name='fallback_method')
+
+            def process_new_task(self, task):
+                raise GrabInvalidUrl("SomeException")
+
+            def fallback_method(self, task, exception):
+                self.fallback_called = True
+                self.exception = exception
+
+
+        from grab.spider.base import logger_verbose
+        logger_verbose.setLevel(logging.DEBUG)
+        bot = SomeSpider()
+        bot.run()
+        self.assertEqual(bot.fallback_called, True)
+        self.assertTrue(isinstance(bot.exception, GrabInvalidUrl))

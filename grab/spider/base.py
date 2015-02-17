@@ -997,12 +997,20 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                                                 % reason)
                             handler = task.get_fallback_handler(self)
                             if handler:
-                                handler(task)
+                                handler(task, StopTaskProcessing(reason))
                             # TODO: not do following line
                             # TODO: middleware: TaskFails
                         else:
-                            self.process_new_task(task)
-                            self.transport.process_handlers()
+                            try:
+                                self.process_new_task(task)
+                                self.transport.process_handlers()
+                            except Exception as ex:
+                                logger.debug('Got exception {ex}'.format(ex=ex))
+                                handler = task.get_fallback_handler(self)
+                                if handler:
+                                    handler(task, ex)
+                                else:
+                                    raise
 
                 with self.save_timer('network_transport'):
                     logger_verbose.debug('Asking transport layer to do '
