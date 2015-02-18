@@ -503,6 +503,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                             time.sleep(0.1)
                             logger.debug('Slave sleeping')
                         else:
+                            self.slave = False
                             break
                     else:
                         break
