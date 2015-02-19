@@ -378,7 +378,8 @@ class CurlTransport(object):
                 if len(cookie.path) != 0:
                     cookie_string += b'; path=' + cookie.path.encode('ascii')
                 if '.' in host_nowww:
-                    cookie_string += b'; domain=' + cookie_domain.encode('ascii')
+                    if cookie_domain:
+                        cookie_string += b'; domain=' + cookie_domain.encode('ascii')
                 if http_only:
                     cookie_string += b'; HttpOnly'
                 self.curl.setopt(pycurl.COOKIELIST, cookie_string)
