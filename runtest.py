@@ -7,7 +7,6 @@ import logging
 from copy import copy
 
 from test.util import prepare_test_environment, clear_test_environment, GLOBAL
-from test.server import start_server, stop_server
 from tools.watch import watch
 
 # **********
@@ -17,43 +16,41 @@ from tools.watch import watch
 # **********
 GRAB_TEST_LIST = (
     # Internal API
-    'test.case.grab_api',
-    'test.case.grab_transport',
-    'test.case.response_class',
-    'test.case.grab_debug',
+    'test.grab_api',
+    'test.grab_transport',
+    'test.response_class',
+    'test.grab_debug',
     # Response processing
-    'test.case.grab_xml_processing',
-    'test.case.grab_response_body_processing',
-    #'test.case.grab_charset',
+    'test.grab_xml_processing',
+    'test.grab_response_body_processing',
+    #'test.grab_charset',
     # Network
-    'test.case.grab_get_request',
-    'test.case.grab_post_request',
-    'test.case.grab_user_agent',
-    'test.case.grab_cookies',
+    'test.grab_get_request',
+    'test.grab_post_request',
+    'test.grab_user_agent',
+    'test.grab_cookies',
     # Refactor
-    'test.case.grab_proxy',
-    'test.case.grab_upload_file',
-    'test.case.grab_limit_option',
-    'test.case.grab_charset_issue',
-    'test.case.grab_pickle',
+    'test.grab_proxy',
+    'test.grab_upload_file',
+    'test.grab_limit_option',
+    'test.grab_charset_issue',
+    'test.grab_pickle',
     # *** Extension sub-system
-    'test.case.extension',
+    'test.extension',
     # *** Extensions
-    'test.case.ext_text',
-    'test.case.ext_rex',
-    'test.case.ext_lxml',
-    #'test.case.ext_form',
-    'test.case.ext_doc',
-    'test.case.ext_structured',
-    # *** Tornado Test Server
-    'test.case.debug_server',
+    'test.ext_text',
+    'test.ext_rex',
+    'test.ext_lxml',
+    #'test.ext_form',
+    'test.ext_doc',
+    'test.ext_structured',
     # *** Pycurl Test
-    'test.case.pycurl_cookie',
+    'test.pycurl_cookie',
 )
 
 GRAB_EXTRA_TEST_LIST = (
-    'test.case.grab_django',
-    'test.case.ext_pyquery',
+    'test.grab_django',
+    'test.ext_pyquery',
 )
 
 # ************
@@ -61,16 +58,16 @@ GRAB_EXTRA_TEST_LIST = (
 # ************
 
 SPIDER_TEST_LIST = (
-    'test.case.spider',
+    'test.spider',
     #'tests.test_distributed_spider',
-    'test.case.spider_task',
-    'test.case.spider_proxy',
-    'test.case.spider_queue',
-    'test.case.spider_misc',
-    'test.case.spider_meta',
-    'test.case.spider_error',
-    'test.case.spider_cache',
-    'test.case.spider_command_controller',
+    'test.spider_task',
+    'test.spider_proxy',
+    'test.spider_queue',
+    'test.spider_misc',
+    'test.spider_meta',
+    'test.spider_error',
+    'test.spider_cache',
+    'test.spider_command_controller',
 )
 
 SPIDER_EXTRA_TEST_LIST = ()
@@ -153,7 +150,6 @@ def main():
 
     runner = unittest.TextTestRunner()
 
-    start_server()
     result = runner.run(suite)
 
     clear_test_environment()

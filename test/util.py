@@ -2,10 +2,13 @@ import os
 import shutil
 import tempfile
 import functools
+from test_server import TestServer
+from unittest import TestCase
 
 from grab import Grab
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_SERVER_PORT = 9876
 
 # Global variable which is used in all tests to build
 # Grab instance with specific transport layer
@@ -103,3 +106,17 @@ def build_grab(**kwargs):
     if not 'transport' in kwargs:
         kwargs['transport'] = GLOBAL['transport']
     return Grab(**kwargs)
+
+
+class BaseGrabTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.server = TestServer(port=TEST_SERVER_PORT)
+        cls.server.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.server.stop()
+
+    def setUp(self):
+        self.server.reset()
