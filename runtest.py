@@ -47,11 +47,7 @@ GRAB_TEST_LIST = (
     'test.case.ext_structured',
     # *** Tornado Test Server
     'test.case.debug_server',
-    # *** Item
-    # FIXME: disabled because it fails test
-    # and it will be removed in near future
-    # 'test.case.item',
-    # pycurl tests
+    # *** Pycurl Test
     'test.case.pycurl_cookie',
 )
 
