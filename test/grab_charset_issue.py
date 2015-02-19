@@ -1,11 +1,8 @@
 # coding: utf-8
-from unittest import TestCase
-from grab import Grab, DataNotFound
-
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 
 
 class LXMLExtensionTest(BaseGrabTestCase):

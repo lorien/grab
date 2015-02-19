@@ -1,11 +1,10 @@
 # coding: utf-8
-from unittest import TestCase
-from grab import Grab, DataNotFound, GrabMisuseError
+from grab import DataNotFound, GrabMisuseError
 
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 
 HTML = u"""
 <head>
@@ -50,24 +49,22 @@ class TextExtensionTest(BaseGrabTestCase):
         self.assertFalse(self.g.search(u'фыва2'))
 
     def test_search_usage_errors(self):
-        self.assertRaises(GrabMisuseError,
-            lambda: self.g.search(u'фыва', byte=True))
+        self.assertRaises(GrabMisuseError, self.g.search, u'фыва', byte=True)
         anchor = 'фыва'
         # py3 hack
         if PY3K:
             anchor = anchor.encode('utf-8')
-        self.assertRaises(GrabMisuseError,
-            lambda: self.g.search(anchor))
+        self.assertRaises(GrabMisuseError, self.g.search, anchor)
 
     def test_assert_substring(self):
         self.g.assert_substring(u'фыва')
         self.g.assert_substring(u'фыва'.encode('cp1251'), byte=True)
-        self.assertRaises(DataNotFound,
-            lambda: self.g.assert_substring(u'фыва2'))
+        self.assertRaises(DataNotFound, self.g.assert_substring, u'фыва2')
 
     def test_assert_substrings(self):
         self.g.assert_substrings((u'фыва',))
         self.g.assert_substrings((u'фывы нет', u'фыва'))
-        self.g.assert_substrings((u'фыва'.encode('cp1251'), 'где ты фыва?'), byte=True)
-        self.assertRaises(DataNotFound,
-            lambda: self.g.assert_substrings((u'фыва, вернись', u'фыва-а-а-а')))
+        self.g.assert_substrings((u'фыва'.encode('cp1251'), 'где ты фыва?'),
+                                 byte=True)
+        self.assertRaises(DataNotFound, self.g.assert_substrings,
+                          (u'фыва, вернись', u'фыва-а-а-а'))

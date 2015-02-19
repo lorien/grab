@@ -1,7 +1,5 @@
 # coding: utf-8
 from __future__ import absolute_import
-from unittest import TestCase
-from grab import Grab, DataNotFound, GrabMisuseError
 import os.path
 
 from test.util import TEST_DIR, TMP_DIR, build_grab
@@ -19,10 +17,7 @@ class TestResponse(BaseGrabTestCase):
         self.server.reset()
 
     def test_save(self):
-        """
-        Test `Response.save` method.
-        """
-        
+        "Test `Response.save` method."
         img_data = open(IMG_FILE, 'rb').read()
         temp_file = os.path.join(TMP_DIR, 'file.bin')
         self.server.response['get.data'] = img_data
@@ -33,10 +28,7 @@ class TestResponse(BaseGrabTestCase):
         self.assertEqual(open(temp_file, 'rb').read(), img_data)
 
     def test_save_hash(self):
-        """
-        Test `Response.save_hash` method.
-        """
-        
+        "Test `Response.save_hash` method."
         img_data = open(IMG_FILE, 'rb').read()
         self.server.response['get.data'] = img_data
 
@@ -47,7 +39,10 @@ class TestResponse(BaseGrabTestCase):
         self.assertEqual(test_data, img_data)
 
     def test_custom_charset(self):
-        self.server.response['get.data'] = u'<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf8;charset=cp1251" /></head><body><h1>крокодил</h1></body></html>'.encode('utf-8')
+        self.server.response['get.data'] = u'<html><head><meta '\
+            u'http-equiv="Content-Type" content="text/html; '\
+            u'charset=utf8;charset=cp1251" /></head><body>'\
+            u'<h1>крокодил</h1></body></html>'.encode('utf-8')
         g = build_grab()
         g.setup(document_charset='utf-8')
         g.go(self.server.get_url())

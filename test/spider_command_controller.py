@@ -1,7 +1,4 @@
-from unittest import TestCase
-
-from grab import Grab
-from grab.spider import Spider, Task, Data
+from grab.spider import Spider
 from test.util import BaseGrabTestCase
 
 

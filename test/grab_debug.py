@@ -1,11 +1,8 @@
 # coding: utf-8
-from unittest import TestCase
-import json
 import os
 
-from grab import Grab, GrabMisuseError
 from test.util import BaseGrabTestCase
-from test.util import TMP_FILE, TMP_DIR, clear_directory, build_grab
+from test.util import TMP_DIR, clear_directory, build_grab
 from grab.base import reset_request_counter
 
 
@@ -27,7 +24,6 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual(os.listdir(TMP_DIR), ['log.html'])
         self.assertEqual(open(log_file_path).read(), 'omsk')
 
-
     def test_log_dir_option(self):
         clear_directory(TMP_DIR)
         reset_request_counter()
@@ -40,9 +36,12 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual(os.listdir(TMP_DIR), [])
         g.go(self.server.get_url())
         g.go(self.server.get_url())
-        self.assertEqual(sorted(os.listdir(TMP_DIR)), ['01.html', '01.log', '02.html', '02.log'])
-        self.assertEqual(open(os.path.join(TMP_DIR, '01.html')).read(), 'omsk1')
-        self.assertEqual(open(os.path.join(TMP_DIR, '02.html')).read(), 'omsk2')
+        self.assertEqual(sorted(os.listdir(TMP_DIR)),
+                         ['01.html', '01.log', '02.html', '02.log'])
+        self.assertEqual(open(os.path.join(TMP_DIR, '01.html')).read(),
+                         'omsk1')
+        self.assertEqual(open(os.path.join(TMP_DIR, '02.html')).read(),
+                         'omsk2')
 
     def test_log_dir_response_content(self):
         clear_directory(TMP_DIR)
@@ -58,7 +57,6 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual(sorted(os.listdir(TMP_DIR)), ['01.html', '01.log'])
         log_file_content = open(os.path.join(TMP_DIR, '01.log')).read()
         self.assertTrue('X-Engine' in log_file_content)
-
 
     def test_log_dir_request_content_is_empty(self):
         clear_directory(TMP_DIR)

@@ -1,7 +1,4 @@
 # coding: utf-8
-from unittest import TestCase
-
-from grab import Grab
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 
@@ -11,7 +8,9 @@ class GrabXMLProcessingTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_xml_with_declaration(self):
-        self.server.response['get.data'] = b'<?xml version="1.0" encoding="UTF-8"?><root><foo>foo</foo></root>'
+        self.server.response['get.data'] =\
+            b'<?xml version="1.0" encoding="UTF-8"?>'\
+            b'<root><foo>foo</foo></root>'
         g = build_grab()
         g.go(self.server.get_url())
         self.assertTrue(g.xpath_one('//foo').text == 'foo')
@@ -21,9 +20,11 @@ class GrabXMLProcessingTestCase(BaseGrabTestCase):
         1. Build Grab instance with XML with xml declaration
         2. Call search method
         3. Call xpath
-        4. Get ValueError: Unicode strings with encoding declaration are not supported.
+        4. Get ValueError: Unicode strings with encoding
+            declaration are not supported.
         """
-        xml = b'<?xml version="1.0" encoding="UTF-8"?><tree><leaf>text</leaf></tree>'
+        xml = b'<?xml version="1.0" encoding="UTF-8"?>'\
+              b'<tree><leaf>text</leaf></tree>'
         g = build_grab(document_body=xml)
         self.assertTrue(g.search(u'text'))
         self.assertEqual(g.xpath_one('//leaf').text, u'text')

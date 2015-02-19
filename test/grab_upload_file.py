@@ -1,6 +1,5 @@
 # coding: utf-8
-from unittest import TestCase
-from grab import Grab, UploadContent
+from grab import UploadContent
 
 from test.util import build_grab
 from test.util import BaseGrabTestCase
@@ -14,7 +13,8 @@ FORMS = u"""
     <div id="header">
         <form id="search_form" method="GET">
             <input id="search_box" name="query" value="" />
-            <input type="submit" value="submit" class="submit_btn" name="submit" />
+            <input type="submit" value="submit" class="submit_btn"
+                name="submit" />
         </form>
     </div>
     <div id="content">
@@ -25,11 +25,13 @@ FORMS = u"""
               <option value="1">Female</option>
               <option value="2">Male</option>
            </select>
-           <input type="submit" value="submit" class="submit_btn" name="submit" />
+           <input type="submit" value="submit" class="submit_btn"
+            name="submit" />
         </FORM>
         <h1 id="fake_form">Big header</h1>
         <form name="dummy" action="/dummy">
-           <input type="submit" value="submit" class="submit_btn" name="submit" />
+           <input type="submit" value="submit" class="submit_btn"
+           name="submit" />
         </form>
     </div>
 </body>

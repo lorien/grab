@@ -1,7 +1,5 @@
 # coding: utf-8
-from unittest import TestCase
-
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 from grab import GrabMisuseError
 from grab.base import reset_request_counter
 from test.util import build_grab
@@ -14,8 +12,8 @@ class GrabApiTestCase(BaseGrabTestCase):
 
     def test_incorrect_option_name(self):
         g = build_grab()
-        self.assertRaises(GrabMisuseError,
-            lambda: g.setup(save_the_word=True))
+        self.assertRaises(GrabMisuseError, g.setup,
+                          save_the_word=True)
 
     # Ghost test was disabled because of strange error
     # that appear when multiple Ghost instances are created
@@ -24,10 +22,8 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.server.response['get.data'] = 'Moon'
         g.go(self.server.get_url())
         self.assertTrue(b'Moon' in g.response.body)
-        g2 = build_grab()
-        # self.assertEqual(g2.doc.grab, g2)
         g2 = g.clone()
-        self.assertTrue(b'Moon' in g.response.body)
+        self.assertTrue(b'Moon' in g2.response.body)
 
     def test_empty_clone(self):
         g = build_grab()
@@ -67,19 +63,17 @@ class GrabApiTestCase(BaseGrabTestCase):
             pass
 
         SimpleExtension.get_data()['counter'] = 0
-        g = CustomGrab()
+        CustomGrab()
         # self.assertEqual(SimpleExtension.get_data()['counter'], 1)
 
         class VeryCustomGrab(CustomGrab):
             pass
 
         SimpleExtension.get_data()['counter'] = 0
-        g = VeryCustomGrab()
+        VeryCustomGrab()
         # self.assertEqual(SimpleExtension.get_data()['counter'], 1)
 
     def test_request_counter(self):
-        import grab.base
-        import itertools
         import threading
 
         reset_request_counter()

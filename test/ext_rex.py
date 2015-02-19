@@ -1,12 +1,11 @@
 # coding: utf-8
-from unittest import TestCase
-from grab import Grab, DataNotFound, GrabMisuseError
+from grab import DataNotFound
 import re
 
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 
 HTML = u"""
 <head>
@@ -52,7 +51,8 @@ class ExtensionRexTestCase(BaseGrabTestCase):
 
         # Search non-unicode rex in byte-string body
         rex = re.compile(u'(фыва)'.encode('cp1251'))
-        self.assertEqual(u'фыва'.encode('cp1251'), self.g.rex(rex, byte=True).group(1))
+        self.assertEqual(u'фыва'.encode('cp1251'),
+                         self.g.rex(rex, byte=True).group(1))
 
         # # Search for non-unicode rex in unicode body shuld fail
         pattern = '(фыва)'

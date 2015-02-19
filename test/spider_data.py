@@ -1,7 +1,4 @@
-from unittest import TestCase
-
-from grab import Grab
-from grab.spider import Spider, Task, Data, NoDataHandler, SpiderMisuseError
+from grab.spider import Spider, Task, Data, NoDataHandler
 
 from test.util import BaseGrabTestCase
 
@@ -24,7 +21,7 @@ class TestSpider(BaseGrabTestCase):
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 yield Data('foo', num=1)
-            
+
             def data_foo(self, num):
                 1/0
 
@@ -41,7 +38,7 @@ class TestSpider(BaseGrabTestCase):
 
             def task_page(self, grab, task):
                 yield Data('foo', number=1)
-            
+
             def data_foo(self, number):
                 self.data_processed.append(number)
 
@@ -58,7 +55,7 @@ class TestSpider(BaseGrabTestCase):
 
             def task_page(self, grab, task):
                 yield Data('foo', one=1, two=2, bar='gaz')
-            
+
             def data_foo(self, one, two, **kwargs):
                 self.data_processed.append(one)
                 self.data_processed.append(two)
@@ -88,7 +85,7 @@ class TestSpider(BaseGrabTestCase):
 
             def task_page(self, grab, task):
                 yield Data('foo', count=task.get('count', 1))
-            
+
             def data_foo(self, count):
                 self.data_processed.append(count)
                 if count == 1:

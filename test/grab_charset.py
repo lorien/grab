@@ -3,15 +3,11 @@
 This test fails in py3.3 environment because `grab.response.body`
 contains <str>, but it should contains <bytes>
 """
-from unittest import TestCase
-import json
-
-from grab import Grab, GrabMisuseError
+from grab import Grab
 from test.util import build_grab
 from test.util import BaseGrabTestCase
-from grab.extension import register_extensions
 
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 
 
 class GrabCharsetDetectionTestCase(BaseGrabTestCase):

@@ -1,15 +1,8 @@
-from unittest import TestCase
-# try:
-#    import cPickle as pickle
-# except ImportError:
-#    import pickle
-
 import grab.spider.base
 from grab import Grab
-from grab.spider import Spider, Task, Data, SpiderMisuseError, NoTaskHandler
+from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
 from grab.spider import inline_task
-from grab.util.py3k_support import * # noqa
-
+from grab.util.py3k_support import *  # noqa
 
 from test.util import BaseGrabTestCase
 
@@ -93,7 +86,6 @@ class TestSpider(BaseGrabTestCase):
     def test_task_clone_with_url_param(self):
         task = Task('baz', url='xxx')
         task.clone(url='http://yandex.ru/')
-
 
     def test_task_useragent(self):
         bot = SimpleSpider()
@@ -219,7 +211,6 @@ class TestSpider(BaseGrabTestCase):
                     # as is in subroutine task:  /?foo=subtask1
                     self.add_response(grab)
 
-
                 url = server.get_url('/?foo=yield')
                 self.add_task(Task('yield', url=url))
 
@@ -268,5 +259,5 @@ class TestSpider(BaseGrabTestCase):
         bot.setup_queue()
         g = Grab()
         g.setup(url=self.server.get_url())
-        self.assertRaises(SpiderMisuseError, 
-            lambda: bot.add_task(Task('page', grab=g, url=self.server.get_url())))
+        self.assertRaises(SpiderMisuseError, Task,
+                          'page', grab=g, url=self.server.get_url())

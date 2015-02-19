@@ -1,11 +1,10 @@
 # coding: utf-8
-from unittest import TestCase
 try:
     from urllib import quote
 except ImportError:
     from urllib.parse import quote
 
-from grab import Grab, GrabMisuseError
+from grab import GrabMisuseError
 from test.util import ignore_transport, build_grab
 from test.util import BaseGrabTestCase
 try:
@@ -59,7 +58,8 @@ class TestPostFeature(BaseGrabTestCase):
         # Provide POST data in non-ascii unicode-string
         g.setup(post=u'Привет, мир!')
         g.request()
-        self.assertEqual(self.server.request['data'], u'Привет, мир!'.encode('utf-8'))
+        self.assertEqual(self.server.request['data'],
+                         u'Привет, мир!'.encode('utf-8'))
 
         # Two values with one key
         g.setup(post=(('foo', 'bar'), ('foo', 'baz')))
@@ -74,7 +74,6 @@ class TestPostFeature(BaseGrabTestCase):
     @ignore_transport('grab.transport.requests.RequestsTransport')
     def test_multipart_post(self):
         g = build_grab(url=self.server.get_url(), debug_post=True)
-        
         # Dict
         g.setup(multipart_post={'foo': 'bar'})
         g.request()
@@ -82,10 +81,14 @@ class TestPostFeature(BaseGrabTestCase):
 
         # Few values with non-ascii data
         # TODO: understand and fix
-        # AssertionError: 'foo=bar&gaz=%D0%94%D0%B5%D0%BB%D1%8C%D1%84%D0%B8%D0%BD&abc=' != 'foo=bar&gaz=\xd0\x94\xd0\xb5\xd0\xbb\xd1\x8c\xd1\x84\xd0\xb8\xd0\xbd&abc='
+        # AssertionError: 'foo=bar&gaz=%D0%94%D0%B5%D0%BB%'\
+        #                 'D1%8C%D1%84%D0%B8%D0%BD&abc=' !=
+        #                 'foo=bar&gaz=\xd0\x94\xd0\xb5\xd0'\
+        #                 '\xbb\xd1\x8c\xd1\x84\xd0\xb8\xd0\xbd&abc='
         # g.setup(post=({'foo': 'bar', 'gaz': u'Дельфин', 'abc': None}))
         # g.request()
-        # self.assertEqual(self.server.request['data'], 'foo=bar&gaz=Дельфин&abc=')
+        # self.assertEqual(self.server.request['data'],
+        #                   'foo=bar&gaz=Дельфин&abc=')
 
         # Multipart data could not be string
         g.setup(multipart_post='asdf')
@@ -113,7 +116,8 @@ class TestPostFeature(BaseGrabTestCase):
         self.server.request['charset'] = 'cp1251'
         g = build_grab()
         data = u'фыва'
-        g.setup(post=data, url=self.server.get_url(), charset='cp1251', debug=True)
+        g.setup(post=data, url=self.server.get_url(),
+                charset='cp1251', debug=True)
         g.request()
         self.assertEqual(self.server.request['data'], data.encode('cp1251'))
 
@@ -121,15 +125,17 @@ class TestPostFeature(BaseGrabTestCase):
         self.server.request['charset'] = 'cp1251'
         g = build_grab()
         data = u'фыва'
-        g.setup(post={'foo': data}, url=self.server.get_url(), charset='cp1251', debug=True)
+        g.setup(post={'foo': data}, url=self.server.get_url(),
+                charset='cp1251', debug=True)
         g.request()
         test = 'foo=%s' % quote(data.encode('cp1251'))
-        test = test.encode('utf-8') # py3 hack
+        test = test.encode('utf-8')  # py3 hack
         self.assertEqual(self.server.request['data'], test)
 
     def test_put(self):
         g = build_grab()
-        g.setup(post=b'abc', url=self.server.get_url(), method='put', debug=True)
+        g.setup(post=b'abc', url=self.server.get_url(),
+                method='put', debug=True)
         self.server.request['debug'] = True
         g.request()
         self.assertEqual(self.server.request['method'], 'PUT')

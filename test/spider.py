@@ -1,9 +1,7 @@
-from unittest import TestCase
-
-from grab.spider import Spider, Task, Data
+from grab.spider import Spider, Task
 from test.util import BaseGrabTestCase
 
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
@@ -70,7 +68,8 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_setup_grab(self):
         """
-        Mulitple calls to `setup_grab` should accumulate changes in config object.
+        Mulitple calls to `setup_grab` should accumulate
+        changes in config object.
         """
         bot = self.SimpleSpider()
         bot.setup_grab(log_dir='/tmp')
@@ -80,7 +79,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(grab.config['timeout'], 30)
 
     def test_generator(self):
-        server = self.server 
+        server = self.server
 
         class TestSpider(Spider):
             def prepare(self):

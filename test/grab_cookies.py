@@ -1,9 +1,7 @@
 # coding: utf-8
-from unittest import TestCase
-# import string
 import json
 
-from grab import Grab, GrabMisuseError
+from grab import Grab
 from test.util import TMP_FILE, build_grab
 from test.util import BaseGrabTestCase
 
@@ -84,7 +82,8 @@ class TestCookies(BaseGrabTestCase):
         g.go(self.server.get_url())
         g.dump_cookies(TMP_FILE)
         self.assertEqual(set(cookies.items()),
-                         set((x['name'], x['value']) for x in json.load(open(TMP_FILE))))
+                         set((x['name'], x['value'])
+                             for x in json.load(open(TMP_FILE))))
 
         # Test non-ascii
         g = build_grab()
@@ -93,7 +92,8 @@ class TestCookies(BaseGrabTestCase):
         g.go(self.server.get_url())
         g.dump_cookies(TMP_FILE)
         self.assertEqual(set(cookies.items()),
-                         set((x['name'], x['value']) for x in json.load(open(TMP_FILE))))
+                         set((x['name'], x['value'])
+                             for x in json.load(open(TMP_FILE))))
 
         # Test load cookies
         g = build_grab()
@@ -131,7 +131,8 @@ class TestCookies(BaseGrabTestCase):
 
         # `cookiefile` file should contains merged cookies
         self.assertEqual(set(MERGED_COOKIES),
-                         set((x['name'], x['value']) for x in json.load(open(TMP_FILE))))
+                         set((x['name'], x['value'])
+                             for x in json.load(open(TMP_FILE))))
 
         # Just ensure it works
         g.go(self.server.get_url())
@@ -140,11 +141,11 @@ class TestCookies(BaseGrabTestCase):
         import pycurl
 
         g = build_grab()
-        g.transport.curl.setopt(pycurl.RESOLVE, ['foo:%d:127.0.0.1' % self.server.port])
+        g.transport.curl.setopt(pycurl.RESOLVE,
+                                ['foo:%d:127.0.0.1' % self.server.port])
         self.server.response['get.data'] = 'zzz'
         g.go('http://foo:%d/' % self.server.port)
         self.assertEqual(b'zzz', g.response.body)
-
 
     def test_different_domains(self):
         import pycurl

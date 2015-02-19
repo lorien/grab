@@ -1,11 +1,9 @@
-from unittest import TestCase
-
 from grab import Grab
-from grab.spider import Spider, Task, Data
+from grab.spider import Spider, Task
 from test.util import BaseGrabTestCase, TEST_SERVER_PORT
 from test_server import TestServer
 
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 
 ADDRESS = '127.0.0.1'
 EXTRA_PORT1 = TEST_SERVER_PORT + 1
@@ -39,7 +37,8 @@ class TestSpider(BaseGrabTestCase):
         bot = SimpleSpider(thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
         bot.setup_queue()
-        bot.add_task(Task('baz', grab=Grab(url='http://yandex.ru', debug=True)))
+        bot.add_task(Task('baz', grab=Grab(url='http://yandex.ru',
+                          debug=True)))
         bot.run()
 
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
@@ -110,7 +109,8 @@ class TestSpider(BaseGrabTestCase):
         content = '%s\n%s' % (PROXY1, PROXY2)
         open('/tmp/__proxy.txt', 'w').write(content)
 
-        # If proxy is configured with both methods (setup_grab and load_proxylist)
+        # If proxy is configured with both methods
+        # (setup_grab and load_proxylist)
         # then proxylist has priority
         bot = SimpleSpider(thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
@@ -121,4 +121,4 @@ class TestSpider(BaseGrabTestCase):
         bot.run()
 
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
-        self.assertTrue(not EXTRA_PORT2 in bot.ports)
+        self.assertTrue(EXTRA_PORT2 not in bot.ports)

@@ -1,9 +1,6 @@
 # coding: utf-8
-
 from json import loads
-from unittest import TestCase
 
-from grab import Grab
 from tools.structured import Structure as x
 
 from test.util import build_grab
@@ -88,7 +85,8 @@ class StructuredExtensionTest(BaseGrabTestCase):
             '//issue',
             x(
                 './detail',
-                description=('./description/text()', lambda item: ' '.join(item.split())),
+                description=('./description/text()',
+                             lambda item: ' '.join(item.split())),
                 detail_number=('./number/text()', int)
             ),
             title='./title/text()',

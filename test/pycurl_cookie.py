@@ -3,16 +3,15 @@
 This test case has written to help me
 understand how pycurl lib works with cookies
 """
-from unittest import TestCase
 import pycurl
 try:
     from cStringIO import StringIO
 except ImportError:
     from io import BytesIO as StringIO
 try:
-    from cookielib import CookieJar, Cookie
+    from cookielib import CookieJar
 except ImportError:
-    from http.cookiejar import CookieJar, Cookie
+    from http.cookiejar import CookieJar
 
 
 from test.util import BaseGrabTestCase
@@ -22,9 +21,11 @@ from grab.cookie import create_cookie
 # http://curl.haxx.se/libcurl/c/curl_easy_setopt.html
 # Cookie:
 # * domain
-# * whether or not all machines under that domain can read the cookie’s information.
+# * whether or not all machines under that domain can read
+# the cookie’s information.
 # * path
-# * Secure Flag: whether or not a secure connection (HTTPS) is required to read the cookie.
+# * Secure Flag: whether or not a secure connection (HTTPS)
+# is required to read the cookie.
 # * exp. timestamp
 # * name
 # * value
@@ -37,12 +38,12 @@ class TestCookies(BaseGrabTestCase):
     def test_pycurl_cookies(self):
         self.server.response_once['code'] = 302
         self.server.response_once['cookies'] = {'foo': 'bar', '1': '2'}.items()
-        self.server.response_once['headers'] = [('Location', self.server.get_url())]
+        self.server.response_once['headers'] = [
+            ('Location', self.server.get_url())]
         self.server.response['get.data'] = 'foo'
 
         buf = StringIO()
         header_buf = StringIO()
-        cfile = StringIO()
 
         # Configure pycurl instance
         # Usually all these crap is automatically handled by the Grab
@@ -79,22 +80,26 @@ class TestCookies(BaseGrabTestCase):
         c.perform()
         self.assertEquals(2, len(self.server.request['cookies']))
         self.assertEquals('bar', self.server.request['cookies']['foo'].value)
-        self.assertEquals(set(('foo', '1')), set(self.server.request['cookies'].keys()))
+        self.assertEquals(set(('foo', '1')),
+                          set(self.server.request['cookies'].keys()))
 
         # Ok, now let's create third cookies that is binded to
         # the path /place, put this cookie into curl object
         # and submit request to /
         # pycurl should not send third cookie
-        cookie = '\t'.join((self.server.address, 'FALSE', '/place', 'FALSE', '0', 'no', 'way'))
+        cookie = '\t'.join((self.server.address,
+                            'FALSE', '/place', 'FALSE', '0', 'no', 'way'))
         c.setopt(pycurl.COOKIELIST, cookie)
         c.setopt(pycurl.URL, self.server.get_url())
         c.perform()
-        self.assertEquals(set(('foo', '1')), set(self.server.request['cookies'].keys()))
+        self.assertEquals(set(('foo', '1')),
+                          set(self.server.request['cookies'].keys()))
 
         # Ok, now send request to /place
         c.setopt(pycurl.URL, self.server.get_url('/place'))
         c.perform()
-        self.assertEquals(set(('foo', '1', 'no')), set(self.server.request['cookies'].keys()))
+        self.assertEquals(set(('foo', '1', 'no')),
+                          set(self.server.request['cookies'].keys()))
 
         # Now, check that not all cookies set with cookieslist
         # are submitted
@@ -107,9 +112,9 @@ class TestCookies(BaseGrabTestCase):
         self.assertEquals(2, len(self.server.request['cookies']))
 
     def test_cookie(self):
-        c = create_cookie('foo', 'bar')
-
-        self.assertRaises(TypeError, lambda: create_cookie('foo', 'bar', x='y'))
+        create_cookie('foo', 'bar')
+        self.assertRaises(TypeError, create_cookie,
+                          'foo', 'bar', x='y')
 
     def test_cookiejar(self):
         c1 = create_cookie('foo', 'bar')

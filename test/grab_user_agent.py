@@ -1,7 +1,4 @@
 # coding: utf-8
-from unittest import TestCase
-
-from grab import Grab, GrabMisuseError
 from test.util import build_grab, only_transport
 from test.util import BaseGrabTestCase
 
@@ -17,7 +14,8 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         # Empty string disable default pycurl user-agent
         g.setup(user_agent='')
         g.go(self.server.get_url())
-        self.assertEqual(self.server.request['headers'].get('user-agent', ''), '')
+        self.assertEqual(self.server.request['headers']
+                             .get('user-agent', ''), '')
 
     def test_useragent_simple(self):
         g = build_grab()
@@ -37,19 +35,21 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         g.setup(user_agent=None)
         g.go(self.server.get_url())
         self.assertTrue(len(self.server.request['headers']) > 0)
-        self.assertFalse('PycURL' in self.server.request['headers']['user-agent'])
+        self.assertFalse('PycURL' in
+                         self.server.request['headers']['user-agent'])
 
         # By default user_agent is None => random user agent is generated
         g = build_grab()
         g.go(self.server.get_url())
         self.assertTrue(len(self.server.request['headers']) > 0)
-        self.assertFalse('PycURL' in self.server.request['headers']['user-agent'])
+        self.assertFalse('PycURL' in
+                         self.server.request['headers']['user-agent'])
 
         # Simple case: setup user agent manually
         g.setup(user_agent='foo')
         g.go(self.server.get_url())
         self.assertEqual(self.server.request['headers']['user-agent'], 'foo')
-        
+
         # user agent from file should be loaded
         path = '/tmp/__ua.txt'
         open(path, 'w').write('GOD')
@@ -62,7 +62,8 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         open(path, 'w').write('GOD1\nGOD2')
         g.setup(user_agent=None, user_agent_file=path)
         g.go(self.server.get_url())
-        self.assertTrue(self.server.request['headers']['user-agent'] in ('GOD1', 'GOD2'))
+        self.assertTrue(self.server.request['headers']['user-agent']
+                        in ('GOD1', 'GOD2'))
         ua = g.config['user_agent']
 
         # User-agent should not change

@@ -1,11 +1,6 @@
 # coding: utf-8
-from unittest import TestCase
-import os
-
-from grab import Grab, GrabMisuseError
-from test.util import TMP_DIR, build_grab
+from test.util import build_grab
 from test.util import BaseGrabTestCase
-from grab.extension import register_extensions
 
 
 class GrabSimpleTestCase(BaseGrabTestCase):

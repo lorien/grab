@@ -1,9 +1,7 @@
-from unittest import TestCase
-
-from grab.spider import Spider, Task, Data
+from grab.spider import Spider
 from test.util import BaseGrabTestCase
 
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 
 
 class SpiderMetaTestCase(BaseGrabTestCase):

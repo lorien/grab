@@ -1,8 +1,5 @@
 # coding: utf-8
-from unittest import TestCase
-import os
-
-from grab import Grab, GrabMisuseError
+from grab import GrabMisuseError
 from test.util import TMP_DIR, build_grab
 from test.util import BaseGrabTestCase
 
@@ -38,6 +35,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         # self.assertTrue(os.path.exists(g.response.body_path))
         # self.assertTrue(TMP_DIR in g.response.body_path)
         # self.assertEqual('foo', open(g.response.body_path).read())
-        # self.assertEqual(os.path.join(TMP_DIR, 'musik.mp3'), g.response.body_path)
+        # self.assertEqual(os.path.join(TMP_DIR, 'musik.mp3'),
+        #                  g.response.body_path)
         # self.assertEqual(g.response.body, 'foo')
         # self.assertEqual(g.response._cached_body, None)

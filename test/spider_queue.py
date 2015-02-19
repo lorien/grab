@@ -1,9 +1,7 @@
-from unittest import TestCase
-
-from grab.spider import Spider, Task, Data
+from grab.spider import Spider, Task
 from test.util import BaseGrabTestCase
 
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 
 
 class SpiderQueueMixin(object):
@@ -27,7 +25,7 @@ class SpiderQueueMixin(object):
             bot.add_task(Task('page', url=url,
                               priority=priority))
         bot.run()
-        urls = [x[1] for x in sorted(requested_urls.items(), 
+        urls = [x[1] for x in sorted(requested_urls.items(),
                                      key=lambda x: x[0])]
         self.assertEqual(urls, bot.url_history)
 

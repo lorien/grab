@@ -1,7 +1,4 @@
 # coding: utf-8
-from unittest import TestCase
-
-from grab import Grab
 from test.util import ignore_transport, build_grab
 from test.util import BaseGrabTestCase
 

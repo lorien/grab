@@ -19,17 +19,18 @@ from copy import deepcopy
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
 from grab.spider.error import (SpiderError, SpiderMisuseError, FatalError,
-                               StopTaskProcessing, NoTaskHandler, NoDataHandler)
+                               StopTaskProcessing, NoTaskHandler,
+                               NoDataHandler)
 from grab.spider.task import Task, NullTask
 from grab.spider.data import Data
 from grab.spider.pattern import SpiderPattern
-from grab.spider.stat  import SpiderStat
+from grab.spider.stat import SpiderStat
 from grab.spider.transport.multicurl import MulticurlTransport
 from grab.proxylist import ProxyList
 from grab.spider.command_controller import CommandController
 from grab.util.misc import camel_case_to_underscore
-from grab.util.py2old_support import * # noqa
-from grab.util.py3k_support import * # noqa
+from grab.util.py2old_support import *  # noqa
+from grab.util.py3k_support import *  # noqa
 from tools.encoding import make_str, make_unicode
 
 DEFAULT_TASK_PRIORITY = 100
@@ -46,15 +47,16 @@ logger_verbose.setLevel(logging.FATAL)
 class SpiderMetaClass(type):
     """
     This meta class does following things::
-    
-    * It creates Meta attribute if it does not defined in Spider descendant class by
-        copying parent's Meta attribute
+
+    * It creates Meta attribute if it does not defined in
+        Spider descendant class by copying parent's Meta attribute
     * It reset Meta.abstract to False if Meta is copied from parent class
-    * If defined Meta does not contains `abstract` attribute then define it and set to False
+    * If defined Meta does not contains `abstract`
+        attribute then define it and set to False
     """
 
     def __new__(cls, name, bases, namespace):
-        if not 'Meta' in namespace:
+        if 'Meta' not in namespace:
             for base in bases:
                 if hasattr(base, 'Meta'):
                     # copy contents of base Meta
@@ -65,7 +67,7 @@ class SpiderMetaClass(type):
                     break
 
         # Process special case (SpiderMetaClassMixin)
-        if not 'Meta' in namespace:
+        if 'Meta' not in namespace:
             namespace['Meta'] = type('Meta', (object,), {})
 
         if not hasattr(namespace['Meta'], 'abstract'):
@@ -243,8 +245,10 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             'request-count': 0,
         }
         self.snapshot_timestamps = []
-        self.snapshot_interval = self.config.get('GRAB_SNAPSHOT_CONFIG', {}).get('interval', 10)
-        self.snapshot_file = self.config.get('GRAB_SNAPSHOT_CONFIG', {}).get('file', None)
+        self.snapshot_interval = self.config.get('GRAB_SNAPSHOT_CONFIG',
+                                                 {}).get('interval', 10)
+        self.snapshot_file = self.config.get('GRAB_SNAPSHOT_CONFIG',
+                                             {}).get('file', None)
         if self.snapshot_file:
             open(self.snapshot_file, 'w').write('')
 
@@ -311,7 +315,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         """
         Catches SIGUSR1 signal and shutdowns spider.
         """
-        
         logger.error('Received SIGUSR2 signal. Doing shutdown')
         self.stop()
 
@@ -363,7 +366,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             task.priority_is_custom = True
 
         if not isinstance(task, NullTask):
-            if not task.url.startswith(('http://', 'https://', 'ftp://', 'file://', 'feed://')):
+            if not task.url.startswith(('http://', 'https://', 'ftp://',
+                                        'file://', 'feed://')):
                 if self.base_url is None:
                     msg = 'Could not resolve relative URL because base_url ' \
                           'is not specified. Task: %s, URL: %s'\
@@ -409,7 +413,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         # then configure it with default backend
         if self.taskq is None:
             self.setup_queue()
-        
+
     def process_task_generator(self):
         """
         Load new tasks from `self.task_generator_object`
@@ -430,9 +434,10 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             else:
                 min_limit = self.thread_number * 10
             if qsize < min_limit:
-                logger_verbose.debug('Task queue contains less tasks (%d) than '
-                                     'allowed limit (%d). Trying to add '
-                                     'new tasks.' % (qsize, min_limit))
+                logger_verbose.debug(
+                    'Task queue contains less tasks (%d) than '
+                    'allowed limit (%d). Trying to add '
+                    'new tasks.' % (qsize, min_limit))
                 try:
                     for x in xrange(min_limit - qsize):
                         item = next(self.task_generator_object)
@@ -474,7 +479,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             except queue.Empty:
                 qsize = self.taskq.size()
                 if qsize:
-                    logger_verbose.debug('No ready-to-go tasks, Waiting for scheduled tasks (%d)' % qsize)
+                    logger_verbose.debug(
+                        'No ready-to-go tasks, Waiting for '
+                        'scheduled tasks (%d)' % qsize)
                     return True
                 if not self.slave:
                     logger_verbose.debug('Task queue is empty.')
@@ -563,8 +570,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             self.inc_count('request-cache')
 
             return {'ok': True, 'grab': grab,
-                   'grab_config_backup': grab_config_backup,
-                   'task': task, 'emsg': None}
+                    'grab_config_backup': grab_config_backup,
+                    'task': task, 'emsg': None}
 
     def valid_response_code(self, code, task):
         """
@@ -583,7 +590,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             logger.error(error_tb)
         else:
             logger.error('Error in %s function' % func_name,
-                          exc_info=ex)
+                         exc_info=ex)
 
         # Looks strange but I really have some problems with
         # serializing exception into string
@@ -651,8 +658,10 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             else:
                 msg = res['emsg']
 
-            self.inc_count('network-error-%s' % make_str(res['emsg'][:20], errors='ignore'))
-            logger.error(u'Network error: %s' % make_unicode(msg, errors='ignore'))
+            self.inc_count('network-error-%s' %
+                           make_str(res['emsg'][:20], errors='ignore'))
+            logger.error(u'Network error: %s' %
+                         make_unicode(msg, errors='ignore'))
 
             # Try to repeat the same network query
             if self.network_try_limit > 0:
@@ -662,7 +671,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 task.setup_grab_config(res['grab_config_backup'])
                 self.add_task(task)
             # TODO: allow to write error handlers
-    
+
     def find_task_handler(self, task):
         if task.origin_task_generator is not None:
             return self.handler_for_inline_task
@@ -730,19 +739,24 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         self.inc_count('task')
         self.inc_count('task-%s' % res['task'].name)
         if (res['task'].network_try_count == 1 and
-            res['task'].task_try_count == 1):
+                res['task'].task_try_count == 1):
             self.inc_count('task-%s-initial' % res['task'].name)
 
         # Update traffic statistics
         if res['grab'] and res['grab'].response:
-            self.timers['network-name-lookup'] += res['grab'].response.name_lookup_time
+            self.timers['network-name-lookup'] +=\
+                res['grab'].response.name_lookup_time
             self.timers['network-connect'] += res['grab'].response.connect_time
             self.timers['network-total'] += res['grab'].response.total_time
             if not from_cache:
-                self.inc_count('download-size', res['grab'].response.download_size)
-                self.inc_count('upload-size', res['grab'].response.upload_size)
-            self.inc_count('download-size-with-cache', res['grab'].response.download_size)
-            self.inc_count('upload-size-with-cache', res['grab'].response.upload_size)
+                self.inc_count('download-size',
+                               res['grab'].response.download_size)
+                self.inc_count('upload-size',
+                               res['grab'].response.upload_size)
+            self.inc_count('download-size-with-cache',
+                           res['grab'].response.download_size)
+            self.inc_count('upload-size-with-cache',
+                           res['grab'].response.upload_size)
         # self.inc_count('traffic-in
 
         # NG
@@ -765,7 +779,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 elif mid_response is None:
                     pass
                 else:
-                    raise Exception('Unknown response from middleware %s' % mid)
+                    raise Exception('Unknown response from '
+                                    'middleware %s' % mid)
         # TOFIX: end
 
         if stop:
@@ -818,7 +833,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             self.inc_count('task-%s-cache' % task.name)
         else:
             if self.only_cache:
-                logger.debug('Skipping network request to %s' % grab.config['url'])
+                logger.debug('Skipping network request to %s' %
+                             grab.config['url'])
             else:
                 self.inc_count('request-network')
                 self.inc_count('task-%s-network' % task.name)
@@ -827,8 +843,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                     logger_verbose.debug('Submitting task to the transport '
                                          'layer')
                     try:
-                        self.transport.process_task(task, grab, grab_config_backup)
-                    except GrabInvalidUrl as ex:
+                        self.transport.process_task(task, grab,
+                                                    grab_config_backup)
+                    except GrabInvalidUrl:
                         logger.debug('Task %s has invalid URL: %s' % (
                             task.name, task.url))
                         self.add_item('invalid-url', task.url)
@@ -843,7 +860,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
         res: {ok, grab, grab_config_backup, task, emsg}
         """
-
 
         if res['ok']:
             if self.cache_enabled:
@@ -882,20 +898,23 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                     self.init_task_generator()
             self.stop_timer('task_generator')
 
-
             while self.work_allowed:
 
                 now = int(time.time())
-                if now - self.last_snapshot_values['timestamp'] > self.snapshot_interval:
+                if (now - self.last_snapshot_values['timestamp'] >
+                        self.snapshot_interval):
                     snapshot = {'timestamp': now}
                     for key in ('download-size', 'upload-size',
                                 'download-size-with-cache'):
-                        snapshot[key] = self.counters[key] - self.last_snapshot_values[key]
+                        snapshot[key] = (self.counters[key] -
+                                         self.last_snapshot_values[key])
                         self.last_snapshot_values[key] = self.counters[key]
 
-                    snapshot['request-count'] = self.counters['request'] -\
-                        self.last_snapshot_values['request-count']
-                    self.last_snapshot_values['request-count'] = self.counters['request']
+                    snapshot['request-count'] = (
+                        self.counters['request'] -
+                        self.last_snapshot_values['request-count'])
+                    self.last_snapshot_values['request-count'] =\
+                        self.counters['request']
                     self.last_snapshot_values['timestamp'] = now
 
                     self.snapshots[now] = snapshot
@@ -925,8 +944,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
                 free_threads = self.transport.get_free_threads_number()
                 if free_threads:
-                    logger_verbose.debug('Transport has free resources (%d). '
-                                         'Trying to add new task (if exists).' % free_threads)
+                    logger_verbose.debug(
+                        'Transport has free resources (%d). '
+                        'Trying to add new task (if exists).' % free_threads)
 
                     # Try five times to get new task and proces task generator
                     # because slave parser could agressively consume
@@ -960,8 +980,9 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                                 if not self.task_generator_enabled:
                                     self.stop()
                         else:
-                            logger_verbose.debug('Transport active tasks: %d' %
-                                                 self.transport.active_task_number())
+                            logger_verbose.debug(
+                                'Transport active tasks: %d' %
+                                self.transport.active_task_number())
                     elif isinstance(task, NullTask):
                         logger_verbose.debug('Got NullTask')
                         if not self.transport.active_task_number():
@@ -990,7 +1011,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                             if reason == 'task-try-count':
                                 self.add_item('task-count-rejected', task.url)
                             elif reason == 'network-try-count':
-                                self.add_item('network-count-rejected', task.url)
+                                self.add_item('network-count-rejected',
+                                              task.url)
                             else:
                                 raise Exception('Unknown response from '
                                                 'check_task_limits: %s'
@@ -1013,7 +1035,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 # Iterate over network trasport ready results
                 # Each result could be valid or failed
                 # Result format: {ok, grab, grab_config_backup, task, emsg}
-                
+
                 # print '[transport iterate results - start]'
                 for result in self.transport.iterate_results():
                     if self.is_valid_for_cache(result):
@@ -1113,7 +1135,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             pass
         else:
             raise SpiderError('Unknown result type: %s' % result)
-        
+
     @classmethod
     def get_spider_name(cls):
         if hasattr(cls, 'spider_name'):
@@ -1227,7 +1249,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             This code is executed when main cycles is breaked
             self.shutdown()
     """
-                
+
     def command_get_stats(self, command):
         return {'data': self.render_stats()}
 

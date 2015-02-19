@@ -1,8 +1,5 @@
-from unittest import TestCase
-
 from grab.spider import Spider, Task
 from test.util import BaseGrabTestCase
-from test.util import only_backend
 
 
 class ContentGenerator(object):
@@ -78,7 +75,8 @@ class SpiderCacheMixin(object):
         * got exception
         """
 
-        server = self.server 
+        server = self.server
+
         class Bug1Spider(Spider):
             def task_foo(self, grab, task):
                 grab.setup(url=server.get_url())
@@ -119,9 +117,12 @@ class SpiderCacheMixin(object):
         # bot.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('one', self.server.get_url(), priority=1))
-        bot.add_task(Task('one', self.server.get_url(), priority=2, cache_timeout=0, delay=1))
-        bot.add_task(Task('one', self.server.get_url(), priority=3, cache_timeout=10, delay=1.1))
-        bot.add_task(Task('one', self.server.get_url(), priority=4, cache_timeout=0, delay=1.2))
+        bot.add_task(Task('one', self.server.get_url(),
+                          priority=2, cache_timeout=0, delay=1))
+        bot.add_task(Task('one', self.server.get_url(),
+                          priority=3, cache_timeout=10, delay=1.1))
+        bot.add_task(Task('one', self.server.get_url(),
+                          priority=4, cache_timeout=0, delay=1.2))
         bot.run()
         self.assertEqual([1, 2, 2, 3], bot.resp_counters)
 

@@ -9,6 +9,8 @@ from grab import Grab
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_SERVER_PORT = 9876
+TMP_DIR = None
+TMP_FILE = None
 
 # Global variable which is used in all tests to build
 # Grab instance with specific transport layer
@@ -103,7 +105,7 @@ def build_grab(**kwargs):
 
         ./runtest.py --transport=
     """
-    if not 'transport' in kwargs:
+    if 'transport' not in kwargs:
         kwargs['transport'] = GLOBAL['transport']
     return Grab(**kwargs)
 

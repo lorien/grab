@@ -1,4 +1,3 @@
-from unittest import TestCase
 import pickle
 
 from grab import Grab

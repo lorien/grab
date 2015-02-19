@@ -1,12 +1,10 @@
 # coding: utf-8
-from unittest import TestCase
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
-from multiprocessing import Process, Queue
+from multiprocessing import Queue
 
-from grab import Grab
 from test.util import BaseGrabTestCase
 from test.util import build_grab
 
@@ -21,7 +19,8 @@ class TestGrab(BaseGrabTestCase):
         """
 
         g = build_grab()
-        self.server.response['get.data'] = '<form><textarea name="text">the cat</textarea></form>'
+        self.server.response['get.data'] =\
+            '<form><textarea name="text">the cat</textarea></form>'
         g.go(self.server.get_url())
         g.set_input('text', 'foobar')
         data = pickle.dumps(g, pickle.HIGHEST_PROTOCOL)

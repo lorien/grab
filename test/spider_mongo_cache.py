@@ -1,7 +1,5 @@
 from unittest import TestCase
 
-from grab.spider import Spider, Task, Data
-from test.util import BaseGrabTestCase
 from test.mixin.spider_cache import SpiderCacheMixin
 
 

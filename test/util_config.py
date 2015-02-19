@@ -4,8 +4,9 @@ import os
 from copy import deepcopy
 
 from test.util import TMP_DIR
-from grab.util.config import Config, build_global_config, build_spider_config
+from grab.util.config import Config, build_root_config, build_spider_config
 from grab.util import default_config
+from grab.spider import Spider
 
 
 class SomeSettings(object):
@@ -14,7 +15,7 @@ class SomeSettings(object):
     trash = 'xxx'
 
 
-SOME_DICT = {'VAR1': 'val1', 'VAR2': 'val2', 'trash': 'xxx'}
+SOME_DICT = {'global': {'var1': 'val1', 'var2': 'val2', 'trash': 'xxx'}}
 SETTINGS_COUNTER = 1
 
 
@@ -24,11 +25,10 @@ def setup_settings_file(settings):
     modname = 'grab_test_settings_%d' % SETTINGS_COUNTER
     SETTINGS_COUNTER += 1
 
-    if not TMP_DIR in sys.path:
+    if TMP_DIR not in sys.path:
         sys.path.append(TMP_DIR)
     with open(os.path.join(TMP_DIR, modname + '.py'), 'w') as out:
-        for key, val in settings.items():
-            out.write('%s = %s\n' % (key, repr(val)))
+        out.write(str(settings))
     sys.path.append(TMP_DIR)
     return modname
 
@@ -43,7 +43,7 @@ def keep_default_config(func):
     return wrapper
 
 
-class ConfigTestCase(BaseGrabTestCase):
+class ConfigTestCase(TestCase):
     def test_config_constructor(self):
         config = Config()
         self.assertEqual(len(config.keys()), 0)
@@ -62,94 +62,101 @@ class ConfigTestCase(BaseGrabTestCase):
         config = Config()
         obj = SomeSettings()
         config.update_with_object(obj)
-        self.assertEqual(config, {'VAR1': 'val1', 'VAR2': 'val2'})
+        self.assertEqual(config, {'var1': 'val1', 'var2': 'val2'})
 
     def test_update_with_object_new_keys(self):
-        config = Config({'VAR1': 'ORIGINAL'})
+        config = Config({'var1': 'original'})
         obj = SomeSettings()
         config.update_with_object(obj, only_new_keys=True)
-        self.assertEqual(config, {'VAR1': 'ORIGINAL', 'VAR2': 'val2'})
+        self.assertEqual(config, {'var1': 'original', 'var2': 'val2'})
 
     def test_update_with_object_allowed_keys(self):
-        config = Config({'VAR1': 'ORIGINAL'})
+        config = Config({'var1': 'original'})
         obj = SomeSettings()
-        config.update_with_object(obj, allowed_keys=['VAR1'])
-        self.assertEqual(config, {'VAR1': 'val1'})
+        config.update_with_object(obj, allowed_keys=['var1'])
+        self.assertEqual(config, {'var1': 'val1'})
 
     def test_update_with_dict(self):
         config = Config()
         config.update_with_object(SOME_DICT)
-        self.assertEqual(config, {'VAR1': 'val1', 'VAR2': 'val2'})
+        self.assertEqual(config, {'var1': 'val1', 'var2': 'val2'})
 
     def test_update_with_dict_new_keys(self):
-        config = Config({'VAR1': 'ORIGINAL'})
+        config = Config({'var1': 'original'})
         config.update_with_object(SOME_DICT, only_new_keys=True)
-        self.assertEqual(config, {'VAR1': 'ORIGINAL', 'VAR2': 'val2'})
+        self.assertEqual(config, {'var1': 'original', 'var2': 'val2'})
 
     def test_update_with_dict_allowed_keys(self):
-        config = Config({'VAR1': 'ORIGINAL'})
-        config.update_with_object(SOME_DICT, allowed_keys=['VAR1'])
-        self.assertEqual(config, {'VAR1': 'val1'})
+        config = Config({'var1': 'original'})
+        config.update_with_object(SOME_DICT, allowed_keys=['var1'])
+        self.assertEqual(config, {'var1': 'val1'})
 
     def test_update_with_path(self):
         modname = setup_settings_file(SOME_DICT)
         config = Config()
         config.update_with_path(modname)
-        self.assertEqual(config, {'VAR1': 'val1', 'VAR2': 'val2'})
+        self.assertEqual(config, {'var1': 'val1', 'var2': 'val2'})
 
     def test_update_with_path_new_keys(self):
         modname = setup_settings_file(SOME_DICT)
-        config = Config({'VAR1': 'ORIGINAL'})
+        config = Config({'global': {'var1': 'original'}})
         config.update_with_path(modname, only_new_keys=True)
-        self.assertEqual(config, {'VAR1': 'ORIGINAL', 'VAR2': 'val2'})
+        self.assertEqual(config,
+                         {'global': {'var1': 'original', 'var2': 'val2'}})
 
     def test_update_with_path_allowed_keys(self):
         modname = setup_settings_file(SOME_DICT)
         config = Config()
-        config.update_with_path(modname, allowed_keys=['VAR1'])
-        self.assertEqual(config, {'VAR1': 'val1'})
+        config.update_with_path(modname, allowed_keys=['var1'])
+        self.assertEqual(config, {'var1': 'val1'})
 
     @keep_default_config
-    def test_build_global_config1(self):
+    def test_build_root_config1(self):
         modname = setup_settings_file({'CACHE': {'backend': 'redis'}})
         default_config.default_config = {}
-        config = build_global_config(modname)
+        config = build_root_config(modname)
         self.assertEqual(config['CACHE'], {'backend': 'redis'})
 
     @keep_default_config
-    def test_build_global_config2(self):
-            modname = setup_settings_file({'CACHE': {'backend': 'redis'}})
-            default_config.default_config = {'CACHE': {'backend': 'mysql'}}
-            config = build_global_config(modname)
-            self.assertEqual(config['CACHE'], {'backend': 'redis'})
+    def test_build_root_config2(self):
+        modname = setup_settings_file(
+            {'global': {'cache': {'backend': 'redis'}}})
+        default_config.default_config = {'cache': {'backend': 'mysql'}}
+        config = build_root_config(modname)
+        self.assertEqual(config['global']['cache'], {'backend': 'redis'})
 
     @keep_default_config
-    def test_build_global_config3(self):
-            modname = setup_settings_file({})
-            default_config.default_config = {'CACHE': {'backend': 'mysql'}}
-            config = build_global_config(modname)
-            self.assertEqual(config['CACHE'], {'backend': 'mysql'})
+    def test_build_root_config3(self):
+        modname = setup_settings_file({})
+        default_config.default_config = {'cache': {'backend': 'mysql'}}
+        config = build_root_config(modname)
+        self.assertEqual(config['global']['cache'], {'backend': 'mysql'})
 
     @keep_default_config
     def test_build_spider_config1(self):
-            modname = setup_settings_file({})
-            default_config.default_config = {
-                'CACHE': {'backend': 'mysql'},
-                'VAR1': 'val1',
-            }
-            config = build_global_config(modname)
-            spider_config = build_spider_config('foo', config)
-            self.assertEqual(config['CACHE'], {'backend': 'mysql'})
+        class FooSpider(Spider):
+            pass
 
+        modname = setup_settings_file({})
+        default_config.default_config = {
+            'cache': {'backend': 'mysql'},
+            'var1': 'val1',
+        }
+        config = build_root_config(modname)
+        spider_config = build_spider_config(FooSpider, config)
+        self.assertEqual(spider_config['cache'], {'backend': 'mysql'})
+
+    """
     @keep_default_config
     def test_build_spider_config2(self):
-            modname = setup_settings_file({})
-            default_config.default_config = {
-                'CACHE': {'backend': 'mysql'},
-                'SPIDER_CONFIG_FOO': {
-                    'CACHE': {'backend': 'tokyo'},
-                },
-            }
-            config = build_global_config(modname)
-            spider_config = build_spider_config('foo', config)
-            self.assertEqual(spider_config['CACHE'], {'backend': 'tokyo'})
+        class FooSpider(Spider):
+            pass
+
+        modname = setup_settings_file({})
+        default_config.default_config = {
+            'cache': {'backend': 'mysql'},
+        }
+        config = build_root_config(modname)
+        spider_config = build_spider_config(FooSpider, config)
+        self.assertEqual(spider_config['cache'], {'backend': 'tokyo'})
+    """

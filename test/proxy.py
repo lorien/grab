@@ -1,11 +1,6 @@
 # coding: utf-8
-from unittest import TestCase
-# import string
-import json
-import re
-
-from grab import Grab, GrabMisuseError
-from test.util import TMP_FILE, GRAB_TRANSPORT, get_temp_file
+from grab import Grab
+from test.util import GRAB_TRANSPORT, get_temp_file
 from test.util import BaseGrabTestCase
 from grab.proxy import ProxyList
 
@@ -70,7 +65,7 @@ class ProxyListTestCase(BaseGrabTestCase):
         pl.set_source('file', location=path)
         self.assertEqual(2, len(pl.proxy_list))
 
-    def test_accumulate_updates_basic(self):
+    def test_accumulate_updates_basic2(self):
         pl = ProxyList()
         pl.setup(accumulate_updates=True)
 
