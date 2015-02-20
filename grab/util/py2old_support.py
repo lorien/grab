@@ -1,6 +1,6 @@
 """
     Python 2.x (older than 2.6) support module
-    Usage: from grab.util.py2old_support import * # noqa
+    Usage: from grab.util.py2old_support import *  # noqa
 """
 
 import sys

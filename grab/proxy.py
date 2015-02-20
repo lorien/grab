@@ -3,7 +3,8 @@ Module contents:
 * `Proxy` class represent single proxy server
 * `ProxyList` class is interface to work with list of proxy servers
 * `LocalFileSource` contains logic to load list of proxies from local file
-* `RemoteFileSource contains logic to load list of proxies from remote document.
+* `RemoteFileSource contains logic to load list of proxies from
+    remote document.
 """
 from __future__ import absolute_import
 import re
@@ -13,8 +14,8 @@ import logging
 import random
 
 from grab.error import GrabError, GrabNetworkError
-from grab.util.py2old_support import * # noqa
-from grab.util.py3k_support import * # noqa
+from grab.util.py2old_support import *  # noqa
+from grab.util.py3k_support import *  # noqa
 
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
 RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')
@@ -65,7 +66,8 @@ class Proxy(object):
 
     def __cmp__(self, obj):
         if (self.server == obj.server and self.port == obj.port and
-                self.username == obj.username and self.password == obj.password and
+                self.username == obj.username and
+                self.password == obj.password and
                 self.proxy_type == obj.proxy_type):
             return 0
         else:
@@ -84,7 +86,7 @@ def parse_proxy_data(data, data_format='text', proxy_type='http'):
             if line and not line.startswith('#'):
                 try:
                     host, port, user, pwd = parse_proxy_line(line)
-                except GrabError as ex:
+                except GrabError:
                     logger.error('Invalid proxy line: %s' % line)
                 else:
                     yield Proxy(host, port, user, pwd, proxy_type)
@@ -208,7 +210,7 @@ class ProxyList(object):
             else:
                 new_list = self.source.load()
                 for item in new_list:
-                    if not item in self.proxy_list:
+                    if item not in self.proxy_list:
                         self.proxy_list.append(item)
 
             self.proxy_list_iter = itertools.cycle(self.proxy_list)

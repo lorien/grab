@@ -2,10 +2,11 @@ from __future__ import absolute_import
 import logging
 from tools.etree import get_node_text
 from tools.text import find_number
+from tools.const import NULL
+from tools.error import DataNotFound
 
 from grab.util.misc import deprecated
-from grab.const import NULL
-from grab.error import DataNotFound, GrabMisuseError
+from grab.error import GrabMisuseError
 from grab import error
 
 
@@ -37,11 +38,13 @@ class DeprecatedThings(object):
 
     @deprecated(use_instead='grab.doc.rex_text')
     def rex_text(self, regexp, flags=0, byte=False, default=NULL):
-        return self.doc.rex_text(regexp, flags=flags, byte=byte, default=default)
+        return self.doc.rex_text(regexp, flags=flags,
+                                 byte=byte, default=default)
 
     @deprecated(use_instead='grab.doc.rex_search')
     def rex(self, regexp, flags=0, byte=False, default=NULL):
-        return self.doc.rex_search(regexp, flags=flags, byte=byte, default=default)
+        return self.doc.rex_search(regexp, flags=flags,
+                                   byte=byte, default=default)
 
     @deprecated(use_instead='grab.doc.rex_assert')
     def assert_rex(self, regexp, byte=False):
@@ -63,7 +66,7 @@ class DeprecatedThings(object):
     @deprecated(use_instead='grab.doc.xml_tree')
     def xml_tree(self):
         return self.doc.xml_tree
-    
+
     @deprecated(use_instead='grab.doc.build_xml_tree()')
     def build_xml_tree(self):
         return self.doc.build_xml_tree()
@@ -80,7 +83,7 @@ class DeprecatedThings(object):
             self.tree.make_links_absolute(self.response.url)
 
         if isinstance(href_pattern, unicode):
-            raise GrabMisuseError('find_link method accepts only '\
+            raise GrabMisuseError('Method `find_link` accepts only '
                                   'byte-string argument')
         for elem, attr, link, pos in self.tree.iterlinks():
             if elem.tag == 'a' and href_pattern in link:
@@ -106,42 +109,6 @@ class DeprecatedThings(object):
                     # link.match = match
                     return link
         return None
-
-    @deprecated()
-    def follow_link(self, anchor=None, href=None):
-        """
-        Find link and follow it.
-
-        # TODO: refactor this shit
-        """
-
-        if anchor is None and href is None:
-            raise Exception('You have to provide anchor or href argument')
-        self.tree.make_links_absolute(self.config['url'])
-        for item in self.tree.iterlinks():
-            if item[0].tag == 'a':
-                found = False
-                text = item[0].text or ''
-                url = item[2]
-                # if object is regular expression
-                if anchor:
-                    if hasattr(anchor, 'finditer'):
-                        if anchor.search(text):
-                            found = True
-                    else:
-                        if text.find(anchor) > -1:
-                            found = True
-                if href:
-                    if hasattr(href, 'finditer'):
-                        if href.search(url):
-                            found = True
-                    else:
-                        if url.startswith(href) > -1:
-                            found = True
-                if found:
-                    url = urljoin(self.config['url'], item[2])
-                    return self.request(url=item[2])
-        raise DataNotFound('Cannot find link ANCHOR=%s, HREF=%s' % (anchor, href))
 
     @deprecated(use_instead='grab.doc.select().node()')
     def xpath(self, path, default=NULL, filter=None):
@@ -170,13 +137,15 @@ class DeprecatedThings(object):
                                           normalize_space=normalize_space)
 
     @deprecated(use_instead='grab.doc.select().number()')
-    def xpath_number(self, path, default=NULL, filter=None, ignore_spaces=False,
+    def xpath_number(self, path, default=NULL, filter=None,
+                     ignore_spaces=False,
                      smart=False, make_int=True):
 
         if filter is not None:
             raise GrabMisuseError('Argument `filter` is not supported anymore')
         return self.doc.select(path).number(default=default, smart=smart,
-                                            ignore_spaces=ignore_spaces, make_int=make_int)
+                                            ignore_spaces=ignore_spaces,
+                                            make_int=make_int)
 
     @deprecated(use_instead='grab.doc.select().exists()')
     def xpath_exists(self, path):
@@ -191,7 +160,8 @@ class DeprecatedThings(object):
     @deprecated()
     def css_one(self, path, default=NULL):
         """
-        Get first element which matches the given css path or raise DataNotFound.
+        Get first element which matches the given css path
+            or raise DataNotFound.
         """
 
         try:
@@ -229,12 +199,14 @@ class DeprecatedThings(object):
     def css_number(self, path, default=NULL, ignore_spaces=False, smart=False,
                    make_int=True):
         """
-        Find number in normalized text of node which matches the given css path.
+        Find number in normalized text of node which
+            matches the given css path.
         """
 
         try:
             text = self.css_text(path, smart=smart)
-            return find_number(text, ignore_spaces=ignore_spaces, make_int=make_int)
+            return find_number(text, ignore_spaces=ignore_spaces,
+                               make_int=make_int)
         except IndexError:
             if default is NULL:
                 raise
@@ -295,18 +267,14 @@ class DeprecatedThings(object):
     def _get_response(self):
         return self.doc
 
-
     def _set_response(self, val):
         self.doc = val
 
-
     response = property(_get_response, _set_response)
-
 
     @deprecated(use_instead='grab.setup_document')
     def fake_response(self, *args, **kwargs):
         return self.setup_document(*args, **kwargs)
-
 
     # Cookies
     # *******
@@ -322,13 +290,17 @@ class DeprecatedThings(object):
     def load_proxylist(self, source, source_type, proxy_type='http',
                        auto_init=True, auto_change=True,
                        **kwargs):
-        # self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type, **kwargs)
+        # self.proxylist = ProxyList(source, source_type,
+        #                            proxy_type=proxy_type, **kwargs)
         if source_type == 'text_file':
-            self.proxylist.set_source('file', location=source, proxy_type=proxy_type, **kwargs)
+            self.proxylist.set_source('file', location=source,
+                                      proxy_type=proxy_type, **kwargs)
         elif source_type == 'url':
-            self.proxylist.set_source('url', url=source, proxy_type=proxy_type, **kwargs)
+            self.proxylist.set_source('url', url=source,
+                                      proxy_type=proxy_type, **kwargs)
         else:
-            raise error.GrabMisuseError('Unknown proxy source type: %s' % source_type)
+            raise error.GrabMisuseError(
+                'Unknown proxy source type: %s' % source_type)
 
         # self.proxylist.setup(auto_change=auto_change, auto_init=auto_init)
         self.setup(proxy_auto_change=auto_change)
@@ -340,11 +312,13 @@ class DeprecatedThings(object):
 
     @deprecated(use_instead='grab.doc.choose_form')
     def choose_form(self, number=None, id=None, name=None, xpath=None):
-        return self.doc.choose_form(number=number, id=id, name=name, xpath=xpath)
-                
+        return self.doc.choose_form(number=number, id=id,
+                                    name=name, xpath=xpath)
+
     @property
     def form(self):
-        logging.error('This attribut is deprecated. Use grab.doc.form instead.')
+        logging.error('This attribut is deprecated. '
+                      'Use grab.doc.form instead.')
         return self.doc.form
 
     @deprecated(use_instead='grab.doc.set_input')
@@ -363,11 +337,11 @@ class DeprecatedThings(object):
     def set_input_by_xpath(self, xpath, value):
         return self.doc.set_input_by_xpath(xpath, value)
 
-
     @deprecated(use_instead='grab.doc.submit')
     def submit(self, submit_name=None, make_request=True,
                url=None, extra_post=None):
-        return self.doc.submit(submit_name=submit_name, make_request=make_request,
+        return self.doc.submit(submit_name=submit_name,
+                               make_request=make_request,
                                url=url, extra_post=extra_post)
 
     @deprecated(use_instead='grab.doc.form_fields')

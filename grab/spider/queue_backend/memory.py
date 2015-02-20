@@ -23,15 +23,15 @@ class QueueBackend(QueueInterface):
         now = datetime.now()
 
         removed_indexes = []
-        idx = 0
+        index = 0
         for schedule_time, task in self.schedule_list:
             if schedule_time <= now:
                 self.put(task, 1)
-                removed_indexes.append(idx)
-            idx += 1
+                removed_indexes.append(index)
+            index += 1
 
         self.schedule_list = [x for idx, x in enumerate(self.schedule_list)
-                              if not idx in removed_indexes]
+                              if idx not in removed_indexes]
 
         priority, task = self.queue_object.get(block=False)
         return task

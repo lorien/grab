@@ -7,13 +7,14 @@ from grab.util.module import import_string
 NULL = object()
 
 # Temporary disabled, spider config are mixed with all global config keys
-# SPIDER_KEYS = ['GRAB_QUEUE', 'GRAB_CACHE', 'GRAB_PROXY_LIST', 'GRAB_THREAD_NUMBER',
-#                'GRAB_NETWORK_TRY_LIMIT', 'GRAB_TASK_TRY_LIMIT']
+# SPIDER_KEYS = ['GRAB_QUEUE', 'GRAB_CACHE', 'GRAB_PROXY_LIST',
+#                'GRAB_THREAD_NUMBER', 'GRAB_NETWORK_TRY_LIMIT',
+#                'GRAB_TASK_TRY_LIMIT']
 
 
 def is_dict_interface(obj):
     try:
-        _ = obj['o_O']
+        obj['o_O']
         list(obj.keys())
     except (TypeError, AttributeError):
         return False
@@ -29,9 +30,10 @@ class Config(dict):
         for key in keys:
             if key.isupper() or not only_uppercase_keys:
                 if not key.startswith('_'):
-                    if not only_new_keys or not key in self:
+                    if not only_new_keys or key not in self:
                         if allowed_keys is None or key in allowed_keys:
-                            self[key] = obj[key] if is_dict else getattr(obj, key)
+                            self[key] = obj[key] if is_dict else getattr(obj,
+                                                                         key)
 
     def update_with_path(self, path, **kwargs):
         obj = import_string(path)
@@ -69,7 +71,8 @@ def build_root_config(settings_mod_path='settings'):
         # do not raise exception if settings_mod_path is default
         # and no settings.py file found in current directory
         if (settings_mod_path == 'settings' and
-            not os.path.exists(os.path.join(os.path.realpath(os.getcwd()), 'settings.py'))):
+            not os.path.exists(os.path.join(os.path.realpath(os.getcwd()),
+                                            'settings.py'))):
             pass
         else:
             raise
@@ -78,25 +81,31 @@ def build_root_config(settings_mod_path='settings'):
         # Try to read config in modern setting
         if 'GRAB_SPIDER_CONFIG' in config:
             # Need to do that because in ideal way we just need to read only
-            # GRAB_SPIDER_CONFIG key and make its values as root of config object
+            # GRAB_SPIDER_CONFIG key and make its values as root of
+            # config object
             # BUT we read all keys (deprecated mode), so we need to inject all
-            # keys from GRAB_SPIDER_CONFIG into our deprecated global root namespace
-            config.update_with_object(deepcopy(config['GRAB_SPIDER_CONFIG']), only_uppercase_keys=False)
+            # keys from GRAB_SPIDER_CONFIG into our deprecated global
+            # root namespace
+            config.update_with_object(deepcopy(config['GRAB_SPIDER_CONFIG']),
+                                      only_uppercase_keys=False)
 
         if 'global' in config:
             config['global'] = Config(config['global'])
         else:
             config['global'] = Config()
 
-        config.update_with_object(default_config.default_config, only_new_keys=True)
-        config['global'].update_with_object(default_config.default_config, only_new_keys=True)
+        config.update_with_object(default_config.default_config,
+                                  only_new_keys=True)
+        config['global'].update_with_object(default_config.default_config,
+                                            only_new_keys=True)
 
         return config
         """
         if 'GRAB_SPIDER_CONFIG' in config:
             root_config = Config()
-            root_config.update_with_object(deepcopy(config['GRAB_SPIDER_CONFIG']),
-                                           only_uppercase_keys=False)
+            root_config.update_with_object(
+                deepcopy(config['GRAB_SPIDER_CONFIG']),
+                only_uppercase_keys=False)
         else:
             root_config = Config()
             root_config['global'] = Config()
@@ -110,9 +119,10 @@ def build_root_config(settings_mod_path='settings'):
         else:
             root_config['global'] = Config()
 
-        # root_config.update_with_object(default_config.default_config, only_new_keys=True)
-        root_config['global'].update_with_object(default_config.default_config, only_new_keys=True)
-        
+        # root_config.update_with_object(default_config.default_config,
+        #                                only_new_keys=True)
+        root_config['global'].update_with_object(default_config.default_config,
+                                                 only_new_keys=True)
         return root_config
 
 
@@ -129,7 +139,8 @@ def build_spider_config(spider_class, root_config=None):
     # Inject keys from global config into spider config
     # Inejct only new keys (that do not exist in spider config)
     spider_config.update_with_object(root_config['global'], only_new_keys=True,
-                                     allowed_keys=None, only_uppercase_keys=False)#SPIDER_KEYS)
+                                     allowed_keys=None,
+                                     only_uppercase_keys=False)
 
     # Apply any customization defined in spider class
     # By default this method does nothing

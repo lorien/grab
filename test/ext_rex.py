@@ -1,6 +1,6 @@
 # coding: utf-8
-from grab import DataNotFound
 import re
+from tools.error import DataNotFound
 
 from test.util import build_grab
 from test.util import BaseGrabTestCase
@@ -54,7 +54,7 @@ class ExtensionRexTestCase(BaseGrabTestCase):
         self.assertEqual(u'фыва'.encode('cp1251'),
                          self.g.rex(rex, byte=True).group(1))
 
-        # # Search for non-unicode rex in unicode body shuld fail
+        # # Search for non-unicode rex in unicode body should fail
         pattern = '(фыва)'
         # py3 hack
         if PY3K:

@@ -1,8 +1,8 @@
 flake:
-	flake8 grab test
+	flake8 grab test setup.py
 
 flake_verbose:
-	flake8 grab test --show-pep8
+	flake8 grab test setup.py --show-pep8
 
 test:
 	tox -e py27

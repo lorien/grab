@@ -19,7 +19,7 @@ import time
 
 from grab.response import Response
 from grab.cookie import CookieManager
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 
 logger = logging.getLogger('grab.spider.cache_backend.mysql')
 
@@ -36,8 +36,10 @@ if PY3K:
         xs = re.findall(RE_HEXS, val)
         xc = [chr(int(s, 16)) for s in xs]
         # Plus escape sequences
-        xs += ['\\\\', "\\'", '\\"', '\\a', '\\b', '\\f', '\\n', '\\r', '\\t', '\\v', '_\\\\_']
-        xc += ['_\\\\_', "\'", '\"', '\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\']
+        xs += ['\\\\', "\\'", '\\"', '\\a', '\\b', '\\f',
+               '\\n', '\\r', '\\t', '\\v', '_\\\\_']
+        xc += ['_\\\\_', "\'", '\"', '\a', '\b', '\f', '\n',
+               '\r', '\t', '\v', '\\']
         # Replaces all
         val = reduce(lambda acc, args: acc.replace(*args), zip(xs, xc), val)
         # Converts to bytes
@@ -56,7 +58,7 @@ class CacheBackend(object):
         self.conn.select_db(database)
         self.cursor = self.conn.cursor()
         self.cursor.execute('SET TRANSACTION ISOLATION LEVEL READ COMMITTED')
-        res = self.cursor.execute('show tables')
+        self.cursor.execute('show tables')
         found = False
         for row in self.cursor:
             if row[0] == 'cache':
@@ -104,7 +106,7 @@ class CacheBackend(object):
                       FROM cache
                       WHERE id = x%%s %(query)s
                       ''' % {'query': query}
-            res = self.cursor.execute(sql, (_hash,))
+            self.cursor.execute(sql, (_hash,))
             row = self.cursor.fetchone()
             self.cursor.execute('COMMIT')
         if row:
@@ -205,7 +207,7 @@ class CacheBackend(object):
                   VALUES(x%s, %s, %s)
                   ON DUPLICATE KEY UPDATE timestamp = %s, data = %s
                   '''
-        res = self.cursor.execute(sql, (_hash, ts, data, ts, data))
+        self.cursor.execute(sql, (_hash, ts, data, ts, data))
         self.cursor.execute('COMMIT')
 
     def pack_database_value(self, val):
@@ -229,7 +231,7 @@ class CacheBackend(object):
             else:
                 ts = int(time.time()) - timeout
                 query = " AND timestamp > %d" % ts
-            res = self.cursor.execute('''
+            self.cursor.execute('''
                 SELECT id
                 FROM cache
                 WHERE id = x%%s %(query)s

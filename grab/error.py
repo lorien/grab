@@ -6,7 +6,7 @@ Taxonomy:
 
 Exception
 |-> GrabError
-    |-> GrabNetworkError <- IOError 
+    |-> GrabNetworkError <- IOError
     |-> Grab*Error
 
 Exception
@@ -14,7 +14,7 @@ Exception
      |-> DataNotFound <- IndexError
 """
 import warnings
-from tools.error import DataNotFound # noqa
+from tools.error import DataNotFound  # noqa
 
 
 class GrabError(Exception):

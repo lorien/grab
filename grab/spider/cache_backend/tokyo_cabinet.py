@@ -15,7 +15,7 @@ import logging
 import marshal
 
 from grab.response import Response
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 
 logger = logging.getLogger('grab.spider.cache_backend.mongo')
 
@@ -30,14 +30,11 @@ def tc_open(path, mode='a+', compress=True, makedirs=True):
     db = tc.HDB()
     if compress:
         db.tune(-1, -1, -1, tc.HDBTDEFLATE)
-    db.open(path,
-        {
-            'r': tc.HDBOREADER,
-            'w': tc.HDBOWRITER | tc.HDBOCREAT | tc.HDBOTRUNC,
-            'a': tc.HDBOWRITER,
-            'a+': tc.HDBOWRITER | tc.HDBOCREAT,
-        }[mode]
-    )
+    db.open(path, {'r': tc.HDBOREADER,
+                   'w': tc.HDBOWRITER | tc.HDBOCREAT | tc.HDBOTRUNC,
+                   'a': tc.HDBOWRITER,
+                   'a+': tc.HDBOWRITER | tc.HDBOCREAT,
+                   }[mode])
     return db
 
 

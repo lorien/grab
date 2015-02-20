@@ -18,11 +18,11 @@ class CSVDumper(object):
         if self.fields is None:
             raise Exception('Can not use `add_record` if `fields` is not set')
         for key in rec:
-            if not key in ignore_fields:
-                if not key in self.fields:
+            if key not in ignore_fields:
+                if key not in self.fields:
                     raise Exception('Unknown record key: %s' % key)
         for key in self.fields:
-            if not key in rec:
+            if key not in rec:
                 raise Exception('Missing key in record: %s' % key)
         row = [rec[x] for x in self.fields]
         self.writer.writerow(self.normalize_row(row))

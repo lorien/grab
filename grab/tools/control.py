@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from tools.control import * # noqa
+from tools.control import *  # noqa
 import logging
 
 logging.error('Module `grab.tools.control` is deprecated. '

@@ -8,7 +8,7 @@ from contextlib import contextmanager
 import json
 
 from tools import metric
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 
 logger = logging.getLogger('grab.spider.stat')
 
@@ -63,7 +63,8 @@ class SpiderStat(object):
         out.append('  %s' % '\n  '.join('%s: %s' % x for x in items))
 
         if 'download-size' in self.counters:
-            out.append('Network download: %s' % metric.format_traffic_value(self.counters['download-size']))
+            out.append('Network download: %s' % metric.format_traffic_value(
+                self.counters['download-size']))
         if hasattr(self.taskq, 'qsize'):
             out.append('Queue size: %d' % self.taskq.qsize())
         else:
@@ -121,7 +122,7 @@ class SpiderStat(object):
             return 0
         else:
             total = now - start
-            if not key in self.timers:
+            if key not in self.timers:
                 self.timers[key] = 0
             self.timers[key] += total
             del self.time_points[start_key]

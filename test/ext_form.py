@@ -1,11 +1,10 @@
 # coding: utf-8
-from unittest import TestCase
 try:
     from urlparse import parse_qsl
 except ImportError:
     from urllib.parse import parse_qsl
 
-from grab import Grab, DataNotFound, GrabMisuseError
+from grab import DataNotFound, GrabMisuseError
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 
@@ -18,7 +17,8 @@ FORMS = u"""
     <div id="header">
         <form id="search_form" method="GET">
             <input id="search_box" name="query" value="" />
-            <input type="submit" value="submit" class="submit_btn" name="submit" />
+            <input type="submit" value="submit" class="submit_btn"
+                name="submit" />
         </form>
     </div>
     <div id="content">
@@ -29,12 +29,15 @@ FORMS = u"""
               <option value="1">Female</option>
               <option value="2">Male</option>
            </select>
-           <input type="submit" value="submit" class="submit_btn" name="submit" />
+           <input type="submit" value="submit" class="submit_btn"
+            name="submit" />
         </FORM>
         <h1 id="fake_form">Big header</h1>
         <form name="dummy" action="/dummy">
-           <input type="submit" value="submit" class="submit_btn" name="submit" />
-           <input type="submit" value="submit2" class="submit_btn" name="submit" />
+           <input type="submit" value="submit" class="submit_btn"
+            name="submit" />
+           <input type="submit" value="submit2" class="submit_btn"
+            name="submit" />
         </form>
     </div>
 </body>
@@ -46,7 +49,7 @@ POST_FORM = """
     <input type="text" name="name" />
     <input type="text" disabled value="some_text" name="disabled_text" />
 </form>
-""" % self.server.get_url()
+"""
 
 MULTIPLE_SUBMIT_FORM = """
 <form method="post">
@@ -83,13 +86,13 @@ class TestHtmlForms(BaseGrabTestCase):
         """
         Test ``choose_form`` method
         """
-        
+
         # raise errors
-        self.assertRaises(DataNotFound, lambda: self.g.choose_form(10))
-        self.assertRaises(DataNotFound, lambda: self.g.choose_form(id='bad_id'))
-        self.assertRaises(DataNotFound, lambda: self.g.choose_form(id='fake_form'))
-        self.assertRaises(GrabMisuseError, lambda: self.g.choose_form())
-        
+        self.assertRaises(DataNotFound, self.g.choose_form, 10)
+        self.assertRaises(DataNotFound, self.g.choose_form, id='bad_id')
+        self.assertRaises(DataNotFound, self.g.choose_form, id='fake_form')
+        self.assertRaises(GrabMisuseError, self.g.choose_form)
+
         # check results
         self.g.choose_form(0)
         self.assertEqual('form', self.g._lxml_form.tag)
@@ -123,29 +126,33 @@ class TestHtmlForms(BaseGrabTestCase):
 
     def test_submit(self):
         g = build_grab()
-        self.server.response['get.data'] = POST_FORM
+        self.server.response['get.data'] = POST_FORM % self.server.get_url()
         g.go(self.server.get_url())
         g.set_input('name', 'Alex')
         g.submit()
-        self.assertEqualQueryString(self.server.request['data'], 'name=Alex&secret=123')
+        self.assertEqualQueryString(self.server.request['data'],
+                                    'name=Alex&secret=123')
 
         # Default submit control
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
         g.go(self.server.get_url())
         g.submit()
-        self.assertEqualQueryString(self.server.request['data'], 'secret=123&submit1=submit1')
+        self.assertEqualQueryString(self.server.request['data'],
+                                    'secret=123&submit1=submit1')
 
         # Selected submit control
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
         g.go(self.server.get_url())
         g.submit(submit_name='submit2')
-        self.assertEqualQueryString(self.server.request['data'], 'secret=123&submit2=submit2')
+        self.assertEqualQueryString(self.server.request['data'],
+                                    'secret=123&submit2=submit2')
 
         # Default submit control if submit control name is invalid
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
         g.go(self.server.get_url())
         g.submit(submit_name='submit3')
-        self.assertEqualQueryString(self.server.request['data'], 'secret=123&submit1=submit1')
+        self.assertEqualQueryString(self.server.request['data'],
+                                    'secret=123&submit1=submit1')
 
     def test_set_methods(self):
         g = build_grab()

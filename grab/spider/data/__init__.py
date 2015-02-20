@@ -1,1 +1,1 @@
-from grab.spider.data.base import Data # noqa
+from grab.spider.data.base import Data  # noqa

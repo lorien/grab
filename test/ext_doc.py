@@ -1,6 +1,5 @@
 # coding: utf-8
 from unittest import TestCase
-from grab import Grab, DataNotFound
 
 from test.util import build_grab
 

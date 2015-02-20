@@ -25,7 +25,6 @@ import re
 import logging
 from copy import deepcopy
 import time
-import logging
 try:
     from urllib2 import urlopen, URLError, HTTPError
 except ImportError:
@@ -33,8 +32,8 @@ except ImportError:
     from urllib.error import URLError, HTTPError
 
 from grab.error import GrabError, GrabNetworkError, GrabMisuseError
-from grab.util.py2old_support import * # noqa
-from grab.util.py3k_support import * # noqa
+from grab.util.py2old_support import *  # noqa
+from grab.util.py3k_support import *  # noqa
 
 READ_TIMEOUT = 60 * 10
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
@@ -104,10 +103,9 @@ class ProxySource(object):
     def reload(self):
         """
         Update proxy list.
-        
+
         Re-read proxy file after each XX seconds.
         """
-        
         if (self.read_time is None or
                 (time.time() - self.read_time) > self.read_timeout):
             logger.debug('Reloading proxy list')
@@ -212,7 +210,7 @@ SOURCE_LIST = {
 
 class ProxyList(object):
     """
-    Class to work with proxy list which 
+    Class to work with proxy list which
     is stored in the plain text file.
     """
 

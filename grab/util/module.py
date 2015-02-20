@@ -1,12 +1,13 @@
 """
-The source code of `reraise` and `import_string` was copied from https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/utils.py
+The source code of `reraise` and `import_string` was copied from
+https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/utils.py
 """
 import logging
 import sys
 
 from grab.spider.base import Spider
 from grab.spider.error import SpiderInternalError
-from grab.util.py3k_support import * # noqa
+from grab.util.py3k_support import *  # noqa
 
 PY2 = not PY3K
 SPIDER_REGISTRY = {}
@@ -122,10 +123,10 @@ def build_spider_registry(config):
                     # mod = __import__
 
     SPIDER_REGISTRY.clear()
-    module_mapping = {}
 
     opt_modules = []
-    opt_modules = config['global'].get('spider_modules', deprecated_key='GRAB_SPIDER_MODULES',
+    opt_modules = config['global'].get('spider_modules',
+                                       deprecated_key='GRAB_SPIDER_MODULES',
                                        default=[])
 
     for path in opt_modules:
@@ -136,7 +137,7 @@ def build_spider_registry(config):
         try:
             mod = __import__(path, None, None, ['foo'])
         except ImportError as ex:
-            if not path in unicode(ex):
+            if path not in unicode(ex):
                 logging.error('', exc_info=ex)
         else:
             for key in dir(mod):
@@ -149,15 +150,17 @@ def build_spider_registry(config):
                             pass
                         else:
                             spider_name = val.get_spider_name()
-                            logger.debug('Module `%s`, found spider `%s` with name `%s`' % (
-                                path, val.__name__, spider_name))
+                            logger.debug(
+                                'Module `%s`, found spider `%s` '
+                                'with name `%s`' % (
+                                    path, val.__name__, spider_name))
                             if spider_name in SPIDER_REGISTRY:
+                                mod = SPIDER_REGISTRY[spider_name].__module__
                                 raise SpiderInternalError(
-                                    'There are two different spiders with the '\
-                                    'same name "%s". Modules: %s and %s' % (
-                                        spider_name,
-                                        SPIDER_REGISTRY[spider_name].__module__,
-                                        val.__module__))
+                                    'There are two different spiders with '
+                                    'the same name "%s". '
+                                    'Modules: %s and %s' % (
+                                        spider_name, mod, val.__module__))
                             else:
                                 SPIDER_REGISTRY[spider_name] = val
     return SPIDER_REGISTRY
@@ -166,7 +169,7 @@ def build_spider_registry(config):
 def load_spider_class(config, spider_name):
     if not SPIDER_REGISTRY:
         build_spider_registry(config)
-    if not spider_name in SPIDER_REGISTRY:
+    if spider_name not in SPIDER_REGISTRY:
         raise SpiderInternalError('Unknown spider: %s' % spider_name)
     else:
         return SPIDER_REGISTRY[spider_name]

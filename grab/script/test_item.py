@@ -20,11 +20,11 @@ def main(item_path, **kwargs):
     for url in urls:
         try:
             g.go(url)
-        except Exception as ex: 
+        except Exception as ex:
             print('Fatal exception:')
             print(ex)
         else:
-            print('URL: %s' % url )
+            print('URL: %s' % url)
             for count, item in enumerate(cls.find(cls.extract_document_data(g),
                                                   url=g.response.url)):
                 print('%s #%d' % (cls.__name__, count))
