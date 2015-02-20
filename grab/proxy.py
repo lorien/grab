@@ -14,7 +14,6 @@ import logging
 import random
 
 from grab.error import GrabError, GrabNetworkError
-from grab.util.py2old_support import *  # noqa
 from grab.util.py3k_support import *  # noqa
 
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')

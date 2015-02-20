@@ -32,7 +32,6 @@ except ImportError:
     from urllib.error import URLError, HTTPError
 
 from grab.error import GrabError, GrabNetworkError, GrabMisuseError
-from grab.util.py2old_support import *  # noqa
 from grab.util.py3k_support import *  # noqa
 
 READ_TIMEOUT = 60 * 10

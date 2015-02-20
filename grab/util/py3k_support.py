@@ -2,7 +2,6 @@
     Python 3.x support module
     Usage: from grab.util.py3k_support import *  # noqa
 """
-
 import sys
 
 PY3K = (sys.version_info >= (3, ))
