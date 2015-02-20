@@ -46,6 +46,8 @@ GRAB_TEST_LIST = (
     'test.ext_structured',
     # *** Pycurl Test
     'test.pycurl_cookie',
+    # *** util.py2x_support, util.py3k_support
+    'test.util_pycompat',
 )
 
 GRAB_EXTRA_TEST_LIST = (
