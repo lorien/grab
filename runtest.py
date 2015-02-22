@@ -67,6 +67,7 @@ GRAB_TEST_LIST = (
     # pycurl tests
     'test.case.pycurl_cookie',
     'test.case.util_module',
+    'test.case.export_mysql_dumper',
 )
 
 GRAB_EXTRA_TEST_LIST = (
