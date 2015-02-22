@@ -4,6 +4,7 @@ from tools.etree import get_node_text
 from tools.text import find_number
 from tools.const import NULL
 from tools.error import DataNotFound
+import six
 
 from grab.util.misc import deprecated
 from grab.error import GrabMisuseError
@@ -82,7 +83,7 @@ class DeprecatedThings(object):
         if make_absolute:
             self.tree.make_links_absolute(self.response.url)
 
-        if isinstance(href_pattern, unicode):
+        if isinstance(href_pattern, six.text_type):
             raise GrabMisuseError('Method `find_link` accepts only '
                                   'byte-string argument')
         for elem, attr, link, pos in self.tree.iterlinks():

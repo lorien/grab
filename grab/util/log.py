@@ -2,10 +2,10 @@
 This module contains `print_dict` function that is useful
 to dump content of dictionary in human acceptable representation.
 """
-
+import six
 
 def repr_value(val):
-    if isinstance(val, unicode):
+    if isinstance(val, six.text_type):
         return val.encode('utf-8')
     elif isinstance(val, (list, tuple)):
         return '[%s]' % ', '.join(repr_value(x) for x in val)

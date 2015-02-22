@@ -12,9 +12,9 @@ import itertools
 import time
 import logging
 import random
+import six
 
 from grab.error import GrabError, GrabNetworkError
-from grab.util.py3k_support import *  # noqa
 
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
 RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')
@@ -79,7 +79,7 @@ def parse_proxy_data(data, data_format='text', proxy_type='http'):
     """
     if data_format == 'text':
         for line in data.splitlines():
-            if not PY3K and isinstance(line, unicode):
+            if not six.PY3 and isinstance(line, six.text_type):
                 line = line.encode('utf-8')
             line = line.strip().replace(' ', '')
             if line and not line.startswith('#'):

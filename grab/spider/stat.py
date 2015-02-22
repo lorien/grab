@@ -6,9 +6,9 @@ from tools.encoding import smart_str
 import os
 from contextlib import contextmanager
 import json
+import six
 
 from tools import metric
-from grab.util.py3k_support import *  # noqa
 
 logger = logging.getLogger('grab.spider.stat')
 
@@ -44,7 +44,7 @@ class SpiderStat(object):
         with open(path, 'wb') as out:
             lines = []
             for item in self.items.get(list_name, []):
-                if isinstance(item, basestring):
+                if isinstance(item, six.string_types):
                     lines.append(smart_str(item))
                 else:
                     lines.append(json.dumps(item))

@@ -13,10 +13,10 @@ import zlib
 import logging
 import marshal
 import time
+import six
 
 from grab.response import Response
 from grab.cookie import CookieManager
-from grab.util.py3k_support import *  # noqa
 
 logger = logging.getLogger('grab.spider.cache_backend.postgresql')
 
@@ -73,7 +73,7 @@ class CacheBackend(object):
                 ts = int(time.time()) - timeout
                 query = " AND timestamp > %d" % ts
             # py3 hack
-            if PY3K:
+            if six.PY3:
                 sql = '''
                       SELECT data
                       FROM cache
@@ -166,7 +166,7 @@ class CacheBackend(object):
         self.cursor.execute('BEGIN')
         ts = int(time.time())
         # py3 hack
-        if PY3K:
+        if six.PY3:
             sql = '''
                   UPDATE cache SET timestamp = {0}, data = {1} WHERE id = {2};
                   INSERT INTO cache (id, timestamp, data)

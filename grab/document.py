@@ -26,6 +26,7 @@ try:
 except ImportError:
     from urllib.parse import urljoin
 from selection import XpathSelector
+import six
 
 import tools.encoding
 from grab.cookie import CookieManager
@@ -36,7 +37,6 @@ from tools.html import decode_entities
 from grab.error import GrabMisuseError, DataNotFound
 from tools.rex import normalize_regexp
 from grab.const import NULL
-from grab.util.py3k_support import *  # noqa
 from tools.http import smart_urlencode
 
 logger = logging.getLogger('grab.response')
@@ -90,16 +90,16 @@ class TextExtension(object):
         If substring is found return True else False.
         """
 
-        if isinstance(anchor, unicode):
+        if isinstance(anchor, six.text_type):
             if byte:
                 raise GrabMisuseError('The anchor should be bytes string in '
                                       'byte mode')
             else:
                 return anchor in self.unicode_body()
 
-        if not isinstance(anchor, unicode):
+        if not isinstance(anchor, six.text_type):
             if byte:
-                # if PY3K:
+                # if six.PY3:
                     # return anchor in self.body_as_bytes()
                 return anchor in self.body
             else:
@@ -168,14 +168,14 @@ class RegexpExtension(object):
         regexp = normalize_regexp(regexp, flags)
         match = None
         if byte:
-            if not isinstance(regexp.pattern, unicode) or not PY3K:
-                # if PY3K:
+            if not isinstance(regexp.pattern, six.text_type) or not six.PY3:
+                # if six.PY3:
                     # body = self.body_as_bytes()
                 # else:
                     # body = self.body
                 match = regexp.search(self.body)
         else:
-            if isinstance(regexp.pattern, unicode) or not PY3K:
+            if isinstance(regexp.pattern, six.text_type) or not six.PY3:
                 ubody = self.unicode_body()
                 match = regexp.search(ubody)
         if match:
@@ -286,7 +286,7 @@ class BodyExtension(object):
 
     def _read_body(self):
         # py3 hack
-        # if PY3K:
+        # if six.PY3:
             # return self.unicode_body()
 
         # self._check_cached_body()
@@ -336,7 +336,7 @@ class DomTreeExtension(object):
             if self.grab.config['strip_null_bytes']:
                 body = body.replace(NULL_BYTE, '')
             # py3 hack
-            if PY3K:
+            if six.PY3:
                 body = RE_UNICODE_XML_DECLARATION.sub('', body)
             else:
                 body = RE_XML_DECLARATION.sub('', body)
@@ -385,7 +385,7 @@ class DomTreeExtension(object):
 
         if self._strict_lxml_tree is None:
             # py3 hack
-            # if PY3K:
+            # if six.PY3:
                 # body = self.body_as_bytes(encode=True)
             # else:
                 # body = self.body
@@ -840,7 +840,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension,
         self.headers = email.message_from_string('\n'.join(valid_lines))
 
         if charset is None:
-            if isinstance(self.body, unicode):
+            if isinstance(self.body, six.text_type):
                 self.charset = 'utf-8'
             else:
                 self.detect_charset()
@@ -945,7 +945,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension,
                 pass
 
         with open(path, 'wb') as out:
-            if isinstance(self._cached_body, unicode):
+            if isinstance(self._cached_body, six.text_type):
                 out.write(self._cached_body.encode('utf-8'))
             else:
                 out.write(self._cached_body)
@@ -977,7 +977,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension,
         returns save_to + path
         """
 
-        if isinstance(location, unicode):
+        if isinstance(location, six.text_type):
             location = location.encode('utf-8')
         rel_path = hashed_path(location, ext=ext)
         path = os.path.join(basedir, rel_path)
@@ -988,7 +988,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension,
             except OSError:
                 pass
             with open(path, 'wb') as out:
-                if isinstance(self._cached_body, unicode):
+                if isinstance(self._cached_body, six.text_type):
                     out.write(self._cached_body.encode('utf-8'))
                 else:
                     out.write(self._cached_body)
@@ -1000,7 +1000,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension,
         Return response body deserialized into JSON object.
         """
 
-        if PY3K:
+        if six.PY3:
             return json.loads(self.body.decode(self.charset))
         else:
             return json.loads(self.body)

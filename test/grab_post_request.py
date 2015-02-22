@@ -143,7 +143,7 @@ class TestPostFeature(BaseGrabTestCase):
 
     def test_patch(self):
         g = build_grab()
-        g.setup(post='abc', url=self.server.get_url(), method='patch')
+        g.setup(post=b'abc', url=self.server.get_url(), method='patch')
         g.request()
         self.assertEqual(self.server.request['method'], 'PATCH')
         self.assertEqual(self.server.request['headers']['content-length'], '3')

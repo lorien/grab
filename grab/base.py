@@ -20,6 +20,7 @@ except ImportError:
 import email
 from datetime import datetime
 import weakref
+import six
 
 from tools.html import find_refresh_url, find_base_url
 from grab.document import Document
@@ -28,7 +29,6 @@ from tools.http import normalize_http_values
 from grab.cookie import CookieManager
 from grab.proxy import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
-from grab.util.py3k_support import *  # noqa
 
 __all__ = ('Grab',)
 # This counter will used in enumerating network queries.
@@ -242,7 +242,7 @@ class Grab(DeprecatedThings):
 
     def setup_transport(self, transport_param):
         self.transport_param = transport_param
-        if isinstance(transport_param, basestring):
+        if isinstance(transport_param, six.string_types):
             mod_path, cls_name = transport_param.rsplit('.', 1)
             try:
                 cls = TRANSPORT_CACHE[(mod_path, cls_name)]
@@ -459,7 +459,7 @@ class Grab(DeprecatedThings):
             if isinstance(post, dict):
                 post = list(post.items())
             if post:
-                if isinstance(post, basestring):
+                if isinstance(post, six.string_types):
                     post = post[:self.config['debug_post_limit']] + '...'
                 else:
                     items = normalize_http_values(post, charset='utf-8')
@@ -549,7 +549,7 @@ class Grab(DeprecatedThings):
             self.copy_request_data()
             self.save_dumps()
         except Exception as ex:
-            logging.error(unicode(ex))
+            logging.error(six.text_type(ex))
 
     def copy_request_data(self):
         # TODO: Maybe request object?

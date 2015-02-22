@@ -4,11 +4,11 @@
 import logging
 import random
 import requests
+import six
 
 from grab.error import GrabError, GrabMisuseError
 from grab.response import Response
 from tools.http import urlencode, normalize_http_values, normalize_unicode
-from grab.util.py3k_support import *  # noqa
 
 logger = logging.getLogger('grab.transport.requests')
 
@@ -41,7 +41,7 @@ class RequestsTransport(object):
             'proxy': None,
         }
 
-        if isinstance(grab.config['url'], unicode):
+        if isinstance(grab.config['url'], six.text_type):
             grab.config['url'] = grab.config['url'].encode('utf-8')
 
         self.requests_config['url'] = grab.config['url']
@@ -80,10 +80,10 @@ class RequestsTransport(object):
             if grab.config['multipart_post']:
                 raise NotImplementedError
             elif grab.config['post']:
-                if isinstance(grab.config['post'], basestring):
+                if isinstance(grab.config['post'], six.string_types):
                     # bytes-string should be posted as-is
                     # unicode should be converted into byte-string
-                    if isinstance(grab.config['post'], unicode):
+                    if isinstance(grab.config['post'], six.text_type):
                         post_data = normalize_unicode(grab.config['post'])
                     else:
                         post_data = grab.config['post']
@@ -163,7 +163,7 @@ class RequestsTransport(object):
             self._requests_response = func(
                 cfg['url'], headers=cfg['headers'], **kwargs)
         except Exception as ex:
-            raise GrabError(0, unicode(ex))
+            raise GrabError(0, six.text_type(ex))
 
     def prepare_response(self, grab):
         # self.response.head = ''.join(self.response_head_chunks)

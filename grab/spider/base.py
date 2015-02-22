@@ -15,6 +15,7 @@ try:
 except ImportError:
     import queue
 from copy import deepcopy
+import six
 
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
@@ -29,7 +30,6 @@ from grab.spider.transport.multicurl import MulticurlTransport
 from grab.proxylist import ProxyList
 from grab.spider.command_controller import CommandController
 from grab.util.misc import camel_case_to_underscore
-from grab.util.py3k_support import *  # noqa
 from tools.encoding import make_str, make_unicode
 
 DEFAULT_TASK_PRIORITY = 100
@@ -438,7 +438,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                     'allowed limit (%d). Trying to add '
                     'new tasks.' % (qsize, min_limit))
                 try:
-                    for x in xrange(min_limit - qsize):
+                    for x in six.moves.range(min_limit - qsize):
                         item = next(self.task_generator_object)
                         logger_verbose.debug('Got new item from generator. '
                                              'Processing it.')
@@ -594,10 +594,10 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         # Looks strange but I really have some problems with
         # serializing exception into string
         try:
-            ex_str = unicode(ex)
+            ex_str = six.text_type(ex)
         except TypeError:
             try:
-                ex_str = unicode(ex, 'utf-8', 'ignore')
+                ex_str = ex.decode('utf-8', 'ignore')
             except TypeError:
                 ex_str = str(ex)
 
@@ -950,7 +950,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                     # Try five times to get new task and proces task generator
                     # because slave parser could agressively consume
                     # tasks from task queue
-                    for x in xrange(5):
+                    for x in six.moves.range(5):
                         task = self.load_new_task()
                         if task is None:
                             if not self.transport.active_task_number():

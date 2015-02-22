@@ -16,15 +16,15 @@ import logging
 import MySQLdb
 import marshal
 import time
+import six
 
 from grab.response import Response
 from grab.cookie import CookieManager
-from grab.util.py3k_support import *  # noqa
 
 logger = logging.getLogger('grab.spider.cache_backend.mysql')
 
 # py3 hack
-if PY3K:
+if six.PY3:
     import re
     from functools import reduce
 
@@ -94,7 +94,7 @@ class CacheBackend(object):
                 ts = int(time.time()) - timeout
                 query = " AND timestamp > %d" % ts
             # py3 hack
-            if PY3K:
+            if six.PY3:
                 sql = '''
                       SELECT data
                       FROM cache
@@ -112,7 +112,7 @@ class CacheBackend(object):
         if row:
             data = row[0]
             # py3 hack
-            if PY3K:
+            if six.PY3:
                 # A temporary solution for MySQLdb (Py3k port)
                 # [https://github.com/davispuh/MySQL-for-Python-3]
                 data = _str_to_hexbytes(data)
@@ -127,7 +127,7 @@ class CacheBackend(object):
 
     def build_hash(self, url):
         with self.spider.save_timer('cache.read.build_hash'):
-            if isinstance(url, unicode):
+            if isinstance(url, six.text_type):
                 utf_url = url.encode('utf-8')
             else:
                 utf_url = url
@@ -188,14 +188,14 @@ class CacheBackend(object):
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
         # py3 hack
-        if PY3K:
+        if six.PY3:
             # A temporary solution for MySQLdb (Py3k port)
             # [https://github.com/davispuh/MySQL-for-Python-3]
             data = _hexbytes_to_str(data)
         self.cursor.execute('BEGIN')
         ts = int(time.time())
         # py3 hack
-        if PY3K:
+        if six.PY3:
             sql = '''
                   INSERT INTO cache (id, timestamp, data)
                   VALUES(x{0}, {1}, {2})

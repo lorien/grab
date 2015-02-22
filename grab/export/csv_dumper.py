@@ -1,4 +1,5 @@
 import csv
+import six
 
 
 class CSVDumper(object):
@@ -39,7 +40,7 @@ class CSVDumper(object):
     def normalize_value(self, val):
         if val is None:
             return self.normalize_none_value(val)
-        elif isinstance(val, unicode):
+        elif isinstance(val, six.text_type):
             return val.encode('utf-8')
         else:
             return str(val)

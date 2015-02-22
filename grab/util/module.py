@@ -8,11 +8,8 @@ import six
 
 from grab.spider.base import Spider
 from grab.spider.error import SpiderInternalError
-from grab.util.py3k_support import *  # noqa
 
-PY2 = not PY3K
 SPIDER_REGISTRY = {}
-string_types = (str, unicode)
 logger = logging.getLogger('grab.util.module')
 
 
@@ -74,7 +71,7 @@ def import_string(import_name, silent=False):
     """
 
     # XXX: py3 review needed
-    assert isinstance(import_name, string_types)
+    assert isinstance(import_name, six.string_types)
     # force the import name to automatically convert to strings
     import_name = str(import_name)
     try:
@@ -86,9 +83,9 @@ def import_string(import_name, silent=False):
             return __import__(import_name)
         # __import__ is not able to handle unicode strings in the fromlist
         # if the module is a package
-        if PY2 and isinstance(obj, unicode):
+        if six.PY2 and isinstance(obj, six.text_type):
             obj = obj.encode('utf-8')
-        if PY3K and isinstance(obj, bytes):
+        if six.PY3 and isinstance(obj, six.binary_type):
             obj = obj.decode('utf-8')
         try:
             return getattr(__import__(module, None, None, [obj]), obj)
@@ -130,7 +127,7 @@ def build_spider_registry(config):
         try:
             mod = __import__(path, None, None, ['foo'])
         except ImportError as ex:
-            if path not in unicode(ex):
+            if path not in six.text_type(ex):
                 logging.error('', exc_info=ex)
         else:
             for key in dir(mod):

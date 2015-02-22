@@ -13,9 +13,9 @@ import tc
 import os
 import logging
 import marshal
+import six
 
 from grab.response import Response
-from grab.util.py3k_support import *  # noqa
 
 logger = logging.getLogger('grab.spider.cache_backend.mongo')
 
@@ -60,7 +60,7 @@ class CacheBackend(object):
         return marshal.loads(dump)
 
     def build_key(self, url):
-        return url.encode('utf-8') if isinstance(url, unicode) else url
+        return url.encode('utf-8') if isinstance(url, six.text_type) else url
 
     def remove_cache_item(self, url):
         del self.db[self.build_key(url)]

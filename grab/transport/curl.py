@@ -19,6 +19,7 @@ try:
     from cookielib import CookieJar
 except ImportError:
     from http.cookiejar import CookieJar
+import six
 
 from grab.cookie import create_cookie, CookieManager
 from grab import error
@@ -27,7 +28,6 @@ from tools.http import (encode_cookies, normalize_http_values,
                         normalize_post_data, normalize_url)
 from tools.user_agent import random_user_agent
 from tools.encoding import smart_str, decode_list, decode_pairs
-from grab.util.py3k_support import *  # noqa
 
 logger = logging.getLogger('grab.transport.curl')
 
@@ -179,10 +179,10 @@ class CurlTransport(object):
             request_url = normalize_url(grab.config['url'])
         except Exception as ex:
             raise error.GrabInvalidUrl(
-                u'%s: %s' % (unicode(ex), grab.config['url']))
+                u'%s: %s' % (six.text_type(ex), grab.config['url']))
 
         # py3 hack
-        if not PY3K:
+        if not six.PY3:
             request_url = smart_str(request_url)
 
         self.curl.setopt(pycurl.URL, request_url)
@@ -245,14 +245,14 @@ class CurlTransport(object):
         if grab.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
             if grab.config['multipart_post']:
-                if isinstance(grab.config['multipart_post'], basestring):
+                if isinstance(grab.config['multipart_post'], six.string_types):
                     raise error.GrabMisuseError(
                         'multipart_post option could not be a string')
                 post_items = normalize_http_values(
                     grab.config['multipart_post'],
                     charset=grab.config['charset'])
                 # py3 hack
-                if PY3K:
+                if six.PY3:
                     post_items = decode_pairs(post_items,
                                               grab.config['charset'])
                 # import pdb; pdb.set_trace()
@@ -261,7 +261,7 @@ class CurlTransport(object):
                 post_data = normalize_post_data(grab.config['post'],
                                                 grab.config['charset'])
                 # py3 hack
-                # if PY3K:
+                # if six.PY3:
                 #    post_data = smart_unicode(post_data,
                 #                              grab.config['charset'])
                 self.curl.setopt(pycurl.COPYPOSTFIELDS, post_data)
@@ -269,10 +269,9 @@ class CurlTransport(object):
                 self.curl.setopt(pycurl.POSTFIELDS, '')
         elif grab.request_method == 'PUT':
             data = grab.config['post']
-            if (isinstance(data, unicode) or
-                    (not PY3K and not isinstance(data, basestring))):
+            if isinstance(data, six.text_type):
                 # py3 hack
-                # if PY3K:
+                # if six.PY3:
                 #    data = data.encode('utf-8')
                 # else:
                 raise error.GrabMisuseError(
@@ -283,14 +282,10 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.INFILESIZE, len(data))
         elif grab.request_method == 'PATCH':
             data = grab.config['post']
-            if isinstance(data, unicode) or not isinstance(data, basestring):
-                # py3 hack
-                if PY3K:
-                    data = data.encode('utf-8')
-                else:
-                    raise error.GrabMisuseError(
-                        'Value of post option could be only byte '
-                        'string if PATCH method is used')
+            if isinstance(data, six.text_type):
+                raise error.GrabMisuseError(
+                    'Value of post option could be only byte '
+                    'string if PATCH method is used')
             self.curl.setopt(pycurl.UPLOAD, 1)
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'PATCH')
             self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read)
@@ -437,7 +432,7 @@ class CurlTransport(object):
 
     def prepare_response(self, grab):
         # py3 hack
-        if PY3K:
+        if six.PY3:
             self.response_head_chunks = decode_list(self.response_head_chunks)
 
         if self.body_file:

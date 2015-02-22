@@ -1,8 +1,8 @@
 import pycurl
 import select
+import six
 
 from grab.error import GrabTooManyRedirectsError
-from grab.util.py3k_support import *  # noqa
 
 
 class MulticurlTransport(object):
@@ -15,7 +15,7 @@ class MulticurlTransport(object):
         self.connection_count = {}
 
         # Create curl instances
-        for x in xrange(self.thread_number):
+        for x in six.moves.range(self.thread_number):
             curl = pycurl.Curl()
             self.connection_count[id(curl)] = 0
             self.freelist.append(curl)
