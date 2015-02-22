@@ -38,3 +38,6 @@ docs/libpeerconnection.log
 .idea/
 /.coverage
 /.env/
+/.py27/
+/.py34/
+/build/

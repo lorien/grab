@@ -1,9 +1,10 @@
 """
-The source code of `reraise` and `import_string` was copied from
+The source code of `import_string` was copied from
 https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/utils.py
 """
 import logging
 import sys
+import six
 
 from grab.spider.base import Spider
 from grab.spider.error import SpiderInternalError
@@ -13,14 +14,6 @@ PY2 = not PY3K
 SPIDER_REGISTRY = {}
 string_types = (str, unicode)
 logger = logging.getLogger('grab.util.module')
-
-
-def reraise(tp, value, tb=None):
-    if sys.version_info < (3,):
-        from grab.util import py2x_support
-        py2x_support.reraise(tp, value, tb)
-    else:
-        raise value.with_traceback(tb)
 
 
 class ImportStringError(ImportError):
@@ -107,7 +100,7 @@ def import_string(import_name, silent=False):
             return sys.modules[modname]
     except ImportError as e:
         if not silent:
-            reraise(
+            six.reraise(
                 ImportStringError,
                 ImportStringError(import_name, e),
                 sys.exc_info()[2])

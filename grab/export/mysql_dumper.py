@@ -8,8 +8,8 @@ class MysqlCSVDumper(CSVDumper):
     Difference from CSVDumper:
     * default `quoting` value is QUOTE_MINIMAL
     * default `write_header` value is False
-    * None values are converted to r'\N'
-    * \ symbols are converted to \\
+    * None values are converted to "\\N"
+    * \ symbols are converted to "\\"
     """
 
     def __init__(self, path, fields=None, write_header=False,

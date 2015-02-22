@@ -48,6 +48,10 @@ GRAB_TEST_LIST = (
     'test.pycurl_cookie',
     # *** util.py2x_support, util.py3k_support
     'test.util_pycompat',
+    # *** util.module
+    'test.util_module',
+    # *** grab.export
+    'test.export_mysql_dumper',
 )
 
 GRAB_EXTRA_TEST_LIST = (
