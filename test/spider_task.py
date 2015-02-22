@@ -1,9 +1,9 @@
+import six
+
 import grab.spider.base
 from grab import Grab
 from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
 from grab.spider import inline_task
-from grab.util.py3k_support import *  # noqa
-
 from test.util import BaseGrabTestCase
 
 
@@ -186,7 +186,7 @@ class TestSpider(BaseGrabTestCase):
 
             def subroutine_task(self, grab):
 
-                for x in xrange(2):
+                for x in six.moves.range(2):
                     url = server.get_url('/?foo=subtask%s' % x)
                     grab.setup(url=url)
                     grab = yield Task(grab=grab)
@@ -198,7 +198,7 @@ class TestSpider(BaseGrabTestCase):
                 self.add_response(grab)
                 self.calls.append('generator')
 
-                for x in xrange(3):
+                for x in six.moves.range(3):
                     url = server.get_url('/?foo=%s' % x)
                     grab.setup(url=url)
                     grab = yield Task(grab=grab)

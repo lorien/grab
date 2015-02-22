@@ -1,11 +1,10 @@
 # coding: utf-8
 import re
 from tools.error import DataNotFound
+import six
 
 from test.util import build_grab
 from test.util import BaseGrabTestCase
-
-from grab.util.py3k_support import *  # noqa
 
 HTML = u"""
 <head>
@@ -57,7 +56,7 @@ class ExtensionRexTestCase(BaseGrabTestCase):
         # # Search for non-unicode rex in unicode body should fail
         pattern = '(фыва)'
         # py3 hack
-        if PY3K:
+        if six.PY3:
             pattern = pattern.encode('utf-8')
         rex = re.compile(pattern)
         self.assertRaises(DataNotFound, lambda: self.g.rex(rex))

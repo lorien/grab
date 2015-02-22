@@ -1,7 +1,7 @@
+import six
+
 from grab.spider import Spider, Task
 from test.util import BaseGrabTestCase
-
-from grab.util.py3k_support import *  # noqa
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
@@ -86,7 +86,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 self.count = 0
 
             def task_generator(self):
-                for x in xrange(1111):
+                for x in six.moves.range(1111):
                     yield Task('page', url=server.get_url())
 
             def task_page(self, grab, task):

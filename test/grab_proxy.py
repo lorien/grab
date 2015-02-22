@@ -2,8 +2,7 @@
 from test.util import build_grab, TMP_FILE
 from test.util import BaseGrabTestCase, TEST_SERVER_PORT
 from test_server import TestServer
-
-from grab.util.py3k_support import *  # noqa
+import six
 
 ADDRESS = '127.0.0.1'
 EXTRA_PORT1 = TEST_SERVER_PORT + 1
@@ -52,7 +51,7 @@ class TestProxy(BaseGrabTestCase):
         g.load_proxylist(TMP_FILE, 'text_file')
         self.assertEqual(g.config['proxy_auto_change'], True)
         servers = set()
-        for x in xrange(10):
+        for x in six.moves.range(10):
             g.go('http://yandex.ru')
             servers.add(g.config['proxy'])
 
@@ -64,7 +63,7 @@ class TestProxy(BaseGrabTestCase):
         g.load_proxylist(TMP_FILE, 'text_file', auto_change=False)
         self.assertEqual(g.config['proxy_auto_change'], False)
         servers = set()
-        for x in xrange(10):
+        for x in six.moves.range(10):
             g.go('http://yandex.ru')
             servers.add(g.config['proxy'])
         self.assertEqual(len(servers), 1)
@@ -82,7 +81,7 @@ class TestProxy(BaseGrabTestCase):
     def test_change_proxy(self):
         g = build_grab()
         with open(TMP_FILE, 'w') as out:
-            for x in xrange(10):
+            for x in six.moves.range(10):
                 out.write('server-%d:777\n' % x)
 
         g.load_proxylist(TMP_FILE, 'text_file', auto_init=False,

@@ -1,9 +1,9 @@
+from test_server import TestServer
+import six
+
 from grab import Grab
 from grab.spider import Spider, Task
 from test.util import BaseGrabTestCase, TEST_SERVER_PORT
-from test_server import TestServer
-
-from grab.util.py3k_support import *  # noqa
 
 ADDRESS = '127.0.0.1'
 EXTRA_PORT1 = TEST_SERVER_PORT + 1
@@ -48,7 +48,7 @@ class TestSpider(BaseGrabTestCase):
         bot = SimpleSpider(thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
         bot.setup_queue()
-        for x in xrange(10):
+        for x in six.moves.range(10):
             bot.add_task(Task('baz', 'http://yandex.ru'))
         bot.run()
 
@@ -59,7 +59,7 @@ class TestSpider(BaseGrabTestCase):
         bot = SimpleSpider(thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
         bot.setup_queue()
-        for x in xrange(10):
+        for x in six.moves.range(10):
             bot.add_task(Task('baz', 'http://yandex.ru'))
         bot.run()
 
@@ -71,7 +71,7 @@ class TestSpider(BaseGrabTestCase):
         bot = SimpleSpider(thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file', auto_change=False)
         bot.setup_queue()
-        for x in xrange(10):
+        for x in six.moves.range(10):
             bot.add_task(Task('baz', 'http://yandex.ru'))
         bot.run()
 
@@ -85,7 +85,7 @@ class TestSpider(BaseGrabTestCase):
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file',
                            auto_change=False, auto_init=False)
         bot.setup_queue()
-        for x in xrange(10):
+        for x in six.moves.range(10):
             bot.add_task(Task('baz', self.server.get_url()))
         bot.run()
 
@@ -115,7 +115,7 @@ class TestSpider(BaseGrabTestCase):
         bot = SimpleSpider(thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
         bot.setup_queue()
-        for x in xrange(10):
+        for x in six.moves.range(10):
             bot.add_task(Task('baz', 'http://yandex.ru'))
         bot.setup_grab(proxy=PROXY3)
         bot.run()

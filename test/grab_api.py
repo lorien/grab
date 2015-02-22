@@ -1,9 +1,9 @@
 # coding: utf-8
-from grab.util.py3k_support import *  # noqa
 from grab import GrabMisuseError
 from grab.base import reset_request_counter
 from test.util import build_grab
 from test.util import BaseGrabTestCase
+import six
 
 
 class GrabApiTestCase(BaseGrabTestCase):
@@ -90,7 +90,7 @@ class GrabApiTestCase(BaseGrabTestCase):
 
         # Make 10 requests in concurrent threads
         threads = []
-        for x in xrange(10):
+        for x in six.moves.range(10):
             th = threading.Thread(target=func)
             threads.append(th)
             th.start()

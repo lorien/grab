@@ -1,7 +1,7 @@
+import six
+
 from grab.spider import Spider, Task
 from test.util import BaseGrabTestCase
-
-from grab.util.py3k_support import *  # noqa
 
 
 class SpiderQueueMixin(object):
@@ -33,7 +33,7 @@ class SpiderQueueMixin(object):
         bot = self.SimpleSpider()
         self.setup_queue(bot)
         bot.taskq.clear()
-        for x in xrange(5):
+        for x in six.moves.range(5):
             bot.add_task(Task('page', url=self.server.get_url()))
         self.assertEqual(5, bot.taskq.size())
         bot.run()

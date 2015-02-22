@@ -1,10 +1,9 @@
 # coding: utf-8
 from grab import DataNotFound, GrabMisuseError
+import six
 
 from test.util import build_grab
 from test.util import BaseGrabTestCase
-
-from grab.util.py3k_support import *  # noqa
 
 HTML = u"""
 <head>
@@ -52,7 +51,7 @@ class TextExtensionTest(BaseGrabTestCase):
         self.assertRaises(GrabMisuseError, self.g.search, u'фыва', byte=True)
         anchor = 'фыва'
         # py3 hack
-        if PY3K:
+        if six.PY3:
             anchor = anchor.encode('utf-8')
         self.assertRaises(GrabMisuseError, self.g.search, anchor)
 
