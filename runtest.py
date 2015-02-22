@@ -23,7 +23,7 @@ GRAB_TEST_LIST = (
     # Response processing
     'test.grab_xml_processing',
     'test.grab_response_body_processing',
-    #'test.grab_charset',
+    'test.grab_charset',
     # Network
     'test.grab_get_request',
     'test.grab_post_request',

@@ -7,8 +7,6 @@ from grab import Grab
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 
-from grab.util.py3k_support import *  # noqa
-
 
 class GrabCharsetDetectionTestCase(BaseGrabTestCase):
     def setUp(self):
@@ -16,18 +14,26 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
 
     def test_document_charset_option(self):
         g = build_grab()
-        self.server.response['get.data'] = 'foo'
+        self.server.response['get.data'] = b'foo'
         g.go(self.server.get_url())
-        self.assertEqual('foo', g.response.body)
+        self.assertEqual(b'foo', g.response.body)
 
         g = build_grab()
         self.server.response['get.data'] = u'фуу'.encode('utf-8')
         g.go(self.server.get_url())
         self.assertEqual(u'фуу'.encode('utf-8'), g.response.body)
+
+        print(g.response.head)
         self.assertEqual(g.response.charset, 'utf-8')
 
-        g = Grab(transport=GRAB_TRANSPORT, document_charset='cp1251')
+        g = build_grab(document_charset='cp1251')
         self.server.response['get.data'] = u'фуу'.encode('cp1251')
         g.go(self.server.get_url())
         self.assertEqual(u'фуу'.encode('cp1251'), g.response.body)
         self.assertEqual(g.response.charset, 'cp1251')
+
+    def test_document_charset_lowercase(self):
+        self.server.response['charset'] = 'UTF-8'
+        g = build_grab()
+        g.go(self.server.get_url())
+        self.assertEquals('utf-8', g.doc.charset)

@@ -845,7 +845,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension,
             else:
                 self.detect_charset()
         else:
-            self.charset = charset
+            self.charset = charset.lower()
 
         self._unicode_body = None
 
@@ -897,6 +897,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension,
                     charset = self.headers['Content-Type'][(pos + 8):]
 
         if charset:
+            charset = charset.lower()
             if not isinstance(charset, str):
                 # Convert to unicode (py2.x) or string (py3.x)
                 charset = charset.decode('utf-8')
