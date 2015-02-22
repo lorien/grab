@@ -37,3 +37,6 @@ docs/libpeerconnection.log
 /spider.py
 .idea/
 /.coverage
+/.py27/
+/.py34/
+/build/

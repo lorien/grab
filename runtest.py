@@ -66,6 +66,7 @@ GRAB_TEST_LIST = (
     'test.case.grab_js',
     # pycurl tests
     'test.case.pycurl_cookie',
+    'test.case.util_module',
 )
 
 GRAB_EXTRA_TEST_LIST = (

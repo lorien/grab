@@ -1,5 +1,6 @@
 """
-The source code of `reraise` and `import_string` was copied from https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/utils.py
+The source code of `reraise` and `import_string` was copied from
+https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/utils.py
 """
 import logging
 import sys
@@ -14,13 +15,33 @@ SPIDER_REGISTRY = {}
 string_types = (str, unicode)
 logger = logging.getLogger('grab.util.module')
 
+# This code got from
+# https://bitbucket.org/gutworth/six/src/tip/six.py?at=default
+# Just do not want to use `six` as dependency in Grab 0.5.x
+if PY3K:
+    def reraise(tp, value, tb=None):
+        if value is None:
+            value = tp()
+        if value.__traceback__ is not tb:
+            raise value.with_traceback(tb)
+        raise value
 
-def reraise(tp, value, tb=None):
-    if sys.version_info < (3,):
-        from grab.util import py2x_support
-        py2x_support.reraise(tp, value, tb)
-    else:
-        raise value.with_traceback(tb)
+else:
+    def exec_(_code_, _globs_=None, _locs_=None):
+        """Execute code in a namespace."""
+        if _globs_ is None:
+            frame = sys._getframe(1)
+            _globs_ = frame.f_globals
+            if _locs_ is None:
+                _locs_ = frame.f_locals
+            del frame
+        elif _locs_ is None:
+            _locs_ = _globs_
+        exec("""exec _code_ in _globs_, _locs_""")
+
+    exec_("""def reraise(tp, value, tb=None):
+    raise tp, value, tb
+""")
 
 
 class ImportStringError(ImportError):
