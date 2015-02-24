@@ -25,16 +25,14 @@ import re
 import logging
 from copy import deepcopy
 import time
-import logging
 try:
     from urllib2 import urlopen, URLError, HTTPError
 except ImportError:
     from urllib.request import urlopen
     from urllib.error import URLError, HTTPError
+import six
 
 from grab.error import GrabError, GrabNetworkError, GrabMisuseError
-from grab.util.py2old_support import * # noqa
-from grab.util.py3k_support import * # noqa
 
 READ_TIMEOUT = 60 * 10
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
@@ -75,7 +73,7 @@ class ProxySource(object):
         """
 
         for proxy in proxies:
-            if not PY3K and isinstance(proxy, unicode):
+            if not six.PY3 and isinstance(proxy, six.text_type):
                 # Convert to string (py2.x)
                 proxy = proxy.encode('utf-8')
             proxy = proxy.strip().replace(' ', '')
@@ -88,7 +86,7 @@ class ProxySource(object):
                 yield server, user_pwd
 
     def get_server_list(self, proxylist):
-        if not PY3K and isinstance(proxylist, unicode):
+        if not six.PY3 and isinstance(proxylist, six.text_type):
             # Convert to string (py2.x)
             proxylist = proxylist.encode('utf-8')
         if isinstance(proxylist, str):
@@ -104,10 +102,9 @@ class ProxySource(object):
     def reload(self):
         """
         Update proxy list.
-        
+
         Re-read proxy file after each XX seconds.
         """
-        
         if (self.read_time is None or
                 (time.time() - self.read_time) > self.read_timeout):
             logger.debug('Reloading proxy list')
@@ -192,7 +189,7 @@ class StringSource(ProxySource):
         * complex: "server:port:user:pwd"
         """
 
-        if not isinstance(self.source, (str, unicode)):
+        if not isinstance(self.source, six.string_types):
             raise GrabMisuseError("Given proxy list isn't a string or unicode "
                                   "type")
         self.server_list = self.get_server_list(self.source)
@@ -212,7 +209,7 @@ SOURCE_LIST = {
 
 class ProxyList(object):
     """
-    Class to work with proxy list which 
+    Class to work with proxy list which
     is stored in the plain text file.
     """
 

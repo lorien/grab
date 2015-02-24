@@ -22,8 +22,9 @@ def image_handler(grab, task):
         if len(grab.response.body):
             if imghdr.what(StringIO(grab.response.body)):
                 grab.response.save(task.path)
-                db[task.collection].update({'_id': task.obj['_id']},
-                                           {'$set': {task.path_field: task.path}})
+                db[task.collection].update(
+                    {'_id': task.obj['_id']},
+                    {'$set': {task.path_field: task.path}})
 
 
 def image_set_handler(grab, task):
@@ -34,14 +35,16 @@ def image_set_handler(grab, task):
             if imghdr.what(StringIO(grab.response.body)):
                 grab.response.save(task.path)
                 db[task.collection].update(
-                    {'_id': task.obj['_id'], ('%s.url' % task.set_field): task.image['url']},
+                    {'_id': task.obj['_id'],
+                     ('%s.url' % task.set_field): task.image['url'],
+                     },
                     {'$set': {('%s.$.path' % task.set_field): task.path}}
-                )   
+                )
 
 
 class MongoObjectImageData(Data):
-    def handler(self, url, collection, obj, path_field, base_dir, task_args=None,
-                grab_args=None, callback=None):
+    def handler(self, url, collection, obj, path_field, base_dir,
+                task_args=None, grab_args=None, callback=None):
         from database import db
         path = hashed_path(url, base_dir=base_dir)
         if os.path.exists(path):
@@ -82,7 +85,9 @@ class MongoObjectImageSetData(Data):
             if os.path.exists(path):
                 if path != image['path']:
                     db[collection].update(
-                        {'_id': obj['_id'], ('%s.url' % set_field): image['url']},
+                        {'_id': obj['_id'],
+                         ('%s.url' % set_field): image['url'],
+                         },
                         {'$set': {('%s.$.path' % set_field): path}})
             else:
                 kwargs = {}
@@ -107,4 +112,3 @@ class MongoObjectImageSetData(Data):
                     backup=g.dump_config(),
                     **kwargs
                 )
-

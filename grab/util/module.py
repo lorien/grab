@@ -1,25 +1,16 @@
 """
-The source code of `reraise` and `import_string` was copied from https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/utils.py
+The source code of `import_string` was copied from
+https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/utils.py
 """
 import logging
 import sys
+import six
 
 from grab.spider.base import Spider
 from grab.spider.error import SpiderInternalError
-from grab.util.py3k_support import * # noqa
 
-PY2 = not PY3K
 SPIDER_REGISTRY = {}
-string_types = (str, unicode)
 logger = logging.getLogger('grab.util.module')
-
-
-def reraise(tp, value, tb=None):
-    if sys.version_info < (3,):
-        from grab.util import py2x_support
-        py2x_support.reraise(tp, value, tb)
-    else:
-        raise value.with_traceback(tb)
 
 
 class ImportStringError(ImportError):
@@ -80,7 +71,7 @@ def import_string(import_name, silent=False):
     """
 
     # XXX: py3 review needed
-    assert isinstance(import_name, string_types)
+    assert isinstance(import_name, six.string_types)
     # force the import name to automatically convert to strings
     import_name = str(import_name)
     try:
@@ -92,9 +83,9 @@ def import_string(import_name, silent=False):
             return __import__(import_name)
         # __import__ is not able to handle unicode strings in the fromlist
         # if the module is a package
-        if PY2 and isinstance(obj, unicode):
+        if six.PY2 and isinstance(obj, six.text_type):
             obj = obj.encode('utf-8')
-        if PY3K and isinstance(obj, bytes):
+        if six.PY3 and isinstance(obj, six.binary_type):
             obj = obj.decode('utf-8')
         try:
             return getattr(__import__(module, None, None, [obj]), obj)
@@ -106,7 +97,7 @@ def import_string(import_name, silent=False):
             return sys.modules[modname]
     except ImportError as e:
         if not silent:
-            reraise(
+            six.reraise(
                 ImportStringError,
                 ImportStringError(import_name, e),
                 sys.exc_info()[2])
@@ -122,10 +113,10 @@ def build_spider_registry(config):
                     # mod = __import__
 
     SPIDER_REGISTRY.clear()
-    module_mapping = {}
 
     opt_modules = []
-    opt_modules = config['global'].get('spider_modules', deprecated_key='GRAB_SPIDER_MODULES',
+    opt_modules = config['global'].get('spider_modules',
+                                       deprecated_key='GRAB_SPIDER_MODULES',
                                        default=[])
 
     for path in opt_modules:
@@ -136,7 +127,7 @@ def build_spider_registry(config):
         try:
             mod = __import__(path, None, None, ['foo'])
         except ImportError as ex:
-            if not path in unicode(ex):
+            if path not in six.text_type(ex):
                 logging.error('', exc_info=ex)
         else:
             for key in dir(mod):
@@ -149,15 +140,17 @@ def build_spider_registry(config):
                             pass
                         else:
                             spider_name = val.get_spider_name()
-                            logger.debug('Module `%s`, found spider `%s` with name `%s`' % (
-                                path, val.__name__, spider_name))
+                            logger.debug(
+                                'Module `%s`, found spider `%s` '
+                                'with name `%s`' % (
+                                    path, val.__name__, spider_name))
                             if spider_name in SPIDER_REGISTRY:
+                                mod = SPIDER_REGISTRY[spider_name].__module__
                                 raise SpiderInternalError(
-                                    'There are two different spiders with the '\
-                                    'same name "%s". Modules: %s and %s' % (
-                                        spider_name,
-                                        SPIDER_REGISTRY[spider_name].__module__,
-                                        val.__module__))
+                                    'There are two different spiders with '
+                                    'the same name "%s". '
+                                    'Modules: %s and %s' % (
+                                        spider_name, mod, val.__module__))
                             else:
                                 SPIDER_REGISTRY[spider_name] = val
     return SPIDER_REGISTRY
@@ -166,7 +159,7 @@ def build_spider_registry(config):
 def load_spider_class(config, spider_name):
     if not SPIDER_REGISTRY:
         build_spider_registry(config)
-    if not spider_name in SPIDER_REGISTRY:
+    if spider_name not in SPIDER_REGISTRY:
         raise SpiderInternalError('Unknown spider: %s' % spider_name)
     else:
         return SPIDER_REGISTRY[spider_name]

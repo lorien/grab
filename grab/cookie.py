@@ -3,7 +3,8 @@ RTFM:
 
 * http://docs.python.org/2/library/cookielib.html#cookie-objects
 
-Some code got from https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
+Some code got from
+    https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 """
 from __future__ import absolute_import
 try:

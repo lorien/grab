@@ -35,13 +35,12 @@ watch
 
 MODULE_CONTENT_TPL = """
 from __future__ import absolute_import
-from tools.%(target_module)s import * # noqa # noqa
+from tools.%(target_module)s import *  # noqa
 import logging
 
 logging.error('Module `grab.tools.%(origin_module)s` is deprecated. '
               'Use `tools.%(target_module)s` module.')
-
-""".strip()
+""".lstrip()
 
 
 def generate_module_content(mod):

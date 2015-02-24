@@ -13,10 +13,10 @@ import zlib
 import logging
 import marshal
 import time
+import six
 
 from grab.response import Response
 from grab.cookie import CookieManager
-from grab.util.py3k_support import * # noqa
 
 logger = logging.getLogger('grab.spider.cache_backend.postgresql')
 
@@ -30,7 +30,7 @@ class CacheBackend(object):
         self.conn = psycopg2.connect(dbname=database, **kwargs)
         self.conn.set_isolation_level(ISOLATION_LEVEL_READ_COMMITTED)
         self.cursor = self.conn.cursor()
-        res = self.cursor.execute("""
+        self.cursor.execute("""
             SELECT
                 TABLE_NAME
             FROM
@@ -38,8 +38,7 @@ class CacheBackend(object):
             WHERE
                 TABLE_TYPE = 'BASE TABLE'
             AND
-                table_schema NOT IN ('pg_catalog', 'information_schema')"""
-        )
+                table_schema NOT IN ('pg_catalog', 'information_schema')""")
         found = False
         for row in self.cursor:
             if row[0] == 'cache':
@@ -74,7 +73,7 @@ class CacheBackend(object):
                 ts = int(time.time()) - timeout
                 query = " AND timestamp > %d" % ts
             # py3 hack
-            if PY3K:
+            if six.PY3:
                 sql = '''
                       SELECT data
                       FROM cache
@@ -86,7 +85,7 @@ class CacheBackend(object):
                       FROM cache
                       WHERE id = %%s %(query)s
                       ''' % {'query': query}
-            res = self.cursor.execute(sql, (_hash,))
+            self.cursor.execute(sql, (_hash,))
             row = self.cursor.fetchone()
             self.cursor.execute('COMMIT')
         if row:
@@ -167,26 +166,27 @@ class CacheBackend(object):
         self.cursor.execute('BEGIN')
         ts = int(time.time())
         # py3 hack
-        if PY3K:
+        if six.PY3:
             sql = '''
                   UPDATE cache SET timestamp = {0}, data = {1} WHERE id = {2};
                   INSERT INTO cache (id, timestamp, data)
-                  SELECT {2}, {0}, {1} WHERE NOT EXISTS (SELECT 1 FROM cache WHERE id = {2});
+                  SELECT {2}, {0}, {1} WHERE NOT EXISTS
+                    (SELECT 1 FROM cache WHERE id = {2});
                   '''
         else:
             sql = '''
                   UPDATE cache SET timestamp = %s, data = %s WHERE id = %s;
                   INSERT INTO cache (id, timestamp, data)
-                  SELECT %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM cache WHERE id = %s);
+                  SELECT %s, %s, %s WHERE NOT EXISTS
+                    (SELECT 1 FROM cache WHERE id = %s);
                   '''
-        res = self.cursor.execute(sql, (ts, psycopg2.Binary(data), _hash,
-                                        _hash, ts, psycopg2.Binary(data),
-                                        _hash))
+        self.cursor.execute(sql, (ts, psycopg2.Binary(data), _hash,
+                            _hash, ts, psycopg2.Binary(data), _hash))
         self.cursor.execute('COMMIT')
 
     def pack_database_value(self, val):
         dump = marshal.dumps(val)
-        return  zlib.compress(dump)
+        return zlib.compress(dump)
 
     def clear(self):
         self.cursor.execute('BEGIN')
@@ -205,7 +205,7 @@ class CacheBackend(object):
             else:
                 ts = int(time.time()) - timeout
                 query = " AND timestamp > %d" % ts
-            res = self.cursor.execute('''
+            self.cursor.execute('''
                 SELECT id
                 FROM cache
                 WHERE id = %%s %(query)s

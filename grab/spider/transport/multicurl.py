@@ -1,8 +1,8 @@
 import pycurl
 import select
+import six
 
 from grab.error import GrabTooManyRedirectsError
-from grab.util.py3k_support import * # noqa
 
 
 class MulticurlTransport(object):
@@ -15,7 +15,7 @@ class MulticurlTransport(object):
         self.connection_count = {}
 
         # Create curl instances
-        for x in xrange(self.thread_number):
+        for x in six.moves.range(self.thread_number):
             curl = pycurl.Curl()
             self.connection_count[id(curl)] = 0
             self.freelist.append(curl)
@@ -54,7 +54,7 @@ class MulticurlTransport(object):
         try:
             grab.prepare_request()
             grab.log_request()
-        except Exception as ex:
+        except Exception:
             # If some error occurred while processing the request arguments
             # then we should put curl object back to free list
             del self.registry[id(curl)]
@@ -91,19 +91,21 @@ class MulticurlTransport(object):
                 results.append((True, curl, None, None))
             for curl, ecode, emsg in fail_list:
                 # CURLE_WRITE_ERROR (23)
-                # An error occurred when writing received data to a local file, or
+                # An error occurred when writing received data
+                # to a local file, or
                 # an error was returned to libcurl from a write callback.
-                # This exception should be ignored if _callback_interrupted flag
-                # is enabled (this happens when nohead or nobody options enabeld)
+                # This exception should be ignored if _callback_interrupted
+                # flag
+                # is enabled (this happens when nohead or
+                # nobody options enabeld)
                 #
-                # Also this error is raised when curl receives KeyboardInterrupt
+                # Also this error is raised when curl receives
+                # KeyboardInterrupt
                 # while it is processing some callback function
                 # (WRITEFUNCTION, HEADERFUNCTIO, etc)
                 if ecode == 23:
                     if getattr(curl, '_callback_interrupted', None) is True:
                         curl._callback_interrupted = False
-                        ecode = None
-                        emsge = None
                         results.append((True, curl, None, None))
                     else:
                         results.append((False, curl, ecode, emsg))
@@ -116,7 +118,8 @@ class MulticurlTransport(object):
                 curl_id = id(curl)
                 task = self.registry[curl_id]['task']
                 grab = self.registry[curl_id]['grab']
-                grab_config_backup = self.registry[curl_id]['grab_config_backup']
+                grab_config_backup =\
+                    self.registry[curl_id]['grab_config_backup']
 
                 try:
                     grab.process_request_result()

@@ -1,4 +1,5 @@
 import csv
+import six
 
 from grab.export.csv_dumper import CSVDumper
 
@@ -8,8 +9,8 @@ class MysqlCSVDumper(CSVDumper):
     Difference from CSVDumper:
     * default `quoting` value is QUOTE_MINIMAL
     * default `write_header` value is False
-    * None values are converted to r'\N'
-    * \ symbols are converted to \\
+    * None values are converted to "\\N"
+    * \ symbols are converted to "\\"
     """
 
     def __init__(self, path, fields=None, write_header=False,
@@ -24,8 +25,8 @@ class MysqlCSVDumper(CSVDumper):
     def normalize_value(self, val):
         if val is None:
             return self.normalize_none_value(val)
-        elif isinstance(val, basestring):
-            if isinstance(val, basestring):
+        elif isinstance(val, six.string_types):
+            if isinstance(val, six.text_type):
                 val = val.encode('utf-8')
             val = val.replace('\\', '\\\\')
             return val

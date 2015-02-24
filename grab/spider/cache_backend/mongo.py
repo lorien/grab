@@ -19,10 +19,10 @@ try:
 except ImportError:
     from pymongo.binary import Binary
 import time
+import six
 
 from grab.response import Response
 from grab.cookie import CookieManager
-from grab.util.py3k_support import * # noqa
 
 logger = logging.getLogger('grab.spider.cache_backend.mongo')
 
@@ -47,7 +47,7 @@ class CacheBackend(object):
         return self.db.cache.find_one(query)
 
     def build_hash(self, url):
-        if isinstance(url, unicode):
+        if isinstance(url, six.text_type):
             utf_url = url.encode('utf-8')
         else:
             utf_url = url
@@ -109,7 +109,7 @@ class CacheBackend(object):
         try:
             self.db.cache.save(item, safe=True)
         except Exception as ex:
-            if 'document too large' in unicode(ex):
+            if 'document too large' in six.text_type(ex):
                 logging.error('Document too large. It was not saved into mongo'
                               ' cache. Url: %s' % url)
             else:

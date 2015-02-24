@@ -1,4 +1,5 @@
 import csv
+import six
 
 
 class CSVDumper(object):
@@ -18,11 +19,11 @@ class CSVDumper(object):
         if self.fields is None:
             raise Exception('Can not use `add_record` if `fields` is not set')
         for key in rec:
-            if not key in ignore_fields:
-                if not key in self.fields:
+            if key not in ignore_fields:
+                if key not in self.fields:
                     raise Exception('Unknown record key: %s' % key)
         for key in self.fields:
-            if not key in rec:
+            if key not in rec:
                 raise Exception('Missing key in record: %s' % key)
         row = [rec[x] for x in self.fields]
         self.writer.writerow(self.normalize_row(row))
@@ -39,7 +40,7 @@ class CSVDumper(object):
     def normalize_value(self, val):
         if val is None:
             return self.normalize_none_value(val)
-        elif isinstance(val, unicode):
+        elif isinstance(val, six.text_type):
             return val.encode('utf-8')
         else:
             return str(val)

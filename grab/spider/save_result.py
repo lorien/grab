@@ -20,8 +20,8 @@ def save_result(func):
 
             def dump_spider_stats(spider):
                 now = time.time()
-                if not hasattr(spider, '_log_task_timer') \
-                        or now - spider._log_task_timer  > 60:
+                if (not hasattr(spider, '_log_task_timer')
+                        or now - spider._log_task_timer > 60):
                     spider._log_task_timer = now
                     elapsed = datetime.now() - task.start_time
                     elapsed_time = (elapsed.days * 3600 * 24) + elapsed.seconds
@@ -35,7 +35,7 @@ def save_result(func):
 
             try:
                 func_res = func(spider_name, *args, **kwargs)
-            except Exception as ex:
+            except Exception:
                 task.error_traceback = format_exc()
                 task.is_ok = False
                 raise
@@ -46,6 +46,7 @@ def save_result(func):
                 task.is_done = True
                 task.end_time = datetime.now()
                 elapsed = task.end_time - task.start_time
-                task.elapsed_time = (elapsed.days * 3600 * 24) + elapsed.seconds
+                task.elapsed_time = ((elapsed.days * 3600 * 24) +
+                                     elapsed.seconds)
                 task.save()
     return decorated

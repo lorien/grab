@@ -1,14 +1,15 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
+from __future__ import absolute_import
 import logging
 import random
-import requests 
+import requests
+import six
 
 from grab.error import GrabError, GrabMisuseError
 from grab.response import Response
 from tools.http import urlencode, normalize_http_values, normalize_unicode
-from grab.util.py3k_support import * # noqa
 
 logger = logging.getLogger('grab.transport.requests')
 
@@ -32,7 +33,7 @@ class RequestsTransport(object):
         """
         Setup curl instance with values from ``grab.config``.
         """
-        
+
         # Accumulate all request options into `self.requests_config`
         self.requests_config = {
             'headers': {},
@@ -41,7 +42,7 @@ class RequestsTransport(object):
             'proxy': None,
         }
 
-        if isinstance(grab.config['url'], unicode):
+        if isinstance(grab.config['url'], six.text_type):
             grab.config['url'] = grab.config['url'].encode('utf-8')
 
         self.requests_config['url'] = grab.config['url']
@@ -49,7 +50,8 @@ class RequestsTransport(object):
         # self.curl.setopt(pycurl.URL, url)
         # self.curl.setopt(pycurl.FOLLOWLOCATION, 1)
         # self.curl.setopt(pycurl.MAXREDIRS, 5)
-        # self.curl.setopt(pycurl.CONNECTTIMEOUT, grab.config['connect_timeout'])
+        # self.curl.setopt(pycurl.CONNECTTIMEOUT,
+        #                  grab.config['connect_timeout'])
         # self.curl.setopt(pycurl.TIMEOUT, grab.config['timeout'])
         # self.curl.setopt(pycurl.NOSIGNAL, 1)
         # self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
@@ -59,7 +61,8 @@ class RequestsTransport(object):
         # TODO: move to base class
         if grab.config['user_agent'] is None:
             if grab.config['user_agent_file'] is not None:
-                lines = open(grab.config['user_agent_file']).read().splitlines()
+                lines = open(grab.config['user_agent_file']).read()\
+                                                            .splitlines()
                 grab.config['user_agent'] = random.choice(lines)
 
         # If value is None then set empty string
@@ -69,7 +72,8 @@ class RequestsTransport(object):
         # in all other transports too
         if not grab.config['user_agent']:
             grab.config['user_agent'] = ''
-        self.requests_config['headers']['User-Agent'] = grab.config['user_agent']
+        self.requests_config['headers']['User-Agent'] =\
+            grab.config['user_agent']
 
         self.requests_config['method'] = grab.request_method.lower()
 
@@ -77,10 +81,10 @@ class RequestsTransport(object):
             if grab.config['multipart_post']:
                 raise NotImplementedError
             elif grab.config['post']:
-                if isinstance(grab.config['post'], basestring):
+                if isinstance(grab.config['post'], six.string_types):
                     # bytes-string should be posted as-is
                     # unicode should be converted into byte-string
-                    if isinstance(grab.config['post'], unicode):
+                    if isinstance(grab.config['post'], six.text_type):
                         post_data = normalize_unicode(grab.config['post'])
                     else:
                         post_data = grab.config['post']
@@ -91,7 +95,8 @@ class RequestsTransport(object):
                 # self.curl.setopt(pycurl.POSTFIELDS, post_data)
         # elif grab.request_method == 'PUT':
             # self.curl.setopt(pycurl.PUT, 1)
-            # self.curl.setopt(pycurl.READFUNCTION, StringIO(grab.config['post']).read) 
+            # self.curl.setopt(pycurl.READFUNCTION,
+            #                  StringIO(grab.config['post']).read)
         elif grab.request_method == 'DELETE':
             pass
             # self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
@@ -102,7 +107,6 @@ class RequestsTransport(object):
             pass
             # self.curl.setopt(pycurl.HTTPGET, 1)
 
-        
         headers = grab.config['common_headers']
         if grab.config['headers']:
             headers.update(grab.config['headers'])
@@ -125,22 +129,25 @@ class RequestsTransport(object):
             # self.curl.setopt(pycurl.REFERER, str(grab.config['referer']))
 
         # if grab.config['proxy']:
-            # self.curl.setopt(pycurl.PROXY, str(grab.config['proxy'])) 
+            # self.curl.setopt(pycurl.PROXY, str(grab.config['proxy']))
         # else:
             # self.curl.setopt(pycurl.PROXY, '')
 
         # if grab.config['proxy_userpwd']:
-            # self.curl.setopt(pycurl.PROXYUSERPWD, grab.config['proxy_userpwd'])
+            # self.curl.setopt(pycurl.PROXYUSERPWD,
+            #                  grab.config['proxy_userpwd'])
 
         if grab.config['proxy']:
             self.requests_config['proxy'] = grab.config['proxy']
 
         if grab.config['proxy_userpwd']:
-            raise GrabMisuseError('requests transport does not support proxy authentication')
+            raise GrabMisuseError('requests transport does not '
+                                  'support proxy authentication')
 
         if grab.config['proxy_type']:
             if grab.config['proxy_type'] != 'http':
-                raise GrabMisuseError('requests transport supports only proxies of http type')
+                raise GrabMisuseError('requests transport supports '
+                                      'only proxies of http type')
 
     def request(self):
         try:
@@ -157,7 +164,7 @@ class RequestsTransport(object):
             self._requests_response = func(
                 cfg['url'], headers=cfg['headers'], **kwargs)
         except Exception as ex:
-            raise GrabError(0, unicode(ex))
+            raise GrabError(0, six.text_type(ex))
 
     def prepare_response(self, grab):
         # self.response.head = ''.join(self.response_head_chunks)

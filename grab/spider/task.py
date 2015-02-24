@@ -16,7 +16,7 @@ class Task(BaseTask):
 
     def __init__(self, name=None, url=None, grab=None, grab_config=None,
                  priority=None, priority_is_custom=True,
-                 network_try_count=0, task_try_count=0, 
+                 network_try_count=0, task_try_count=0,
                  disable_cache=False, refresh_cache=False,
                  valid_status=[], use_proxylist=True,
                  cache_timeout=None, delay=0,
@@ -113,8 +113,8 @@ class Task(BaseTask):
                                     'used together')
 
         if grab is not None and grab_config is not None:
-            raise SpiderMisuseError('Options grab and grab_config could not be '
-                                    'used together')
+            raise SpiderMisuseError(
+                'Options grab and grab_config could not be used together')
 
         if grab:
             self.setup_grab_config(grab.dump_config())
@@ -177,24 +177,26 @@ class Task(BaseTask):
 
         # Reset some task properties if they have not
         # been set explicitly in kwargs
-        if not 'network_try_count' in kwargs:
+        if 'network_try_count' not in kwargs:
             task.network_try_count = 0
-        if not 'task_try_count' in kwargs:
+        if 'task_try_count' not in kwargs:
             task.task_try_count = self.task_try_count + 1
-        if not 'refresh_cache' in kwargs:
+        if 'refresh_cache' not in kwargs:
             task.refresh_cache = False
-        if not 'disable_cache' in kwargs:
+        if 'disable_cache' not in kwargs:
             task.disable_cache = False
 
         if kwargs.get('url') is not None and kwargs.get('grab') is not None:
             raise SpiderMisuseError('Options url and grab could not be '
                                     'used together')
 
-        if kwargs.get('url') is not None and kwargs.get('grab_config') is not None:
+        if (kwargs.get('url') is not None and
+                kwargs.get('grab_config') is not None):
             raise SpiderMisuseError('Options url and grab_config could not '
                                     'be used together')
 
-        if kwargs.get('grab') is not None and kwargs.get('grab_config') is not None:
+        if (kwargs.get('grab') is not None and
+                kwargs.get('grab_config') is not None):
             raise SpiderMisuseError('Options grab and grab_config could not '
                                     'be used together')
 
@@ -261,4 +263,3 @@ def inline_task(f):
         origin_task_generator = f(self, grab, task)
         self.handler_for_inline_task(None, origin_task_generator)
     return wrap
-

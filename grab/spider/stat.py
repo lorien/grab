@@ -6,9 +6,9 @@ from tools.encoding import smart_str
 import os
 from contextlib import contextmanager
 import json
+import six
 
 from tools import metric
-from grab.util.py3k_support import * # noqa
 
 logger = logging.getLogger('grab.spider.stat')
 
@@ -44,7 +44,7 @@ class SpiderStat(object):
         with open(path, 'wb') as out:
             lines = []
             for item in self.items.get(list_name, []):
-                if isinstance(item, basestring):
+                if isinstance(item, six.string_types):
                     lines.append(smart_str(item))
                 else:
                     lines.append(json.dumps(item))
@@ -63,7 +63,8 @@ class SpiderStat(object):
         out.append('  %s' % '\n  '.join('%s: %s' % x for x in items))
 
         if 'download-size' in self.counters:
-            out.append('Network download: %s' % metric.format_traffic_value(self.counters['download-size']))
+            out.append('Network download: %s' % metric.format_traffic_value(
+                self.counters['download-size']))
         if hasattr(self.taskq, 'qsize'):
             out.append('Queue size: %d' % self.taskq.qsize())
         else:
@@ -121,7 +122,7 @@ class SpiderStat(object):
             return 0
         else:
             total = now - start
-            if not key in self.timers:
+            if key not in self.timers:
                 self.timers[key] = 0
             self.timers[key] += total
             del self.time_points[start_key]

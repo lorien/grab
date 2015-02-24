@@ -18,7 +18,8 @@ def setup_arg_parser(parser):
                         help='Number of network threads')
     parser.add_argument('--slave', action='store_true', default=False,
                         help='Enable the slave-mode')
-    parser.add_argument('-n', '--network-logs', action='store_true', default=False,
+    parser.add_argument('-n', '--network-logs', action='store_true',
+                        default=False,
                         help='Dump to console details about network requests')
     parser.add_argument('--save-result', action='store_true', default=False,
                         help='Save crawling state to database')
@@ -29,7 +30,8 @@ def setup_arg_parser(parser):
     parser.add_argument('--settings-module', type=str, default='settings')
 
 
-def get_lock_key(spider_name, lock_key=None, ignore_lock=False, slave=False, **kwargs):
+def get_lock_key(spider_name, lock_key=None, ignore_lock=False,
+                 slave=False, **kwargs):
     # --ignore-lock has highest precedence
     if ignore_lock:
         return None
@@ -51,7 +53,7 @@ def get_lock_key(spider_name, lock_key=None, ignore_lock=False, slave=False, **k
 @save_result
 def main(spider_name, thread_number=None, slave=False,
          settings_module='settings', network_logs=False,
-         disable_proxy=False, ignore_lock=False, 
+         disable_proxy=False, ignore_lock=False,
          disable_report=False,
          *args, **kwargs):
     default_logging(propagate_network_logger=network_logs)
@@ -71,8 +73,6 @@ def main(spider_name, thread_number=None, slave=False,
         thread_number = \
             int(spider_config.get('thread_number',
                                   deprecated_key='GRAB_THREAD_NUMBER'))
-
-    stat_task_object = kwargs.get('stat_task_object', None)
 
     bot = spider_class(
         thread_number=thread_number,

@@ -1,0 +1,13 @@
+lxml
+pycurl
+selection
+tools
+cssselect
+tornado
+pyquery
+django
+coverage
+coveralls
+flake8
+bumpversion
+test_server
