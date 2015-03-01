@@ -28,6 +28,7 @@ GRAB_TEST_LIST = (
     #'test.case.grab_charset',
     # Network
     'test.case.grab_get_request',
+    'test.case.grab_request',
     'test.case.grab_post_request',
     'test.case.grab_user_agent',
     'test.case.grab_cookies',
