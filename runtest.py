@@ -27,6 +27,7 @@ GRAB_TEST_LIST = (
     # Network
     'test.grab_get_request',
     'test.grab_post_request',
+    'test.grab_request',
     'test.grab_user_agent',
     'test.grab_cookies',
     # Refactor

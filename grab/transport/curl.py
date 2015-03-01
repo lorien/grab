@@ -291,7 +291,7 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read)
             self.curl.setopt(pycurl.INFILESIZE, len(data))
         elif grab.request_method == 'DELETE':
-            self.curl.setopt(pycurl.CUSTOMREQUEST, 'delete')
+            self.curl.setopt(pycurl.CUSTOMREQUEST, 'DELETE')
         elif grab.request_method == 'HEAD':
             self.curl.setopt(pycurl.NOBODY, 1)
         elif grab.request_method == 'UPLOAD':
