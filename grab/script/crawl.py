@@ -27,6 +27,8 @@ def setup_arg_parser(parser):
                         help='Disable proxy servers')
     parser.add_argument('--ignore-lock', action='store_true', default=False)
     parser.add_argument('--disable-report', action='store_true', default=False)
+    parser.add_argument('--disable-default-logs', action='store_true',
+                        default=False)
     parser.add_argument('--settings-module', type=str, default='settings')
 
 
@@ -80,8 +82,13 @@ def main(spider_name, thread_number=None, slave=False,
          settings_module='settings', network_logs=False,
          disable_proxy=False, ignore_lock=False, 
          disable_report=False,
+         disable_default_logs=False,
          *args, **kwargs):
-    default_logging(propagate_network_logger=network_logs)
+    if disable_default_logs:
+        default_logging(propagate_network_logger=network_logs,
+                        grab_log=None, network_log=None)
+    else:
+        default_logging(propagate_network_logger=network_logs)
 
     root_config = build_root_config(settings_module)
     spider_class = load_spider_class(root_config, spider_name)
