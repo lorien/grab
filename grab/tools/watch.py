@@ -59,7 +59,7 @@ class Watcher(object):
                             break
             """
             wait_time = 1
-            for x in xrange(10):
+            for x in range(10):
                 os.kill(self.child, signal.SIGKILL)
                 if not os.path.exists('/proc/%d' % self.child):
                     break
