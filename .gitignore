@@ -40,4 +40,5 @@ docs/libpeerconnection.log
 /.env/
 /.py27/
 /.py34/
+/docs/en/build/
 /build/

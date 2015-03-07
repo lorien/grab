@@ -1,20 +1,24 @@
 Grab documentation
 ==================
 
-Grab is a python framework for building site scrapers. The Grab library consists of two main interfaces:
+Grab is a python framework for building web scrapers. The Grab consists of two
+main parts:
 
-1) Grab. The main interface to configure network requests and to handle network responses.
-2) Grab::Spider. A more complex interface to build asynchronous site scrapers. The Spider interface has many commonalities with the Scrapy interface. The main benefits of Spider are an asynchronous concurrent request engine, and an internal design that forces you to organize scraping logic in to well structured blocks.
+1) Grab - API to create single network request and process result of response.
+2) Grab::Spider - API to create crawler i.e. class that contains methods (handlers)
+to process each spawned network request. Grab:Spider allows you to spawn
+asynchronous network requests.
 
-When to consider using the Grab API:
+When to use Grab API:
 
-* When you want to submit a single network request and process the response
+* If you want just to send one single network request and process the response
 * In most cases when you think to use urllib, urllib2, pycurl or requests libs.
 
-When Grab::Spider will probably be useful:
+When to use Grab:Spider API:
 
-* When you need to extract data from a web site with multiple concurrent web workers
-* In most cases when you are thinking of using scrapy.
+* If you want to extract data from a web site and you need to process pages
+  of different types and you need to spawn multiple parallel network requests.
+* In most cases when you think about of using scrapy.
 
 Grab is not only a tool to build network requests and download network responses, it is also a tool to handle the data of network responses and extract information you need. Grab provides a flexible API to query parts of the DOM trees of HTML documents.
 
@@ -60,33 +64,3 @@ Base Grab Interface
     api_grab_base
     api_grab_error
     api_grab_cookie
-
-
-Tools Package
-~~~~~~~~~~~~~
-
-.. toctree::
-    :maxdepth: 3
-
-    api_tools_html
-    api_tools_work
-    api_tools_pwork
-    api_tools_lock
-    api_tools_logs
-    api_tools_files
-    api_tools_lxml_tools
-    api_tools_rex
-    api_tools_text
-    api_tools_http
-    api_tools_content
-    api_tools_control
-    api_tools_debug
-    api_tools_encoding
-    api_tools_feed
-    api_tools_metric
-    api_tools_parser
-    api_tools_russian
-    api_tools_progress
-    api_tools_user_agent
-    api_tools_watch
-    api_tools_system
