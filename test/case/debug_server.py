@@ -24,10 +24,18 @@ class TestTornadoServer(TestCase):
         self.assertEqual(SERVER.REQUEST['args']['bar'], '1')
 
 
-    def test_post(self):
+    def test_response_post(self):
         SERVER.RESPONSE['post'] = b'foo'
         data = urlopen(SERVER.BASE_URL, b'THE POST').read()
         self.assertEqual(data, SERVER.RESPONSE['post'])
+
+    def test_request_post(self):
+        urlopen(SERVER.BASE_URL, b'DATA').read()
+        self.assertEqual(SERVER.REQUEST['post'], b'DATA')
+
+        SERVER.reset()
+        urlopen(SERVER.BASE_URL).read()
+        self.assertEqual(SERVER.REQUEST['post'], b'')
 
     def test_callback(self):
         class ContentGenerator():

@@ -141,3 +141,14 @@ class TestPostFeature(TestCase):
         g.request()
         self.assertEqual(SERVER.REQUEST['method'], 'PATCH')
         self.assertEqual(SERVER.REQUEST['headers']['content-length'], '3')
+
+    def test_empty_post(self):
+        g = build_grab()
+        g.setup(method='post')
+        g.go(SERVER.BASE_URL)
+        self.assertEqual(SERVER.REQUEST['method'], 'POST')
+        self.assertEqual(SERVER.REQUEST['post'], b'')
+        self.assertEqual(SERVER.REQUEST['headers']['content-length'], '0')
+
+        g.go(SERVER.BASE_URL, post='DATA')
+        self.assertEqual(SERVER.REQUEST['headers']['content-length'], '4')

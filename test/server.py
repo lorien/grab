@@ -28,6 +28,7 @@ class ServerState(object):
             'path': None,
             'method': None,
             'charset': 'utf-8',
+            'post': None,
         })
         self.RESPONSE.update({
             'get': '',
