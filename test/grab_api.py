@@ -4,6 +4,8 @@ from grab.base import reset_request_counter
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 import six
+import tempfile
+import os
 
 
 class GrabApiTestCase(BaseGrabTestCase):
@@ -22,8 +24,10 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.server.response['get.data'] = 'Moon'
         g.go(self.server.get_url())
         self.assertTrue(b'Moon' in g.response.body)
-        g2 = g.clone()
-        self.assertTrue(b'Moon' in g2.response.body)
+        self.server.response['post.data'] = 'Foo'
+        g2 = g.clone(method='post')
+        g2.go(self.server.get_url())
+        self.assertTrue(b'Foo' in g2.response.body)
 
     def test_empty_clone(self):
         g = build_grab()
@@ -99,3 +103,23 @@ class GrabApiTestCase(BaseGrabTestCase):
 
         g.go(self.server.get_url())
         self.assertEqual(g.request_counter, 13)
+
+    def test_download(self):
+        fd, path = tempfile.mkstemp()
+        g = build_grab()
+        self.server.response['get.data'] = 'FOO'
+        length = g.download(self.server.get_url(), path)
+        self.assertEqual(3, length)
+        os.unlink(path)
+
+    def test_follow_refresh_option(self):
+        def handler():
+            response = "<meta http-equiv='refresh' content='0;url= %s'>" % \
+                       self.server.get_url()
+            yield response.encode('ascii')
+            yield b'OK'
+
+        self.server.response['data'] = handler()
+        g = build_grab(follow_refresh=True)
+        g.go(self.server.get_url())
+        self.assertEqual(g.response.body, b'OK')
