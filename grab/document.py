@@ -12,21 +12,16 @@ import logging
 import email
 import os
 import json
-try:
-    from urlparse import urlsplit, parse_qs
-except ImportError:
-    from urllib.parse import urlsplit, parse_qs
+
+
 import tempfile
 import webbrowser
 import codecs
 from datetime import datetime
 import time
-try:
-    from urlparse import urljoin
-except ImportError:
-    from urllib.parse import urljoin
 from selection import XpathSelector
 import six
+from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
 
 import tools.encoding
 from grab.cookie import CookieManager

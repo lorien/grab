@@ -1,5 +1,6 @@
 # coding: utf-8
 from grab import GrabMisuseError
+from grab.error import GrabTooManyRedirectsError
 from grab.base import reset_request_counter
 from test.util import build_grab
 from test.util import BaseGrabTestCase
@@ -117,9 +118,22 @@ class GrabApiTestCase(BaseGrabTestCase):
             response = "<meta http-equiv='refresh' content='0;url= %s'>" % \
                        self.server.get_url()
             yield response.encode('ascii')
+            yield response.encode('ascii')
+            yield response.encode('ascii')
             yield b'OK'
 
         self.server.response['data'] = handler()
         g = build_grab(follow_refresh=True)
         g.go(self.server.get_url())
         self.assertEqual(g.response.body, b'OK')
+        self.server.response['data'] = handler()
+        g.setup(redirect_limit=1)
+        self.assertRaises(GrabTooManyRedirectsError, g.go,
+                          self.server.get_url())
+
+    def test_find_base_url(self):
+        g = build_grab()
+        self.server.response['get.data'] = '<base href="http://foo/bar/">'
+        g.go(self.server.get_url())
+        absolute_url = g.make_url_absolute('/foobar', resolve_base=True)
+        self.assertEqual(absolute_url, 'http://foo/foobar')
