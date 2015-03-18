@@ -3,7 +3,6 @@
 This test fails in py3.3 environment because `grab.response.body`
 contains <str>, but it should contains <bytes>
 """
-from grab import Grab
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 

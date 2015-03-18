@@ -4,6 +4,7 @@ to dump content of dictionary in human acceptable representation.
 """
 import six
 
+
 def repr_value(val):
     if isinstance(val, six.text_type):
         return val.encode('utf-8')

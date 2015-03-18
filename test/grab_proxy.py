@@ -80,10 +80,13 @@ class TestProxy(BaseGrabTestCase):
 
     def test_change_proxy(self):
         g = build_grab()
+        g.change_proxy()
+        self.assertEqual(g.config['proxy'], None)
+
+        g = build_grab()
         with open(TMP_FILE, 'w') as out:
             for x in six.moves.range(10):
                 out.write('server-%d:777\n' % x)
-
         g.load_proxylist(TMP_FILE, 'text_file', auto_init=False,
                          auto_change=False)
         self.assertEqual(g.config['proxy'], None)

@@ -383,7 +383,7 @@ class CurlTransport(object):
             http_only = cookie_domain.startswith('#httponly_')
             if http_only:
                 cookie_domain = cookie_domain.replace('#httponly_', '')
-            if not cookie_domain or host_nowww in cookie_domain:
+            if not cookie_domain or cookie_domain in host_nowww:
                 encoded = encode_cookies(
                     {cookie.name: cookie.value},
                     join=True, charset=grab.config['charset'])

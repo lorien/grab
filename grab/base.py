@@ -13,10 +13,7 @@ from copy import copy, deepcopy
 import threading
 import itertools
 import collections
-try:
-    from urlparse import urljoin
-except ImportError:
-    from urllib.parse import urljoin
+from six.moves.urllib.parse import urljoin
 import email
 from datetime import datetime
 import weakref
