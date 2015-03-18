@@ -41,7 +41,7 @@ def process_command_line():
     args, trash = parser.parse_known_args()
 
     config = build_root_config()
-    if config and config['GRAB_DJANGO_SETTINGS']:
+    if config and config.get('GRAB_DJANGO_SETTINGS'):
         os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
         # Turn off DEBUG to prevent memory leaks
         from django.conf import settings
