@@ -28,7 +28,6 @@ from grab.spider.pattern import SpiderPattern
 from grab.spider.stat import SpiderStat
 from grab.spider.transport.multicurl import MulticurlTransport
 from grab.proxylist import ProxyList
-from grab.spider.command_controller import CommandController
 from grab.util.misc import camel_case_to_underscore
 from tools.encoding import make_str, make_unicode
 
@@ -230,8 +229,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
         # FIXIT: REMOVE
         self.dump_spider_stats = None
-
-        self.controller = CommandController(self)
 
         # snapshots contains information about spider's state
         # for each 10 seconds interval
@@ -929,9 +926,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 # info about current scraping process
                 if self.dump_spider_stats:
                     self.dump_spider_stats(self)
-
-                if self.controller.enabled:
-                    self.controller.process_commands()
 
                 if not self.ng:
                     # NG
