@@ -5,7 +5,6 @@ from argparse import ArgumentParser
 from grab.util.config import build_spider_config, build_root_config
 from grab.util.module import load_spider_class
 from tools.logs import default_logging
-from grab.spider.save_result import save_result
 from tools.files import clear_directory
 from tools.encoding import make_str
 
@@ -21,8 +20,6 @@ def setup_arg_parser(parser):
     parser.add_argument('-n', '--network-logs', action='store_true',
                         default=False,
                         help='Dump to console details about network requests')
-    parser.add_argument('--save-result', action='store_true', default=False,
-                        help='Save crawling state to database')
     parser.add_argument('--disable-proxy', action='store_true', default=False,
                         help='Disable proxy servers')
     parser.add_argument('--ignore-lock', action='store_true', default=False)
@@ -50,7 +47,6 @@ def get_lock_key(spider_name, lock_key=None, ignore_lock=False,
     return lock_key
 
 
-@save_result
 def main(spider_name, thread_number=None, slave=False,
          settings_module='settings', network_logs=False,
          disable_proxy=False, ignore_lock=False,
