@@ -51,6 +51,8 @@ GRAB_TEST_LIST = (
     'test.util_module',
     # *** grab.export
     'test.export_mysql_dumper',
+    'test.tools_deprecated',
+    'test.item_deprecated',
 )
 
 GRAB_EXTRA_TEST_LIST = (
