@@ -11,7 +11,7 @@ services:
   - mongodb
 
 install:
-  - pip install -r requirements_travis.txt
+  - pip install -r requirements_dev.txt
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
   - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
   - python setup.py develop
