@@ -2,6 +2,7 @@ import six
 
 from grab.spider import Spider, Task
 from test.util import BaseGrabTestCase
+from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
 
 
 class SpiderQueueMixin(object):
@@ -75,11 +76,11 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
     _backend = 'mongo'
 
     def setup_queue(self, bot):
-        bot.setup_queue(backend='mongo', database='queue_test')
+        bot.setup_queue(backend='mongo', **MONGODB_CONNECTION)
 
 
 class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
     _backend = 'redis'
 
     def setup_queue(self, bot):
-        bot.setup_queue(backend='redis')
+        bot.setup_queue(backend='redis', **REDIS_CONNECTION)

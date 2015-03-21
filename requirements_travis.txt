@@ -16,3 +16,4 @@ item
 selenium
 pymongo
 mysqlclient
+redis

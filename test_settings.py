@@ -8,6 +8,8 @@ MYSQL_CONNECTION = {
     'passwd': 'web-**',
 }
 
+REDIS_CONNECTION = {}
+
 try:
     from test_settings_local import *
 except ImportError:
