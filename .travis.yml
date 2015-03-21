@@ -12,10 +12,18 @@ install:
   - python setup.py develop
 
 script:
-    - coverage run --source=grab runtest.py --test-all --extra --backend-mongo
+    # Override test settings with travis settings 
+    - cp travis_settings.py test_settings_local.py
+    # Run tests and find out the test coverage
+    - coverage run --source=grab runtest.py --test-all --extra --backend-mongo --backend-mysql
 
 after_success:
   - coveralls
 
 services:
   - mongodb
+
+# This reportedly works around an issue downloading packages from pypi on
+# travis.  Consider removing this after the underlying issue is fixed.
+# https://github.com/travis-ci/travis-ci/issues/2389
+sudo: false
