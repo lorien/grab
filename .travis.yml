@@ -11,6 +11,9 @@ install:
   - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
   - python setup.py develop
 
+before_script:
+  - mysql -e 'create database spider_test'
+
 script:
     # Override test settings with travis settings 
     - cp travis_settings.py test_settings_local.py
