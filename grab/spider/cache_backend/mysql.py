@@ -23,6 +23,7 @@ from grab.cookie import CookieManager
 
 logger = logging.getLogger('grab.spider.cache_backend.mysql')
 
+"""
 # py3 hack
 if six.PY3:
     import re
@@ -31,6 +32,7 @@ if six.PY3:
     RE_HEXS = re.compile('0x[a-fA-F0-9]{2}')
 
     def _str_to_hexbytes(val):
+        val = val.decode('utf-8')
         val = val.replace('\\x', '0x')
         # Finds all hexadecimals
         xs = re.findall(RE_HEXS, val)
@@ -47,6 +49,7 @@ if six.PY3:
 
     def _hexbytes_to_str(val):
         return str(val)[2:-1]
+"""
 
 
 class CacheBackend(object):
@@ -98,7 +101,7 @@ class CacheBackend(object):
                 sql = '''
                       SELECT data
                       FROM cache
-                      WHERE id = x{0} %(query)s
+                      WHERE id = x%%s %(query)s
                       ''' % {'query': query}
             else:
                 sql = '''
@@ -112,10 +115,12 @@ class CacheBackend(object):
         if row:
             data = row[0]
             # py3 hack
+            """
             if six.PY3:
                 # A temporary solution for MySQLdb (Py3k port)
                 # [https://github.com/davispuh/MySQL-for-Python-3]
                 data = _str_to_hexbytes(data)
+            """
             return self.unpack_database_value(data)
         else:
             return None
@@ -187,19 +192,21 @@ class CacheBackend(object):
     def set_item(self, url, item):
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
+        """
         # py3 hack
         if six.PY3:
             # A temporary solution for MySQLdb (Py3k port)
             # [https://github.com/davispuh/MySQL-for-Python-3]
             data = _hexbytes_to_str(data)
+        """
         self.cursor.execute('BEGIN')
         ts = int(time.time())
         # py3 hack
         if six.PY3:
             sql = '''
                   INSERT INTO cache (id, timestamp, data)
-                  VALUES(x{0}, {1}, {2})
-                  ON DUPLICATE KEY UPDATE timestamp = {3}, data = {4}
+                  VALUES(x%s, %s, %s)
+                  ON DUPLICATE KEY UPDATE timestamp = %s, data =%s 
                   '''
         else:
             sql = '''

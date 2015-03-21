@@ -1,3 +1,4 @@
+# coding: utf-8
 from grab.spider import Spider, Task
 
 from test.util import BaseGrabTestCase
@@ -16,7 +17,7 @@ class ContentGenerator(object):
         self.counter += 1
         return """
         <head>
-            <title>ABC</title>
+            <title>ФЫВА</title>
         </head>
         <body>
             <a href="%(get_url())s">link #1</a>
