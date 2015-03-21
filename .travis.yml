@@ -12,7 +12,10 @@ install:
   - python setup.py develop
 
 script:
-  - coverage run --source=grab runtest.py --test-all --extra
+    - coverage run --source=grab runtest.py --test-all --extra --mongo-backend
 
 after_success:
   - coveralls
+
+services:
+  - mongodb

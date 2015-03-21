@@ -14,3 +14,4 @@ test_server
 feedparser
 item
 selenium
+pymongo
