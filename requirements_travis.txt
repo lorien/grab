@@ -11,3 +11,5 @@ coveralls
 flake8
 bumpversion
 test_server
+feedparser
+item

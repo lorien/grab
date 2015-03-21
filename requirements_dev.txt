@@ -16,6 +16,7 @@ flake8
 bumpversion
 test_server
 feedparser
+item
 
 # Python 3.x mysql package
 # https://github.com/davispuh/MySQL-for-Python-3/archive/master.zip
