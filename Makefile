@@ -17,7 +17,7 @@ coverage:
 
 coverage_full:
 	coverage erase
-	coverage run --source=grab ./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis
+	coverage run --source=grab ./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis --backend-postgres
 	coverage report -m
 
 clean:
