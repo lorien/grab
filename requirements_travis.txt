@@ -13,3 +13,4 @@ bumpversion
 test_server
 feedparser
 item
+selenium

@@ -51,13 +51,13 @@ GRAB_TEST_LIST = (
     'test.util_module',
     # *** grab.export
     'test.export_mysql_dumper',
-    'test.tools_deprecated',
 )
 
 GRAB_EXTRA_TEST_LIST = (
     'test.grab_django',
     'test.ext_pyquery',
     'test.item_deprecated',
+    'test.tools_deprecated',
 )
 
 # ************
