@@ -2,7 +2,8 @@
 from grab.spider import Spider, Task
 
 from test.util import BaseGrabTestCase
-from test_settings import MONGODB_CONNECTION, MYSQL_CONNECTION
+from test_settings import (MONGODB_CONNECTION, MYSQL_CONNECTION,
+                           POSTGRESQL_CONNECTION)
 
 
 class ContentGenerator(object):
@@ -148,4 +149,4 @@ class SpiderPostgresqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
     _backend = 'postgresql'
 
     def setup_cache(self, bot):
-        bot.setup_cache(backend='postgresql', database='spider_test')
+        bot.setup_cache(backend='postgresql', **POSTGRESQL_CONNECTION)

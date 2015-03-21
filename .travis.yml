@@ -18,6 +18,7 @@ install:
 
 before_script:
   - mysql -e 'create database spider_test'
+  - psql -c 'create database spider_test' -U postgres
 
 script:
     # Override test settings with travis settings 

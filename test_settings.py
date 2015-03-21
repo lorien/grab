@@ -10,6 +10,10 @@ MYSQL_CONNECTION = {
 
 REDIS_CONNECTION = {}
 
+POSTGRESQL_CONNECTION = {
+    'database': 'spider_test',
+}
+
 try:
     from test_settings_local import *
 except ImportError:

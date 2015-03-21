@@ -53,7 +53,7 @@ class CacheBackend(object):
             CREATE TABLE cache (
                 id BYTEA NOT NULL CONSTRAINT primary_key PRIMARY KEY,
                 timestamp INT NOT NULL,
-                data BYTEA NOT NULL,
+                data BYTEA NOT NULL
             );
             CREATE INDEX timestamp_idx ON cache (timestamp);
         ''')
@@ -77,7 +77,7 @@ class CacheBackend(object):
                 sql = '''
                       SELECT data
                       FROM cache
-                      WHERE id = {0} %(query)s
+                      WHERE id = %%s %(query)s
                       ''' % {'query': query}
             else:
                 sql = '''
@@ -96,16 +96,14 @@ class CacheBackend(object):
 
     def unpack_database_value(self, val):
         with self.spider.save_timer('cache.read.unpack_data'):
-            dump = zlib.decompress(str(val))
+            dump = zlib.decompress(val)
             return marshal.loads(dump)
 
     def build_hash(self, url):
         with self.spider.save_timer('cache.read.build_hash'):
-            if isinstance(url, unicode):
-                utf_url = url.encode('utf-8')
-            else:
-                utf_url = url
-            return sha1(utf_url).hexdigest()
+            if isinstance(url, six.text_type):
+                url = url.encode('utf-8')
+            return sha1(url).hexdigest()
 
     def remove_cache_item(self, url):
         _hash = self.build_hash(url)
@@ -168,10 +166,10 @@ class CacheBackend(object):
         # py3 hack
         if six.PY3:
             sql = '''
-                  UPDATE cache SET timestamp = {0}, data = {1} WHERE id = {2};
+                  UPDATE cache SET timestamp = %s, data = %s WHERE id = %s;
                   INSERT INTO cache (id, timestamp, data)
-                  SELECT {2}, {0}, {1} WHERE NOT EXISTS
-                    (SELECT 1 FROM cache WHERE id = {2});
+                  SELECT %s, %s, %s WHERE NOT EXISTS
+                    (SELECT 1 FROM cache WHERE id = %s);
                   '''
         else:
             sql = '''
