@@ -41,24 +41,15 @@ class UtilModuleTestCase(TestCase):
         self.assertEqual(1, len(reg))
 
     def test_build_spider_registry_failed_module(self):
-        path = os.path.join(TMP_DIR, 'foobar.py')
-        with open(path, 'w') as out:
-            out.write('import null.zz')
-        sys.path.append(TMP_DIR)
-        cfg = self.build_config(['test.util_module', 'zz', 'foobar'])
+        cfg = self.build_config(['test.util_module', 'zz',
+                                 'test.files.invalid_import'])
         reg = build_spider_registry(cfg)
         self.assertEqual(2, len(reg))
-        os.unlink(path)
 
     def test_build_spider_registry_same_name_spiders(self):
-        path = os.path.join(TMP_DIR, 'foobar2.py')
-        with open(path, 'w') as out:
-            out.write('from grab.spider import Spider\n'
-                      'class FirstSpider(Spider): pass')
-        sys.path.append(TMP_DIR)
-        cfg = self.build_config(['test.util_module', 'zz', 'foobar2'])
+        cfg = self.build_config(['test.util_module', 'zz',
+                                 'test.files.first_spider'])
         self.assertRaises(SpiderInternalError, build_spider_registry, cfg)
-        os.unlink(path)
 
     def test_load_spider_class(self):
         cfg = self.build_config(['test.util_module'])
