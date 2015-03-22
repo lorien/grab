@@ -2,7 +2,7 @@ import os
 
 from copy import deepcopy
 from grab.util import default_config
-from grab.util.module import import_string
+import importlib
 
 NULL = object()
 
@@ -36,7 +36,7 @@ class Config(dict):
                                                                          key)
 
     def update_with_path(self, path, **kwargs):
-        obj = import_string(path)
+        obj = importlib.import_module(path)
         self.update_with_object(obj, **kwargs)
 
     def clone(self):
