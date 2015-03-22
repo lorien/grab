@@ -1,14 +1,18 @@
 from unittest import TestCase
+"""
 import sys
 import os
 from copy import deepcopy
 
 from test.util import TMP_DIR
-from grab.util.config import Config, build_root_config, build_spider_config
 from grab.util import default_config
 from grab.spider import Spider
+"""
+from grab.util.config import (Config, build_root_config, build_spider_config,
+                              is_dict_interface)
 
 
+"""
 class SomeSettings(object):
     VAR1 = 'val1'
     VAR2 = 'val2'
@@ -43,7 +47,9 @@ def keep_default_config(func):
     return wrapper
 
 
+"""
 class ConfigTestCase(TestCase):
+    """
     def test_config_constructor(self):
         config = Config()
         self.assertEqual(len(config.keys()), 0)
@@ -145,18 +151,9 @@ class ConfigTestCase(TestCase):
         config = build_root_config(modname)
         spider_config = build_spider_config(FooSpider, config)
         self.assertEqual(spider_config['cache'], {'backend': 'mysql'})
-
     """
-    @keep_default_config
-    def test_build_spider_config2(self):
-        class FooSpider(Spider):
-            pass
-
-        modname = setup_settings_file({})
-        default_config.default_config = {
-            'cache': {'backend': 'mysql'},
-        }
-        config = build_root_config(modname)
-        spider_config = build_spider_config(FooSpider, config)
-        self.assertEqual(spider_config['cache'], {'backend': 'tokyo'})
-    """
+    def test_is_dict_interface(self):
+        self.assertTrue(is_dict_interface({}))
+        self.assertFalse(is_dict_interface(1))
+        self.assertFalse(is_dict_interface([]))
+        self.assertFalse(is_dict_interface('asfasdf'))

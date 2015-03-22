@@ -52,6 +52,7 @@ GRAB_TEST_LIST = (
     'test.util_log',
     # *** grab.export
     'test.export_mysql_dumper',
+    'test.util_config',
 )
 
 GRAB_EXTRA_TEST_LIST = (
