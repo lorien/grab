@@ -12,9 +12,7 @@ def build_spider_registry(config):
     SPIDER_REGISTRY.clear()
 
     opt_modules = []
-    opt_modules = config['global'].get('spider_modules',
-                                       deprecated_key='GRAB_SPIDER_MODULES',
-                                       default=[])
+    opt_modules = config['global'].get('spider_modules', [])
 
     for path in opt_modules:
         if ':' in path:
