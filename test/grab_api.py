@@ -141,7 +141,6 @@ class GrabApiTestCase(BaseGrabTestCase):
         absolute_url = g.make_url_absolute('/foobar')
         self.assertEqual(absolute_url, '/foobar')
 
-
     def test_error_request(self):
         g = build_grab()
         g.setup(post={'foo': 'bar'})
