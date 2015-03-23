@@ -1,5 +1,4 @@
 from unittest import TestCase
-from grab.util.config import Config
 from grab.util.module import (build_spider_registry, SPIDER_REGISTRY,
                               load_spider_class)
 from grab.spider import Spider
@@ -23,7 +22,7 @@ class SecondSpider(BaseSpider):
 
 class UtilModuleTestCase(TestCase):
     def build_config(self, modules):
-        cfg = Config({'global': Config({'spider_modules': modules})})
+        cfg = {'global': {'spider_modules': modules}}
         return cfg
 
     def test_build_spider_registry(self):

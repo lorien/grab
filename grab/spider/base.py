@@ -180,9 +180,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if config is not None:
             self.config = config
         else:
-            # Fix circular import error
-            from grab.util.config import Config
-            self.config = Config()
+            self.config = {}
 
         if meta:
             self.meta = meta
