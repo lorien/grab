@@ -6,6 +6,7 @@ def update_dict(target, source, overwrite=False):
     for key, val in source.items():
         if key not in target or overwrite:
             target[key] = deepcopy(source[key])
+    return target
 
 
 def build_root_config(settings_mod_path):
