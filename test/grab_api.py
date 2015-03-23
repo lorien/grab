@@ -1,5 +1,5 @@
 # coding: utf-8
-from grab import GrabMisuseError
+from grab import GrabMisuseError, GrabError
 from grab.error import GrabTooManyRedirectsError
 from grab.base import reset_request_counter
 from test.util import build_grab
@@ -131,9 +131,24 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertRaises(GrabTooManyRedirectsError, g.go,
                           self.server.get_url())
 
-    def test_find_base_url(self):
+    def test_make_url_absolute(self):
         g = build_grab()
         self.server.response['get.data'] = '<base href="http://foo/bar/">'
         g.go(self.server.get_url())
         absolute_url = g.make_url_absolute('/foobar', resolve_base=True)
         self.assertEqual(absolute_url, 'http://foo/foobar')
+        g = build_grab()
+        absolute_url = g.make_url_absolute('/foobar')
+        self.assertEqual(absolute_url, '/foobar')
+
+    def test_error_request(self):
+        g = build_grab()
+        g.setup(post={'foo': 'bar'})
+
+        self.assertRaises(GrabError, g.go,
+                          url='Could not resolve host address')
+        self.assertEqual(g.config['post'], None)
+        self.assertEqual(g.config['multipart_post'], None)
+        self.assertEqual(g.config['method'], None)
+        self.assertEqual(g.config['body_storage_filename'], None)
+        self.assertEqual(g.config['refresh_redirect_count'], 0)
