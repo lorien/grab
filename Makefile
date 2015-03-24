@@ -10,12 +10,12 @@ test:
 test_all:
 	tox -e py27-all,py34-all
 
-coverage:
+coverage_nobackend:
 	coverage erase
 	coverage run --source=grab ./runtest.py --test-all
 	coverage report -m
 
-coverage_full:
+coverage:
 	coverage erase
 	coverage run --source=grab ./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis --backend-postgres
 	coverage report -m

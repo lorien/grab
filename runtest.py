@@ -37,7 +37,6 @@ GRAB_TEST_LIST = (
     'test.grab_charset_issue',
     'test.grab_pickle',
     # *** Extension sub-system
-    'test.extension',
     # *** Extensions
     'test.ext_text',
     'test.ext_rex',

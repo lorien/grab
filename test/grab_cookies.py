@@ -2,6 +2,8 @@
 import json
 from grab import Grab
 from grab.error import GrabMisuseError
+from grab.cookie import CookieManager, create_cookie
+import pickle
 
 from test.util import TMP_FILE, build_grab
 from test.util import BaseGrabTestCase
@@ -182,3 +184,26 @@ class TestCookies(BaseGrabTestCase):
         self.assertRaises(GrabMisuseError, g.cookies.update, None)
         self.assertRaises(GrabMisuseError, g.cookies.update, 'asdf')
         self.assertRaises(GrabMisuseError, g.cookies.update, ['asdf'])
+
+    def test_from_cookie_list(self):
+        cookie = create_cookie('foo', 'bar')
+        mgr = CookieManager.from_cookie_list([cookie])
+        test_cookie = [x for x in mgr.cookiejar if x.name == 'foo'][0]
+        self.assertEqual(cookie.name, test_cookie.name)
+
+        mgr = CookieManager.from_cookie_list([])
+        self.assertEqual(0, len(list(mgr.cookiejar)))
+
+    def test_pickle_serialization(self):
+        cookie = create_cookie('foo', 'bar')
+        mgr = CookieManager.from_cookie_list([cookie])
+        dump = pickle.dumps(mgr)
+        mgr2 = pickle.loads(dump)
+        self.assertEqual(list(mgr.cookiejar)[0].value,
+                         list(mgr2.cookiejar)[0].value)
+
+    def test_get_item(self):
+        cookie = create_cookie('foo', 'bar')
+        mgr = CookieManager.from_cookie_list([cookie])
+        self.assertEqual('bar', mgr['foo'])
+        self.assertRaises(KeyError, lambda: mgr['zzz'])
