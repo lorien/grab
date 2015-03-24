@@ -35,10 +35,6 @@ class QueueBackend(QueueInterface):
 
         super(QueueInterface, self).__init__(**kwargs)
 
-    def clear_collection(self):
-        logger.debug('Deleting collection: %s' % self.collection)
-        self.collection.drop()
-
     def size(self):
         return self.collection.count()
 

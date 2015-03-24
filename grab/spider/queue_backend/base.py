@@ -8,7 +8,7 @@ class QueueInterface(object):
         pass
 
     def put(self, task, priority):
-        pass
+        raise NotImplementedError
 
     def get(self):
         """
@@ -17,11 +17,12 @@ class QueueInterface(object):
         @returns: `grab.spider.task.Task` object
         @raises: `Queue.Empty` exception
         """
+        raise NotImplementedError
+
 
     def size(self):
-        pass
+        raise NotImplementedError
 
     def clear(self):
-        """
-        Remove all tasks from the queue.
-        """
+        """Remove all tasks from the queue."""
+        raise NotImplementedError

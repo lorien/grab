@@ -9,8 +9,7 @@ from grab.error import warn
 
 
 class XpathSelector(XpathSelectorOrigin):
-    def select(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         warn('You are using XpathSelector from deprecated `grab.selector` '
              'package. Please, switch to `selection` package.')
-
-        return super(XpathSelector, self).select(*args, **kwargs)
+        super(XpathSelector, self).__init__(*args, **kwargs)

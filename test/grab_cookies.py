@@ -1,7 +1,8 @@
 # coding: utf-8
 import json
-
 from grab import Grab
+from grab.error import GrabMisuseError
+
 from test.util import TMP_FILE, build_grab
 from test.util import BaseGrabTestCase
 
@@ -175,3 +176,9 @@ class TestCookies(BaseGrabTestCase):
         g.transport.curl.setopt(pycurl.RESOLVE, names)
         g.cookies.set('foo', 'bar', domain='example.com')
         g.go('http://example.com:%d/' % self.server.port)
+
+    def test_update_invalid_cookie(self):
+        g = build_grab()
+        self.assertRaises(GrabMisuseError, g.cookies.update, None)
+        self.assertRaises(GrabMisuseError, g.cookies.update, 'asdf')
+        self.assertRaises(GrabMisuseError, g.cookies.update, ['asdf'])

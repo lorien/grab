@@ -12,6 +12,7 @@ services:
 
 install:
   - pip install -r requirements_dev.txt
+  - pip install -r requirements_dev_backend.txt
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
   - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
   - python setup.py develop

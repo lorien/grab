@@ -7,15 +7,11 @@ feedparser
 flake8
 item
 lxml
-mysqlclient
-psycopg2
 pycurl
-pymongo
 pyquery
-qr
-redis
 selection
 selenium
 test_server
 tools
 tornado
+mock

@@ -54,6 +54,8 @@ GRAB_TEST_LIST = (
     'test.export_mysql_dumper',
     'test.util_config',
     'test.script_crawl',
+    'test.grab_error',
+    'test.selector_deprecated',
 )
 
 GRAB_EXTRA_TEST_LIST = (

@@ -1,6 +1,9 @@
 import six
-
 from grab.spider import Spider, Task
+from grab.spider.error import SpiderMisuseError
+from unittest import TestCase
+from grab.spider.queue_backend.base import QueueInterface
+
 from test.util import BaseGrabTestCase
 from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
 
@@ -78,9 +81,43 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
     def setup_queue(self, bot):
         bot.setup_queue(backend='mongo', **MONGODB_CONNECTION)
 
+    def test_delay_error(self):
+        bot = self.SimpleSpider()
+        self.setup_queue(bot)
+        bot.taskq.clear()
+        self.assertRaises(SpiderMisuseError,
+                          bot.add_task,
+                          Task('page', url=self.server.get_url(), delay=1))
+
+    def test_clear_collection(self):
+        bot = self.SimpleSpider()
+        self.setup_queue(bot)
+        bot.taskq.clear()
+
 
 class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
     _backend = 'redis'
 
     def setup_queue(self, bot):
         bot.setup_queue(backend='redis', **REDIS_CONNECTION)
+
+    def test_delay_error(self):
+        bot = self.SimpleSpider()
+        self.setup_queue(bot)
+        bot.taskq.clear()
+        self.assertRaises(SpiderMisuseError,
+                          bot.add_task,
+                          Task('page', url=self.server.get_url(), delay=1))
+
+
+class QueueInterfaceTestCase(TestCase):
+    def test_abstract_methods(self):
+        """Just to improve test coverage"""
+        class BrokenQueue(QueueInterface):
+            pass
+
+        taskq = BrokenQueue('spider_name')
+        self.assertRaises(NotImplementedError, taskq.put, None, None)
+        self.assertRaises(NotImplementedError, taskq.get)
+        self.assertRaises(NotImplementedError, taskq.size)
+        self.assertRaises(NotImplementedError, taskq.clear)
