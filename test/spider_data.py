@@ -79,6 +79,8 @@ class TestSpider(BaseGrabTestCase):
         self.assertEqual({'age': 22}, data.get('person'))
 
     def test_things_yiled_from_data_handler(self):
+        server = self.server 
+
         class TestSpider(Spider):
             def prepare(self):
                 self.data_processed = []
@@ -90,7 +92,7 @@ class TestSpider(BaseGrabTestCase):
                 self.data_processed.append(count)
                 if count == 1:
                     yield Data('foo', count=666)
-                    yield Task('page', url=self.server.get_url(),
+                    yield Task('page', url=server.get_url(),
                                count=count + 1)
 
         bot = TestSpider()
