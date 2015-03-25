@@ -96,7 +96,7 @@ def only_backend(backend):
     return wrapper
 
 
-def build_grab(**kwargs):
+def build_grab(*args, **kwargs):
     """
     Build the Grab instance with default transport.
 
@@ -107,7 +107,7 @@ def build_grab(**kwargs):
     """
     if 'transport' not in kwargs:
         kwargs['transport'] = GLOBAL['transport']
-    return Grab(**kwargs)
+    return Grab(*args, **kwargs)
 
 
 class BaseGrabTestCase(TestCase):

@@ -724,13 +724,14 @@ class FormExtension(object):
         return fields
 
     def choose_form_by_element(self, xpath):
-        forms = self.tree.xpath('//form')
-        found_form = None
-        for form in forms:
-            if len(form.xpath(xpath)):
-                found_form = form
-                break
-        self._lxml_form = found_form if found_form is not None else forms[0]
+        elem = self.select(xpath).node()
+        while elem is not None:
+            if elem.tag == 'form':
+                self._lxml_form = elem
+                return
+            else:
+                elem = elem.getparent()
+        self._lxml_form = None
 
 
 class Document(TextExtension, RegexpExtension, DjangoExtension,
