@@ -2,6 +2,7 @@ import os
 import logging
 import shutil
 import re
+from grab.error import GrabError
 
 logger = logging.getLogger('grab.script.start_project')
 
@@ -45,7 +46,7 @@ def main(project_name, template, **kwargs):
         template_path = template
 
     if os.path.exists(project_dir):
-        raise Exception('Directory %s already exists' % project_dir)
+        raise GrabError('Directory %s already exists' % project_dir)
     else:
         logger.debug('Copying %s to %s' % (template_path, project_dir))
         shutil.copytree(template_path, project_dir)
