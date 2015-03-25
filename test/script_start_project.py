@@ -4,15 +4,16 @@ from grab.util.module import SPIDER_REGISTRY
 from unittest import TestCase
 import os
 import subprocess
+from grab.script import start_project
 
 from test.util import TMP_DIR
 
 
 class ScriptStartProjectTestCase(TestCase):
-    def test_crawl(self):
+    def test_start_project(self):
         old_dir = os.getcwd()
         os.chdir(TMP_DIR)
-        subprocess.call(['run', 'start_project', 'test_project'])
+        start_project.main(project_name='test_project', template=None)
         os.chdir(old_dir)
         self.assertTrue(os.path.exists(os.path.join(TMP_DIR,
                                                     'test_project/var')))

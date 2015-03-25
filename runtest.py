@@ -50,7 +50,6 @@ GRAB_TEST_LIST = (
     'test.util_module',
     'test.util_log',
     # *** grab.export
-    'test.export_mysql_dumper',
     'test.util_config',
     'test.script_crawl',
     'test.script_start_project',
