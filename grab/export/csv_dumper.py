@@ -1,5 +1,6 @@
 import csv
 import six
+from tools.encoding import make_str, make_unicode
 
 
 class CSVDumper(object):
@@ -11,7 +12,8 @@ class CSVDumper(object):
         self.file_handler = open(path, 'w')
         self.writer = csv.writer(self.file_handler, quoting=quoting)
         if self.fields and self.write_header:
-            self.writer.writerow(self.normalize_row(self.fields))
+            self.writer.writerow(
+                self.normalize_unicode_row(self.normalize_row(self.fields)))
 
     def add_record(self, rec, ignore_fields=None):
         if ignore_fields is None:
@@ -29,10 +31,14 @@ class CSVDumper(object):
         self.writer.writerow(self.normalize_row(row))
 
     def add_row(self, row):
-        self.writer.writerow(self.normalize_row(row))
+        self.writer.writerow(
+            self.normalize_unicode_row(self.normalize_row(row)))
+
+    def normalize_unicode_row(self, row):
+        return list(map(make_unicode if six.PY3 else make_str, row))
 
     def normalize_row(self, row):
-        return map(self.normalize_value, row)
+        return list(map(self.normalize_value, row))
 
     def normalize_none_value(self, val):
         return ''
@@ -41,7 +47,10 @@ class CSVDumper(object):
         if val is None:
             return self.normalize_none_value(val)
         elif isinstance(val, six.text_type):
-            return val.encode('utf-8')
+            if six.PY3:
+                return val
+            else:
+                return val.encode('utf-8')
         else:
             return str(val)
 

@@ -25,11 +25,11 @@ class MysqlCSVDumper(CSVDumper):
     def normalize_value(self, val):
         if val is None:
             return self.normalize_none_value(val)
-        elif isinstance(val, six.string_types):
+        elif isinstance(val, (six.string_types, six.binary_type)):
             if isinstance(val, six.text_type):
-                val = val.encode('utf-8')
-            val = val.replace('\\', '\\\\')
-            return val
+                return val.replace(u'\\', u'\\\\')
+            else:
+                return val.replace(b'\\', b'\\\\')
         else:
             return str(val)
 
