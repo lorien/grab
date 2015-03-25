@@ -16,12 +16,12 @@ except ImportError:
     import queue
 from copy import deepcopy
 import six
+import os
 
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
 from grab.spider.error import (SpiderError, SpiderMisuseError, FatalError,
-                               StopTaskProcessing, NoTaskHandler,
-                               NoDataHandler)
+                               NoTaskHandler, NoDataHandler)
 from grab.spider.task import Task, NullTask
 from grab.spider.data import Data
 from grab.spider.pattern import SpiderPattern
@@ -94,11 +94,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
     # The base url which is used to resolve all relative urls
     # The resolving takes place in `add_task` method
     base_url = None
-
-    middlewares = []
-    middleware_points = {
-        'response': [],
-    }
 
     class Meta:
         # Meta.abstract means that this class will not be
@@ -206,28 +201,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         self.proxylist = None
         self.proxy = None
         self.proxy_auto_change = False
-
-        # FIXIT: REMOVE
-        self.dump_spider_stats = None
-
-        # snapshots contains information about spider's state
-        # for each 10 seconds interval
-        self.snapshots = {}
-        self.last_snapshot_values = {
-            'timestamp': 0,
-            'download-size': 0,
-            'upload-size': 0,
-            'download-size-with-cache': 0,
-            'request-count': 0,
-        }
-        self.snapshot_timestamps = []
-        self.snapshot_interval = self.config.get('GRAB_SNAPSHOT_CONFIG',
-                                                 {}).get('interval', 10)
-        self.snapshot_file = self.config.get('GRAB_SNAPSHOT_CONFIG',
-                                             {}).get('file', None)
-        if self.snapshot_file:
-            open(self.snapshot_file, 'w').write('')
-
         self.interrupted = False
 
     def get_grab_config(self):
@@ -241,16 +214,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         self._grab_config = val
 
     grab_config = property(get_grab_config, set_grab_config)
-
-    def setup_middleware(self, middleware_list):
-        for item in middleware_list:
-            self.middlewares.append(item)
-            mod_path, cls_name = item.rsplit('.', 1)
-            mod = __import__(mod_path, None, None, ['foo'])
-            cls = getattr(mod, cls_name)
-            mid = cls()
-            if hasattr(mid, 'process_response'):
-                self.middleware_points['response'].append(mid)
 
     def setup_cache(self, backend='mongo', database=None, use_compression=True,
                     **kwargs):
@@ -268,7 +231,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         logger.debug('Using %s backend for task queue' % backend)
         mod = __import__('grab.spider.queue_backend.%s' % backend,
                          globals(), locals(), ['foo'])
-        self.taskq = mod.QueueBackend(spider_name=self.get_name(),
+        self.taskq = mod.QueueBackend(spider_name=self.get_spider_name(),
                                       **kwargs)
 
     def prepare(self):
@@ -558,15 +521,10 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         return (code < 400 or code == 404 or
                 code in task.valid_status)
 
-    def process_handler_error(self, func_name, ex, task, error_tb=None):
+    def process_handler_error(self, func_name, ex, task):
         self.inc_count('error-%s' % ex.__class__.__name__.lower())
 
-        if error_tb is not None:
-            logger.error('Error in %s function' % func_name)
-            logger.error(error_tb)
-        else:
-            logger.error('Error in %s function' % func_name,
-                         exc_info=ex)
+        logger.error('Error in %s function' % func_name, exc_info=ex)
 
         # Looks strange but I really have some problems with
         # serializing exception into string
@@ -733,34 +691,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                            res['grab'].response.download_size)
             self.inc_count('upload-size-with-cache',
                            res['grab'].response.upload_size)
-        # self.inc_count('traffic-in
-
-        # NG
-        # FIX: Understand how it should work in NG spider
-        # TOFIX: start
-        stop = False
-        for mid in self.middleware_points['response']:
-            try:
-                mid_response = mid.process_response(self, res)
-            except StopTaskProcessing:
-                logger.debug('Got StopTaskProcessing exception')
-                stop = True
-                break
-            else:
-                if isinstance(mid_response, Task):
-                    logger.debug('Got task from middleware')
-                    self.add_task(mid_response)
-                    stop = True
-                    break
-                elif mid_response is None:
-                    pass
-                else:
-                    raise Exception('Unknown response from '
-                                    'middleware %s' % mid)
-        # TOFIX: end
-
-        if stop:
-            return
 
         handler = self.find_task_handler(res['task'])
         self.execute_task_handler(res, handler)
@@ -869,38 +799,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             self.stop_timer('task_generator')
 
             while self.work_allowed:
-
-                now = int(time.time())
-                if (now - self.last_snapshot_values['timestamp'] >
-                        self.snapshot_interval):
-                    snapshot = {'timestamp': now}
-                    for key in ('download-size', 'upload-size',
-                                'download-size-with-cache'):
-                        snapshot[key] = (self.counters[key] -
-                                         self.last_snapshot_values[key])
-                        self.last_snapshot_values[key] = self.counters[key]
-
-                    snapshot['request-count'] = (
-                        self.counters['request'] -
-                        self.last_snapshot_values['request-count'])
-                    self.last_snapshot_values['request-count'] =\
-                        self.counters['request']
-                    self.last_snapshot_values['timestamp'] = now
-
-                    self.snapshots[now] = snapshot
-                    self.snapshot_timestamps.append(now)
-
-                    if self.snapshot_file:
-                        with open(self.snapshot_file, 'a') as out:
-                            out.write(json.dumps(snapshot) + '\n')
-
-                # FIXIT: REMOVE
-                # Run update task handler which
-                # updates database object which stores
-                # info about current scraping process
-                if self.dump_spider_stats:
-                    self.dump_spider_stats(self)
-
                 self.start_timer('task_generator')
                 if self.task_generator_enabled:
                     self.process_task_generator()
@@ -965,14 +863,12 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                                 self.add_item('network-count-rejected',
                                               task.url)
                             else:
-                                raise Exception('Unknown response from '
-                                                'check_task_limits: %s'
-                                                % reason)
+                                raise SpiderError('Unknown response from '
+                                                  'check_task_limits: %s'
+                                                  % reason)
                             handler = task.get_fallback_handler(self)
                             if handler:
                                 handler(task)
-                            # TODO: not do following line
-                            # TODO: middleware: TaskFails
                         else:
                             self.process_new_task(task)
                             self.transport.process_handlers()
@@ -1004,7 +900,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
             logger_verbose.debug('Work done')
         except KeyboardInterrupt:
-            print('\nGot ^C signal. Stopping.')
+            print('\nGot ^C signal in process %d. Stopping.' % os.getpid())
             self.interrupted = True
             raise
         finally:
@@ -1023,12 +919,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if not auto_change and auto_init:
             self.proxy = self.proxylist.get_random()
         self.proxy_auto_change = auto_change
-
-    def get_name(self):
-        if hasattr(self, 'spider_name'):
-            return self.spider_name
-        else:
-            return camel_case_to_underscore(self.__class__.__name__)
 
     # ****************
     # Abstract methods
@@ -1097,6 +987,3 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
     @classmethod
     def setup_spider_config(cls, config):
         pass
-
-    def command_get_stats(self, command):
-        return {'data': self.render_stats()}

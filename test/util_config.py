@@ -57,3 +57,17 @@ class UtilConfigTestCase(TestCase):
                 self.assertEqual(cfg[key], 777)
             else:
                 self.assertEqual(cfg[key], val)
+
+    def test_setup_spider_config(self):
+        class TestSpider(Spider):
+            @classmethod
+            def setup_spider_config(cls, config):
+                config['foo'] = 'bar'
+
+        root_cfg = build_root_config('test.files.settings_minimal')
+        cfg = build_spider_config(TestSpider, root_cfg)
+        for key, val in  DEFAULT_SPIDER_GLOBAL_CONFIG.items():
+            if key == 'foo':
+                self.assertEqual(cfg[key], 'bar')
+            else:
+                self.assertEqual(cfg[key], val)

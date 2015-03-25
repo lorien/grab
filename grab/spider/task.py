@@ -257,6 +257,9 @@ class NullTask(BaseTask):
         self.network_try_count = network_try_count
         self.task_try_count = task_try_count
 
+        self.schedule_time = None
+        self.original_delay = None
+
 
 def inline_task(f):
     def wrap(self, grab, task):

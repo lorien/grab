@@ -105,6 +105,22 @@ class SpiderCacheMixin(object):
         bot.run()
         self.assertEqual([1, 1, 1, 2], bot.resp_counters)
 
+    def test_only_cache_task(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.points = []
+
+            def task_page(self, grab, task):
+                self.points.append(1)
+
+        bot = TestSpider(only_cache=True)
+        self.setup_cache(bot)
+        bot.cache.clear()
+        bot.setup_queue()
+        bot.add_task(Task('page', self.server.get_url()))
+        bot.run()
+        self.assertEqual(bot.points, [])
+
     def test_timeout(self):
         bot = SimpleSpider(meta={'server': self.server})
         self.setup_cache(bot)

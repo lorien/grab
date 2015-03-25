@@ -97,11 +97,6 @@ def main(spider_name, thread_number=None, slave=False,
         for iface_config in opt_ifaces:
             bot.controller.add_interface(**iface_config)
 
-    # Dirty hack
-    # FIXIT: REMOVE
-    bot.dump_spider_stats = kwargs.get('dump_spider_stats')
-    bot.stats_object = kwargs.get('stats_object')
-
     try:
         bot.run()
     except KeyboardInterrupt:
