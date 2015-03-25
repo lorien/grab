@@ -118,13 +118,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                  max_task_generator_chunk=None,
                  args=None,
                  # New options start here
-                 waiting_shutdown_event=None,
                  taskq=None,
-                 result_queue=None,
-                 network_response_queue=None,
-                 shutdown_event=None,
-                 generator_done_event=None,
-                 ng=False,
                  ):
         """
         Arguments:
@@ -144,23 +138,11 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
             network request which is performed again due to network error
         * args - command line arguments parsed with `setup_arg_parser` method
         New options:
-        * waiting_shutdown_event=None,
         * taskq=None,
-        * result_queue=None,
         * newtork_response_queue=None,
-        * shutdown_event=None,
-        * generator_done_event=None):
         """
 
-        # New options starts
-        self.waiting_shutdown_event = waiting_shutdown_event
         self.taskq = taskq
-        self.result_queue = result_queue
-        self.shutdown_event = shutdown_event
-        self.generator_done_event = generator_done_event
-        self.network_response_queue = network_response_queue
-        self.ng = ng
-        # New options ends
 
         if args is None:
             self.args = {}
@@ -780,13 +762,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
         if stop:
             return
 
-        if self.ng:
-            logger_verbose.debug('Submitting result for task %s to response'
-                                 ' queue' % res['task'])
-            self.network_response_queue.put(res)
-        else:
-            handler = self.find_task_handler(res['task'])
-            self.execute_task_handler(res, handler)
+        handler = self.find_task_handler(res['task'])
+        self.execute_task_handler(res, handler)
 
     def change_proxy(self, task, grab):
         """
@@ -888,8 +865,7 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
 
             self.start_timer('task_generator')
             if not self.slave:
-                if not self.ng:
-                    self.init_task_generator()
+                self.init_task_generator()
             self.stop_timer('task_generator')
 
             while self.work_allowed:
@@ -925,13 +901,10 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                 if self.dump_spider_stats:
                     self.dump_spider_stats(self)
 
-                if not self.ng:
-                    # NG
-                    self.start_timer('task_generator')
-                    # star
-                    if self.task_generator_enabled:
-                        self.process_task_generator()
-                    self.stop_timer('task_generator')
+                self.start_timer('task_generator')
+                if self.task_generator_enabled:
+                    self.process_task_generator()
+                self.stop_timer('task_generator')
 
                 free_threads = self.transport.get_free_threads_number()
                 if free_threads:
@@ -958,18 +931,8 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                         if not self.transport.active_task_number():
                             logger_verbose.debug('Network transport has no '
                                                  'active tasks')
-                            # NG
-                            if self.ng:
-                                self.waiting_shutdown_event.set()
-                                if self.shutdown_event.is_set():
-                                    logger_verbose.debug('Got shutdown signal')
-                                    self.stop()
-                                else:
-                                    logger_verbose.debug('Shutdown event has'
-                                                         ' not been set yet')
-                            else:
-                                if not self.task_generator_enabled:
-                                    self.stop()
+                            if not self.task_generator_enabled:
+                                self.stop()
                         else:
                             logger_verbose.debug(
                                 'Transport active tasks: %d' %
@@ -987,9 +950,6 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
                         if not self.transport.active_task_number():
                             time.sleep(0.1)
                     else:
-                        if self.ng:
-                            if self.waiting_shutdown_event.is_set():
-                                self.waiting_shutdown_event.clear()
                         logger_verbose.debug('Got new task from task queue: %s'
                                              % task)
                         self.process_task_counters(task)
@@ -1138,117 +1098,5 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
     def setup_spider_config(cls, config):
         pass
 
-    # ***********
-    # NG Features
-    # ***********
-
-    def run_generator(self):
-        """
-        Generate tasks and put them into Task Queue.
-
-        This is main method for Generator Process
-        """
-
-        self.init_task_generator()
-
-        while True:
-            if not self.task_generator_enabled:
-                self.generator_done_event.set()
-            if self.shutdown_event.is_set():
-                logger.info('Got shutdown event')
-                break
-            time.sleep(1)
-            self.process_task_generator()
-
-    def run_parser(self):
-        """
-        Process items received from Network Response Queue.
-
-        Network Response Queue are filled by Downloader Process.
-
-        This is main method for Parser Process.
-        """
-        should_work = True
-        while should_work:
-            try:
-                response = self.network_response_queue.get(True, 0.1)
-            except queue.Empty:
-                logger_verbose.debug('Response queue is empty.')
-                response = None
-
-            if not response:
-                self.waiting_shutdown_event.set()
-                if self.shutdown_event.is_set():
-                    logger_verbose.debug('Got shutdown signal')
-                    should_work = False
-                else:
-                    logger_verbose.debug('Shutdown event has not been set yet')
-            else:
-                if self.waiting_shutdown_event.is_set():
-                    self.waiting_shutdown_event.clear()
-                logger_verbose.debug('Got new response from response '
-                                     'queue: %s' % response['task'].url)
-
-                handler = self.find_task_handler(response['task'])
-                self.execute_task_handler(response, handler)
-
-        logger_verbose.debug('Work done')
-
-    """
-    TODO:
-    Develop Manager Process which contains logic of accepting or rejecting
-    task objects received from Parser Processes
-    Maybe Manager Process also should controls the Data flow
-    TODO2:
-    Data handler process
-    def run_manager(self):
-        try:
-            self.start_time = time.time()
-            self.prepare()
-            res_count = 0
-
-            while True:
-                try:
-                    res = self.result_queue.get(block=True, timeout=2)
-                except Queue.Empty:
-                    #pass
-                    res = None
-
-                if res is None:
-                    logging.error('res is None: stopping')
-                    break
-
-                if self.should_stop:
-                    break
-
-                if self.task_generator_enabled:
-                    self.process_task_generator()
-
-                for task, original_task in res['task_list']:
-                    logging.debug('Processing task items from result queue')
-                    self.process_handler_result(task)
-
-                #for data, original_task in res['data_list']:
-                    #logging.debug('Processing data items from result queue')
-                    #self.process_handler_result(data)
-
-        except KeyboardInterrupt:
-            print '\nGot ^C signal. Stopping.'
-            print self.render_stats()
-            raise
-        finally:
-            This code is executed when main cycles is breaked
-            self.shutdown()
-    """
-
     def command_get_stats(self, command):
         return {'data': self.render_stats()}
-
-    @classmethod
-    def get_available_command_names(cls):
-        spider = cls()
-        clist = []
-        for key in dir(spider):
-            if key.startswith('command_'):
-                clist.append(key.split('command_', 1)[1])
-        return sorted(clist)
