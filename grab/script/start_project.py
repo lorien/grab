@@ -51,17 +51,17 @@ def main(project_name, template, **kwargs):
         shutil.copytree(template_path, project_dir)
 
         project_name_camelcase = underscore_to_camelcase(project_name)
+        context = {
+            'PROJECT_NAME': project_name,
+            'PROJECT_NAME_CAMELCASE': project_name_camelcase,
+        }
         for base, dir_names, file_names in os.walk(project_dir):
             for file_name in file_names:
-                if file_name.endswith('.py'):
-                    file_path = os.path.join(base,
-                                             normalize_extension(file_name))
-                    context = {
-                        'PROJECT_NAME': project_name,
-                        'PROJECT_NAME_CAMELCASE': project_name_camelcase,
-                    }
+                if file_name.endswith(('._py', '.py')):
+                    file_path = os.path.join(base, file_name)
                     changed, content = process_macros(open(file_path).read(),
                                                       context)
                     if changed:
-                        with open(file_path, 'w') as out:
+                        with open(normalize_extension(file_path), 'w') as out:
                             out.write(content)
+                        os.unlink(file_path)
