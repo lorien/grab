@@ -165,7 +165,3 @@ class GrabApiTestCase(BaseGrabTestCase):
         <h1>test</h1>
         '''
         self.assertRaises(GrabMisuseError, build_grab, data)
-
-    def test_tree_attribute_if_no_body(self):
-        g = build_grab()
-        self.assertEqual(None, g.doc.tree)
