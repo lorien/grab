@@ -24,7 +24,6 @@ from grab.spider.error import (SpiderError, SpiderMisuseError, FatalError,
                                NoTaskHandler, NoDataHandler)
 from grab.spider.task import Task, NullTask
 from grab.spider.data import Data
-from grab.spider.pattern import SpiderPattern
 from grab.spider.stat import SpiderStat
 from grab.spider.transport.multicurl import MulticurlTransport
 from grab.proxylist import ProxyList
@@ -78,7 +77,7 @@ class SpiderMetaClass(type):
 SpiderMetaClassMixin = SpiderMetaClass('SpiderMetaClassMixin', (object,), {})
 
 
-class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
+class Spider(SpiderMetaClassMixin, SpiderStat):
     """
     Asynchronous scraping framework.
     """
@@ -987,3 +986,32 @@ class Spider(SpiderMetaClassMixin, SpiderPattern, SpiderStat):
     @classmethod
     def setup_spider_config(cls, config):
         pass
+
+    def process_next_page(self, grab, task, xpath,
+                          resolve_base=False, **kwargs):
+        """
+        Generate task for next page.
+
+        :param grab: Grab instance
+        :param task: Task object which should be assigned to next page url
+        :param xpath: xpath expression which calculates list of URLS
+        :param **kwargs: extra settings for new task object
+
+        Example::
+
+            self.follow_links(grab, 'topic', '//div[@class="topic"]/a/@href')
+        """
+        try:
+            # next_url = grab.xpath_text(xpath)
+            next_url = grab.doc.select(xpath).text()
+        except IndexError:
+            return False
+        else:
+            url = grab.make_url_absolute(next_url, resolve_base=resolve_base)
+            page = task.get('page', 1) + 1
+            grab2 = grab.clone()
+            grab2.setup(url=url)
+            task2 = task.clone(task_try_count=0, grab=grab2,
+                               page=page, **kwargs)
+            self.add_task(task2)
+            return True
