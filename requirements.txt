@@ -2,3 +2,4 @@ lxml
 pycurl
 selection
 tools
+six
