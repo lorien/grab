@@ -50,7 +50,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         g2.adopt(g)
 
     def test_default_content_for_fake_response(self):
-        content = '<strong>test</strong>'
+        content = b'<strong>test</strong>'
         g = build_grab(document_body=content)
         self.assertEqual(g.response.body, content)
 
@@ -152,3 +152,16 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertEqual(g.config['method'], None)
         self.assertEqual(g.config['body_storage_filename'], None)
         self.assertEqual(g.config['refresh_redirect_count'], 0)
+
+    def setup_document(self):
+        data = '''b
+        <h1>test</h1>
+        '''
+        g = build_grab(data)
+        self.assertTrue(b'test' in g.doc.body)
+
+    def setup_document_invalid_input(self):
+        data = u'''
+        <h1>test</h1>
+        '''
+        self.assertRaises(GrabMisuseError, build_grab, data)

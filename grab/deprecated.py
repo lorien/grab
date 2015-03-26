@@ -4,6 +4,7 @@ from tools.etree import get_node_text
 from tools.text import find_number
 from tools.const import NULL
 from tools.error import DataNotFound
+from tools.encoding import make_unicode
 import six
 
 from grab.util.misc import deprecated
@@ -86,6 +87,7 @@ class DeprecatedThings(object):
         if isinstance(href_pattern, six.text_type):
             raise GrabMisuseError('Method `find_link` accepts only '
                                   'byte-string argument')
+        href_pattern = make_unicode(href_pattern)
         for elem, attr, link, pos in self.tree.iterlinks():
             if elem.tag == 'a' and href_pattern in link:
                 return link
@@ -152,8 +154,6 @@ class DeprecatedThings(object):
     def xpath_exists(self, path):
         return self.doc.select(path).exists()
 
-    # TODO:
-    # Make support of CSS queries in selector module
     @deprecated()
     def css(self, *args, **kwargs):
         return self.css_one(*args, **kwargs)
@@ -258,8 +258,8 @@ class DeprecatedThings(object):
     # **********************************************
 
     @deprecated(use_instead='grab.doc.pyquery()')
-    def pyquery(self):
-        return self.doc.pyquery()
+    def pyquery(self, query):
+        return self.doc.pyquery(query)
 
     # Response related things
     # ***********************

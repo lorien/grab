@@ -565,6 +565,10 @@ class Grab(DeprecatedThings):
 
         self.reset()
 
+        if isinstance(content, six.text_type):
+            raise error.GrabMisuseError('Method `setup_document` accepts only '
+                                        'byte string in `content` argument.')
+
         # Configure Document instance
         doc = Document(grab=self)
         doc.body = content

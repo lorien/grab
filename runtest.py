@@ -55,6 +55,7 @@ GRAB_TEST_LIST = (
     'test.script_start_project',
     'test.grab_error',
     'test.selector_deprecated',
+    'test.grab_deprecated',
 )
 
 GRAB_EXTRA_TEST_LIST = (

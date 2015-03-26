@@ -280,11 +280,6 @@ class BodyExtension(object):
         return self._unicode_body
 
     def _read_body(self):
-        # py3 hack
-        # if six.PY3:
-            # return self.unicode_body()
-
-        # self._check_cached_body()
         if self.body_path:
             return self.read_body_from_file()
         else:

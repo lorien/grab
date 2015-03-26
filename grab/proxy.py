@@ -79,8 +79,10 @@ def parse_proxy_data(data, data_format='text', proxy_type='http'):
     """
     if data_format == 'text':
         for line in data.splitlines():
-            if not six.PY3 and isinstance(line, six.text_type):
-                line = line.encode('utf-8')
+            #if not six.PY3 and isinstance(line, six.text_type):
+            #    line = line.encode('utf-8')
+            if not isinstance(line, six.text_type):
+                line = line.decode('utf-8')
             line = line.strip().replace(' ', '')
             if line and not line.startswith('#'):
                 try:
