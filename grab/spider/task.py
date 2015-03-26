@@ -227,13 +227,13 @@ class Task(BaseTask):
         return '<Task: %s>' % self.url
 
     def __lt__(self, other):
-        if self.priority and other.priority:
-            return (self.priority < other.priority)
-        else:
-            return False
+        return self.priority < other.priority
 
     def __eq__(self, other):
-        return (self.priority == other.priority)
+        if not self.priority or not other.priority:
+            return True
+        else:
+            return (self.priority == other.priority)
 
     def get_fallback_handler(self, spider):
         if self.fallback_name:

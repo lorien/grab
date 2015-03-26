@@ -176,12 +176,12 @@ class SpiderCacheMixin(object):
         # This task will be spawned in 1 second and will
         # receive cached data  (cache timeout = 1.5sec > 1sec)
         bot.add_task(Task('page', url=self.server.get_url(),
-                     delay=1, cache_timeout=1.5))
+                     delay=1, cache_timeout=10))
         # This task will be spawned in 2 seconds and will not
         # receive cached data (cache timeout = 1.5 sec < 2 sec)
         # So, this task will receive next data from `get.data` iterator
         bot.add_task(Task('page', url=self.server.get_url(),
-                     delay=2, cache_timeout=1.5))
+                     delay=2, cache_timeout=0.5))
 
         self.server.response['get.data'] = iter([b'a', b'b'])
         bot.run()
