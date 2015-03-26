@@ -153,15 +153,19 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertEqual(g.config['body_storage_filename'], None)
         self.assertEqual(g.config['refresh_redirect_count'], 0)
 
-    def setup_document(self):
-        data = '''b
+    def test_setup_document(self):
+        data = b'''
         <h1>test</h1>
         '''
         g = build_grab(data)
         self.assertTrue(b'test' in g.doc.body)
 
-    def setup_document_invalid_input(self):
+    def test_setup_document_invalid_input(self):
         data = u'''
         <h1>test</h1>
         '''
         self.assertRaises(GrabMisuseError, build_grab, data)
+
+    def test_tree_attribute_if_no_body(self):
+        g = build_grab()
+        self.assertEqual(None, g.doc.tree)
