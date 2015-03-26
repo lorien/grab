@@ -14,12 +14,10 @@ from hashlib import sha1
 import zlib
 import logging
 import pymongo
-try:
-    from bson import Binary
-except ImportError:
-    from pymongo.binary import Binary
+from bson import Binary
 import time
 import six
+from tools.encoding import make_str
 
 from grab.response import Response
 from grab.cookie import CookieManager
@@ -47,10 +45,7 @@ class CacheBackend(object):
         return self.db.cache.find_one(query)
 
     def build_hash(self, url):
-        if isinstance(url, six.text_type):
-            utf_url = url.encode('utf-8')
-        else:
-            utf_url = url
+        utf_url = make_str(url)
         return sha1(utf_url).hexdigest()
 
     def remove_cache_item(self, url):
@@ -72,17 +67,7 @@ class CacheBackend(object):
             response.download_size = len(body)
             response.upload_size = 0
             response.download_speed = 0
-
-            # Hack for deprecated behaviour
-            if 'response_url' in cache_item:
-                response.url = cache_item['response_url']
-            else:
-                logger.debug('You cache contains items without `response_url` '
-                             'key. It is deprecated data format. Please '
-                             're-download you cache or build manually '
-                             '`response_url` keys.')
-                response.url = cache_item['url']
-
+            response.url = cache_item['response_url']
             response.parse()
             response.cookies = CookieManager(transport.extract_cookiejar())
 
@@ -117,3 +102,20 @@ class CacheBackend(object):
 
     def clear(self):
         self.db.cache.remove()
+
+    def size(self):
+        return self.db.cache.count()
+
+    def has_item(self, url, timeout=None):
+        """
+        Test if required item exists in the cache.
+        """
+
+        _hash = self.build_hash(url)
+        if timeout is not None:
+            ts = int(time.time()) - timeout
+            query = {'_id': _hash, 'timestamp': {'$gt': ts}}
+        else:
+            query = {'_id': _hash}
+        doc = self.db.cache.find_one(query, {'id': 1})
+        return doc is not None

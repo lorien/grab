@@ -1,5 +1,7 @@
 # coding: utf-8
 from grab.spider import Spider, Task
+import mock
+from copy import deepcopy
 
 from test.util import BaseGrabTestCase
 from test_settings import (MONGODB_CONNECTION, MYSQL_CONNECTION,
@@ -71,13 +73,11 @@ class SpiderCacheMixin(object):
         self.assertEqual([1], bot.resp_counters)
 
     def test_bug1(self):
-        """
-        Test the bug:
-        * enable cache
-        * fetch document (it goes to cache)
-        * request same URL
-        * got exception
-        """
+        # Test the bug:
+        # * enable cache
+        # * fetch document (it goes to cache)
+        # * request same URL
+        # * got exception
 
         server = self.server
 
@@ -121,6 +121,19 @@ class SpiderCacheMixin(object):
         bot.run()
         self.assertEqual(bot.points, [])
 
+    def test_cache_size(self):
+        class TestSpider(Spider):
+            def task_page(self, grab, task):
+                pass
+
+        bot = TestSpider()
+        self.setup_cache(bot)
+        bot.cache.clear()
+        bot.setup_queue()
+        bot.add_task(Task('page', self.server.get_url()))
+        bot.run()
+        self.assertEqual(bot.cache.size(), 1)
+
     def test_timeout(self):
         bot = SimpleSpider(meta={'server': self.server})
         self.setup_cache(bot)
@@ -146,23 +159,137 @@ class SpiderCacheMixin(object):
         bot.run()
         self.assertEqual([1, 2, 2, 3], bot.resp_counters)
 
+    def test_task_cache_timeout(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.points = []
+
+            def task_page(self, grab, task):
+                self.points.append(grab.doc.body)
+
+        bot = TestSpider()
+        self.setup_cache(bot)
+        bot.cache.clear()
+        bot.setup_queue()
+        # This task will receive first data from `get.data` iterator
+        bot.add_task(Task('page', url=self.server.get_url()))
+        # This task will be spawned in 1 second and will
+        # receive cached data  (cache timeout = 1.5sec > 1sec)
+        bot.add_task(Task('page', url=self.server.get_url(),
+                     delay=1, cache_timeout=1.5))
+        # This task will be spawned in 2 seconds and will not
+        # receive cached data (cache timeout = 1.5 sec < 2 sec)
+        # So, this task will receive next data from `get.data` iterator
+        bot.add_task(Task('page', url=self.server.get_url(),
+                     delay=2, cache_timeout=1.5))
+
+        self.server.response['get.data'] = iter([b'a', b'b'])
+        bot.run()
+        self.assertEqual(bot.points, [b'a', b'a', b'b'])
+
+    def test_remove_cache_item(self):
+        class TestSpider(Spider):
+            def task_page(self, grab, task):
+                pass
+
+        bot = TestSpider()
+        self.setup_cache(bot)
+        bot.cache.clear()
+        bot.setup_queue()
+        bot.add_task(Task('page', url=self.server.get_url()))
+        bot.add_task(Task('page', url=self.server.get_url('/foo')))
+        bot.run()
+        self.assertEqual(2, bot.cache.size())
+        bot.cache.remove_cache_item(self.server.get_url())
+        self.assertEqual(1, bot.cache.size())
+
+    def test_has_item(self):
+        class TestSpider(Spider):
+            def task_page(self, grab, task):
+                pass
+
+        bot = TestSpider()
+        self.setup_cache(bot)
+        bot.cache.clear()
+        bot.setup_queue()
+        bot.add_task(Task('page', url=self.server.get_url()))
+        bot.add_task(Task('page', url=self.server.get_url('/foo')))
+        bot.run()
+        self.assertTrue(bot.cache.has_item(self.server.get_url()))
+        self.assertTrue(bot.cache.has_item(self.server.get_url(), timeout=100))
+        self.assertFalse(bot.cache.has_item(self.server.get_url(), timeout=0))
+        self.assertTrue(bot.cache.has_item(self.server.get_url('/foo')))
+        self.assertFalse(bot.cache.has_item(self.server.get_url('/bar')))
+
 
 class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
     _backend = 'mongo'
 
-    def setup_cache(self, bot):
-        bot.setup_cache(backend='mongo', **MONGODB_CONNECTION)
+    def setup_cache(self, bot, **kwargs):
+        config = deepcopy(MONGODB_CONNECTION)
+        config.update(kwargs)
+        bot.setup_cache(backend='mongo', **config)
+
+    def test_too_large_document(self):
+        class TestSpider(Spider):
+            def task_page(self, grab, task):
+                pass
+
+        # The maximum BSON document size is 16 megabytes.
+        self.server.response['get.data'] = 'x' * (1024 * 1024 * 17)
+        bot = TestSpider()
+        self.setup_cache(bot, use_compression=False)
+        bot.cache.clear()
+        bot.setup_queue()
+        bot.add_task(Task('page', url=self.server.get_url()))
+        patch = mock.Mock()
+        with mock.patch('logging.error', patch):
+            bot.run()
+        self.assertEqual(bot.cache.size(), 0)
+        self.assertTrue('Document too large' in patch.call_args[0][0])
 
 
 class SpiderMysqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
     _backend = 'mysql'
 
-    def setup_cache(self, bot):
-        bot.setup_cache(backend='mysql', **MYSQL_CONNECTION)
+    def setup_cache(self, bot, **kwargs):
+        config = deepcopy(MYSQL_CONNECTION)
+        config.update(kwargs)
+        bot.setup_cache(backend='mysql', **config)
+
+    def test_create_table(self):
+        class TestSpider(Spider):
+            def task_page(self, grab, task):
+                pass
+
+        bot = TestSpider()
+        self.setup_cache(bot)
+        bot.cache.cursor.execute('begin')
+        bot.cache.cursor.execute('DROP TABLE cache')
+        bot.cache.cursor.execute('commit')
+        self.setup_cache(bot)
+        bot.cache.clear()
+        self.assertEqual(0, bot.cache.size())
 
 
 class SpiderPostgresqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
     _backend = 'postgresql'
 
-    def setup_cache(self, bot):
-        bot.setup_cache(backend='postgresql', **POSTGRESQL_CONNECTION)
+    def setup_cache(self, bot, **kwargs):
+        config = deepcopy(POSTGRESQL_CONNECTION)
+        config.update(kwargs)
+        bot.setup_cache(backend='postgresql', **config)
+
+    def test_create_table(self):
+        class TestSpider(Spider):
+            def task_page(self, grab, task):
+                pass
+
+        bot = TestSpider()
+        self.setup_cache(bot)
+        bot.cache.cursor.execute('begin')
+        bot.cache.cursor.execute('DROP TABLE cache')
+        bot.cache.cursor.execute('commit')
+        self.setup_cache(bot)
+        bot.cache.clear()
+        self.assertEqual(0, bot.cache.size())

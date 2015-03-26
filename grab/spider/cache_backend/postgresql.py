@@ -14,6 +14,7 @@ import logging
 import marshal
 import time
 import six
+from tools.encoding import make_str
 
 from grab.response import Response
 from grab.cookie import CookieManager
@@ -72,19 +73,11 @@ class CacheBackend(object):
             else:
                 ts = int(time.time()) - timeout
                 query = " AND timestamp > %d" % ts
-            # py3 hack
-            if six.PY3:
-                sql = '''
-                      SELECT data
-                      FROM cache
-                      WHERE id = %%s %(query)s
-                      ''' % {'query': query}
-            else:
-                sql = '''
-                      SELECT data
-                      FROM cache
-                      WHERE id = %%s %(query)s
-                      ''' % {'query': query}
+            sql = '''
+                  SELECT data
+                  FROM cache
+                  WHERE id = %%s %(query)s
+                  ''' % {'query': query}
             self.cursor.execute(sql, (_hash,))
             row = self.cursor.fetchone()
             self.cursor.execute('COMMIT')
@@ -101,15 +94,14 @@ class CacheBackend(object):
 
     def build_hash(self, url):
         with self.spider.save_timer('cache.read.build_hash'):
-            if isinstance(url, six.text_type):
-                url = url.encode('utf-8')
-            return sha1(url).hexdigest()
+            utf_url = make_str(url)
+            return sha1(utf_url).hexdigest()
 
     def remove_cache_item(self, url):
         _hash = self.build_hash(url)
         self.cursor.execute('begin')
         self.cursor.execute('''
-            DELETE FROM cache WHERE id = x%s
+            DELETE FROM cache WHERE id = %s
         ''', (_hash,))
         self.cursor.execute('commit')
 
@@ -126,17 +118,7 @@ class CacheBackend(object):
             response.download_size = len(body)
             response.upload_size = 0
             response.download_speed = 0
-
-            # Hack for deprecated behaviour
-            if 'response_url' in cache_item:
-                response.url = cache_item['response_url']
-            else:
-                logger.debug('You cache contains items without '
-                             '`response_url` key. It is deprecated data '
-                             'format. Please re-download you cache or '
-                             'build manually `response_url` keys.')
-                response.url = cache_item['url']
-
+            response.url = cache_item['response_url']
             response.parse()
             response.cookies = CookieManager(transport.extract_cookiejar())
             return response
@@ -163,21 +145,12 @@ class CacheBackend(object):
         data = self.pack_database_value(item)
         self.cursor.execute('BEGIN')
         ts = int(time.time())
-        # py3 hack
-        if six.PY3:
-            sql = '''
-                  UPDATE cache SET timestamp = %s, data = %s WHERE id = %s;
-                  INSERT INTO cache (id, timestamp, data)
-                  SELECT %s, %s, %s WHERE NOT EXISTS
-                    (SELECT 1 FROM cache WHERE id = %s);
-                  '''
-        else:
-            sql = '''
-                  UPDATE cache SET timestamp = %s, data = %s WHERE id = %s;
-                  INSERT INTO cache (id, timestamp, data)
-                  SELECT %s, %s, %s WHERE NOT EXISTS
-                    (SELECT 1 FROM cache WHERE id = %s);
-                  '''
+        sql = '''
+              UPDATE cache SET timestamp = %s, data = %s WHERE id = %s;
+              INSERT INTO cache (id, timestamp, data)
+              SELECT %s, %s, %s WHERE NOT EXISTS
+                (SELECT 1 FROM cache WHERE id = %s);
+              '''
         self.cursor.execute(sql, (ts, psycopg2.Binary(data), _hash,
                             _hash, ts, psycopg2.Binary(data), _hash))
         self.cursor.execute('COMMIT')
@@ -212,3 +185,7 @@ class CacheBackend(object):
                 (_hash,))
             row = self.cursor.fetchone()
         return True if row else False
+
+    def size(self):
+        self.cursor.execute('SELECT COUNT(*) from cache')
+        return self.cursor.fetchone()[0]

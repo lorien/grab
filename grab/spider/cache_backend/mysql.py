@@ -17,39 +17,12 @@ import MySQLdb
 import marshal
 import time
 import six
+from tools.encoding import make_str
 
 from grab.response import Response
 from grab.cookie import CookieManager
 
 logger = logging.getLogger('grab.spider.cache_backend.mysql')
-
-"""
-# py3 hack
-if six.PY3:
-    import re
-    from functools import reduce
-
-    RE_HEXS = re.compile('0x[a-fA-F0-9]{2}')
-
-    def _str_to_hexbytes(val):
-        val = val.decode('utf-8')
-        val = val.replace('\\x', '0x')
-        # Finds all hexadecimals
-        xs = re.findall(RE_HEXS, val)
-        xc = [chr(int(s, 16)) for s in xs]
-        # Plus escape sequences
-        xs += ['\\\\', "\\'", '\\"', '\\a', '\\b', '\\f',
-               '\\n', '\\r', '\\t', '\\v', '_\\\\_']
-        xc += ['_\\\\_', "\'", '\"', '\a', '\b', '\f', '\n',
-               '\r', '\t', '\v', '\\']
-        # Replaces all
-        val = reduce(lambda acc, args: acc.replace(*args), zip(xs, xc), val)
-        # Converts to bytes
-        return val.encode('raw_unicode_escape')
-
-    def _hexbytes_to_str(val):
-        return str(val)[2:-1]
-"""
 
 
 class CacheBackend(object):
@@ -96,31 +69,16 @@ class CacheBackend(object):
             else:
                 ts = int(time.time()) - timeout
                 query = " AND timestamp > %d" % ts
-            # py3 hack
-            if six.PY3:
-                sql = '''
-                      SELECT data
-                      FROM cache
-                      WHERE id = x%%s %(query)s
-                      ''' % {'query': query}
-            else:
-                sql = '''
-                      SELECT data
-                      FROM cache
-                      WHERE id = x%%s %(query)s
-                      ''' % {'query': query}
+            sql = '''
+                  SELECT data
+                  FROM cache
+                  WHERE id = x%%s %(query)s
+                  ''' % {'query': query}
             self.cursor.execute(sql, (_hash,))
             row = self.cursor.fetchone()
             self.cursor.execute('COMMIT')
         if row:
             data = row[0]
-            # py3 hack
-            """
-            if six.PY3:
-                # A temporary solution for MySQLdb (Py3k port)
-                # [https://github.com/davispuh/MySQL-for-Python-3]
-                data = _str_to_hexbytes(data)
-            """
             return self.unpack_database_value(data)
         else:
             return None
@@ -132,10 +90,7 @@ class CacheBackend(object):
 
     def build_hash(self, url):
         with self.spider.save_timer('cache.read.build_hash'):
-            if isinstance(url, six.text_type):
-                utf_url = url.encode('utf-8')
-            else:
-                utf_url = url
+            utf_url = make_str(url)
             return sha1(utf_url).hexdigest()
 
     def remove_cache_item(self, url):
@@ -159,17 +114,7 @@ class CacheBackend(object):
             response.download_size = len(body)
             response.upload_size = 0
             response.download_speed = 0
-
-            # Hack for deprecated behaviour
-            if 'response_url' in cache_item:
-                response.url = cache_item['response_url']
-            else:
-                logger.debug('You cache contains items without `response_url` '
-                             'key. It is deprecated data format. Please '
-                             're-download you cache or build manually '
-                             '`response_url` keys.')
-                response.url = cache_item['url']
-
+            response.url = cache_item['response_url']
             response.parse()
             response.cookies = CookieManager(transport.extract_cookiejar())
             return response
@@ -192,28 +137,13 @@ class CacheBackend(object):
     def set_item(self, url, item):
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
-        """
-        # py3 hack
-        if six.PY3:
-            # A temporary solution for MySQLdb (Py3k port)
-            # [https://github.com/davispuh/MySQL-for-Python-3]
-            data = _hexbytes_to_str(data)
-        """
         self.cursor.execute('BEGIN')
         ts = int(time.time())
-        # py3 hack
-        if six.PY3:
-            sql = '''
-                  INSERT INTO cache (id, timestamp, data)
-                  VALUES(x%s, %s, %s)
-                  ON DUPLICATE KEY UPDATE timestamp = %s, data =%s 
-                  '''
-        else:
-            sql = '''
-                  INSERT INTO cache (id, timestamp, data)
-                  VALUES(x%s, %s, %s)
-                  ON DUPLICATE KEY UPDATE timestamp = %s, data = %s
-                  '''
+        sql = '''
+              INSERT INTO cache (id, timestamp, data)
+              VALUES(x%s, %s, %s)
+              ON DUPLICATE KEY UPDATE timestamp = %s, data = %s
+              '''
         self.cursor.execute(sql, (_hash, ts, data, ts, data))
         self.cursor.execute('COMMIT')
 
@@ -238,6 +168,7 @@ class CacheBackend(object):
             else:
                 ts = int(time.time()) - timeout
                 query = " AND timestamp > %d" % ts
+            self.cursor.execute('BEGIN')
             self.cursor.execute('''
                 SELECT id
                 FROM cache
@@ -246,4 +177,12 @@ class CacheBackend(object):
                 ''' % {'query': query},
                 (_hash,))
             row = self.cursor.fetchone()
+            self.cursor.execute('COMMIT')
         return True if row else False
+
+    def size(self):
+        self.cursor.execute('BEGIN')
+        self.cursor.execute('SELECT COUNT(*) from cache')
+        row = self.cursor.fetchone()
+        self.cursor.execute('COMMIT')
+        return row[0]
