@@ -29,4 +29,7 @@ clean:
 	find -name '*.pyc' -delete
 	find -name '*.swp' -delete
 
+doc:
+	sh -c 'cd docs/en2; make html'
+
 .PHONY: all build venv flake test vtest testloop cov clean doc
