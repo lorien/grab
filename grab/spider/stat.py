@@ -19,7 +19,7 @@ class SpiderStat(object):
     collecting statistics about spider work.
     """
 
-    def add_item(self, list_name, item, display=False):
+    def add_item(self, list_name, item):
         """
         You can call multiply time this method in process of parsing.
 
@@ -33,8 +33,6 @@ class SpiderStat(object):
 
         lst = self.items.setdefault(list_name, [])
         lst.append(item)
-        if display:
-            logger.debug(list_name)
 
     def save_list(self, list_name, path):
         """
@@ -44,10 +42,10 @@ class SpiderStat(object):
         with open(path, 'wb') as out:
             lines = []
             for item in self.items.get(list_name, []):
-                if isinstance(item, six.string_types):
+                if isinstance(item, (six.text_type, six.binary_type)):
                     lines.append(smart_str(item))
                 else:
-                    lines.append(json.dumps(item))
+                    lines.append(smart_str(json.dumps(item)))
             out.write(b'\n'.join(lines) + b'\n')
 
     def render_stats(self, timing=True):
@@ -65,10 +63,7 @@ class SpiderStat(object):
         if 'download-size' in self.counters:
             out.append('Network download: %s' % metric.format_traffic_value(
                 self.counters['download-size']))
-        if hasattr(self.taskq, 'qsize'):
-            out.append('Queue size: %d' % self.taskq.qsize())
-        else:
-            out.append('Queue size: %d' % self.taskq.size())
+        out.append('Queue size: %d' % self.taskq.size())
         out.append('Threads: %d' % self.thread_number)
 
         if timing:

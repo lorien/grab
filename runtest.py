@@ -56,6 +56,7 @@ GRAB_TEST_LIST = (
     'test.grab_error',
     'test.selector_deprecated',
     'test.grab_deprecated',
+    'test.spider_stat',
 )
 
 GRAB_EXTRA_TEST_LIST = (
