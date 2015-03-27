@@ -25,7 +25,7 @@ script:
     # Override test settings with travis settings 
     - cp travis_settings.py test_settings_local.py
     # Run tests and find out the test coverage
-    - coverage run --source=grab runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis --backend-postgres
+    - coverage run --source=grab runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
 
 after_success:
   - coveralls
