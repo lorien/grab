@@ -12,10 +12,7 @@ TEST_SERVER_PORT = 9876
 TMP_DIR = None
 TMP_FILE = None
 
-# Global variable which is used in all tests to build
-# Grab instance with specific transport layer
 GLOBAL = {
-    'transport': None,
     'backends': [],
 }
 
@@ -44,69 +41,8 @@ def get_temp_file():
     return path
 
 
-def ignore_transport(transport):
-    """
-    If test function is wrapped into this decorator then
-    it should not be tested if test is performed for
-    specified transport
-    """
-
-    def wrapper(func):
-        @functools.wraps(func)
-        def test_method(*args, **kwargs):
-            if GLOBAL['transport'] == transport:
-                return
-            else:
-                func(*args, **kwargs)
-        return test_method
-    return wrapper
-
-
-def only_transport(transport):
-    """
-    If test function is wrapped into this decorator then
-    it should be called only for specified transport.
-    """
-
-    def wrapper(func):
-        @functools.wraps(func)
-        def test_method(*args, **kwargs):
-            if GLOBAL['transport'] == transport:
-                func(*args, **kwargs)
-            else:
-                return
-        return test_method
-    return wrapper
-
-
-def only_backend(backend):
-    """
-    If test function is wrapped into this decorator then
-    it should be called only for specified backend.
-    """
-
-    def wrapper(func):
-        @functools.wraps(func)
-        def test_method(*args, **kwargs):
-            if backend in GLOBAL['backends']:
-                func(*args, **kwargs)
-            else:
-                return
-        return test_method
-    return wrapper
-
-
 def build_grab(*args, **kwargs):
-    """
-    Build the Grab instance with default transport.
-
-    That func is used in all tests to build grab instance with default
-    transport. Default transport could be changed via command line::
-
-        ./runtest.py --transport=
-    """
-    if 'transport' not in kwargs:
-        kwargs['transport'] = GLOBAL['transport']
+    """Build the Grab instance with default options."""
     return Grab(*args, **kwargs)
 
 

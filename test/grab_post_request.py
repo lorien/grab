@@ -5,7 +5,7 @@ except ImportError:
     from urllib.parse import quote
 
 from grab import GrabMisuseError
-from test.util import ignore_transport, build_grab
+from test.util import build_grab
 from test.util import BaseGrabTestCase
 try:
     from urlparse import parse_qsl
@@ -71,7 +71,6 @@ class TestPostFeature(BaseGrabTestCase):
         args2 = set([(x, y[0]) for x, y in parse_qsl(qs2)])
         self.assertEqual(args1, args2)
 
-    @ignore_transport('grab.transport.requests.RequestsTransport')
     def test_multipart_post(self):
         g = build_grab(url=self.server.get_url(), debug_post=True)
         # Dict

@@ -1,5 +1,5 @@
 # coding: utf-8
-from test.util import ignore_transport, build_grab
+from test.util import build_grab
 from test.util import BaseGrabTestCase
 
 
@@ -7,7 +7,6 @@ class TestContentLimit(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    @ignore_transport('grab.transport.requests.RequestsTransport')
     def test_nobody(self):
         g = build_grab()
         g.setup(nobody=True)
@@ -16,7 +15,6 @@ class TestContentLimit(BaseGrabTestCase):
         self.assertEqual(b'', g.response.body)
         self.assertTrue(len(g.response.head) > 0)
 
-    @ignore_transport('grab.transport.requests.RequestsTransport')
     def test_body_maxsize(self):
         g = build_grab()
         g.setup(body_maxsize=100)

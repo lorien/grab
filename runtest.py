@@ -57,9 +57,6 @@ GRAB_TEST_LIST = (
     'test.selector_deprecated',
     'test.grab_deprecated',
     'test.spider_stat',
-)
-
-GRAB_EXTRA_TEST_LIST = (
     'test.grab_django',
     'test.ext_pyquery',
     'test.item_deprecated',
@@ -83,17 +80,11 @@ SPIDER_TEST_LIST = (
     'test.spider_data',
 )
 
-SPIDER_EXTRA_TEST_LIST = ()
-
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
     parser = OptionParser()
     parser.add_option('-t', '--test', help='Run only specified tests')
-    parser.add_option('--transport', help='Test specified transport',
-                      default='grab.transport.curl.CurlTransport')
-    parser.add_option('--extra', action='store_true',
-                      default=False, help='Run extra tests for specific backends')
     parser.add_option('--test-grab', action='store_true',
                       default=False, help='Run tests for Grab::Spider')
     parser.add_option('--test-spider', action='store_true',
@@ -109,8 +100,6 @@ def main():
     parser.add_option('--backend-postgresql', action='store_true',
                       default=False, help='Run extra tests that depends on postgresql')
     opts, args = parser.parse_args()
-
-    GLOBAL['transport'] = opts.transport
 
     if opts.backend_mongo:
         GLOBAL['backends'].append('mongo')
@@ -130,19 +119,12 @@ def main():
     if opts.test_all:
         test_list += GRAB_TEST_LIST
         test_list += SPIDER_TEST_LIST
-        if opts.extra:
-            test_list += GRAB_EXTRA_TEST_LIST
-            test_list += SPIDER_EXTRA_TEST_LIST
 
     if opts.test_grab:
         test_list += GRAB_TEST_LIST
-        if opts.extra:
-            test_list += GRAB_EXTRA_TEST_LIST
 
     if opts.test_spider:
         test_list += SPIDER_TEST_LIST
-        if opts.extra:
-            test_list += SPIDER_EXTRA_TEST_LIST
 
     if opts.test:
         test_list += [opts.test]

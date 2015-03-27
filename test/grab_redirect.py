@@ -1,7 +1,7 @@
 from grab import Grab
 from grab.error import GrabTooManyRedirectsError
 from test.util import BaseGrabTestCase
-from test.util import GRAB_TRANSPORT, only_transport
+from test.util import GRAB_TRANSPORT
 
 
 class RedirectController(object):
@@ -64,7 +64,6 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         self.assertEqual(self.server.request['path'], '/foo')
         self.assertEqual(g.response.url, meta_url)
 
-    @only_transport('grab.transport.curl.CurlTransport')
     def test_redirect_limit(self):
         ctl = RedirectController(10)
         self.server.response['get_callback'] = ctl.request_handler
@@ -79,7 +78,6 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         g.setup(redirect_limit=20)
         g.go(self.server.get_url())
 
-    @only_transport('grab.transport.curl.CurlTransport')
     def test_refresh_redirect_limit(self):
         ctl = RefreshRedirectController(10)
         self.server.response['get_callback'] = ctl.request_handler

@@ -1,5 +1,5 @@
 # coding: utf-8
-from test.util import build_grab, only_transport
+from test.util import build_grab
 from test.util import BaseGrabTestCase
 
 
@@ -7,7 +7,6 @@ class GrabSimpleTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    @only_transport('grab.transport.curl.CurlTransport')
     def test_empty_useragent_pycurl(self):
         g = build_grab()
 
