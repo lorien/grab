@@ -11,6 +11,7 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
+    grab/request_method
     usage/installation
     usage/testing
 
