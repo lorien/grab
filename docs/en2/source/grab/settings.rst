@@ -96,29 +96,6 @@ Redirects follow the "Location" header in 301/302 network responses, and
 also follow the URL specified in meta refresh tags.
 
 
-.. _option_hammer_mode:
-
-hammer_mode
-^^^^^^^^^^^
-
-:Type: bool
-:Default: False
-
-The special mode that forces Grab to repeat the network request in case of network errors.
-See details in :ref:`grab_hammer_mode`.
-
-
-.. _option_hammer_timeouts:
-
-hammer_timeouts
-^^^^^^^^^^^^^^^
-
-:Type: list
-:Default: ((2, 5), (5, 10), (10, 20), (15, 30))
-
-Sets timeouts in hammer mode.
-
-
 .. _option_userpwd:
 
 

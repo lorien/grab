@@ -36,3 +36,69 @@ argument of `go` method is always `url`. Except this thing all other named
 arguments of `go` and `request` are just passed to `setup` function.
 
 Full list of available settings you can see in :ref:`grab_settings`
+
+
+Grab Config Object
+------------------
+
+Every time you configure a Grab instance, all options go to the special object
+`grab.config` that holds all Grab instance settings. You can receive a copy of
+the config object and also you can setup a Grab instance with the config object:
+
+.. code:: python
+
+    >>> g = Grab(url='http://google.com/')
+    >>> g.config['url']
+    'http://google.com/'
+    >>> config = g.dump_config()
+    >>> g2 = Grab()
+    >>> g2.load_config(config)
+    >>> g2.config['url']
+    'http://google.com/'
+
+The Grab config object is simply a `dict` object some of which values are also
+`dict` objects.
+
+
+.. _grab_configuration_cloning:
+
+Grab Instance Cloning
+---------------------
+
+If you need to copy a Grab object there is a more elegant way than using
+`dump_config` and `load_config` methods:
+
+.. code:: python
+
+    g2 = g1.clone()
+
+Instance `g2` gets the same state as instance `g1`. In particular, `g2` gets
+same cookies.
+
+There is also `adopt`, which does the opposite of the `clone` method:
+
+.. code:: python
+
+    g2.adopt(g1)
+
+The `g2` instance receives the state of `g1` instance.
+
+
+.. _grab_configuration_pycurl:
+
+Setting Up the Pycurl Object
+----------------------------
+
+Sometimes you need more detailed control of network requests than Grab allows.
+In such cases you can configure the pycurl object directly. All Grab's network
+features are only the interface to the pycurl library. Any available Grab
+option just sets some option of the pycurl object. Here is a simple example of
+how to change the type of the HTTP authentication:
+
+.. code:: python
+
+    >>> import pycurl
+    >>> from grab import Grab
+    >>> g = Grab()
+    >>> g.setup(userpwd='root:123')
+    >>> g.transport.curl.setopt(pycurl.HTTPAUTH, pycurl.HTTPAUTH_NTLM)

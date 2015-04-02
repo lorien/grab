@@ -35,6 +35,8 @@ Table of Contents
     grab/request_method
     grab/request_setup
     grab/settings
+    grab/debugging
+    grab/request_headers
 
 
 
