@@ -37,6 +37,9 @@ Table of Contents
     grab/settings
     grab/debugging
     grab/request_headers
+    grab/response_body
+    grab/redirect
+    grab/forms
 
 
 
