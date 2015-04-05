@@ -1,28 +1,31 @@
-Grab documentation
-==================
+.. Grab documentation master file, created by
+   sphinx-quickstart on Fri Mar 27 02:27:14 2015.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-Grab is a python framework for building web scrapers. The Grab consists of two
-main parts:
+Welcome to Grab's documentation!
+================================
 
-1) Grab - API to create single network request and process result of response.
-2) Grab::Spider - API to create crawler i.e. class that contains methods (handlers)
-to process each spawned network request. Grab:Spider allows you to spawn
-asynchronous network requests.
+Grab is python framework for building web scrapers. With Grab you can build web
+scrapers of various complexity: from simple 5-line scripts to complex
+asynchronous web-site crawlers processing millions of web pages. Grab provides
+API for performing network requests and for handling received content e.g.
+interacting with DOM tree of the HTML document.
 
-When to use Grab API:
+There are two main parts in Grab library:
 
-* If you want just to send one single network request and process the response
-* In most cases when you think to use urllib, urllib2, pycurl or requests libs.
+    1) The single request/response API that allows you build network request,
+    perform it and work with the received content. That API is a wrapper
+    of the pycurl and lxml libraries.
 
-When to use Grab:Spider API:
+    2) The Spider API to build asynchronous web crawlers. You write class that
+    define handlers for each type of network request. Each handler could spawn
+    new network requests. Network requests are processed simultaneusly with a
+    pool of asynchronous web sockets.
 
-* If you want to extract data from a web site and you need to process pages
-  of different types and you need to spawn multiple parallel network requests.
-* In most cases when you think about of using scrapy.
 
-Grab is not only a tool to build network requests and download network responses, it is also a tool to handle the data of network responses and extract information you need. Grab provides a flexible API to query parts of the DOM trees of HTML documents.
-
-See the quick start tutorials to quickly get an overview of how to use Grab and Grab::Spider.
+Table of Contents
+=================
 
 Grab User Manual
 ----------------
@@ -30,37 +33,41 @@ Grab User Manual
 .. toctree::
     :maxdepth: 2
 
-    grab_quickstart
-    grab_installation
-    grab_configuration
-    grab_debugging
-    grab_options
-    grab_http_headers
-    grab_http_methods
-    grab_response_body
-    grab_redirect
-    grab_network_errors
-    grab_forms
-    grab_charset
-    grab_cookies
-    grab_proxy
-    grab_response_search
-    pycurl
-    changelog
-    grab_response
-    grab_what_is_inside
+    usage/installation
+    usage/testing
+    grab/request_method
+    grab/request_setup
+    grab/settings
+    grab/debugging
+    grab/request_headers
+    grab/response_body
+    grab/redirect
+    grab/forms
+    grab/network_errors
+    grab/charset
+    grab/cookies
+    grab/proxy
+    grab/response_search
+    grab/pycurl
+    grab/response
+
 
 API Reference
 -------------
 
 Using the API Reference you can get an overview of what modules, classes, and methods exist, what they do, what they return, and what parameters they accept.
 
-Base Grab Interface
-~~~~~~~~~~~~~~~~~~~
-
 .. toctree::
     :maxdepth: 2
 
-    api_grab_base
-    api_grab_error
-    api_grab_cookie
+    api/grab_base
+    api/grab_error
+    api/grab_cookie
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
