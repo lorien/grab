@@ -27,6 +27,8 @@ There are two main parts in Grab library:
 Table of Contents
 =================
 
+.. _grab_toc:
+
 Grab User Manual
 ----------------
 
@@ -51,6 +53,29 @@ Grab User Manual
     grab/pycurl
     grab/response
 
+
+.. _spider_toc:
+
+Grab::Spider User Manual
+------------------------
+
+Grab::Spider is a framework to build well-structured asyncronous web-site
+crawlers.
+
+.. toctree::
+    :maxdepth: 2
+
+    spider/intro
+    spider/task
+    spider/task_queue
+
+spider/error_handling
+spider/cache
+spider/proxy - new
+spider/stat - new (inc_count/add_item/save_list/render_stats/save_all_lists)
+
+
+.. _api_toc:
 
 API Reference
 -------------
