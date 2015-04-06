@@ -1,4 +1,3 @@
-====
 Grab
 ====
 
@@ -18,8 +17,15 @@ Grab
    :target: https://landscape.io/github/lorien/grab/v06
 
 
-Grab is a python web scraping framework. Grab provides tons of helpful methods to scrape web sites
-and to process the scraped content:
+.. image:: https://readthedocs.org/projects/grab/badge/?version=latest
+    :target: https://docs.grablib.org/en/latest/
+
+
+What is Grab?
+-------------
+
+Grab is a python web scraping framework. Grab provides tons of helpful methods
+to scrape web sites and to process the scraped content:
 
 * Automatic cookies (session) support
 * HTTP and SOCKS proxy with and without authorization
@@ -30,15 +36,14 @@ and to process the scraped content:
 * Flexible customization of HTTP requests
 * Automatic charset detection
 * Powerful API of extracting info from HTML documents with XPATH queries
-* Asynchronous API to make thousands of simultaneous queries. This part of library called Spider and it is too big to even list its features in this README.
+* Asynchronous API to make thousands of simultaneous queries. This part of
+  library called Spider and it is too big to even list its features
+  in this README.
 * Python 3 ready
-* And much, much more
-* Grab has written by the guy who is doing site scraping since 2005
 
-Check out docs (RU): https://github.com/lorien/grab/tree/master/docs
-Check out docs (EN): https://github.com/lorien/grab/tree/master/docs2/source
 
-Example of Grab usage:
+Grab Example
+------------
 
 .. code:: python
 
@@ -53,7 +58,9 @@ Example of Grab usage:
         print('%s: %s' % (elem.text(), elem.attr('href')))
 
 
-Example of Grab::Spider usage:
+
+Grab::Spider Example
+--------------------
 
 .. code:: python
 
@@ -76,7 +83,7 @@ Example of Grab::Spider usage:
 
 
 Installation
-============
+------------
 
 Pip is recommended way to install Grab and its dependencies:
 
@@ -87,19 +94,20 @@ Pip is recommended way to install Grab and its dependencies:
 See details here https://github.com/lorien/grab/blob/master/docs2/source/grab_installation.rst
 
 
-Documentation
-=============
+Documentation and Help
+----------------------
 
-Russian docs: http://docs.grablib.org
+Documentaion: http://docs.grablib.org/en/latest/
 
-English docs in progress: https://github.com/lorien/grab/tree/master/docs2/source
+English mailing list: http://groups.google.com/group/grab-users/
 
-Mailing List (Ru/En languages): http://groups.google.com/group/python-grab/
+Russian mailing list: http://groups.google.com/group/python-grab/
 
 
 Contribution
 ============
 
-If you have found a bug or wish a new feature please open new issue on github:
+To report a bug please use github issue tracker: https://github.com/lorien/grab/issues
 
-* https://github.com/lorien/grab/issues
+If you want to develop new feature in Grab please use issue tracker to
+describe what you want to do or contact me at lorien@lorien.name
