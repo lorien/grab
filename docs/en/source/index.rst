@@ -68,11 +68,12 @@ crawlers.
     spider/intro
     spider/task
     spider/task_queue
+    spider/cache
+    spider/error_handling
 
-spider/error_handling
-spider/cache
-spider/proxy - new
-spider/stat - new (inc_count/add_item/save_list/render_stats/save_all_lists)
+..
+    spider/proxy - new
+    spider/stat - new (inc_count/add_item/save_list/render_stats/save_all_lists)
 
 
 .. _api_toc:
