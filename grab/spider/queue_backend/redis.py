@@ -14,6 +14,7 @@ import logging
 from grab.spider.queue_backend.base import QueueInterface
 from grab.spider.error import SpiderMisuseError
 
+
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, queue_name=None, **kwargs):
         super(QueueInterface, self).__init__(**kwargs)
@@ -49,8 +50,3 @@ class QueueBackend(QueueInterface):
     def clear(self):
         con = StrictRedis()
         con.delete(self.queue_name)
-        #try:
-            #while True:
-                #self.get()
-        #except queue.Empty:
-            #pass

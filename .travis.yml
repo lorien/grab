@@ -5,18 +5,27 @@ python:
   - "3.3"
   - "3.4"
 
+services:
+  - mongodb
+  - redis-server
+  - mongodb
+
 install:
-  - pip install coverage
-  - pip install coveralls
-  - pip install flake8
-  - pip install --use-mirrors tornado
-  - pip install -r requirements.txt --use-mirrors
+  - pip install -r requirements_dev.txt
+  - pip install -r requirements_dev_backend.txt
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
   - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
   - python setup.py develop
 
+before_script:
+  - mysql -e 'create database spider_test'
+  - psql -c 'create database spider_test' -U postgres
+
 script:
-  - coverage run --source=grab runtest.py --test-all --extra
+    # Override test settings with travis settings 
+    - cp travis_settings.py test_settings_local.py
+    # Run tests and find out the test coverage
+    - coverage run --source=grab runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
 
 after_success:
   - coveralls

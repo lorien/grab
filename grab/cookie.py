@@ -3,14 +3,15 @@ RTFM:
 
 * http://docs.python.org/2/library/cookielib.html#cookie-objects
 
-Some code got from https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
+Some code got from
+    https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 """
+from __future__ import absolute_import
 try:
     from cookielib import CookieJar, Cookie
 except ImportError:
     from http.cookiejar import CookieJar, Cookie
 import json
-import dummy_threading
 
 from grab.error import GrabMisuseError
 
@@ -69,10 +70,10 @@ class CookieManager(object):
             self.cookiejar = cookiejar
         else:
             self.cookiejar = CookieJar()
-        #self.disable_cookiejar_lock(self.cookiejar)
+        # self.disable_cookiejar_lock(self.cookiejar)
 
-    #def disable_cookiejar_lock(self, cj):
-        #cj._cookies_lock = dummy_threading.RLock()
+    # def disable_cookiejar_lock(self, cj):
+        # cj._cookies_lock = dummy_threading.RLock()
 
     def set(self, name, value, **kwargs):
         """Add new cookie or replace existing cookie with same parameters.

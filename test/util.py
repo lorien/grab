@@ -2,17 +2,20 @@ import os
 import shutil
 import tempfile
 import functools
+from test_server import TestServer
+from unittest import TestCase
 
 from grab import Grab
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_SERVER_PORT = 9876
+TMP_DIR = None
+TMP_FILE = None
 
-# Global variable which is used in all tests to build
-# Grab instance with specific transport layer
 GLOBAL = {
-    'transport': None,
     'backends': [],
 }
+
 
 def prepare_test_environment():
     global TMP_DIR, TMP_FILE
@@ -32,72 +35,26 @@ def clear_directory(path):
         for _dir in dirs:
             shutil.rmtree(os.path.join(root, _dir))
 
+
 def get_temp_file():
     handler, path = tempfile.mkstemp(dir=TMP_DIR)
     return path
 
 
-def ignore_transport(transport):
-    """
-    If test function is wrapped into this decorator then
-    it should not be tested if test is performed for
-    specified transport
-    """
-
-    def wrapper(func):
-        @functools.wraps(func)
-        def test_method(*args, **kwargs):
-            if GLOBAL['transport'] == transport:
-                return
-            else:
-                func(*args, **kwargs)
-        return test_method
-    return wrapper
+def build_grab(*args, **kwargs):
+    """Build the Grab instance with default options."""
+    return Grab(*args, **kwargs)
 
 
-def only_transport(transport):
-    """
-    If test function is wrapped into this decorator then
-    it should be called only for specified transport.
-    """
+class BaseGrabTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.server = TestServer(port=TEST_SERVER_PORT)
+        cls.server.start()
 
-    def wrapper(func):
-        @functools.wraps(func)
-        def test_method(*args, **kwargs):
-            if GLOBAL['transport'] == transport:
-                func(*args, **kwargs)
-            else:
-                return
-        return test_method
-    return wrapper
+    @classmethod
+    def tearDownClass(cls):
+        cls.server.stop()
 
-
-def only_backend(backend):
-    """
-    If test function is wrapped into this decorator then
-    it should be called only for specified backend.
-    """
-
-    def wrapper(func):
-        @functools.wraps(func)
-        def test_method(*args, **kwargs):
-            if backend in GLOBAL['backends']:
-                func(*args, **kwargs)
-            else:
-                return
-        return test_method
-    return wrapper
-
-
-def build_grab(**kwargs):
-    """
-    Build the Grab instance with default transport.
-
-    That func is used in all tests to build grab instance with default
-    transport. Default transport could be changed via command line::
-
-        ./runtest.py --transport=
-    """
-    if not 'transport' in kwargs:
-        kwargs['transport'] = GLOBAL['transport']
-    return Grab(**kwargs)
+    def setUp(self):
+        self.server.reset()

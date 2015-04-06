@@ -1,21 +1,29 @@
 flake:
-	flake8 grab test
+	flake8 grab test setup.py
 
 flake_verbose:
-	flake8 grab test --show-pep8
+	flake8 grab test setup.py --show-pep8
 
 test:
-	./runtest.py --test-all
+	tox -e py27
 
-coverage:
+test_all:
+	tox -e py27-all,py34-all
+
+coverage_nobackend:
 	coverage erase
 	coverage run --source=grab ./runtest.py --test-all
 	coverage report -m
 
-coverage_full:
+coverage:
 	coverage erase
-	coverage run --source=grab ./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis
+	coverage run --source=grab ./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis --backend-postgres
 	coverage report -m
+
+coverage_missing:
+	coverage erase
+	coverage run --source=grab ./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis --backend-postgres
+	coverage report -m | grep -v '100%' | grep -v Missing | grep -v -- '----' | sort -k 3 -nr
 
 clean:
 	find -name '*.pyc' -delete
@@ -23,5 +31,11 @@ clean:
 
 upload:
 	python setup.py sdist upload
+
+doc:
+	sh -c 'cd docs/en; make html'
+
+doc_ru:
+	sh -c 'cd docs/ru; make html'
 
 .PHONY: all build venv flake test vtest testloop cov clean doc

@@ -1,37 +1,33 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-import email
 import logging
-#import urllib
+# import urllib
 try:
     from cStringIO import StringIO
 except ImportError:
     from io import BytesIO as StringIO
-import threading
 import random
 try:
-    from urlparse import urlsplit, urlunsplit
+    from urlparse import urlsplit
 except ImportError:
-    from urllib.parse import urlsplit, urlunsplit
+    from urllib.parse import urlsplit
 import pycurl
 import tempfile
 import os
-import pdb
 try:
     from cookielib import CookieJar
 except ImportError:
     from http.cookiejar import CookieJar
+import six
 
 from grab.cookie import create_cookie, CookieManager
-from grab.upload import UploadContent, UploadFile
 from grab import error
 from grab.response import Response
-from grab.tools.http import (encode_cookies, smart_urlencode, normalize_unicode,
-                             normalize_http_values, normalize_post_data, normalize_url)
-from grab.tools.user_agent import random_user_agent
-from grab.tools.encoding import smart_str, smart_unicode, decode_list, decode_pairs
-from grab.util.py3k_support import *
+from tools.http import (encode_cookies, normalize_http_values,
+                        normalize_post_data, normalize_url)
+from tools.user_agent import random_user_agent
+from tools.encoding import smart_str, decode_list, decode_pairs
 
 logger = logging.getLogger('grab.transport.curl')
 
@@ -43,16 +39,17 @@ logger = logging.getLogger('grab.transport.curl')
 # http://curl.haxx.se/mail/curlpython-2005-06/0004.html
 # http://curl.haxx.se/mail/lib-2010-03/0114.html
 
-#CURLOPT_NOSIGNAL
-#Pass a long. If it is 1, libcurl will not use any functions that install
+# CURLOPT_NOSIGNAL
+# Pass a long. If it is 1, libcurl will not use any functions that install
 # signal handlers or any functions that cause signals to be sent to the
 # process. This option is mainly here to allow multi-threaded unix applications
 # to still set/use all timeout options etc, without risking getting signals.
 # (Added in 7.10)
 
-#If this option is set and libcurl has been built with the standard name
+# If this option is set and libcurl has been built with the standard name
 # resolver, timeouts will not occur while the name resolve takes place.
-# Consider building libcurl with c-ares support to enable asynchronous DNS 
+# Consider building libcurl with c-ares support to enable
+# asynchronous DNS
 # lookups, which enables nice timeouts for name resolves without signals.
 
 try:
@@ -103,8 +100,6 @@ class CurlTransport(object):
         Process head of response.
         """
 
-        #if self.config['nohead']:
-            #return 0
         self.response_head_chunks.append(chunk)
         # Returning None implies that all bytes were written
         return None
@@ -153,10 +148,12 @@ class CurlTransport(object):
         if _type == pycurl.INFOTYPE_DATA_OUT:
             self.request_body += text
 
-        #if _type == pycurl.INFOTYPE_TEXT:
-            #if self.request_log is None:
-                #self.request_log = ''
-            #self.request_log += text
+        """
+        if _type == pycurl.INFOTYPE_TEXT:
+            if self.request_log is None:
+                self.request_log = ''
+            self.request_log += text
+        """
 
         if self.verbose_logging:
             if _type in (pycurl.INFOTYPE_TEXT, pycurl.INFOTYPE_HEADER_IN,
@@ -181,20 +178,22 @@ class CurlTransport(object):
         try:
             request_url = normalize_url(grab.config['url'])
         except Exception as ex:
-            raise error.GrabInvalidUrl(u'%s: %s' % (unicode(ex), grab.config['url']))
+            raise error.GrabInvalidUrl(
+                u'%s: %s' % (six.text_type(ex), grab.config['url']))
 
         # py3 hack
-        if not PY3K:
+        if not six.PY3:
             request_url = smart_str(request_url)
 
         self.curl.setopt(pycurl.URL, request_url)
 
-        self.curl.setopt(pycurl.FOLLOWLOCATION, 1 if grab.config['follow_location'] else 0)
+        self.curl.setopt(pycurl.FOLLOWLOCATION,
+                         1 if grab.config['follow_location'] else 0)
         self.curl.setopt(pycurl.MAXREDIRS, grab.config['redirect_limit'])
         self.curl.setopt(pycurl.CONNECTTIMEOUT, grab.config['connect_timeout'])
         self.curl.setopt(pycurl.TIMEOUT, grab.config['timeout'])
         self.curl.setopt(pycurl.IPRESOLVE, pycurl.IPRESOLVE_V4)
-        #self.curl.setopt(pycurl.DNS_CACHE_TIMEOUT, 0)
+        # self.curl.setopt(pycurl.DNS_CACHE_TIMEOUT, 0)
         if not grab.config['connection_reuse']:
             self.curl.setopt(pycurl.FRESH_CONNECT, 1)
             self.curl.setopt(pycurl.FORBID_REUSE, 1)
@@ -206,7 +205,8 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
         else:
             if not grab.config['body_storage_dir']:
-                raise error.GrabMisuseError('Option body_storage_dir is not defined')
+                raise error.GrabMisuseError(
+                    'Option body_storage_dir is not defined')
             self.setup_body_file(grab.config['body_storage_dir'],
                                  grab.config['body_storage_filename'])
             self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
@@ -240,52 +240,55 @@ class CurlTransport(object):
         self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)
 
         # Disabled to avoid SSL3_READ_BYTES:sslv3 alert handshake failure error
-        #self.curl.setopt(pycurl.SSLVERSION, pycurl.SSLVERSION_SSLv3)
+        # self.curl.setopt(pycurl.SSLVERSION, pycurl.SSLVERSION_SSLv3)
 
         if grab.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
             if grab.config['multipart_post']:
-                if isinstance(grab.config['multipart_post'], basestring):
-                    raise error.GrabMisuseError('multipart_post option could not be a string')
-                post_items = normalize_http_values(grab.config['multipart_post'],
-                                                   charset=grab.config['charset'])
+                if isinstance(grab.config['multipart_post'], six.string_types):
+                    raise error.GrabMisuseError(
+                        'multipart_post option could not be a string')
+                post_items = normalize_http_values(
+                    grab.config['multipart_post'],
+                    charset=grab.config['charset'])
                 # py3 hack
-                if PY3K:
-                    post_items = decode_pairs(post_items, grab.config['charset'])
-                #import pdb; pdb.set_trace()
-                self.curl.setopt(pycurl.HTTPPOST, post_items) 
+                if six.PY3:
+                    post_items = decode_pairs(post_items,
+                                              grab.config['charset'])
+                # import pdb; pdb.set_trace()
+                self.curl.setopt(pycurl.HTTPPOST, post_items)
             elif grab.config['post']:
-                post_data = normalize_post_data(grab.config['post'], grab.config['charset'])
+                post_data = normalize_post_data(grab.config['post'],
+                                                grab.config['charset'])
                 # py3 hack
-                #if PY3K:
-                #    post_data = smart_unicode(post_data, grab.config['charset'])
+                # if six.PY3:
+                #    post_data = smart_unicode(post_data,
+                #                              grab.config['charset'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
             else:
                 self.curl.setopt(pycurl.POSTFIELDS, '')
         elif grab.request_method == 'PUT':
             data = grab.config['post']
-            if isinstance(data, unicode) or (not PY3K and not isinstance(data, basestring)):
+            if isinstance(data, six.text_type):
                 # py3 hack
-                #if PY3K:
+                # if six.PY3:
                 #    data = data.encode('utf-8')
-                #else:
-                raise error.GrabMisuseError('Value of post option could be only '\
-                                            'byte string if PUT method is used')
+                # else:
+                raise error.GrabMisuseError(
+                    'Value of post option could be only '
+                    'byte string if PUT method is used')
             self.curl.setopt(pycurl.UPLOAD, 1)
-            self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read) 
+            self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read)
             self.curl.setopt(pycurl.INFILESIZE, len(data))
         elif grab.request_method == 'PATCH':
             data = grab.config['post']
-            if isinstance(data, unicode) or not isinstance(data, basestring):
-                # py3 hack
-                if PY3K:
-                    data = data.encode('utf-8')
-                else:
-                    raise error.GrabMisuseError('Value of post option could be only byte '\
-                                                'string if PATCH method is used')
+            if isinstance(data, six.text_type):
+                raise error.GrabMisuseError(
+                    'Value of post option could be only byte '
+                    'string if PATCH method is used')
             self.curl.setopt(pycurl.UPLOAD, 1)
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'PATCH')
-            self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read) 
+            self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read)
             self.curl.setopt(pycurl.INFILESIZE, len(data))
         elif grab.request_method == 'DELETE':
             self.curl.setopt(pycurl.CUSTOMREQUEST, 'DELETE')
@@ -296,12 +299,13 @@ class CurlTransport(object):
         elif grab.request_method == 'GET':
             self.curl.setopt(pycurl.HTTPGET, 1)
         else:
-            raise error.GrabMisuseError('Invalid method: %s' % grab.request_method)
-        
+            raise error.GrabMisuseError('Invalid method: %s' %
+                                        grab.request_method)
+
         headers = grab.config['common_headers']
         if grab.config['headers']:
             headers.update(grab.config['headers'])
-        header_tuples = [str('%s: %s' % x) for x\
+        header_tuples = [str('%s: %s' % x) for x
                          in headers.items()]
         self.curl.setopt(pycurl.HTTPHEADER, header_tuples)
 
@@ -311,21 +315,24 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.REFERER, str(grab.config['referer']))
 
         if grab.config['proxy']:
-            self.curl.setopt(pycurl.PROXY, str(grab.config['proxy'])) 
+            self.curl.setopt(pycurl.PROXY, str(grab.config['proxy']))
         else:
             self.curl.setopt(pycurl.PROXY, '')
 
         if grab.config['proxy_userpwd']:
-            self.curl.setopt(pycurl.PROXYUSERPWD, str(grab.config['proxy_userpwd']))
+            self.curl.setopt(pycurl.PROXYUSERPWD,
+                             str(grab.config['proxy_userpwd']))
 
         if grab.config['proxy_type']:
-            ptype = getattr(pycurl, 'PROXYTYPE_%s' % grab.config['proxy_type'].upper())
-            self.curl.setopt(pycurl.PROXYTYPE, ptype)
+            key = 'PROXYTYPE_%s' % grab.config['proxy_type'].upper()
+            self.curl.setopt(pycurl.PROXYTYPE, getattr(pycurl, key))
 
         if grab.config['encoding']:
-            if 'gzip' in grab.config['encoding'] and not 'zlib' in pycurl.version:
-                raise error.GrabMisuseError('You can not use gzip encoding because '\
-                                      'pycurl was built without zlib support')
+            if ('gzip' in grab.config['encoding'] and
+                    'zlib' not in pycurl.version):
+                raise error.GrabMisuseError(
+                    'You can not use gzip encoding because '
+                    'pycurl was built without zlib support')
             self.curl.setopt(pycurl.ENCODING, grab.config['encoding'])
 
         if grab.config['userpwd']:
@@ -335,7 +342,8 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.INTERFACE, grab.config['interface'])
 
         if grab.config.get('reject_file_size') is not None:
-            self.curl.setopt(pycurl.MAXFILESIZE, grab.config['reject_file_size'])
+            self.curl.setopt(pycurl.MAXFILESIZE,
+                             grab.config['reject_file_size'])
 
     def process_cookie_options(self, grab, request_url):
         host = urlsplit(request_url).netloc.split(':')[0]
@@ -357,8 +365,6 @@ class CurlTransport(object):
                 else:
                     domain = ''
                 grab.cookies.set(
-                    #name=normalize_unicode(name, grab.config['charset']),
-                    #value=normalize_unicode(value, grab.config['charset']),
                     name=name,
                     value=value,
                     domain=domain
@@ -377,15 +383,17 @@ class CurlTransport(object):
             http_only = cookie_domain.startswith('#httponly_')
             if http_only:
                 cookie_domain = cookie_domain.replace('#httponly_', '')
-            if not cookie_domain or host_nowww in cookie_domain \
-                    or cookie_domain in host_nowww:
-                encoded = encode_cookies({cookie.name: cookie.value}, join=True,
-                                         charset=grab.config['charset'])
+            if not cookie_domain or cookie_domain in host_nowww:
+                encoded = encode_cookies(
+                    {cookie.name: cookie.value},
+                    join=True, charset=grab.config['charset'])
                 cookie_string = b'Set-Cookie: ' + encoded
                 if len(cookie.path) != 0:
                     cookie_string += b'; path=' + cookie.path.encode('ascii')
                 if '.' in host_nowww:
-                    cookie_string += b'; domain=' + cookie_domain.encode('ascii')
+                    if cookie_domain:
+                        cookie_string += b'; domain=' +\
+                                         cookie_domain.encode('ascii')
                 if http_only:
                     cookie_string += b'; HttpOnly'
                 self.curl.setopt(pycurl.COOKIELIST, cookie_string)
@@ -417,13 +425,14 @@ class CurlTransport(object):
                 elif ex.args[0] == 67:
                     raise error.GrabAuthError(ex.args[0], ex.args[1])
                 elif ex.args[0] == 47:
-                    raise error.GrabTooManyRedirectsError(ex.args[0], ex.args[1])
+                    raise error.GrabTooManyRedirectsError(ex.args[0],
+                                                          ex.args[1])
                 else:
                     raise error.GrabNetworkError(ex.args[0], ex.args[1])
 
     def prepare_response(self, grab):
         # py3 hack
-        if PY3K:
+        if six.PY3:
             self.response_head_chunks = decode_list(self.response_head_chunks)
 
         if self.body_file:
@@ -470,12 +479,15 @@ class CurlTransport(object):
         """
 
         # Example of line:
-        # www.google.com\tFALSE\t/accounts/\tFALSE\t0\tGoogleAccountsLocale_session\ten
+        # www.google.com\tFALSE\t/accounts/\tFALSE\t0'
+        # \tGoogleAccountsLocale_session\ten
         # Fields:
         # * domain
-        # * whether or not all machines under that domain can read the cookie's information.
+        # * whether or not all machines under that domain can
+        # read the cookie's information.
         # * path
-        # * Secure Flag: whether or not a secure connection (HTTPS) is required to read the cookie.
+        # * Secure Flag: whether or not a secure connection (HTTPS)
+        # is required to read the cookie.
         # * exp. timestamp
         # * name
         # * value
@@ -483,7 +495,7 @@ class CurlTransport(object):
         for line in self.curl.getinfo(pycurl.INFO_COOKIELIST):
             values = line.split('\t')
             # old
-            #cookies[values[-2]] = values[-1]
+            # cookies[values[-2]] = values[-1]
             # new
             cookie = create_cookie(
                 name=values[5],
@@ -514,6 +526,6 @@ class CurlTransport(object):
         self.__dict__ = state
 
 
-#from grab.base import BaseGrab
-#class GrabCurl(CurlTransportExtension, BaseGrab):
-    #pass
+# from grab.base import BaseGrab
+# class GrabCurl(CurlTransportExtension, BaseGrab):
+    # pass

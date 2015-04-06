@@ -1,2 +1,4 @@
-from grab.spider.base import Spider, Task, Data, NullTask, inline_task
-from grab.spider.error import *
+from grab.spider.base import Spider  # noqa
+from grab.spider.data import Data  # noqa
+from grab.spider.task import Task, inline_task, NullTask  # noqa
+from grab.spider.error import *  # noqa

@@ -2,12 +2,10 @@ try:
     import Queue as queue
 except ImportError:
     import queue
-from time import time
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
-import uuid
 from bson import Binary
 import logging
 import pymongo
@@ -36,10 +34,6 @@ class QueueBackend(QueueInterface):
         self.collection.ensure_index('priority')
 
         super(QueueInterface, self).__init__(**kwargs)
-
-    def clear_collection(self):
-        logger.debug('Deleting collection: %s' % self.collection)
-        self.collection.drop()
 
     def size(self):
         return self.collection.count()

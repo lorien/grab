@@ -1,4 +1,6 @@
-def check_ares_support():
-    import pycurl
+from __future__ import absolute_import
+from tools.system import *  # noqa
+import logging
 
-    return 'c-ares' in pycurl.version
+logging.error('Module `grab.tools.system` is deprecated. '
+              'Use `tools.system` module.')

@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+
+
 class UploadContent(str):
     """
     TODO: docstring
@@ -28,5 +31,3 @@ class UploadFile(str):
         # move to transport extension
         import pycurl
         return pycurl.FORM_FILE, self.path
-
-

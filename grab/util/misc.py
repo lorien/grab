@@ -1,7 +1,7 @@
 import re
 from functools import wraps
 import logging
-#from grab.error import GrabMisuseError
+# from grab.error import GrabMisuseError
 
 
 def camel_case_to_underscore(name):
@@ -21,7 +21,7 @@ def deprecated(use_instead=None):
             message = "Call to deprecated function %s." % func.__name__
             if use_instead:
                 message += " Use %s instead." % use_instead
-            #warnings.warn(message, category=GrabMisuseError, stacklevel=2)
+            # warnings.warn(message, category=GrabMisuseError, stacklevel=2)
             logging.error(message)
             return func(*args, **kwargs)
         return new_func

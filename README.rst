@@ -2,11 +2,11 @@
 Grab
 ====
 
-.. image:: https://travis-ci.org/lorien/grab.png?branch=master
-    :target: https://travis-ci.org/lorien/grab?branch=master
+.. image:: https://travis-ci.org/lorien/grab.png?branch=v06
+    :target: https://travis-ci.org/lorien/grab?branch=v06
 
-.. image:: https://coveralls.io/repos/lorien/grab/badge.svg?branch=master
-    :target: https://coveralls.io/r/lorien/grab?branch=master
+.. image:: https://coveralls.io/repos/lorien/grab/badge.svg?branch=v06
+    :target: https://coveralls.io/r/lorien/grab?branch=v06
 
 .. image:: https://pypip.in/download/grab/badge.svg?period=month
     :target: https://pypi.python.org/pypi/grab
@@ -14,8 +14,8 @@ Grab
 .. image:: https://pypip.in/version/grab/badge.svg
     :target: https://pypi.python.org/pypi/grab
 
-.. image:: https://landscape.io/github/lorien/grab/master/landscape.png
-   :target: https://landscape.io/github/lorien/grab/master
+.. image:: https://landscape.io/github/lorien/grab/v06/landscape.png
+   :target: https://landscape.io/github/lorien/grab/v06
 
 
 Grab is a python web scraping framework. Grab provides tons of helpful methods to scrape web sites
@@ -38,7 +38,9 @@ and to process the scraped content:
 Check out docs (RU): https://github.com/lorien/grab/tree/master/docs
 Check out docs (EN): https://github.com/lorien/grab/tree/master/docs2/source
 
-Example of Grab usage::
+Example of Grab usage:
+
+.. code:: python
 
     from grab import Grab
 
@@ -48,10 +50,12 @@ Example of Grab usage::
     g.set_input('password', '***')
     g.submit()
     for elem in g.doc.select('//ul[@id="repo_listing"]/li/a'):
-        print '%s: %s' % (elem.text(), elem.attr('href'))
+        print('%s: %s' % (elem.text(), elem.attr('href')))
 
 
-Example of Grab::Spider usage::
+Example of Grab::Spider usage:
+
+.. code:: python
 
     from grab.spider import Spider, Task
     import logging
@@ -63,7 +67,7 @@ Example of Grab::Spider usage::
                 yield Task('search', url=url)
         
         def task_search(self, grab, task):
-            print grab.doc.select('//div[@class="s"]//cite').text()
+            print(grab.doc.select('//div[@class="s"]//cite').text())
 
 
     logging.basicConfig(level=logging.DEBUG)
@@ -74,7 +78,9 @@ Example of Grab::Spider usage::
 Installation
 ============
 
-Pip is recommended way to install Grab and its dependencies::
+Pip is recommended way to install Grab and its dependencies:
+
+.. code:: bash
 
     $ pip install grab
 

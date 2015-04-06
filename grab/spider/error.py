@@ -1,5 +1,8 @@
+from __future__ import absolute_import
+
+
 __all__ = ('SpiderError', 'SpiderMisuseError', 'FatalError',
-           'StopTaskProcessing', 'SpiderInternalError',
+           'SpiderInternalError',
            'NoTaskHandler', 'NoDataHandler')
 
 
@@ -13,12 +16,6 @@ class SpiderMisuseError(SpiderError):
 
 class FatalError(SpiderError):
     """Fatal error which should stop parsing process"""
-
-
-class StopTaskProcessing(SpiderError):
-    """
-    Used in middlewares to stop task processing
-    """
 
 
 class SpiderInternalError(SpiderError):

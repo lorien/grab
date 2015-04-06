@@ -1,23 +1,5 @@
-# You probably need these packages
 lxml
 pycurl
-cssselect
-tornado
-pytils
-pyquery
-django
-redis
-qr
-pymongo
-
-# Optional packages required to use some part of Grab
-#redis
-#qr
-#pymongo
-#mysql-python
-#tornado
-#pytils
-
-# Python3 alternate packages
-# mysql:
-# https://github.com/davispuh/MySQL-for-Python-3/archive/master.zip
+selection
+tools
+six

@@ -5,6 +5,7 @@
 """
 The core of grab package: the Grab class.
 """
+from __future__ import absolute_import
 import logging
 import os
 from random import randint
@@ -12,26 +13,19 @@ from copy import copy, deepcopy
 import threading
 import itertools
 import collections
-try:
-    from urlparse import urljoin
-except ImportError:
-    from urllib.parse import urljoin
+from six.moves.urllib.parse import urljoin
 import email
 from datetime import datetime
 import weakref
+import six
 
-from grab.tools.html import find_refresh_url, find_base_url
+from tools.html import find_refresh_url, find_base_url
 from grab.document import Document
 from grab import error
-from grab.tools.http import normalize_http_values
+from tools.http import normalize_http_values
 from grab.cookie import CookieManager
 from grab.proxy import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
-from grab.kit_interface import GrabKitInterface
-from grab.ext.form import FormExtension
-
-from grab.util.py2old_support import *
-from grab.util.py3k_support import *
 
 __all__ = ('Grab',)
 # This counter will used in enumerating network queries.
@@ -197,7 +191,7 @@ class Grab(DeprecatedThings):
 
                  # Dirty hack to make it possible to inherit Grab from
                  # multiple base classes with __slots__
-                 '_doc', '_kit',
+                 '_doc',
                  )
 
     # Attributes which should be processed when clone
@@ -245,7 +239,7 @@ class Grab(DeprecatedThings):
 
     def setup_transport(self, transport_param):
         self.transport_param = transport_param
-        if isinstance(transport_param, basestring):
+        if isinstance(transport_param, six.string_types):
             mod_path, cls_name = transport_param.rsplit('.', 1)
             try:
                 cls = TRANSPORT_CACHE[(mod_path, cls_name)]
@@ -275,9 +269,6 @@ class Grab(DeprecatedThings):
 
         self.request_method = None
         self.transport.reset()
-
-        # KIT
-        self._kit = None
 
     def clone(self, **kwargs):
         """
@@ -465,7 +456,7 @@ class Grab(DeprecatedThings):
             if isinstance(post, dict):
                 post = list(post.items())
             if post:
-                if isinstance(post, basestring):
+                if isinstance(post, six.string_types):
                     post = post[:self.config['debug_post_limit']] + '...'
                 else:
                     items = normalize_http_values(post, charset='utf-8')
@@ -555,7 +546,7 @@ class Grab(DeprecatedThings):
             self.copy_request_data()
             self.save_dumps()
         except Exception as ex:
-            logging.error(unicode(ex))
+            logging.error(six.text_type(ex))
 
     def copy_request_data(self):
         # TODO: Maybe request object?
@@ -573,6 +564,10 @@ class Grab(DeprecatedThings):
         """
 
         self.reset()
+
+        if isinstance(content, six.text_type):
+            raise error.GrabMisuseError('Method `setup_document` accepts only '
+                                        'byte string in `content` argument.')
 
         # Configure Document instance
         doc = Document(grab=self)
@@ -738,17 +733,6 @@ class Grab(DeprecatedThings):
         except Exception as ex:
             logging.error('Could not parse request headers', exc_info=ex)
             return {}
-
-    @property
-    def kit(self):
-        """
-        Return KitInterface object that provides some
-        methods to communicate with Kit transport.
-        """
-
-        if not self._kit:
-            self._kit = GrabKitInterface(self)
-        return self._kit
 
     def dump(self):
         """

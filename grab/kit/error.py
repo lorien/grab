@@ -1,2 +1,0 @@
-class KitError(Exception):
-    pass

@@ -7,12 +7,6 @@
 # setuptools
 dist/
 
-# docs
-docs/_build
-docs-redirect/_build
-docs2/build
-docs-redirect/_build
-
 # misc
 log.html
 prof
@@ -37,9 +31,10 @@ docs/libpeerconnection.log
 /spider.py
 .idea/
 /.coverage
+/.env/
 /.py27/
 /.py34/
+/docs/en/build/
+/docs/ru/_build/
 /build/
-/docs/en/
-/docs/ru/
 /en
