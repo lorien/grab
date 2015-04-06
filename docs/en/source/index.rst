@@ -37,6 +37,7 @@ Grab User Manual
 
     usage/installation
     usage/testing
+    grab/quickstart
     grab/request_method
     grab/request_setup
     grab/settings

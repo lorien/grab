@@ -32,4 +32,7 @@ clean:
 doc:
 	sh -c 'cd docs/en; make html'
 
+doc_ru:
+	sh -c 'cd docs/ru; make html'
+
 .PHONY: all build venv flake test vtest testloop cov clean doc

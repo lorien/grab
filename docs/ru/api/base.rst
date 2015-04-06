@@ -25,8 +25,3 @@ grab.base: API базового класса
     .. automethod:: clear_cookies
     .. automethod:: load_cookies
     .. automethod:: dump_cookies
-
-
-.. autoclass:: UploadFile
-
-.. autoclass:: GrabInterface

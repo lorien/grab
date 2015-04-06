@@ -7,6 +7,12 @@
 Grab - фреймворк для парсинга сайтов
 ====================================
 
+.. warning::
+
+    Документация на русском языке устарела и может содержать ошибки.
+    Пожалуйста, используйте английскую документацию для получения
+    актуальной информации о библиотеке Grab.
+
 Grab - библиотека для работы с сетевыми документами. Основные области использования Grab:
 
  * извлечение данных с веб-сайтов (site scraping)
@@ -76,17 +82,6 @@ Grab сайты
     spider/error_handling
     spider/cache
 
-TODO::
-
-    * Работа с прокси
-    * Утилиты:
-     * process_links
-     * process_next_page
-     * inc_count/add_item/save_list/render_stats/save_all_lists
-     * process_object_image
-    
-
-
 
 API
 ---
@@ -102,36 +97,12 @@ API
     api/error
     api/response
 
-Расширения:
-
-.. toctree::
-    :maxdepth: 2
-
-    api/ext_form
-    api/ext_text
-    api/ext_lxml
-    api/ext_django
-    api/ext_soup
-    api/ext_rex
-    api/ext_pquery
-
 Утилиты:
 
 .. toctree::
     :maxdepth: 2
 
-    api/tools_html
-    api/tools
     api/upload
-
-
-Похожие проекты
-----------------
-
-* `urllib <http://docs.python.org/library/urllib.html>`_ and `urllib2 <http://docs.python.org/library/urllib2.html>`_ - для суровых python-хакеров
-* `Scrapy <http://scrapy.org>`_ - пожалуй, самый известный python фреймворк для парсинга сайтов
-* `Mechanize <http://wwwsearch.sourceforge.net/mechanize/>`_ - одна из самых старых python-библиотек парсинга сайтов
-* `Requests <http://docs.python-requests.org>`_ - простой интерфейс к стандартной urllib библиотеке
 
 
 Всякая фигня
