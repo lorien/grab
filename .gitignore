@@ -41,3 +41,5 @@ docs/libpeerconnection.log
 /.py34/
 /build/
 /docs/en/
+/docs/ru/
+/en
