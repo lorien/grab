@@ -3,6 +3,7 @@
 Grab Installaion
 ================
 
+
 .. _installation_linux:
 
 Installation on Linux
@@ -13,6 +14,7 @@ Run the command:
 .. code:: shell
 
     pip install -U Grab
+
 
 
 .. _installation_windows:
@@ -41,6 +43,7 @@ Now you can install Grab via pip with this command::
     python -m pip install grab
 
 
+
 .. _installation_freebsd:
 
 Installation on FreeBSD
@@ -58,6 +61,7 @@ You can also install Grab from FreeBSD ports (thanks to Ruslan Makhmatkhanov):
 * To add the package: pkg_add -r py27-grab
 
 
+
 .. _installation_macos:
 
 Installation on MacOS
@@ -70,12 +74,32 @@ Run the command:
     pip install -U Grab
 
 
+
 .. _installation_deps:
 
 Dependencies
 ------------
 
 All required dependencies should be installed automatically if you 
-install Grab with pip. Here is actual list of Grab dependencies:
+install Grab with pip. Here is actual list of Grab dependencies::
 
-.. literalinclude:: ./../../../../requirements.txt
+    lxml
+    pycurl
+    selection
+    tools
+    six
+
+
+.. _installation_upgrade:
+
+Upgrade Grab from 0.5.x version to 0.6.x
+------------------------------------
+
+In Grab 0.6.x some features were moved out into separate packages. If
+you install/upgrade Grab with pip command all dependencies should
+be installed automatically. Anyway, if you have some ImportError issues
+then try to install dependencies manually with the command:
+
+.. code:: shell
+
+    pip istall -U lxml pycurl selection tools six

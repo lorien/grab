@@ -317,10 +317,10 @@ compression, pass the empty string to this option.
 .. _option_document_charset:
 
 document_charset
-^^^^^^^
+^^^^^^^^^^^^^^^^
 
 Character set of the document's content.
-By default, :ref:`_option_document_charset` is detected automatically.
+By default, document charset is detected automatically.
 In case the character set is incorrectly determined, you can specify it with this option. The value you specified will be used to convert the bytes in the body of the document to the character set specified in :ref:`_option_charset`. After that the converted body will be passed to lxml to build the DOM tree. :ref:`_option_document_charset` is also used to encode non-ascii symbols in POST data.
 
 :Type: string
@@ -332,7 +332,7 @@ charset
 ^^^^^^^
 
 Character set that the content of the document should be converted to.
-This option is only useful in case :ref:`_option_document_charset` is not 'utf-8' (e.g., if content is a *bytestring*). Otherwise, this option won't affect the resulting content.
+This option is only useful in case :ref:`option_document_charset` is not 'utf-8' (e.g., if content is a *bytestring*). Otherwise, this option won't affect the resulting content.
 
 :Type: string
 :Default: 'utf-8'
