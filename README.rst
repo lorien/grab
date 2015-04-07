@@ -16,7 +16,6 @@ Grab
 .. image:: https://landscape.io/github/lorien/grab/v06/landscape.png
    :target: https://landscape.io/github/lorien/grab/v06
 
-
 .. image:: https://readthedocs.org/projects/grab/badge/?version=latest
     :target: https://docs.grablib.org/en/latest/
 
@@ -89,15 +88,15 @@ Pip is recommended way to install Grab and its dependencies:
 
 .. code:: bash
 
-    $ pip install grab
+    $ pip install -U grab
 
-See details here https://github.com/lorien/grab/blob/master/docs2/source/grab_installation.rst
+See details here http://docs.grablib.org/en/latest/usage/installation.html
 
 
 Documentation and Help
 ----------------------
 
-Documentaion: http://docs.grablib.org/en/latest/
+Documentation: http://docs.grablib.org/en/latest/
 
 English mailing list: http://groups.google.com/group/grab-users/
 
