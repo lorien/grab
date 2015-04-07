@@ -82,6 +82,30 @@ put task back to task queue.
 
 
 
+Manual Processing of Failed Tasks
+---------------------------------
+
+You can disable default mechanism of processing failed tasks and
+process failures manually. Use `raw=True` parameter in Task contstructor.
+If the network request would fail then the grab object passed to the handler
+would contain information about failure in two attributes: 
+`grab.response.error_code` and `grab.response.error_msg`
+
+See example:
+
+.. code:: python
+
+    class TestSpider(Spider):
+        def task_generator(self):
+            yield Task('page', url='http://example.com/', raw=True)
+
+        def task_page(self, grab, task):
+            if grab.response.error_code:
+                print('Request failed. Reason: %s' % grab.response.error_msg)
+            else:
+                print('Request completed. HTTP code: %d' % grab.response.code)
+
+
 Error Statistics
 ----------------
 
