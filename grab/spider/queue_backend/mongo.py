@@ -20,14 +20,14 @@ class QueueBackend(QueueInterface):
     def __init__(self, spider_name, database=None, queue_name=None,
                  **kwargs):
         """
-        All "unexpected" kwargs goes to `pymongo.Connection()` method
+        All "unexpected" kwargs goes to `pymongo.MongoClient()` method
         """
         if queue_name is None:
             queue_name = 'task_queue_%s' % spider_name
 
         self.database = database
         self.queue_name = queue_name
-        conn = pymongo.Connection(**kwargs)
+        conn = pymongo.MongoClient(**kwargs)
         self.collection = conn[self.database][self.queue_name]
         logger.debug('Using collection: %s' % self.collection)
 

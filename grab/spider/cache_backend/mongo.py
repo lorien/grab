@@ -28,7 +28,7 @@ logger = logging.getLogger('grab.spider.cache_backend.mongo')
 class CacheBackend(object):
     def __init__(self, database, use_compression=True, spider=None):
         self.spider = spider
-        self.db = pymongo.Connection()[database]
+        self.db = pymongo.MongoClient()[database]
         self.use_compression = use_compression
 
     def get_item(self, url, timeout=None):
@@ -92,7 +92,7 @@ class CacheBackend(object):
             'cookies': None,
         }
         try:
-            self.db.cache.save(item, safe=True)
+            self.db.cache.save(item, w=1)
         except Exception as ex:
             if 'document too large' in six.text_type(ex):
                 logging.error('Document too large. It was not saved into mongo'
