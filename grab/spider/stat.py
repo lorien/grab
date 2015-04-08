@@ -63,7 +63,8 @@ class SpiderStat(object):
         if 'download-size' in self.counters:
             out.append('Network download: %s' % metric.format_traffic_value(
                 self.counters['download-size']))
-        out.append('Queue size: %d' % self.taskq.size())
+        out.append('Queue size: %d' % self.taskq.size()
+                   if self.taskq else 'NA')
         out.append('Threads: %d' % self.thread_number)
 
         if timing:

@@ -44,6 +44,10 @@ class SpiderQueueMixin(object):
         self.assertEqual(0, bot.taskq.size())
         bot.run()
 
+    def test_taskq_render_stats(self):
+        bot = self.SimpleSpider()
+        bot.render_stats()
+
 
 class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
     def setup_queue(self, bot):
