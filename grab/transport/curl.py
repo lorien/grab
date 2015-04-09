@@ -20,14 +20,15 @@ try:
 except ImportError:
     from http.cookiejar import CookieJar
 import six
-
-from grab.cookie import create_cookie, CookieManager
-from grab import error
-from grab.response import Response
 from tools.http import (encode_cookies, normalize_http_values,
                         normalize_post_data, normalize_url)
 from tools.user_agent import random_user_agent
 from tools.encoding import smart_str, decode_list, decode_pairs
+
+from grab.cookie import create_cookie, CookieManager
+from grab import error
+from grab.response import Response
+from grab.upload import UploadFile, UploadContent
 
 logger = logging.getLogger('grab.transport.curl')
 
@@ -63,6 +64,19 @@ try:
         pass
 except ImportError:
     pass
+
+
+def process_upload_items(items):
+    result = []
+    for key, val in items:
+        if isinstance(val, UploadContent):
+            result.append((key, (pycurl.FORM_BUFFER, val.filename,
+                                 pycurl.FORM_BUFFERPTR, val.content)))
+        elif isinstance(val, UploadFile):
+            result.append((key, (pycurl.FORM_FILE, val.path)))
+        else:
+            result.append((key, val))
+    return result
 
 
 class CurlTransport(object):
@@ -250,13 +264,16 @@ class CurlTransport(object):
                         'multipart_post option could not be a string')
                 post_items = normalize_http_values(
                     grab.config['multipart_post'],
-                    charset=grab.config['charset'])
+                    charset=grab.config['charset'],
+                    ignore_classes=(UploadFile, UploadContent),
+                )
                 # py3 hack
                 if six.PY3:
                     post_items = decode_pairs(post_items,
                                               grab.config['charset'])
                 # import pdb; pdb.set_trace()
-                self.curl.setopt(pycurl.HTTPPOST, post_items)
+                self.curl.setopt(pycurl.HTTPPOST,
+                                 process_upload_items(post_items))
             elif grab.config['post']:
                 post_data = normalize_post_data(grab.config['post'],
                                                 grab.config['charset'])

@@ -1,9 +1,20 @@
 from __future__ import absolute_import
+from hashlib import md5
+import time
+from tools.encoding import make_str
 
 
 class UploadContent(object):
-    def __init__(self, content):
+    def __init__(self, content, filename=None):
+        if filename is None:
+            self.filename = self.get_random_filename()
+            
+        else:
+            self.filename = filename
         self.content = content
+
+    def get_random_filename(self):
+        return md5(make_str(str(time.time()))).hexdigest()[:10]
 
 
 class UploadFile(object):
@@ -13,10 +24,6 @@ class UploadFile(object):
 
 """
 class UploadContent(str):
-    """
-    TODO: docstring
-    """
-
     def __new__(cls, value):
         obj = str.__new__(cls, 'xxx')
         obj.raw_value = value
@@ -29,10 +36,6 @@ class UploadContent(str):
 
 
 class UploadFile(str):
-    """
-    TODO: docstring
-    """
-
     def __new__(cls, path):
         obj = str.__new__(cls, 'xxx')
         obj.path = path

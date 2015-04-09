@@ -506,7 +506,9 @@ class FormExtension(object):
             # string
             if getattr(elem, 'type', '').lower() == 'file':
                 self._file_fields[name] = value
-            elem.value = value
+                elem.value = ''
+            else:
+                elem.value = value
 
     def set_input_by_id(self, _id, value):
         """
