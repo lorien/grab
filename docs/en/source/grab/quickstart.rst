@@ -13,7 +13,7 @@ Also you should manually install lxml and pycurl libraries.
 Let's get started with simple examples.
 
 Make a request
-==============
+--------------
 
 First, you need to import Grab class::
 
@@ -46,7 +46,7 @@ Let's see small example of HEAD request::
     1776
 
 Creating POST requests
-======================
+----------------------
 
 When you build site scrapers or work with network APIs it is a common task to create
 POST requests. You can build POST request using `post` option::
@@ -85,7 +85,7 @@ Also you can upload files via form API::
     >>> g.submit()
 
 Response Content
-================
+----------------
 
 Consider the simple page retreiving code again::
 
@@ -113,4 +113,6 @@ Oiriginal content is useful if you need to save some binary content like image::
 The `gzip` and `deflate` encodings are automatically decoded.
 
 Response Status Code
-====================
+--------------------
+
+TO BE CONTINUED
