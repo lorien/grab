@@ -70,10 +70,18 @@ def process_upload_items(items):
     result = []
     for key, val in items:
         if isinstance(val, UploadContent):
-            result.append((key, (pycurl.FORM_BUFFER, val.filename,
-                                 pycurl.FORM_BUFFERPTR, val.content)))
+            data = [pycurl.FORM_BUFFER, val.filename,
+                    pycurl.FORM_BUFFERPTR, val.content]
+            if val.content_type:
+                data.extend([pycurl.FORM_CONTENTTYPE, val.content_type])
+            result.append((key, tuple(data)))
         elif isinstance(val, UploadFile):
-            result.append((key, (pycurl.FORM_FILE, val.path)))
+            data = [pycurl.FORM_FILE, val.path]
+            if val.filename:
+                data.extend([pycurl.FORM_FILENAME, val.filename])
+            if val.content_type:
+                data.extend([pycurl.FORM_CONTENTTYPE, val.content_type])
+            result.append((key, tuple(data)))
         else:
             result.append((key, val))
     return result

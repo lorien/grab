@@ -5,21 +5,23 @@ from tools.encoding import make_str
 
 
 class UploadContent(object):
-    def __init__(self, content, filename=None):
+    def __init__(self, content, filename=None, content_type=None):
         if filename is None:
             self.filename = self.get_random_filename()
-            
         else:
             self.filename = filename
         self.content = content
+        self.content_type = content_type
 
     def get_random_filename(self):
         return md5(make_str(str(time.time()))).hexdigest()[:10]
 
 
 class UploadFile(object):
-    def __init__(self, path):
+    def __init__(self, path, filename=None, content_type=None):
         self.path = path
+        self.filename = filename
+        self.content_type = content_type
 
 
 """
