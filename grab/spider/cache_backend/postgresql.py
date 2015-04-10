@@ -106,7 +106,7 @@ class CacheBackend(object):
         self.cursor.execute('commit')
 
     def load_response(self, grab, cache_item):
-        grab.fake_response(cache_item['body'])
+        grab.setup_document(cache_item['body'])
 
         body = cache_item['body']
 
