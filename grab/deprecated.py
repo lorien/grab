@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 import logging
-from tools.etree import get_node_text
-from tools.text import find_number
-from tools.const import NULL
-from tools.error import DataNotFound
-from tools.encoding import make_unicode
+from weblib.etree import get_node_text
+from weblib.text import find_number
+from weblib.const import NULL
+from weblib.error import DataNotFound
+from weblib.encoding import make_unicode
 import six
 
 from grab.util.misc import deprecated

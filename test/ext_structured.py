@@ -1,7 +1,7 @@
 # coding: utf-8
 from json import loads
 
-from tools.structured import Structure as x
+from weblib.structured import Structure as x
 
 from test.util import build_grab
 from test.util import BaseGrabTestCase

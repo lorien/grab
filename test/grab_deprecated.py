@@ -1,6 +1,6 @@
 # coding: utf-8
-from tools.etree import parse_html
-from tools.error import DataNotFound
+from weblib.etree import parse_html
+from weblib.error import DataNotFound
 from grab.error import GrabMisuseError
 from tempfile import mkstemp
 import os

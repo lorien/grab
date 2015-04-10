@@ -35,7 +35,7 @@ follows:
 
 Usage of `default_logging` function is simple::
 
-    >>> from grab.tools.logs import default_logging
+    >>> from weblib.logs import default_logging
     >>> default_logging()
 
 

@@ -7,7 +7,7 @@ import logging
 from copy import copy
 
 from test.util import prepare_test_environment, clear_test_environment, GLOBAL
-from tools.watch import watch
+from weblib.watch import watch
 
 # **********
 # Grab Tests

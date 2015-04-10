@@ -86,7 +86,7 @@ install Grab with pip. Here is actual list of Grab dependencies::
     lxml
     pycurl
     selection
-    tools
+    weblib
     six
 
 
@@ -102,4 +102,4 @@ then try to install dependencies manually with the command:
 
 .. code:: shell
 
-    pip istall -U lxml pycurl selection tools six
+    pip istall -U lxml pycurl selection weblib six

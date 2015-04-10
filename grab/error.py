@@ -10,11 +10,11 @@ Exception
     |-> Grab*Error
 
 Exception
-| -> tools.error.ToolsError
+| -> weblib.error.WeblibError
      |-> DataNotFound <- IndexError
 """
 import warnings
-from tools.error import DataNotFound  # noqa
+from weblib.error import DataNotFound  # noqa
 
 
 class GrabError(Exception):

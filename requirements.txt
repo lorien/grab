@@ -1,5 +1,5 @@
 lxml
 pycurl
 selection
-tools
+weblib
 six

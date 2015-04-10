@@ -28,7 +28,7 @@ from grab.spider.stat import SpiderStat
 from grab.spider.transport.multicurl import MulticurlTransport
 from grab.proxylist import ProxyList
 from grab.util.misc import camel_case_to_underscore
-from tools.encoding import make_str, make_unicode
+from weblib.encoding import make_str, make_unicode
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)

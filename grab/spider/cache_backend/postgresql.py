@@ -14,7 +14,7 @@ import logging
 import marshal
 import time
 import six
-from tools.encoding import make_str
+from weblib.encoding import make_str
 
 from grab.response import Response
 from grab.cookie import CookieManager

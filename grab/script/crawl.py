@@ -4,9 +4,9 @@ from argparse import ArgumentParser
 
 from grab.util.config import build_spider_config, build_root_config
 from grab.util.module import load_spider_class
-from tools.logs import default_logging
-from tools.files import clear_directory
-from tools.encoding import make_str
+from weblib.logs import default_logging
+from weblib.files import clear_directory
+from weblib.encoding import make_str
 
 logger = logging.getLogger('grab.script.crawl')
 

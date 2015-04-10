@@ -20,10 +20,10 @@ try:
 except ImportError:
     from http.cookiejar import CookieJar
 import six
-from tools.http import (encode_cookies, normalize_http_values,
+from weblib.http import (encode_cookies, normalize_http_values,
                         normalize_post_data, normalize_url)
-from tools.user_agent import random_user_agent
-from tools.encoding import smart_str, decode_list, decode_pairs
+from weblib.user_agent import random_user_agent
+from weblib.encoding import smart_str, decode_list, decode_pairs
 
 from grab.cookie import create_cookie, CookieManager
 from grab import error

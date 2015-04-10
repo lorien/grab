@@ -1,6 +1,6 @@
 from __future__ import absolute_import
-from tools.files import *  # noqa
+from weblib.files import *  # noqa
 import logging
 
 logging.error('Module `grab.tools.files` is deprecated. '
-              'Use `tools.files` module.')
+              'Use `weblib.files` module.')

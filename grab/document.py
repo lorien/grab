@@ -23,16 +23,16 @@ from selection import XpathSelector
 import six
 from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
 
-import tools.encoding
+import weblib.encoding
 from grab.cookie import CookieManager
-from tools.files import hashed_path
-from tools.structured import TreeInterface
-from tools.text import normalize_space
-from tools.html import decode_entities
+from weblib.files import hashed_path
+from weblib.structured import TreeInterface
+from weblib.text import normalize_space
+from weblib.html import decode_entities
 from grab.error import GrabMisuseError, DataNotFound
-from tools.rex import normalize_regexp
+from weblib.rex import normalize_regexp
 from grab.const import NULL
-from tools.http import smart_urlencode
+from weblib.http import smart_urlencode
 
 logger = logging.getLogger('grab.response')
 NULL_BYTE = chr(0)
@@ -244,7 +244,7 @@ class BodyExtension(object):
         if bom:
             body = body[len(self.bom):]
         if fix_special_entities:
-            body = tools.encoding.fix_special_entities(body)
+            body = weblib.encoding.fix_special_entities(body)
         if ignore_errors:
             errors = 'ignore'
         else:

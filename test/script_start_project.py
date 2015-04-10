@@ -6,7 +6,7 @@ import os
 import subprocess
 from grab.script import start_project
 from grab.error import GrabError
-from tools.files import clear_directory
+from weblib.files import clear_directory
 from argparse import ArgumentParser
 
 from test.util import TMP_DIR

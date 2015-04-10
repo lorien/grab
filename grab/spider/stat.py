@@ -2,13 +2,13 @@ from __future__ import absolute_import
 import logging
 import time
 from grab.base import GLOBAL_STATE
-from tools.encoding import smart_str
+from weblib.encoding import smart_str
 import os
 from contextlib import contextmanager
 import json
 import six
 
-from tools import metric
+from weblib import metric
 
 logger = logging.getLogger('grab.spider.stat')
 

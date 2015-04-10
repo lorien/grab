@@ -1,6 +1,6 @@
 from __future__ import absolute_import
-from tools.lock import *  # noqa
+from weblib.lock import *  # noqa
 import logging
 
 logging.error('Module `grab.tools.lock` is deprecated. '
-              'Use `tools.lock` module.')
+              'Use `weblib.lock` module.')

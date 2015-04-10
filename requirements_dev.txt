@@ -12,7 +12,6 @@ pyquery
 selection
 selenium
 test_server
-tools
 tornado
 mock
 runscript

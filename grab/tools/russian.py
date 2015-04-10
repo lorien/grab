@@ -1,6 +1,6 @@
 from __future__ import absolute_import
-from tools.russian import *  # noqa
+from weblib.russian import *  # noqa
 import logging
 
 logging.error('Module `grab.tools.russian` is deprecated. '
-              'Use `tools.russian` module.')
+              'Use `weblib.russian` module.')

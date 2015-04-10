@@ -19,10 +19,10 @@ from datetime import datetime
 import weakref
 import six
 
-from tools.html import find_refresh_url, find_base_url
+from weblib.html import find_refresh_url, find_base_url
 from grab.document import Document
 from grab import error
-from tools.http import normalize_http_values
+from weblib.http import normalize_http_values
 from grab.cookie import CookieManager
 from grab.proxy import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings

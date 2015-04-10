@@ -1,6 +1,6 @@
 # coding: utf-8
 import re
-from tools.error import DataNotFound
+from weblib.error import DataNotFound
 import six
 
 from test.util import build_grab

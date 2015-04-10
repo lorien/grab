@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from hashlib import md5
 import time
-from tools.encoding import make_str
+from weblib.encoding import make_str
 import os
 
 
