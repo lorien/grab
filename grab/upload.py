@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from hashlib import md5
 import time
 from tools.encoding import make_str
+import os
 
 
 class UploadContent(object):
@@ -20,7 +21,10 @@ class UploadContent(object):
 class UploadFile(object):
     def __init__(self, path, filename=None, content_type=None):
         self.path = path
-        self.filename = filename
+        if filename is None:
+            self.filename = os.path.split(path)[1]
+        else:
+            self.filename = filename
         self.content_type = content_type
 
 
