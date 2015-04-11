@@ -9,6 +9,7 @@ except ImportError:
 from bson import Binary
 import logging
 import pymongo
+from datetime import datetime
 
 from grab.spider.queue_backend.base import QueueInterface
 from grab.spider.error import SpiderMisuseError
@@ -33,25 +34,26 @@ class QueueBackend(QueueInterface):
 
         self.collection.ensure_index('priority')
 
-        super(QueueInterface, self).__init__(**kwargs)
+        super(QueueInterface, self).__init__()
 
     def size(self):
         return self.collection.count()
 
     def put(self, task, priority, schedule_time=None):
-        if schedule_time is not None:
-            raise SpiderMisuseError('Mongo task queue does not support'
-                                    ' delayed task')
+        if schedule_time is None:
+            schedule_time = datetime.utcnow()
+
         item = {
             'task': Binary(pickle.dumps(task)),
             'priority': priority,
+            'schedule_time': schedule_time,
         }
         self.collection.save(item)
 
     def get(self):
-        item = self.collection.find_and_modify(
-            sort=[('priority', pymongo.ASCENDING)],
-            remove=True
+        item = self.collection.find_one_and_delete(
+            {'schedule_time': {'$lt': datetime.utcnow()}},
+            sort=[('priority', pymongo.ASCENDING)]
         )
         if item is None:
             raise queue.Empty()
