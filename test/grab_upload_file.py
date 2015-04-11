@@ -123,7 +123,7 @@ class TestUploadContent(BaseGrabTestCase):
         self.assertEqual('avatar.jpg',
                          self.server.request['files']['image'][0]['filename'])
         self.assertEqual(
-            'application/octet-stream',
+            'image/jpeg',
             self.server.request['files']['image'][0]['content_type'])
 
     def test_upload_file_custom_content_type(self):

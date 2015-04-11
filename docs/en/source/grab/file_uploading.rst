@@ -78,18 +78,18 @@ Custom Content Type
 
 With both `UploadFile` and `UploadContent` you can use custom content type.
 
-If you do not specify content type then lately the pycurl (the Grab network
-request engine) will choose the content type by analizing the filename, but at
-the time of creation upload object the content type will be just `None`.
+If you do not specify content type then filename will be used to guess the
+content type e.g. "image.jpg" will have "image/jpeg" conent type and "asdfasdf"
+will be just a "application/octet-stream"
 
 .. code:: python
 
     >>> from grab import UploadFile, UploadContent
-    >>> print(UploadFile('/path/to/image.jpg').content_type)
-    None
+    >>> UploadFile('/path/to/image.jpg').content_type
+    'image/jpeg'
     >>> UploadFile('/path/to/image.jpg', content_type='text/plain').content_type
     'text/plain'
-    >>> print(UploadContent('/path/to/image.jpg').content_type)
-    None
+    >>> UploadContent('/path/to/image.jpg').content_type
+    'image/jpeg'
     >>> UploadContent('...', content_type='text/plain').content_type
     'text/plain'
