@@ -152,7 +152,7 @@ class Task(BaseTask):
 
     def process_delay_option(self, delay):
         if delay:
-            self.schedule_time = datetime.now() + timedelta(seconds=delay)
+            self.schedule_time = datetime.utcnow() + timedelta(seconds=delay)
             self.original_delay = delay
         else:
             self.schedule_time = None

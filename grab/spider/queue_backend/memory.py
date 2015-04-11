@@ -20,7 +20,7 @@ class QueueBackend(QueueInterface):
             self.schedule_list.append((schedule_time, task))
 
     def get(self):
-        now = datetime.now()
+        now = datetime.utcnow()
 
         removed_indexes = []
         index = 0
