@@ -22,8 +22,6 @@ class SpiderErrorTestCase(BaseGrabTestCase):
             def task_generator(self):
                 yield Task('page', url=INVALID_URL)
 
-        from grab.spider.base import logger_verbose
-        logger_verbose.setLevel(logging.DEBUG)
         bot = SomeSpider()
         bot.run()
 
@@ -39,8 +37,6 @@ class SpiderErrorTestCase(BaseGrabTestCase):
             def task_page(self, grab, task):
                 pass
 
-        # from grab.spider.base import logger_verbose
-        # logger_verbose.setLevel(logging.DEBUG)
         self.server.response_once['code'] = 301
         self.server.response_once['headers'] = [
             ('Location', INVALID_URL),
