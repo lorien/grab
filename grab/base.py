@@ -449,7 +449,7 @@ class Grab(DeprecatedThings):
         Process result of real request performed via transport extension.
         """
 
-        now = datetime.now()
+        now = datetime.utcnow()
         # TODO: move into separate method
         if self.config['debug_post']:
             post = self.config['post'] or self.config['multipart_post']

@@ -767,7 +767,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension,
         self.cookies = CookieManager()
         self.charset = 'utf-8'
         self.bom = None
-        self.timestamp = datetime.now()
+        self.timestamp = datetime.utcnow()
         self.name_lookup_time = 0
         self.connect_time = 0
         self.total_time = 0
