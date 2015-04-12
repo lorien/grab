@@ -85,13 +85,30 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
     def setup_queue(self, bot):
         bot.setup_queue(backend='mongo', **MONGODB_CONNECTION)
 
-    def test_delay_error(self):
-        bot = self.SimpleSpider()
+    def test_schedule(self):
+        """
+        In this test I create a number of delayed task
+        and then check the order in which they was executed
+        """
+        server = self.server
+
+        class TestSpider(Spider):
+            def prepare(self):
+                self.numbers = []
+
+            def task_generator(self):
+                yield Task('page', url=server.get_url(), num=1)
+                yield Task('page', url=server.get_url(), delay=1.5, num=2)
+                yield Task('page', url=server.get_url(), delay=0.5, num=3)
+                yield Task('page', url=server.get_url(), delay=1, num=4)
+
+            def task_page(self, grab, task):
+                self.numbers.append(task.num)
+
+        bot = TestSpider()
         self.setup_queue(bot)
-        bot.taskq.clear()
-        self.assertRaises(SpiderMisuseError,
-                          bot.add_task,
-                          Task('page', url=self.server.get_url(), delay=1))
+        bot.run()
+        self.assertEqual(bot.numbers, [1, 3, 4, 2])
 
     def test_clear_collection(self):
         bot = self.SimpleSpider()
