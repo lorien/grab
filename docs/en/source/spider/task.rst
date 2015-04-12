@@ -165,3 +165,60 @@ more beautiful:
 
         def task_yahoo(self, grab, task):
             pass
+
+
+.. _spider_default_grab_instance:
+
+Default Grab Instance
+---------------------
+
+You can control the default config of Grab instances used in spider tasks.
+Define the `create_grab_instance` method in your spider class:
+
+.. code:: python
+
+    class TestSpider(Spider):
+        def create_grab_instance(self, **kwargs):
+            g = super(TestSpider, self).create_grab_instance(**kwargs)
+            g.setup(timeout=20)
+            return g
+
+Be aware, that this method allows you to control only those Grab instances
+that were created automatically. If you create task with explicit grab instance
+it will not be affected by `create_grab_instance_method`:
+
+.. code:: python
+
+    class TestSpider(Spider):
+        def create_grab_instance(self, **kwargs):
+            g = Grab(**kwargs)
+            g.setup(timeout=20)
+            return g
+
+        def task_generator(self):
+            g = Grab(url='http://example.com')
+            yield Task('page', grab=g)
+            # The grab instance in the yielded task
+            # will not be affected by `create_grab_instance` method.
+
+
+.. _spider_updating_any_grab_instance:
+
+Updating Any Grab Instance
+--------------------------
+
+With method `update_grab_instance` you can update any Grab instance, even those
+instances that you have passed explicitly to the Task object. Be aware, that
+any option configured in this method overwrites the previously configured
+option.
+
+.. code:: python
+
+    class TestSpider(Spider):
+        def update_grab_instance(self, grab):
+            grab.setup(timeout=20)
+
+        def task_generator(self):
+            g = Grab(url='http://example.com', timeout=5)
+            yield Task('page', grab=g)
+            # The effective timeout setting will be equal to 20!

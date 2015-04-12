@@ -449,7 +449,7 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
 
     def create_grab_instance(self, **kwargs):
         # Back-ward compatibility for deprecated `grab_config` attribute
-        # Use _grab_config to not trigger warning messages
+        # Here I use `_grab_config` to not trigger warning messages
         if self._grab_config and kwargs:
             merged_config = deepcopy(self._grab_config)
             merged_config.update(kwargs)
@@ -458,7 +458,6 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
             grab = Grab(**self._grab_config)
         else:
             grab = Grab(**kwargs)
-        self.update_grab_instance(grab)
         return grab
 
     def update_grab_instance(self, grab):
@@ -477,6 +476,7 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
 
         # Generate new common headers
         grab.config['common_headers'] = grab.common_headers()
+        self.update_grab_instance(grab)
         return grab
 
     def is_task_cacheable(self, task, grab):

@@ -333,3 +333,53 @@ class TestSpider(BaseGrabTestCase):
         self.assertEqual(t1.get_fallback_handler(bot), bot.zz)
         self.assertEqual(t2.get_fallback_handler(bot), bot.task_bar_fallback)
         self.assertEqual(t3.get_fallback_handler(bot), None)
+
+    def test_update_grab_instance(self):
+        class TestSpider(Spider):
+            def update_grab_instance(self, grab):
+                grab.setup(timeout=77)
+
+            def prepare(self):
+                self.points = set()
+
+            def task_generator(self):
+                yield Task('page', url=self.meta['server'].get_url())
+                yield Task('page', grab=Grab(url=self.meta['server'].get_url(),
+                                             timeout=1))
+
+            def task_page(self, grab, task):
+                self.points.add(grab.config['timeout'])
+
+        bot = TestSpider(meta={'server': self.server})
+        bot.setup_queue()
+        bot.add_task(Task('page', url=self.server.get_url()))
+        bot.add_task(Task('page', grab=Grab(url=self.server.get_url(),
+                                            timeout=1)))
+        bot.run()
+        self.assertEqual(set([77]), bot.points)
+
+    def test_create_grab_instance(self):
+        class TestSpider(Spider):
+            def create_grab_instance(self, **kwargs):
+                grab = super(TestSpider, self).create_grab_instance(**kwargs)
+                grab.setup(timeout=77)
+                return grab
+
+            def prepare(self):
+                self.points = set()
+
+            def task_generator(self):
+                yield Task('page', url=self.meta['server'].get_url())
+                yield Task('page', grab=Grab(url=self.meta['server'].get_url(),
+                                             timeout=76))
+
+            def task_page(self, grab, task):
+                self.points.add(grab.config['timeout'])
+
+        bot = TestSpider(meta={'server': self.server})
+        bot.setup_queue()
+        bot.add_task(Task('page', url=self.server.get_url()))
+        bot.add_task(Task('page', grab=Grab(url=self.server.get_url(),
+                                            timeout=75)))
+        bot.run()
+        self.assertEqual(set([77, 76, 75]), bot.points)
