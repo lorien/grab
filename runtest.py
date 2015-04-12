@@ -41,7 +41,7 @@ GRAB_TEST_LIST = (
     'test.ext_text',
     'test.ext_rex',
     'test.ext_lxml',
-    #'test.ext_form',
+    'test.ext_form',
     'test.ext_doc',
     'test.ext_structured',
     # *** Pycurl Test

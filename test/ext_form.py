@@ -95,33 +95,33 @@ class TestHtmlForms(BaseGrabTestCase):
 
         # check results
         self.g.choose_form(0)
-        self.assertEqual('form', self.g._lxml_form.tag)
-        self.assertEqual('search_form', self.g._lxml_form.get('id'))
+        self.assertEqual('form', self.g.doc._lxml_form.tag)
+        self.assertEqual('search_form', self.g.doc._lxml_form.get('id'))
 
         # reset current form
-        self.g._lxml_form = None
+        self.g.doc._lxml_form = None
 
         self.g.choose_form(id='common_form')
-        self.assertEqual('form', self.g._lxml_form.tag)
-        self.assertEqual('common_form', self.g._lxml_form.get('id'))
+        self.assertEqual('form', self.g.doc._lxml_form.tag)
+        self.assertEqual('common_form', self.g.doc._lxml_form.get('id'))
 
         # reset current form
-        self.g._lxml_form = None
+        self.g.doc._lxml_form = None
 
         self.g.choose_form(name='dummy')
-        self.assertEqual('form', self.g._lxml_form.tag)
-        self.assertEqual('dummy', self.g._lxml_form.get('name'))
+        self.assertEqual('form', self.g.doc._lxml_form.tag)
+        self.assertEqual('dummy', self.g.doc._lxml_form.get('name'))
 
         # reset current form
-        self.g._lxml_form = None
+        self.g.doc._lxml_form = None
 
         self.g.choose_form(xpath='//form[contains(@action, "/dummy")]')
-        self.assertEqual('form', self.g._lxml_form.tag)
-        self.assertEqual('dummy', self.g._lxml_form.get('name'))
+        self.assertEqual('form', self.g.doc._lxml_form.tag)
+        self.assertEqual('dummy', self.g.doc._lxml_form.get('name'))
 
     def assertEqualQueryString(self, qs1, qs2):
-        args1 = set([(x, y[0]) for x, y in parse_qsl(qs1)])
-        args2 = set([(x, y[0]) for x, y in parse_qsl(qs2)])
+        args1 = set([(x, y) for x, y in parse_qsl(qs1)])
+        args2 = set([(x, y) for x, y in parse_qsl(qs2)])
         self.assertEqual(args1, args2)
 
     def test_submit(self):
@@ -131,51 +131,51 @@ class TestHtmlForms(BaseGrabTestCase):
         g.set_input('name', 'Alex')
         g.submit()
         self.assertEqualQueryString(self.server.request['data'],
-                                    'name=Alex&secret=123')
+                                    b'name=Alex&secret=123')
 
         # Default submit control
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
         g.go(self.server.get_url())
         g.submit()
         self.assertEqualQueryString(self.server.request['data'],
-                                    'secret=123&submit1=submit1')
+                                    b'secret=123&submit1=submit1')
 
         # Selected submit control
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
         g.go(self.server.get_url())
         g.submit(submit_name='submit2')
         self.assertEqualQueryString(self.server.request['data'],
-                                    'secret=123&submit2=submit2')
+                                    b'secret=123&submit2=submit2')
 
         # Default submit control if submit control name is invalid
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
         g.go(self.server.get_url())
         g.submit(submit_name='submit3')
         self.assertEqualQueryString(self.server.request['data'],
-                                    'secret=123&submit1=submit1')
+                                    b'secret=123&submit1=submit1')
 
     def test_set_methods(self):
         g = build_grab()
         self.server.response['get.data'] = FORMS
         g.go(self.server.get_url())
 
-        self.assertEqual(g._lxml_form, None)
+        self.assertEqual(g.doc._lxml_form, None)
 
         g.set_input('gender', '1')
-        self.assertEqual('common_form', g._lxml_form.get('id'))
+        self.assertEqual('common_form', g.doc._lxml_form.get('id'))
 
         self.assertRaises(KeyError, lambda: g.set_input('query', 'asdf'))
 
-        g._lxml_form = None
+        g.doc._lxml_form = None
         g.set_input_by_id('search_box', 'asdf')
-        self.assertEqual('search_form', g._lxml_form.get('id'))
+        self.assertEqual('search_form', g.doc._lxml_form.get('id'))
 
         g.choose_form(xpath='//form[@id="common_form"]')
         g.set_input_by_number(0, 'asdf')
 
-        g._lxml_form = None
+        g.doc._lxml_form = None
         g.set_input_by_xpath('//*[@name="gender"]', '2')
-        self.assertEqual('common_form', g._lxml_form.get('id'))
+        self.assertEqual('common_form', g.doc._lxml_form.get('id'))
 
     def test_html_without_forms(self):
         g = build_grab()
