@@ -3,6 +3,7 @@ import six
 
 from grab.spider.base import Spider
 from grab.spider.error import SpiderInternalError
+from grab.util.config import build_root_config, build_spider_config
 
 SPIDER_REGISTRY = {}
 logger = logging.getLogger('grab.util.module')
@@ -58,3 +59,9 @@ def load_spider_class(config, spider_name):
         raise SpiderInternalError('Unknown spider: %s' % spider_name)
     else:
         return SPIDER_REGISTRY[spider_name]
+
+
+def build_spider_instance(cls, settings_module, **kwargs):
+    root_config = build_root_config(settings_module)
+    spider_config = build_spider_config(cls, root_config)
+    return cls(config=spider_config)

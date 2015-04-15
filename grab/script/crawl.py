@@ -72,16 +72,12 @@ def main(spider_name, thread_number=None, slave=False,
         opts, trash = parser.parse_known_args()
         spider_args = vars(opts)
 
-    if thread_number is None:
-        thread_number = \
-            int(spider_config.get('thread_number'))
-
     bot = spider_class(
         thread_number=thread_number,
         slave=slave,
         config=spider_config,
-        network_try_limit=int(spider_config.get('network_try_limit')),
-        task_try_limit=int(spider_config.get('task_try_limit')),
+        network_try_limit=None,
+        task_try_limit=None,
         args=spider_args,
     )
     opt_queue = spider_config.get('queue')

@@ -101,8 +101,8 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
         # Meta.abstract is reset to False in each descendant
         abstract = True
 
-    def __init__(self, thread_number=3,
-                 network_try_limit=10, task_try_limit=10,
+    def __init__(self, thread_number=None,
+                 network_try_limit=None, task_try_limit=None,
                  request_pause=NULL,
                  priority_mode='random',
                  meta=None,
@@ -165,12 +165,17 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
 
         self.task_generator_enabled = False
         self.only_cache = only_cache
-        self.thread_number = thread_number
+
+        self.thread_number = thread_number or\
+                             int(self.config.get('thread_number', 3))
+        self.task_try_limit = task_try_limit or\
+                              int(self.config.get('task_try_limit', 10))
+        self.network_try_limit = network_try_limit or \
+                                 int(self.config.get('network_try_limit', 10))
+
         self.counters = defaultdict(int)
         self._grab_config = {}
         self.items = {}
-        self.task_try_limit = task_try_limit
-        self.network_try_limit = network_try_limit
         if priority_mode not in ['random', 'const']:
             raise SpiderMisuseError('Value of priority_mode option should be '
                                     '"random" or "const"')
