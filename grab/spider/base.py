@@ -294,7 +294,7 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
         else:
             return randint(*RANDOM_TASK_PRIORITY_RANGE)
 
-    def add_task(self, task):
+    def add_task(self, task, raise_error=False):
         """
         Add task to the task queue.
         """
@@ -309,25 +309,30 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
             task.priority_is_custom = True
 
         if not isinstance(task, NullTask):
-            if not task.url.startswith(('http://', 'https://', 'ftp://',
-                                        'file://', 'feed://')):
-                if self.base_url is None:
-                    msg = 'Could not resolve relative URL because base_url ' \
-                          'is not specified. Task: %s, URL: %s'\
-                          % (task.name, task.url)
-                    logger.error(msg)
-                    self.add_item('task-with-invalid-url', task.url)
-                    return False
+            try:
+                if not task.url.startswith(('http://', 'https://', 'ftp://',
+                                            'file://', 'feed://')):
+                    if self.base_url is None:
+                        msg = 'Could not resolve relative URL because base_url ' \
+                              'is not specified. Task: %s, URL: %s'\
+                              % (task.name, task.url)
+                        raise SpiderError(msg)
+                    else:
+                        task.url = urljoin(self.base_url, task.url)
+                        # If task has grab_config object then update it too
+                        if task.grab_config:
+                            task.grab_config['url'] = task.url
+            except Exception as ex:
+                self.add_item('task-with-invalid-url', task.url)
+                if raise_error:
+                    raise
                 else:
-                    task.url = urljoin(self.base_url, task.url)
-                    # If task has grab_config object then update it too
-                    if task.grab_config:
-                        task.grab_config['url'] = task.url
+                    logger.error('', exc_info=ex)
+                    return False
 
         # TODO: keep original task priority if it was set explicitly
         self.taskq.put(task, task.priority, schedule_time=task.schedule_time)
-        is_valid = True
-        return is_valid
+        return True
 
     def load_initial_urls(self):
         """
@@ -977,6 +982,8 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
                 self.process_handler_error('data_%s' % result.handler_key, ex,
                                            task)
         elif result is None:
+            pass
+        elif isinstance(result, NullTask):
             pass
         else:
             raise SpiderError('Unknown result type: %s' % result)

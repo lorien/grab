@@ -5,6 +5,7 @@ from grab import Grab
 from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
 from grab.spider import inline_task
 from test.util import BaseGrabTestCase, build_grab
+from grab.spider.error import SpiderError
 
 
 class SimpleSpider(Spider):
@@ -383,3 +384,28 @@ class TestSpider(BaseGrabTestCase):
                                             timeout=75)))
         bot.run()
         self.assertEqual(set([77, 76, 75]), bot.points)
+
+    def test_add_task_invalid_url_no_error(self):
+        class TestSpider(Spider):
+            pass
+
+        bot = TestSpider()
+        bot.setup_queue()
+        bot.add_task(Task('page', url='zz://zz'))
+        self.assertEqual(0, bot.taskq.size())
+        bot.add_task(Task('page', url='zz://zz'), raise_error=False)
+        self.assertEqual(0, bot.taskq.size())
+        bot.add_task(Task('page', url='http://example.com/'))
+        self.assertEqual(1, bot.taskq.size())
+
+    def test_add_task_invalid_url_raise_error(self):
+        class TestSpider(Spider):
+            pass
+
+        bot = TestSpider()
+        bot.setup_queue()
+        self.assertRaises(SpiderError, bot.add_task,
+                          Task('page', url='zz://zz'), raise_error=True)
+        self.assertEqual(0, bot.taskq.size())
+        bot.add_task(Task('page', url='http://example.com/'))
+        self.assertEqual(1, bot.taskq.size())
