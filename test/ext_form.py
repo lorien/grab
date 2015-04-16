@@ -194,7 +194,7 @@ class TestHtmlForms(BaseGrabTestCase):
         g.submit(make_request=False)
 
     def test_set_input_by_xpath_regex(self):
-        html = '''
+        html = b'''
             <div><form action="" method="post"><input name="foo" type="text">
             <input name="bar" id="bar" type="text">
         '''
