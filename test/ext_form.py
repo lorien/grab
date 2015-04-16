@@ -192,3 +192,16 @@ class TestHtmlForms(BaseGrabTestCase):
         self.server.response['get.data'] = DISABLED_RADIO_HTML
         g.go(self.server.get_url())
         g.submit(make_request=False)
+
+    def test_set_input_by_xpath_regex(self):
+        html = '''
+            <div><form action="" method="post"><input name="foo" type="text">
+            <input name="bar" id="bar" type="text">
+        '''
+        g = build_grab(html)
+        g.set_input_by_xpath('//input[re:test(@id, "^ba")]', 'bar-value')
+        g.submit(make_request=False)
+        self.assertEqual(
+            set([('foo', None), ('bar', 'bar-value')]),
+            set(g.config['post']),
+        )

@@ -12,8 +12,6 @@ import logging
 import email
 import os
 import json
-
-
 import tempfile
 import webbrowser
 import codecs
@@ -521,7 +519,8 @@ class FormExtension(object):
         xpath = './/*[@id="%s"]' % _id
         if self._lxml_form is None:
             self.choose_form_by_element(xpath)
-        elem = self.form.xpath(xpath)[0]
+        sel = XpathSelector(self.form)
+        elem = sel.select(xpath).node()
         return self.set_input(elem.get('name'), value)
 
     def set_input_by_number(self, number, value):
@@ -532,7 +531,8 @@ class FormExtension(object):
         :param value: value which should be set to element
         """
 
-        elem = self.form.xpath('.//input[@type="text"]')[number]
+        sel = XpathSelector(self.form)
+        elem = sel.select('.//input[@type="text"]')[number].node()
         return self.set_input(elem.get('name'), value)
 
     def set_input_by_xpath(self, xpath, value):
@@ -543,7 +543,7 @@ class FormExtension(object):
         :param value: value which should be set to element
         """
 
-        elem = self.tree.xpath(xpath)[0]
+        elem = self.select(xpath).node()
 
         if self._lxml_form is None:
             # Explicitly set the default form
