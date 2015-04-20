@@ -17,12 +17,12 @@ from grab.spider.error import SpiderMisuseError
 
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, queue_name=None, **kwargs):
-        super(QueueInterface, self).__init__(**kwargs)
+        super(QueueBackend, self).__init__(spider_name, **kwargs)
         self.spider_name = spider_name
         if queue_name is None:
             queue_name = 'task_queue_%s' % spider_name
         self.queue_name = queue_name
-        self.queue_object = PriorityQueue(queue_name)
+        self.queue_object = PriorityQueue(queue_name, **kwargs)
         logging.debug('Redis queue key: %s' % self.queue_name)
 
     def put(self, task, priority, schedule_time=None):
