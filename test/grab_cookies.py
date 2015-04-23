@@ -13,6 +13,7 @@ class TestCookies(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
+    """
     def test_parsing_response_cookies(self):
         g = build_grab()
         self.server.response['cookies'] = {'foo': 'bar', '1': '2'}.items()
@@ -207,3 +208,25 @@ class TestCookies(BaseGrabTestCase):
         mgr = CookieManager.from_cookie_list([cookie])
         self.assertEqual('bar', mgr['foo'])
         self.assertRaises(KeyError, lambda: mgr['zzz'])
+    """
+
+    def test_dot_domain(self):
+        import pycurl
+
+        g = build_grab(debug=True)
+        names = [
+            'foo.bar:%d:127.0.0.1' % self.server.port,
+            'www.foo.bar:%d:127.0.0.1' % self.server.port,
+        ]
+        g.transport.curl.setopt(pycurl.RESOLVE, names)
+
+        self.server.response['headers'] = [
+            ('Set-Cookie', 'foo=foo; Domain=.foo.bar; '
+                           'Expires=Wed, 13 Jan 2021 22:23:01 GMT;')
+        ]
+
+        g.go('http://www.foo.bar:%d' % self.server.port)
+        self.assertEqual(dict(g.response.cookies.items()), {'foo': 'foo'})
+
+        g.go('http://www.foo.bar:%d' % self.server.port)
+        self.assertEqual('foo', self.server.request['cookies'].get('foo').value)

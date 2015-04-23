@@ -404,7 +404,7 @@ class CurlTransport(object):
         # TODO: At this point we should use cookielib magic
         # to pick up cookies for the current requests
         for cookie in grab.cookies.cookiejar:
-            cookie_domain = cookie.domain
+            cookie_domain = cookie.domain.lstrip('.')
             http_only = cookie_domain.startswith('#httponly_')
             if http_only:
                 cookie_domain = cookie_domain.replace('#httponly_', '')
