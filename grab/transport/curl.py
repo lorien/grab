@@ -409,7 +409,7 @@ class CurlTransport(object):
             if http_only:
                 cookie_domain = cookie_domain.replace('#httponly_', '')
 
-            cookie_domain = cookie.domain.lstrip('.')
+            cookie_domain = cookie_domain.lstrip('.')
             
             if not cookie_domain or cookie_domain in host_nowww:
                 encoded = encode_cookies(
