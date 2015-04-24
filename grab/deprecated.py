@@ -247,13 +247,6 @@ class DeprecatedThings(object):
 
         return get_node_text(fromstring(content), smart=smart)
 
-    # Methods from deprecated grab.ext.django module
-    # **********************************************
-
-    @deprecated(use_instead='grab.doc.django_file()')
-    def django_file(self, name=None):
-        return self.doc.django_file(name=name)
-
     # Methods from deprecated grab.ext.pquery module
     # **********************************************
 

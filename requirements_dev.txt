@@ -2,7 +2,6 @@ bumpversion
 coverage
 coveralls
 cssselect
-django
 feedparser
 flake8
 item

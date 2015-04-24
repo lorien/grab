@@ -57,7 +57,6 @@ GRAB_TEST_LIST = (
     'test.selector_deprecated',
     'test.grab_deprecated',
     'test.spider_stat',
-    'test.grab_django',
     'test.ext_pyquery',
     'test.item_deprecated',
     'test.tools_deprecated',

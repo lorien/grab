@@ -187,25 +187,6 @@ class RegexpExtension(object):
         self.rex_search(rex, byte=byte)
 
 
-class DjangoExtension(object):
-    def django_file(self, name=None):
-        """
-        Convert content of response into django `ContentFile` object.
-
-        :param name: specify name of file, otherwise the last segment in
-        URL path will be used as filename.
-        """
-        from django.core.files.base import ContentFile
-
-        if not name:
-            path = urlsplit(self.url).path
-            name = path.rstrip('/').split('/')[-1]
-
-        content_file = ContentFile(self.body)
-        content_file.name = name
-        return content_file
-
-
 class PyqueryExtension(object):
     __slots__ = ()
 
@@ -731,9 +712,8 @@ class FormExtension(object):
         self._lxml_form = None
 
 
-class Document(TextExtension, RegexpExtension, DjangoExtension,
-               PyqueryExtension, BodyExtension, DomTreeExtension,
-               FormExtension):
+class Document(TextExtension, RegexpExtension, PyqueryExtension,
+               BodyExtension, DomTreeExtension, FormExtension):
     """
     Document (in most cases it is a network response
         i.e. result of network request)
@@ -745,7 +725,7 @@ class Document(TextExtension, RegexpExtension, DjangoExtension,
                  'bom', 'timestamp',
                  'name_lookup_time', 'connect_time', 'total_time',
                  'download_size', 'upload_size', 'download_speed',
-                 'error_code', 'error_msg', 'grab',
+                 'error_code', 'error_msg', 'grab', 'remote_ip',
                  '_lxml_tree', '_strict_lxml_tree', '_pyquery',
                  '_lxml_form', '_file_fields',
                  )

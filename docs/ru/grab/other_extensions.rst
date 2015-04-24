@@ -1,24 +1,6 @@
-.. _django:
-
 =================
 Другие расширения
 =================
-
-Django расширение
-=================
-
-C помощью метода :meth:`~grab.ext.django.DjangoExtension.django_file` вы можете получить доступ к объекту класса `django.core.files.base.ContentFile`, который будет содержать тело документа. Можно использовать этот объект для присвоения `FileField` полю некой модели. Гипотетический пример::
-
-    # в models.py
-    class Profile(models.Model):
-        avatar = models.ImageField(upload_to='upload/user/avatar')
-
-    # где-то ещё
-    g = Grab()
-    g.go('http://domain.com/some/path/to/image.gif')
-    profile = Profile.objects.get(pk=77)
-    profile.avatar = g.django_file
-    profile.save()
 
 PyQuery расширение
 ==================

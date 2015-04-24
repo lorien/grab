@@ -4,7 +4,6 @@ from weblib.error import DataNotFound
 from grab.error import GrabMisuseError
 from tempfile import mkstemp
 import os
-from django.core.files.base import ContentFile 
 import re
 
 from test.util import build_grab
@@ -120,12 +119,6 @@ class GrabApiTestCase(BaseGrabTestCase):
         g = build_grab(data)
         self.assertEqual(g.doc('//input').node().value,
                          g.pyquery('input')[0].value)
-
-    def test_django_file(self):
-        self.server.response['data'] = b'abc'
-        g = build_grab()
-        g.go(self.server.get_url())
-        self.assertTrue(isinstance(g.django_file(), ContentFile))
 
     def test_assert_xpath(self):
         data = b'''<h1>tet</h1>'''
