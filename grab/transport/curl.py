@@ -372,9 +372,6 @@ class CurlTransport(object):
 
     def process_cookie_options(self, grab, request_url):
         host = urlsplit(request_url).netloc.split(':')[0]
-        host_nowww = host
-        if host_nowww.startswith('www.'):
-            host_nowww = host_nowww[4:]
 
         # `cookiefile` option should be processed before `cookies` option
         # because `load_cookies` updates `cookies` option
@@ -385,8 +382,8 @@ class CurlTransport(object):
             if not isinstance(grab.config['cookies'], dict):
                 raise error.GrabMisuseError('cookies option should be a dict')
             for name, value in grab.config['cookies'].items():
-                if '.' in host_nowww:
-                    domain = host_nowww
+                if '.' in host:
+                    domain = host
                 else:
                     domain = ''
                 grab.cookies.set(
@@ -411,14 +408,14 @@ class CurlTransport(object):
 
             cookie_domain = cookie_domain.lstrip('.')
             
-            if not cookie_domain or cookie_domain in host_nowww:
+            if not cookie_domain or cookie_domain in host:
                 encoded = encode_cookies(
                     {cookie.name: cookie.value},
                     join=True, charset=grab.config['charset'])
                 cookie_string = b'Set-Cookie: ' + encoded
                 if len(cookie.path) != 0:
                     cookie_string += b'; path=' + cookie.path.encode('ascii')
-                if '.' in host_nowww:
+                if '.' in host:
                     if cookie_domain:
                         cookie_string += b'; domain=' +\
                                          cookie_domain.encode('ascii')
