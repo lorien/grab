@@ -17,7 +17,7 @@ Grab
    :target: https://landscape.io/github/lorien/grab/master
 
 .. image:: https://readthedocs.org/projects/grab/badge/?version=latest
-    :target: https://docs.grablib.org/en/latest/
+    :target: http://docs.grablib.org/en/latest/
 
 
 What is Grab?
