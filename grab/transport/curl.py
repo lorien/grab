@@ -408,7 +408,7 @@ class CurlTransport(object):
 
             cookie_domain = cookie_domain.lstrip('.')
             
-            if not cookie_domain or cookie_domain in host:
+            if not cookie_domain or cookie.domain in host:
                 encoded = encode_cookies(
                     {cookie.name: cookie.value},
                     join=True, charset=grab.config['charset'])
