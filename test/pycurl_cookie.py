@@ -4,16 +4,10 @@ This test case has written to help me
 understand how pycurl lib works with cookies
 """
 import pycurl
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import BytesIO as StringIO
-try:
-    from cookielib import CookieJar
-except ImportError:
-    from http.cookiejar import CookieJar
+from six import BytesIO
+from six.moves.http_cookiejar import CookieJar
 
-
+from grab.error import GrabMisuseError
 from test.util import BaseGrabTestCase
 from grab.cookie import create_cookie
 
@@ -42,8 +36,8 @@ class TestCookies(BaseGrabTestCase):
             ('Location', self.server.get_url())]
         self.server.response['get.data'] = 'foo'
 
-        buf = StringIO()
-        header_buf = StringIO()
+        buf = BytesIO()
+        header_buf = BytesIO()
 
         # Configure pycurl instance
         # Usually all these crap is automatically handled by the Grab
@@ -113,7 +107,7 @@ class TestCookies(BaseGrabTestCase):
 
     def test_cookie(self):
         create_cookie('foo', 'bar')
-        self.assertRaises(TypeError, create_cookie,
+        self.assertRaises(GrabMisuseError, create_cookie,
                           'foo', 'bar', x='y')
 
     def test_cookiejar(self):

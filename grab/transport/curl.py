@@ -15,15 +15,13 @@ except ImportError:
 import pycurl
 import tempfile
 import os
-try:
-    from cookielib import CookieJar
-except ImportError:
-    from http.cookiejar import CookieJar
-import six
 from weblib.http import (encode_cookies, normalize_http_values,
                         normalize_post_data, normalize_url)
 from weblib.user_agent import random_user_agent
-from weblib.encoding import smart_str, decode_list, decode_pairs
+from weblib.encoding import make_str, decode_list, decode_pairs
+import six
+from six.moves.http_cookies import SimpleCookie
+from six.moves.http_cookiejar import CookieJar
 
 from grab.cookie import create_cookie, CookieManager
 from grab import error
@@ -205,7 +203,7 @@ class CurlTransport(object):
 
         # py3 hack
         if not six.PY3:
-            request_url = smart_str(request_url)
+            request_url = make_str(request_url)
 
         self.curl.setopt(pycurl.URL, request_url)
 
@@ -378,13 +376,19 @@ class CurlTransport(object):
         if grab.config['cookiefile']:
             grab.cookies.load_from_file(grab.config['cookiefile'])
 
+        # Process `cookies` option that is simple dict i.e.
+        # it provides only `name` and `value` attributes of cookie
+        # No domain, no path, no expires, etc
+        # To pass these cookies to the requested host
+        # we should set up cookie with same host name
         if grab.config['cookies']:
             if not isinstance(grab.config['cookies'], dict):
                 raise error.GrabMisuseError('cookies option should be a dict')
             for name, value in grab.config['cookies'].items():
                 if '.' in host:
-                    domain = host
+                    domain = '.' + host
                 else:
+                    # TODO: should I do that?
                     domain = ''
                 grab.cookies.set(
                     name=name,
@@ -398,30 +402,28 @@ class CurlTransport(object):
         # Enable pycurl cookie processing mode
         self.curl.setopt(pycurl.COOKIELIST, '')
 
-        # TODO: At this point we should use cookielib magic
-        # to pick up cookies for the current requests
+        # Put all cookies from `grab.cookies.cookiejar` to
+        # the pycurl instance.
+        # We put *all* cookies, for all host names
+        # Pycurl cookie engine is smart enough to send
+        # only cookies belong to the current request's host name
         for cookie in grab.cookies.cookiejar:
-            cookie_domain = cookie.domain
-            http_only = cookie_domain.startswith('#httponly_')
-            if http_only:
-                cookie_domain = cookie_domain.replace('#httponly_', '')
-
-            cookie_domain = cookie_domain.lstrip('.')
-            
-            if not cookie_domain or cookie_domain in host:
-                encoded = encode_cookies(
-                    {cookie.name: cookie.value},
-                    join=True, charset=grab.config['charset'])
-                cookie_string = b'Set-Cookie: ' + encoded
-                if len(cookie.path) != 0:
-                    cookie_string += b'; path=' + cookie.path.encode('ascii')
-                if '.' in host:
-                    if cookie_domain:
-                        cookie_string += b'; domain=' +\
-                                         cookie_domain.encode('ascii')
-                if http_only:
-                    cookie_string += b'; HttpOnly'
-                self.curl.setopt(pycurl.COOKIELIST, cookie_string)
+            cookies = SimpleCookie()
+            cname = cookie.name
+            # python2: should be py2 <str>
+            # python3: should be py3 <str>
+            if six.PY2:
+                cname = cname.encode('ascii')
+            cookies[cname] = cookie.value
+            cookies[cname]['domain'] = cookie.domain
+            cookies[cname]['httponly'] =\
+                cookie.get_nonstandard_attr('HttpOnly')
+            for key in ('path', 'comment', 'expires', 'secure',
+                        'version'):
+                val = getattr(cookie, key)
+                if val:
+                    cookies[cname][key] = getattr(cookie, key)
+            self.curl.setopt(pycurl.COOKIELIST, cookies.output())
 
     def request(self):
 
@@ -519,16 +521,23 @@ class CurlTransport(object):
         cookiejar = CookieJar()
         for line in self.curl.getinfo(pycurl.INFO_COOKIELIST):
             values = line.split('\t')
+            domain = values[0].lower()
+            if domain.startswith('#httponly_'):
+                domain = domain.replace('#httponly_', '')
+                httponly = True
+            else:
+                httponly = False
             # old
             # cookies[values[-2]] = values[-1]
             # new
             cookie = create_cookie(
                 name=values[5],
                 value=values[6],
-                domain=values[0],
+                domain=domain,
                 path=values[2],
                 secure=values[3] == "TRUE",
                 expires=int(values[4]) if values[4] else None,
+                httponly=httponly,
             )
             cookiejar.set_cookie(cookie)
         return cookiejar

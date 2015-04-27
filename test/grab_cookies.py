@@ -13,7 +13,6 @@ class TestCookies(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    """
     def test_parsing_response_cookies(self):
         g = build_grab()
         self.server.response['cookies'] = {'foo': 'bar', '1': '2'}.items()
@@ -89,9 +88,8 @@ class TestCookies(BaseGrabTestCase):
                          set((x['name'], x['value'])
                              for x in json.load(open(TMP_FILE))))
 
-        # Test non-ascii
         g = build_grab()
-        cookies = {'foo': 'bar', 'spam': u'бегемот'}
+        cookies = {'foo': 'bar', 'spam': u'begemot'}
         g.setup(cookies=cookies)
         g.go(self.server.get_url())
         g.dump_cookies(TMP_FILE)
@@ -102,19 +100,21 @@ class TestCookies(BaseGrabTestCase):
         # Test load cookies
         g = build_grab()
         cookies = [{'name': 'foo', 'value': 'bar'},
-                   {'name': 'spam', 'value': u'бегемот'}]
+                   {'name': 'spam', 'value': u'begemot'}]
         json.dump(cookies, open(TMP_FILE, 'w'))
         g.load_cookies(TMP_FILE)
         self.assertEqual(set(g.cookies.items()),
                          set((x['name'], x['value']) for x in cookies))
 
-    def test_cookiefile(self):
+    def test_cookiefile_empty(self):
         g = build_grab()
-
         # Empty file should not raise Exception
         open(TMP_FILE, 'w').write('')
         g.setup(cookiefile=TMP_FILE)
         g.go(self.server.get_url())
+
+    def test_cookiefile(self):
+        g = build_grab()
 
         cookies = [{'name': 'spam', 'value': 'ham'}]
         json.dump(cookies, open(TMP_FILE, 'w'))
@@ -208,7 +208,6 @@ class TestCookies(BaseGrabTestCase):
         mgr = CookieManager.from_cookie_list([cookie])
         self.assertEqual('bar', mgr['foo'])
         self.assertRaises(KeyError, lambda: mgr['zzz'])
-    """
 
     def test_dot_domain(self):
         import pycurl

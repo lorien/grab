@@ -7,10 +7,7 @@ Some code got from
     https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 """
 from __future__ import absolute_import
-try:
-    from cookielib import CookieJar, Cookie
-except ImportError:
-    from http.cookiejar import CookieJar, Cookie
+from six.moves.http_cookiejar import CookieJar, Cookie
 import json
 
 from grab.error import GrabMisuseError
@@ -20,7 +17,7 @@ COOKIE_ATTRS = ('name', 'value', 'version', 'port', 'domain',
                 'comment_url', 'rfc2109')
 
 
-def create_cookie(name, value, **kwargs):
+def create_cookie(name, value, httponly=None, **kwargs):
     """Creates `cookielib.Cookie` instance.
     """
 
@@ -37,18 +34,20 @@ def create_cookie(name, value, **kwargs):
         comment=None,
         comment_url=None,
         rfc2109=False,
-        rest={'HttpOnly': None},  # wtf?
+        rest={'HttpOnly': httponly},
     )
 
-    bad_args = set(kwargs) - set(config.keys())
-    if bad_args:
-        raise TypeError('Unexpected arguments: %s' % tuple(bad_args))
+    for key in kwargs.keys():
+        if key not in config:
+            raise GrabMisuseError('Function `create_cookie` does not accept '
+                                  '`%s` argument' % key)
 
     config.update(**kwargs)
+    config['rest']['HttpOnly'] = httponly
 
     config['port_specified'] = bool(config['port'])
     config['domain_specified'] = bool(config['domain'])
-    config['domain_initial_dot'] = config['domain'].startswith('.')
+    config['domain_initial_dot'] = (config['domain'] or '').startswith('.')
     config['path_specified'] = bool(config['path'])
 
     return Cookie(**config)
