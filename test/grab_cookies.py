@@ -1,4 +1,5 @@
 # coding: utf-8
+import pycurl
 import json
 from grab import Grab
 from grab.error import GrabMisuseError
@@ -142,8 +143,6 @@ class TestCookies(BaseGrabTestCase):
         g.go(self.server.get_url())
 
     def test_manual_dns(self):
-        import pycurl
-
         g = build_grab()
         g.transport.curl.setopt(pycurl.RESOLVE,
                                 ['foo:%d:127.0.0.1' % self.server.port])
@@ -152,8 +151,6 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual(b'zzz', g.response.body)
 
     def test_different_domains(self):
-        import pycurl
-
         g = build_grab()
         names = [
             'foo:%d:127.0.0.1' % self.server.port,
@@ -170,8 +167,6 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual(dict(g.response.cookies.items()), {'bar': 'bar'})
 
     def test_cookie_domain(self):
-        import pycurl
-
         g = Grab()
         names = [
             'example.com:%d:127.0.0.1' % self.server.port,
@@ -210,8 +205,6 @@ class TestCookies(BaseGrabTestCase):
         self.assertRaises(KeyError, lambda: mgr['zzz'])
 
     def test_dot_domain(self):
-        import pycurl
-
         g = build_grab(debug=True)
         names = [
             'foo.bar:%d:127.0.0.1' % self.server.port,
@@ -229,3 +222,45 @@ class TestCookies(BaseGrabTestCase):
 
         g.go('http://www.foo.bar:%d' % self.server.port)
         self.assertEqual('foo', self.server.request['cookies'].get('foo').value)
+
+    def test_path(self):
+        self.server.response['headers'] = [
+            ('Set-Cookie', 'foo=1; path=/;'),
+            ('Set-Cookie', 'bar=1; path=/admin;'),
+        ]
+
+        # work with "/" path
+        g = build_grab()
+        # get cookies
+        g.go(self.server.get_url('/'))
+        # submit received cookies
+        g.go(self.server.get_url('/'))
+        self.assertEqual(1, len(self.server.request['cookies']))
+
+        # work with "/admin" path
+        g = build_grab()
+        # get cookies
+        g.go(self.server.get_url('/'))
+        # submit received cookies
+        g.go(self.server.get_url('/admin/zz'))
+        self.assertEqual(2, len(self.server.request['cookies']))
+
+    def test_common_case_www_domain(self):
+        g = build_grab()
+        names = [
+            'www.foo.bar:%d:127.0.0.1' % self.server.port,
+        ]
+        g.transport.curl.setopt(pycurl.RESOLVE, names)
+
+        # Cookies are set for root domain (not for www subdomain)
+        self.server.response['headers'] = [
+            ('Set-Cookie', 'foo=1; Domain=foo.bar;'),
+            ('Set-Cookie', 'bar=2; Domain=.foo.bar;'),
+        ]
+
+        # get cookies
+        g.go('http://www.foo.bar:%d' % self.server.port)
+        # submit cookies
+        g.go('http://www.foo.bar:%d' % self.server.port)
+        self.assertEqual('1', self.server.request['cookies'].get('foo').value)
+        self.assertEqual('2', self.server.request['cookies'].get('bar').value)
