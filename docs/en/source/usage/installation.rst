@@ -117,4 +117,4 @@ then try to install dependencies manually with the command:
 
 .. code:: shell
 
-    pip istall -U lxml pycurl selection weblib six
+    pip install -U lxml pycurl selection weblib six
