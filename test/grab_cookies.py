@@ -125,6 +125,7 @@ class TestCookies(BaseGrabTestCase):
         self.server.response['cookies'] = {'godzilla': 'monkey'}.items()
         g.setup(cookiefile=TMP_FILE, debug=True)
         g.go(self.server.get_url())
+        print(g.request_head)
         self.assertEqual(self.server.request['cookies']['spam'].value, 'ham')
 
         # This is correct reslt of combining two cookies
@@ -164,7 +165,11 @@ class TestCookies(BaseGrabTestCase):
 
         self.server.response['cookies'] = {'bar': 'bar'}.items()
         g.go('http://bar:%d' % self.server.port)
-        self.assertEqual(dict(g.response.cookies.items()), {'bar': 'bar'})
+
+        # response.cookies contains cookies from both domains
+        # because it just accumulates cookies over time
+        self.assertEqual(dict(g.response.cookies.items()), {'foo': 'foo',
+                                                            'bar': 'bar'})
 
     def test_cookie_domain(self):
         g = Grab()

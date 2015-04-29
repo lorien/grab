@@ -20,7 +20,6 @@ from weblib.http import (encode_cookies, normalize_http_values,
 from weblib.user_agent import random_user_agent
 from weblib.encoding import make_str, decode_list, decode_pairs
 import six
-from six.moves.http_cookies import SimpleCookie
 from six.moves.http_cookiejar import CookieJar
 
 from grab.cookie import create_cookie, CookieManager
@@ -369,7 +368,7 @@ class CurlTransport(object):
                              grab.config['reject_file_size'])
 
     def process_cookie_options(self, grab, request_url):
-        host = urlsplit(request_url).netloc.split(':')[0]
+        request_host = urlsplit(request_url).netloc.split(':')[0]
 
         # `cookiefile` option should be processed before `cookies` option
         # because `load_cookies` updates `cookies` option
@@ -385,15 +384,9 @@ class CurlTransport(object):
             if not isinstance(grab.config['cookies'], dict):
                 raise error.GrabMisuseError('cookies option should be a dict')
             for name, value in grab.config['cookies'].items():
-                if '.' in host:
-                    domain = '.' + host
-                else:
-                    # TODO: should I do that?
-                    domain = ''
                 grab.cookies.set(
                     name=name,
-                    value=value,
-                    domain=domain
+                    value=value
                 )
 
         # Erase known cookies stored in pycurl handler
@@ -408,22 +401,26 @@ class CurlTransport(object):
         # Pycurl cookie engine is smart enough to send
         # only cookies belong to the current request's host name
         for cookie in grab.cookies.cookiejar:
-            cookies = SimpleCookie()
-            cname = cookie.name
-            # python2: should be py2 <str>
-            # python3: should be py3 <str>
-            if six.PY2:
-                cname = cname.encode('ascii')
-            cookies[cname] = cookie.value
-            cookies[cname]['domain'] = cookie.domain
-            cookies[cname]['httponly'] =\
-                cookie.get_nonstandard_attr('HttpOnly')
-            for key in ('path', 'comment', 'expires', 'secure',
-                        'version'):
-                val = getattr(cookie, key)
-                if val:
-                    cookies[cname][key] = getattr(cookie, key)
-            self.curl.setopt(pycurl.COOKIELIST, cookies.output())
+            self.curl.setopt(pycurl.COOKIELIST,
+                             self.get_netscape_cookie_spec(cookie,
+                                                           request_host))
+            
+    def get_netscape_cookie_spec(self, cookie, request_host):
+        host = cookie.domain or request_host
+        if cookie.get_nonstandard_attr('HttpOnly'):
+            host = '#HttpOnly_' + host
+        items = [
+            host,
+            'TRUE',
+            cookie.path,
+            'TRUE' if cookie.secure else 'FALSE',
+            str(cookie.expires) if cookie.expires\
+                else 'Fri, 31 Dec 9999 23:59:59 GMT',
+            cookie.name,
+            cookie.value,
+        ]
+        out = u'\t'.join(items)
+        return out
 
     def request(self):
 
