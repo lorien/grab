@@ -24,6 +24,7 @@ docs/libpeerconnection.log
 /.py33
 /script/
 /test.py
+/test2.py
 /many_links_prof
 /prof.compiled
 /.venv/
