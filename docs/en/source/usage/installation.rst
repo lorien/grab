@@ -39,7 +39,7 @@ Installation on Windows
 
 1) Install lxml. You can get lxml here: http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 
-2) Install pycurl. You can get pycurl here: http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
+2) Install pycurl. You can get pycurl here: http://www.lfd.uci.edu/~gohlke/pythonlibs/#pycurl
 
 3) Install Grab
 
