@@ -20,6 +20,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
     def test_put_method(self):
         g = build_grab()
-        g.setup(method='put', post=b'')
+        g.setup(method='put', post=b'abc')
         g.go(self.server.get_url())
         self.assertEquals('PUT', self.server.request['method'])
+        self.assertEquals('3', self.server.request['headers']['Content-Length'])

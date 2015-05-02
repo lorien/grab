@@ -300,6 +300,7 @@ class CurlTransport(object):
                     'Value of post option could be only '
                     'byte string if PUT method is used')
             self.curl.setopt(pycurl.UPLOAD, 1)
+            self.curl.setopt(pycurl.CUSTOMREQUEST, 'PUT')
             self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read)
             self.curl.setopt(pycurl.INFILESIZE, len(data))
         elif grab.request_method == 'PATCH':
