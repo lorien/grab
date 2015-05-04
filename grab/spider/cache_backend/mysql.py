@@ -16,7 +16,6 @@ import logging
 import MySQLdb
 import marshal
 import time
-import six
 from weblib.encoding import make_str
 
 from grab.response import Response
@@ -29,12 +28,13 @@ class CacheBackend(object):
     def __init__(self, database, use_compression=True,
                  mysql_engine='innodb', spider=None, **kwargs):
         self.spider = spider
-        self.conn = MySQLdb.connect(**kwargs)
+        self.database = database
+        self.m_kwargs = kwargs
         self.mysql_engine = mysql_engine
-        self.conn.select_db(database)
-        self.cursor = self.conn.cursor()
-        self.cursor.execute('SET TRANSACTION ISOLATION LEVEL READ COMMITTED')
-        self.cursor.execute('show tables')
+
+        self.connect()
+        self.execute('SET TRANSACTION ISOLATION LEVEL READ COMMITTED')
+        self.execute('show tables')
         found = False
         for row in self.cursor:
             if row[0] == 'cache':
@@ -43,9 +43,22 @@ class CacheBackend(object):
         if not found:
             self.create_cache_table(self.mysql_engine)
 
+    def connect(self):
+        self.conn = MySQLdb.connect(**self.m_kwargs)
+        self.conn.select_db(self.database)
+        self.cursor = self.conn.cursor()
+
+    def execute(self, *args):
+        try:
+            self.cursor.execute(*args)
+        except (AttributeError, MySQLdb.OperationalError):
+            self.connect()
+            self.cursor.execute(*args)
+        return self.cursor
+
     def create_cache_table(self, engine):
-        self.cursor.execute('begin')
-        self.cursor.execute('''
+        self.execute('begin')
+        self.execute('''
             create table cache (
                 id binary(20) not null,
                 timestamp int not null,
@@ -54,7 +67,7 @@ class CacheBackend(object):
                 index timestamp_idx(timestamp)
             ) engine = %s
         ''' % engine)
-        self.cursor.execute('commit')
+        self.execute('commit')
 
     def get_item(self, url, timeout=None):
         """
@@ -63,7 +76,7 @@ class CacheBackend(object):
 
         _hash = self.build_hash(url)
         with self.spider.save_timer('cache.read.mysql_query'):
-            self.cursor.execute('BEGIN')
+            self.execute('BEGIN')
             if timeout is None:
                 query = ""
             else:
@@ -74,9 +87,9 @@ class CacheBackend(object):
                   FROM cache
                   WHERE id = x%%s %(query)s
                   ''' % {'query': query}
-            self.cursor.execute(sql, (_hash,))
+            self.execute(sql, (_hash,))
             row = self.cursor.fetchone()
-            self.cursor.execute('COMMIT')
+            self.execute('COMMIT')
         if row:
             data = row[0]
             return self.unpack_database_value(data)
@@ -95,11 +108,11 @@ class CacheBackend(object):
 
     def remove_cache_item(self, url):
         _hash = self.build_hash(url)
-        self.cursor.execute('begin')
-        self.cursor.execute('''
+        self.execute('begin')
+        self.execute('''
             delete from cache where id = x%s
         ''', (_hash,))
-        self.cursor.execute('commit')
+        self.execute('commit')
 
     def load_response(self, grab, cache_item):
         grab.setup_document(cache_item['body'])
@@ -137,24 +150,24 @@ class CacheBackend(object):
     def set_item(self, url, item):
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
-        self.cursor.execute('BEGIN')
+        self.execute('BEGIN')
         ts = int(time.time())
         sql = '''
               INSERT INTO cache (id, timestamp, data)
               VALUES(x%s, %s, %s)
               ON DUPLICATE KEY UPDATE timestamp = %s, data = %s
               '''
-        self.cursor.execute(sql, (_hash, ts, data, ts, data))
-        self.cursor.execute('COMMIT')
+        self.execute(sql, (_hash, ts, data, ts, data))
+        self.execute('COMMIT')
 
     def pack_database_value(self, val):
         dump = marshal.dumps(val)
         return zlib.compress(dump)
 
     def clear(self):
-        self.cursor.execute('BEGIN')
-        self.cursor.execute('TRUNCATE cache')
-        self.cursor.execute('COMMIT')
+        self.execute('BEGIN')
+        self.execute('TRUNCATE cache')
+        self.execute('COMMIT')
 
     def has_item(self, url, timeout=None):
         """
@@ -168,8 +181,8 @@ class CacheBackend(object):
             else:
                 ts = int(time.time()) - timeout
                 query = " AND timestamp > %d" % ts
-            self.cursor.execute('BEGIN')
-            self.cursor.execute('''
+            self.execute('BEGIN')
+            self.execute('''
                 SELECT id
                 FROM cache
                 WHERE id = x%%s %(query)s
@@ -177,12 +190,12 @@ class CacheBackend(object):
                 ''' % {'query': query},
                 (_hash,))
             row = self.cursor.fetchone()
-            self.cursor.execute('COMMIT')
+            self.execute('COMMIT')
         return True if row else False
 
     def size(self):
-        self.cursor.execute('BEGIN')
-        self.cursor.execute('SELECT COUNT(*) from cache')
+        self.execute('BEGIN')
+        self.execute('SELECT COUNT(*) from cache')
         row = self.cursor.fetchone()
-        self.cursor.execute('COMMIT')
+        self.execute('COMMIT')
         return row[0]
