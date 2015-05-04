@@ -137,6 +137,7 @@ class MulticurlTransport(object):
                        'grab_config_backup': grab_config_backup, 'task': task}
 
                 self.multi.remove_handle(curl)
+                curl.reset()
                 self.freelist.append(curl)
 
             if not queued_messages:
