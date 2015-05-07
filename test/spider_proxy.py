@@ -4,6 +4,7 @@ import six
 from grab import Grab
 from grab.spider import Spider, Task
 from test.util import BaseGrabTestCase, TEST_SERVER_PORT
+from grab.proxylist import BaseProxySource, Proxy
 
 ADDRESS = '127.0.0.1'
 EXTRA_PORT1 = TEST_SERVER_PORT + 1
@@ -18,7 +19,6 @@ class SimpleSpider(Spider):
         self.ports = set()
 
     def task_baz(self, grab, task):
-        print(grab.request_headers)
         self.ports.add(int(grab.response.headers.get('Listen-Port', 0)))
 
 
@@ -29,6 +29,7 @@ class TestSpider(BaseGrabTestCase):
                                 extra_ports=[EXTRA_PORT1, EXTRA_PORT2])
         cls.server.start()
 
+    """
     def test_setup_proxylist(self):
         content = '%s\n%s\n%s' % (PROXY1, PROXY2, PROXY3)
         open('/tmp/__proxy.txt', 'w').write(content)
@@ -122,3 +123,29 @@ class TestSpider(BaseGrabTestCase):
 
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
         self.assertTrue(EXTRA_PORT2 not in bot.ports)
+    """
+
+    def test_spider_custom_proxy_source(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.ports = set()
+
+            def task_page(self, grab, task):
+                self.ports.add(int(grab.response.headers.get('Listen-Port', 0)))
+
+
+        class CustomProxySource(BaseProxySource):
+            def load(self):
+                return [
+                    Proxy(ADDRESS, TEST_SERVER_PORT, None, None, 'http'),
+                ]
+
+
+        bot = TestSpider()
+        bot.setup_queue()
+        bot.load_proxylist(CustomProxySource())
+        bot.add_task(Task('page', url='http://yandex.ru/'))
+        bot.run()
+
+        self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
+        self.assertEqual(bot.ports, set([TEST_SERVER_PORT]))

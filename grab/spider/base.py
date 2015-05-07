@@ -26,7 +26,7 @@ from grab.spider.task import Task, NullTask
 from grab.spider.data import Data
 from grab.spider.stat import SpiderStat
 from grab.spider.transport.multicurl import MulticurlTransport
-from grab.proxylist import ProxyList
+from grab.proxylist import ProxyList, BaseProxySource
 from grab.util.misc import camel_case_to_underscore
 from weblib.encoding import make_str, make_unicode
 
@@ -920,18 +920,25 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
             self.stop_timer('total')
             self.shutdown()
 
-    def load_proxylist(self, source, source_type, proxy_type='http',
+    def load_proxylist(self, source, source_type=None, proxy_type='http',
                        auto_init=True, auto_change=True,
                        **kwargs):
         self.proxylist = ProxyList()
-        if source_type == 'text_file':
-            self.proxylist.load_file(source, proxy_type=proxy_type)
-        elif source_type == 'url':
-            self.proxylist.load_url(source, proxy_type=proxy_type)
+        if isinstance(source, BaseProxySource):
+            self.proxylist.set_source(source)
+        elif isinstance(source, six.string_types):
+            if source_type == 'text_file':
+                self.proxylist.load_file(source, proxy_type=proxy_type)
+            elif source_type == 'url':
+                self.proxylist.load_url(source, proxy_type=proxy_type)
+            else:
+                raise SpiderMisuseError('Method `load_proxylist` received '
+                                        'invalid `source_type` argument: %s'
+                                        % source_type) 
         else:
             raise SpiderMisuseError('Method `load_proxylist` received '
-                                    'invalid `source_type` argument: '
-                                    % source_type) 
+                                    'invalid `source` argument: %s'
+                                    % source) 
 
         self.proxylist_enabled = True
         self.proxy = None
