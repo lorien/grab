@@ -370,6 +370,10 @@ class CurlTransport(object):
 
     def process_cookie_options(self, grab, request_url):
         request_host = urlsplit(request_url).netloc.split(':')[0]
+        if request_host.startswith('www.'):
+            request_host_no_www = request_host[4:]
+        else:
+            request_host_no_www = request_host
 
         # `cookiefile` option should be processed before `cookies` option
         # because `load_cookies` updates `cookies` option
@@ -379,15 +383,17 @@ class CurlTransport(object):
         # Process `cookies` option that is simple dict i.e.
         # it provides only `name` and `value` attributes of cookie
         # No domain, no path, no expires, etc
-        # To pass these cookies to the requested host
-        # we should set up cookie with same host name
+        # I pass these no-domain cookies to *each* requested domain
+        # by setting these cookies with corresponding domain attribute
+        # Trying to guess better domain name by removing leading "www."
         if grab.config['cookies']:
             if not isinstance(grab.config['cookies'], dict):
                 raise error.GrabMisuseError('cookies option should be a dict')
             for name, value in grab.config['cookies'].items():
                 grab.cookies.set(
                     name=name,
-                    value=value
+                    value=value,
+                    domain=request_host_no_www
                 )
 
         # Erase known cookies stored in pycurl handler
@@ -407,6 +413,8 @@ class CurlTransport(object):
                                                            request_host))
             
     def get_netscape_cookie_spec(self, cookie, request_host):
+        # FIXME: Now cookie.domain could not be None
+        # request_host is not needed anymore
         host = cookie.domain or request_host
         if cookie.get_nonstandard_attr('HttpOnly'):
             host = '#HttpOnly_' + host

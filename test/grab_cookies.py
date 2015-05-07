@@ -100,8 +100,10 @@ class TestCookies(BaseGrabTestCase):
 
         # Test load cookies
         g = build_grab()
-        cookies = [{'name': 'foo', 'value': 'bar'},
-                   {'name': 'spam', 'value': u'begemot'}]
+        cookies = [{'name': 'foo', 'value': 'bar',
+                    'domain': self.server.address},
+                   {'name': 'spam', 'value': u'begemot',
+                    'domain': self.server.address}]
         json.dump(cookies, open(TMP_FILE, 'w'))
         g.load_cookies(TMP_FILE)
         self.assertEqual(set(g.cookies.items()),
@@ -117,7 +119,8 @@ class TestCookies(BaseGrabTestCase):
     def test_cookiefile(self):
         g = build_grab()
 
-        cookies = [{'name': 'spam', 'value': 'ham'}]
+        cookies = [{'name': 'spam', 'value': 'ham',
+                    'domain': self.server.address}]
         json.dump(cookies, open(TMP_FILE, 'w'))
 
         # One cookie are sent in server reponse
@@ -187,7 +190,7 @@ class TestCookies(BaseGrabTestCase):
         self.assertRaises(GrabMisuseError, g.cookies.update, ['asdf'])
 
     def test_from_cookie_list(self):
-        cookie = create_cookie('foo', 'bar')
+        cookie = create_cookie('foo', 'bar', self.server.address)
         mgr = CookieManager.from_cookie_list([cookie])
         test_cookie = [x for x in mgr.cookiejar if x.name == 'foo'][0]
         self.assertEqual(cookie.name, test_cookie.name)
@@ -196,7 +199,7 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual(0, len(list(mgr.cookiejar)))
 
     def test_pickle_serialization(self):
-        cookie = create_cookie('foo', 'bar')
+        cookie = create_cookie('foo', 'bar', self.server.address)
         mgr = CookieManager.from_cookie_list([cookie])
         dump = pickle.dumps(mgr)
         mgr2 = pickle.loads(dump)
@@ -204,7 +207,7 @@ class TestCookies(BaseGrabTestCase):
                          list(mgr2.cookiejar)[0].value)
 
     def test_get_item(self):
-        cookie = create_cookie('foo', 'bar')
+        cookie = create_cookie('foo', 'bar', self.server.address)
         mgr = CookieManager.from_cookie_list([cookie])
         self.assertEqual('bar', mgr['foo'])
         self.assertRaises(KeyError, lambda: mgr['zzz'])
@@ -226,7 +229,8 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual(dict(g.response.cookies.items()), {'foo': 'foo'})
 
         g.go('http://www.foo.bar:%d' % self.server.port)
-        self.assertEqual('foo', self.server.request['cookies'].get('foo').value)
+        self.assertEqual('foo',
+                         self.server.request['cookies'].get('foo').value)
 
     def test_path(self):
         self.server.response['headers'] = [
@@ -269,3 +273,33 @@ class TestCookies(BaseGrabTestCase):
         g.go('http://www.foo.bar:%d' % self.server.port)
         self.assertEqual('1', self.server.request['cookies'].get('foo').value)
         self.assertEqual('2', self.server.request['cookies'].get('bar').value)
+
+    def test_cookie_merging_replace_with_cookies_option(self):
+
+        init_cookies = [{'name': 'foo', 'value': 'bar',
+                         'domain': self.server.address}]
+        json.dump(init_cookies, open(TMP_FILE, 'w'))
+
+        g = build_grab(debug=True)
+        g.cookies.load_from_file(TMP_FILE)
+
+        cookies = {
+            'foo': 'bar2',
+            'sex': 'male',
+        }
+
+        g.setup(cookies=cookies)
+        g.go(self.server.get_url())
+        self.assertEqual(2, len(self.server.request['cookies'].items()))
+
+    def test_cookie_merging_replace(self):
+        g = Grab()
+        g.cookies.set('foo', 'bar', self.server.address)
+        g.cookies.set('foo', 'bar2', self.server.address)
+        self.assertEqual(1, len(g.cookies.items()))
+
+        g.cookies.set('foo', 'bar3', '')
+        self.assertEqual(1, len(g.cookies.items()))
+
+        g.cookies.set('foo', 'bar2', domain='ya.ru')
+        self.assertEqual(2, len(g.cookies.items()))

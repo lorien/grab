@@ -49,7 +49,7 @@ def build_grab(*args, **kwargs):
 class BaseGrabTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.server = TestServer(port=TEST_SERVER_PORT)
+        cls.server = TestServer(address='localhost', port=TEST_SERVER_PORT)
         cls.server.start()
 
     @classmethod

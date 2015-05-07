@@ -9,24 +9,27 @@ Some code got from
 from __future__ import absolute_import
 from six.moves.http_cookiejar import CookieJar, Cookie
 import json
+import logging
 
 from grab.error import GrabMisuseError
 
+logger = logging.getLogger('grab.cookie')
 COOKIE_ATTRS = ('name', 'value', 'version', 'port', 'domain',
                 'path', 'secure', 'expires', 'discard', 'comment',
                 'comment_url', 'rfc2109')
 
 
-def create_cookie(name, value, httponly=None, **kwargs):
-    """Creates `cookielib.Cookie` instance.
-    """
+def create_cookie(name, value, domain, httponly=None, **kwargs):
+    "Creates `cookielib.Cookie` instance"
 
+    if domain == 'localhost':
+        domain = ''
     config = dict(
         name=name,
         value=value,
         version=0,
         port=None,
-        domain='',
+        domain=domain,
         path='/',
         secure=False,
         expires=None,
@@ -74,7 +77,7 @@ class CookieManager(object):
     # def disable_cookiejar_lock(self, cj):
         # cj._cookies_lock = dummy_threading.RLock()
 
-    def set(self, name, value, **kwargs):
+    def set(self, name, value, domain, **kwargs):
         """Add new cookie or replace existing cookie with same parameters.
 
         :param name: name of cookie
@@ -82,7 +85,10 @@ class CookieManager(object):
         :param kwargs: extra attributes of cookie
         """
 
-        self.cookiejar.set_cookie(create_cookie(name, value, **kwargs))
+        if domain == 'localhost':
+            domain = ''
+
+        self.cookiejar.set_cookie(create_cookie(name, value, domain, **kwargs))
 
     def update(self, cookies):
         if isinstance(cookies, CookieJar):
@@ -153,10 +159,10 @@ class CookieManager(object):
                 items = json.loads(data)
             else:
                 items = {}
-        jar = CookieJar()
         for item in items:
-            jar.set_cookie(create_cookie(**item))
-        self.update(jar)
+            extra = dict((x, y) for x, y in item.items()
+                         if x not in ['name', 'value', 'domain'])
+            self.set(item['name'], item['value'], item['domain'], **extra)
 
     def get_dict(self):
         res = []

@@ -106,13 +106,13 @@ class TestCookies(BaseGrabTestCase):
         self.assertEquals(2, len(self.server.request['cookies']))
 
     def test_cookie(self):
-        create_cookie('foo', 'bar')
+        create_cookie('foo', 'bar', self.server.address)
         self.assertRaises(GrabMisuseError, create_cookie,
-                          'foo', 'bar', x='y')
+                          'foo', 'bar', self.server.address, x='y')
 
     def test_cookiejar(self):
-        c1 = create_cookie('foo', 'bar')
-        c2 = create_cookie('foo', 'bar')
+        c1 = create_cookie('foo', 'bar', self.server.address)
+        c2 = create_cookie('foo', 'bar', self.server.address)
         self.assertFalse(c1 == c2)
 
         c = create_cookie('foo', 'bar', domain='.dumpz.org')
