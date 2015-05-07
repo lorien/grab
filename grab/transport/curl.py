@@ -378,7 +378,11 @@ class CurlTransport(object):
         # `cookiefile` option should be processed before `cookies` option
         # because `load_cookies` updates `cookies` option
         if grab.config['cookiefile']:
-            grab.cookies.load_from_file(grab.config['cookiefile'])
+            # Do not raise exception if cookie file does not exist
+            try:
+                grab.cookies.load_from_file(grab.config['cookiefile'])
+            except IOError as ex:
+                logging.error(ex)
 
         # Process `cookies` option that is simple dict i.e.
         # it provides only `name` and `value` attributes of cookie
