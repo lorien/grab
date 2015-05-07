@@ -287,11 +287,9 @@ class DeprecatedThings(object):
         # self.proxylist = ProxyList(source, source_type,
         #                            proxy_type=proxy_type, **kwargs)
         if source_type == 'text_file':
-            self.proxylist.set_source('file', location=source,
-                                      proxy_type=proxy_type, **kwargs)
+            self.proxylist.load_file(source, proxy_type=proxy_type)
         elif source_type == 'url':
-            self.proxylist.set_source('url', url=source,
-                                      proxy_type=proxy_type, **kwargs)
+            self.proxylist.load_url(source, proxy_type=proxy_type)
         else:
             raise error.GrabMisuseError(
                 'Unknown proxy source type: %s' % source_type)

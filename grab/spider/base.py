@@ -704,18 +704,21 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
         handler = self.find_task_handler(res['task'])
         self.execute_task_handler(res, handler)
 
-    def change_proxy(self, task, grab):
-        """
-        Assign new proxy from proxylist to the task.
-        """
 
-        if task.use_proxylist and self.proxylist_enabled:
-            if self.proxy_auto_change:
-                self.proxy = self.proxylist.get_random()
-            if self.proxy:
-                proxy, proxy_userpwd, proxy_type = self.proxy
-                grab.setup(proxy=proxy, proxy_userpwd=proxy_userpwd,
-                           proxy_type=proxy_type)
+    def process_grab_proxy(self, task, grab):
+        "Assign new proxy from proxylist to the task"
+
+        if task.use_proxylist:
+            if self.proxylist_enabled:
+                if self.proxy_auto_change:
+                    self.proxy = self.change_proxy(task, grab)
+
+    def change_proxy(self, task, grab):
+        proxy = self.proxylist.get_random_proxy()
+        grab.setup(proxy=proxy.get_address(),
+                   proxy_userpwd=proxy.get_userpwd(),
+                   proxy_type=proxy.proxy_type)
+        return proxy
 
     def process_new_task(self, task):
         """
@@ -748,7 +751,7 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
             else:
                 self.inc_count('request-network')
                 self.inc_count('task-%s-network' % task.name)
-                self.change_proxy(task, grab)
+                self.process_grab_proxy(task, grab)
                 with self.save_timer('network_transport'):
                     logger_verbose.debug('Submitting task to the transport '
                                          'layer')
@@ -920,13 +923,20 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
     def load_proxylist(self, source, source_type, proxy_type='http',
                        auto_init=True, auto_change=True,
                        **kwargs):
-        self.proxylist = ProxyList(source, source_type, proxy_type=proxy_type,
-                                   **kwargs)
+        self.proxylist = ProxyList()
+        if source_type == 'text_file':
+            self.proxylist.load_file(source, proxy_type=proxy_type)
+        elif source_type == 'url':
+            self.proxylist.load_url(source, proxy_type=proxy_type)
+        else:
+            raise SpiderMisuseError('Method `load_proxylist` received '
+                                    'invalid `source_type` argument: '
+                                    % source_type) 
 
         self.proxylist_enabled = True
         self.proxy = None
         if not auto_change and auto_init:
-            self.proxy = self.proxylist.get_random()
+            self.proxy = self.proxylist.get_random_proxy()
         self.proxy_auto_change = auto_change
 
     # ****************

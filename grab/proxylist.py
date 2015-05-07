@@ -3,208 +3,144 @@ import re
 import itertools
 import time
 import logging
-import random
+from random import randint
 import six
+from collections import namedtuple
 
 from grab.error import GrabError, GrabNetworkError
 
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
 RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')
-logger = logging.getLogger('grab.proxy')
+PROXY_FIELDS = ('host', 'port', 'username', 'password', 'proxy_type')
+logger = logging.getLogger('grab.proxylist')
+
+
+class Proxy(namedtuple('Proxy', PROXY_FIELDS)):
+    def get_address(self):
+        return '%s:%s' % (self.host, self.port)
+
+    def get_userpwd(self):
+        if self.username:
+            return '%s:%s' % (self.username, self.password or '')
+
+
+class InvalidProxyLine(GrabError):
+    pass
 
 
 def parse_proxy_line(line):
     """
-    Extract proxy details from the text line.
+    Parse proxy details from the raw text line.
 
     The text line could be in one of the following formats:
     * host:port
     * host:port:username:password
     """
 
+    line = line.strip()
     match = RE_SIMPLE_PROXY.search(line)
     if match:
-        host, port = match.groups()
-        return host, port, None, None
-    else:
-        match = RE_AUTH_PROXY.search(line)
-        if match:
-            host, port, user, pwd = match.groups()
-            return host, port, user, pwd
-    raise GrabError('Invalid proxy line: %s' % line)
+        return match.group(1), match.group(2), None, None
+
+    match = RE_AUTH_PROXY.search(line)
+    if match:
+        host, port, user, pwd = match.groups()
+        return host, port, user, pwd
+
+    raise InvalidProxyLine('Invalid proxy line: %s' % line)
 
 
-class Proxy(object):
-    """
-    Represents single proxy server.
-    """
-
-    def __init__(self, server, port, username=None, password=None,
-                 proxy_type='http'):
-        self.server = server
-        self.port = port
-        self.username = username
-        self.password = password
-        self.proxy_type = proxy_type
-
-    @property
-    def address(self):
-        return '%s:%s' % (self.server, self.port)
-
-    @property
-    def userpwd(self):
-        return '%s:%s' % (self.username, self.password)
-
-    def __cmp__(self, obj):
-        if (self.server == obj.server and self.port == obj.port and
-                self.username == obj.username and
-                self.password == obj.password and
-                self.proxy_type == obj.proxy_type):
-            return 0
-        else:
-            return 1
-
-
-def parse_proxy_list_data(data, proxy_type='http'):
-    """
-    Yield `Proxy` objects found in the given `data`.
-    """
-    for line in data.splitlines():
-        #if not six.PY3 and isinstance(line, six.text_type):
-        #    line = line.encode('utf-8')
-        if not isinstance(line, six.text_type):
-            line = line.decode('utf-8')
-        line = line.strip().replace(' ', '')
+def parse_raw_list_data(data, proxy_type='http'):
+    "Iterate over proxy servers found in the raw data"
+    if not isinstance(data, six.text_type):
+        data = data.decode('utf-8')
+    for orig_line in data.splitlines():
+        line = orig_line.strip().replace(' ', '')
         if line and not line.startswith('#'):
             try:
-                host, port, user, pwd = parse_proxy_line(line)
-            except GrabError:
-                logger.error('Invalid proxy line: %s' % line)
+                host, port, username, password = parse_proxy_line(line)
+            except InvalidProxyLine as ex:
+                logger.error(ex)
             else:
-                yield Proxy(host, port, user, pwd, proxy_type)
+                yield Proxy(host, port, username, password, proxy_type)
 
 
-def load_file(location, ignore_errors=False, proxy_type='http'):
-    try:
-        return open(location).read()
-    except Exception as ex:
-        if self.ignore_errors:
-            logger.error('Could not load proxy list', format_exc=ex)
-            return ''
-        else:
-            raise
-    else:
-        return parse_proxy_list_data(g.response.body, proxy_type=proxy_type)
+class BaseProxySource(object):
+    def __init__(self, **kwargs):
+        kwargs.setdefault('proxy_type', 'http')
+        self.config = kwargs
 
-
-def load_url(url, ignore_errors=False, proxy_type='http'):
-    from grab import Grab
-
-    g = Grab()
-
-
-def load_proxylist(location, source_type='file', ignore_errors=False,
-                   proxy_type='http'):
-    from grab import Grab
-
-    try:
-        if source_type == 'file':
-            data = open(location).read()
-        elif source_type == 'url':
-            data = Grab(location).go().body
-        else:
-            raise GrabMisuseError('Unknown source type: %s' % source_type)
-    except GrabMisuseError:
-        raise
-    except GrabNetworkError as ex:
-        if self.ignore_errors:
-            logger.error('Could not load proxy list', format_exc=ex)
-            return ''
-        else:
-            raise
-    else:
-        return parse_proxy_list_data(g.response.body, proxy_type=proxy_type)
+    def load(self):
+        data = self.load_raw_data()
+        return list(parse_raw_list_data(
+            data, proxy_type=self.config['proxy_type']))
 
 
 
+class FileProxySource(BaseProxySource):
+    "Proxy source that loads list from the file"
+    def __init__(self, path, **kwargs):
+        self.path = path
+        super(FileProxySource, self).__init__(**kwargs)
 
+    def load_raw_data(self):
+        return open(self.path).read()
+
+
+class WebProxySource(BaseProxySource):
+    "Proxy source that loads list from web resource"
+    def __init__(self, url, **kwargs):
+        self.url = url
+        super(WebProxySource, self).__init__(**kwargs)
+
+    def load_raw_data(self):
+        from grab import Grab
+        limit = 3
+        for count in range(limit):
+            try:
+                return Grab().go(url=self.url).unicode_body()
+            except GrabNetworkError:
+                if count >= (limit - 1):
+                    raise
 
 
 class ProxyList(object):
     """
-    Main class to work with proxy list.
+    Class to work with proxy list.
     """
 
-    def __init__(self, **kwargs):
-        """
-        Args:
-            accumulate_updates: if it is True, then update existing proxy list
-            with new proxy list when do reloading
-        """
-        self.source = None
-        self.proxy_list = []
-        self.iterator_index = 0
-        self.setup(**kwargs)
+    def __init__(self, source=None):
+        self._source = source
+        self._list = []
+        self._list_iter = None
 
-    def setup(self, accumulate_updates=False, reload_time=600):
-        self.accumulate_updates = accumulate_updates
-        self.reload_time = reload_time
+    def set_source(self, source):
+        "Set the proxy source and use it to load proxy list"
+        self._source = source
+        self.load()
 
-    def set_source(self, source_type='file', proxy_type='http', **kwargs):
-        """
-        Configure proxy list source and load proxies from that source.
-        """
+    def load_file(self, path, proxy_type='http'):
+        "Load proxy list from file"
+        self.set_source(FileProxySource(path, proxy_type=proxy_type))
 
-        if source_type in SOURCE_TYPE_ALIAS:
-            source_cls = SOURCE_TYPE_ALIAS[source_type]
-            self.source = source_cls(proxy_type=proxy_type, **kwargs)
-            self.reload(force=True)
-        else:
-            raise GrabError('Unknown source type: %s' % source_type)
+    def load_url(self, url, proxy_type='http'):
+        "Load proxy list from web document"
+        self.set_source(WebProxySource(url, proxy_type=proxy_type))
 
-    def reload(self, force=False):
-        """
-        Reload proxies from the configured proxy list source.
-        """
-
-        now = time.time()
-        if force or now - self.load_timestamp > self.reload_time:
-            self.load_timestamp = now
-            if not self.accumulate_updates:
-                self.proxy_list = self.source.load()
-                self.iterator_index = 0
-            else:
-                new_list = self.source.load()
-                for item in new_list:
-                    if item not in self.proxy_list:
-                        self.proxy_list.append(item)
-
-            self.proxy_list_iter = itertools.cycle(self.proxy_list)
+    def load(self):
+        "Load proxy list from configured proxy source"
+        self._list = self._source.load()
+        self._list_iter = itertools.cycle(self._list)
 
     def get_random_proxy(self):
-        """
-        Return random server from the list
-        """
-
-        self.reload()
-        self.iterator_index = random.randint(0, len(self.proxy_list) - 1)
-        return self.proxy_list[self.iterator_index]
+        "Return random proxy"
+        idx = randint(0, len(self._list) - 1)
+        return self._list[idx]
 
     def get_next_proxy(self):
-        """
-        Return next server in the list.
-        """
+        "Return next proxy"
+        return self._list_iter.next()
 
-        self.reload()
-        if (self.iterator_index + 1) > len(self.proxy_list):
-            self.iterator_index = 0
-        proxy = self.proxy_list[self.iterator_index]
-        self.iterator_index += 1
-        return proxy
-
-    def is_empty(self):
-        """
-        Check if the proxy list is empty.
-        """
-
-        return len(self.proxy_list) == 0
+    def size(self):
+        "Return number of proxies in the list"
+        return len(self._list)

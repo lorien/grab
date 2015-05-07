@@ -24,7 +24,7 @@ from grab.document import Document
 from grab import error
 from weblib.http import normalize_http_values
 from grab.cookie import CookieManager
-from grab.proxy import ProxyList, parse_proxy_line
+from grab.proxylist import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
 
 __all__ = ('Grab',)
@@ -338,13 +338,13 @@ class Grab(DeprecatedThings):
         """
 
         if 'hammer_mode' in kwargs:
-            logging.error('Option hammer_mode is deprecated. Grab does not '
-                          'support hammer mode anymore.')
+            logger.error('Option hammer_mode is deprecated. Grab does not '
+                         'support hammer mode anymore.')
             del kwargs['hammer_mode']
 
         if 'hammer_timeouts' in kwargs:
-            logging.error('Option hammer_timeouts is deprecated. Grab does not'
-                          ' support hammer mode anymore.')
+            logger.error('Option hammer_timeouts is deprecated. Grab does not'
+                         ' support hammer mode anymore.')
             del kwargs['hammer_timeouts']
 
         for key in kwargs:
@@ -388,7 +388,7 @@ class Grab(DeprecatedThings):
         self.request_counter = next(REQUEST_COUNTER)
         if kwargs:
             self.setup(**kwargs)
-        if not self.proxylist.is_empty() and self.config['proxy_auto_change']:
+        if self.proxylist.size() and self.config['proxy_auto_change']:
             self.change_proxy()
         self.request_method = self.detect_request_method()
         self.transport.process_config(self)
@@ -546,7 +546,7 @@ class Grab(DeprecatedThings):
             self.copy_request_data()
             self.save_dumps()
         except Exception as ex:
-            logging.error(six.text_type(ex))
+            logger.error(six.text_type(ex))
 
     def copy_request_data(self):
         # TODO: Maybe request object?
@@ -591,12 +591,13 @@ class Grab(DeprecatedThings):
         Set random proxy from proxylist.
         """
 
-        if not self.proxylist.is_empty():
+        if self.proxylist.size():
             proxy = self.proxylist.get_random_proxy()
-            self.setup(proxy=proxy.address, proxy_userpwd=proxy.userpwd,
+            self.setup(proxy=proxy.get_address(),
+                       proxy_userpwd=proxy.get_userpwd(),
                        proxy_type=proxy.proxy_type)
         else:
-            logging.debug('Proxy list is empty')
+            logger.debug('Proxy list is empty')
 
     """
     Private methods
@@ -731,7 +732,7 @@ class Grab(DeprecatedThings):
             headers = email.message_from_string('\n'.join(lines))
             return headers
         except Exception as ex:
-            logging.error('Could not parse request headers', exc_info=ex)
+            logger.error('Could not parse request headers', exc_info=ex)
             return {}
 
     def dump(self):
