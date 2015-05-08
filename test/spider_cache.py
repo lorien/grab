@@ -248,6 +248,17 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
         self.assertEqual(bot.cache.size(), 0)
         self.assertTrue('Document too large' in patch.call_args[0][0])
 
+    def test_connection_kwargs(self):
+        class TestSpider(Spider):
+            def task_page(self, grab, task):
+                pass
+
+        config = deepcopy(MONGODB_CONNECTION)
+        # Set port that would go as **kwargs into MongoClient()
+        MONGODB_CONNECTION.setdefault('port', 27017)
+        bot = TestSpider()
+        bot.setup_cache(backend='mongo', **config)
+
 
 class SpiderMysqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
     _backend = 'mysql'

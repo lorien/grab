@@ -29,7 +29,7 @@ class CacheBackend(object):
                  mysql_engine='innodb', spider=None, **kwargs):
         self.spider = spider
         self.database = database
-        self.m_kwargs = kwargs
+        self.connection_config = kwargs
         self.mysql_engine = mysql_engine
 
         self.connect()
@@ -44,7 +44,7 @@ class CacheBackend(object):
             self.create_cache_table(self.mysql_engine)
 
     def connect(self):
-        self.conn = MySQLdb.connect(**self.m_kwargs)
+        self.conn = MySQLdb.connect(**self.connection_config)
         self.conn.select_db(self.database)
         self.cursor = self.conn.cursor()
 
