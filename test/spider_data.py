@@ -29,7 +29,7 @@ class TestSpider(BaseGrabTestCase):
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
-        self.assertTrue('data_foo' in bot.items['fatal'][0])
+        self.assertTrue('data_foo' in bot.stat.collections['fatal'][0])
 
     def test_data_simple_case(self):
         class TestSpider(Spider):

@@ -17,6 +17,7 @@ from copy import deepcopy
 import six
 import os
 from weblib import metric
+from contextlib import contextmanager
 
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
@@ -24,12 +25,12 @@ from grab.spider.error import (SpiderError, SpiderMisuseError, FatalError,
                                NoTaskHandler, NoDataHandler)
 from grab.spider.task import Task, NullTask
 from grab.spider.data import Data
-from grab.spider.stat import SpiderStat
 from grab.spider.transport.multicurl import MulticurlTransport
 from grab.proxylist import ProxyList, BaseProxySource
 from grab.util.misc import camel_case_to_underscore
 from weblib.encoding import make_str, make_unicode
 from grab.base import GLOBAL_STATE
+from grab.stat import Stat
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
@@ -74,11 +75,8 @@ class SpiderMetaClass(type):
         return super(SpiderMetaClass, cls).__new__(cls, name, bases, namespace)
 
 
-# See http://mikewatkins.ca/2008/11/29/python-2-and-3-metaclasses/
-SpiderMetaClassMixin = SpiderMetaClass('SpiderMetaClassMixin', (object,), {})
-
-
-class Spider(SpiderMetaClassMixin, SpiderStat):
+@six.add_metaclass(SpiderMetaClass)
+class Spider(object):
     """
     Asynchronous scraping framework.
     """
@@ -137,6 +135,7 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
         * newtork_response_queue=None,
         """
 
+        self.stat = Stat()
         self.taskq = taskq
 
         if args is None:
@@ -153,7 +152,7 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
             'network-total': 0,
         }
         self.time_points = {}
-        self.start_timer('total')
+        self.stat.start_timer('total')
         if config is not None:
             self.config = config
         else:
@@ -397,7 +396,7 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
         start = time.time()
         while True:
             try:
-                with self.save_timer('task_queue'):
+                with self.stat.log_time('task_queue'):
                     return self.taskq.get()
             except queue.Empty:
                 qsize = self.taskq.size()
@@ -483,9 +482,9 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
         if cache_item is None:
             return None
         else:
-            with self.save_timer('cache.read.prepare_request'):
+            with self.stat.log_time('cache.read.prepare_request'):
                 grab.prepare_request()
-            with self.save_timer('cache.read.load_response'):
+            with self.stat.log_time('cache.read.load_response'):
                 self.cache.load_response(grab, cache_item)
 
             grab.log_request('CACHED')
@@ -555,8 +554,8 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
             res['ok'] and self.valid_response_code(res['grab'].response.code,
                                                    res['task']))):
             try:
-                with self.save_timer('response_handler'):
-                    with self.save_timer('response_handler.%s' % handler_name):
+                with self.stat.log_time('response_handler'):
+                    with self.stat.log_time('response_handler.%s' % handler_name):
                         result = handler(res['grab'], res['task'])
                         if result is None:
                             pass
@@ -709,8 +708,8 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
 
         cache_result = None
         if self.is_task_cacheable(task, grab):
-            with self.save_timer('cache'):
-                with self.save_timer('cache.read'):
+            with self.stat.log_time('cache'):
+                with self.stat.log_time('cache.read'):
                     cache_result = self.load_task_from_cache(
                         self.transport, task, grab, grab_config_backup)
 
@@ -727,7 +726,7 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
                 self.inc_count('request-network')
                 self.inc_count('task-%s-network' % task.name)
                 self.process_grab_proxy(task, grab)
-                with self.save_timer('network_transport'):
+                with self.stat.log_time('network_transport'):
                     logger_verbose.debug('Submitting task to the transport '
                                          'layer')
                     try:
@@ -772,7 +771,7 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
         Main method. All work is done here.
         """
 
-        self.start_timer('total')
+        self.stat.start_timer('total')
 
         self.transport = MulticurlTransport(self.thread_number)
 
@@ -780,16 +779,16 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
             self.setup_default_queue()
             self.prepare()
 
-            self.start_timer('task_generator')
+            self.stat.start_timer('task_generator')
             if not self.slave:
                 self.init_task_generator()
-            self.stop_timer('task_generator')
+            self.stat.stop_timer('task_generator')
 
             while self.work_allowed:
-                self.start_timer('task_generator')
+                self.stat.start_timer('task_generator')
                 if self.task_generator_enabled:
                     self.process_task_generator()
-                self.stop_timer('task_generator')
+                self.stat.stop_timer('task_generator')
 
                 free_threads = self.transport.get_free_threads_number()
                 if free_threads:
@@ -860,7 +859,7 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
                             self.process_new_task(task)
                             self.transport.process_handlers()
 
-                with self.save_timer('network_transport'):
+                with self.stat.log_time('network_transport'):
                     logger_verbose.debug('Asking transport layer to do '
                                          'something')
                     self.transport.process_handlers()
@@ -873,8 +872,8 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
                 # print '[transport iterate results - start]'
                 for result in self.transport.iterate_results():
                     if self.is_valid_for_cache(result):
-                        with self.save_timer('cache'):
-                            with self.save_timer('cache.write'):
+                        with self.stat.log_time('cache'):
+                            with self.stat.log_time('cache.write'):
                                 self.cache.save_response(result['task'].url,
                                                          result['grab'])
 
@@ -892,7 +891,7 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
             raise
         finally:
             # This code is executed when main cycles is breaked
-            self.stop_timer('total')
+            self.stat.stop_timer('total')
             self.shutdown()
 
     def load_proxylist(self, source, source_type=None, proxy_type='http',
@@ -1051,3 +1050,33 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
     @classmethod
     def setup_spider_config(cls, config):
         pass
+
+    # ******************
+    # Deprecated Methods
+    # ******************
+
+    def add_item(self, list_name, item):
+        self.stat.append(list_name, item)
+
+    def inc_count(self, key, count=1):
+        self.stat.inc(key, count)
+
+    def start_timer(self, key):
+        logger.debug('Method `Spider::start_timer` is deprecated. '
+                     'Use `Spider::stat.start_timer` method instead.')
+        self.stat.start_timer(key)
+
+    def stop_timer(self, key):
+        logger.debug('Method `Spider::stop_timer` is deprecated. '
+                     'Use `Spider::stat.stop_timer` method instead.')
+        self.stat.stop_timer(key)
+
+    @contextmanager
+    def save_timer(self, key):
+        logger.debug('Method `Spider::save_timer` is deprecated. '
+                     'Use `Spider::stat.log_time` method instead.')
+        self.stat.start_timer(key)
+        try:
+            yield
+        finally:
+            self.stat.stop_timer(key)

@@ -45,4 +45,4 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             pass
 
         bot = TestSpider()
-        self.assertEqual(0, bot.stop_timer('zzz'))
+        self.assertRaises(KeyError, bot.stop_timer, 'zzz')
