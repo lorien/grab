@@ -58,7 +58,6 @@ GRAB_TEST_LIST = (
     'test.grab_deprecated',
     'test.spider_stat',
     'test.ext_pyquery',
-    'test.item_deprecated',
     'test.tools_deprecated',
 )
 
