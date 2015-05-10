@@ -40,7 +40,6 @@ REQUEST_COUNTER = itertools.count(1)
 
 GLOBAL_STATE = {
     'dom_build_time': 0,
-    'selector_time': 0,
 }
 MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies']
 TRANSPORT_CACHE = {}

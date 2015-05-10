@@ -1,6 +1,7 @@
 import logging
 import os
 from argparse import ArgumentParser
+import six
 
 from grab.util.config import build_spider_config, build_root_config
 from grab.util.module import load_spider_class
@@ -47,6 +48,21 @@ def get_lock_key(spider_name, lock_key=None, ignore_lock=False,
     # generate lock key from the spider name and use it
     lock_key = 'crawl.%s' % spider_name
     return lock_key
+
+
+def save_list(lst, path):
+    """
+    Save items from list to the file.
+    """
+
+    with open(path, 'wb') as out:
+        lines = []
+        for item in lst:
+            if isinstance(item, (six.text_type, six.binary_type)):
+                lines.append(make_str(item))
+            else:
+                lines.append(make_str(json.dumps(item)))
+        out.write(b'\n'.join(lines) + b'\n')
 
 
 def main(spider_name, thread_number=None, slave=False,
@@ -119,12 +135,12 @@ def main(spider_name, thread_number=None, slave=False,
             for subdir in (str(pid), 'last'):
                 dir_ = 'var/%s' % subdir
                 if not os.path.exists(dir_):
-                    os.mkdir(dir_)
+                    os.makedirs(dir_)
                 else:
                     clear_directory(dir_)
                 for key, lst in bot.items.items():
                     fname_key = key.replace('-', '_')
-                    bot.save_list(key, '%s/%s.txt' % (dir_, fname_key))
+                    save_list(lst, '%s/%s.txt' % (dir_, fname_key))
                 with open('%s/report.txt' % dir_, 'wb') as out:
                     out.write(make_str(stats_with_time))
 

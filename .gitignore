@@ -40,3 +40,6 @@ docs/libpeerconnection.log
 /build/
 /en
 /.v4
+/settings.py
+/foo.py
+/run.ini

@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 import types
-import signal
 import logging
 from collections import defaultdict
 import time
@@ -17,6 +16,7 @@ except ImportError:
 from copy import deepcopy
 import six
 import os
+from weblib import metric
 
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
@@ -29,6 +29,7 @@ from grab.spider.transport.multicurl import MulticurlTransport
 from grab.proxylist import ProxyList, BaseProxySource
 from grab.util.misc import camel_case_to_underscore
 from weblib.encoding import make_str, make_unicode
+from grab.base import GLOBAL_STATE
 
 DEFAULT_TASK_PRIORITY = 100
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
@@ -182,16 +183,6 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
         else:
             self.priority_mode = priority_mode
 
-        try:
-            signal.signal(signal.SIGUSR1, self.sigusr1_handler)
-        except (ValueError, AttributeError):
-            pass
-
-        try:
-            signal.signal(signal.SIGUSR2, self.sigusr2_handler)
-        except (ValueError, AttributeError):
-            pass
-
         # Initial cache-subsystem values
         self.cache_enabled = False
         self.cache = None
@@ -244,22 +235,6 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
         before it has started working. Simply redefine
         this method in your Spider class.
         """
-
-    def sigusr1_handler(self, signal, frame):
-        """
-        Catches SIGUSR1 signal and dumps current state
-        to temporary file
-        """
-
-        with open('/tmp/spider.state', 'w') as out:
-            out.write(self.render_stats())
-
-    def sigusr2_handler(self, signal, frame):
-        """
-        Catches SIGUSR1 signal and shutdowns spider.
-        """
-        logger.error('Received SIGUSR2 signal. Doing shutdown')
-        self.stop()
 
     def setup_grab(self, **kwargs):
         logging.error('This method is deprecated. Instead override '
@@ -946,33 +921,6 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
             self.proxy = self.proxylist.get_random_proxy()
         self.proxy_auto_change = auto_change
 
-    # ****************
-    # Abstract methods
-    # ****************
-
-    def shutdown(self):
-        """
-        You can override this method to do some final actions
-        after parsing has been done.
-        """
-
-        logger.debug('Job done!')
-
-    def task_generator(self):
-        """
-        You can override this method to load new tasks smoothly.
-
-        It will be used each time as number of tasks
-        in task queue is less then number of threads multiplied on 2
-        This allows you to not overload all free memory if total number of
-        tasks is big.
-        """
-
-        if False:
-            # Some magic to make this function empty generator
-            yield ':-)'
-        return
-
     def process_handler_result(self, result, task=None):
         """
         Process result received from the task handler.
@@ -1012,10 +960,6 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
         else:
             return camel_case_to_underscore(cls.__name__)
 
-    @classmethod
-    def setup_spider_config(cls, config):
-        pass
-
     def process_next_page(self, grab, task, xpath,
                           resolve_base=False, **kwargs):
         """
@@ -1044,3 +988,66 @@ class Spider(SpiderMetaClassMixin, SpiderStat):
                                page=page, **kwargs)
             self.add_task(task2)
             return True
+
+    def render_stats(self, timing=True):
+        out = []
+        out.append('Counters:')
+        # Sort counters by its names
+        items = sorted(self.counters.items(), key=lambda x: x[0], reverse=True)
+        out.append('  %s' % '\n  '.join('%s: %s' % x for x in items))
+        out.append('\nLists:')
+        # Sort lists by number of items
+        items = [(x, len(y)) for x, y in self.items.items()]
+        items = sorted(items, key=lambda x: x[1], reverse=True)
+        out.append('  %s' % '\n  '.join('%s: %s' % x for x in items))
+
+        if 'download-size' in self.counters:
+            out.append('Network download: %s' % metric.format_traffic_value(
+                self.counters['download-size']))
+        out.append('Queue size: %d' % self.taskq.size()
+                   if self.taskq else 'NA')
+        out.append('Threads: %d' % self.thread_number)
+
+        if timing:
+            out.append(self.render_timing())
+        return '\n'.join(out) + '\n'
+
+    def render_timing(self):
+        out = []
+        out.append('Timers:')
+        out.append('  DOM: %.3f' % GLOBAL_STATE['dom_build_time'])
+        items = [(x, y) for x, y in self.timers.items()]
+        items = sorted(items, key=lambda x: x[1])
+        out.append('  %s' % '\n  '.join('%s: %.03f' % x for x in items))
+        return '\n'.join(out) + '\n'
+
+    # ****************
+    # Abstract methods
+    # ****************
+
+    def shutdown(self):
+        """
+        You can override this method to do some final actions
+        after parsing has been done.
+        """
+
+        logger.debug('Job done!')
+
+    def task_generator(self):
+        """
+        You can override this method to load new tasks smoothly.
+
+        It will be used each time as number of tasks
+        in task queue is less then number of threads multiplied on 2
+        This allows you to not overload all free memory if total number of
+        tasks is big.
+        """
+
+        if False:
+            # Some magic to make this function empty generator
+            yield ':-)'
+        return
+
+    @classmethod
+    def setup_spider_config(cls, config):
+        pass

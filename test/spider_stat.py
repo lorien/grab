@@ -14,6 +14,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
+    """
     def test_save_list(self):
         class TestSpider(Spider):
             pass
@@ -37,19 +38,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.save_list('foo', path)
         self.assertTrue('{"key": 3}' in open(path).read())
         os.unlink(path)
-
-    def test_save_all_lists(self):
-        class TestSpider(Spider):
-            pass
-
-        bot = TestSpider()
-        bot.add_item('foo', 'bar')
-        bot.add_item('foo2', 'bar2')
-        bot.save_all_lists(TMP_DIR)
-        self.assertTrue('bar' in
-                        open(os.path.join(TMP_DIR, 'foo.txt')).read())
-        self.assertTrue('bar2' in
-                        open(os.path.join(TMP_DIR, 'foo2.txt')).read())
+    """
 
     def test_stop_timer_invalid_input(self):
         class TestSpider(Spider):
