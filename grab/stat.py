@@ -5,8 +5,10 @@ from contextlib import contextmanager
 
 
 class Stat(object):
-    def __init__(self, logger_name='stat', log_file=None):
+    def __init__(self, logger_name='grab.stat', log_file=None,
+                 logging_period=5):
         self.time = time.time()
+        self.logging_period = logging_period
         self.count_prev = 0
         self.counters = defaultdict(int)
         self.collections = defaultdict(list)
@@ -20,16 +22,16 @@ class Stat(object):
 
     def get_counters_line(self):
         items = []
-        for key in sorted(self.counters.keys):
+        for key in sorted(self.counters.keys()):
             if key is not None:
-                items.append('%s:%d' % (key, self.items_counters[key]))
+                items.append('%s:%d' % (key, self.counters[key]))
         return '/'.join(items)
 
     def inc(self, key=None, delta=1):
         self.counters[key] += delta
-        count_current = self.counters[None]
         now = time.time()
-        if now - self.time > 5:
+        if now - self.time > self.logging_period:
+            count_current = self.counters[None]
             diff = count_current - self.count_prev
             qps = diff / (now - self.time) 
             self.logger.debug(

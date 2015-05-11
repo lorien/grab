@@ -46,3 +46,18 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         bot = TestSpider()
         self.assertRaises(KeyError, bot.stop_timer, 'zzz')
+
+    def test_collections(self):
+        class TestSpider(Spider):
+            def prepare(self):
+                self.stat.logging_period = 0
+                self.stat.inc()
+
+            def task_page(self, grab, task):
+                pass
+
+        bot = TestSpider()
+        bot.setup_queue()
+        bot.add_task(Task('page', url=self.server.get_url()))
+        bot.run()
+        self.assertRaises(KeyError, bot.stop_timer, 'zzz')
