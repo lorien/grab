@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 import re
 import itertools
-import time
 import logging
 from random import randint
 import six

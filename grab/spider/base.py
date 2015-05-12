@@ -1,9 +1,7 @@
 from __future__ import absolute_import
 import types
 import logging
-from collections import defaultdict
 import time
-import json
 try:
     from urlparse import urljoin
 except ImportError:
