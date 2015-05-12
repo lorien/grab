@@ -3,6 +3,8 @@ from collections import defaultdict
 import time
 from contextlib import contextmanager
 
+DEFAULT_COUNTER_KEY = 'DEFAULT'
+
 
 class Stat(object):
     def __init__(self, logger_name='grab.stat', log_file=None,
@@ -27,11 +29,11 @@ class Stat(object):
                 items.append('%s:%d' % (key, self.counters[key]))
         return '/'.join(items)
 
-    def inc(self, key=None, delta=1):
+    def inc(self, key=DEFAULT_COUNTER_KEY, delta=1):
         self.counters[key] += delta
         now = time.time()
         if now - self.time > self.logging_period:
-            count_current = self.counters[None]
+            count_current = self.counters[DEFAULT_COUNTER_KEY]
             diff = count_current - self.count_prev
             qps = diff / (now - self.time) 
             self.logger.debug(

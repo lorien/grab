@@ -47,7 +47,25 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot = TestSpider()
         self.assertRaises(KeyError, bot.stop_timer, 'zzz')
 
-    def test_collections(self):
+    def test_counters_and_collections(self):
+        from grab.stat import DEFAULT_COUNTER_KEY
+
+        class TestSpider(Spider):
+            def prepare(self):
+                self.stat.logging_period = 0
+                self.stat.inc()
+
+            def task_page(self, grab, task):
+                1/0
+
+        bot = TestSpider()
+        bot.setup_queue()
+        bot.add_task(Task('page', url=self.server.get_url()))
+        bot.run()
+        self.assertEqual(1, bot.stat.counters[DEFAULT_COUNTER_KEY])
+        self.assertEqual(1, len(bot.stat.collections['fatal']))
+
+    def test_render_stats(self):
         class TestSpider(Spider):
             def prepare(self):
                 self.stat.logging_period = 0
@@ -60,4 +78,5 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
-        self.assertRaises(KeyError, bot.stop_timer, 'zzz')
+        stats = bot.render_stats()
+        stats = bot.render_stats(timing=True)

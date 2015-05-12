@@ -33,6 +33,9 @@ from grab.base import GLOBAL_STATE
 from grab.stat import Stat
 
 DEFAULT_TASK_PRIORITY = 100
+DEFAULT_NETWORK_STREAM_NUMBER = 3
+DEFAULT_TASK_TRY_LIMIT = 3
+DEFAULT_NETWORK_TRY_LIMIT = 3
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
 NULL = object()
 
@@ -146,12 +149,6 @@ class Spider(object):
         self.slave = slave
 
         self.max_task_generator_chunk = max_task_generator_chunk
-        self.timers = {
-            'network-name-lookup': 0,
-            'network-connect': 0,
-            'network-total': 0,
-        }
-        self.time_points = {}
         self.stat.start_timer('total')
         if config is not None:
             self.config = config
@@ -166,14 +163,18 @@ class Spider(object):
         self.task_generator_enabled = False
         self.only_cache = only_cache
 
-        self.thread_number = thread_number or\
-                             int(self.config.get('thread_number', 3))
-        self.task_try_limit = task_try_limit or\
-                              int(self.config.get('task_try_limit', 10))
-        self.network_try_limit = network_try_limit or \
-                                 int(self.config.get('network_try_limit', 10))
+        self.thread_number = (
+            thread_number or
+            int(self.config.get('thread_number',
+                                DEFAULT_NETWORK_STREAM_NUMBER)))
+        self.task_try_limit = (
+            task_try_limit or
+            int(self.config.get('task_try_limit', DEFAULT_TASK_TRY_LIMIT)))
+        self.network_try_limit = (
+            network_try_limit or
+            int(self.config.get('network_try_limit',
+                                DEFAULT_NETWORK_TRY_LIMIT)))
 
-        self.counters = defaultdict(int)
         self._grab_config = {}
         self.items = {}
         if priority_mode not in ['random', 'const']:
@@ -661,10 +662,12 @@ class Spider(object):
 
         # Update traffic statistics
         if res['grab'] and res['grab'].response:
-            self.timers['network-name-lookup'] +=\
+            self.stat.timers['network-name-lookup'] +=\
                 res['grab'].response.name_lookup_time
-            self.timers['network-connect'] += res['grab'].response.connect_time
-            self.timers['network-total'] += res['grab'].response.total_time
+            self.stat.timers['network-connect'] +=\
+                res['grab'].response .connect_time
+            self.stat.timers['network-total'] +=\
+                res['grab'].response .total_time
             if not from_cache:
                 self.inc_count('download-size',
                                res['grab'].response.download_size)
@@ -989,35 +992,45 @@ class Spider(object):
             return True
 
     def render_stats(self, timing=True):
-        out = []
+        out = ['------------ Stats: ------------']
         out.append('Counters:')
-        # Sort counters by its names
-        items = sorted(self.counters.items(), key=lambda x: x[0], reverse=True)
-        out.append('  %s' % '\n  '.join('%s: %s' % x for x in items))
-        out.append('\nLists:')
-        # Sort lists by number of items
-        items = [(x, len(y)) for x, y in self.items.items()]
-        items = sorted(items, key=lambda x: x[1], reverse=True)
-        out.append('  %s' % '\n  '.join('%s: %s' % x for x in items))
 
-        if 'download-size' in self.counters:
-            out.append('Network download: %s' % metric.format_traffic_value(
-                self.counters['download-size']))
+        # Process counters
+        items = sorted(self.stat.counters.items(),
+                       key=lambda x: x[0], reverse=True)
+        for item in items:
+            out.append('  %s: %s' % item)
+        out.append('')
+
+        out.append('Lists:')
+        # Process collections sorted by size desc
+        col_sizes = [(x, len(y)) for x, y in self.stat.collections.items()]
+        col_sizes = sorted(col_sizes, key=lambda x: x[1], reverse=True)
+        for col_size in col_sizes:
+            out.append('  %s: %d' % col_size)
+        out.append('')
+
+        # Process extra metrics
+        if 'download-size' in self.stat.counters:
+            out.append('Network download: %s' %
+                       metric.format_traffic_value(
+                           self.stat.counters['download-size']))
         out.append('Queue size: %d' % self.taskq.size()
-                   if self.taskq else 'NA')
-        out.append('Threads: %d' % self.thread_number)
+                                      if self.taskq else 'NA')
+        out.append('Network streams: %d' % self.thread_number)
 
         if timing:
+            out.append('')
             out.append(self.render_timing())
         return '\n'.join(out) + '\n'
 
     def render_timing(self):
-        out = []
-        out.append('Timers:')
+        out = ['Timers:']
         out.append('  DOM: %.3f' % GLOBAL_STATE['dom_build_time'])
-        items = [(x, y) for x, y in self.timers.items()]
-        items = sorted(items, key=lambda x: x[1])
-        out.append('  %s' % '\n  '.join('%s: %.03f' % x for x in items))
+        time_items = [(x, y) for x, y in self.stat.timers.items()]
+        time_items = sorted(time_items, key=lambda x: x[1])
+        for time_item in time_items:
+            out.append('  %s: %.03f' % time_item)
         return '\n'.join(out) + '\n'
 
     # ****************
