@@ -1,3 +1,8 @@
+"""
+This module contains Stat class. It is used inside
+Grab::Spider to collect statistics about events happening
+during the scraping session.
+"""
 import logging
 from collections import defaultdict
 import time
@@ -18,6 +23,11 @@ class Stat(object):
         self.timers = defaultdict(int)
         self.logger_name = logger_name
         self.logger = logging.getLogger(logger_name)
+        self.setup_logging_file(log_file)
+        self.logging_ignore_prefixes = ['spider:']
+
+    def setup_logging_file(self, log_file):
+        self.log_file = log_file
         if log_file:
             self.logger.addHandler(logging.FileHandler(log_file, 'w'))
             self.logger.setLevel(logging.DEBUG)
@@ -25,9 +35,10 @@ class Stat(object):
     def get_counters_line(self):
         items = []
         for key in sorted(self.counters.keys()):
-            if key is not None:
-                items.append('%s:%d' % (key, self.counters[key]))
-        return '/'.join(items)
+            if not any(key.startswith(x)
+                       for x in self.logging_ignore_prefixes):
+                items.append('%s=%d' % (key, self.counters[key]))
+        return ', '.join(items)
 
     def inc(self, key=DEFAULT_COUNTER_KEY, delta=1):
         self.counters[key] += delta

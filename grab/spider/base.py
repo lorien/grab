@@ -298,7 +298,7 @@ class Spider(object):
                         if task.grab_config:
                             task.grab_config['url'] = task.url
             except Exception as ex:
-                self.add_item('task-with-invalid-url', task.url)
+                self.stat.append('task-with-invalid-url', task.url)
                 if raise_error:
                     raise
                 else:
@@ -489,8 +489,8 @@ class Spider(object):
                 self.cache.load_response(grab, cache_item)
 
             grab.log_request('CACHED')
-            self.inc_count('request')
-            self.inc_count('request-cache')
+            self.stat.inc('spider:request')
+            self.stat.inc('spider:request-cache')
 
             return {'ok': True, 'grab': grab,
                     'grab_config_backup': grab_config_backup,
@@ -506,7 +506,7 @@ class Spider(object):
                 code in task.valid_status)
 
     def process_handler_error(self, func_name, ex, task):
-        self.inc_count('error-%s' % ex.__class__.__name__.lower())
+        self.stat.inc('spider:error-%s' % ex.__class__.__name__.lower())
 
         logger.error('Error in %s function' % func_name, exc_info=ex)
 
@@ -521,7 +521,7 @@ class Spider(object):
                 ex_str = str(ex)
 
         task_url = task.url if task is not None else None
-        self.add_item('fatal', '%s|%s|%s|%s' % (
+        self.stat.append('fatal', '%s|%s|%s|%s' % (
             func_name, ex.__class__.__name__, ex_str, task_url))
         if isinstance(ex, FatalError):
             raise
@@ -568,7 +568,7 @@ class Spider(object):
             except Exception as ex:
                 self.process_handler_error(handler_name, ex, res['task'])
             else:
-                self.inc_count('task-%s-ok' % res['task'].name)
+                self.stat.inc('spider:task-%s-ok' % res['task'].name)
         else:
             # Log the error
             if res['ok']:
@@ -576,8 +576,8 @@ class Spider(object):
             else:
                 msg = res['emsg']
 
-            self.inc_count('network-error-%s' %
-                           make_str(res['emsg'][:20], errors='ignore'))
+            self.stat.inc('spider:network-error-%s' %
+                          make_str(res['emsg'][:20], errors='ignore'))
             logger.error(u'Network error: %s' %
                          make_unicode(msg, errors='ignore'))
 
@@ -653,12 +653,12 @@ class Spider(object):
         """
 
         # Increase stat counters
-        self.inc_count('request-processed')
-        self.inc_count('task')
-        self.inc_count('task-%s' % res['task'].name)
+        self.stat.inc('spider:request-processed')
+        self.stat.inc('spider:task')
+        self.stat.inc('spider:task-%s' % res['task'].name)
         if (res['task'].network_try_count == 1 and
                 res['task'].task_try_count == 1):
-            self.inc_count('task-%s-initial' % res['task'].name)
+            self.stat.inc('spider:task-%s-initial' % res['task'].name)
 
         # Update traffic statistics
         if res['grab'] and res['grab'].response:
@@ -668,15 +668,16 @@ class Spider(object):
                 res['grab'].response .connect_time
             self.stat.timers['network-total'] +=\
                 res['grab'].response .total_time
-            if not from_cache:
-                self.inc_count('download-size',
-                               res['grab'].response.download_size)
-                self.inc_count('upload-size',
-                               res['grab'].response.upload_size)
-            self.inc_count('download-size-with-cache',
-                           res['grab'].response.download_size)
-            self.inc_count('upload-size-with-cache',
-                           res['grab'].response.upload_size)
+            if from_cache:
+                self.stat.inc('spider:download-size-with-cache',
+                              res['grab'].response.download_size)
+                self.stat.inc('spider:upload-size-with-cache',
+                              res['grab'].response.upload_size)
+            else:
+                self.stat.inc('spider:download-size',
+                              res['grab'].response.download_size)
+                self.stat.inc('spider:upload-size',
+                              res['grab'].response.upload_size)
 
         handler = self.find_task_handler(res['task'])
         self.execute_task_handler(res, handler)
@@ -720,14 +721,14 @@ class Spider(object):
             logger_verbose.debug('Task data is loaded from the cache. '
                                  'Yielding task result.')
             self.process_network_result(cache_result, from_cache=True)
-            self.inc_count('task-%s-cache' % task.name)
+            self.stat.inc('spider:task-%s-cache' % task.name)
         else:
             if self.only_cache:
                 logger.debug('Skipping network request to %s' %
                              grab.config['url'])
             else:
-                self.inc_count('request-network')
-                self.inc_count('task-%s-network' % task.name)
+                self.stat.inc('spider:request-network')
+                self.stat.inc('spider:task-%s-network' % task.name)
                 self.process_grab_proxy(task, grab)
                 with self.stat.log_time('network_transport'):
                     logger_verbose.debug('Submitting task to the transport '
@@ -738,7 +739,7 @@ class Spider(object):
                     except GrabInvalidUrl:
                         logger.debug('Task %s has invalid URL: %s' % (
                             task.name, task.url))
-                        self.add_item('invalid-url', task.url)
+                        self.stat.append('invalid-url', task.url)
                     else:
                         logger_verbose.debug('Asking transport layer to do '
                                              'something')
@@ -847,10 +848,11 @@ class Spider(object):
                                                  '%s limit'
                                                  % (task.name, reason))
                             if reason == 'task-try-count':
-                                self.add_item('task-count-rejected', task.url)
+                                self.stat.append('task-count-rejected',
+                                                 task.url)
                             elif reason == 'network-try-count':
-                                self.add_item('network-count-rejected',
-                                              task.url)
+                                self.stat.append('network-count-rejected',
+                                                 task.url)
                             else:
                                 raise SpiderError('Unknown response from '
                                                   'check_task_limits: %s'
@@ -883,7 +885,7 @@ class Spider(object):
                     # print '[process network results]'
                     self.process_network_result(result)
                     # print '[done]'
-                    self.inc_count('request')
+                    self.stat.inc('spider:request')
 
                 # print '[transport iterate results - end]'
 
@@ -1069,9 +1071,13 @@ class Spider(object):
     # ******************
 
     def add_item(self, list_name, item):
+        logger.debug('Method `Spider::add_item` is deprecated. '
+                     'Use `Spider::stat.append` method instead.')
         self.stat.append(list_name, item)
 
     def inc_count(self, key, count=1):
+        logger.debug('Method `Spider::inc_count` is deprecated. '
+                     'Use `Spider::stat.inc` method instead.')
         self.stat.inc(key, count)
 
     def start_timer(self, key):

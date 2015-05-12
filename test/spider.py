@@ -35,14 +35,14 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         sp.setup_grab(connect_timeout=1, timeout=1)
         sp.add_task(Task('baz', self.server.get_url()))
         sp.run()
-        self.assertEqual(sp.stat.counters['request-network'], 1)
+        self.assertEqual(sp.stat.counters['spider:request-network'], 1)
 
         sp = self.SimpleSpider(network_try_limit=2)
         sp.setup_queue()
         sp.setup_grab(connect_timeout=1, timeout=1)
         sp.add_task(Task('baz', self.server.get_url()))
         sp.run()
-        self.assertEqual(sp.stat.counters['request-network'], 2)
+        self.assertEqual(sp.stat.counters['spider:request-network'], 2)
 
     def test_task_limit(self):
         self.server.response['get.data'] = 'Hello spider!'
@@ -53,13 +53,13 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         sp.setup_queue()
         sp.add_task(Task('baz', self.server.get_url()))
         sp.run()
-        self.assertEqual(sp.stat.counters['task-baz'], 1)
+        self.assertEqual(sp.stat.counters['spider:task-baz'], 1)
 
         sp = self.SimpleSpider(task_try_limit=2)
         sp.setup_queue()
         sp.add_task(Task('baz', self.server.get_url(), task_try_count=3))
         sp.run()
-        self.assertEqual(sp.stat.counters['request-network'], 0)
+        self.assertEqual(sp.stat.counters['spider:request-network'], 0)
 
     def test_task_retry(self):
         self.server.response['get.data'] = 'xxx'
@@ -134,7 +134,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
-        self.assertEqual(1, bot.stat.counters['error-spidererror'])
+        self.assertEqual(1, bot.stat.counters['spider:error-spidererror'])
 
     """
     # DOES NOT WORK
