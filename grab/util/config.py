@@ -2,6 +2,7 @@ from copy import deepcopy
 from grab.util.default_config import DEFAULT_SPIDER_GLOBAL_CONFIG
 import importlib
 
+
 def update_dict(target, source, overwrite=False):
     for key, val in source.items():
         if key not in target or overwrite:

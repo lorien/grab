@@ -75,7 +75,6 @@ class BaseProxySource(object):
             data, proxy_type=self.config['proxy_type']))
 
 
-
 class FileProxySource(BaseProxySource):
     "Proxy source that loads list from the file"
     def __init__(self, path, **kwargs):
