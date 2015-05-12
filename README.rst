@@ -47,14 +47,24 @@ Grab Example
 .. code:: python
 
     from grab import Grab
+    import logging
 
+    logging.basicConfig(level=logging.DEBUG)
     g = Grab()
     g.go('https://github.com/login')
     g.set_input('login', 'lorien')
     g.set_input('password', '***')
     g.submit()
-    for elem in g.doc.select('//ul[@id="repo_listing"]/li/a'):
-        print('%s: %s' % (elem.text(), elem.attr('href')))
+    g.doc.save('/tmp/x.html')
+
+    g.doc('//span[contains(@class, "octicon-sign-out")]').assert_exists()
+    home_url = g.doc('//a[contains(@class, "header-nav-link name")]/@href').text()
+    repo_url = home_url + '?tab=repositories'
+
+    g.go(repo_url)
+    for elem in g.doc.select('//h3[@class="repo-list-name"]/a'):
+        print('%s: %s' % (elem.text(),
+                          g.make_url_absolute(elem.attr('href'))))
 
 
 
@@ -70,10 +80,11 @@ Grab::Spider Example
         def task_generator(self):
             for lang in ('python', 'ruby', 'perl'):
                 url = 'https://www.google.com/search?q=%s' % lang
-                yield Task('search', url=url)
+                yield Task('search', url=url, lang=lang)
         
         def task_search(self, grab, task):
-            print(grab.doc.select('//div[@class="s"]//cite').text())
+            print('%s: %s' % (task.lang,
+                              grab.doc('//div[@class="s"]//cite').text()))
 
 
     logging.basicConfig(level=logging.DEBUG)
