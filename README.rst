@@ -52,7 +52,7 @@ Grab Example
     logging.basicConfig(level=logging.DEBUG)
     g = Grab()
     g.go('https://github.com/login')
-    g.set_input('login', 'lorien')
+    g.set_input('login', '***')
     g.set_input('password', '***')
     g.submit()
     g.doc.save('/tmp/x.html')
