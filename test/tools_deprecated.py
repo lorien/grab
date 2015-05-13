@@ -38,4 +38,4 @@ class ToolsDeprecatedTestCase(TestCase):
     def test(self):
         for mod_name in MODULES:
             path = 'grab.tools.%s' % mod_name
-            import_module(path)
+            __import__(path, fromlist=[mod_name])

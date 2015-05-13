@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from weblib.__init__ import *  # noqa
-import logging
+from grab.tools.hook import CustomImporter
+import sys
 
-logging.error('Module `grab.tools.__init__` is deprecated. '
-              'Use `weblib.__init__` module.')
+sys.meta_path.append(CustomImporter())
