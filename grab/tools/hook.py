@@ -1,17 +1,25 @@
 from importlib import import_module
 import logging
-
+import sys
 
 class CustomImporter(object):
+    """
+    Class that hooks grab.tools import and then redirect to weblib package
+    """
     virtual_name = 'grab.tools'
 
     def find_module(self, name, path=None):
+        """
+        This method is called by Python if this class is on sys.path. This
+        method will be called every time an import
+        statement is detected (or __import__ is called), before
+        Python's built-in package/module-finding code kicks in.
+        """
         if name.find(self.virtual_name) == 0:
             name = name.split('.')
 
             if name[-1] == 'lxml_tools':
                 name[-1] = 'etree'
-
             if len(name) == 3:
                 self.name = '.%s' % (name[-1])
             else:
@@ -23,4 +31,10 @@ class CustomImporter(object):
         return None
 
     def load_module(self, name):
-        return import_module(self.name, 'weblib')
+        """
+        This method is called by Python if CustomImporter.find_module
+         does not return None.
+        """
+        module = import_module(self.name, 'weblib')
+        sys.modules[name] = module
+        return module
