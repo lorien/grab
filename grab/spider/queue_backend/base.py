@@ -19,7 +19,6 @@ class QueueInterface(object):
         """
         raise NotImplementedError
 
-
     def size(self):
         raise NotImplementedError
 

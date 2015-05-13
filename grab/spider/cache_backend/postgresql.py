@@ -13,7 +13,6 @@ import zlib
 import logging
 import marshal
 import time
-import six
 from weblib.encoding import make_str
 
 from grab.response import Response

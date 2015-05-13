@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 import re
 import itertools
-import time
 import logging
 from random import randint
 import six
@@ -74,7 +73,6 @@ class BaseProxySource(object):
         data = self.load_raw_data()
         return list(parse_raw_list_data(
             data, proxy_type=self.config['proxy_type']))
-
 
 
 class FileProxySource(BaseProxySource):

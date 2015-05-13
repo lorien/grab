@@ -233,7 +233,7 @@ class Task(BaseTask):
         if not self.priority or not other.priority:
             return True
         else:
-            return (self.priority == other.priority)
+            return self.priority == other.priority
 
     def get_fallback_handler(self, spider):
         if self.fallback_name:

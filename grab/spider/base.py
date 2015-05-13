@@ -1,9 +1,7 @@
 from __future__ import absolute_import
 import types
 import logging
-from collections import defaultdict
 import time
-import json
 try:
     from urlparse import urljoin
 except ImportError:
@@ -681,7 +679,6 @@ class Spider(object):
 
         handler = self.find_task_handler(res['task'])
         self.execute_task_handler(res, handler)
-
 
     def process_grab_proxy(self, task, grab):
         "Assign new proxy from proxylist to the task"
