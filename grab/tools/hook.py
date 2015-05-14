@@ -23,12 +23,10 @@ class CustomImporter(object):
                 name[-1] = 'etree'
 
             if len(name) == 3:
-                self.name = '.'+'.'.join(name[2:])
+                self.name = '.' + '.'.join(name[2:])
             else:
                 self.name = ''
 
-            logging.error('Module `grab.tools%s` is deprecated. '
-                          'Use `weblib%s` module.' % (self.name, self.name))
             return self
         return None
 
@@ -37,6 +35,12 @@ class CustomImporter(object):
         This method is called by Python if CustomImporter.find_module
          does not return None.
         """
-        module = import_module(self.name, 'weblib')
-        sys.modules[name] = module
+        try:
+            module = import_module(self.name, 'weblib')
+            sys.modules[name] = module
+            logging.error('Module `grab.tools%s` is deprecated. '
+                          'Use `weblib%s` module.' % (self.name, self.name))
+        except:
+            raise ImportError(name)
+
         return module
