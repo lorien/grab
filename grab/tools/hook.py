@@ -2,9 +2,10 @@ from importlib import import_module
 import logging
 import sys
 
+
 class CustomImporter(object):
     """
-    Class that hooks grab.tools import and then redirect to weblib package
+    Class that hooks grab.tools imports and then redirect it to weblib package
     """
     virtual_name = 'grab.tools'
 
@@ -20,8 +21,9 @@ class CustomImporter(object):
 
             if name[-1] == 'lxml_tools':
                 name[-1] = 'etree'
+
             if len(name) == 3:
-                self.name = '.%s' % (name[-1])
+                self.name = '.'+'.'.join(name[2:])
             else:
                 self.name = ''
 
