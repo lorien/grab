@@ -1,5 +1,6 @@
 from unittest import TestCase
 from importlib import import_module
+from grab.tools.hook import CustomImporter
 
 MODULES = """
 content
@@ -34,8 +35,26 @@ system
 watch
 """.strip().splitlines()
 
+
 class ToolsDeprecatedTestCase(TestCase):
-    def test(self):
+    def setUp(self):
+        self.hook = CustomImporter()
+
+    def test_import(self):
         for mod_name in MODULES:
             path = 'grab.tools.%s' % mod_name
-            import_module(path)
+            self.hook.find_module(path)
+            self.hook.load_module(path)
+
+    def test_hook(self):
+        self.assertIsInstance(self.hook.find_module('grab.tools.yandex'),
+                              CustomImporter)
+        self.assertEqual(self.hook.find_module('grab.spider'),
+                         None)
+
+        self.hook.find_module('grab.tools.lxml_tools')
+        self.assertEqual(self.hook.name, '.etree')
+
+        self.hook.find_module('grab.tools.module')
+        self.assertRaises(ImportError, self.hook.load_module,
+                          'grab.tools.module')
