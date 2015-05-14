@@ -51,3 +51,10 @@ class ToolsDeprecatedTestCase(TestCase):
                               CustomImporter)
         self.assertEqual(self.hook.find_module('grab.spider'),
                          None)
+
+        self.hook.find_module('grab.tools.lxml_tools')
+        self.assertEqual(self.hook.name, '.etree')
+
+        self.hook.find_module('grab.tools.module')
+        self.assertRaises(ImportError, self.hook.load_module,
+                          'grab.tools.module')
