@@ -280,7 +280,8 @@ class DeprecatedThings(object):
     def dump_cookies(self, path):
         self.cookies.save_to_file(path)
 
-    @deprecated(use_instead='grab.proxylist.set_source')
+    @deprecated(use_instead='grab.proxylist.load_file OR '
+                            'grab.proxylist.load_url')
     def load_proxylist(self, source, source_type, proxy_type='http',
                        auto_init=True, auto_change=True,
                        **kwargs):
