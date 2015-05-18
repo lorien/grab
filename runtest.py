@@ -30,6 +30,7 @@ GRAB_TEST_LIST = (
     'test.grab_request',
     'test.grab_user_agent',
     'test.grab_cookies',
+    'test.grab_url_processing',
     # Refactor
     'test.grab_proxy',
     'test.grab_upload_file',

@@ -3,7 +3,7 @@ from test.util import build_grab
 from test.util import BaseGrabTestCase
 
 
-class GrabSimpleTestCase(BaseGrabTestCase):
+class GrabRequestTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 

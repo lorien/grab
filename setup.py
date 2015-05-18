@@ -14,7 +14,7 @@ setup(
 
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['lxml', 'pycurl', 'selection', 'weblib', 'six'],
+    install_requires=['lxml', 'pycurl', 'selection', 'weblib>=0.1.10', 'six'],
 
     license="MIT",
     keywords="pycurl multicurl curl network parsing grabbing scraping"
