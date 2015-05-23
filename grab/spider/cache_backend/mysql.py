@@ -130,6 +130,7 @@ class CacheBackend(object):
             response.url = cache_item['response_url']
             response.parse()
             response.cookies = CookieManager(transport.extract_cookiejar())
+            response.from_cache = True
             return response
 
         grab.process_request_result(custom_prepare_response_func)

@@ -727,7 +727,7 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
                  'download_size', 'upload_size', 'download_speed',
                  'error_code', 'error_msg', 'grab', 'remote_ip',
                  '_lxml_tree', '_strict_lxml_tree', '_pyquery',
-                 '_lxml_form', '_file_fields',
+                 '_lxml_form', '_file_fields', 'from_cache',
                  )
 
     def __init__(self, grab=None):
@@ -756,6 +756,7 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
         self.download_speed = 0
         self.error_code = None
         self.error_msg = None
+        self.from_cache = False
 
         # Body
         self.body_path = None
