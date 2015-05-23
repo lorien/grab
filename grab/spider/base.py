@@ -16,6 +16,8 @@ import six
 import os
 from weblib import metric
 from contextlib import contextmanager
+from multiprocessing import Process, Event, Queue
+from traceback import format_exc
 
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
@@ -132,6 +134,11 @@ class Spider(object):
                  args=None,
                  # New options start here
                  taskq=None,
+                 # MP:
+                 network_result_queue=None,
+                 parser_result_queue=None,
+                 waiting_shutdown_event=None,
+                 shutdown_event=None,
                  ):
         """
         Arguments:
@@ -154,6 +161,12 @@ class Spider(object):
         * taskq=None,
         * newtork_response_queue=None,
         """
+
+        # MP:
+        self.network_result_queue = network_result_queue
+        self.parser_result_queue = parser_result_queue
+        self.waiting_shutdown_event = waiting_shutdown_event
+        self.shutdown_event = shutdown_event
 
         self.stat = Stat()
         self.timer = Timer()
@@ -613,7 +626,11 @@ class Spider(object):
     def process_handler_error(self, func_name, ex, task):
         self.stat.inc('spider:error-%s' % ex.__class__.__name__.lower())
 
-        logger.error('Error in %s function' % func_name, exc_info=ex)
+        if hasattr(ex, 'tb'):
+            logger.error('Error in %s function' % func_name)
+            logger.error(ex.tb)
+        else:
+            logger.error('Error in %s function' % func_name, exc_info=ex)
 
         # Looks strange but I really have some problems with
         # serializing exception into string
@@ -629,7 +646,8 @@ class Spider(object):
         self.stat.collect('fatal', '%s|%s|%s|%s' % (
             func_name, ex.__class__.__name__, ex_str, task_url))
         if isinstance(ex, FatalError):
-            raise
+            raise FatalError()
+            #raise
 
     def find_data_handler(self, data):
         try:
@@ -652,6 +670,7 @@ class Spider(object):
                 return True
         return False
 
+    '''
     def process_network_result_with_handler(self, res, handler):
         """Apply `handler` function to the network result."""
         handler_name = getattr(handler, '__name__', 'NONE')
@@ -670,6 +689,50 @@ class Spider(object):
             self.process_handler_error(handler_name, ex, res['task'])
         else:
             self.stat.inc('spider:task-%s-ok' % res['task'].name)
+    '''
+
+    def run_parser(self):
+        while True:
+            try:
+                result = self.network_result_queue.get(True, 0.1)
+            except queue.Empty:
+                logger_verbose.debug('Network result queue is empty')
+                self.waiting_shutdown_event.set()
+                if self.shutdown_event.is_set():
+                    logger_verbose.debug('Got shutdown event')
+                    return
+            else:
+                if self.waiting_shutdown_event.is_set():
+                    self.waiting_shutdown_event.clear()
+                print(result['grab'].config['url'])
+                print(result['task'].name)
+                handler = self.find_task_handler(result['task'])
+                self.process_network_result_with_handler_mp(
+                    result, handler)
+
+
+    def process_network_result_with_handler_mp(self, result, handler):
+        """
+        This is like `process_network_result_with_handler` but
+        for multiprocessing version
+        """
+        handler_name = getattr(handler, '__name__', 'NONE')
+        try:
+            with self.timer.log_time('response_handler'):
+                with self.timer.log_time('response_handler.%s' % handler_name):
+                    handler_result = handler(result['grab'], result['task'])
+                    if handler_result is None:
+                        pass
+                    else:
+                        for something in handler_result:
+                            self.parser_result_queue.put((something,
+                                                          result['task']))
+        except NoDataHandler as ex:
+            ex.tb = format_exc()
+            self.parser_result_queue.put((ex, result['task']))
+        except Exception as ex:
+            ex.tb = format_exc()
+            self.parser_result_queue.put((ex, result['task']))
 
     def find_task_handler(self, task):
         if task.origin_task_generator is not None:
@@ -803,6 +866,43 @@ class Spider(object):
         """
         self.timer.start('total')
         self.transport = MulticurlTransport(self.thread_number)
+        
+        # MP:
+        # ***
+        compat_mode = True
+        if compat_mode:
+            from multiprocessing.dummy import Process, Event, Queue
+        network_result_queue = Queue()
+        network_result_queue_limit = self.thread_number * 2
+
+        parser_result_queue = Queue()
+
+        shutdown_event = Event()
+        parser_pool_size = 2
+        if compat_mode:
+            parser_pool_size = 1
+        parser_pool = []
+        for x in range(parser_pool_size):
+            waiting_shutdown_event = Event()
+            if compat_mode:
+                bot = self
+                self.network_result_queue = network_result_queue
+                self.parser_result_queue = parser_result_queue
+                self.waiting_shutdown_event = waiting_shutdown_event
+                self.shutdown_event = shutdown_event
+            else:
+                bot = self.__class__(
+                    network_result_queue=network_result_queue,
+                    parser_result_queue=parser_result_queue,
+                    waiting_shutdown_event=waiting_shutdown_event,
+                    shutdown_event=shutdown_event)
+            proc = Process(target=bot.run_parser)
+            proc.start()
+            parser_pool.append({
+                'proc': proc,
+                'waiting_shutdown_event': waiting_shutdown_event,
+            })
+
         try:
             # Run custom things defined by this specific spider
             # By defaut it does nothing
@@ -824,10 +924,14 @@ class Spider(object):
 
                 result_from_cache = None
                 free_threads = self.transport.get_free_threads_number()
-                if free_threads:
+                # Load new task only if network_result_queue is not full
+                if (free_threads and
+                        network_result_queue.qsize()
+                        < network_result_queue_limit):
                     logger_verbose.debug(
-                        'Transport has free resources (%d). '
-                        'Trying to add new task (if exists).' % free_threads)
+                        'Transport and parser have free resources (%d/NA). '
+                        'Trying to process new task (if exists).'
+                        % free_threads)
 
                     # Try five times to get new task and proces task generator
                     # because slave parser could agressively consume
@@ -845,10 +949,18 @@ class Spider(object):
                             break
 
                     if task is None:
-                        if not self.transport.get_active_threads_number():
+                        if (not self.transport.get_active_threads_number()
+                                and not network_result_queue.qsize()
+                                and not parser_result_queue.qsize()
+                                and all([x['waiting_shutdown_event'].is_set()
+                                         for x in parser_pool])):
                             logger_verbose.debug('Network transport has no '
-                                                 'active tasks')
+                                                 'active tasks. No parser '
+                                                 'futures. No pending results')
                             if not self.task_generator_enabled:
+                                shutdown_event.set()
+                                for proc in parser_pool:
+                                    proc['proc'].join()
                                 self.stop()
                         else:
                             logger_verbose.debug(
@@ -913,8 +1025,12 @@ class Spider(object):
                     self.log_network_result_stats(
                         result, from_cache=from_cache)
                     if self.is_valid_network_result(result):
-                        self.process_network_result_with_handler(
-                            result, self.find_task_handler(result['task']))
+                        #handler = self.find_task_handler(result['task'])
+                        #self.process_network_result_with_handler(
+                        #    result, handler)
+                        # MP:
+                        # ***
+                        network_result_queue.put(result)
                     else:
                         self.log_failed_network_result(result)
                         # Try to do network request one more time
@@ -927,7 +1043,15 @@ class Spider(object):
                         self.stat.inc('spider:task-%s-cache' % task.name)
                     self.stat.inc('spider:request')
 
-                # print '[transport iterate results - end]'
+                # MP:
+                # ***
+                while True:
+                    try:
+                        p_res, p_task = parser_result_queue.get_nowait()
+                    except queue.Empty:
+                        break
+                    else:
+                        self.process_handler_result(p_res, p_task)
 
             logger_verbose.debug('Work done')
         except KeyboardInterrupt:
@@ -994,6 +1118,10 @@ class Spider(object):
                                            task)
         elif result is None:
             pass
+        elif isinstance(result, Exception): 
+            handler = self.find_task_handler(task)
+            handler_name = getattr(handler, '__name__', 'NONE')
+            self.process_handler_error(handler_name, result, task)
         else:
             raise SpiderError('Unknown result type: %s' % result)
 
