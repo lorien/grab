@@ -57,7 +57,6 @@ GRAB_TEST_LIST = (
     'test.grab_error',
     'test.selector_deprecated',
     'test.grab_deprecated',
-    'test.spider_stat',
     'test.ext_pyquery',
     'test.tools_deprecated',
 )
@@ -77,6 +76,7 @@ SPIDER_TEST_LIST = (
     'test.spider_error',
     'test.spider_cache',
     'test.spider_data',
+    'test.spider_stat',
 )
 
 

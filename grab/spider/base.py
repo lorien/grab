@@ -28,7 +28,7 @@ from grab.proxylist import ProxyList, BaseProxySource
 from grab.util.misc import camel_case_to_underscore
 from weblib.encoding import make_str, make_unicode
 from grab.base import GLOBAL_STATE
-from grab.stat import Stat
+from grab.stat import Stat, Timer
 
 DEFAULT_TASK_PRIORITY = 100
 DEFAULT_NETWORK_STREAM_NUMBER = 3
@@ -137,6 +137,7 @@ class Spider(object):
         """
 
         self.stat = Stat()
+        self.timer = Timer()
         self.taskq = taskq
 
         if args is None:
@@ -147,7 +148,7 @@ class Spider(object):
         self.slave = slave
 
         self.max_task_generator_chunk = max_task_generator_chunk
-        self.stat.start_timer('total')
+        self.timer.start('total')
         if config is not None:
             self.config = config
         else:
@@ -395,7 +396,7 @@ class Spider(object):
         start = time.time()
         while True:
             try:
-                with self.stat.log_time('task_queue'):
+                with self.timer.log_time('task_queue'):
                     return self.taskq.get()
             except queue.Empty:
                 qsize = self.taskq.size()
@@ -481,9 +482,9 @@ class Spider(object):
         if cache_item is None:
             return None
         else:
-            with self.stat.log_time('cache.read.prepare_request'):
+            with self.timer.log_time('cache.read.prepare_request'):
                 grab.prepare_request()
-            with self.stat.log_time('cache.read.load_response'):
+            with self.timer.log_time('cache.read.load_response'):
                 self.cache.load_response(grab, cache_item)
 
             grab.log_request('CACHED')
@@ -553,8 +554,8 @@ class Spider(object):
             res['ok'] and self.valid_response_code(res['grab'].response.code,
                                                    res['task']))):
             try:
-                with self.stat.log_time('response_handler'):
-                    with self.stat.log_time('response_handler.%s' % handler_name):
+                with self.timer.log_time('response_handler'):
+                    with self.timer.log_time('response_handler.%s' % handler_name):
                         result = handler(res['grab'], res['task'])
                         if result is None:
                             pass
@@ -709,8 +710,8 @@ class Spider(object):
 
         cache_result = None
         if self.is_task_cacheable(task, grab):
-            with self.stat.log_time('cache'):
-                with self.stat.log_time('cache.read'):
+            with self.timer.log_time('cache'):
+                with self.timer.log_time('cache.read'):
                     cache_result = self.load_task_from_cache(
                         self.transport, task, grab, grab_config_backup)
 
@@ -727,7 +728,7 @@ class Spider(object):
                 self.stat.inc('spider:request-network')
                 self.stat.inc('spider:task-%s-network' % task.name)
                 self.process_grab_proxy(task, grab)
-                with self.stat.log_time('network_transport'):
+                with self.timer.log_time('network_transport'):
                     logger_verbose.debug('Submitting task to the transport '
                                          'layer')
                     try:
@@ -771,25 +772,22 @@ class Spider(object):
         """
         Main method. All work is done here.
         """
-
-        self.stat.start_timer('total')
-
+        self.timer.start('total')
         self.transport = MulticurlTransport(self.thread_number)
-
         try:
             self.setup_default_queue()
             self.prepare()
 
-            self.stat.start_timer('task_generator')
+            self.timer.start('task_generator')
             if not self.slave:
                 self.init_task_generator()
-            self.stat.stop_timer('task_generator')
+            self.timer.stop('task_generator')
 
             while self.work_allowed:
-                self.stat.start_timer('task_generator')
+                self.timer.start('task_generator')
                 if self.task_generator_enabled:
                     self.process_task_generator()
-                self.stat.stop_timer('task_generator')
+                self.timer.stop('task_generator')
 
                 free_threads = self.transport.get_free_threads_number()
                 if free_threads:
@@ -861,7 +859,7 @@ class Spider(object):
                             self.process_new_task(task)
                             self.transport.process_handlers()
 
-                with self.stat.log_time('network_transport'):
+                with self.timer.log_time('network_transport'):
                     logger_verbose.debug('Asking transport layer to do '
                                          'something')
                     self.transport.process_handlers()
@@ -874,8 +872,8 @@ class Spider(object):
                 # print '[transport iterate results - start]'
                 for result in self.transport.iterate_results():
                     if self.is_valid_for_cache(result):
-                        with self.stat.log_time('cache'):
-                            with self.stat.log_time('cache.write'):
+                        with self.timer.log_time('cache'):
+                            with self.timer.log_time('cache.write'):
                                 self.cache.save_response(result['task'].url,
                                                          result['grab'])
 
@@ -893,7 +891,7 @@ class Spider(object):
             raise
         finally:
             # This code is executed when main cycles is breaked
-            self.stat.stop_timer('total')
+            self.timer.stop('total')
             self.shutdown()
 
     def load_proxylist(self, source, source_type=None, proxy_type='http',
@@ -1079,20 +1077,20 @@ class Spider(object):
 
     def start_timer(self, key):
         logger.debug('Method `Spider::start_timer` is deprecated. '
-                     'Use `Spider::stat.start_timer` method instead.')
-        self.stat.start_timer(key)
+                     'Use `Spider::timer.start` method instead.')
+        self.timer.start(key)
 
     def stop_timer(self, key):
         logger.debug('Method `Spider::stop_timer` is deprecated. '
-                     'Use `Spider::stat.stop_timer` method instead.')
-        self.stat.stop_timer(key)
+                     'Use `Spider::timer.stop` method instead.')
+        self.timer.stop(key)
 
     @contextmanager
     def save_timer(self, key):
         logger.debug('Method `Spider::save_timer` is deprecated. '
-                     'Use `Spider::stat.log_time` method instead.')
-        self.stat.start_timer(key)
+                     'Use `Spider::timer.log_time` method instead.')
+        self.timer.start(key)
         try:
             yield
         finally:
-            self.stat.stop_timer(key)
+            self.timer.stop(key)

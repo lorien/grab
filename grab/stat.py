@@ -55,21 +55,26 @@ class Stat(object):
     def append(self, key, val):
         self.collections[key].append(val)
 
-    def start_timer(self, key):
+
+class Timer(object):
+    def __init__(self):
+        self.time_points = {}
+        self.timers = defaultdict(int)
+
+    def start(self, key):
         self.time_points[key] = time.time()
 
-    def stop_timer(self, key):
+    def stop(self, key):
         start = self.time_points[key]
-        now = time.time()
-        total = now - start
+        total = time.time() - start
         self.timers[key] += total
         del self.time_points[key]
         return total
 
     @contextmanager
     def log_time(self, key):
-        self.start_timer(key)
+        self.start(key)
         try:
             yield
         finally:
-            self.stop_timer(key)
+            self.stop(key)
