@@ -242,7 +242,7 @@ class Spider(object):
 
     def check_task_limits(self, task):
         """
-        Check that network/try counters are OK.
+        Check that task's network & try counters do not exceed limits.
 
         Returns:
         * if success: (True, None)
@@ -396,9 +396,6 @@ class Spider(object):
 
         logger_verbose.debug('Task queue is empty.')
         return None
-
-    def process_task_counters(self, task):
-        task.network_try_count += 1
 
     def create_grab_instance(self, **kwargs):
         # Back-ward compatibility for deprecated `grab_config` attribute
@@ -701,8 +698,8 @@ class Spider(object):
                     logger_verbose.debug('Submitting task to the transport '
                                          'layer')
                     try:
-                        self.transport.process_task(task, grab,
-                                                    grab_config_backup)
+                        self.transport.start_task_processing(
+                            task, grab, grab_config_backup)
                     except GrabInvalidUrl:
                         logger.debug('Task %s has invalid URL: %s' % (
                             task.name, task.url))
@@ -797,10 +794,12 @@ class Spider(object):
                     else:
                         logger_verbose.debug('Got new task from task queue: %s'
                                              % task)
-                        self.process_task_counters(task)
+                        task.network_try_count += 1
 
                         is_valid, reason = self.check_task_limits(task)
-                        if not is_valid:
+                        if is_valid:
+                            self.process_new_task(task)
+                        else:
                             logger_verbose.debug('Task %s is rejected due to '
                                                  '%s limit'
                                                  % (task.name, reason))
@@ -817,9 +816,6 @@ class Spider(object):
                             handler = task.get_fallback_handler(self)
                             if handler:
                                 handler(task)
-                        else:
-                            self.process_new_task(task)
-                            self.transport.process_handlers()
 
                 with self.timer.log_time('network_transport'):
                     logger_verbose.debug('Asking transport layer to do '

@@ -45,7 +45,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             pass
 
         bot = TestSpider()
-        self.assertRaises(KeyError, bot.stop_timer, 'zzz')
+        self.assertRaises(KeyError, bot.timer.stop, 'zzz')
 
     def test_counters_and_collections(self):
         from grab.stat import DEFAULT_COUNTER_KEY

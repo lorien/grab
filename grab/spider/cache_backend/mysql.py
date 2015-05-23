@@ -75,7 +75,7 @@ class CacheBackend(object):
         """
 
         _hash = self.build_hash(url)
-        with self.spider.stat.log_time('cache.read.mysql_query'):
+        with self.spider.timer.log_time('cache.read.mysql_query'):
             self.execute('BEGIN')
             if timeout is None:
                 query = ""
@@ -97,12 +97,12 @@ class CacheBackend(object):
             return None
 
     def unpack_database_value(self, val):
-        with self.spider.stat.log_time('cache.read.unpack_data'):
+        with self.spider.timer.log_time('cache.read.unpack_data'):
             dump = zlib.decompress(val)
             return marshal.loads(dump)
 
     def build_hash(self, url):
-        with self.spider.stat.log_time('cache.read.build_hash'):
+        with self.spider.timer.log_time('cache.read.build_hash'):
             utf_url = make_str(url)
             return sha1(utf_url).hexdigest()
 
@@ -176,7 +176,7 @@ class CacheBackend(object):
         """
 
         _hash = self.build_hash(url)
-        with self.spider.stat.log_time('cache.read.mysql_query'):
+        with self.spider.timer.log_time('cache.read.mysql_query'):
             if timeout is None:
                 query = ""
             else:

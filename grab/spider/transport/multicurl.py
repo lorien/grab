@@ -42,7 +42,7 @@ class MulticurlTransport(object):
         else:
             return curl
 
-    def process_task(self, task, grab, grab_config_backup):
+    def start_task_processing(self, task, grab, grab_config_backup):
         curl = self.process_connection_count(self.freelist.pop())
 
         self.registry[id(curl)] = {
