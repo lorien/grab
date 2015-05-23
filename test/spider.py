@@ -1,5 +1,5 @@
 import six
-from grab.spider import Spider, Task, NullTask
+from grab.spider import Spider, Task
 from grab.spider.error import SpiderError, FatalError
 import os
 import signal
@@ -202,25 +202,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.add_task(Task('page', url=self.server.get_url(),
                           fallback_name='fallback_zz'))
         self.assertRaises(SpiderError, bot.run)
-
-    def test_null_task(self):
-        class TestSpider(Spider):
-            pass
-
-
-        bot = TestSpider()
-        bot.setup_queue()
-        bot.add_task(NullTask(sleep=0.3))
-
-        points = []
-        def sleep(arg):
-            points.append(arg)
-
-
-        with mock.patch('time.sleep', sleep):
-            bot.run()
-
-        self.assertEqual(points, [0.3])
 
     def test_fatal_error(self):
         class TestSpider(Spider):

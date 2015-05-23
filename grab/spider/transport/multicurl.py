@@ -6,8 +6,8 @@ from grab.error import GrabTooManyRedirectsError
 
 
 class MulticurlTransport(object):
-    def __init__(self, thread_number):
-        self.thread_number = thread_number
+    def __init__(self, socket_number):
+        self.socket_number = socket_number
         self.multi = pycurl.CurlMulti()
         self.multi.handles = []
         self.freelist = []
@@ -15,7 +15,7 @@ class MulticurlTransport(object):
         self.connection_count = {}
 
         # Create curl instances
-        for x in six.moves.range(self.thread_number):
+        for x in six.moves.range(self.socket_number):
             curl = pycurl.Curl()
             self.connection_count[id(curl)] = 0
             self.freelist.append(curl)
@@ -27,8 +27,8 @@ class MulticurlTransport(object):
     def get_free_threads_number(self):
         return len(self.freelist)
 
-    def active_task_number(self):
-        return self.thread_number - len(self.freelist)
+    def get_active_threads_number(self):
+        return self.socket_number - len(self.freelist)
 
     def process_connection_count(self, curl):
         curl_id = id(curl)
@@ -67,8 +67,7 @@ class MulticurlTransport(object):
     def process_handlers(self):
         # Ok, frankly I have real bad understanding of
         # how to deal with multicurl sockets ;-)
-        # It is a sort of miracle that Grab is used by some people
-        # and they managed to get job done
+        # It is a sort of miracle that Grab actually works
         rlist, wlist, xlist = self.multi.fdset()
         if rlist or wlist or xlist:
             timeout = self.multi.timeout()
@@ -133,8 +132,11 @@ class MulticurlTransport(object):
                 del self.registry[curl_id]
                 grab.transport.curl = None
 
-                yield {'ok': ok, 'emsg': emsg, 'grab': grab,
-                       'grab_config_backup': grab_config_backup, 'task': task}
+                yield {'ok': ok,
+                       'emsg': emsg,
+                       'grab': grab,
+                       'grab_config_backup': grab_config_backup,
+                       'task': task}
 
                 self.multi.remove_handle(curl)
                 curl.reset()

@@ -21,7 +21,7 @@ from grab.base import Grab
 from grab.error import GrabInvalidUrl
 from grab.spider.error import (SpiderError, SpiderMisuseError, FatalError,
                                NoTaskHandler, NoDataHandler)
-from grab.spider.task import Task, NullTask
+from grab.spider.task import Task
 from grab.spider.data import Data
 from grab.spider.transport.multicurl import MulticurlTransport
 from grab.proxylist import ProxyList, BaseProxySource
@@ -282,59 +282,30 @@ class Spider(object):
         else:
             task.priority_is_custom = True
 
-        if not isinstance(task, NullTask):
-            try:
-                if not task.url.startswith(('http://', 'https://', 'ftp://',
-                                            'file://', 'feed://')):
-                    if self.base_url is None:
-                        msg = 'Could not resolve relative URL because base_url ' \
-                              'is not specified. Task: %s, URL: %s'\
-                              % (task.name, task.url)
-                        raise SpiderError(msg)
-                    else:
-                        task.url = urljoin(self.base_url, task.url)
-                        # If task has grab_config object then update it too
-                        if task.grab_config:
-                            task.grab_config['url'] = task.url
-            except Exception as ex:
-                self.stat.append('task-with-invalid-url', task.url)
-                if raise_error:
-                    raise
+        try:
+            if not task.url.startswith(('http://', 'https://', 'ftp://',
+                                        'file://', 'feed://')):
+                if self.base_url is None:
+                    msg = 'Could not resolve relative URL because base_url ' \
+                          'is not specified. Task: %s, URL: %s'\
+                          % (task.name, task.url)
+                    raise SpiderError(msg)
                 else:
-                    logger.error('', exc_info=ex)
-                    return False
+                    task.url = urljoin(self.base_url, task.url)
+                    # If task has grab_config object then update it too
+                    if task.grab_config:
+                        task.grab_config['url'] = task.url
+        except Exception as ex:
+            self.stat.append('task-with-invalid-url', task.url)
+            if raise_error:
+                raise
+            else:
+                logger.error('', exc_info=ex)
+                return False
 
         # TODO: keep original task priority if it was set explicitly
         self.taskq.put(task, task.priority, schedule_time=task.schedule_time)
         return True
-
-    def load_initial_urls(self):
-        """
-        Create initial tasks from `self.initial_urls`.
-
-        Tasks are created with name "initial".
-        """
-
-        if self.initial_urls:
-            for url in self.initial_urls:
-                self.add_task(Task('initial', url=url))
-
-    def setup_default_queue(self):
-        """
-        If task queue is not configured explicitly
-        then create task queue with default parameters
-
-        This method is not the same as `self.setup_queue` because
-        `self.setup_queue` works by default with in-memory queue.
-        You can override `setup_default_queue` in your custom
-        Spider and use other storage engines for you
-        default task queue.
-        """
-
-        # If queue is still not configured
-        # then configure it with default backend
-        if self.taskq is None:
-            self.setup_queue()
 
     def process_task_generator(self):
         """
@@ -374,22 +345,22 @@ class Spider(object):
                                          'Disabling it')
                     self.task_generator_enabled = False
 
-    def init_task_generator(self):
+    def start_task_generator(self):
         """
-        Process `initial_urls` and `task_generator`.
-        Generate first portion of tasks.
+        Process `self.initial_urls` list and `self.task_generator`
+        method.  Generate first portion of tasks.
 
         TODO: task generator should work in separate OS process
         """
 
+        logger_verbose.debug('Processing initial urls')
+        if self.initial_urls:
+            for url in self.initial_urls:
+                self.add_task(Task('initial', url=url))
+
         self.task_generator_object = self.task_generator()
         self.task_generator_enabled = True
-
-        logger_verbose.debug('Processing initial urls')
-        self.load_initial_urls()
-
-        # Initial call to task generator
-        # before main cycle
+        # Initial call to task generator before spider has started working
         self.process_task_generator()
 
     def load_new_task(self):
@@ -411,10 +382,10 @@ class Spider(object):
                 else:
                     # Temporarily hack which force slave crawler
                     # to wait 5 seconds for new tasks, this solves
-                    # the problem that sometimes slave crawler stop
-                    # its work because it could not receive new
+                    # the problem: sometimes slave crawler stops
+                    # working because it could not receive new
                     # tasks immediately
-                    if not self.transport.active_task_number():
+                    if not self.transport.get_active_threads_number():
                         if time.time() - start < 5:
                             time.sleep(0.1)
                             logger.debug('Slave sleeping')
@@ -428,8 +399,6 @@ class Spider(object):
 
     def process_task_counters(self, task):
         task.network_try_count += 1
-        if task.task_try_count == 0:
-            task.task_try_count = 1
 
     def create_grab_instance(self, **kwargs):
         # Back-ward compatibility for deprecated `grab_config` attribute
@@ -775,19 +744,23 @@ class Spider(object):
         self.timer.start('total')
         self.transport = MulticurlTransport(self.thread_number)
         try:
-            self.setup_default_queue()
+            # Run custom things defined by this specific spider
+            # By defaut it does nothing
             self.prepare()
 
-            self.timer.start('task_generator')
-            if not self.slave:
-                self.init_task_generator()
-            self.timer.stop('task_generator')
+            # Setup task queue if it has not been configured yet
+            if self.taskq is None:
+                self.setup_queue()
+
+            # Initiate task generate. Only in main process!
+            with self.timer.log_time('task_generator'):
+                if not self.slave:
+                    self.start_task_generator()
 
             while self.work_allowed:
-                self.timer.start('task_generator')
-                if self.task_generator_enabled:
-                    self.process_task_generator()
-                self.timer.stop('task_generator')
+                with self.timer.log_time('task_generator'):
+                    if self.task_generator_enabled:
+                        self.process_task_generator()
 
                 free_threads = self.transport.get_free_threads_number()
                 if free_threads:
@@ -801,7 +774,7 @@ class Spider(object):
                     for x in six.moves.range(5):
                         task = self.load_new_task()
                         if task is None:
-                            if not self.transport.active_task_number():
+                            if not self.transport.get_active_threads_number():
                                 self.process_task_generator()
                         elif task is True:
                             # If only delayed tasks in queue
@@ -810,8 +783,8 @@ class Spider(object):
                             # If got some task
                             break
 
-                    if not task:
-                        if not self.transport.active_task_number():
+                    if task is None:
+                        if not self.transport.get_active_threads_number():
                             logger_verbose.debug('Network transport has no '
                                                  'active tasks')
                             if not self.task_generator_enabled:
@@ -819,18 +792,10 @@ class Spider(object):
                         else:
                             logger_verbose.debug(
                                 'Transport active tasks: %d' %
-                                self.transport.active_task_number())
-                    elif isinstance(task, NullTask):
-                        logger_verbose.debug('Got NullTask')
-                        if not self.transport.active_task_number():
-                            if task.sleep:
-                                logger.debug('Got NullTask with sleep '
-                                             'instruction. Sleeping for'
-                                             ' %.2f seconds' % task.sleep)
-                                time.sleep(task.sleep)
+                                self.transport.get_active_threads_number())
                     elif isinstance(task, bool) and (task is True):
                         # Take some sleep to not load CPU
-                        if not self.transport.active_task_number():
+                        if not self.transport.get_active_threads_number():
                             time.sleep(0.1)
                     else:
                         logger_verbose.debug('Got new task from task queue: %s'
@@ -947,8 +912,6 @@ class Spider(object):
                                            task)
         elif result is None:
             pass
-        elif isinstance(result, NullTask):
-            pass
         else:
             raise SpiderError('Unknown result type: %s' % result)
 
@@ -983,7 +946,7 @@ class Spider(object):
             page = task.get('page', 1) + 1
             grab2 = grab.clone()
             grab2.setup(url=url)
-            task2 = task.clone(task_try_count=0, grab=grab2,
+            task2 = task.clone(task_try_count=1, grab=grab2,
                                page=page, **kwargs)
             self.add_task(task2)
             return True

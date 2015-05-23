@@ -16,7 +16,7 @@ class Task(BaseTask):
 
     def __init__(self, name=None, url=None, grab=None, grab_config=None,
                  priority=None, priority_is_custom=True,
-                 network_try_count=0, task_try_count=0,
+                 network_try_count=0, task_try_count=1,
                  disable_cache=False, refresh_cache=False,
                  valid_status=[], use_proxylist=True,
                  cache_timeout=None, delay=0,
@@ -244,21 +244,6 @@ class Task(BaseTask):
                 return getattr(spider, fb_name)
         else:
             return None
-
-
-class NullTask(BaseTask):
-    def __init__(self, name='initial', sleep=0, priority=None,
-                 priority_is_custom=True, network_try_count=0,
-                 task_try_count=0):
-        self.name = name
-        self.sleep = sleep
-        self.priority = None
-        self.priority_is_custom = False
-        self.network_try_count = network_try_count
-        self.task_try_count = task_try_count
-
-        self.schedule_time = None
-        self.original_delay = None
 
 
 def inline_task(f):
