@@ -296,7 +296,7 @@ class Spider(object):
                     if task.grab_config:
                         task.grab_config['url'] = task.url
         except Exception as ex:
-            self.stat.append('task-with-invalid-url', task.url)
+            self.stat.collect('task-with-invalid-url', task.url)
             if raise_error:
                 raise
             else:
@@ -489,7 +489,7 @@ class Spider(object):
                 ex_str = str(ex)
 
         task_url = task.url if task is not None else None
-        self.stat.append('fatal', '%s|%s|%s|%s' % (
+        self.stat.collect('fatal', '%s|%s|%s|%s' % (
             func_name, ex.__class__.__name__, ex_str, task_url))
         if isinstance(ex, FatalError):
             raise
@@ -706,10 +706,7 @@ class Spider(object):
                     except GrabInvalidUrl:
                         logger.debug('Task %s has invalid URL: %s' % (
                             task.name, task.url))
-                        self.stat.append('invalid-url', task.url)
-                    else:
-                        logger_verbose.debug('Asking transport layer to do '
-                                             'something')
+                        self.stat.collect('invalid-url', task.url)
 
     def is_valid_for_cache(self, res):
         """
@@ -808,10 +805,10 @@ class Spider(object):
                                                  '%s limit'
                                                  % (task.name, reason))
                             if reason == 'task-try-count':
-                                self.stat.append('task-count-rejected',
+                                self.stat.collect('task-count-rejected',
                                                  task.url)
                             elif reason == 'network-try-count':
-                                self.stat.append('network-count-rejected',
+                                self.stat.collect('network-count-rejected',
                                                  task.url)
                             else:
                                 raise SpiderError('Unknown response from '
@@ -1030,8 +1027,8 @@ class Spider(object):
 
     def add_item(self, list_name, item):
         logger.debug('Method `Spider::add_item` is deprecated. '
-                     'Use `Spider::stat.append` method instead.')
-        self.stat.append(list_name, item)
+                     'Use `Spider::stat.collect` method instead.')
+        self.stat.collect(list_name, item)
 
     def inc_count(self, key, count=1):
         logger.debug('Method `Spider::inc_count` is deprecated. '

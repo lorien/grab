@@ -52,8 +52,13 @@ class Stat(object):
             self.count_prev = count_current
             self.time = now
 
-    def append(self, key, val):
+    def collect(self, key, val):
         self.collections[key].append(val)
+
+    def append(self, key, val):
+        logging.error('Method `Stat::append` is deprecated. '
+                      'Use `Stat::collect` method.')
+        self.collect(key, val)
 
 
 class Timer(object):
