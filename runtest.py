@@ -66,9 +66,8 @@ GRAB_TEST_LIST = (
 # ************
 
 SPIDER_TEST_LIST = (
-    'test.spider',
-    #'tests.test_distributed_spider',
     'test.spider_task',
+    'test.spider',
     'test.spider_proxy',
     'test.spider_queue',
     'test.spider_misc',
@@ -89,15 +88,22 @@ def main():
     parser.add_option('--test-spider', action='store_true',
                       default=False, help='Run tests for Grab')
     parser.add_option('--test-all', action='store_true',
-                      default=False, help='Run tests for both Grab and Grab::Spider')
+                      default=False,
+                      help='Run tests for both Grab and Grab::Spider')
     parser.add_option('--backend-mongo', action='store_true',
-                      default=False, help='Run extra tests that depends on mongodb')
+                      default=False,
+                      help='Run extra tests that depends on mongodb')
     parser.add_option('--backend-redis', action='store_true',
-                      default=False, help='Run extra tests that depends on redis')
+                      default=False,
+                      help='Run extra tests that depends on redis')
     parser.add_option('--backend-mysql', action='store_true',
-                      default=False, help='Run extra tests that depends on mysql')
+                      default=False,
+                      help='Run extra tests that depends on mysql')
     parser.add_option('--backend-postgresql', action='store_true',
-                      default=False, help='Run extra tests that depends on postgresql')
+                      default=False,
+                      help='Run extra tests that depends on postgresql')
+    parser.add_option('--multiprocess', action='store_true', default=False,
+                      help='Use multiprocess spider in spider tests')
     opts, args = parser.parse_args()
 
     if opts.backend_mongo:
@@ -127,6 +133,8 @@ def main():
 
     if opts.test:
         test_list += [opts.test]
+
+    GLOBAL['multiprocess'] = opts.multiprocess
 
     # Check tests integrity
     # Ensure that all test modules are imported correctly

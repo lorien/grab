@@ -4,7 +4,8 @@ import grab.spider.base
 from grab import Grab
 from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
 from grab.spider import inline_task
-from test.util import BaseGrabTestCase, build_grab
+from test.util import (BaseGrabTestCase, build_grab, build_spider,
+                       multiprocess_mode)
 from grab.spider.error import SpiderError
 
 
@@ -22,7 +23,7 @@ class TestSpider(BaseGrabTestCase):
     def test_task_priority(self):
         # Automatic random priority
         grab.spider.base.RANDOM_TASK_PRIORITY_RANGE = (10, 20)
-        bot = SimpleSpider(priority_mode='random')
+        bot = build_spider(SimpleSpider, priority_mode='random')
         bot.setup_queue()
         task = Task('baz', url='xxx')
         self.assertEqual(task.priority, None)
@@ -31,7 +32,7 @@ class TestSpider(BaseGrabTestCase):
 
         # Automatic constant priority
         grab.spider.base.DEFAULT_TASK_PRIORITY = 33
-        bot = SimpleSpider(priority_mode='const')
+        bot = build_spider(SimpleSpider, priority_mode='const')
         bot.setup_queue()
         task = Task('baz', url='xxx')
         self.assertEqual(task.priority, None)
@@ -40,7 +41,7 @@ class TestSpider(BaseGrabTestCase):
 
         # Automatic priority does not override explictily setted priority
         grab.spider.base.DEFAULT_TASK_PRIORITY = 33
-        bot = SimpleSpider(priority_mode='const')
+        bot = build_spider(SimpleSpider, priority_mode='const')
         bot.setup_queue()
         task = Task('baz', url='xxx', priority=1)
         self.assertEqual(1, task.priority)
@@ -51,7 +52,7 @@ class TestSpider(BaseGrabTestCase):
                           lambda: SimpleSpider(priority_mode='foo'))
 
     def test_task_url(self):
-        bot = SimpleSpider()
+        bot = build_spider(SimpleSpider, )
         bot.setup_queue()
         task = Task('baz', url='xxx')
         self.assertEqual('xxx', task.url)
@@ -66,7 +67,7 @@ class TestSpider(BaseGrabTestCase):
         self.assertEqual('http://google.com/yyy', task.grab_config['url'])
 
     def test_task_clone(self):
-        bot = SimpleSpider()
+        bot = build_spider(SimpleSpider, )
         bot.setup_queue()
 
         task = Task('baz', url='xxx')
@@ -89,7 +90,7 @@ class TestSpider(BaseGrabTestCase):
         task.clone(url='http://yandex.ru/')
 
     def test_task_useragent(self):
-        bot = SimpleSpider()
+        bot = build_spider(SimpleSpider, )
         bot.setup_queue()
 
         g = Grab()
@@ -105,11 +106,12 @@ class TestSpider(BaseGrabTestCase):
         class TestSpider(Spider):
             pass
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider, )
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         self.assertRaises(NoTaskHandler, bot.run)
 
+    @multiprocess_mode(False)
     def test_task_raw(self):
         class TestSpider(Spider):
             def prepare(self):
@@ -120,20 +122,21 @@ class TestSpider(BaseGrabTestCase):
 
         self.server.response['code'] = 502
 
-        bot = TestSpider(network_try_limit=1)
+        bot = build_spider(TestSpider, network_try_limit=1)
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
         self.assertEqual(0, len(bot.codes))
 
-        bot = TestSpider(network_try_limit=1)
+        bot = build_spider(TestSpider, network_try_limit=1)
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url(), raw=True))
         bot.add_task(Task('page', url=self.server.get_url(), raw=True))
         bot.run()
         self.assertEqual(2, len(bot.codes))
 
+    """
     def test_task_callback(self):
         class TestSpider(Spider):
             def task_page(self, grab, task):
@@ -149,7 +152,7 @@ class TestSpider(BaseGrabTestCase):
         tokens = []
         func = FuncWithState(tokens)
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider, )
         bot.meta['tokens'] = tokens
         bot.setup_queue()
         # classic handler
@@ -163,7 +166,9 @@ class TestSpider(BaseGrabTestCase):
         bot.run()
         self.assertEqual(['0_handler', '1_func', '1_func', '1_func'],
                          sorted(tokens))
+    """
 
+    @multiprocess_mode(False)
     def test_inline_task(self):
 
         def callback(self):
@@ -226,7 +231,7 @@ class TestSpider(BaseGrabTestCase):
                 self.add_response(grab)
                 self.calls.append('end')
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider, )
         bot.run()
 
         self.assertEqual(['/?foo=start',
@@ -256,7 +261,7 @@ class TestSpider(BaseGrabTestCase):
             def task_page(self, grab, task):
                 self.done = True
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider, )
         bot.setup_queue()
         g = Grab()
         g.setup(url=self.server.get_url())
@@ -329,12 +334,13 @@ class TestSpider(BaseGrabTestCase):
         t2 = Task('bar', url='http://foo.com/')
         t3 = Task(url='http://foo.com/')
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider, )
 
         self.assertEqual(t1.get_fallback_handler(bot), bot.zz)
         self.assertEqual(t2.get_fallback_handler(bot), bot.task_bar_fallback)
         self.assertEqual(t3.get_fallback_handler(bot), None)
 
+    @multiprocess_mode(False)
     def test_update_grab_instance(self):
         class TestSpider(Spider):
             def update_grab_instance(self, grab):
@@ -351,7 +357,7 @@ class TestSpider(BaseGrabTestCase):
             def task_page(self, grab, task):
                 self.points.add(grab.config['timeout'])
 
-        bot = TestSpider(meta={'server': self.server})
+        bot = build_spider(TestSpider, meta={'server': self.server})
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.add_task(Task('page', grab=Grab(url=self.server.get_url(),
@@ -359,6 +365,7 @@ class TestSpider(BaseGrabTestCase):
         bot.run()
         self.assertEqual(set([77]), bot.points)
 
+    @multiprocess_mode(False)
     def test_create_grab_instance(self):
         class TestSpider(Spider):
             def create_grab_instance(self, **kwargs):
@@ -377,7 +384,7 @@ class TestSpider(BaseGrabTestCase):
             def task_page(self, grab, task):
                 self.points.add(grab.config['timeout'])
 
-        bot = TestSpider(meta={'server': self.server})
+        bot = build_spider(TestSpider, meta={'server': self.server})
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.add_task(Task('page', grab=Grab(url=self.server.get_url(),
@@ -389,7 +396,7 @@ class TestSpider(BaseGrabTestCase):
         class TestSpider(Spider):
             pass
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider, )
         bot.setup_queue()
         bot.add_task(Task('page', url='zz://zz'))
         self.assertEqual(0, bot.taskq.size())
@@ -402,10 +409,26 @@ class TestSpider(BaseGrabTestCase):
         class TestSpider(Spider):
             pass
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider, )
         bot.setup_queue()
         self.assertRaises(SpiderError, bot.add_task,
                           Task('page', url='zz://zz'), raise_error=True)
         self.assertEqual(0, bot.taskq.size())
         bot.add_task(Task('page', url='http://example.com/'))
         self.assertEqual(1, bot.taskq.size())
+
+    @multiprocess_mode(False)
+    def test_multiple_internal_worker_error(self):
+        class TestSpider(Spider):
+            def process_network_result_with_handler_mp(*args, **kwargs):
+                1/0
+
+            def task_page(self):
+                pass
+
+        bot = build_spider(TestSpider, )
+        bot.setup_queue()
+        for x in range(5):
+            bot.add_task(Task('page', url='http://ya.ru/'))
+        bot.run()
+        self.assertEqual(4, bot.stat.counters['parser-process-restore'])

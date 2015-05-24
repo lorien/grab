@@ -4,7 +4,7 @@ from grab.spider.error import SpiderMisuseError
 from unittest import TestCase
 from grab.spider.queue_backend.base import QueueInterface
 
-from test.util import BaseGrabTestCase
+from test.util import BaseGrabTestCase, build_spider, multiprocess_mode
 from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
 
 
@@ -18,8 +18,9 @@ class SpiderQueueMixin(object):
             self.url_history.append(task.url)
             self.priority_history.append(task.priority)
 
+    @multiprocess_mode(False)
     def test_basic_priority(self):
-        bot = self.SimpleSpider()
+        bot = build_spider(self.SimpleSpider)
         self.setup_queue(bot)
         bot.taskq.clear()
         requested_urls = {}
@@ -34,7 +35,7 @@ class SpiderQueueMixin(object):
         self.assertEqual(urls, bot.url_history)
 
     def test_queue_length(self):
-        bot = self.SimpleSpider()
+        bot = build_spider(self.SimpleSpider)
         self.setup_queue(bot)
         bot.taskq.clear()
         for x in six.moves.range(5):
@@ -45,7 +46,7 @@ class SpiderQueueMixin(object):
         bot.run()
 
     def test_taskq_render_stats(self):
-        bot = self.SimpleSpider()
+        bot = build_spider(self.SimpleSpider)
         bot.render_stats()
 
 
@@ -53,6 +54,7 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
     def setup_queue(self, bot):
         bot.setup_queue(backend='memory')
 
+    @multiprocess_mode(False)
     def test_schedule(self):
         """
         In this test I create a number of delayed task
@@ -73,7 +75,7 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
             def task_page(self, grab, task):
                 self.numbers.append(task.num)
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         self.setup_queue(bot)
         bot.run()
         self.assertEqual(bot.numbers, [1, 3, 4, 2])
@@ -85,6 +87,7 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
     def setup_queue(self, bot):
         bot.setup_queue(backend='mongo', **MONGODB_CONNECTION)
 
+    @multiprocess_mode(False)
     def test_schedule(self):
         """
         In this test I create a number of delayed task
@@ -105,13 +108,13 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
             def task_page(self, grab, task):
                 self.numbers.append(task.num)
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         self.setup_queue(bot)
         bot.run()
         self.assertEqual(bot.numbers, [1, 3, 4, 2])
 
     def test_clear_collection(self):
-        bot = self.SimpleSpider()
+        bot = build_spider(self.SimpleSpider)
         self.setup_queue(bot)
         bot.taskq.clear()
 
@@ -123,7 +126,7 @@ class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
         bot.setup_queue(backend='redis', **REDIS_CONNECTION)
 
     def test_delay_error(self):
-        bot = self.SimpleSpider()
+        bot = build_spider(self.SimpleSpider)
         self.setup_queue(bot)
         bot.taskq.clear()
         self.assertRaises(SpiderMisuseError,

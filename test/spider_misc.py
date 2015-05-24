@@ -1,11 +1,12 @@
 from grab.spider import Spider, Task
-from test.util import BaseGrabTestCase
+from test.util import BaseGrabTestCase, multiprocess_mode, build_spider
 
 
 class MiscTest(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
+    @multiprocess_mode(False)
     def test_null_grab_bug(self):
         # Test following bug:
         # Create task and process it
@@ -27,6 +28,6 @@ class MiscTest(BaseGrabTestCase):
             def task_two(self, grab, task):
                 self.page_count += 1
 
-        bot = SimpleSpider(thread_number=1)
+        bot = build_spider(SimpleSpider, thread_number=1)
         bot.run()
         self.assertEqual(2, bot.page_count)

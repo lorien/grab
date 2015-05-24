@@ -4,9 +4,11 @@ import tempfile
 import functools
 from test_server import TestServer
 from unittest import TestCase
+import logging
 
 from grab import Grab
 
+logger = logging.getLogger('test.util')
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_SERVER_PORT = 9876
 TMP_DIR = None
@@ -14,6 +16,7 @@ TMP_FILE = None
 
 GLOBAL = {
     'backends': [],
+    'multiprocess': False,
 }
 
 
@@ -42,8 +45,15 @@ def get_temp_file():
 
 
 def build_grab(*args, **kwargs):
-    """Build the Grab instance with default options."""
+    """Builds the Grab instance with default options."""
     return Grab(*args, **kwargs)
+
+
+def build_spider(cls, **kwargs):
+    """Builds the Spider instance with default options. Also handles
+    `multiprocess` option that is configured globally."""
+    kwargs.setdefault('multiprocess', GLOBAL['multiprocess'])
+    return cls(**kwargs)
 
 
 class BaseGrabTestCase(TestCase):
@@ -58,3 +68,18 @@ class BaseGrabTestCase(TestCase):
 
     def setUp(self):
         self.server.reset()
+
+
+def multiprocess_mode(mode):
+    def wrapper_builder(func):
+        def wrapper(self, *args, **kwargs):
+            if mode != GLOBAL['multiprocess']:
+                logger.debug('Skipping %s:%s:%s. Reason: need '
+                             'multiprocess mode=%s' % (
+                                 func.__module__,
+                                 self.__class__.__name__,
+                                 func.__name__, GLOBAL['multiprocess']))
+            else:
+                return func(self, *args, **kwargs)
+        return wrapper
+    return wrapper_builder

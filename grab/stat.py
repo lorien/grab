@@ -15,16 +15,17 @@ class Stat(object):
     def __init__(self, logger_name='grab.stat', log_file=None,
                  logging_period=5):
         self.time = time.time()
+        self.logging_ignore_prefixes = ['spider:']
         self.logging_period = logging_period
         self.count_prev = 0
-        self.counters = defaultdict(int)
-        self.collections = defaultdict(list)
-        self.time_points = {}
-        self.timers = defaultdict(int)
         self.logger_name = logger_name
         self.logger = logging.getLogger(logger_name)
         self.setup_logging_file(log_file)
-        self.logging_ignore_prefixes = ['spider:']
+        self.reset()
+
+    def reset(self):
+        self.counters = defaultdict(int)
+        self.collections = defaultdict(list)
 
     def setup_logging_file(self, log_file):
         self.log_file = log_file
@@ -43,7 +44,7 @@ class Stat(object):
     def inc(self, key=DEFAULT_COUNTER_KEY, delta=1):
         self.counters[key] += delta
         now = time.time()
-        if now - self.time > self.logging_period:
+        if self.logging_period and now - self.time > self.logging_period:
             count_current = self.counters[DEFAULT_COUNTER_KEY]
             diff = count_current - self.count_prev
             qps = diff / (now - self.time) 
@@ -75,6 +76,9 @@ class Timer(object):
         self.timers[key] += total
         del self.time_points[key]
         return total
+
+    def inc_timer(self, key, value):
+        self.timers[key] += value
 
     @contextmanager
     def log_time(self, key):
