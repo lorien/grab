@@ -3,7 +3,7 @@ from grab.spider import Spider, Task
 import mock
 from copy import deepcopy
 
-from test.util import BaseGrabTestCase
+from test.util import BaseGrabTestCase, multiprocess_mode, build_spider
 from test_settings import (MONGODB_CONNECTION, MYSQL_CONNECTION,
                            POSTGRESQL_CONNECTION)
 
@@ -63,8 +63,9 @@ class SpiderCacheMixin(object):
         self.server.reset()
         self.server.response['get.data'] = ContentGenerator(self.server)
 
+    @multiprocess_mode(False)
     def test_counter(self):
-        bot = SimpleSpider(meta={'server': self.server})
+        bot = build_spider(SimpleSpider, meta={'server': self.server})
         self.setup_cache(bot)
         bot.cache.clear()
         bot.setup_queue()
@@ -89,15 +90,16 @@ class SpiderCacheMixin(object):
             def task_bar(self, grab, task):
                 pass
 
-        bot = Bug1Spider()
+        bot = build_spider(Bug1Spider, )
         self.setup_cache(bot)
         bot.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('foo', self.server.get_url()))
         bot.run()
 
+    @multiprocess_mode(False)
     def test_something(self):
-        bot = SimpleSpider(meta={'server': self.server})
+        bot = build_spider(SimpleSpider, meta={'server': self.server})
         self.setup_cache(bot)
         bot.cache.clear()
         bot.setup_queue()
@@ -105,6 +107,7 @@ class SpiderCacheMixin(object):
         bot.run()
         self.assertEqual([1, 1, 1, 2], bot.resp_counters)
 
+    @multiprocess_mode(False)
     def test_only_cache_task(self):
         class TestSpider(Spider):
             def prepare(self):
@@ -113,7 +116,7 @@ class SpiderCacheMixin(object):
             def task_page(self, grab, task):
                 self.points.append(1)
 
-        bot = TestSpider(only_cache=True)
+        bot = build_spider(TestSpider, only_cache=True)
         self.setup_cache(bot)
         bot.cache.clear()
         bot.setup_queue()
@@ -126,7 +129,7 @@ class SpiderCacheMixin(object):
             def task_page(self, grab, task):
                 pass
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider, )
         self.setup_cache(bot)
         bot.cache.clear()
         bot.setup_queue()
@@ -134,8 +137,9 @@ class SpiderCacheMixin(object):
         bot.run()
         self.assertEqual(bot.cache.size(), 1)
 
+    @multiprocess_mode(False)
     def test_timeout(self):
-        bot = SimpleSpider(meta={'server': self.server})
+        bot = build_spider(SimpleSpider, meta={'server': self.server})
         self.setup_cache(bot)
         bot.cache.clear()
         bot.setup_queue()
@@ -144,7 +148,7 @@ class SpiderCacheMixin(object):
         bot.run()
         self.assertEqual([1, 1], bot.resp_counters)
 
-        bot = SimpleSpider(meta={'server': self.server})
+        bot = build_spider(SimpleSpider, meta={'server': self.server})
         self.setup_cache(bot)
         # DO not clear the cache
         # bot.cache.clear()
@@ -159,6 +163,7 @@ class SpiderCacheMixin(object):
         bot.run()
         self.assertEqual([1, 2, 2, 3], bot.resp_counters)
 
+    @multiprocess_mode(False)
     def test_task_cache_timeout(self):
         class TestSpider(Spider):
             def prepare(self):
@@ -167,7 +172,7 @@ class SpiderCacheMixin(object):
             def task_page(self, grab, task):
                 self.points.append(grab.doc.body)
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         self.setup_cache(bot)
         bot.cache.clear()
         bot.setup_queue()
@@ -192,7 +197,7 @@ class SpiderCacheMixin(object):
             def task_page(self, grab, task):
                 pass
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         self.setup_cache(bot)
         bot.cache.clear()
         bot.setup_queue()
@@ -208,7 +213,7 @@ class SpiderCacheMixin(object):
             def task_page(self, grab, task):
                 pass
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         self.setup_cache(bot)
         bot.cache.clear()
         bot.setup_queue()
@@ -237,7 +242,7 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
 
         # The maximum BSON document size is 16 megabytes.
         self.server.response['get.data'] = 'x' * (1024 * 1024 * 17)
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         self.setup_cache(bot, use_compression=False)
         bot.cache.clear()
         bot.setup_queue()
@@ -256,7 +261,7 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
         config = deepcopy(MONGODB_CONNECTION)
         # Set port that would go as **kwargs into MongoClient()
         MONGODB_CONNECTION.setdefault('port', 27017)
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         bot.setup_cache(backend='mongo', **config)
 
 
@@ -273,7 +278,7 @@ class SpiderMysqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
             def task_page(self, grab, task):
                 pass
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         self.setup_cache(bot)
         bot.cache.cursor.execute('begin')
         bot.cache.cursor.execute('DROP TABLE cache')
@@ -296,7 +301,7 @@ class SpiderPostgresqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
             def task_page(self, grab, task):
                 pass
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         self.setup_cache(bot)
         bot.cache.cursor.execute('begin')
         bot.cache.cursor.execute('DROP TABLE cache')

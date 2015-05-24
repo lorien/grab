@@ -7,7 +7,7 @@ import mock
 import sys
 
 from test.util import TMP_DIR
-from test.util import BaseGrabTestCase
+from test.util import BaseGrabTestCase, build_spider, multiprocess_mode
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
@@ -20,7 +20,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             pass
 
         fh, path = mkstemp()
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         bot.add_item('foo', 'bar')
         bot.add_item('foo2', 'bar2')
         bot.save_list('foo', path)
@@ -33,7 +33,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             pass
 
         fh, path = mkstemp()
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         bot.add_item('foo', {'key': 3})
         bot.save_list('foo', path)
         self.assertTrue('{"key": 3}' in open(path).read())
@@ -44,7 +44,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         class TestSpider(Spider):
             pass
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         self.assertRaises(KeyError, bot.timer.stop, 'zzz')
 
     def test_counters_and_collections(self):
@@ -55,14 +55,18 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 self.stat.logging_period = 0
                 self.stat.inc()
 
-            def task_page(self, grab, task):
+            def task_page_valid(self, grab, task):
+                self.stat.inc()
+
+            def task_page_fail(self, grab, task):
                 1/0
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         bot.setup_queue()
-        bot.add_task(Task('page', url=self.server.get_url()))
+        bot.add_task(Task('page_valid', url=self.server.get_url()))
+        bot.add_task(Task('page_fail', url=self.server.get_url()))
         bot.run()
-        self.assertEqual(1, bot.stat.counters[DEFAULT_COUNTER_KEY])
+        self.assertEqual(2, bot.stat.counters[DEFAULT_COUNTER_KEY])
         self.assertEqual(1, len(bot.stat.collections['fatal']))
 
     def test_render_stats(self):
@@ -74,7 +78,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def task_page(self, grab, task):
                 pass
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()

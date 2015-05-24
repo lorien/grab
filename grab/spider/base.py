@@ -16,8 +16,8 @@ import six
 import os
 from weblib import metric
 from contextlib import contextmanager
-from multiprocessing import Process, Event, Queue
 from traceback import format_exc
+import multiprocessing
 
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
@@ -139,6 +139,9 @@ class Spider(object):
                  parser_result_queue=None,
                  waiting_shutdown_event=None,
                  shutdown_event=None,
+                 multiprocess=False,
+                 parser_pool_size=None,
+                 parser_mode=False,
                  ):
         """
         Arguments:
@@ -163,10 +166,16 @@ class Spider(object):
         """
 
         # MP:
+        self.multiprocess = multiprocess
         self.network_result_queue = network_result_queue
         self.parser_result_queue = parser_result_queue
         self.waiting_shutdown_event = waiting_shutdown_event
         self.shutdown_event = shutdown_event
+        if parser_pool_size is not None:
+            self.parser_pool_size = parser_pool_size
+        else:
+            self.parser_pool_size = multiprocessing.cpu_count()
+        self.parser_mode = parser_mode
 
         self.stat = Stat()
         self.timer = Timer()
@@ -252,6 +261,12 @@ class Spider(object):
         """
         Add task to the task queue.
         """
+
+        # MP:
+        # ***
+        if self.parser_mode:
+            self.parser_result_queue.put(task)
+            return
 
         if self.taskq is None:
             raise SpiderMisuseError('You should configure task queue before '
@@ -387,7 +402,7 @@ class Spider(object):
     def render_timing(self):
         out = ['Timers:']
         out.append('  DOM: %.3f' % GLOBAL_STATE['dom_build_time'])
-        time_items = [(x, y) for x, y in self.stat.timers.items()]
+        time_items = [(x, y) for x, y in self.timer.timers.items()]
         time_items = sorted(time_items, key=lambda x: x[1])
         for time_item in time_items:
             out.append('  %s: %.03f' % time_item)
@@ -402,6 +417,18 @@ class Spider(object):
         You can do additional spider customization here
         before it has started working. Simply redefine
         this method in your Spider class.
+        """
+
+
+    def prepare_parser(self):
+        """
+        You can do additional spider customization here
+        before it has started working. Simply redefine
+        this method in your Spider class.
+
+        This method is called only from Spider working in parser mode
+        that, in turn, is spawned automatically by main spider proces
+        working in multiprocess mode.
         """
 
     def shutdown(self):
@@ -646,8 +673,10 @@ class Spider(object):
         self.stat.collect('fatal', '%s|%s|%s|%s' % (
             func_name, ex.__class__.__name__, ex_str, task_url))
         if isinstance(ex, FatalError):
-            raise FatalError()
-            #raise
+            #raise FatalError()
+            #six.reraise(FatalError, ex)
+            #logger.error(ex.tb)
+            raise ex
 
     def find_data_handler(self, data):
         try:
@@ -692,23 +721,52 @@ class Spider(object):
     '''
 
     def run_parser(self):
-        while True:
-            try:
-                result = self.network_result_queue.get(True, 0.1)
-            except queue.Empty:
-                logger_verbose.debug('Network result queue is empty')
-                self.waiting_shutdown_event.set()
-                if self.shutdown_event.is_set():
-                    logger_verbose.debug('Got shutdown event')
-                    return
-            else:
-                if self.waiting_shutdown_event.is_set():
-                    self.waiting_shutdown_event.clear()
-                print(result['grab'].config['url'])
-                print(result['task'].name)
-                handler = self.find_task_handler(result['task'])
-                self.process_network_result_with_handler_mp(
-                    result, handler)
+        """
+        Main work cycle of spider process working in parser-mode.
+        """
+        # Use Stat instance that does not print any logging messages
+        # Do nothing in semi-multiprocessing mode (when parser mode is False)
+        if self.parser_mode:
+            self.stat = Stat(logging_period=None)
+        self.prepare_parser()
+        try:
+            while True:
+                try:
+                    result = self.network_result_queue.get(True, 0.1)
+                except queue.Empty:
+                    logger_verbose.debug('Network result queue is empty')
+                    self.waiting_shutdown_event.set()
+                    if self.shutdown_event.is_set():
+                        logger_verbose.debug('Got shutdown event')
+                        return
+                else:
+                    # Do nothing in semi-multiprocessing mode
+                    # (when parser mode is False)
+                    if self.parser_mode:
+                        self.stat.reset()
+                    if self.waiting_shutdown_event.is_set():
+                        self.waiting_shutdown_event.clear()
+                    try:
+                        handler = self.find_task_handler(result['task'])
+                        self.process_network_result_with_handler_mp(
+                            result, handler)
+                    except NoTaskHandler as ex:
+                        ex.tb = format_exc()
+                        self.parser_result_queue.put((ex, result['task']))
+                    finally:
+                        # Do nothing in semi-multiprocessing mode
+                        # (when parser mode is False)
+                        if not self.parser_mode:
+                            pass
+                        else:
+                            data = {
+                                'type': 'stat',
+                                'counters': self.stat.counters,
+                                'collections': self.stat.collections,
+                            }
+                            self.parser_result_queue.put((data, result['task']))
+        finally:
+            self.waiting_shutdown_event.set()
 
 
     def process_network_result_with_handler_mp(self, result, handler):
@@ -800,9 +858,9 @@ class Spider(object):
         # Update traffic statistics
         if res['grab'] and res['grab'].response:
             resp = res['grab'].response
-            self.stat.timers['network-name-lookup'] += resp.name_lookup_time
-            self.stat.timers['network-connect'] += resp.connect_time
-            self.stat.timers['network-total'] += resp.total_time
+            self.timer.inc_timer('network-name-lookup', resp.name_lookup_time)
+            self.timer.inc_timer('network-connect', resp.connect_time)
+            self.timer.inc_timer('network-total', resp.total_time)
             if from_cache:
                 self.stat.inc('spider:download-size-with-cache',
                               resp.download_size)
@@ -860,6 +918,36 @@ class Spider(object):
                             return True
         return False
 
+    def start_parser_process(self, network_result_queue, parser_result_queue,
+                             shutdown_event):
+        if self.multiprocess:
+            from multiprocessing import Process, Event
+        else:
+            from multiprocessing.dummy import Process, Event
+        waiting_shutdown_event = Event()
+        if self.multiprocess:
+            bot = self.__class__(
+                network_result_queue=network_result_queue,
+                parser_result_queue=parser_result_queue,
+                waiting_shutdown_event=waiting_shutdown_event,
+                shutdown_event=shutdown_event,
+                parser_mode=True)
+        else:
+            # In non-multiprocess mode we start `run_process`
+            # method in new semi-process (actually it is a thread)
+            # Because the use `run_process` of main spider instance
+            # all changes made in handlers are applied to main
+            # spider instance, that allows to suppport deprecated
+            # spiders that do not know about multiprocessing mode
+            bot = self
+            self.network_result_queue = network_result_queue
+            self.parser_result_queue = parser_result_queue
+            self.waiting_shutdown_event = waiting_shutdown_event
+            self.shutdown_event = shutdown_event
+        proc = Process(target=bot.run_parser)
+        proc.start()
+        return waiting_shutdown_event, proc
+
     def run(self):
         """
         Main method. All work is done here.
@@ -869,8 +957,9 @@ class Spider(object):
         
         # MP:
         # ***
-        compat_mode = True
-        if compat_mode:
+        if self.multiprocess:
+            from multiprocessing import Process, Event, Queue
+        else:
             from multiprocessing.dummy import Process, Event, Queue
         network_result_queue = Queue()
         network_result_queue_limit = self.thread_number * 2
@@ -878,29 +967,18 @@ class Spider(object):
         parser_result_queue = Queue()
 
         shutdown_event = Event()
-        parser_pool_size = 2
-        if compat_mode:
-            parser_pool_size = 1
+        if not self.multiprocess:
+            self.parser_pool_size = 1
         parser_pool = []
-        for x in range(parser_pool_size):
-            waiting_shutdown_event = Event()
-            if compat_mode:
-                bot = self
-                self.network_result_queue = network_result_queue
-                self.parser_result_queue = parser_result_queue
-                self.waiting_shutdown_event = waiting_shutdown_event
-                self.shutdown_event = shutdown_event
-            else:
-                bot = self.__class__(
-                    network_result_queue=network_result_queue,
-                    parser_result_queue=parser_result_queue,
-                    waiting_shutdown_event=waiting_shutdown_event,
-                    shutdown_event=shutdown_event)
-            proc = Process(target=bot.run_parser)
-            proc.start()
+        for x in range(self.parser_pool_size):
+            waiting_shutdown_event, proc = self.start_parser_process(
+                network_result_queue,
+                parser_result_queue,
+                shutdown_event,
+            )
             parser_pool.append({
-                'proc': proc,
                 'waiting_shutdown_event': waiting_shutdown_event,
+                'proc': proc,
             })
 
         try:
@@ -960,6 +1038,13 @@ class Spider(object):
                             if not self.task_generator_enabled:
                                 shutdown_event.set()
                                 for proc in parser_pool:
+                                    if self.multiprocess:
+                                        logger.debug(
+                                            'Joining %s parser process'
+                                            % proc['proc'].pid)
+                                    else:
+                                        logger.debug('Joining %s parser thread'
+                                                     % proc['proc'].name)
                                     proc['proc'].join()
                                 self.stop()
                         else:
@@ -1053,15 +1138,39 @@ class Spider(object):
                     else:
                         self.process_handler_result(p_res, p_task)
 
+                if not shutdown_event.is_set():
+                    for proc in list(parser_pool):
+                        if not proc['proc'].is_alive():
+                            self.stat.inc('parser-process-restore')
+                            logger.debug('Restoring died parser process')
+                            evnt, new_proc = self.start_parser_process(
+                                network_result_queue,
+                                parser_result_queue,
+                                shutdown_event,
+                            )
+                            parser_pool.append({
+                                'waiting_shutdown_event': evnt,
+                                'proc': new_proc,
+                            })
+                            parser_pool.remove(proc)
+
             logger_verbose.debug('Work done')
         except KeyboardInterrupt:
-            print('\nGot ^C signal in process %d. Stopping.' % os.getpid())
+            logger.info('\nGot ^C signal in process %d. Stopping.'
+                        % os.getpid())
             self.interrupted = True
             raise
         finally:
             # This code is executed when main cycles is breaked
             self.timer.stop('total')
             self.shutdown()
+
+            # Stop parser processes
+            shutdown_event.set()
+            for proc in parser_pool:
+                proc['proc'].join()
+
+            logger.debug('Main process [pid=%s]: work done' % os.getpid())
 
     def log_failed_network_result(self, res):
         # Log the error
@@ -1122,6 +1231,15 @@ class Spider(object):
             handler = self.find_task_handler(task)
             handler_name = getattr(handler, '__name__', 'NONE')
             self.process_handler_error(handler_name, result, task)
+        elif isinstance(result, dict):
+            if result.get('type') == 'stat':
+                for name, count in result['counters'].items():
+                    self.stat.inc(name, count)
+                for name, items in result['collections'].items():
+                    for item in items:
+                        self.stat.collect(name, item)
+            else:
+                raise SpiderError('Unknown result type: %s' % result)
         else:
             raise SpiderError('Unknown result type: %s' % result)
 
@@ -1172,14 +1290,14 @@ class Spider(object):
     grab_config = property(get_grab_config, set_grab_config)
 
     def setup_grab(self, **kwargs):
-        logging.error('Method `Grab::setup_grab` is deprecated. '
-                      'Define `Grab::create_grab_instance` or '
-                      'Grab::update_grab_instance` methods in your '
-                      'Spider sub-class.')
+        logger.error('Method `Grab::setup_grab` is deprecated. '
+                     'Define `Grab::create_grab_instance` or '
+                     'Grab::update_grab_instance` methods in your '
+                     'Spider sub-class.')
         self.grab_config.update(**kwargs)
 
     def valid_response_code(self, code, task):
-        logging.error('Method `Grab::valid_response_code` is deprecated. '
-                      'Use `Grab::is_valid_network_response_code` method or '
-                      '`Grab::is_valid_network_result` method.')
+        logger.error('Method `Grab::valid_response_code` is deprecated. '
+                     'Use `Grab::is_valid_network_response_code` method or '
+                     '`Grab::is_valid_network_result` method.')
         return self.is_valid_network_response_code(code, task)

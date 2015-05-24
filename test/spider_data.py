@@ -1,6 +1,6 @@
 from grab.spider import Spider, Task, Data, NoDataHandler
 
-from test.util import BaseGrabTestCase
+from test.util import BaseGrabTestCase, build_spider, multiprocess_mode
 
 
 class TestSpider(BaseGrabTestCase):
@@ -12,7 +12,7 @@ class TestSpider(BaseGrabTestCase):
             def task_page(self, grab, task):
                 yield Data('foo', num=1)
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         self.assertRaises(NoDataHandler, bot.run)
@@ -25,7 +25,7 @@ class TestSpider(BaseGrabTestCase):
             def data_foo(self, num):
                 1/0
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
@@ -42,7 +42,7 @@ class TestSpider(BaseGrabTestCase):
             def data_foo(self, number):
                 self.data_processed.append(number)
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
@@ -61,7 +61,7 @@ class TestSpider(BaseGrabTestCase):
                 self.data_processed.append(two)
                 self.data_processed.append(kwargs)
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
@@ -95,7 +95,7 @@ class TestSpider(BaseGrabTestCase):
                     yield Task('page', url=server.get_url(),
                                count=count + 1)
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()

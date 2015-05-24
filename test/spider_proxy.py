@@ -3,7 +3,8 @@ import six
 
 from grab import Grab
 from grab.spider import Spider, Task
-from test.util import BaseGrabTestCase, TEST_SERVER_PORT
+from test.util import (BaseGrabTestCase, TEST_SERVER_PORT, multiprocess_mode,
+                       build_spider)
 from grab.proxylist import BaseProxySource, Proxy
 
 ADDRESS = '127.0.0.1'
@@ -35,7 +36,7 @@ class TestSpider(BaseGrabTestCase):
         open('/tmp/__proxy.txt', 'w').write(content)
 
         # Simple test, one task
-        bot = SimpleSpider(thread_number=1)
+        bot = build_spider(SimpleSpider, thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
         bot.setup_queue()
         bot.add_task(Task('baz', grab=Grab(url='http://yandex.ru',
@@ -46,7 +47,7 @@ class TestSpider(BaseGrabTestCase):
         self.assertTrue(len(bot.ports) == 1)
 
         # By default auto_change is True
-        bot = SimpleSpider(thread_number=1)
+        bot = build_spider(SimpleSpider, thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
         bot.setup_queue()
         for x in six.moves.range(10):
@@ -57,7 +58,7 @@ class TestSpider(BaseGrabTestCase):
         self.assertTrue(len(bot.ports) > 1)
 
         # DO the same test with load_proxylist method
-        bot = SimpleSpider(thread_number=1)
+        bot = build_spider(SimpleSpider, thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
         bot.setup_queue()
         for x in six.moves.range(10):
@@ -69,7 +70,7 @@ class TestSpider(BaseGrabTestCase):
 
         # Disable auto_change
         # By default auto_init is True
-        bot = SimpleSpider(thread_number=1)
+        bot = build_spider(SimpleSpider, thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file', auto_change=False)
         bot.setup_queue()
         for x in six.moves.range(10):
@@ -82,7 +83,7 @@ class TestSpider(BaseGrabTestCase):
         # Disable auto_change
         # Disable auto_init
         # Proxylist will not be used by default
-        bot = SimpleSpider(thread_number=1)
+        bot = build_spider(SimpleSpider, thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file',
                            auto_change=False, auto_init=False)
         bot.setup_queue()
@@ -97,7 +98,7 @@ class TestSpider(BaseGrabTestCase):
 
     def test_setup_grab(self):
         # Simple test, one task
-        bot = SimpleSpider(thread_number=1)
+        bot = build_spider(SimpleSpider, thread_number=1)
         bot.setup_grab(proxy=PROXY1)
         bot.setup_queue()
         bot.add_task(Task('baz', 'http://yandex.ru'))
@@ -113,7 +114,7 @@ class TestSpider(BaseGrabTestCase):
         # If proxy is configured with both methods
         # (setup_grab and load_proxylist)
         # then proxylist has priority
-        bot = SimpleSpider(thread_number=1)
+        bot = build_spider(SimpleSpider, thread_number=1)
         bot.load_proxylist('/tmp/__proxy.txt', 'text_file')
         bot.setup_queue()
         for x in six.moves.range(10):
@@ -125,6 +126,7 @@ class TestSpider(BaseGrabTestCase):
         self.assertTrue(EXTRA_PORT2 not in bot.ports)
     """
 
+    @multiprocess_mode(False)
     def test_spider_custom_proxy_source(self):
         class TestSpider(Spider):
             def prepare(self):
@@ -141,7 +143,7 @@ class TestSpider(BaseGrabTestCase):
                 ]
 
 
-        bot = TestSpider()
+        bot = build_spider(TestSpider)
         bot.setup_queue()
         bot.load_proxylist(CustomProxySource())
         bot.add_task(Task('page', url='http://yandex.ru/'))

@@ -1,7 +1,7 @@
 from grab.spider import Spider, Task
 import logging
 
-from test.util import BaseGrabTestCase
+from test.util import BaseGrabTestCase, multiprocess_mode, build_spider
 
 # That URLs breaks Grab's URL normalization process
 # with error "label empty or too long"
@@ -22,7 +22,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
             def task_generator(self):
                 yield Task('page', url=INVALID_URL)
 
-        bot = SomeSpider()
+        bot = build_spider(SomeSpider)
         bot.run()
 
     def test_redirect_with_invalid_url(self):
@@ -41,5 +41,5 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         self.server.response_once['headers'] = [
             ('Location', INVALID_URL),
         ]
-        bot = SomeSpider(network_try_limit=1)
+        bot = build_spider(SomeSpider, network_try_limit=1)
         bot.run()
