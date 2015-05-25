@@ -4,10 +4,10 @@ python: 2.7
 
 env:
   - TOX_ENV=py27
-  - TOX_ENV=py23
+  - TOX_ENV=py33
   - TOX_ENV=py34
   - TOX_ENV=py27-mp
-  - TOX_ENV=py23-mp
+  - TOX_ENV=py33-mp
   - TOX_ENV=py34-mp
 
 services:
