@@ -35,18 +35,22 @@ system
 watch
 """.strip().splitlines()
 
-
 class ToolsDeprecatedTestCase(TestCase):
     def setUp(self):
         self.hook = CustomImporter()
 
-    def test_import(self):
+    def test_import_traditional_way(self):
+        for mod_name in MODULES:
+            path = 'grab.tools.%s' % mod_name
+            import_module(path)
+
+    def test_hook(self):
         for mod_name in MODULES:
             path = 'grab.tools.%s' % mod_name
             self.hook.find_module(path)
             self.hook.load_module(path)
 
-    def test_hook(self):
+    def test_hook2(self):
         self.assertIsInstance(self.hook.find_module('grab.tools.yandex'),
                               CustomImporter)
         self.assertEqual(self.hook.find_module('grab.spider'),
@@ -58,3 +62,4 @@ class ToolsDeprecatedTestCase(TestCase):
         self.hook.find_module('grab.tools.module')
         self.assertRaises(ImportError, self.hook.load_module,
                           'grab.tools.module')
+
