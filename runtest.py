@@ -76,6 +76,7 @@ SPIDER_TEST_LIST = (
     'test.spider_cache',
     'test.spider_data',
     'test.spider_stat',
+    'test.spider_multiprocess',
 )
 
 
