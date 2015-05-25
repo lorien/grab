@@ -1,7 +1,7 @@
 from grab.spider import Spider, Task
 import logging
 
-from test.util import BaseGrabTestCase, multiprocess_mode, build_spider
+from test.util import BaseGrabTestCase, build_spider
 
 # That URLs breaks Grab's URL normalization process
 # with error "label empty or too long"

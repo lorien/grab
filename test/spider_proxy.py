@@ -3,8 +3,7 @@ import six
 
 from grab import Grab
 from grab.spider import Spider, Task
-from test.util import (BaseGrabTestCase, TEST_SERVER_PORT, multiprocess_mode,
-                       build_spider)
+from test.util import BaseGrabTestCase, TEST_SERVER_PORT, build_spider
 from grab.proxylist import BaseProxySource, Proxy
 
 ADDRESS = '127.0.0.1'
@@ -16,11 +15,9 @@ PROXY3 = '%s:%d' % (ADDRESS, EXTRA_PORT2)
 
 
 class SimpleSpider(Spider):
-    def prepare(self):
-        self.ports = set()
-
     def task_baz(self, grab, task):
-        self.ports.add(int(grab.response.headers.get('Listen-Port', 0)))
+        self.stat.collect('ports',
+                          int(grab.response.headers.get('Listen-Port', 0)))
 
 
 class TestSpider(BaseGrabTestCase):
@@ -30,7 +27,6 @@ class TestSpider(BaseGrabTestCase):
                                 extra_ports=[EXTRA_PORT1, EXTRA_PORT2])
         cls.server.start()
 
-    """
     def test_setup_proxylist(self):
         content = '%s\n%s\n%s' % (PROXY1, PROXY2, PROXY3)
         open('/tmp/__proxy.txt', 'w').write(content)
@@ -44,7 +40,7 @@ class TestSpider(BaseGrabTestCase):
         bot.run()
 
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
-        self.assertTrue(len(bot.ports) == 1)
+        self.assertEqual(1, len(set(bot.stat.collections['ports'])))
 
         # By default auto_change is True
         bot = build_spider(SimpleSpider, thread_number=1)
@@ -55,7 +51,7 @@ class TestSpider(BaseGrabTestCase):
         bot.run()
 
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
-        self.assertTrue(len(bot.ports) > 1)
+        self.assertTrue(len(set(bot.stat.collections['ports'])) > 1)
 
         # DO the same test with load_proxylist method
         bot = build_spider(SimpleSpider, thread_number=1)
@@ -66,7 +62,7 @@ class TestSpider(BaseGrabTestCase):
         bot.run()
 
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
-        self.assertTrue(len(bot.ports) > 1)
+        self.assertTrue(len(set(bot.stat.collections['ports'])) > 1)
 
         # Disable auto_change
         # By default auto_init is True
@@ -78,7 +74,7 @@ class TestSpider(BaseGrabTestCase):
         bot.run()
 
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
-        self.assertTrue(len(bot.ports) == 1)
+        self.assertEqual(1, len(set(bot.stat.collections['ports'])))
 
         # Disable auto_change
         # Disable auto_init
@@ -93,8 +89,8 @@ class TestSpider(BaseGrabTestCase):
 
         self.assertEqual(self.server.request['headers'].get('host'),
                          '%s:%s' % (ADDRESS, self.server.port))
-        self.assertTrue(len(bot.ports) == 1)
-        self.assertEqual(list(bot.ports)[0], self.server.port)
+        self.assertEqual(1, len(set(bot.stat.collections['ports'])))
+        self.assertEqual(bot.stat.collections['ports'][0], self.server.port)
 
     def test_setup_grab(self):
         # Simple test, one task
@@ -105,8 +101,9 @@ class TestSpider(BaseGrabTestCase):
         bot.run()
 
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
-        self.assertEqual(bot.ports, set([self.server.port]))
-        self.assertTrue(len(bot.ports) == 1)
+        self.assertEqual(set(bot.stat.collections['ports']),
+                         set([self.server.port]))
+        self.assertEqual(1, len(set(bot.stat.collections['ports'])))
 
         content = '%s\n%s' % (PROXY1, PROXY2)
         open('/tmp/__proxy.txt', 'w').write(content)
@@ -123,18 +120,14 @@ class TestSpider(BaseGrabTestCase):
         bot.run()
 
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
-        self.assertTrue(EXTRA_PORT2 not in bot.ports)
-    """
+        self.assertTrue(EXTRA_PORT2 not in bot.stat.collections['ports'])
+        self.assertTrue(EXTRA_PORT2 not in set(bot.stat.collections['ports']))
 
-    @multiprocess_mode(False)
     def test_spider_custom_proxy_source(self):
         class TestSpider(Spider):
-            def prepare(self):
-                self.ports = set()
-
             def task_page(self, grab, task):
-                self.ports.add(int(grab.response.headers.get('Listen-Port', 0)))
-
+                self.stat.collect(
+                    'ports', int(grab.response.headers.get('Listen-Port', 0)))
 
         class CustomProxySource(BaseProxySource):
             def load(self):
@@ -150,4 +143,5 @@ class TestSpider(BaseGrabTestCase):
         bot.run()
 
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
-        self.assertEqual(bot.ports, set([TEST_SERVER_PORT]))
+        self.assertEqual(set(bot.stat.collections['ports']),
+                         set([TEST_SERVER_PORT]))

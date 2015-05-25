@@ -111,14 +111,10 @@ class TestSpider(BaseGrabTestCase):
         bot.add_task(Task('page', url=self.server.get_url()))
         self.assertRaises(NoTaskHandler, bot.run)
 
-    @multiprocess_mode(False)
     def test_task_raw(self):
         class TestSpider(Spider):
-            def prepare(self):
-                self.codes = []
-
             def task_page(self, grab, task):
-                self.codes.append(grab.response.code)
+                self.stat.collect('codes', grab.response.code)
 
         self.server.response['code'] = 502
 
@@ -127,16 +123,16 @@ class TestSpider(BaseGrabTestCase):
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
-        self.assertEqual(0, len(bot.codes))
+        self.assertEqual(0, len(bot.stat.collections['codes']))
 
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url(), raw=True))
         bot.add_task(Task('page', url=self.server.get_url(), raw=True))
         bot.run()
-        self.assertEqual(2, len(bot.codes))
+        self.assertEqual(2, len(bot.stat.collections['codes']))
 
-    """
+    @multiprocess_mode(False)
     def test_task_callback(self):
         class TestSpider(Spider):
             def task_page(self, grab, task):
@@ -166,7 +162,6 @@ class TestSpider(BaseGrabTestCase):
         bot.run()
         self.assertEqual(['0_handler', '1_func', '1_func', '1_func'],
                          sorted(tokens))
-    """
 
     @multiprocess_mode(False)
     def test_inline_task(self):
@@ -180,11 +175,8 @@ class TestSpider(BaseGrabTestCase):
         server = self.server
 
         class TestSpider(Spider):
-            calls = []
-            responses = []
-
             def add_response(self, grab):
-                self.responses.append(grab.doc.unicode_body())
+                self.stat.collect('responses', grab.doc.unicode_body())
 
             def task_generator(self):
                 url = server.get_url('/?foo=start')
@@ -197,12 +189,12 @@ class TestSpider(BaseGrabTestCase):
                     grab.setup(url=url)
                     grab = yield Task(grab=grab)
                     self.add_response(grab)
-                    self.calls.append('subinline%s' % x)
+                    self.stat.collect('calls', 'subinline%s' % x)
 
             @inline_task
             def task_inline(self, grab, task):
                 self.add_response(grab)
-                self.calls.append('generator')
+                self.stat.collect('calls', 'generator')
 
                 for x in six.moves.range(3):
                     url = server.get_url('/?foo=%s' % x)
@@ -210,7 +202,7 @@ class TestSpider(BaseGrabTestCase):
                     grab = yield Task(grab=grab)
 
                     self.add_response(grab)
-                    self.calls.append('inline%s' % x)
+                    self.stat.collect('calls', 'inline%s' % x)
 
                     grab = yield self.subroutine_task(grab)
                     # In this case the grab body will be the same
@@ -222,14 +214,14 @@ class TestSpider(BaseGrabTestCase):
 
             def task_yield(self, grab, task):
                 self.add_response(grab)
-                self.calls.append('yield')
+                self.stat.collect('calls', 'yield')
 
                 url = server.get_url('/?foo=end')
                 yield Task('end', url=url)
 
             def task_end(self, grab, task):
                 self.add_response(grab)
-                self.calls.append('end')
+                self.stat.collect('calls', 'end')
 
         bot = build_spider(TestSpider, )
         bot.run()
@@ -242,7 +234,7 @@ class TestSpider(BaseGrabTestCase):
                           '/?foo=2',
                           '/?foo=subtask0', '/?foo=subtask1', '/?foo=subtask1',
                           '/?foo=yield', '/?foo=end'],
-                         bot.responses)
+                         bot.stat.collections['responses'])
         self.assertEqual(['generator',
                           'inline0',
                           'subinline0', 'subinline1',
@@ -251,7 +243,7 @@ class TestSpider(BaseGrabTestCase):
                           'inline2',
                           'subinline0', 'subinline1',
                           'yield', 'end'],
-                         bot.calls)
+                         bot.stat.collections['calls'])
 
     def test_task_url_and_grab_options(self):
         class TestSpider(Spider):
@@ -340,14 +332,10 @@ class TestSpider(BaseGrabTestCase):
         self.assertEqual(t2.get_fallback_handler(bot), bot.task_bar_fallback)
         self.assertEqual(t3.get_fallback_handler(bot), None)
 
-    @multiprocess_mode(False)
     def test_update_grab_instance(self):
         class TestSpider(Spider):
             def update_grab_instance(self, grab):
                 grab.setup(timeout=77)
-
-            def prepare(self):
-                self.points = set()
 
             def task_generator(self):
                 yield Task('page', url=self.meta['server'].get_url())
@@ -355,7 +343,7 @@ class TestSpider(BaseGrabTestCase):
                                              timeout=1))
 
             def task_page(self, grab, task):
-                self.points.add(grab.config['timeout'])
+                self.stat.collect('points', grab.config['timeout'])
 
         bot = build_spider(TestSpider, meta={'server': self.server})
         bot.setup_queue()
@@ -363,9 +351,8 @@ class TestSpider(BaseGrabTestCase):
         bot.add_task(Task('page', grab=Grab(url=self.server.get_url(),
                                             timeout=1)))
         bot.run()
-        self.assertEqual(set([77]), bot.points)
+        self.assertEqual(set([77]), set(bot.stat.collections['points']))
 
-    @multiprocess_mode(False)
     def test_create_grab_instance(self):
         class TestSpider(Spider):
             def create_grab_instance(self, **kwargs):
@@ -373,16 +360,13 @@ class TestSpider(BaseGrabTestCase):
                 grab.setup(timeout=77)
                 return grab
 
-            def prepare(self):
-                self.points = set()
-
             def task_generator(self):
                 yield Task('page', url=self.meta['server'].get_url())
                 yield Task('page', grab=Grab(url=self.meta['server'].get_url(),
                                              timeout=76))
 
             def task_page(self, grab, task):
-                self.points.add(grab.config['timeout'])
+                self.stat.collect('points', grab.config['timeout'])
 
         bot = build_spider(TestSpider, meta={'server': self.server})
         bot.setup_queue()
@@ -390,7 +374,8 @@ class TestSpider(BaseGrabTestCase):
         bot.add_task(Task('page', grab=Grab(url=self.server.get_url(),
                                             timeout=75)))
         bot.run()
-        self.assertEqual(set([77, 76, 75]), bot.points)
+        self.assertEqual(set([77, 76, 75]),
+                         set(bot.stat.collections['points']))
 
     def test_add_task_invalid_url_no_error(self):
         class TestSpider(Spider):
@@ -417,7 +402,6 @@ class TestSpider(BaseGrabTestCase):
         bot.add_task(Task('page', url='http://example.com/'))
         self.assertEqual(1, bot.taskq.size())
 
-    @multiprocess_mode(False)
     def test_multiple_internal_worker_error(self):
         class TestSpider(Spider):
             def process_network_result_with_handler_mp(*args, **kwargs):
@@ -431,4 +415,4 @@ class TestSpider(BaseGrabTestCase):
         for x in range(5):
             bot.add_task(Task('page', url='http://ya.ru/'))
         bot.run()
-        self.assertEqual(4, bot.stat.counters['parser-process-restore'])
+        self.assertTrue(1 < bot.stat.counters['parser-process-restore'])
