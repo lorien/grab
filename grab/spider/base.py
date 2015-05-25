@@ -931,7 +931,8 @@ class Spider(object):
                 parser_result_queue=parser_result_queue,
                 waiting_shutdown_event=waiting_shutdown_event,
                 shutdown_event=shutdown_event,
-                parser_mode=True)
+                parser_mode=True,
+                meta=self.meta)
         else:
             # In non-multiprocess mode we start `run_process`
             # method in new semi-process (actually it is a thread)
