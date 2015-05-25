@@ -1,6 +1,6 @@
 from grab.spider import Spider, Task, Data, NoDataHandler
 
-from test.util import BaseGrabTestCase, build_spider, multiprocess_mode
+from test.util import BaseGrabTestCase, build_spider
 
 
 class TestSpider(BaseGrabTestCase):

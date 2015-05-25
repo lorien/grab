@@ -5,71 +5,70 @@ import os
 import signal
 import mock
 
-from test.util import BaseGrabTestCase, build_spider, multiprocess_mode
+from test.util import BaseGrabTestCase, build_spider
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
     class SimpleSpider(Spider):
         def task_baz(self, grab, task):
-            self.SAVED_ITEM = grab.response.body
+            self.stat.collect('SAVED_ITEM', grab.response.body)
 
     def setUp(self):
         self.server.reset()
 
-    @multiprocess_mode(False)
     def test_spider(self):
         self.server.response['get.data'] = 'Hello spider!'
         self.server.response['sleep'] = 0
-        sp = build_spider(self.SimpleSpider)
-        sp.setup_queue()
-        sp.add_task(Task('baz', self.server.get_url()))
-        sp.run()
-        self.assertEqual(b'Hello spider!', sp.SAVED_ITEM)
+        bot = build_spider(self.SimpleSpider)
+        bot.setup_queue()
+        bot.add_task(Task('baz', self.server.get_url()))
+        bot.run()
+        self.assertEqual(b'Hello spider!',
+                         bot.stat.collections['SAVED_ITEM'][0])
 
     def test_network_limit(self):
         self.server.response['get.data'] = 'Hello spider!'
         self.server.response['sleep'] = 1.1
 
-        sp = build_spider(self.SimpleSpider, network_try_limit=1)
-        sp.setup_queue()
-        sp.setup_grab(connect_timeout=1, timeout=1)
-        sp.add_task(Task('baz', self.server.get_url()))
-        sp.run()
-        self.assertEqual(sp.stat.counters['spider:request-network'], 1)
+        bot = build_spider(self.SimpleSpider, network_try_limit=1)
+        bot.setup_queue()
+        bot.setup_grab(connect_timeout=1, timeout=1)
+        bot.add_task(Task('baz', self.server.get_url()))
+        bot.run()
+        self.assertEqual(bot.stat.counters['spider:request-network'], 1)
 
-        sp = build_spider(self.SimpleSpider, network_try_limit=2)
-        sp.setup_queue()
-        sp.setup_grab(connect_timeout=1, timeout=1)
-        sp.add_task(Task('baz', self.server.get_url()))
-        sp.run()
-        self.assertEqual(sp.stat.counters['spider:request-network'], 2)
+        bot = build_spider(self.SimpleSpider, network_try_limit=2)
+        bot.setup_queue()
+        bot.setup_grab(connect_timeout=1, timeout=1)
+        bot.add_task(Task('baz', self.server.get_url()))
+        bot.run()
+        self.assertEqual(bot.stat.counters['spider:request-network'], 2)
 
     def test_task_limit(self):
         self.server.response['get.data'] = 'Hello spider!'
         self.server.response['sleep'] = 1.1
 
-        sp = build_spider(self.SimpleSpider, network_try_limit=1)
-        sp.setup_grab(connect_timeout=1, timeout=1)
-        sp.setup_queue()
-        sp.add_task(Task('baz', self.server.get_url()))
-        sp.run()
-        self.assertEqual(sp.stat.counters['spider:task-baz'], 1)
+        bot = build_spider(self.SimpleSpider, network_try_limit=1)
+        bot.setup_grab(connect_timeout=1, timeout=1)
+        bot.setup_queue()
+        bot.add_task(Task('baz', self.server.get_url()))
+        bot.run()
+        self.assertEqual(bot.stat.counters['spider:task-baz'], 1)
 
-        sp = build_spider(self.SimpleSpider, task_try_limit=2)
-        sp.setup_queue()
-        sp.add_task(Task('baz', self.server.get_url(), task_try_count=3))
-        sp.run()
-        self.assertEqual(sp.stat.counters['spider:request-network'], 0)
+        bot = build_spider(self.SimpleSpider, task_try_limit=2)
+        bot.setup_queue()
+        bot.add_task(Task('baz', self.server.get_url(), task_try_count=3))
+        bot.run()
+        self.assertEqual(bot.stat.counters['spider:request-network'], 0)
 
-    @multiprocess_mode(False)
     def test_task_retry(self):
         self.server.response['get.data'] = 'xxx'
         self.server.response_once['code'] = 403
-        sp = build_spider(self.SimpleSpider)
-        sp.setup_queue()
-        sp.add_task(Task('baz', self.server.get_url()))
-        sp.run()
-        self.assertEqual(b'xxx', sp.SAVED_ITEM)
+        bot = build_spider(self.SimpleSpider)
+        bot.setup_queue()
+        bot.add_task(Task('baz', self.server.get_url()))
+        bot.run()
+        self.assertEqual(b'xxx', bot.stat.collections['SAVED_ITEM'][0])
 
     def test_setup_grab(self):
         # Mulitple calls to `setup_grab` should accumulate
@@ -81,24 +80,20 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(grab.config['log_dir'], '/tmp')
         self.assertEqual(grab.config['timeout'], 30)
 
-    @multiprocess_mode(False)
     def test_generator(self):
         server = self.server
 
         class TestSpider(Spider):
-            def prepare(self):
-                self.count = 0
-
             def task_generator(self):
                 for x in six.moves.range(1111):
                     yield Task('page', url=server.get_url())
 
             def task_page(self, grab, task):
-                self.count += 1
+                self.stat.inc('count')
 
         bot = build_spider(TestSpider)
         bot.run()
-        self.assertEqual(bot.count, 1111)
+        self.assertEqual(bot.stat.counters['count'], 1111)
 
     def test_get_spider_name(self):
         class TestSpider(Spider):

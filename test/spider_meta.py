@@ -1,5 +1,5 @@
 from grab.spider import Spider
-from test.util import BaseGrabTestCase, multiprocess_mode, build_spider
+from test.util import BaseGrabTestCase, build_spider
 
 
 class SpiderMetaTestCase(BaseGrabTestCase):

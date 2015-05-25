@@ -53,6 +53,7 @@ def build_spider(cls, **kwargs):
     """Builds the Spider instance with default options. Also handles
     `multiprocess` option that is configured globally."""
     kwargs.setdefault('multiprocess', GLOBAL['multiprocess'])
+    kwargs.setdefault('parser_pool_size', 2)
     return cls(**kwargs)
 
 
