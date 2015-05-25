@@ -1,0 +1,56 @@
+environment:
+  matrix:
+    - PYTHON: "C:\\Python27"
+      PYTHON_VERSION: "2.7.8"
+      PYTHON_ARCH: "32"
+      TOX_ENV: "py27"
+
+    - PYTHON: "C:\\Python33"
+      PYTHON_VERSION: "3.3.5"
+      PYTHON_ARCH: "32"
+      TOX_ENV: "py33"
+
+    - PYTHON: "C:\\Python34"
+      PYTHON_VERSION: "3.4.1"
+      PYTHON_ARCH: "32"
+      TOX_ENV: "py34"
+
+    - PYTHON: "C:\\Python27-x64"
+      PYTHON_VERSION: "2.7.8"
+      PYTHON_ARCH: "64"
+      WINDOWS_SDK_VERSION: "v7.0"
+      TOX_ENV: "py27"
+
+    - PYTHON: "C:\\Python33-x64"
+      PYTHON_VERSION: "3.3.5"
+      PYTHON_ARCH: "64"
+      WINDOWS_SDK_VERSION: "v7.1"
+      TOX_ENV: "py33"
+
+    - PYTHON: "C:\\Python34-x64"
+      PYTHON_VERSION: "3.4.1"
+      PYTHON_ARCH: "64"
+      WINDOWS_SDK_VERSION: "v7.1"
+      TOX_ENV: "py34"
+
+#init:
+#  - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
+
+install:
+  - "powershell appveyor\\win_pip_install.ps"
+  - "%PYTHON%/python -m pip install tox"
+
+build:
+  - "cp travis_settings.py test_settings_local.py"
+
+test_script:
+  - "%PYTHON%/python -m tox -e %TOX_ENV%"
+
+#after_test:
+#  - "%WITH_COMPILER% %PYTHON%/python setup.py bdist_wheel"
+
+#artifacts:
+#  - path: dist\*
+
+#on_success:
+#  - TODO: upload the content of dist/*.whl to a public wheelhouse
