@@ -40,7 +40,7 @@ install:
   - "powershell appveyor\\win_pip_install.ps"
   - "%PYTHON%/python -m pip install tox"
 
-build:
+before_test:
   - "cp travis_settings.py test_settings_local.py"
 
 test_script:
