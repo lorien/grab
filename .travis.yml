@@ -1,21 +1,23 @@
 language: python
 
-python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
+python: 2.7
+
+env:
+  - TOX_ENV=py27
+  - TOX_ENV=py23
+  - TOX_ENV=py34
+  - TOX_ENV=py27-mp
+  - TOX_ENV=py23-mp
+  - TOX_ENV=py34-mp
 
 services:
   - mongodb
   - redis-server
-  - mongodb
 
 install:
-  - pip install -r requirements_dev.txt
-  - pip install -r requirements_dev_backend.txt
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
   - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
-  - python setup.py develop
+  - pip install tox
 
 before_script:
   - mysql -e 'create database spider_test'
@@ -25,7 +27,7 @@ script:
     # Override test settings with travis settings 
     - cp travis_settings.py test_settings_local.py
     # Run tests and find out the test coverage
-    - coverage run --source=grab runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
+    - tox -e $TOX_ENV
 
 after_success:
   - coveralls
