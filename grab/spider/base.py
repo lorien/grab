@@ -18,6 +18,7 @@ from weblib import metric
 from contextlib import contextmanager
 from traceback import format_exc
 import multiprocessing
+import threading
 
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
@@ -142,6 +143,8 @@ class Spider(object):
                  multiprocess=False,
                  parser_pool_size=None,
                  parser_mode=False,
+                 # http api
+                 http_api_port=None,
                  ):
         """
         Arguments:
@@ -164,6 +167,9 @@ class Spider(object):
         * taskq=None,
         * newtork_response_queue=None,
         """
+
+        # API:
+        self.http_api_port = http_api_port
 
         # MP:
         self.multiprocess = multiprocess
@@ -547,8 +553,6 @@ class Spider(object):
         """
         Process `self.initial_urls` list and `self.task_generator`
         method.  Generate first portion of tasks.
-
-        TODO: task generator should work in separate OS process
         """
 
         logger_verbose.debug('Processing initial urls')
@@ -698,27 +702,6 @@ class Spider(object):
             if self.is_valid_network_response_code(res_code, res['task']):
                 return True
         return False
-
-    '''
-    def process_network_result_with_handler(self, res, handler):
-        """Apply `handler` function to the network result."""
-        handler_name = getattr(handler, '__name__', 'NONE')
-        try:
-            with self.timer.log_time('response_handler'):
-                with self.timer.log_time('response_handler.%s' % handler_name):
-                    result = handler(res['grab'], res['task'])
-                    if result is None:
-                        pass
-                    else:
-                        for item in result:
-                            self.process_handler_result(item, res['task'])
-        except NoDataHandler as ex:
-            raise
-        except Exception as ex:
-            self.process_handler_error(handler_name, ex, res['task'])
-        else:
-            self.stat.inc('spider:task-%s-ok' % res['task'].name)
-    '''
 
     def run_parser(self):
         """
@@ -949,12 +932,24 @@ class Spider(object):
         proc.start()
         return waiting_shutdown_event, proc
 
+    def start_api_thread(self):
+        from grab.spider.http_api import HttpApiThread
+
+        proc = HttpApiThread(self)
+        proc.start()
+        return proc
+
     def run(self):
         """
         Main method. All work is done here.
         """
         self.timer.start('total')
         self.transport = MulticurlTransport(self.thread_number)
+
+        if self.http_api_port:
+            http_api_proc = self.start_api_thread()
+        else:
+            http_api_proc = None
         
         # MP:
         # ***
@@ -1165,6 +1160,11 @@ class Spider(object):
             # This code is executed when main cycles is breaked
             self.timer.stop('total')
             self.shutdown()
+
+            # Stop HTTP API process
+            if http_api_proc:
+                http_api_proc.server.shutdown()
+                http_api_proc.join()
 
             # Stop parser processes
             shutdown_event.set()

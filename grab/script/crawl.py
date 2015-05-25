@@ -28,6 +28,7 @@ def setup_arg_parser(parser):
     parser.add_argument('--disable-default-logs', action='store_true',
                         default=False)
     parser.add_argument('--settings-module', type=str, default='settings')
+    parser.add_argument('--api-port', type=int, default=None)
 
 
 def get_lock_key(spider_name, lock_key=None, ignore_lock=False,
@@ -70,6 +71,7 @@ def main(spider_name, thread_number=None, slave=False,
          disable_proxy=False, ignore_lock=False,
          disable_report=False,
          disable_default_logs=False,
+         api_port=None,
          *args, **kwargs):
     if disable_default_logs:
         default_logging(propagate_network_logger=network_logs,
@@ -95,6 +97,7 @@ def main(spider_name, thread_number=None, slave=False,
         network_try_limit=None,
         task_try_limit=None,
         args=spider_args,
+        http_api_port=api_port,
     )
     opt_queue = spider_config.get('queue')
     if opt_queue:
