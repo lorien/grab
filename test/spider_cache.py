@@ -135,7 +135,7 @@ class SpiderCacheMixin(object):
         bot.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('one', self.server.get_url()))
-        bot.add_task(Task('one', self.server.get_url(), delay=1))
+        bot.add_task(Task('one', self.server.get_url(), delay=2))
         bot.run()
         self.assertEqual([1, 1], bot.stat.collections['resp_counters'])
 
@@ -149,9 +149,9 @@ class SpiderCacheMixin(object):
         bot.add_task(Task('one', self.server.get_url(),
                           priority=2, cache_timeout=0, delay=1))
         bot.add_task(Task('one', self.server.get_url(),
-                          priority=3, cache_timeout=10, delay=2))
+                          priority=3, cache_timeout=10, delay=3))
         bot.add_task(Task('one', self.server.get_url(),
-                          priority=4, cache_timeout=0, delay=3))
+                          priority=4, cache_timeout=0, delay=4))
         bot.run()
         self.assertEqual([1, 2, 2, 3], bot.stat.collections['resp_counters'])
 
