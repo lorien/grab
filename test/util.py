@@ -6,6 +6,7 @@ from test_server import TestServer
 from unittest import TestCase
 import logging
 from six.moves.urllib.request import urlopen
+import socket
 
 from grab import Grab
 
@@ -64,7 +65,10 @@ class BaseGrabTestCase(TestCase):
         cls.server = TestServer(address='localhost', port=TEST_SERVER_PORT)
         cls.server.start()
         # Ensure that test server works
+        old_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(3)
         urlopen('http://localhost:%d/' % TEST_SERVER_PORT).read()
+        socket.setdefaulttimeout(old_timeout)
 
     @classmethod
     def tearDownClass(cls):
