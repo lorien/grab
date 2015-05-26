@@ -19,8 +19,87 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-resource.min.js"></script>
+    <script src="http://angular-ui.github.io/ui-router/release/angular-ui-router.min.js"></script>
+<script>
+(function() {
+    'use strict'
+
+    angular
+        .module('app', [
+            'ui.router',
+            'ngResource',
+            'app.dashboard'
+        ]);
+
+    angular
+        .module('app.dashboard', [])
+        .config([
+            '$stateProvider',
+            '$urlRouterProvider',
+            function($stateProvider, $urlRouterProvider) {
+                $urlRouterProvider.otherwise('/info');
+                $stateProvider
+                    .state('info', {
+                        url: '/info',
+                        template: $('#template-info').html(),
+                        controller: ['$resource', '$scope', function($resource, $scope) {
+                            $resource('/api/info').get({}, function(data) {
+                                $scope.data = data;
+                            });
+                        }],
+                    })
+                    .state('stop', {
+                        url: '/stop',
+                        controller: ['$resource', function($resource) {
+                            $resource('/api/stop').get({}, function() {
+                            });
+                        }],
+                        template: $('#template-stop').html()
+                    });
+        }]);
+})();
+/*
+$.get(location.href + 'api/info', {}, function(data) {
+    html = ''
+    $.each(data['counters'], function(key, value){
+        html += '<p>' + key + ':' + value + '</p>'
+    });
+    $('#body').html(html);
+}, 'json');
+*/
+</script>
 </head>
 <body>
+    <div style="display: none">
+        <div id="template-info">
+            <div class="row">
+                <div class="col-md-4">
+                    <h3>Counters</h3>
+                    <div ng-repeat="(key, val) in data.counters">
+                        <div>{{ key }}: {{ val }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h3>Collections</h3>
+                    <div ng-repeat="(key, val) in data.collections">
+                        <div>{{ key }}: {{ val }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h3>Info</h3>
+                    <div>Network threads: {{ data.thread_number }}</div>
+                    <div>Parser processes: {{ data.parser_pool_size }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="template-stop">
+            <p>Stop request sent</p>
+        </div>
+
+    </div>
     <nav class="navbar navbar-default">
         <div class="container">
             <div class="navbar-header">
@@ -31,12 +110,18 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/">Grab::Spider</a>
+                <a class="navbar-brand" href="#/info">Grab::Spider</a>
             </div>
 
             <div class="collapse navbar-collapse" id="navbar-collapse">
-                <p class="navbar-text navbar-left">
-                </p>
+                <ul class="nav navbar-nav navbar-left">
+                    <li ui-sref-active="active"><a ui-sref="info">Info</a></li>
+                    <li ui-sref-active="active">
+                        <a href="#" onclick="if (confirm('Are you sure you want to stop spider?')) {
+                            location.href='#/stop'}; return false">Stop spider</a>
+                        <span style="display: none"><a ui-sref="stop"></a></span>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -44,16 +129,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <div id="body"></div>
-                <script>
-                    $.get(location.href + 'api/info', {}, function(data) {
-                        html = ''
-                        $.each(data['counters'], function(key, value){
-                            html += '<p>' + key + ':' + value + '</p>'
-                        });
-                        $('#body').html(html);
-                    }, 'json');
-                </script>
+                <div ui-view></div>
             </div>
         </div>
     </div>

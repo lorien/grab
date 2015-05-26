@@ -34,6 +34,10 @@ class ApiHandler(SimpleHTTPRequestHandler):
     def api_info(self):
         info = {
             'counters': self.spider.stat.counters,
+            'collections': dict((x, len(y)) for (x, y)
+                                in self.spider.stat.collections.items()),
+            'thread_number': self.spider.thread_number,
+            'parser_pool_size': self.spider.parser_pool_size,
         }
         content = make_str(json.dumps(info))
         self.response(content=content)
