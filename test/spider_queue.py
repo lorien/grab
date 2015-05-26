@@ -15,7 +15,8 @@ class SpiderQueueMixin(object):
             self.stat.collect('priority_history', task.priority)
 
     def test_basic_priority(self):
-        bot = build_spider(self.SimpleSpider, parser_pool_size=1)
+        bot = build_spider(self.SimpleSpider, parser_pool_size=1,
+                           thread_number=1)
         self.setup_queue(bot)
         bot.taskq.clear()
         requested_urls = {}
