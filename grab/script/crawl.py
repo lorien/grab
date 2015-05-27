@@ -29,6 +29,10 @@ def setup_arg_parser(parser):
                         default=False)
     parser.add_argument('--settings-module', type=str, default='settings')
     parser.add_argument('--api-port', type=int, default=None)
+    parser.add_argument('--multiprocess', action='store_true', default=False,
+                        help='Run task handlers (HTML parsers) in separate '
+                             'processes')
+    parser.add_argument('--parser-pool-size', type=int)
 
 
 def get_lock_key(spider_name, lock_key=None, ignore_lock=False,
@@ -72,6 +76,8 @@ def main(spider_name, thread_number=None, slave=False,
          disable_report=False,
          disable_default_logs=False,
          api_port=None,
+         multiprocess=False,
+         parser_pool_size=None,
          *args, **kwargs):
     if disable_default_logs:
         default_logging(propagate_network_logger=network_logs,
@@ -98,6 +104,8 @@ def main(spider_name, thread_number=None, slave=False,
         task_try_limit=None,
         args=spider_args,
         http_api_port=api_port,
+        multiprocess=multiprocess,
+        parser_pool_size=parser_pool_size,
     )
     opt_queue = spider_config.get('queue')
     if opt_queue:
