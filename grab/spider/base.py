@@ -1035,13 +1035,14 @@ class Spider(object):
                                 shutdown_event.set()
                                 for proc in parser_pool:
                                     if self.multiprocess:
-                                        logger.debug(
-                                            'Joining %s parser process'
-                                            % proc['proc'].pid)
+                                        pname = proc['proc'].pid
                                     else:
-                                        logger.debug('Joining %s parser thread'
-                                                     % proc['proc'].name)
+                                        pname = proc['proc'].name
+                                    logger.debug('Start joining parser '
+                                                 'process: %s' % pname)
                                     proc['proc'].join()
+                                    logger.debug('Stop joining parser '
+                                                 'process: %s' % pname)
                                 self.stop()
                         else:
                             logger_verbose.debug(
