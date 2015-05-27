@@ -39,6 +39,7 @@ DEFAULT_TASK_TRY_LIMIT = 3
 DEFAULT_NETWORK_TRY_LIMIT = 3
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
 NULL = object()
+PARSER_PROCESS_JOIN_TIMEOUT = 3
 
 logger = logging.getLogger('grab.spider.base')
 logger_verbose = logging.getLogger('grab.spider.base.verbose')
@@ -929,6 +930,8 @@ class Spider(object):
             self.waiting_shutdown_event = waiting_shutdown_event
             self.shutdown_event = shutdown_event
         proc = Process(target=bot.run_parser)
+        if not self.multiprocess:
+            proc.daemon = True
         proc.start()
         return waiting_shutdown_event, proc
 
@@ -1033,16 +1036,6 @@ class Spider(object):
                                                  'futures. No pending results')
                             if not self.task_generator_enabled:
                                 shutdown_event.set()
-                                for proc in parser_pool:
-                                    if self.multiprocess:
-                                        pname = proc['proc'].pid
-                                    else:
-                                        pname = proc['proc'].name
-                                    logger.debug('Start joining parser '
-                                                 'process: %s' % pname)
-                                    proc['proc'].join()
-                                    logger.debug('Stop joining parser '
-                                                 'process: %s' % pname)
                                 self.stop()
                         else:
                             logger_verbose.debug(
@@ -1170,7 +1163,26 @@ class Spider(object):
             # Stop parser processes
             shutdown_event.set()
             for proc in parser_pool:
-                proc['proc'].join()
+                if self.multiprocess:
+                    pname = proc['proc'].pid
+                else:
+                    pname = proc['proc'].name
+                logger.debug('Started shutdown of parser '
+                             'process: %s' % pname)
+                proc['proc'].join(
+                    PARSER_PROCESS_JOIN_TIMEOUT)
+                if proc['proc'].is_alive():
+                    if self.multiprocess:
+                        print('Process %s does not respond. '
+                              'Finish him!' % pname)
+                        proc['proc'].terminate()
+                    else:
+                        # do nothing, because in
+                        # semi-mp mode parser threads
+                        # have daemon=True flag
+                        pass
+                logger.debug('Finished joining parser '
+                             'process: %s' % pname)
 
             logger.debug('Main process [pid=%s]: work done' % os.getpid())
 
