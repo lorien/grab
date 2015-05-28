@@ -60,6 +60,7 @@ class SpiderCacheMixin(object):
         self.server.reset()
         self.server.response['get.data'] = ContentGenerator(self.server)
 
+    """
     def test_counter(self):
         bot = build_spider(SimpleSpider, meta={'server': self.server})
         self.setup_cache(bot)
@@ -128,6 +129,7 @@ class SpiderCacheMixin(object):
         bot.add_task(Task('page', self.server.get_url()))
         bot.run()
         self.assertEqual(bot.cache.size(), 1)
+    """
 
     def test_timeout(self):
         bot = build_spider(SimpleSpider, meta={'server': self.server})
@@ -137,6 +139,8 @@ class SpiderCacheMixin(object):
         bot.add_task(Task('one', self.server.get_url()))
         bot.add_task(Task('one', self.server.get_url(), delay=2))
         bot.run()
+        self.assertEqual(2, bot.stat.counters['spider:request'])
+        self.assertEqual(1, bot.stat.counters['spider:request-cache'])
         self.assertEqual([1, 1], bot.stat.collections['resp_counters'])
 
         bot = build_spider(SimpleSpider, meta={'server': self.server},

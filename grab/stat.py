@@ -15,7 +15,7 @@ class Stat(object):
     def __init__(self, logger_name='grab.stat', log_file=None,
                  logging_period=5):
         self.time = time.time()
-        self.logging_ignore_prefixes = ['spider:']
+        self.logging_ignore_prefixes = ['spider:', 'parser:']
         self.logging_period = logging_period
         self.count_prev = 0
         self.logger_name = logger_name

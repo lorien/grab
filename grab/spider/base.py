@@ -47,6 +47,11 @@ logger_verbose = logging.getLogger('grab.spider.base.verbose')
 # change logging level of that logger
 logger_verbose.setLevel(logging.FATAL)
 
+wtf_logger = logging.getLogger('wtf')
+wtf_logger.addHandler(logging.FileHandler('var/wtf.log', 'w'))
+wtf_logger.setLevel(logging.DEBUG)
+wtf_logger.propagate = False
+
 
 class SpiderMetaClass(type):
     """
@@ -639,7 +644,6 @@ class Spider(object):
                         self.cache.load_response(grab, cache_item)
 
                     grab.log_request('CACHED')
-                    self.stat.inc('spider:request')
                     self.stat.inc('spider:request-cache')
 
                     return {'ok': True, 'grab': grab,
@@ -714,16 +718,22 @@ class Spider(object):
             self.stat = Stat(logging_period=None)
         self.prepare_parser()
         try:
+            recent_task_time = time.time()
             while True:
                 try:
                     result = self.network_result_queue.get(True, 0.1)
                 except queue.Empty:
                     logger_verbose.debug('Network result queue is empty')
-                    self.waiting_shutdown_event.set()
+                    # Set `waiting_shutdown_event` only after 1 seconds
+                    # of waiting for tasks to avoid
+                    # race-condition issues
+                    if time.time() - recent_task_time > 1:
+                        self.waiting_shutdown_event.set()
                     if self.shutdown_event.is_set():
                         logger_verbose.debug('Got shutdown event')
                         return
                 else:
+                    recent_task_time = time.time()
                     # Do nothing in semi-multiprocessing mode
                     # (when parser mode is False)
                     if self.parser_mode:
@@ -732,11 +742,14 @@ class Spider(object):
                         self.waiting_shutdown_event.clear()
                     try:
                         handler = self.find_task_handler(result['task'])
-                        self.process_network_result_with_handler_mp(
-                            result, handler)
                     except NoTaskHandler as ex:
                         ex.tb = format_exc()
                         self.parser_result_queue.put((ex, result['task']))
+                        self.stat.inc('parser:handler-not-found')
+                    else:
+                        self.process_network_result_with_handler_mp(
+                            result, handler)
+                        self.stat.inc('parser:handler-processed')
                     finally:
                         # Do nothing in semi-multiprocessing mode
                         # (when parser mode is False)
@@ -961,7 +974,7 @@ class Spider(object):
         else:
             from multiprocessing.dummy import Process, Event, Queue
         network_result_queue = Queue()
-        network_result_queue_limit = self.thread_number * 2
+        network_result_queue_limit = max(10, self.thread_number * 2)
 
         parser_result_queue = Queue()
 
@@ -1090,6 +1103,19 @@ class Spider(object):
                 if result_from_cache:
                     results.append((result_from_cache, True))
 
+                # Some sleep to avoid thousands of iterations per second.
+                # If no results from network transport
+                if not results:
+                    # If task queue is empty (or if there are only
+                    # delayed tasks)
+                    if task is None or bool(task) == True:
+                        # If no network activity
+                        if not self.transport.get_active_threads_number():
+                            # If parser (hander result) queue is empty
+                            if not parser_result_queue.qsize():
+                                # Just sleep some time, do not kill CPU
+                                time.sleep(0.1)
+
                 for result, from_cache in results:
                     if not from_cache:
                         if self.is_valid_for_cache(result):
@@ -1120,12 +1146,15 @@ class Spider(object):
 
                 # MP:
                 # ***
+                #wtf_logger.debug('!')
+                self.stat.inc('wtf')
                 while True:
                     try:
                         p_res, p_task = parser_result_queue.get_nowait()
                     except queue.Empty:
                         break
                     else:
+                        self.stat.inc('spider:parser-result')
                         self.process_handler_result(p_res, p_task)
 
                 if not shutdown_event.is_set():
