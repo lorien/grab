@@ -47,11 +47,6 @@ logger_verbose = logging.getLogger('grab.spider.base.verbose')
 # change logging level of that logger
 logger_verbose.setLevel(logging.FATAL)
 
-wtf_logger = logging.getLogger('wtf')
-wtf_logger.addHandler(logging.FileHandler('var/wtf.log', 'w'))
-wtf_logger.setLevel(logging.DEBUG)
-wtf_logger.propagate = False
-
 
 class SpiderMetaClass(type):
     """
@@ -1146,7 +1141,6 @@ class Spider(object):
 
                 # MP:
                 # ***
-                #wtf_logger.debug('!')
                 self.stat.inc('wtf')
                 while True:
                     try:
