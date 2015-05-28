@@ -1,27 +1,17 @@
 # coding: utf-8
 from test.util import build_grab, TMP_FILE
-from test.util import BaseGrabTestCase, TEST_SERVER_PORT
+from test.util import (BaseGrabTestCase, TEST_SERVER_PORT,
+                       EXTRA_PORT1, EXTRA_PORT2)
 from test_server import TestServer
 import six
 
 ADDRESS = '127.0.0.1'
-EXTRA_PORT1 = TEST_SERVER_PORT + 1
-EXTRA_PORT2 = TEST_SERVER_PORT + 2
 PROXY1 = '%s:%d' % (ADDRESS, TEST_SERVER_PORT)
 PROXY2 = '%s:%d' % (ADDRESS, EXTRA_PORT1)
 PROXY3 = '%s:%d' % (ADDRESS, EXTRA_PORT2)
 
 
 class TestProxy(BaseGrabTestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.server = TestServer(port=TEST_SERVER_PORT,
-                                extra_ports=[EXTRA_PORT1, EXTRA_PORT2])
-        cls.server.start()
-
-    def setUp(self):
-        self.server.reset()
-
     def test_proxy_option(self):
         g = build_grab()
 
