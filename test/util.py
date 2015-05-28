@@ -68,7 +68,7 @@ class BaseGrabTestCase(TestCase):
         # Ensure that test server works
         old_timeout = socket.getdefaulttimeout()
         ok = False
-        for x in xrange(6):
+        for x in range(6):
             socket.setdefaulttimeout(0.5)
             try:
                 urlopen('http://localhost:%d/' % TEST_SERVER_PORT).read()
