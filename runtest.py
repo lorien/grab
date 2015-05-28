@@ -6,7 +6,8 @@ from optparse import OptionParser
 import logging
 from copy import copy
 
-from test.util import prepare_test_environment, clear_test_environment, GLOBAL
+from test.util import (prepare_test_environment, clear_test_environment,
+                       GLOBAL, start_server, stop_server)
 from weblib.watch import watch
 
 # **********
@@ -153,9 +154,9 @@ def main():
                     suite.addTest(test)
 
     runner = unittest.TextTestRunner()
-
+    start_server()
     result = runner.run(suite)
-
+    stop_server()
     clear_test_environment()
     if result.wasSuccessful():
         sys.exit(0)
