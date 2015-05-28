@@ -7,6 +7,7 @@ from unittest import TestCase
 import logging
 from six.moves.urllib.request import urlopen
 import socket
+import time
 
 from grab import Grab
 
@@ -66,8 +67,19 @@ class BaseGrabTestCase(TestCase):
         cls.server.start()
         # Ensure that test server works
         old_timeout = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(3)
-        urlopen('http://localhost:%d/' % TEST_SERVER_PORT).read()
+        ok = False
+        for x in xrange(6):
+            socket.setdefaulttimeout(0.5)
+            try:
+                urlopen('http://localhost:%d/' % TEST_SERVER_PORT).read()
+            except Exception as ex:
+                logger.error('', exc_info=ex)
+                time.sleep(0.1)
+            else:
+                ok = True
+                break
+        if not ok:
+            raise Exception('Test server does not respond.')
         socket.setdefaulttimeout(old_timeout)
 
     @classmethod
