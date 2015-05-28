@@ -1141,7 +1141,6 @@ class Spider(object):
 
                 # MP:
                 # ***
-                self.stat.inc('wtf')
                 while True:
                     try:
                         p_res, p_task = parser_result_queue.get_nowait()
