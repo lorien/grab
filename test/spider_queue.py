@@ -59,10 +59,10 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
 
         class TestSpider(Spider):
             def task_generator(self):
+                yield Task('page', url=server.get_url(), delay=1.5, num=3)
+                yield Task('page', url=server.get_url(), delay=4.5, num=2)
+                yield Task('page', url=server.get_url(), delay=3, num=4)
                 yield Task('page', url=server.get_url(), num=1)
-                yield Task('page', url=server.get_url(), delay=1.5, num=2)
-                yield Task('page', url=server.get_url(), delay=0.5, num=3)
-                yield Task('page', url=server.get_url(), delay=1, num=4)
 
             def task_page(self, grab, task):
                 self.stat.collect('numbers', task.num)
