@@ -67,7 +67,7 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
             def task_page(self, grab, task):
                 self.stat.collect('numbers', task.num)
 
-        bot = build_spider(TestSpider)
+        bot = build_spider(TestSpider, thread_number=1)
         self.setup_queue(bot)
         bot.run()
         self.assertEqual(bot.stat.collections['numbers'], [1, 3, 4, 2])
