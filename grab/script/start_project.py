@@ -13,13 +13,11 @@ def setup_arg_parser(parser):
 
 
 def process_content(content, context):
-    changed = False
     for key, value in context.items():
         re_macros = re.compile(r'\{\{\s*%s\s*\}\}' % re.escape(key))
         if re_macros.search(content):
-            changed = True
             content = re_macros.sub(value, content)
-    return changed, content
+    return content
 
 
 def process_file_path(path, context):
@@ -58,11 +56,15 @@ def main(project_name, template, **kwargs):
         for base, dir_names, file_names in os.walk(project_dir):
             for file_name in file_names:
                 if file_name.endswith('.py'):
+                    print('Processing: %s' % file_name)
                     file_path = os.path.join(base, file_name)
-                    changed, content = process_content(open(file_path).read(),
-                                                       context)
+                    content = process_content(open(file_path).read(), context)
                     new_file_path = process_file_path(file_path, context)
-                    if changed:
-                        with open(new_file_path, 'w') as out:
-                            out.write(content)
+                    with open(new_file_path, 'w') as out:
+                        out.write(content)
+
+                    if file_path != new_file_path:
                         os.unlink(file_path)
+                        print('%s: OK' % new_file_path)
+                    else:
+                        print('%s: OK' % file_path)
