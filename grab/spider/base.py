@@ -223,7 +223,6 @@ class Spider(object):
                                 DEFAULT_NETWORK_TRY_LIMIT)))
 
         self._grab_config = {}
-        self.items = {}
         if priority_mode not in ['random', 'const']:
             raise SpiderMisuseError('Value of priority_mode option should be '
                                     '"random" or "const"')
@@ -1302,6 +1301,18 @@ class Spider(object):
         logger.debug('Method `Spider::stop_timer` is deprecated. '
                      'Use `Spider::timer.stop` method instead.')
         self.timer.stop(key)
+
+    @property
+    def items(self):
+        logger.debug('Attribute `Spider::items` is deprecated. '
+                     'Use `Spider::stat.collections` attribute instead.')
+        return self.stat.collections
+
+    @property
+    def counters(self):
+        logger.debug('Attribute `Spider::counters` is deprecated. '
+                     'Use `Spider::stat.counters` attribute instead.')
+        return self.stat.counters
 
     @contextmanager
     def save_timer(self, key):
