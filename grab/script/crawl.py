@@ -149,7 +149,7 @@ def main(spider_name, thread_number=None, slave=False,
                     os.makedirs(dir_)
                 else:
                     clear_directory(dir_)
-                for key, lst in bot.items.items():
+                for key, lst in bot.stat.collections.items():
                     fname_key = key.replace('-', '_')
                     save_list(lst, '%s/%s.txt' % (dir_, fname_key))
                 with open('%s/report.txt' % dir_, 'wb') as out:
