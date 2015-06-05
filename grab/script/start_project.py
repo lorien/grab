@@ -12,7 +12,7 @@ def setup_arg_parser(parser):
     parser.add_argument('--template')
 
 
-def process_macros(content, context):
+def process_content(content, context):
     changed = False
     for key, value in context.items():
         re_macros = re.compile(r'\{\{\s*%s\s*\}\}' % re.escape(key))
@@ -22,16 +22,15 @@ def process_macros(content, context):
     return changed, content
 
 
+def process_file_path(path, context):
+    for key, value in context.items():
+        path = path.replace(key, value)
+    return path
+
+
 def underscore_to_camelcase(val):
     items = val.lower().split('_')
     return ''.join(x.title() for x in items)
-
-
-def normalize_extension(fname):
-    if fname.endswith('._py'):
-        return fname[:-4] + '.py'
-    else:
-        return fname
 
 
 def main(project_name, template, **kwargs):
@@ -58,11 +57,12 @@ def main(project_name, template, **kwargs):
         }
         for base, dir_names, file_names in os.walk(project_dir):
             for file_name in file_names:
-                if file_name.endswith(('._py', '.py')):
+                if file_name.endswith('.py'):
                     file_path = os.path.join(base, file_name)
-                    changed, content = process_macros(open(file_path).read(),
-                                                      context)
+                    changed, content = process_content(open(file_path).read(),
+                                                       context)
+                    new_file_path = process_file_path(file_path, context)
                     if changed:
-                        with open(normalize_extension(file_path), 'w') as out:
+                        with open(new_file_path, 'w') as out:
                             out.write(content)
                         os.unlink(file_path)
