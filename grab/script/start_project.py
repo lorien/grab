@@ -56,7 +56,6 @@ def main(project_name, template, **kwargs):
         for base, dir_names, file_names in os.walk(project_dir):
             for file_name in file_names:
                 if file_name.endswith('.py'):
-                    print('Processing: %s' % file_name)
                     file_path = os.path.join(base, file_name)
                     content = process_content(open(file_path).read(), context)
                     new_file_path = process_file_path(file_path, context)

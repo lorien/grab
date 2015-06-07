@@ -4,6 +4,15 @@ import six
 
 from grab.error import GrabTooManyRedirectsError
 
+ERROR_TOO_MANY_REFRESH_REDIRECTS = -2
+ERROR_ABBR = {
+    ERROR_TOO_MANY_REFRESH_REDIRECTS: 'too-many-refresh-redirects',
+}
+for key in dir(pycurl):
+    if key.startswith('E_'):
+        abbr = key[2:].lower().replace('_', '-')
+        ERROR_ABBR[getattr(pycurl, key)] = abbr
+
 
 class MulticurlTransport(object):
     def __init__(self, socket_number):
@@ -123,7 +132,7 @@ class MulticurlTransport(object):
                 try:
                     grab.process_request_result()
                 except GrabTooManyRedirectsError:
-                    ecode = -1
+                    ecode = ERROR_TOO_MANY_REFRESH_REDIRECTS
                     emsg = 'Too many meta refresh redirects'
                 grab.response.error_code = ecode
                 grab.response.error_msg = emsg
@@ -132,8 +141,14 @@ class MulticurlTransport(object):
                 del self.registry[curl_id]
                 grab.transport.curl = None
 
+                if ok:
+                    error_abbr = None
+                else:
+                   error_abbr = ERROR_ABBR.get(ecode, 'unknown-%d' % ecode)
                 yield {'ok': ok,
+                       'ecode': ecode,
                        'emsg': emsg,
+                       'error_abbr': error_abbr,
                        'grab': grab,
                        'grab_config_backup': grab_config_backup,
                        'task': task}

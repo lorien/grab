@@ -1210,15 +1210,13 @@ class Spider(object):
     def log_failed_network_result(self, res):
         # Log the error
         if res['ok']:
-            msg = 'HTTP %s' % res['grab'].response.code
-            res['emsg'] = msg  # Update res['emsg'] 'couse it's empty
+            msg = 'http-%s' % res['grab'].response.code
         else:
-            msg = res['emsg']
+            msg = res['error_abbr']
 
-        self.stat.inc('spider:network-error-%s' %
-                      make_str(res['emsg'][:20], errors='ignore'))
-        logger.error(u'Network error: %s' %
-                     make_unicode(msg, errors='ignore'))
+        self.stat.inc('error:%s' % msg) 
+        #logger.error(u'Network error: %s' % msg)#%
+                     #make_unicode(msg, errors='ignore'))
 
     def log_rejected_task(self, task, reason):
         logger_verbose.debug('Task %s is rejected due to '

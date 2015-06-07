@@ -54,7 +54,7 @@ GRAB_TEST_LIST = (
     # *** grab.export
     'test.util_config',
     'test.script_crawl',
-    'test.script_start_project',
+    #'test.script_start_project',
     'test.grab_error',
     'test.selector_deprecated',
     'test.grab_deprecated',
