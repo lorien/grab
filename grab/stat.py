@@ -8,12 +8,15 @@ from collections import defaultdict
 import time
 from contextlib import contextmanager
 
-DEFAULT_COUNTER_KEY = 'DEFAULT'
+DEFAULT_SPEED_KEY = 'spider:request-processed'
+DEFAULT_LOGGING_PERIOD = 1
 
 
 class Stat(object):
     def __init__(self, logger_name='grab.stat', log_file=None,
-                 logging_period=5):
+                 logging_period=DEFAULT_LOGGING_PERIOD,
+                 extra_speed_keys=None):
+        self.setup_speed_keys(extra_speed_keys)
         self.time = time.time()
         self.logging_ignore_prefixes = ['spider:', 'parser:']
         self.logging_period = logging_period
@@ -23,9 +26,16 @@ class Stat(object):
         self.setup_logging_file(log_file)
         self.reset()
 
+    def setup_speed_keys(self, extra_keys):
+        keys = [DEFAULT_SPEED_KEY]
+        if extra_keys:
+            keys.extend(extra_keys)
+        self.speed_keys = keys
+
     def reset(self):
         self.counters = defaultdict(int)
         self.collections = defaultdict(list)
+        self.counters_prev = defaultdict(int)
 
     def setup_logging_file(self, log_file):
         self.log_file = log_file
@@ -33,7 +43,7 @@ class Stat(object):
             self.logger.addHandler(logging.FileHandler(log_file, 'w'))
             self.logger.setLevel(logging.DEBUG)
 
-    def get_counters_line(self):
+    def get_counter_line(self):
         items = []
         for key in sorted(self.counters.keys()):
             if not any(key.startswith(x)
@@ -41,16 +51,27 @@ class Stat(object):
                 items.append('%s=%d' % (key, self.counters[key]))
         return ', '.join(items)
 
-    def inc(self, key=DEFAULT_COUNTER_KEY, delta=1):
+    def get_speed_line(self, now):
+        items = []
+        for key in self.speed_keys:
+            count_current = self.counters[key]
+            diff = count_current - self.counters_prev[key]
+            qps = diff / (now - self.time) 
+            self.counters_prev[key] = count_current
+            if key == DEFAULT_SPEED_KEY:
+                label = 'RPS'
+            else:
+                label = key
+            items.append('%s: %.2f' % (label, qps))
+        return ', '.join(items)
+
+    def inc(self, key, delta=1):
         self.counters[key] += delta
         now = time.time()
         if self.logging_period and now - self.time > self.logging_period:
-            count_current = self.counters[DEFAULT_COUNTER_KEY]
-            diff = count_current - self.count_prev
-            qps = diff / (now - self.time) 
             self.logger.debug(
-                'rps: %.2f [%s]' % (qps, self.get_counters_line()))
-            self.count_prev = count_current
+                '%s [%s]' % (self.get_speed_line(now),
+                                    self.get_counter_line()))
             self.time = now
 
     def collect(self, key, val):

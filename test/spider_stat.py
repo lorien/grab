@@ -22,15 +22,13 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.assertRaises(KeyError, bot.timer.stop, 'zzz')
 
     def test_counters_and_collections(self):
-        from grab.stat import DEFAULT_COUNTER_KEY
-
         class TestSpider(Spider):
             def prepare(self):
                 self.stat.logging_period = 0
-                self.stat.inc()
+                self.stat.inc('foo')
 
             def task_page_valid(self, grab, task):
-                self.stat.inc()
+                self.stat.inc('foo')
 
             def task_page_fail(self, grab, task):
                 1/0
@@ -40,14 +38,14 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.add_task(Task('page_valid', url=self.server.get_url()))
         bot.add_task(Task('page_fail', url=self.server.get_url()))
         bot.run()
-        self.assertEqual(2, bot.stat.counters[DEFAULT_COUNTER_KEY])
+        self.assertEqual(2, bot.stat.counters['foo'])
         self.assertEqual(1, len(bot.stat.collections['fatal']))
 
     def test_render_stats(self):
         class TestSpider(Spider):
             def prepare(self):
                 self.stat.logging_period = 0
-                self.stat.inc()
+                self.stat.inc('foo')
 
             def task_page(self, grab, task):
                 pass
