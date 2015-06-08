@@ -44,12 +44,18 @@ class Stat(object):
             self.logger.setLevel(logging.DEBUG)
 
     def get_counter_line(self):
-        items = []
-        for key in sorted(self.counters.keys()):
+        result = []
+        for key in self.counters.keys():
             if not any(key.startswith(x)
                        for x in self.logging_ignore_prefixes):
-                items.append('%s=%d' % (key, self.counters[key]))
-        return ', '.join(items)
+                result.append((key, '%s=%d' % (key, self.counters[key])))
+        for key in self.collections.keys():
+            if not any(key.startswith(x)
+                       for x in self.logging_ignore_prefixes):
+                result.append((key,
+                               '%s=%d' % (key, len(self.collections[key]))))
+        tokens = [x[1] for x in sorted(result, key=lambda x: x[0])]
+        return ', '.join(tokens)
 
     def get_speed_line(self, now):
         items = []
