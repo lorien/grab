@@ -187,6 +187,7 @@ class Grab(DeprecatedThings):
                  'transport',
                  'transport_param', 'request_method', 'request_counter',
                  '__weakref__', 'cookies',
+                 'meta',
 
                  # Dirty hack to make it possible to inherit Grab from
                  # multiple base classes with __slots__
@@ -211,18 +212,16 @@ class Grab(DeprecatedThings):
         Create Grab instance
         """
 
+        self.meta = {}
         self._doc = None
         self.config = default_config()
         self.config['common_headers'] = self.common_headers()
         self.cookies = CookieManager()
         self.proxylist = ProxyList()
-
         self.setup_transport(transport)
-
         self.reset()
         if kwargs:
             self.setup(**kwargs)
-
         if document_body is not None:
             self.setup_document(document_body)
 
@@ -265,7 +264,6 @@ class Grab(DeprecatedThings):
         self.request_head = None
         self.request_log = None
         self.request_body = None
-
         self.request_method = None
         self.transport.reset()
 
