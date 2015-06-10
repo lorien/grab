@@ -130,9 +130,10 @@ class TestSpider(BaseGrabTestCase):
                     'ports', int(grab.response.headers.get('Listen-Port', 0)))
 
         class CustomProxySource(BaseProxySource):
-            def load(self):
+            def load(self, userpwd):
                 return [
-                    Proxy(ADDRESS, TEST_SERVER_PORT, None, None, 'http'),
+                    Proxy(ADDRESS, TEST_SERVER_PORT,
+                          userpwd['login'], userpwd['password'], 'http'),
                 ]
 
 
