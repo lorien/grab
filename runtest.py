@@ -154,9 +154,9 @@ def main():
                     suite.addTest(test)
 
     runner = unittest.TextTestRunner()
-    start_server()
+    #start_server()
     result = runner.run(suite)
-    stop_server()
+    #stop_server()
     clear_test_environment()
     if result.wasSuccessful():
         sys.exit(0)

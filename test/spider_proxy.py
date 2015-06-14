@@ -3,10 +3,9 @@ import six
 
 from grab import Grab
 from grab.spider import Spider, Task
-from test.util import BaseGrabTestCase, TEST_SERVER_PORT, build_spider
+from test.util import BaseGrabTestCase, TEST_SERVER_PORT, build_spider, ADDRESS
 from grab.proxylist import BaseProxySource, Proxy
 
-ADDRESS = '127.0.0.1'
 EXTRA_PORT1 = TEST_SERVER_PORT + 1
 EXTRA_PORT2 = TEST_SERVER_PORT + 2
 PROXY1 = '%s:%d' % (ADDRESS, TEST_SERVER_PORT)
@@ -21,11 +20,11 @@ class SimpleSpider(Spider):
 
 
 class TestSpider(BaseGrabTestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.server = TestServer(port=TEST_SERVER_PORT, address=ADDRESS,
-                                extra_ports=[EXTRA_PORT1, EXTRA_PORT2])
-        cls.server.start()
+    #@classmethod
+    #def setUpClass(cls):
+    #    cls.server = TestServer(port=TEST_SERVER_PORT, address=ADDRESS,
+    #                            extra_ports=[EXTRA_PORT1, EXTRA_PORT2])
+    #    cls.server.start()
 
     def test_setup_proxylist(self):
         content = '%s\n%s\n%s' % (PROXY1, PROXY2, PROXY3)
