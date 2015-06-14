@@ -104,8 +104,8 @@ def main():
     parser.add_option('--backend-postgresql', action='store_true',
                       default=False,
                       help='Run extra tests that depends on postgresql')
-    parser.add_option('--multiprocess', action='store_true', default=False,
-                      help='Use multiprocess spider in spider tests')
+    parser.add_option('--mp-mode', action='store_true', default=False,
+                      help='Enable multiprocess mode in spider tests')
     opts, args = parser.parse_args()
 
     if opts.backend_mongo:
@@ -136,7 +136,7 @@ def main():
     if opts.test:
         test_list += [opts.test]
 
-    GLOBAL['multiprocess'] = opts.multiprocess
+    GLOBAL['mp_mode'] = opts.mp_mode
 
     # Check tests integrity
     # Ensure that all test modules are imported correctly

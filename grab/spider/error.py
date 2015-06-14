@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from grab.error import GrabError
 
 
 __all__ = ('SpiderError', 'SpiderMisuseError', 'FatalError',
@@ -6,8 +7,12 @@ __all__ = ('SpiderError', 'SpiderMisuseError', 'FatalError',
            'NoTaskHandler', 'NoDataHandler')
 
 
-class SpiderError(Exception):
+class SpiderError(GrabError):
     """Base class for Spider exceptions"""
+
+
+class SpiderConfigurationError(SpiderError):
+    pass
 
 
 class SpiderMisuseError(SpiderError):

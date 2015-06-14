@@ -22,7 +22,7 @@ TMP_FILE = None
 
 GLOBAL = {
     'backends': [],
-    'multiprocess': False,
+    'mp_mode': False,
     #'test_server': None,
 }
 
@@ -58,9 +58,12 @@ def build_grab(*args, **kwargs):
 
 def build_spider(cls, **kwargs):
     """Builds the Spider instance with default options. Also handles
-    `multiprocess` option that is configured globally."""
-    kwargs.setdefault('multiprocess', GLOBAL['multiprocess'])
-    kwargs.setdefault('parser_pool_size', 2)
+    `--mp-mode` option that is configured globally."""
+    kwargs.setdefault('mp_mode', GLOBAL['mp_mode'])
+    if kwargs['mp_mode']:
+        kwargs.setdefault('parser_pool_size', 2)
+    else:
+        kwargs['parser_pool_size'] = 1
     return cls(**kwargs)
 
 
@@ -80,12 +83,12 @@ class BaseGrabTestCase(TestCase):
 def multiprocess_mode(mode):
     def wrapper_builder(func):
         def wrapper(self, *args, **kwargs):
-            if mode != GLOBAL['multiprocess']:
+            if mode != GLOBAL['mp_mode']:
                 logger.debug('Skipping %s:%s:%s. Reason: need '
-                             'multiprocess mode=%s' % (
+                             '--mp-mode=%s' % (
                                  func.__module__,
                                  self.__class__.__name__,
-                                 func.__name__, GLOBAL['multiprocess']))
+                                 func.__name__, GLOBAL['mp_mode']))
             else:
                 return func(self, *args, **kwargs)
         return wrapper

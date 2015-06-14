@@ -384,11 +384,11 @@ class TestSpider(BaseGrabTestCase):
         bot = build_spider(TestSpider, )
         bot.setup_queue()
         bot.add_task(Task('page', url='zz://zz'))
-        self.assertEqual(0, bot.taskq.size())
+        self.assertEqual(0, bot.task_queue.size())
         bot.add_task(Task('page', url='zz://zz'), raise_error=False)
-        self.assertEqual(0, bot.taskq.size())
+        self.assertEqual(0, bot.task_queue.size())
         bot.add_task(Task('page', url='http://example.com/'))
-        self.assertEqual(1, bot.taskq.size())
+        self.assertEqual(1, bot.task_queue.size())
 
     def test_add_task_invalid_url_raise_error(self):
         class TestSpider(Spider):
@@ -398,9 +398,9 @@ class TestSpider(BaseGrabTestCase):
         bot.setup_queue()
         self.assertRaises(SpiderError, bot.add_task,
                           Task('page', url='zz://zz'), raise_error=True)
-        self.assertEqual(0, bot.taskq.size())
+        self.assertEqual(0, bot.task_queue.size())
         bot.add_task(Task('page', url='http://example.com/'))
-        self.assertEqual(1, bot.taskq.size())
+        self.assertEqual(1, bot.task_queue.size())
 
     def test_multiple_internal_worker_error(self):
         class TestSpider(Spider):
@@ -415,4 +415,4 @@ class TestSpider(BaseGrabTestCase):
         for x in range(5):
             bot.add_task(Task('page', url='http://ya.ru/'))
         bot.run()
-        self.assertTrue(1 < bot.stat.counters['parser-process-restore'])
+        self.assertTrue(1 < bot.parser_pipeline.restore_count)

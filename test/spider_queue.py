@@ -18,7 +18,7 @@ class SpiderQueueMixin(object):
         bot = build_spider(self.SimpleSpider, parser_pool_size=1,
                            thread_number=1)
         self.setup_queue(bot)
-        bot.taskq.clear()
+        bot.task_queue.clear()
         requested_urls = {}
         for priority in (4, 2, 1, 5):
             url = self.server.get_url() + '?p=%d' % priority
@@ -33,15 +33,15 @@ class SpiderQueueMixin(object):
     def test_queue_length(self):
         bot = build_spider(self.SimpleSpider)
         self.setup_queue(bot)
-        bot.taskq.clear()
+        bot.task_queue.clear()
         for x in six.moves.range(5):
             bot.add_task(Task('page', url=self.server.get_url()))
-        self.assertEqual(5, bot.taskq.size())
+        self.assertEqual(5, bot.task_queue.size())
         bot.run()
-        self.assertEqual(0, bot.taskq.size())
+        self.assertEqual(0, bot.task_queue.size())
         bot.run()
 
-    def test_taskq_render_stats(self):
+    def test_task_queue_render_stats(self):
         bot = build_spider(self.SimpleSpider)
         bot.render_stats()
 
@@ -104,7 +104,7 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
     def test_clear_collection(self):
         bot = build_spider(self.SimpleSpider)
         self.setup_queue(bot)
-        bot.taskq.clear()
+        bot.task_queue.clear()
 
 
 class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
@@ -116,7 +116,7 @@ class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
     def test_delay_error(self):
         bot = build_spider(self.SimpleSpider)
         self.setup_queue(bot)
-        bot.taskq.clear()
+        bot.task_queue.clear()
         self.assertRaises(SpiderMisuseError,
                           bot.add_task,
                           Task('page', url=self.server.get_url(), delay=1))
@@ -128,8 +128,8 @@ class QueueInterfaceTestCase(TestCase):
         class BrokenQueue(QueueInterface):
             pass
 
-        taskq = BrokenQueue('spider_name')
-        self.assertRaises(NotImplementedError, taskq.put, None, None)
-        self.assertRaises(NotImplementedError, taskq.get)
-        self.assertRaises(NotImplementedError, taskq.size)
-        self.assertRaises(NotImplementedError, taskq.clear)
+        task_queue = BrokenQueue('spider_name')
+        self.assertRaises(NotImplementedError, task_queue.put, None, None)
+        self.assertRaises(NotImplementedError, task_queue.get)
+        self.assertRaises(NotImplementedError, task_queue.size)
+        self.assertRaises(NotImplementedError, task_queue.clear)
