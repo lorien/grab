@@ -179,11 +179,22 @@ class Spider(object):
 
         # MP:
         self.mp_mode = mp_mode
-        self.network_result_queue = network_result_queue
+        if self.mp_mode:
+            from multiprocessing import Process, Event, Queue
+        else:
+            from multiprocessing.dummy import Process, Event, Queue
+
+        if network_result_queue is not None:
+            self.network_result_queue = network_result_queue
+        else:
+            self.network_result_queue = Queue()
         self.parser_result_queue = parser_result_queue
         self.waiting_shutdown_event = waiting_shutdown_event
-        self.shutdown_event = shutdown_event
-        if not self.mp_mode and parser_pool_size > 1:
+        if shutdown_event is not None:
+            self.shutdown_event = shutdown_event
+        else:
+            self.shutdown_event = Event()
+        if not self.mp_mode and parser_pool_size and parser_pool_size > 1:
             raise SpiderConfigurationError(
                 'Parser pool size could be only 1 in '
                 'non-multiprocess mode')
@@ -915,46 +926,14 @@ class Spider(object):
 
         from grab.spider.parser_pipeline import ParserPipeline
 
-
-        shutdown_event = Event()
-        network_result_queue = Queue()
-        network_result_queue_limit = max(10, self.thread_number * 2)
         self.parser_pipeline = ParserPipeline(
             bot=self,
             mp_mode=self.mp_mode,
             pool_size=self.parser_pool_size,
-            shutdown_event=shutdown_event,
-            network_result_queue=network_result_queue)
-        
-        # MP:
-        # ***
-        '''
-        if self.multiprocess:
-            from multiprocessing import Process, Event, Queue
-        else:
-            from multiprocessing.dummy import Process, Event, Queue
-
-        network_result_queue = Queue()
+            shutdown_event=self.shutdown_event,
+            network_result_queue=self.network_result_queue)
         network_result_queue_limit = max(10, self.thread_number * 2)
-
-        parser_result_queue = Queue()
-
-        shutdown_event = Event()
-        if not self.multiprocess:
-            self.parser_pool_size = 1
-        parser_pool = []
-        for x in range(self.parser_pool_size):
-            waiting_shutdown_event, proc = self.start_parser_process(
-                network_result_queue,
-                parser_result_queue,
-                shutdown_event,
-            )
-            parser_pool.append({
-                'waiting_shutdown_event': waiting_shutdown_event,
-                'proc': proc,
-            })
-        '''
-
+        
         try:
             # Run custom things defined by this specific spider
             # By defaut it does nothing
@@ -975,9 +954,9 @@ class Spider(object):
 
                 result_from_cache = None
                 free_threads = self.transport.get_free_threads_number()
-                # Load new task only if network_result_queue is not full
+                # Load new task only if self.network_result_queue is not full
                 if (self.transport.get_free_threads_number()
-                        and (network_result_queue.qsize()
+                        and (self.network_result_queue.qsize()
                              < network_result_queue_limit)):
                     logger_verbose.debug(
                         'Transport and parser have free resources. '
@@ -991,7 +970,7 @@ class Spider(object):
 
                     if task is None:
                         if (not self.transport.get_active_threads_number()
-                                and not network_result_queue.qsize()
+                                and not self.network_result_queue.qsize()
                                 and not self.parser_pipeline.parser_result_queue.qsize()
                                 and not self.task_queue.size()
                                 and all([x['waiting_shutdown_event'].is_set()
@@ -1000,7 +979,7 @@ class Spider(object):
                                                  'active tasks. No parser '
                                                  'futures. No pending results')
                             if not self.task_generator_enabled:
-                                shutdown_event.set()
+                                self.shutdown_event.set()
                                 self.stop()
                         else:
                             logger_verbose.debug(
@@ -1083,7 +1062,7 @@ class Spider(object):
                         #    result, handler)
                         # MP:
                         # ***
-                        network_result_queue.put(result)
+                        self.network_result_queue.put(result)
                     else:
                         self.log_failed_network_result(result)
                         # Try to do network request one more time
@@ -1108,7 +1087,7 @@ class Spider(object):
                         self.stat.inc('spider:parser-result')
                         self.process_handler_result(p_res, p_task)
 
-                if not shutdown_event.is_set():
+                if not self.shutdown_event.is_set():
                     self.parser_pipeline.check_pool_health()
 
             logger_verbose.debug('Work done')
@@ -1128,7 +1107,7 @@ class Spider(object):
                 http_api_proc.join()
 
             # Stop parser processes
-            shutdown_event.set()
+            self.shutdown_event.set()
             self.parser_pipeline.shutdown()
             logger.debug('Main process [pid=%s]: work done' % os.getpid())
 
