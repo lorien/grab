@@ -1099,6 +1099,7 @@ class Spider(object):
         finally:
             # This code is executed when main cycles is breaked
             self.timer.stop('total')
+            self.stat.print_progress_line()
             self.shutdown()
 
             # Stop HTTP API process

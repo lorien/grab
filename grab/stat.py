@@ -71,13 +71,16 @@ class Stat(object):
             items.append('%s: %.2f' % (label, qps))
         return ', '.join(items)
 
+    def print_progress_line(self):
+        now = time.time()
+        self.logger.debug('%s [%s]' % (self.get_speed_line(now),
+                                       self.get_counter_line()))
+
     def inc(self, key, delta=1):
         self.counters[key] += delta
         now = time.time()
         if self.logging_period and now - self.time > self.logging_period:
-            self.logger.debug(
-                '%s [%s]' % (self.get_speed_line(now),
-                                    self.get_counter_line()))
+            self.print_progress_line()
             self.time = now
 
     def collect(self, key, val):
