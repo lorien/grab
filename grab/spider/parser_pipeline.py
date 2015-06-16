@@ -91,7 +91,7 @@ class ParserPipeline(object):
             proc['proc'].join(
                 PARSER_PROCESS_JOIN_TIMEOUT)
             if proc['proc'].is_alive():
-                if self.mp_mode::
+                if self.mp_mode:
                     print('Process %s does not respond. Finish him!' % pname)
                     proc['proc'].terminate()
                 else:
