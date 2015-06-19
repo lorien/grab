@@ -1,4 +1,5 @@
 import logging
+import multiprocessing
 
 PARSER_PROCESS_JOIN_TIMEOUT = 3
 logger = logging.getLogger('grab.spider.parser_pipeline')
