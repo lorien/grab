@@ -27,7 +27,7 @@ class InvalidProxyLine(GrabError):
     pass
 
 
-def parse_proxy_line(line):
+def parse_proxy_line(line, userpwd):
     """
     Parse proxy details from the raw text line.
 
@@ -39,7 +39,8 @@ def parse_proxy_line(line):
     line = line.strip()
     match = RE_SIMPLE_PROXY.search(line)
     if match:
-        return match.group(1), match.group(2), None, None
+        return (match.group(1), match.group(2),
+                userpwd['login'], userpwd['password'])
 
     match = RE_AUTH_PROXY.search(line)
     if match:
@@ -49,7 +50,7 @@ def parse_proxy_line(line):
     raise InvalidProxyLine('Invalid proxy line: %s' % line)
 
 
-def parse_raw_list_data(data, proxy_type='http'):
+def parse_raw_list_data(data, userpwd, proxy_type='http'):
     "Iterate over proxy servers found in the raw data"
     if not isinstance(data, six.text_type):
         data = data.decode('utf-8')
@@ -57,7 +58,7 @@ def parse_raw_list_data(data, proxy_type='http'):
         line = orig_line.strip().replace(' ', '')
         if line and not line.startswith('#'):
             try:
-                host, port, username, password = parse_proxy_line(line)
+                host, port, username, password = parse_proxy_line(line, userpwd)
             except InvalidProxyLine as ex:
                 logger.error(ex)
             else:
@@ -69,10 +70,10 @@ class BaseProxySource(object):
         kwargs.setdefault('proxy_type', 'http')
         self.config = kwargs
 
-    def load(self):
+    def load(self, userpwd):
         data = self.load_raw_data()
         return list(parse_raw_list_data(
-            data, proxy_type=self.config['proxy_type']))
+            data, userpwd, proxy_type=self.config['proxy_type']))
 
 
 class FileProxySource(BaseProxySource):
@@ -107,6 +108,8 @@ class ProxyList(object):
     Class to work with proxy list.
     """
 
+    userpwd = {'login': None, 'password': None}
+
     def __init__(self, source=None):
         self._source = source
         self._list = []
@@ -127,7 +130,7 @@ class ProxyList(object):
 
     def load(self):
         "Load proxy list from configured proxy source"
-        self._list = self._source.load()
+        self._list = self._source.load(self.userpwd)
         self._list_iter = itertools.cycle(self._list)
 
     def get_random_proxy(self):
