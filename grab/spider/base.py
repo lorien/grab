@@ -915,11 +915,13 @@ class Spider(object):
         # 3) Task queue is empty
         # 4) Parser pipeline is ready to shutdown
         # 5) Task generator has completed
-        return (not self.transport.get_active_threads_number()
-                and not self.network_result_queue.qsize()
-                and not self.task_queue.size()
-                and self.parser_pipeline.is_waiting_shutdown()
-                and not self.task_generator_enabled)
+        return (
+            self.parser_pipeline.is_waiting_shutdown()
+            and not self.task_generator_enabled
+            and not self.transport.get_active_threads_number()
+            and not self.task_queue.size()
+            and not self.network_result_queue.qsize()
+        )
 
     def run(self):
         """
