@@ -4,6 +4,7 @@ from test.util import (BaseGrabTestCase, TEST_SERVER_PORT,
                        EXTRA_PORT1, EXTRA_PORT2)
 from test_server import TestServer
 import six
+from grab.proxylist import BaseProxySource
 
 ADDRESS = '127.0.0.1'
 PROXY1 = '%s:%d' % (ADDRESS, TEST_SERVER_PORT)
@@ -88,3 +89,20 @@ class TestProxy(BaseGrabTestCase):
         g.load_proxylist(TMP_FILE, 'text_file', auto_init=True,
                          auto_change=False)
         self.assertTrue('server-' in g.config['proxy'])
+
+    def test_list_proxysource(self):
+        g = build_grab()
+        items = [PROXY1, PROXY2]
+        g.proxylist.load_list(items)
+        g.go('http://yandex.ru')
+        self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
+
+    def test_custom_proxysource(self):
+        class CustomProxySource(BaseProxySource):
+            def load_raw_data(self):
+                return PROXY1
+
+        g = build_grab()
+        g.proxylist.set_source(CustomProxySource())
+        g.go('http://yandex.ru')
+        self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')

@@ -69,6 +69,9 @@ class BaseProxySource(object):
         kwargs.setdefault('proxy_type', 'http')
         self.config = kwargs
 
+    def load_raw_data(self):
+        raise NotImplementedError
+
     def load(self):
         data = self.load_raw_data()
         return list(parse_raw_list_data(
@@ -102,6 +105,17 @@ class WebProxySource(BaseProxySource):
                     raise
 
 
+class ListProxySource(BaseProxySource):
+    """That proxy source that loads list from
+    python list of strings"""
+    def __init__(self, items, **kwargs):
+        self.items = items
+        super(ListProxySource, self).__init__(**kwargs)
+
+    def load_raw_data(self):
+        return '\n'.join(self.items)
+
+
 class ProxyList(object):
     """
     Class to work with proxy list.
@@ -124,6 +138,10 @@ class ProxyList(object):
     def load_url(self, url, proxy_type='http'):
         "Load proxy list from web document"
         self.set_source(WebProxySource(url, proxy_type=proxy_type))
+
+    def load_list(self, items, proxy_type='http'):
+        "Load proxy list from python list"
+        self.set_source(ListProxySource(items, proxy_type=proxy_type))
 
     def load(self):
         "Load proxy list from configured proxy source"
