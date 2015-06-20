@@ -100,9 +100,10 @@ class TestProxy(BaseGrabTestCase):
     def test_custom_proxysource(self):
         class CustomProxySource(BaseProxySource):
             def load_raw_data(self):
-                return PROXY1
+                return '\n'.join(PROXY1, PROXY2 + ':foo:bar')
 
         g = build_grab()
         g.proxylist.set_source(CustomProxySource())
+        g.go('http://yandex.ru')
         g.go('http://yandex.ru')
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
