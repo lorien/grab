@@ -49,7 +49,7 @@ def parse_proxy_line(line):
     raise InvalidProxyLine('Invalid proxy line: %s' % line)
 
 
-def parse_raw_list_data(data, proxy_type='http'):
+def parse_raw_list_data(data, proxy_type='http', proxy_userpwd=None):
     "Iterate over proxy servers found in the raw data"
     if not isinstance(data, six.text_type):
         data = data.decode('utf-8')
@@ -61,12 +61,15 @@ def parse_raw_list_data(data, proxy_type='http'):
             except InvalidProxyLine as ex:
                 logger.error(ex)
             else:
+                if username is None and proxy_userpwd is not None:
+                    username, password = proxy_userpwd.split(':')
                 yield Proxy(host, port, username, password, proxy_type)
 
 
 class BaseProxySource(object):
-    def __init__(self, **kwargs):
-        kwargs.setdefault('proxy_type', 'http')
+    def __init__(self, proxy_type='http', proxy_userpwd=None, **kwargs):
+        kwargs['proxy_type'] = proxy_type
+        kwargs['proxy_userpwd'] = proxy_userpwd
         self.config = kwargs
 
     def load_raw_data(self):
@@ -75,7 +78,9 @@ class BaseProxySource(object):
     def load(self):
         data = self.load_raw_data()
         return list(parse_raw_list_data(
-            data, proxy_type=self.config['proxy_type']))
+            data,
+            proxy_type=self.config['proxy_type'],
+            proxy_userpwd=self.config['proxy_userpwd']))
 
 
 class FileProxySource(BaseProxySource):
@@ -131,17 +136,17 @@ class ProxyList(object):
         self._source = source
         self.load()
 
-    def load_file(self, path, proxy_type='http'):
+    def load_file(self, path, **kwargs):
         "Load proxy list from file"
-        self.set_source(FileProxySource(path, proxy_type=proxy_type))
+        self.set_source(FileProxySource(path, **kwargs))
 
-    def load_url(self, url, proxy_type='http'):
+    def load_url(self, url, **kwargs):
         "Load proxy list from web document"
-        self.set_source(WebProxySource(url, proxy_type=proxy_type))
+        self.set_source(WebProxySource(url, **kwargs))
 
-    def load_list(self, items, proxy_type='http'):
+    def load_list(self, items, **kwargs):
         "Load proxy list from python list"
-        self.set_source(ListProxySource(items, proxy_type=proxy_type))
+        self.set_source(ListProxySource(items, **kwargs))
 
     def load(self):
         "Load proxy list from configured proxy source"
@@ -155,7 +160,7 @@ class ProxyList(object):
 
     def get_next_proxy(self):
         "Return next proxy"
-        return self._list_iter.next()
+        return next(self._list_iter)
 
     def size(self):
         "Return number of proxies in the list"

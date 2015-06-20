@@ -115,3 +115,43 @@ class TestProxy(BaseGrabTestCase):
         g.go('http://yandex.ru')
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
         self.assertEqual(g.doc.headers['listen-port'], str(EXTRA_PORT1))
+
+    def test_baseproxysource_constructor_arguments(self):
+        ps = BaseProxySource()
+        self.assertEqual(ps.config, {'proxy_type': 'http', 'proxy_userpwd': None})
+        ps = BaseProxySource(proxy_type='socks')
+        self.assertEqual(ps.config, {'proxy_type': 'socks', 'proxy_userpwd': None})
+        ps = BaseProxySource(proxy_userpwd='foo:bar')
+        self.assertEqual(ps.config, {'proxy_type': 'http', 'proxy_userpwd': 'foo:bar'})
+        ps = BaseProxySource(foo='bar')
+        self.assertEqual(ps.config, {'proxy_type': 'http', 'proxy_userpwd': None,
+                                     'foo': 'bar'})
+
+    def test_global_proxy_userpwd_argument(self):
+        g = build_grab()
+        items = [PROXY1]
+        g.proxylist.load_list(items)
+        self.assertEquals(g.proxylist.get_next_proxy().username, None)
+
+        g.proxylist.load_list(items, proxy_userpwd='foo:bar')
+        proxy = g.proxylist.get_next_proxy()
+        self.assertEquals(proxy.username, 'foo')
+        self.assertEquals(proxy.password, 'bar')
+
+        items = [PROXY1 + ':admin:test', PROXY2]
+        g.proxylist.load_list(items, proxy_userpwd='foo:bar')
+        proxy = g.proxylist.get_next_proxy()
+        self.assertEquals(proxy.username, 'admin')
+        self.assertEquals(proxy.password, 'test')
+
+    def test_global_proxy_type_argument(self):
+        g = build_grab()
+        items = [PROXY1]
+
+        g.proxylist.load_list(items)
+        proxy = g.proxylist.get_next_proxy()
+        self.assertEquals(proxy.proxy_type, 'http')
+
+        g.proxylist.load_list(items, proxy_type='socks')
+        proxy = g.proxylist.get_next_proxy()
+        self.assertEquals(proxy.proxy_type, 'socks')
