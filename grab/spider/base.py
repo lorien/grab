@@ -33,6 +33,7 @@ from grab.util.misc import camel_case_to_underscore
 from weblib.encoding import make_str, make_unicode
 from grab.base import GLOBAL_STATE
 from grab.stat import Stat, Timer
+from grab.spider.parser_pipeline import ParserPipeline
 
 DEFAULT_TASK_PRIORITY = 100
 DEFAULT_NETWORK_STREAM_NUMBER = 3
@@ -907,6 +908,19 @@ class Spider(object):
         proc.start()
         return proc
 
+    def is_ready_to_shutdown(self):
+        # Things should be true to shutdown spider
+        # 1) No active network connections
+        # 2) Network result queue is empty
+        # 3) Task queue is empty
+        # 4) Parser pipeline is ready to shutdown
+        # 5) Task generator has completed
+        return (not self.transport.get_active_threads_number()
+                and not self.network_result_queue.qsize()
+                and not self.task_queue.size()
+                and self.parser_pipeline.is_waiting_shutdown()
+                and not self.task_generator_enabled)
+
     def run(self):
         """
         Main method. All work is done here.
@@ -923,8 +937,6 @@ class Spider(object):
             http_api_proc = self.start_api_thread()
         else:
             http_api_proc = None
-
-        from grab.spider.parser_pipeline import ParserPipeline
 
         self.parser_pipeline = ParserPipeline(
             bot=self,
@@ -964,27 +976,20 @@ class Spider(object):
 
                     task = self.get_task_from_queue()
 
+                    # If no task received from task queue
+                    # try to query task generator
+                    # and then check if spider could be shuted down
                     if task is None:
                         if not self.transport.get_active_threads_number():
                             self.process_task_generator()
 
                     if task is None:
-                        if (not self.transport.get_active_threads_number()
-                                and not self.network_result_queue.qsize()
-                                and not self.parser_pipeline.parser_result_queue.qsize()
-                                and not self.task_queue.size()
-                                and all([x['waiting_shutdown_event'].is_set()
-                                         for x in self.parser_pipeline.parser_pool])):
-                            logger_verbose.debug('Network transport has no '
-                                                 'active tasks. No parser '
-                                                 'futures. No pending results')
-                            if not self.task_generator_enabled:
-                                self.shutdown_event.set()
-                                self.stop()
-                        else:
-                            logger_verbose.debug(
-                                'Transport active tasks: %d' %
-                                self.transport.get_active_threads_number())
+                        # If no task received from task queue
+                        # check if spider could be shut down
+                        if self.is_ready_to_shutdown():
+                            self.shutdown_event.set()
+                            self.stop()
+                            break # Break `if self.work_allowed` cycle
                     elif isinstance(task, bool) and (task is True):
                         # Take some sleep to not load CPU
                         if not self.transport.get_active_threads_number():
@@ -1042,8 +1047,8 @@ class Spider(object):
                     if task is None or bool(task) == True:
                         # If no network activity
                         if not self.transport.get_active_threads_number():
-                            # If parser (hander result) queue is empty
-                            if not self.parser_pipeline.parser_result_queue.qsize():
+                            # If parser result queue is empty
+                            if not self.parser_pipeline.has_results():
                                 # Just sleep some time, do not kill CPU
                                 time.sleep(0.1)
 
@@ -1079,8 +1084,7 @@ class Spider(object):
                 # ***
                 while True:
                     try:
-                        p_res, p_task = self.parser_pipeline\
-                                            .parser_result_queue.get_nowait()
+                        p_res, p_task = self.parser_pipeline.get_result()
                     except queue.Empty:
                         break
                     else:
