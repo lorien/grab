@@ -596,6 +596,19 @@ class Grab(DeprecatedThings):
         else:
             logger.debug('Proxy list is empty')
 
+    def use_next_proxy(self):
+        """
+        Set next proxy from proxylist.
+        """
+
+        if self.proxylist.size():
+            proxy = self.proxylist.get_next_proxy()
+            self.setup(proxy=proxy.get_address(),
+                       proxy_userpwd=proxy.get_userpwd(),
+                       proxy_type=proxy.proxy_type)
+        else:
+            logger.debug('Proxy list is empty')
+
     """
     Private methods
     """
