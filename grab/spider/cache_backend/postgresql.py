@@ -109,7 +109,7 @@ class CacheBackend(object):
 
         body = cache_item['body']
 
-        def custom_prepare_response_func(transport, g):
+        def custom_prepare_response_func(transport, grab):
             response = Response()
             response.head = cache_item['head']
             response.body = body
@@ -118,7 +118,7 @@ class CacheBackend(object):
             response.upload_size = 0
             response.download_speed = 0
             response.url = cache_item['response_url']
-            response.parse()
+            response.parse(charset=grab.config['document_charset'])
             response.cookies = CookieManager(transport.extract_cookiejar())
             response.from_cache = True
             return response

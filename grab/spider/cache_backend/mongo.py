@@ -59,7 +59,7 @@ class CacheBackend(object):
         if self.use_compression:
             body = zlib.decompress(body)
 
-        def custom_prepare_response_func(transport, g):
+        def custom_prepare_response_func(transport, grab):
             response = Response()
             response.head = cache_item['head'].decode('utf-8')
             response.body = body
@@ -68,7 +68,7 @@ class CacheBackend(object):
             response.upload_size = 0
             response.download_speed = 0
             response.url = cache_item['response_url']
-            response.parse()
+            response.parse(charset=grab.config['document_charset'])
             response.cookies = CookieManager(transport.extract_cookiejar())
             response.from_cache = True
             return response

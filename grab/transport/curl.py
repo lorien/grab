@@ -496,10 +496,7 @@ class CurlTransport(object):
 
         response.url = self.curl.getinfo(pycurl.EFFECTIVE_URL)
 
-        if grab.config['document_charset'] is not None:
-            response.parse(charset=grab.config['document_charset'])
-        else:
-            response.parse()
+        response.parse(charset=grab.config['document_charset'])
 
         response.cookies = CookieManager(self.extract_cookiejar())
 
