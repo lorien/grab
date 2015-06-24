@@ -2,7 +2,6 @@
 Spider task queue backend powered by redis
 """
 from __future__ import absolute_import
-from redis import StrictRedis
 from qr import PriorityQueue
 try:
     import Queue as queue
@@ -48,5 +47,4 @@ class QueueBackend(QueueInterface):
         return len(self.queue_object)
 
     def clear(self):
-        con = StrictRedis()
-        con.delete(self.queue_name)
+        self.queue_object.clear()
