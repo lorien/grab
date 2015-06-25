@@ -101,3 +101,22 @@ class ParserPipeline(object):
                     # have daemon=True flag
                     pass
             logger.debug('Finished joining parser process: %s' % pname)
+
+    def has_results(self):
+        return self.parser_result_queue.qsize()
+
+    def is_parser_pool_waiting_shutdown(self):
+        return all(x['waiting_shutdown_event'].is_set()
+                   for x in self.parser_pool)
+
+    def is_waiting_shutdown(self):
+        return (not self.has_results()
+                and self.is_parser_pool_waiting_shutdown())
+
+    def get_result(self):
+        """
+        Returns tuple (result, task)
+
+        Result could be Task, Data, Exception, dict
+        """
+        return self.parser_result_queue.get_nowait()

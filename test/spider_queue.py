@@ -121,6 +121,17 @@ class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
                           bot.add_task,
                           Task('page', url=self.server.get_url(), delay=1))
 
+    def test_clear(self):
+        bot = build_spider(self.SimpleSpider)
+        self.setup_queue(bot)
+        bot.task_queue.clear()
+
+        for x in six.moves.range(5):
+            bot.add_task(Task('page', url=self.server.get_url()))
+        self.assertEqual(5, bot.task_queue.size())
+        bot.task_queue.clear()
+        self.assertEqual(0, bot.task_queue.size())
+
 
 class QueueInterfaceTestCase(TestCase):
     def test_abstract_methods(self):
