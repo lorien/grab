@@ -1113,6 +1113,8 @@ class Spider(object):
                 http_api_proc.server.shutdown()
                 http_api_proc.join()
 
+            self.task_queue.clear()
+
             # Stop parser processes
             self.shutdown_event.set()
             self.parser_pipeline.shutdown()

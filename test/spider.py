@@ -211,3 +211,25 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         self.assertRaises(FatalError, bot.run)
+
+    def test_task_queue_clear(self):
+        class TestSpider(Spider):
+            def task_page(self, grab, task):
+                self.stop()
+
+            def task_keyboard_interrupt_page(self, grab, task):
+                raise KeyboardInterrupt
+
+        bot = build_spider(TestSpider)
+        bot.setup_queue()
+        for x in six.moves.range(5):
+            bot.add_task(Task('page', url=self.server.get_url()))
+        self.assertEqual(5, bot.task_queue.size())
+        bot.run()
+        self.assertEqual(0, bot.task_queue.size())
+
+        for x in six.moves.range(5):
+            bot.add_task(Task('keyboard_interrupt_page', url=self.server.get_url()))
+        self.assertEqual(5, bot.task_queue.size())
+        bot.run()
+        self.assertEqual(0, bot.task_queue.size())
