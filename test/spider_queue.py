@@ -45,6 +45,17 @@ class SpiderQueueMixin(object):
         bot = build_spider(self.SimpleSpider)
         bot.render_stats()
 
+    def test_clear(self):
+        bot = build_spider(self.SimpleSpider)
+        self.setup_queue(bot)
+        bot.task_queue.clear()
+
+        for x in six.moves.range(5):
+            bot.add_task(Task('page', url=self.server.get_url()))
+        self.assertEqual(5, bot.task_queue.size())
+        bot.task_queue.clear()
+        self.assertEqual(0, bot.task_queue.size())
+
 
 class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
     def setup_queue(self, bot):
@@ -71,6 +82,18 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
         self.setup_queue(bot)
         bot.run()
         self.assertEqual(bot.stat.collections['numbers'], [1, 3, 4, 2])
+
+    def test_schedule_list_clear(self):
+        bot = build_spider(self.SimpleSpider)
+        self.setup_queue(bot)
+        bot.task_queue.clear()
+
+        for x in six.moves.range(5):
+            bot.add_task(Task('page', url=self.server.get_url(), delay=x+1))
+
+        self.assertEqual(5, len(bot.task_queue.schedule_list))
+        bot.task_queue.clear()
+        self.assertEqual(0, len(bot.task_queue.schedule_list))
 
 
 class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
@@ -120,17 +143,6 @@ class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
         self.assertRaises(SpiderMisuseError,
                           bot.add_task,
                           Task('page', url=self.server.get_url(), delay=1))
-
-    def test_clear(self):
-        bot = build_spider(self.SimpleSpider)
-        self.setup_queue(bot)
-        bot.task_queue.clear()
-
-        for x in six.moves.range(5):
-            bot.add_task(Task('page', url=self.server.get_url()))
-        self.assertEqual(5, bot.task_queue.size())
-        bot.task_queue.clear()
-        self.assertEqual(0, bot.task_queue.size())
 
 
 class QueueInterfaceTestCase(TestCase):
