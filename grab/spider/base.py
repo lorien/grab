@@ -132,7 +132,7 @@ class Spider(object):
                  meta=None,
                  only_cache=False,
                  config=None,
-                 slave=False,
+                 slave=None,
                  max_task_generator_chunk=None,
                  args=None,
                  # New options start here
@@ -170,10 +170,11 @@ class Spider(object):
         * newtork_response_queue=None,
         """
 
-        if slave:
+        if slave is not None:
             raise SpiderConfigurtionError(
                 'Slave mode is not supported anymore. '
-                'Use multiprocess mode instead.')
+                'Use `mp_mode=True` option to run multiple HTML'
+                ' parser processes.')
 
         # API:
         self.http_api_port = http_api_port

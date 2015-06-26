@@ -16,8 +16,6 @@ def setup_arg_parser(parser):
     parser.add_argument('spider_name', type=str)
     parser.add_argument('-t', '--thread-number', default=None, type=int,
                         help='Number of network threads')
-    parser.add_argument('--slave', action='store_true', default=False,
-                        help='Enable the slave-mode')
     parser.add_argument('-n', '--network-logs', action='store_true',
                         default=False,
                         help='Dump to console details about network requests')
@@ -36,7 +34,7 @@ def setup_arg_parser(parser):
 
 
 def get_lock_key(spider_name, lock_key=None, ignore_lock=False,
-                 slave=False, **kwargs):
+                 **kwargs):
     # --ignore-lock has highest precedence
     if ignore_lock:
         return None
@@ -44,10 +42,6 @@ def get_lock_key(spider_name, lock_key=None, ignore_lock=False,
     # If --lock-key is specified explicitly use it
     if lock_key is not None:
         return lock_key
-
-    # Do not lock --slave spiders
-    if slave:
-        return None
 
     # As fallback, if no information has been given about locking
     # generate lock key from the spider name and use it
@@ -70,7 +64,7 @@ def save_list(lst, path):
         out.write(b'\n'.join(lines) + b'\n')
 
 
-def main(spider_name, thread_number=None, slave=False,
+def main(spider_name, thread_number=None,
          settings_module='settings', network_logs=False,
          disable_proxy=False, ignore_lock=False,
          disable_report=False,
@@ -98,7 +92,6 @@ def main(spider_name, thread_number=None, slave=False,
 
     bot = spider_class(
         thread_number=thread_number,
-        slave=slave,
         config=spider_config,
         network_try_limit=None,
         task_try_limit=None,
