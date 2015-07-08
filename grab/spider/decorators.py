@@ -35,6 +35,8 @@ def integrity(integrity_func, integrity_errors=(ResponseNotValid,),
                 yield task.clone(refresh_cache=True)
                 self.stat.inc(ex.__class__.__name__)
                 #logging.error(ex)
+            except Exception as ex:
+                raise
             else:
                 grab.meta['integrity_error'] = None
                 result = func(self, grab, task)
