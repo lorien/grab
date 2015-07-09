@@ -860,6 +860,11 @@ class Spider(object):
 
         if task.use_proxylist:
             if self.proxylist_enabled:
+                # Need this to work around
+                # pycurl feature/bug: 
+                # pycurl instance uses previously connected proxy server
+                # even if `proxy` options is set with another proxy server
+                grab.setup(connection_reuse=False)
                 if self.proxy_auto_change:
                     self.proxy = self.change_proxy(task, grab)
 
@@ -873,7 +878,6 @@ class Spider(object):
     def submit_task_to_transport(self, task, grab, grab_config_backup):
         self.stat.inc('spider:request-network')
         self.stat.inc('spider:task-%s-network' % task.name)
-        self.process_grab_proxy(task, grab)
         with self.timer.log_time('network_transport'):
             logger_verbose.debug('Submitting task to the transport '
                                  'layer')
@@ -1019,6 +1023,7 @@ class Spider(object):
                                     logger.debug('Skipping network request to '
                                                  '%s' % grab.config['url'])
                                 else:
+                                    self.process_grab_proxy(task, grab)
                                     self.submit_task_to_transport(
                                         task, grab, grab_config_backup)
                         else:
