@@ -15,8 +15,10 @@ DEFAULT_LOGGING_PERIOD = 1
 class Stat(object):
     def __init__(self, logger_name='grab.stat', log_file=None,
                  logging_period=DEFAULT_LOGGING_PERIOD,
+                 speed_key=DEFAULT_SPEED_KEY,
                  extra_speed_keys=None):
-        self.setup_speed_keys(extra_speed_keys)
+        self.speed_key = speed_key
+        self.setup_speed_keys(speed_key, extra_speed_keys)
         self.time = time.time()
         self.logging_ignore_prefixes = ['spider:', 'parser:']
         self.logging_period = logging_period
@@ -26,8 +28,8 @@ class Stat(object):
         self.setup_logging_file(log_file)
         self.reset()
 
-    def setup_speed_keys(self, extra_keys):
-        keys = [DEFAULT_SPEED_KEY]
+    def setup_speed_keys(self, speed_key, extra_keys):
+        keys = [speed_key]
         if extra_keys:
             keys.extend(extra_keys)
         self.speed_keys = keys
@@ -64,7 +66,7 @@ class Stat(object):
             diff = count_current - self.counters_prev[key]
             qps = diff / (now - self.time) 
             self.counters_prev[key] = count_current
-            if key == DEFAULT_SPEED_KEY:
+            if key == self.speed_key:
                 label = 'RPS'
             else:
                 label = key
