@@ -475,9 +475,9 @@ class CurlTransport(object):
         # py3 hack
         if six.PY3:
             bytes_head = b''.join(self.response_head_chunks)
-            response.head = make_unicode(bytes_head)
         else:
-            response.head = ''.join(self.response_head_chunks)
+            bytes_head = ''.join(self.response_head_chunks)
+        response.head = make_unicode(bytes_head, errors='ignore')
 
         if self.body_path:
             response.body_path = self.body_path
