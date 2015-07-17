@@ -18,7 +18,7 @@ import os
 from weblib.http import (encode_cookies, normalize_http_values,
                         normalize_post_data, normalize_url)
 from weblib.user_agent import random_user_agent
-from weblib.encoding import make_str, decode_list, decode_pairs
+from weblib.encoding import make_str, decode_pairs, make_unicode
 import six
 from six.moves.http_cookiejar import CookieJar
 
@@ -468,14 +468,17 @@ class CurlTransport(object):
                     raise error.GrabNetworkError(ex.args[0], ex.args[1])
 
     def prepare_response(self, grab):
-        # py3 hack
-        if six.PY3:
-            self.response_head_chunks = decode_list(self.response_head_chunks)
-
         if self.body_file:
             self.body_file.close()
         response = Response()
-        response.head = ''.join(self.response_head_chunks)
+
+        # py3 hack
+        if six.PY3:
+            bytes_head = b''.join(self.response_head_chunks)
+            response.head = make_unicode(bytes_head)
+        else:
+            response.head = ''.join(self.response_head_chunks)
+
         if self.body_path:
             response.body_path = self.body_path
         else:
