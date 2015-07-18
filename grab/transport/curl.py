@@ -21,6 +21,7 @@ from weblib.user_agent import random_user_agent
 from weblib.encoding import make_str, decode_pairs, make_unicode
 import six
 from six.moves.http_cookiejar import CookieJar
+import sys
 
 from grab.cookie import create_cookie, CookieManager
 from grab import error
@@ -466,6 +467,9 @@ class CurlTransport(object):
                                                           ex.args[1])
                 else:
                     raise error.GrabNetworkError(ex.args[0], ex.args[1])
+        except Exception as ex:
+            six.reraise(error.GrabInternalError, error.GrabInternalError(ex),
+                        sys.exc_info()[2])
 
     def prepare_response(self, grab):
         if self.body_file:

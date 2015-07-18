@@ -29,7 +29,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
 
         server = self.server
 
-        class SomeSpider(Spider):
+        class TestSpider(Spider):
             def task_generator(self):
                 self.done_counter = 0
                 yield Task('page', url=server.get_url())
@@ -41,5 +41,28 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         self.server.response_once['headers'] = [
             ('Location', INVALID_URL),
         ]
-        bot = build_spider(SomeSpider, network_try_limit=1)
+        bot = build_spider(TestSpider, network_try_limit=1)
         bot.run()
+
+    '''
+    def test_redirect_with_invalid_byte(self):
+        url = self.server.get_url()
+        invalid_url = b'http://\xa0' + url.encode('ascii')
+
+        def callback(server):
+            server.set_status(301)
+            server.add_header('Location', invalid_url)
+            server.write('')
+            server.finish()
+
+        class TestSpider(Spider):
+            def task_generator(self):
+                yield Task('page', url='http://www.tripadvisor.com/ShowUrl?&excludeFromVS=false&odc=BusinessListingsUrl&d=4289178&url=1')
+
+            def task_page(self, grab, task):
+                pass
+
+        self.server.response['callback'] = callback
+        bot = TestSpider()
+        bot.run()
+    '''

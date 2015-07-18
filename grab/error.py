@@ -79,5 +79,9 @@ class GrabInvalidUrl(GrabError):
     """
 
 
+class GrabInternalError(GrabError):
+    pass
+
+
 def warn(msg):
     warnings.warn(msg, category=GrabDeprecationWarning, stacklevel=3)

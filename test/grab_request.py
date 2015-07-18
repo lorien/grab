@@ -2,6 +2,8 @@
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 
+from grab.error import GrabInternalError
+
 
 class GrabRequestTestCase(BaseGrabTestCase):
     def setUp(self):
@@ -35,3 +37,17 @@ class GrabRequestTestCase(BaseGrabTestCase):
         self.server.response['callback'] = callback
         g = build_grab()
         g.go(self.server.get_url())
+
+    def test_redirect_with_invalid_byte(self):
+        url = self.server.get_url()
+        invalid_url = b'http://\xa0' + url.encode('ascii')
+
+        def callback(server):
+            server.set_status(301)
+            server.add_header('Location', invalid_url)
+            server.write('')
+            server.finish()
+
+        self.server.response['callback'] = callback
+        g = build_grab()
+        self.assertRaises(GrabInternalError, g.go, self.server.get_url())

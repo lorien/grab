@@ -95,7 +95,12 @@ class MulticurlTransport(object):
 
     def iterate_results(self):
         while True:
-            queued_messages, ok_list, fail_list = self.multi.info_read()
+            try:
+                queued_messages, ok_list, fail_list = self.multi.info_read()
+            except Exception as ex:
+                # Usually that should not happen
+                logging.error('', exc_info=ex)
+                continue
 
             results = []
             for curl in ok_list:
@@ -137,10 +142,12 @@ class MulticurlTransport(object):
                 except GrabTooManyRedirectsError:
                     ecode = ERROR_TOO_MANY_REFRESH_REDIRECTS
                     emsg = 'Too many meta refresh redirects'
+                    ok = False
                 except Exception as ex:
                     logging.error('', exc_info=ex)
                     ecode = ERROR_INTERNAL_GRAB_ERROR
                     emsg = 'Internal grab error'
+                    ok = False
 
                 grab.response.error_code = ecode
                 grab.response.error_msg = emsg
