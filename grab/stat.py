@@ -64,7 +64,10 @@ class Stat(object):
         for key in self.speed_keys:
             count_current = self.counters[key]
             diff = count_current - self.counters_prev[key]
-            qps = diff / (now - self.time) 
+            divisor = now - self.time
+            if divisior == 0:
+                divisior = 0.1
+            qps = diff / divisior
             self.counters_prev[key] = count_current
             if key == self.speed_key:
                 label = 'RPS'
