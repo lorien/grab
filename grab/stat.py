@@ -62,10 +62,13 @@ class Stat(object):
     def get_speed_line(self, now):
         items = []
         for key in self.speed_keys:
-            count_current = self.counters[key]
-            diff = count_current - self.counters_prev[key]
-            qps = diff / (now - self.time) 
-            self.counters_prev[key] = count_current
+            if now == self.time:
+                qps = 0
+            else:
+                count_current = self.counters[key]
+                diff = count_current - self.counters_prev[key]
+                qps = diff / (now - self.time) 
+                self.counters_prev[key] = count_current
             if key == self.speed_key:
                 label = 'RPS'
             else:
