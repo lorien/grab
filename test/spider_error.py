@@ -45,6 +45,8 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot.run()
 
     '''
+    # That test case ruins the spider instance :(
+
     def test_redirect_with_invalid_byte(self):
         url = self.server.get_url()
         invalid_url = b'http://\xa0' + url.encode('ascii')
@@ -57,7 +59,9 @@ class SpiderErrorTestCase(BaseGrabTestCase):
 
         class TestSpider(Spider):
             def task_generator(self):
-                yield Task('page', url='http://www.tripadvisor.com/ShowUrl?&excludeFromVS=false&odc=BusinessListingsUrl&d=4289178&url=1')
+                #yield Task('page', url='http://www.tripadvisor.com/ShowUrl?&excludeFromVS=false&odc=BusinessListingsUrl&d=4289178&url=1')
+                #yield Task('page', invalid_url)
+                yield Task('page', url)
 
             def task_page(self, grab, task):
                 pass

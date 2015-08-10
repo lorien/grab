@@ -95,12 +95,12 @@ class MulticurlTransport(object):
 
     def iterate_results(self):
         while True:
-            try:
-                queued_messages, ok_list, fail_list = self.multi.info_read()
-            except Exception as ex:
-                # Usually that should not happen
-                logging.error('', exc_info=ex)
-                continue
+            #try:
+            queued_messages, ok_list, fail_list = self.multi.info_read()
+            #except Exception as ex:
+            #    # Usually that should not happen
+            #    logging.error('', exc_info=ex)
+            #    continue
 
             results = []
             for curl in ok_list:
