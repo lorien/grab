@@ -6,6 +6,10 @@ os:
   - linux
   - osx
 
+matrix:
+  allow_failures:
+    - os: osx
+
 env:
   - TOX_ENV=py27
   - TOX_ENV=py33
