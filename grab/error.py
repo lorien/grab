@@ -51,6 +51,13 @@ class GrabConnectionError(GrabNetworkError):
     """
 
 
+class GrabCouldNotResolveHostError(GrabNetworkError):
+    """
+    URLE_COULDNT_RESOLVE_HOST (6)
+    Couldn't resolve host. The given remote host was not resolved.
+    """
+
+
 class GrabAuthError(GrabError):
     """
     Raised when remote server denies authentication credentials.

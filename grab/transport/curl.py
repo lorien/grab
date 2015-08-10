@@ -465,6 +465,9 @@ class CurlTransport(object):
                 elif ex.args[0] == 47:
                     raise error.GrabTooManyRedirectsError(ex.args[0],
                                                           ex.args[1])
+                elif ex.args[0] == 6:
+                    raise error.GrabCouldNotResolveHostError(ex.args[0],
+                                                             ex.args[1])
                 else:
                     raise error.GrabNetworkError(ex.args[0], ex.args[1])
         except Exception as ex:

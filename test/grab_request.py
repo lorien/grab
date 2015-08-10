@@ -2,7 +2,7 @@
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 
-from grab.error import GrabInternalError
+from grab.error import GrabInternalError, GrabCouldNotResolveHostError
 
 
 class GrabRequestTestCase(BaseGrabTestCase):
@@ -50,4 +50,5 @@ class GrabRequestTestCase(BaseGrabTestCase):
 
         self.server.response['callback'] = callback
         g = build_grab()
-        self.assertRaises(GrabInternalError, g.go, self.server.get_url())
+        self.assertRaises((GrabInternalError, GrabCouldNotResolveHostError),
+                          g.go, self.server.get_url())
