@@ -23,7 +23,7 @@ Grab. Если вам нужны только её сообщения, то на
 Также вы можете воспользоваться функцией `default_logging` которая настраивает logging-систему на вывод
 всех сообщений Grab в файл::
 
-    from grab.tools.logs import default_logging()
+    from grab.tools.logs import default_logging
     default_logging()
 
 После вызова этой функции вы можете через отдельную консоль наблюдать за активностью Grab с помощью
