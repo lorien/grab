@@ -12,8 +12,7 @@ setup(
     author='Gregory Petukhov',
     author_email='lorien@lorien.name',
 
-    packages=find_packages(),
-    include_package_data=True,
+    packages=find_packages(exclude=['test', 'test.files']),
     install_requires=['lxml', 'pycurl', 'selection', 'weblib>=0.1.10', 'six'],
 
     license="MIT",
