@@ -4,6 +4,7 @@ from grab.spider.error import SpiderError, FatalError
 import os
 import signal
 import mock
+from grab.spider.decorators import integrity
 
 from test.util import BaseGrabTestCase, build_spider, multiprocess_mode
 
@@ -20,6 +21,14 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             self.foo_count += 1
             if not task.get('last'):
                 yield Task('page', url=self.meta['url'], last=True)
+
+        def check_integrity(self, grab):
+            pass
+
+        @integrity('check_integrity')
+        def task_page2(self, grab, task):
+            if True:#not task.get('last'):
+                yield task.clone(last=True)
 
         def shutdown(self):
             self.foo_count += 1
@@ -46,6 +55,13 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.add_task(Task('page', self.server.get_url()))
         bot.run()
         self.assertEqual(2, bot.foo_count)
+
+    @multiprocess_mode(True)
+    def test_integrity_decorator_in_mp_mode(self):
+        bot = build_spider(self.SimpleSpider)
+        bot.setup_queue()
+        bot.add_task(Task('page2', self.server.get_url()))
+        bot.run()
 
     '''
     @multiprocess_mode(True)
