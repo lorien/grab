@@ -63,6 +63,34 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.add_task(Task('page2', self.server.get_url()))
         bot.run()
 
+    @multiprocess_mode(True)
+    def test_requests_per_process(self):
+        url = self.server.get_url()
+
+        class TestSpider(Spider):
+            def task_generator(self):
+                for x in range(3):
+                    yield Task('page', url=url)
+
+            def task_page(self, grab, task):
+                self.collect('pid', os.getpid())
+
+        bot = TestSpider(mp_mode=True, parser_pool_size=1)
+        bot.run()
+        self.assertEqual(1, len(set(bot.stat.collections['pid'])))
+
+        bot = TestSpider(mp_mode=True, parser_pool_size=1, parser_requests_per_process=1)
+        bot.run()
+        self.assertEqual(3, len(set(bot.stat.collections['pid'])))
+
+        bot = TestSpider(mp_mode=True, parser_pool_size=1, parser_requests_per_process=2)
+        bot.run()
+        self.assertEqual(2, len(set(bot.stat.collections['pid'])))
+
+        bot = TestSpider(mp_mode=True, parser_pool_size=1, parser_requests_per_process=3)
+        bot.run()
+        self.assertEqual(3, len(set(bot.stat.collections['pid'])))
+
     '''
     @multiprocess_mode(True)
     def test_task_callback(self):

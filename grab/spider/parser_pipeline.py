@@ -7,7 +7,7 @@ logger = logging.getLogger('grab.spider.parser_pipeline')
 
 class ParserPipeline(object):
     def __init__(self, bot, mp_mode, pool_size, shutdown_event,
-                 network_result_queue):
+                 network_result_queue, requests_per_process):
         self.bot = bot
         self.mp_mode = mp_mode
 
@@ -20,7 +20,7 @@ class ParserPipeline(object):
                 self.pool_size = multiprocessing.cpu_count()
         self.shutdown_event = shutdown_event
         self.network_result_queue = network_result_queue
-        self.restore_count = 0
+        self.requests_per_process = requests_per_process
 
         if self.mp_mode:
             from multiprocessing import Process, Event, Queue
@@ -49,6 +49,7 @@ class ParserPipeline(object):
                 parser_result_queue=self.parser_result_queue,
                 waiting_shutdown_event=waiting_shutdown_event,
                 shutdown_event=self.shutdown_event,
+                parser_requests_per_process=self.requests_per_process,
                 parser_mode=True,
                 meta=self.bot.meta)
         else:
@@ -63,6 +64,7 @@ class ParserPipeline(object):
             bot.parser_result_queue = self.parser_result_queue
             bot.waiting_shutdown_event = waiting_shutdown_event
             bot.shutdown_event = self.shutdown_event
+            bot.parser_requests_per_process = self.requests_per_process,
             bot.meta = self.bot.meta
         proc = Process(target=bot.run_parser)
         if not self.mp_mode:
@@ -73,7 +75,7 @@ class ParserPipeline(object):
     def check_pool_health(self):
         for proc in self.parser_pool:
             if not proc['proc'].is_alive():
-                self.restore_count += 1
+                self.bot.stat.inc('parser-pipeline-restore')
                 logger.debug('Restoring died parser process')
                 down_event, new_proc = self.start_parser_process()
                 self.parser_pool.append({

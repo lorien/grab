@@ -415,4 +415,4 @@ class TestSpider(BaseGrabTestCase):
         for x in range(5):
             bot.add_task(Task('page', url='http://ya.ru/'))
         bot.run()
-        self.assertTrue(1 < bot.parser_pipeline.restore_count)
+        self.assertTrue(1 < bot.stat.counters['parser-pipeline-restore'])

@@ -145,6 +145,7 @@ class Spider(object):
                  mp_mode=False,
                  parser_pool_size=None,
                  parser_mode=False,
+                 parser_requests_per_process=10000,
                  # http api
                  http_api_port=None,
                  ):
@@ -202,6 +203,7 @@ class Spider(object):
                 'non-multiprocess mode')
         self.parser_pool_size = parser_pool_size
         self.parser_mode = parser_mode
+        self.parser_requests_per_process = parser_requests_per_process
 
         self.stat = Stat()
         self.timer = Timer()
@@ -707,6 +709,7 @@ class Spider(object):
         if self.parser_mode:
             self.stat = Stat(logging_period=None)
         self.prepare_parser()
+        process_request_count = 0
         try:
             recent_task_time = time.time()
             while True:
@@ -723,6 +726,7 @@ class Spider(object):
                         logger_verbose.debug('Got shutdown event')
                         return
                 else:
+                    process_request_count += 1
                     recent_task_time = time.time()
                     if self.parser_mode:
                         self.stat.reset()
@@ -746,6 +750,10 @@ class Spider(object):
                                 'collections': self.stat.collections,
                             }
                             self.parser_result_queue.put((data, result['task']))
+                        if self.parser_mode:
+                            if self.parser_requests_per_process:
+                                if process_request_count >= self.parser_requests_per_process:
+                                    break
         except Exception as ex:
             logging.error('', exc_info=ex)
             raise
@@ -950,7 +958,9 @@ class Spider(object):
             mp_mode=self.mp_mode,
             pool_size=self.parser_pool_size,
             shutdown_event=self.shutdown_event,
-            network_result_queue=self.network_result_queue)
+            network_result_queue=self.network_result_queue,
+            requests_per_process=self.parser_requests_per_process,
+        )
         network_result_queue_limit = max(10, self.thread_number * 2)
         
         try:
