@@ -73,7 +73,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                     yield Task('page', url=url)
 
             def task_page(self, grab, task):
-                self.collect('pid', os.getpid())
+                self.stat.collect('pid', os.getpid())
 
         bot = TestSpider(mp_mode=True, parser_pool_size=1)
         bot.run()
@@ -89,7 +89,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         bot = TestSpider(mp_mode=True, parser_pool_size=1, parser_requests_per_process=3)
         bot.run()
-        self.assertEqual(3, len(set(bot.stat.collections['pid'])))
+        self.assertEqual(1, len(set(bot.stat.collections['pid'])))
 
     '''
     @multiprocess_mode(True)
