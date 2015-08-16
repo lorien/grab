@@ -289,7 +289,7 @@ class Spider(object):
         # MP:
         # ***
         if self.parser_mode:
-            self.parser_result_queue.put(task)
+            self.parser_result_queue.put((task, None))
             return
 
         if self.task_queue is None:
