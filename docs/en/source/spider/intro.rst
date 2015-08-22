@@ -12,8 +12,8 @@ The Spider process network requests asynchronously. There is only one process
 that handles all network, business logic and HTML-processing tasks. Network
 requests are performed by multicurl library. In short, when you create new
 network request it is processed by multicurl and when the response is ready,
-then the corresponding handler from your spider classs is called with result
-of networ request.
+then the corresponding handler from your spider class is called with result
+of network request.
 
 Each handler receives two arguments. First argument is a Grab object, that
 contains all data bout network request and response. The second argument is
