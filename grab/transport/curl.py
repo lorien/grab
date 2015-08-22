@@ -93,7 +93,10 @@ class CurlTransport(object):
     def __init__(self):
         self.curl = pycurl.Curl()
 
-    def setup_body_file(self, storage_dir, storage_filename):
+    def setup_body_file(self, storage_dir, storage_filename, create_dir=False):
+        if create_dir:
+            if not os.path.exists(storage_dir):
+                os.makedirs(storage_dir)
         if storage_filename is None:
             handle, path = tempfile.mkstemp(dir=storage_dir)
             self.body_file = os.fdopen(handle, 'wb')
@@ -227,8 +230,10 @@ class CurlTransport(object):
             if not grab.config['body_storage_dir']:
                 raise error.GrabMisuseError(
                     'Option body_storage_dir is not defined')
-            self.setup_body_file(grab.config['body_storage_dir'],
-                                 grab.config['body_storage_filename'])
+            self.setup_body_file(
+                grab.config['body_storage_dir'],
+                grab.config['body_storage_filename'],
+                create_dir=grab.config['body_storage_create_dir'])
             self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
 
         if grab.config['verbose_logging']:

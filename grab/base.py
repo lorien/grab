@@ -127,6 +127,7 @@ def default_config():
         body_inmemory=True,
         body_storage_dir=None,
         body_storage_filename=None,
+        body_storage_create_dir=False,
         reject_file_size=None,
 
         # Content compression
