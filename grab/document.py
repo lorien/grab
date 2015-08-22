@@ -211,8 +211,8 @@ class BodyExtension(object):
         if self.body_path:
             with open(self.body_path, 'rb') as inp:
                 body_chunk = inp.read(4096)
-        elif self._cached_body:
-            body_chunk = self._cached_body[:4096]
+        elif self._bytes_body:
+            body_chunk = self._bytes_body[:4096]
         return body_chunk
 
     def convert_body_to_unicode(self, body, bom, charset,
@@ -230,14 +230,6 @@ class BodyExtension(object):
             errors = 'strict'
         return body.decode(charset, errors).strip()
 
-    def _check_cached_body(self):
-        """
-        WTF???
-        """
-        if not self._cached_body:
-            if self.body_path:
-                self._cached_body = self.read_body_from_file()
-
     def read_body_from_file(self):
         with open(self.body_path, 'rb') as inp:
             return inp.read()
@@ -247,10 +239,9 @@ class BodyExtension(object):
         Return response body as unicode string.
         """
 
-        # self._check_cached_body()
         if not self._unicode_body:
             self._unicode_body = self.convert_body_to_unicode(
-                body=self.body,  # _cached_body,
+                body=self.body,
                 bom=self.bom,
                 charset=self.charset,
                 ignore_errors=ignore_errors,
@@ -262,15 +253,17 @@ class BodyExtension(object):
         if self.body_path:
             return self.read_body_from_file()
         else:
-            return self._cached_body
+            return self._bytes_body
 
     def _write_body(self, body):
-        if self.body_path:
+        if isinstance(body, six.text_type):
+            raise GrabMisuseError('Document.body could be only byte string.')
+        elif self.body_path:
             with open(self.body_path, 'wb') as out:
                 out.write(body)
-            self._cached_body = None
+            self._bytes_body = None
         else:
-            self._cached_body = body
+            self._bytes_body = body
         self._unicode_body = None
 
     body = property(_read_body, _write_body)
@@ -297,7 +290,6 @@ class DomTreeExtension(object):
         from grab.base import GLOBAL_STATE
 
         if self._lxml_tree is None:
-            # body = self.unicode_runtime_body(
             fix_setting = self.grab.config['fix_special_entities']
             body = self.unicode_body(fix_special_entities=fix_setting).strip()
             if self.grab.config['lowercased_tree']:
@@ -719,9 +711,9 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
         i.e. result of network request)
     """
 
-    __slots__ = ('status', 'code', 'head', '_cached_body', '_runtime_body',
+    __slots__ = ('status', 'code', 'head', '_bytes_body',
                  'body_path', 'headers', 'url', 'cookies',
-                 'charset', '_unicode_body', '_unicode_runtime_body',
+                 'charset', '_unicode_body',
                  'bom', 'timestamp',
                  'name_lookup_time', 'connect_time', 'total_time',
                  'download_size', 'upload_size', 'download_speed',
@@ -760,10 +752,8 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
 
         # Body
         self.body_path = None
-        self._cached_body = None
+        self._bytes_body = None
         self._unicode_body = None
-        self._runtime_body = None
-        self._unicode_runtime_body = None
 
         # DOM Tree
         self._lxml_tree = None
@@ -919,10 +909,7 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
                 pass
 
         with open(path, 'wb') as out:
-            if isinstance(self._cached_body, six.text_type):
-                out.write(self._cached_body.encode('utf-8'))
-            else:
-                out.write(self._cached_body)
+            out.write(self._bytes_body)
 
     def save_hash(self, location, basedir, ext=None):
         """
@@ -962,10 +949,7 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
             except OSError:
                 pass
             with open(path, 'wb') as out:
-                if isinstance(self._cached_body, six.text_type):
-                    out.write(self._cached_body.encode('utf-8'))
-                else:
-                    out.write(self._cached_body)
+                out.write(self._bytes_body)
         return rel_path
 
     @property
