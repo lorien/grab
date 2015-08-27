@@ -1,10 +1,9 @@
 """
 This is obsoleted module. Use selection package instead.
 """
+from selection.base import SelectorList, RexResultList  # noqa
+from selection.backend import PyquerySelector, XpathSelector as XpathSelectorOrigin
 
-from selection.selector_list import SelectorList, RexResultList  # noqa
-from selection.backend.xpath import XpathSelector as XpathSelectorOrigin
-from selection.backend.pyquery import PyquerySelector  # noqa
 from grab.error import warn
 
 
