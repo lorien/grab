@@ -64,7 +64,7 @@ images.yandex.ru and save found data to the file.
                 # Pay attention, that we create new tasks
                 # with yield call. Also you can use `add_task` method:
                 # self.add_task(Task('habrapost', url=...))
-                yield Task('habrapost', url=elem.get('href'))
+                yield Task('habrapost', url=elem.attr('href'))
 
         def task_habrapost(self, grab, task):
             print 'Habrahabr topic: %s' % task.url
