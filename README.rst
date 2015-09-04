@@ -13,9 +13,6 @@ Grab
 .. image:: https://img.shields.io/pypi/v/grab.svg
     :target: https://pypi.python.org/pypi/grab
 
-.. image:: https://landscape.io/github/lorien/grab/master/landscape.png
-   :target: https://landscape.io/github/lorien/grab/master
-
 .. image:: https://readthedocs.org/projects/grab/badge/?version=latest
     :target: http://docs.grablib.org/en/latest/
 
