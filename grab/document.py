@@ -20,6 +20,8 @@ import time
 from selection import XpathSelector
 import six
 from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
+import threading
+from six import BytesIO, StringIO
 
 import weblib.encoding
 from grab.cookie import CookieManager
@@ -51,6 +53,7 @@ _BOM_TABLE = [
     (codecs.BOM_UTF8, 'utf-8')
 ]
 _FIRST_CHARS = set(char[0] for (char, name) in _BOM_TABLE)
+THREAD_STORAGE = threading.local()
 
 
 def read_bom(data):
@@ -283,8 +286,26 @@ class DomTreeExtension(object):
         else:
             return self.build_html_tree()
 
+    def _build_dom(self, content, mode):
+        from lxml.html import HTMLParser
+        from lxml.etree import XMLParser, parse
+
+        assert mode in ('html', 'xml')
+        if mode == 'html':
+            if not hasattr(THREAD_STORAGE, 'html_parser'):
+                THREAD_STORAGE.html_parser = HTMLParser()
+            dom = parse(StringIO(content),
+                        parser=THREAD_STORAGE.html_parser)
+            return dom.getroot()
+        else:
+            if not hasattr(THREAD_STORAGE, 'xml_parser'):
+                THREAD_STORAGE.xml_parser = XMLParser()
+            dom = parse(BytesIO(content),
+                        parser=THREAD_STORAGE.xml_parser)
+            return dom.getroot()
+
+
     def build_html_tree(self):
-        from lxml.html import fromstring
         from lxml.etree import ParserError
 
         from grab.base import GLOBAL_STATE
@@ -304,19 +325,18 @@ class DomTreeExtension(object):
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser
-                body = '<html></html>'
+                body = b'<html></html>'
             start = time.time()
 
-            # body = simplify_html(body)
             try:
-                self._lxml_tree = fromstring(body)
+                self._lxml_tree = self._build_dom(body, 'html')
             except Exception as ex:
                 if (isinstance(ex, ParserError)
                         and 'Document is empty' in str(ex)
                         and '<html' not in body):
                     # Fix for "just a string" body
                     body = '<html>%s</html>'.format(body)
-                    self._lxml_tree = fromstring(body)
+                    self._lxml_tree = self._build_dom(body, 'html')
 
                 elif (isinstance(ex, TypeError)
                       and "object of type 'NoneType' has no len" in str(ex)
@@ -324,7 +344,7 @@ class DomTreeExtension(object):
 
                     # Fix for smth like "<frameset></frameset>"
                     body = '<html>%s</html>'.format(body)
-                    self._lxml_tree = fromstring(body)
+                    self._lxml_tree = self._build_dom(body, 'html')
                 else:
                     raise
 
@@ -342,15 +362,8 @@ class DomTreeExtension(object):
         return self.build_xml_tree()
 
     def build_xml_tree(self):
-        from lxml.etree import fromstring
-
         if self._strict_lxml_tree is None:
-            # py3 hack
-            # if six.PY3:
-                # body = self.body_as_bytes(encode=True)
-            # else:
-                # body = self.body
-            self._strict_lxml_tree = fromstring(self.body)
+            self._strict_lxml_tree = self._build_dom(self.body, 'xml')
         return self._strict_lxml_tree
 
 
