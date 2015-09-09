@@ -9,9 +9,9 @@ os:
 matrix:
   allow_failures:
     - os: osx
-    - env: py27-mp
-    - env: py33-mp
-    - env: py34-mp
+    - env: TOX_ENV=py27-mp
+    - env: TOX_ENV=py33-mp
+    - env: TOX_ENV=py34-mp
 
 env:
   - TOX_ENV=py27
