@@ -52,3 +52,16 @@ class GrabRequestTestCase(BaseGrabTestCase):
         g = build_grab()
         self.assertRaises((GrabInternalError, GrabCouldNotResolveHostError),
                           g.go, self.server.get_url())
+
+    def test_options_method(self):
+        g = build_grab()
+        g.setup(method='options', post=b'abc')
+        g.go(self.server.get_url())
+        self.assertEquals('OPTIONS', self.server.request['method'])
+        self.assertEquals('3', self.server.request['headers']['Content-Length'])
+
+        g = build_grab()
+        g.setup(method='options')
+        g.go(self.server.get_url())
+        self.assertEquals('OPTIONS', self.server.request['method'])
+        self.assertTrue('Content-Length' not in self.server.request['headers'])

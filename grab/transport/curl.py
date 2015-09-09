@@ -327,6 +327,17 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.UPLOAD, 1)
         elif grab.request_method == 'GET':
             self.curl.setopt(pycurl.HTTPGET, 1)
+        elif grab.request_method == 'OPTIONS':
+            data = grab.config['post']
+            if data is not None:
+                if isinstance(data, six.text_type):
+                    raise error.GrabMisuseError(
+                        'Value of post option could be only byte '
+                        'string if PATCH method is used')
+                self.curl.setopt(pycurl.UPLOAD, 1)
+                self.curl.setopt(pycurl.READFUNCTION, StringIO(data).read)
+                self.curl.setopt(pycurl.INFILESIZE, len(data))
+            self.curl.setopt(pycurl.CUSTOMREQUEST, 'OPTIONS')
         else:
             raise error.GrabMisuseError('Invalid method: %s' %
                                         grab.request_method)
