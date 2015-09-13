@@ -62,7 +62,7 @@ class Stat(object):
     def get_speed_line(self, now):
         items = []
         for key in self.speed_keys:
-            if now == self.time:
+            if now - self.time == 0:
                 qps = 0
             else:
                 count_current = self.counters[key]
