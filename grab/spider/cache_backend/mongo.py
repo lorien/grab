@@ -61,7 +61,7 @@ class CacheBackend(object):
 
         def custom_prepare_response_func(transport, grab):
             response = Response()
-            response.head = cache_item['head'].decode('utf-8')
+            response.head = cache_item['head']
             response.body = body
             response.code = cache_item['response_code']
             response.download_size = len(body)
@@ -87,7 +87,7 @@ class CacheBackend(object):
             'url': url,
             'response_url': grab.response.url,
             'body': Binary(body),
-            'head': Binary(grab.response.head.encode('utf-8')),
+            'head': Binary(grab.response.head),
             'response_code': grab.response.code,
             'cookies': None,
         }

@@ -106,7 +106,7 @@ class CurlTransport(object):
         self.body_path = path
 
     def reset(self):
-        self.response_head_chunks = []
+        self.response_header_chunks = []
         self.response_body_chunks = []
         self.response_body_bytes_read = 0
         self.verbose_logging = False
@@ -118,12 +118,12 @@ class CurlTransport(object):
         self.request_body = ''
         self.request_log = ''
 
-    def head_processor(self, chunk):
+    def header_processor(self, chunk):
         """
         Process head of response.
         """
 
-        self.response_head_chunks.append(chunk)
+        self.response_header_chunks.append(chunk)
         # Returning None implies that all bytes were written
         return None
 
@@ -222,7 +222,7 @@ class CurlTransport(object):
             self.curl.setopt(pycurl.FORBID_REUSE, 1)
 
         self.curl.setopt(pycurl.NOSIGNAL, 1)
-        self.curl.setopt(pycurl.HEADERFUNCTION, self.head_processor)
+        self.curl.setopt(pycurl.HEADERFUNCTION, self.header_processor)
 
         if grab.config['body_inmemory']:
             self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
@@ -496,11 +496,12 @@ class CurlTransport(object):
         response = Response()
 
         # py3 hack
-        if six.PY3:
-            bytes_head = b''.join(self.response_head_chunks)
-        else:
-            bytes_head = ''.join(self.response_head_chunks)
-        response.head = make_unicode(bytes_head, errors='ignore')
+        #if six.PY3:
+        #    bytes_head = b''.join(self.response_header_chunks)
+        #else:
+        #    bytes_head = ''.join(self.response_header_chunks)
+        #response.head = make_unicode(bytes_head, errors='ignore')
+        response.head = b''.join(self.response_header_chunks)
 
         if self.body_path:
             response.body_path = self.body_path
@@ -508,7 +509,7 @@ class CurlTransport(object):
             response.body = b''.join(self.response_body_chunks)
 
         # Clear memory
-        self.response_head_chunks = []
+        self.response_header_chunks = []
         self.response_body_chunks = []
 
         response.code = self.curl.getinfo(pycurl.HTTP_CODE)

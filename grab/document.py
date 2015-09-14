@@ -790,31 +790,18 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
 
     def parse(self, charset=None):
         """
-        Parse headers and cookies.
+        Parse headers.
 
         This method is called after Grab instance performes network request.
         """
 
-        # Extract only valid lines which contain ":" character
-        valid_lines = []
-        for line in self.head.split('\n'):
-            line = line.rstrip('\r')
-            if line:
-                # Each HTTP line meand the start of new response
-                # self.head could contains info about multiple responses
-                # For example, then 301/302 redirect was
-                # processed automatically
-                # Maybe it is a bug and should be fixed
-                # Anyway, we handle this issue here and save headers
-                # only from last response
-                if line.startswith('HTTP'):
-                    self.status = line
-                    valid_lines = []
-                else:
-                    if ':' in line:
-                        valid_lines.append(line)
-
-        self.headers = email.message_from_string('\n'.join(valid_lines))
+        # Parse headers only from last response
+        # There could be multiple responses in `self.head`
+        # in case of 301/302 redirect
+        responses = self.head.rsplit(b'\nHTTP/', 1)
+        _, response = responses[-1].split(b'\n', 1)
+        response = response.decode('ascii', 'ignore')
+        self.headers = email.message_from_string(response)
 
         if charset is None:
             if isinstance(self.body, six.text_type):
@@ -1016,13 +1003,9 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
                 if slot != '__weakref__':
                     if hasattr(self, slot):
                         state[slot] = getattr(self, slot)
-
         state['_lxml_tree'] = None
         state['_strict_lxml_tree'] = None
         state['_lxml_form'] = None
-
-        # state['doc'].grab = weakref.proxy(self)
-
         return state
 
     def __setstate__(self, state):

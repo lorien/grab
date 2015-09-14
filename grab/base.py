@@ -562,7 +562,6 @@ class Grab(DeprecatedThings):
         """
 
         self.reset()
-
         if isinstance(content, six.text_type):
             raise error.GrabMisuseError('Method `setup_document` accepts only '
                                         'byte string in `content` argument.')
@@ -571,7 +570,7 @@ class Grab(DeprecatedThings):
         doc = Document(grab=self)
         doc.body = content
         doc.status = ''
-        doc.head = ''
+        doc.head = b'HTTP/1.1 200 OK\r\n\r\n'
         doc.parse(charset=kwargs.get('document_charset'))
         doc.code = 200
         doc.total_time = 0
@@ -647,7 +646,7 @@ class Grab(DeprecatedThings):
                 out.write(self.request_body)
                 out.write('\n\n')
                 out.write('Response headers:\n')
-                out.write(self.doc.head)
+                out.write(self.doc.head.decode('ascii'))
 
             file_extension = 'html'
             file_name = os.path.join(self.config['log_dir'], '%02d%s.%s' % (

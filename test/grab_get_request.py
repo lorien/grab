@@ -26,12 +26,6 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         g.go(self.server.get_url())
         self.assertEqual(200, g.response.code)
 
-    def test_parsing_response_headers(self):
-        self.server.response['headers'] = [('Hello', 'Grab')]
-        g = build_grab()
-        g.go(self.server.get_url())
-        self.assertTrue(g.response.headers['Hello'] == 'Grab')
-
     def test_depreated_hammer_mode_options(self):
         self.server.response['get.data'] = 'foo'
         g = build_grab()
@@ -40,3 +34,9 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
         g.setup(hammer_timeouts=((1, 1), (2, 2)))
         g.go(self.server.get_url())
+
+    def test_parsing_response_headers(self):
+        self.server.response['headers'] = [('Hello', 'Grab')]
+        g = build_grab()
+        g.go(self.server.get_url())
+        self.assertTrue(g.response.headers['Hello'] == 'Grab')
