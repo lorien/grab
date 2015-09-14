@@ -14,3 +14,4 @@ test_server
 tornado
 mock
 runscript
+pyprof2calltree

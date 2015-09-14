@@ -106,6 +106,8 @@ def main():
                       help='Run extra tests that depends on postgresql')
     parser.add_option('--mp-mode', action='store_true', default=False,
                       help='Enable multiprocess mode in spider tests')
+    parser.add_option('--profile', action='store_true', default=False,
+                      help='Do profiling')
     opts, args = parser.parse_args()
 
     if opts.backend_mongo:
@@ -155,8 +157,21 @@ def main():
 
     runner = unittest.TextTestRunner()
     #start_server()
-    result = runner.run(suite)
-    #stop_server()
+
+
+    if opts.profile:
+        import cProfile
+        import pyprof2calltree
+        import pstats
+
+        profile_tree_file = 'var/test.prof.out'
+        prof = cProfile.Profile()
+        result = prof.runcall(runner.run, suite)
+        stats = pstats.Stats(prof)
+        stats.strip_dirs()
+        pyprof2calltree.convert(stats, profile_tree_file)
+    else:
+        result = runner.run(suite)
     clear_test_environment()
     if result.wasSuccessful():
         sys.exit(0)
