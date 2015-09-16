@@ -1,4 +1,5 @@
 import logging
 from grab.selector.selector import *  # noqa
+from grab.util.warning import warn
 
-logging.error('Module `grab.selector` is deprecated. Use `selection` package.')
+warn('Module `grab.selector` is deprecated. Use `selection` package.')

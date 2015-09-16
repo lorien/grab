@@ -18,14 +18,15 @@ import email
 from datetime import datetime
 import weakref
 import six
-
 from weblib.html import find_refresh_url, find_base_url
+from weblib.http import normalize_http_values
+
 from grab.document import Document
 from grab import error
-from weblib.http import normalize_http_values
 from grab.cookie import CookieManager
 from grab.proxylist import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
+from grab.util.warning import warn
 
 __all__ = ('Grab',)
 # This counter will used in enumerating network queries.
@@ -336,13 +337,13 @@ class Grab(DeprecatedThings):
         """
 
         if 'hammer_mode' in kwargs:
-            logger.error('Option hammer_mode is deprecated. Grab does not '
-                         'support hammer mode anymore.')
+            warn('Option `hammer_mode` is deprecated. Grab does not '
+                 'support hammer mode anymore.')
             del kwargs['hammer_mode']
 
         if 'hammer_timeouts' in kwargs:
-            logger.error('Option hammer_timeouts is deprecated. Grab does not'
-                         ' support hammer mode anymore.')
+            warn('Option `hammer_timeouts` is deprecated. Grab does not '
+                 'support hammer mode anymore.')
             del kwargs['hammer_timeouts']
 
         for key in kwargs:

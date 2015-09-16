@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-import logging
 from weblib.etree import get_node_text
 from weblib.text import find_number
 from weblib.const import NULL
@@ -7,7 +6,7 @@ from weblib.error import DataNotFound
 from weblib.encoding import make_unicode
 import six
 
-from grab.util.misc import deprecated
+from grab.util.warning import warn, deprecated
 from grab.error import GrabMisuseError
 from grab import error
 
@@ -310,8 +309,8 @@ class DeprecatedThings(object):
 
     @property
     def form(self):
-        logging.error('This attribut is deprecated. '
-                      'Use grab.doc.form instead.')
+        warn('The `Grab.form` attribute is deprecated. '
+             'Use `Grab.doc.form` instead.')
         return self.doc.form
 
     @deprecated(use_instead='grab.doc.set_input')

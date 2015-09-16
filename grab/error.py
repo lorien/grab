@@ -13,7 +13,6 @@ Exception
 | -> weblib.error.WeblibError
      |-> DataNotFound <- IndexError
 """
-import warnings
 from weblib.error import DataNotFound  # noqa
 
 
@@ -73,12 +72,6 @@ class GrabTooManyRedirectsError(GrabError):
     """
 
 
-class GrabDeprecationWarning(Warning):
-    """
-    Raised when some deprecated feature is used.
-    """
-
-
 class GrabInvalidUrl(GrabError):
     """
     Raised when Grab have no idea how to handle the URL or when
@@ -88,7 +81,3 @@ class GrabInvalidUrl(GrabError):
 
 class GrabInternalError(GrabError):
     pass
-
-
-def warn(msg):
-    warnings.warn(msg, category=GrabDeprecationWarning, stacklevel=3)

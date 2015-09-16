@@ -2,7 +2,7 @@ from unittest import TestCase
 import mock
 from six import StringIO
 
-from grab.error import warn
+from grab.util.warning import warn
 
 class GrabErrorTestCase(TestCase):
     def test_warn(self):

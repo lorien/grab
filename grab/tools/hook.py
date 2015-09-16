@@ -2,6 +2,8 @@ from importlib import import_module
 import logging
 import sys
 
+from grab.util.warning import warn
+
 
 class CustomImporter(object):
     """
@@ -38,8 +40,8 @@ class CustomImporter(object):
         try:
             module = import_module(self.name, 'weblib')
             sys.modules[name] = module
-            logging.error('Module `grab.tools%s` is deprecated. '
-                          'Use `weblib%s` module.' % (self.name, self.name))
+            warn('Module `grab.tools%s` is deprecated. '
+                 'Use `weblib%s` module.' % (self.name, self.name))
         except:
             raise ImportError(name)
 

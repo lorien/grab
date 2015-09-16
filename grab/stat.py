@@ -8,6 +8,8 @@ from collections import defaultdict
 import time
 from contextlib import contextmanager
 
+from grab.util.warning import warn
+
 DEFAULT_SPEED_KEY = 'spider:request-processed'
 DEFAULT_LOGGING_PERIOD = 1
 
@@ -92,8 +94,8 @@ class Stat(object):
         self.collections[key].append(val)
 
     def append(self, key, val):
-        logging.error('Method `Stat::append` is deprecated. '
-                      'Use `Stat::collect` method.')
+        warn('Method `Stat::append` is deprecated. '
+             'Use `Stat::collect` method instead.')
         self.collect(key, val)
 
 

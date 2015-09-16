@@ -8,7 +8,6 @@ from __future__ import absolute_import
 import weakref
 import re
 from copy import copy
-import logging
 import email
 import os
 import json
@@ -22,19 +21,19 @@ import six
 from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
 import threading
 from six import BytesIO, StringIO
-
+from weblib.http import smart_urlencode
 import weblib.encoding
-from grab.cookie import CookieManager
 from weblib.files import hashed_path
 from weblib.structured import TreeInterface
 from weblib.text import normalize_space
 from weblib.html import decode_entities
-from grab.error import GrabMisuseError, DataNotFound
 from weblib.rex import normalize_regexp
-from grab.const import NULL
-from weblib.http import smart_urlencode
 
-logger = logging.getLogger('grab.response')
+from grab.cookie import CookieManager
+from grab.error import GrabMisuseError, DataNotFound
+from grab.const import NULL
+from grab.util.warning import warn
+
 NULL_BYTE = chr(0)
 RE_XML_DECLARATION = re.compile(br'^[^<]{,100}<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(br'encoding\s*=\s*["\']([^"\']+)["\']')
@@ -356,9 +355,9 @@ class DomTreeExtension(object):
         """
         Return DOM-tree of the document built with XML DOM builder.
         """
-        logger.debug(
-            'This method is deprecated. Please use `tree` property '
-            'and content_type="xml" option instead.')
+        warn('Attribute `grab.xml_tree` is deprecated. '
+             'Use `Grab.doc.tree` attribute '
+             'AND content_type="xml" option instead.')
         return self.build_xml_tree()
 
     def build_xml_tree(self):
@@ -988,8 +987,8 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
 
     @property
     def time(self):
-        logger.error('Attribute Response.time is deprecated. '
-                     'Use Response.total_time instead.')
+        warn('Attribute `Document.time` is deprecated. '
+             'Use `Document.total_time` instead.')
         return self.total_time
 
     def __getstate__(self):

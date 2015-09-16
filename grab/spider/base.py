@@ -35,6 +35,7 @@ from grab.base import GLOBAL_STATE
 from grab.stat import Stat, Timer
 from grab.spider.parser_pipeline import ParserPipeline
 from grab.spider.deprecated import DeprecatedThingsSpiderMixin
+from grab.util.warning import warn
 
 DEFAULT_TASK_PRIORITY = 100
 DEFAULT_NETWORK_STREAM_NUMBER = 3
@@ -54,8 +55,8 @@ class SpiderMetaClass(type):
     """
     This meta class does following things::
 
-    * It creates Meta attribute if it does not defined in
-        Spider descendant class by copying parent's Meta attribute
+    * It creates Meta attribute, if it is not defined in
+        Spider descendant class, by copying parent's Meta attribute
     * It reset Meta.abstract to False if Meta is copied from parent class
     * If defined Meta does not contains `abstract`
         attribute then define it and set to False
@@ -256,8 +257,8 @@ class Spider(DeprecatedThingsSpiderMixin):
 
         self.work_allowed = True
         if request_pause is not NULL:
-            logger.error('Option `request_pause` is deprecated and is not '
-                         'supported anymore')
+            warn('Option `request_pause` is deprecated and is not '
+                 'supported anymore')
 
         self.proxylist_enabled = None
         self.proxylist = None
