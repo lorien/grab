@@ -97,10 +97,6 @@ class Spider(DeprecatedThingsSpiderMixin):
     # `initial_urls` attribute
     initial_urls = None
 
-    # The base url which is used to resolve all relative urls
-    # The resolving takes place in `add_task` method
-    base_url = None
-
     class Meta:
         # Meta.abstract means that this class will not be
         # collected to spider registry by `grab crawl` CLI command.
@@ -314,6 +310,8 @@ class Spider(DeprecatedThingsSpiderMixin):
                           % (task.name, task.url)
                     raise SpiderError(msg)
                 else:
+                    warn('Class attribute `Spider::base_url` is deprecated. '
+                         'Use Task objects with absolute URLs')
                     task.url = urljoin(self.base_url, task.url)
                     # If task has grab_config object then update it too
                     if task.grab_config:
