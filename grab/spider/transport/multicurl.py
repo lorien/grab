@@ -6,10 +6,10 @@ import logging
 from grab.error import GrabTooManyRedirectsError
 
 ERROR_TOO_MANY_REFRESH_REDIRECTS = -2
-ERROR_INTERNAL_GRAB_ERROR = -3
+#ERROR_INTERNAL_GRAB_ERROR = -3
 ERROR_ABBR = {
     ERROR_TOO_MANY_REFRESH_REDIRECTS: 'too-many-refresh-redirects',
-    ERROR_INTERNAL_GRAB_ERROR: 'internal-grab-error',
+    #ERROR_INTERNAL_GRAB_ERROR: 'internal-grab-error',
 }
 for key in dir(pycurl):
     if key.startswith('E_'):
@@ -143,11 +143,11 @@ class MulticurlTransport(object):
                     ecode = ERROR_TOO_MANY_REFRESH_REDIRECTS
                     emsg = 'Too many meta refresh redirects'
                     ok = False
-                except Exception as ex:
-                    logging.error('', exc_info=ex)
-                    ecode = ERROR_INTERNAL_GRAB_ERROR
-                    emsg = 'Internal grab error'
-                    ok = False
+                #except Exception as ex:
+                #    logging.error('', exc_info=ex)
+                #    ecode = ERROR_INTERNAL_GRAB_ERROR
+                #    emsg = 'Internal grab error'
+                #    ok = False
 
                 grab.response.error_code = ecode
                 grab.response.error_msg = emsg

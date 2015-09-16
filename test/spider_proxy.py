@@ -91,6 +91,29 @@ class TestSpider(BaseGrabTestCase):
         self.assertEqual(1, len(set(bot.stat.collections['ports'])))
         self.assertEqual(bot.stat.collections['ports'][0], self.server.port)
 
+    def test_spider_custom_proxy_source(self):
+        class TestSpider(Spider):
+            def task_page(self, grab, task):
+                self.stat.collect(
+                    'ports', int(grab.response.headers.get('Listen-Port', 0)))
+
+        class CustomProxySource(BaseProxySource):
+            def load(self):
+                return [
+                    Proxy(ADDRESS, TEST_SERVER_PORT, None, None, 'http'),
+                ]
+
+
+        bot = build_spider(TestSpider)
+        bot.setup_queue()
+        bot.load_proxylist(CustomProxySource())
+        bot.add_task(Task('page', url='http://yandex.ru/'))
+        bot.run()
+
+        self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
+        self.assertEqual(set(bot.stat.collections['ports']),
+                         set([TEST_SERVER_PORT]))
+
     def test_setup_grab(self):
         # Simple test, one task
         bot = build_spider(SimpleSpider, thread_number=1)
@@ -122,25 +145,3 @@ class TestSpider(BaseGrabTestCase):
         self.assertTrue(EXTRA_PORT2 not in bot.stat.collections['ports'])
         self.assertTrue(EXTRA_PORT2 not in set(bot.stat.collections['ports']))
 
-    def test_spider_custom_proxy_source(self):
-        class TestSpider(Spider):
-            def task_page(self, grab, task):
-                self.stat.collect(
-                    'ports', int(grab.response.headers.get('Listen-Port', 0)))
-
-        class CustomProxySource(BaseProxySource):
-            def load(self):
-                return [
-                    Proxy(ADDRESS, TEST_SERVER_PORT, None, None, 'http'),
-                ]
-
-
-        bot = build_spider(TestSpider)
-        bot.setup_queue()
-        bot.load_proxylist(CustomProxySource())
-        bot.add_task(Task('page', url='http://yandex.ru/'))
-        bot.run()
-
-        self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
-        self.assertEqual(set(bot.stat.collections['ports']),
-                         set([TEST_SERVER_PORT]))
