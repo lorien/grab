@@ -3,3 +3,4 @@ pycurl
 selection
 weblib
 six
+defusedxml>=0.4.1

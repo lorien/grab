@@ -13,7 +13,8 @@ setup(
     author_email='lorien@lorien.name',
 
     packages=find_packages(exclude=['test', 'test.files']),
-    install_requires=['lxml', 'pycurl', 'selection', 'weblib>=0.1.10', 'six'],
+    install_requires=['lxml', 'pycurl', 'selection', 'weblib>=0.1.10', 'six',
+                      'defusedxml>=0.4.1'],
 
     license="MIT",
     keywords="pycurl multicurl curl network parsing grabbing scraping"
