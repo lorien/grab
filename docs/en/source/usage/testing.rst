@@ -10,7 +10,7 @@ To run all tests run the command:
 
 .. code:: shell
 
-	./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis --backend-postgres
+	./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
 
 
 .. _usage_testing_control:
