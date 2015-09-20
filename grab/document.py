@@ -293,6 +293,8 @@ class DomTreeExtension(object):
 
     @classmethod
     def _build_dom(cls, content, mode):
+        from defusedxml.lxml import parse
+
         assert mode in ('html', 'xml')
         if mode == 'html':
             if not hasattr(THREAD_STORAGE, 'html_parser'):
@@ -306,7 +308,6 @@ class DomTreeExtension(object):
             dom = parse(BytesIO(content),
                         parser=THREAD_STORAGE.xml_parser)
             return dom.getroot()
-
 
     def build_html_tree(self):
         from grab.base import GLOBAL_STATE

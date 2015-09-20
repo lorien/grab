@@ -20,6 +20,7 @@ setup(
         'selection',
         'lxml;platform_system!="Windows"',
         'pycurl;platform_system!="Windows"',
+        'defusedxml',
     ],
     extras_require={
         'full': ['urllib3'],
