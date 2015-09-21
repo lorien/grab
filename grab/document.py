@@ -287,7 +287,8 @@ class DomTreeExtension(object):
 
     def _build_dom(self, content, mode):
         from lxml.html import HTMLParser
-        from lxml.etree import XMLParser, parse
+        from lxml.etree import XMLParser
+        from defusedxml.lxml import parse
 
         assert mode in ('html', 'xml')
         if mode == 'html':
@@ -302,7 +303,6 @@ class DomTreeExtension(object):
             dom = parse(BytesIO(content),
                         parser=THREAD_STORAGE.xml_parser)
             return dom.getroot()
-
 
     def build_html_tree(self):
         from lxml.etree import ParserError
@@ -873,7 +873,6 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
             try:
                 codecs.lookup(charset)
             except LookupError:
-                logger.error('Unknown charset found: %s' % charset)
                 self.charset = 'utf-8'
             else:
                 self.charset = charset
