@@ -2,7 +2,7 @@
 import os
 
 from test.util import BaseGrabTestCase
-from test.util import TMP_DIR, clear_directory, build_grab
+from test.util import TMP_DIR, clear_directory, build_grab, exclude_transport
 from grab.base import reset_request_counter
 
 
@@ -56,7 +56,7 @@ class TestCookies(BaseGrabTestCase):
         g.go(self.server.get_url())
         self.assertEqual(sorted(os.listdir(TMP_DIR)), ['01.html', '01.log'])
         log_file_content = open(os.path.join(TMP_DIR, '01.log')).read()
-        self.assertTrue('X-Engine' in log_file_content)
+        self.assertTrue('x-engine' in log_file_content.lower())
 
     def test_log_dir_request_content_is_empty(self):
         clear_directory(TMP_DIR)
@@ -73,6 +73,8 @@ class TestCookies(BaseGrabTestCase):
         self.assertFalse('X-Name' in log_file_content)
         self.assertFalse('xxxPost' in log_file_content)
 
+    # because urllib3 does not collects request headers
+    @exclude_transport('urllib3')
     def test_log_dir_request_content_headers_and_post(self):
         clear_directory(TMP_DIR)
         reset_request_counter()
@@ -85,8 +87,8 @@ class TestCookies(BaseGrabTestCase):
         g.go(self.server.get_url())
         self.assertEqual(sorted(os.listdir(TMP_DIR)), ['01.html', '01.log'])
         log_file_content = open(os.path.join(TMP_DIR, '01.log')).read()
-        self.assertTrue('X-Name' in log_file_content)
-        self.assertTrue('xxx=Post' in log_file_content)
+        self.assertTrue('x-name' in log_file_content.lower())
+        self.assertTrue('xxx=post' in log_file_content.lower())
 
     def test_debug_post(self):
         g = build_grab(debug_post=True)

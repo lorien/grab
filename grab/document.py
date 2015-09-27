@@ -787,25 +787,28 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
     def structure(self, *args, **kwargs):
         return TreeInterface(self.tree).structured_xpath(*args, **kwargs)
 
-    def parse(self, charset=None):
+    def parse(self, charset=None, headers=None):
         """
         Parse headers.
 
         This method is called after Grab instance performes network request.
         """
 
-        # Parse headers only from last response
-        # There could be multiple responses in `self.head`
-        # in case of 301/302 redirect
-        # Separate responses
-        if self.head:
-            responses = self.head.rsplit(b'\nHTTP/', 1)
-            # Cut off the 'HTTP/*' line from the last response
-            _, response = responses[-1].split(b'\n', 1)
-            response = response.decode('ascii', 'ignore')
+        if headers:
+            self.headers = headers
         else:
-            response = ''
-        self.headers = email.message_from_string(response)
+            # Parse headers only from last response
+            # There could be multiple responses in `self.head`
+            # in case of 301/302 redirect
+            # Separate responses
+            if self.head:
+                responses = self.head.rsplit(b'\nHTTP/', 1)
+                # Cut off the 'HTTP/*' line from the last response
+                _, response = responses[-1].split(b'\n', 1)
+                response = response.decode('ascii', 'ignore')
+            else:
+                response = ''
+            self.headers = email.message_from_string(response)
 
         if charset is None:
             if isinstance(self.body, six.text_type):

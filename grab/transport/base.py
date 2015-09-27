@@ -1,0 +1,2 @@
+class BaseTransport(object):
+    pass

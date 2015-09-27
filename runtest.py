@@ -85,6 +85,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     parser = OptionParser()
     parser.add_option('-t', '--test', help='Run only specified tests')
+    parser.add_option('--transport', default='pycurl')
     parser.add_option('--test-grab', action='store_true',
                       default=False, help='Run tests for Grab::Spider')
     parser.add_option('--test-spider', action='store_true',
@@ -109,6 +110,8 @@ def main():
     parser.add_option('--profile', action='store_true', default=False,
                       help='Do profiling')
     opts, args = parser.parse_args()
+
+    GLOBAL['transport'] = opts.transport
 
     if opts.backend_mongo:
         GLOBAL['backends'].append('mongo')

@@ -23,7 +23,7 @@ TMP_FILE = None
 GLOBAL = {
     'backends': [],
     'mp_mode': False,
-    #'test_server': None,
+    'transport': None,
 }
 
 
@@ -53,6 +53,7 @@ def get_temp_file():
 
 def build_grab(*args, **kwargs):
     """Builds the Grab instance with default options."""
+    kwargs.setdefault('transport', GLOBAL['transport']) 
     return Grab(*args, **kwargs)
 
 
@@ -126,3 +127,16 @@ def start_server():
 def stop_server():
     logger.debug('Stopping test server')
     #GLOBAL['test_server'].stop()
+
+
+def exclude_transport(*names):
+    def decorator(func):
+        def caller(*args, **kwargs):
+            if GLOBAL['transport'] in names:
+                logger.debug('Running test %s for transport %s is restricted'
+                             % (func, GLOBAL['transport']))
+                return None
+            else:
+                return func(*args, **kwargs)
+        return caller
+    return decorator

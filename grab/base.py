@@ -38,12 +38,15 @@ __all__ = ('Grab',)
 # creates multiple Grab instances - in case of shared counter
 # grab instances do not overwrite dump logs
 REQUEST_COUNTER = itertools.count(1)
-
 GLOBAL_STATE = {
     'dom_build_time': 0,
 }
 MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies']
 TRANSPORT_CACHE = {}
+TRANSPORT_ALIAS = {
+    'pycurl': 'grab.transport.curl.CurlTransport',
+    'urllib3': 'grab.transport.urllib3.Urllib3Transport',
+}
 
 logger = logging.getLogger('grab.base')
 # Logger to handle network activity
@@ -209,7 +212,7 @@ class Grab(DeprecatedThings):
     """
 
     def __init__(self, document_body=None,
-                 transport='grab.transport.curl.CurlTransport', **kwargs):
+                 transport='pycurl', **kwargs):
         """
         Create Grab instance
         """
@@ -240,14 +243,20 @@ class Grab(DeprecatedThings):
     def setup_transport(self, transport_param):
         self.transport_param = transport_param
         if isinstance(transport_param, six.string_types):
-            mod_path, cls_name = transport_param.rsplit('.', 1)
-            try:
-                cls = TRANSPORT_CACHE[(mod_path, cls_name)]
-            except KeyError:
-                mod = __import__(mod_path, globals(), locals(), ['foo'])
-                cls = getattr(mod, cls_name)
-                TRANSPORT_CACHE[(mod_path, cls_name)] = cls
-            self.transport = cls()
+            if transport_param in TRANSPORT_ALIAS:
+                transport_param = TRANSPORT_ALIAS[transport_param]
+            if not '.' in transport_param:
+                raise error.GrabMisuseError('Unknown transport: %s'
+                                            % transport_param)
+            else:
+                mod_path, cls_name = transport_param.rsplit('.', 1)
+                try:
+                    cls = TRANSPORT_CACHE[(mod_path, cls_name)]
+                except KeyError:
+                    mod = __import__(mod_path, globals(), locals(), ['foo'])
+                    cls = getattr(mod, cls_name)
+                    TRANSPORT_CACHE[(mod_path, cls_name)] = cls
+                self.transport = cls()
         elif isinstance(transport_param, collections.Callable):
             self.transport = transport_param()
         else:

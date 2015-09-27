@@ -495,12 +495,6 @@ class CurlTransport(object):
             self.body_file.close()
         response = Response()
 
-        # py3 hack
-        #if six.PY3:
-        #    bytes_head = b''.join(self.response_header_chunks)
-        #else:
-        #    bytes_head = ''.join(self.response_header_chunks)
-        #response.head = make_unicode(bytes_head, errors='ignore')
         response.head = b''.join(self.response_header_chunks)
 
         if self.body_path:
