@@ -18,15 +18,13 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertRaises(GrabMisuseError, g.setup,
                           save_the_word=True)
 
-    # Ghost test was disabled because of strange error
-    # that appear when multiple Ghost instances are created
     def test_clone(self):
         g = build_grab()
         self.server.response['get.data'] = 'Moon'
         g.go(self.server.get_url())
         self.assertTrue(b'Moon' in g.response.body)
         self.server.response['post.data'] = 'Foo'
-        g2 = g.clone(method='post')
+        g2 = g.clone(method='post', post='')
         g2.go(self.server.get_url())
         self.assertTrue(b'Foo' in g2.response.body)
 

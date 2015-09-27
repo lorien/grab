@@ -15,12 +15,15 @@ from weblib.watch import watch
 # * pycurl transport
 # * extensions
 # **********
+
+# TODO:
+# * test redirect and response.url after redirect
 GRAB_TEST_LIST = (
     # Internal API
     'test.grab_api',
     'test.grab_transport',
     'test.response_class',
-    'test.grab_debug',
+    'test.grab_debug', # TODO: fix tests excluded for urllib3
     # Response processing
     'test.grab_xml_processing',
     'test.grab_response_body_processing',
@@ -28,16 +31,16 @@ GRAB_TEST_LIST = (
     # Network
     'test.grab_get_request',
     'test.grab_post_request',
-    'test.grab_request',
+    'test.grab_request', # TODO: fix tests excluded for urllib3
     'test.grab_user_agent',
-    'test.grab_cookies',
+    'test.grab_cookies', # !!!!!!! FIX URLLIB3 TEST
     'test.grab_url_processing',
     # Refactor
     'test.grab_proxy',
     'test.grab_upload_file',
     'test.grab_limit_option',
     'test.grab_charset_issue',
-    'test.grab_pickle',
+    'test.grab_pickle', # TODO: fix tests excluded for urllib3
     # *** Extension sub-system
     # *** Extensions
     'test.ext_text',

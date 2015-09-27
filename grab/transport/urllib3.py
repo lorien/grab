@@ -8,7 +8,6 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from io import BytesIO as StringIO
-import random
 try:
     from urlparse import urlsplit
 except ImportError:
@@ -18,54 +17,59 @@ import tempfile
 import os
 from weblib.http import (encode_cookies, normalize_http_values,
                         normalize_post_data, normalize_url)
-from weblib.user_agent import random_user_agent
 from weblib.encoding import make_str, decode_pairs, make_unicode
 import six
 from six.moves.http_cookiejar import CookieJar
 import sys
 
-from grab.upload import UploadFile, UploadContent
 '''
-from weblib.http import normalize_url, normalize_post_data
+from weblib.http import (normalize_url, normalize_post_data,
+                         normalize_http_values)
+from weblib.encoding import make_str
 from urllib3 import PoolManager, ProxyManager, exceptions
+from urllib3.filepost import encode_multipart_formdata
+from urllib3.fields import RequestField
 import six
 from six.moves.urllib.parse import urlencode
 import tempfile
 import os
+import random
 
 from grab import error
+from grab.error import GrabMisuseError
 from grab.cookie import CookieManager#, create_cookie
 from grab.response import Response
+from grab.upload import UploadFile, UploadContent
+from weblib.user_agent import random_user_agent
 
 logger = logging.getLogger('grab.transport.urllib3')
 
-'''
+
 def process_upload_items(items):
     result = []
     for key, val in items:
         if isinstance(val, UploadContent):
-            data = [pycurl.FORM_BUFFER, val.filename,
-                    pycurl.FORM_BUFFERPTR, val.content]
-            if val.content_type:
-                data.extend([pycurl.FORM_CONTENTTYPE, val.content_type])
-            result.append((key, tuple(data)))
+            headers = {'Content-Type': val.content_type}
+            field = RequestField(name=key, data=val.content, 
+                                 filename=val.filename, headers=headers)
+            field.make_multipart(content_type=val.content_type)
+            result.append(field)
         elif isinstance(val, UploadFile):
-            data = [pycurl.FORM_FILE, val.path]
-            if val.filename:
-                data.extend([pycurl.FORM_FILENAME, val.filename])
-            if val.content_type:
-                data.extend([pycurl.FORM_CONTENTTYPE, val.content_type])
-            result.append((key, tuple(data)))
+            data = open(val.path, 'rb').read()
+            headers = {'Content-Type': val.content_type}
+            field = RequestField(name=key, data=data,
+                                 filename=val.filename, headers=headers)
+            field.make_multipart(content_type=val.content_type)
+            result.append(field)
         else:
             result.append((key, val))
     return result
-'''
 
 
 class Request(object):
     def __init__(self, method=None, url=None, data=None,
                  proxy=None, proxy_userpwd=None, proxy_type=None,
-                 headers=None):
+                 headers=None, body_maxsize=None):
         self.url = url
         self.method = method
         self.data = data
@@ -73,6 +77,7 @@ class Request(object):
         self.proxy_userpwd = proxy_userpwd
         self.proxy_type = proxy_type
         self.headers = headers
+        self.body_maxsize = body_maxsize
 
         self._response_file = None
         self._response_path = None
@@ -109,14 +114,20 @@ class Urllib3Transport(object):
         req.url = request_url
 
         method = grab.detect_request_method()
-        req.method = method
+        req.method = make_str(method)
+
+        req.body_maxsize = grab.config['body_maxsize']
+        if grab.config['nobody']:
+            req.body_maxsize = 0
+
+        extra_headers = {}
 
         # Body processing
         if grab.config['body_inmemory']:
             pass
         else:
             if not grab.config['body_storage_dir']:
-                raise error.GrabMisuseError(
+                raise GrabMisuseError(
                     'Option body_storage_dir is not defined')
             file_, path_ = self.setup_body_file(
                 grab.config['body_storage_dir'],
@@ -126,17 +137,26 @@ class Urllib3Transport(object):
             req._response_path = path_
 
         if grab.config['multipart_post'] is not None:
-            #post_items = normalize_http_values(
-            #    grab.config['multipart_post'],
-            #    charset=grab.config['charset'],
-            #    ignore_classes=(UploadFile, UploadContent),
-            #)
-            #if six.PY3:
-            #    post_items = decode_pairs(post_items,
-            #                              grab.config['charset'])
-            #self.curl.setopt(pycurl.HTTPPOST,
-            #                 process_upload_items(post_items))
-            raise Exception('multipart not supported')
+            post_data = grab.config['multipart_post']
+            if isinstance(post_data, six.binary_type):
+                pass
+            elif isinstance(post_data, six.text_type):
+                raise GrabMisuseError('Option multipart_post data'
+                                      ' does not accept unicode.')
+            else:
+                post_items = normalize_http_values(
+                    grab.config['multipart_post'],
+                    charset=grab.config['charset'],
+                    ignore_classes=(UploadFile, UploadContent),
+                )
+                if six.PY3:
+                    post_items = decode_pairs(post_items,
+                                              grab.config['charset'])
+                post_items = process_upload_items(post_items)
+                post_data, content_type = encode_multipart_formdata(post_items)
+                extra_headers['Content-Type'] = content_type
+            extra_headers['Content-Length'] = len(post_data)
+            req.data = post_data
         elif grab.config['post'] is not None:
             post_data = normalize_post_data(grab.config['post'],
                                             grab.config['charset'])
@@ -144,7 +164,15 @@ class Urllib3Transport(object):
             # if six.PY3:
             #    post_data = smart_unicode(post_data,
             #                              grab.config['charset'])
+            extra_headers['Content-Length'] = len(post_data)
             req.data = post_data
+
+        if method in ('POST', 'PUT'):
+            if (grab.config['post'] is None and
+                grab.config['multipart_post'] is None):
+                    raise GrabMisuseError('Neither `post` or `multipart_post`'
+                                          ' options was specified for the %s'
+                                          ' request' % method)
 
         # Proxy
         if grab.config['proxy']:
@@ -158,8 +186,20 @@ class Urllib3Transport(object):
         else:
             req.proxy_type = 'http'
 
+        # User-Agent
+        if grab.config['user_agent'] is None:
+            if grab.config['user_agent_file'] is not None:
+                with open(grab.config['user_agent_file']) as inf:
+                    lines = inf.read().splitlines()
+                grab.config['user_agent'] = random.choice(lines)
+            else:
+                grab.config['user_agent'] = random_user_agent()
+
+        extra_headers['User-Agent'] = grab.config['user_agent'] 
+
         # Headers
-        headers = grab.config['common_headers']
+        headers = extra_headers
+        headers.update(grab.config['common_headers'])
         if grab.config['headers']:
             headers.update(grab.config['headers'])
         req.headers = headers
@@ -179,8 +219,10 @@ class Urllib3Transport(object):
         else:
             pool = self.pool
         try:
-            res = pool.urlopen(req.method, req.url, body=req.data, timeout=2,
-                               retries=False, headers=req.headers)
+            res = pool.urlopen(req.method, make_str(req.url),
+                               body=req.data, timeout=2,
+                               retries=False, headers=req.headers,
+                               preload_content=False)
         except exceptions.ConnectionError as ex:
             raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
 
@@ -211,7 +253,7 @@ class Urllib3Transport(object):
         for key, val in self._response.getheaders().items():
             head += '%s: %s\r\n' % (key, val)
         head += '\r\n'
-        response.head = head.encode('latin')
+        response.head = make_str(head, encoding='latin', errors='ignore')
 
         #if self.body_path:
         #    response.body_path = self.body_path
@@ -219,11 +261,16 @@ class Urllib3Transport(object):
         #    response.body = b''.join(self.response_body_chunks)
         if self._request._response_path:
             response.body_path = self._request._response_path
-            # Quick dirty hack, actullay, response is ready into memory
-            self._request._response_file.write(self._response.data)
+            # Quick dirty hack, actullay, response is fully read into memory
+            self._request._response_file.write(self._response.read())#data)
             self._request._response_file.close()
         else:
-            response.body = self._response.data
+            response.body = self._response.read()#data
+            if self._request.body_maxsize is not None:
+                #if self.response_body_bytes_read > self.config_body_maxsize:
+                #    logger.debug('Response body max size limit reached: %s' %
+                #                 self.config_body_maxsize)
+                response.body = self._response.read(self._request.body_maxsize)
 
         # Clear memory
         #self.response_header_chunks = []
@@ -237,7 +284,7 @@ class Urllib3Transport(object):
         #response.download_speed = self.curl.getinfo(pycurl.SPEED_DOWNLOAD)
         #response.remote_ip = self.curl.getinfo(pycurl.PRIMARY_IP)
 
-        response.url = None#self.curl.getinfo(pycurl.EFFECTIVE_URL)
+        response.url = self._response.get_redirect_location() or self._request.url
 
         import email.message
         hdr = email.message.Message() 

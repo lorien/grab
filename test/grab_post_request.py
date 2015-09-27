@@ -89,10 +89,6 @@ class TestPostFeature(BaseGrabTestCase):
         # self.assertEqual(self.server.request['data'],
         #                   'foo=bar&gaz=Дельфин&abc=')
 
-        # Multipart data could not be string
-        g.setup(multipart_post='asdf')
-        self.assertRaises(GrabMisuseError, lambda: g.request())
-
         # tuple with one pair
         g.setup(multipart_post=(('foo', 'bar'),))
         g.request()
@@ -149,7 +145,7 @@ class TestPostFeature(BaseGrabTestCase):
 
     def test_empty_post(self):
         g = build_grab()
-        g.setup(method='post')
+        g.setup(method='post', post='')
         g.go(self.server.get_url())
         self.assertEqual(self.server.request['method'], 'POST')
         self.assertEqual(self.server.request['data'], b'')
@@ -157,3 +153,8 @@ class TestPostFeature(BaseGrabTestCase):
 
         g.go(self.server.get_url(), post='DATA')
         self.assertEqual(self.server.request['headers']['content-length'], '4')
+
+    def test_method_post_nobody(self):
+        g = build_grab()
+        g.setup(method='post')
+        self.assertRaises(GrabMisuseError, g.go, self.server.get_url())

@@ -38,7 +38,7 @@ class GrabRequestTestCase(BaseGrabTestCase):
         g = build_grab()
         g.go(self.server.get_url())
 
-    @exclude_transport('urllib3')
+    #@exclude_transport('urllib3')
     def test_redirect_with_invalid_byte(self):
         url = self.server.get_url()
         invalid_url = b'http://\xa0' + url.encode('ascii')
