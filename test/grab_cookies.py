@@ -6,7 +6,7 @@ from grab.error import GrabMisuseError
 from grab.cookie import CookieManager, create_cookie
 import pickle
 
-from test.util import TMP_FILE, build_grab
+from test.util import TMP_FILE, build_grab, exclude_transport
 from test.util import BaseGrabTestCase
 
 
@@ -62,6 +62,7 @@ class TestCookies(BaseGrabTestCase):
         g.go(self.server.get_url())
         self.assertTrue(len(self.server.request['cookies']) == 0)
 
+    @exclude_transport('urllib3')
     def test_redirect_session(self):
         g = build_grab()
         self.server.response['cookies'] = {'foo': 'bar'}.items()
@@ -128,7 +129,6 @@ class TestCookies(BaseGrabTestCase):
         self.server.response['cookies'] = {'godzilla': 'monkey'}.items()
         g.setup(cookiefile=TMP_FILE, debug=True)
         g.go(self.server.get_url())
-        print(g.request_head)
         self.assertEqual(self.server.request['cookies']['spam'].value, 'ham')
 
         # This is correct reslt of combining two cookies
@@ -146,6 +146,7 @@ class TestCookies(BaseGrabTestCase):
         # Just ensure it works
         g.go(self.server.get_url())
 
+    @exclude_transport('urllib3')
     def test_manual_dns(self):
         g = build_grab()
         g.transport.curl.setopt(pycurl.RESOLVE,
@@ -154,6 +155,7 @@ class TestCookies(BaseGrabTestCase):
         g.go('http://foo:%d/' % self.server.port)
         self.assertEqual(b'zzz', g.response.body)
 
+    @exclude_transport('urllib3')
     def test_different_domains(self):
         g = build_grab()
         names = [
@@ -174,6 +176,7 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual(dict(g.response.cookies.items()), {'foo': 'foo',
                                                             'bar': 'bar'})
 
+    @exclude_transport('urllib3')
     def test_cookie_domain(self):
         g = Grab()
         names = [
@@ -212,6 +215,7 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual('bar', mgr['foo'])
         self.assertRaises(KeyError, lambda: mgr['zzz'])
 
+    @exclude_transport('urllib3')
     def test_dot_domain(self):
         g = build_grab(debug=True)
         names = [
@@ -254,6 +258,7 @@ class TestCookies(BaseGrabTestCase):
         g.go(self.server.get_url('/admin/zz'))
         self.assertEqual(2, len(self.server.request['cookies']))
 
+    @exclude_transport('urllib3')
     def test_common_case_www_domain(self):
         g = build_grab()
         names = [

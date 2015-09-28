@@ -3,43 +3,25 @@
 # License: MIT
 from __future__ import absolute_import
 import logging
-'''
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import BytesIO as StringIO
-try:
-    from urlparse import urlsplit
-except ImportError:
-    from urllib.parse import urlsplit
-import pycurl
-import tempfile
-import os
-from weblib.http import (encode_cookies, normalize_http_values,
-                        normalize_post_data, normalize_url)
-from weblib.encoding import make_str, decode_pairs, make_unicode
-import six
-from six.moves.http_cookiejar import CookieJar
-import sys
-
-'''
 from weblib.http import (normalize_url, normalize_post_data,
                          normalize_http_values)
-from weblib.encoding import make_str
+from weblib.encoding import make_str, make_unicode
 from urllib3 import PoolManager, ProxyManager, exceptions
 from urllib3.filepost import encode_multipart_formdata
 from urllib3.fields import RequestField
+from urllib3.util.retry import Retry
 import six
-from six.moves.urllib.parse import urlencode
-import tempfile
-import os
+from six.moves.urllib.parse import urlencode, urlsplit
 import random
+from six.moves.http_cookiejar import CookieJar
+from six.moves.urllib.parse import urlparse
 
 from grab import error
 from grab.error import GrabMisuseError
-from grab.cookie import CookieManager#, create_cookie
+from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.response import Response
 from grab.upload import UploadFile, UploadContent
+from grab.transport.base import BaseTransport
 from weblib.user_agent import random_user_agent
 
 logger = logging.getLogger('grab.transport.urllib3')
@@ -82,8 +64,13 @@ class Request(object):
         self._response_file = None
         self._response_path = None
 
+    def get_full_url(self):
+        return self.url
 
-class Urllib3Transport(object):
+
+
+
+class Urllib3Transport(BaseTransport):
     """
     Grab network transport based on urllib3 library.
     """
@@ -173,7 +160,6 @@ class Urllib3Transport(object):
                     raise GrabMisuseError('Neither `post` or `multipart_post`'
                                           ' options was specified for the %s'
                                           ' request' % method)
-
         # Proxy
         if grab.config['proxy']:
             req.proxy = grab.config['proxy']
@@ -197,12 +183,17 @@ class Urllib3Transport(object):
 
         extra_headers['User-Agent'] = grab.config['user_agent'] 
 
+
         # Headers
         headers = extra_headers
         headers.update(grab.config['common_headers'])
         if grab.config['headers']:
             headers.update(grab.config['headers'])
         req.headers = headers
+
+        # Cookies
+        self.process_cookie_options(grab, req)
+
 
         self._request = req
 
@@ -219,12 +210,15 @@ class Urllib3Transport(object):
         else:
             pool = self.pool
         try:
+            retry = Retry(redirect=5, connect=False, read=False)
             res = pool.urlopen(req.method, make_str(req.url),
                                body=req.data, timeout=2,
-                               retries=False, headers=req.headers,
+                               retries=retry, headers=req.headers,
                                preload_content=False)
         except exceptions.ConnectionError as ex:
             raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
+        except exceptions.NewConnectionError as ex:
+            raise error.GrabConnectionError('Could not create connection')
 
         # WTF?
         self.request_head = ''
@@ -293,22 +287,51 @@ class Urllib3Transport(object):
         response.parse(charset=grab.config['document_charset'],
                        headers=hdr)
 
-        response.cookies = CookieManager()#self.extract_cookiejar())
+        jar = self.extract_cookiejar(self._response, self._request)
+        response.cookies = CookieManager(jar)
 
         # We do not need anymore cookies stored in the
         # curl instance so drop them
         #self.curl.setopt(pycurl.COOKIELIST, 'ALL')
         return response
 
-    def setup_body_file(self, storage_dir, storage_filename, create_dir=False):
-        if create_dir:
-            if not os.path.exists(storage_dir):
-                os.makedirs(storage_dir)
-        if storage_filename is None:
-            handle, path = tempfile.mkstemp(dir=storage_dir)
-            self.body_file = os.fdopen(handle, 'wb')
-        else:
-            path = os.path.join(storage_dir, storage_filename)
-            self.body_file = open(path, 'wb')
-        self.body_path = path
-        return self.body_file, self.body_path
+    def extract_cookiejar(self, resp, req):
+        jar = CookieJar()
+        jar.extract_cookies(MockResponse(resp._original_response.msg),
+                            MockRequest(req))
+        return jar
+
+    def process_cookie_options(self, grab, req):
+        # `cookiefile` option should be processed before `cookies` option
+        # because `load_cookies` updates `cookies` option
+        if grab.config['cookiefile']:
+            # Do not raise exception if cookie file does not exist
+            try:
+                grab.cookies.load_from_file(grab.config['cookiefile'])
+            except IOError as ex:
+                logging.error(ex)
+
+        request_host = urlsplit(req.url).hostname
+        if request_host:
+            if request_host.startswith('www.'):
+                request_host_no_www = request_host[4:]
+            else:
+                request_host_no_www = request_host
+
+            # Process `cookies` option that is simple dict i.e.
+            # it provides only `name` and `value` attributes of cookie
+            # No domain, no path, no expires, etc
+            # I pass these no-domain cookies to *each* requested domain
+            # by setting these cookies with corresponding domain attribute
+            # Trying to guess better domain name by removing leading "www."
+            if grab.config['cookies']:
+                if not isinstance(grab.config['cookies'], dict):
+                    raise error.GrabMisuseError('cookies option should be a dict')
+                for name, value in grab.config['cookies'].items():
+                    grab.cookies.set(
+                        name=name,
+                        value=value,
+                        domain=request_host_no_www
+                    )
+
+        req.headers['Cookie'] = grab.cookies.get_cookie_header(req)

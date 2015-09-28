@@ -144,7 +144,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         g.setup(post={'foo': 'bar'})
 
         self.assertRaises(GrabError, g.go,
-                          url='Could not resolve host address')
+                          url='Could-not-resolve-host-address')
         self.assertEqual(g.config['post'], None)
         self.assertEqual(g.config['multipart_post'], None)
         self.assertEqual(g.config['method'], None)

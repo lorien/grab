@@ -25,8 +25,10 @@ import sys
 
 from grab.cookie import create_cookie, CookieManager
 from grab import error
+from grab.error import GrabMisuseError
 from grab.response import Response
 from grab.upload import UploadFile, UploadContent
+from grab.transport.base import BaseTransport
 
 logger = logging.getLogger('grab.transport.curl')
 
@@ -85,7 +87,7 @@ def process_upload_items(items):
     return result
 
 
-class CurlTransport(object):
+class CurlTransport(BaseTransport):
     """
     Grab transport layer using pycurl.
     """
@@ -93,25 +95,13 @@ class CurlTransport(object):
     def __init__(self):
         self.curl = pycurl.Curl()
 
-    def setup_body_file(self, storage_dir, storage_filename, create_dir=False):
-        if create_dir:
-            if not os.path.exists(storage_dir):
-                os.makedirs(storage_dir)
-        if storage_filename is None:
-            handle, path = tempfile.mkstemp(dir=storage_dir)
-            self.body_file = os.fdopen(handle, 'wb')
-        else:
-            path = os.path.join(storage_dir, storage_filename)
-            self.body_file = open(path, 'wb')
-        self.body_path = path
-
     def reset(self):
+        super(CurlTransport, self).reset()
+
         self.response_header_chunks = []
         self.response_body_chunks = []
         self.response_body_bytes_read = 0
         self.verbose_logging = False
-        self.body_file = None
-        self.body_path = None
 
         # Maybe move to super-class???
         self.request_head = ''
@@ -266,6 +256,13 @@ class CurlTransport(object):
 
         # Disabled to avoid SSL3_READ_BYTES:sslv3 alert handshake failure error
         # self.curl.setopt(pycurl.SSLVERSION, pycurl.SSLVERSION_SSLv3)
+
+        if grab.request_method in ('POST', 'PUT'):
+            if (grab.config['post'] is None and
+                grab.config['multipart_post'] is None):
+                    raise GrabMisuseError('Neither `post` or `multipart_post`'
+                                          ' options was specified for the %s'
+                                          ' request' % grab.request_method)
 
         if grab.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
