@@ -1,5 +1,5 @@
 # coding: utf-8
-from test.util import build_grab
+from test.util import build_grab, only_transport
 from test.util import BaseGrabTestCase
 
 
@@ -7,6 +7,14 @@ class GrabSimpleTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
+    def test_default_random_user_agent(self):
+        g = build_grab()
+        g.go(self.server.get_url())
+        self.assertTrue(
+            self.server.request['headers'].get('user-agent')
+                .startswith('Mozilla/5.0 '))
+
+    @only_transport('pycurl')
     def test_empty_useragent_pycurl(self):
         g = build_grab()
 

@@ -17,11 +17,11 @@ import tempfile
 import os
 from weblib.http import (encode_cookies, normalize_http_values,
                         normalize_post_data, normalize_url)
-from weblib.user_agent import random_user_agent
 from weblib.encoding import make_str, decode_pairs, make_unicode
 import six
 from six.moves.http_cookiejar import CookieJar
 import sys
+from user_agent import generate_user_agent
 
 from grab.cookie import create_cookie, CookieManager
 from grab import error
@@ -241,7 +241,7 @@ class CurlTransport(BaseTransport):
                     lines = inf.read().splitlines()
                 grab.config['user_agent'] = random.choice(lines)
             else:
-                grab.config['user_agent'] = random_user_agent()
+                grab.config['user_agent'] = generate_user_agent()
 
         # If value is None then set empty string
         # None is not acceptable because in such case

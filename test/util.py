@@ -141,3 +141,17 @@ def exclude_transport(*names):
                 return func(*args, **kwargs)
         return caller
     return decorator
+
+
+def only_transport(*names):
+    def decorator(func):
+        def caller(*args, **kwargs):
+            if GLOBAL['transport'] in names:
+                return func(*args, **kwargs)
+            else:
+                func_name = '%s:%s' % (func.__module__, func.__name__)
+                logger.debug('Running test %s for transport %s is restricted'
+                             % (func_name, GLOBAL['transport']))
+                return None
+        return caller
+    return decorator

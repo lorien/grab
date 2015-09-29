@@ -22,7 +22,7 @@ from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.response import Response
 from grab.upload import UploadFile, UploadContent
 from grab.transport.base import BaseTransport
-from weblib.user_agent import random_user_agent
+from user_agent import generate_user_agent
 
 logger = logging.getLogger('grab.transport.urllib3')
 
@@ -188,7 +188,7 @@ class Urllib3Transport(BaseTransport):
                     lines = inf.read().splitlines()
                 grab.config['user_agent'] = random.choice(lines)
             else:
-                grab.config['user_agent'] = random_user_agent()
+                grab.config['user_agent'] = generate_user_agent()
 
         extra_headers['User-Agent'] = grab.config['user_agent'] 
 
