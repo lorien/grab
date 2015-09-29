@@ -19,6 +19,7 @@ from contextlib import contextmanager
 from traceback import format_exc
 import multiprocessing
 import threading
+from datetime import datetime
 
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
@@ -419,6 +420,13 @@ class Spider(DeprecatedThingsSpiderMixin):
         out.append('Queue size: %d' % self.task_queue.size()
                                       if self.task_queue else 'NA')
         out.append('Network streams: %d' % self.thread_number)
+        elapsed = self.timer.timers['total']
+        hours, seconds = divmod(elapsed, 3600)
+        minutes, seconds = divmod(seconds, 60)
+        out.append('Time elapsed: %d:%d:%d (H:M:S)' % (
+            hours, minutes, seconds))
+        out.append('End time: %s' % 
+                   datetime.utcnow().strftime('%d %b %Y, %H:%M:%S UTC'))
 
         if timing:
             out.append('')
