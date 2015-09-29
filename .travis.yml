@@ -12,6 +12,9 @@ matrix:
     - env: TOX_ENV=py27-mp
     - env: TOX_ENV=py33-mp
     - env: TOX_ENV=py34-mp
+    - env: TOX_ENV=py27-urllib3
+    - env: TOX_ENV=py33-urllib3
+    - env: TOX_ENV=py34-urllib3
 
 env:
   - TOX_ENV=py27
@@ -20,6 +23,9 @@ env:
   - TOX_ENV=py27-mp
   - TOX_ENV=py33-mp
   - TOX_ENV=py34-mp
+  - TOX_ENV=py27-urllib3
+  - TOX_ENV=py33-urllib3
+  - TOX_ENV=py34-urllib3
 
 services:
   - mongodb

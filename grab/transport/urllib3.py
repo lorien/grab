@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import logging
 from weblib.http import (normalize_url, normalize_post_data,
                          normalize_http_values)
-from weblib.encoding import make_str, make_unicode
+from weblib.encoding import make_str, decode_pairs
 from urllib3 import PoolManager, ProxyManager, exceptions
 from urllib3.filepost import encode_multipart_formdata
 from urllib3.fields import RequestField
@@ -25,6 +25,15 @@ from grab.transport.base import BaseTransport
 from weblib.user_agent import random_user_agent
 
 logger = logging.getLogger('grab.transport.urllib3')
+
+
+def make_unicode(val, encoding='utf-8', errors='strict'):
+    if isinstance(val, six.binary_type):
+        return val.decode(encoding, errors)
+    elif isinstance(val, six.text_type):
+        return val
+    else:
+        return make_unicode(str(val))
 
 
 def process_upload_items(items):
@@ -211,7 +220,16 @@ class Urllib3Transport(BaseTransport):
             pool = self.pool
         try:
             retry = Retry(redirect=5, connect=False, read=False)
-            res = pool.urlopen(req.method, make_str(req.url),
+            #req_headers = dict((make_unicode(x), make_unicode(y))
+            #                   for (x, y) in req.headers.items())
+            if six.PY3:
+                req_url = make_unicode(req.url)
+                req_method = make_unicode(req.method)
+            else:
+                req_url = make_str(req.url)
+                req_method = req.method
+            res = pool.urlopen(req_method,
+                               req_url,
                                body=req.data, timeout=2,
                                retries=retry, headers=req.headers,
                                preload_content=False)
@@ -334,4 +352,6 @@ class Urllib3Transport(BaseTransport):
                         domain=request_host_no_www
                     )
 
-        req.headers['Cookie'] = grab.cookies.get_cookie_header(req)
+        cookie_hdr = grab.cookies.get_cookie_header(req)
+        if cookie_hdr:
+            req.headers['Cookie'] = cookie_hdr
