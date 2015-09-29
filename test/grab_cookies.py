@@ -62,7 +62,6 @@ class TestCookies(BaseGrabTestCase):
         g.go(self.server.get_url())
         self.assertTrue(len(self.server.request['cookies']) == 0)
 
-    @exclude_transport('urllib3')
     def test_redirect_session(self):
         g = build_grab()
         self.server.response['cookies'] = {'foo': 'bar'}.items()

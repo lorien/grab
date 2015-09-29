@@ -233,10 +233,10 @@ class Urllib3Transport(BaseTransport):
                                body=req.data, timeout=2,
                                retries=retry, headers=req.headers,
                                preload_content=False)
-        except exceptions.ConnectionError as ex:
-            raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
-        except exceptions.NewConnectionError as ex:
+        except exceptions.ConnectTimeoutError as ex:
             raise error.GrabConnectionError('Could not create connection')
+        except exceptions.ProtocolError as ex:
+            raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
 
         # WTF?
         self.request_head = ''

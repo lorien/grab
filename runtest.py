@@ -34,7 +34,7 @@ GRAB_TEST_LIST = (
     'test.grab_post_request',
     'test.grab_request', # TODO: fix tests excluded for urllib3
     'test.grab_user_agent',
-    'test.grab_cookies', # !!!!!!! FIX URLLIB3 TEST
+    'test.grab_cookies', # TODO: fix tests excluded for urllib3
     'test.grab_url_processing',
     # Refactor
     'test.grab_proxy',
