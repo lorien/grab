@@ -219,7 +219,7 @@ class Urllib3Transport(BaseTransport):
         else:
             pool = self.pool
         try:
-            retry = Retry(redirect=5, connect=False, read=False)
+            retry = Retry(redirect=False, connect=False, read=False)
             #req_headers = dict((make_unicode(x), make_unicode(y))
             #                   for (x, y) in req.headers.items())
             if six.PY3:

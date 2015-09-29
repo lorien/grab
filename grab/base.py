@@ -452,6 +452,20 @@ class Grab(DeprecatedThings):
                 raise
             else:
                 doc = self.process_request_result()
+
+                if self.config['follow_location']:
+                    if doc.code in (301, 302, 303, 307, 308):
+                        if doc.headers.get('Location'):
+                            refresh_count += 1
+                            if refresh_count > self.config['redirect_limit']:
+                                raise error.GrabTooManyRedirectsError()
+                            else:
+                                url = doc.headers.get('Location')
+                                self.prepare_request(
+                                    url=self.make_url_absolute(url),
+                                    referer=None)
+                                continue
+
                 if self.config['follow_refresh']:
                     refresh_url = self.doc.get_meta_refresh_url()
                     if refresh_url is not None:
@@ -460,7 +474,8 @@ class Grab(DeprecatedThings):
                             raise error.GrabTooManyRedirectsError()
                         else:
                             self.prepare_request(
-                                url=self.make_url_absolute(refresh_url))
+                                url=self.make_url_absolute(refresh_url),
+                                referer=None)
                             continue
                 return doc
 

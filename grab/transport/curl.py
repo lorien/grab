@@ -200,6 +200,11 @@ class CurlTransport(BaseTransport):
 
         self.curl.setopt(pycurl.URL, request_url)
 
+        # Actually, FOLLOWLOCATION should always be 0
+        # because redirect logic takes place in Grab.request method
+        # BUT in Grab.Spider this method is not invoked
+        # So, in Grab.Spider we still rely on Grab internal ability
+        # to follow 30X Locations
         self.curl.setopt(pycurl.FOLLOWLOCATION,
                          1 if grab.config['follow_location'] else 0)
         self.curl.setopt(pycurl.MAXREDIRS, grab.config['redirect_limit'])
