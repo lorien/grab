@@ -449,8 +449,8 @@ class Grab(DeprecatedThings):
             raise
         else:
             # That builds `self.doc`
-            self.process_request_result()
-            return self.doc
+            doc = self.process_request_result()
+        return doc
 
     def process_request_result(self, prepare_response_func=None):
         """
@@ -529,7 +529,7 @@ class Grab(DeprecatedThings):
                     return self.request(url=url,
                                         refresh_redirect_count=inc_count)
 
-        return None
+        return self.doc
 
     def reset_temporary_options(self):
         self.config['post'] = None

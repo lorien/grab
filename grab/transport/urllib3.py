@@ -145,9 +145,9 @@ class Urllib3Transport(BaseTransport):
                     charset=grab.config['charset'],
                     ignore_classes=(UploadFile, UploadContent),
                 )
-                if six.PY3:
-                    post_items = decode_pairs(post_items,
-                                              grab.config['charset'])
+                #if six.PY3:
+                post_items = decode_pairs(post_items,
+                                          grab.config['charset'])
                 post_items = process_upload_items(post_items)
                 post_data, content_type = encode_multipart_formdata(post_items)
                 extra_headers['Content-Type'] = content_type
