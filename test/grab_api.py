@@ -111,24 +111,6 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertEqual(3, length)
         os.unlink(path)
 
-    def test_follow_refresh_option(self):
-        def handler():
-            response = "<meta http-equiv='refresh' content='0;url= %s'>" % \
-                       self.server.get_url()
-            yield response.encode('ascii')
-            yield response.encode('ascii')
-            yield response.encode('ascii')
-            yield b'OK'
-
-        self.server.response['data'] = handler()
-        g = build_grab(follow_refresh=True)
-        g.go(self.server.get_url())
-        self.assertEqual(g.response.body, b'OK')
-        self.server.response['data'] = handler()
-        g.setup(redirect_limit=1)
-        self.assertRaises(GrabTooManyRedirectsError, g.go,
-                          self.server.get_url())
-
     def test_make_url_absolute(self):
         g = build_grab()
         self.server.response['get.data'] = '<base href="http://foo/bar/">'
@@ -149,7 +131,6 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertEqual(g.config['multipart_post'], None)
         self.assertEqual(g.config['method'], None)
         self.assertEqual(g.config['body_storage_filename'], None)
-        self.assertEqual(g.config['refresh_redirect_count'], 0)
 
     def test_setup_document(self):
         data = b'''

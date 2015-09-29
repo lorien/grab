@@ -143,7 +143,6 @@ def default_config():
         # Redirects
         follow_refresh=False,
         follow_location=True,
-        refresh_redirect_count=0,
         redirect_limit=10,
 
         # Authentication
@@ -438,19 +437,32 @@ class Grab(DeprecatedThings):
         Returns: ``Document`` objects.
         """
 
-        self.prepare_request(**kwargs)
-        self.log_request()
 
-        try:
-            self.transport.request()
-        except error.GrabError:
-            self.reset_temporary_options()
-            self.save_failed_dump()
-            raise
-        else:
-            # That builds `self.doc`
-            doc = self.process_request_result()
-        return doc
+        self.prepare_request(**kwargs)
+        refresh_count = 0
+
+        while True:
+            self.log_request()
+
+            try:
+                self.transport.request()
+            except error.GrabError:
+                self.reset_temporary_options()
+                self.save_failed_dump()
+                raise
+            else:
+                doc = self.process_request_result()
+                if self.config['follow_refresh']:
+                    refresh_url = self.doc.get_meta_refresh_url()
+                    if refresh_url is not None:
+                        refresh_count += 1
+                        if refresh_count > self.config['redirect_limit']:
+                            raise error.GrabTooManyRedirectsError()
+                        else:
+                            self.prepare_request(
+                                url=self.make_url_absolute(refresh_url))
+                            continue
+                return doc
 
     def process_request_result(self, prepare_response_func=None):
         """
@@ -484,7 +496,6 @@ class Grab(DeprecatedThings):
         # It's important to delete old POST data after request is performed.
         # If POST data is not cleared then next request will try to use them
         # again!
-        old_refresh_count = self.config['refresh_redirect_count']
         self.reset_temporary_options()
 
         if prepare_response_func:
@@ -518,17 +529,6 @@ class Grab(DeprecatedThings):
         # Should be called after `copy_request_data`
         self.save_dumps()
 
-        # TODO: check max redirect count
-        if self.config['follow_refresh']:
-            url = find_refresh_url(self.doc.unicode_body())
-            if url is not None:
-                inc_count = old_refresh_count + 1
-                if inc_count > self.config['redirect_limit']:
-                    raise error.GrabTooManyRedirectsError()
-                else:
-                    return self.request(url=url,
-                                        refresh_redirect_count=inc_count)
-
         return self.doc
 
     def reset_temporary_options(self):
@@ -536,7 +536,6 @@ class Grab(DeprecatedThings):
         self.config['multipart_post'] = None
         self.config['method'] = None
         self.config['body_storage_filename'] = None
-        self.config['refresh_redirect_count'] = 0
 
     def save_failed_dump(self):
         """

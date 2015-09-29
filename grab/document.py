@@ -26,7 +26,7 @@ import weblib.encoding
 from weblib.files import hashed_path
 from weblib.structured import TreeInterface
 from weblib.text import normalize_space
-from weblib.html import decode_entities
+from weblib.html import decode_entities, find_refresh_url
 from weblib.rex import normalize_regexp
 
 from grab.cookie import CookieManager
@@ -1018,3 +1018,6 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
     def __setstate__(self, state):
         for slot, value in state.items():
             setattr(self, slot, value)
+
+    def get_meta_refresh_url(self):
+        return find_refresh_url(self.unicode_body())
