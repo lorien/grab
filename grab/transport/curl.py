@@ -347,6 +347,8 @@ class CurlTransport(BaseTransport):
         headers = grab.config['common_headers']
         if grab.config['headers']:
             headers.update(grab.config['headers'])
+        # This is required to avoid some problems
+        headers.update({'Expect': ''})
         header_tuples = [str('%s: %s' % x) for x
                          in headers.items()]
         self.curl.setopt(pycurl.HTTPHEADER, header_tuples)

@@ -656,7 +656,6 @@ class Grab(DeprecatedThings):
             'Accept-Charset': 'utf-8,windows-1251;q=0.7,*;q=0.%d'
                               % randint(5, 7),
             'Keep-Alive': '300',
-            'Expect': '',
         }
 
     def save_dumps(self):
