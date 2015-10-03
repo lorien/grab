@@ -542,7 +542,8 @@ class Grab(DeprecatedThings):
         self.copy_request_data()
 
         # Should be called after `copy_request_data`
-        self.save_dumps()
+        if self.config['log_dir']:
+            self.save_dumps()
 
         return self.doc
 
@@ -564,11 +565,16 @@ class Grab(DeprecatedThings):
         # I put it inside try/except to not break
         # live spiders
         try:
-            self.doc = self.transport.prepare_response(self)
-            self.copy_request_data()
-            self.save_dumps()
+            if self.transport_param == 'urllib3':
+                # TODO: fix exceptions
+                pass
+            else:
+                self.doc = self.transport.prepare_response(self)
+                self.copy_request_data()
+                if self.config['log_dir']:
+                    self.save_dumps()
         except Exception as ex:
-            logger.error(six.text_type(ex))
+            logger.error('', exc_info=ex)
 
     def copy_request_data(self):
         # TODO: Maybe request object?
@@ -654,28 +660,27 @@ class Grab(DeprecatedThings):
         }
 
     def save_dumps(self):
-        if self.config['log_dir']:
-            thread_name = threading.currentThread().getName().lower()
-            if thread_name == 'mainthread':
-                thread_name = ''
-            else:
-                thread_name = '-%s' % thread_name
-            file_name = os.path.join(self.config['log_dir'], '%02d%s.log' % (
-                self.request_counter, thread_name))
-            with open(file_name, 'w') as out:
-                out.write('Request headers:\n')
-                out.write(self.request_head)
-                out.write('\n')
-                out.write('Request body:\n')
-                out.write(self.request_body)
-                out.write('\n\n')
-                out.write('Response headers:\n')
-                out.write(self.doc.head.decode('ascii'))
+        thread_name = threading.currentThread().getName().lower()
+        if thread_name == 'mainthread':
+            thread_name = ''
+        else:
+            thread_name = '-%s' % thread_name
+        file_name = os.path.join(self.config['log_dir'], '%02d%s.log' % (
+            self.request_counter, thread_name))
+        with open(file_name, 'w') as out:
+            out.write('Request headers:\n')
+            out.write(self.request_head)
+            out.write('\n')
+            out.write('Request body:\n')
+            out.write(self.request_body)
+            out.write('\n\n')
+            out.write('Response headers:\n')
+            out.write(self.doc.head.decode('ascii'))
 
-            file_extension = 'html'
-            file_name = os.path.join(self.config['log_dir'], '%02d%s.%s' % (
-                self.request_counter, thread_name, file_extension))
-            self.doc.save(file_name)
+        file_extension = 'html'
+        file_name = os.path.join(self.config['log_dir'], '%02d%s.%s' % (
+            self.request_counter, thread_name, file_extension))
+        self.doc.save(file_name)
 
     def make_url_absolute(self, url, resolve_base=False):
         """

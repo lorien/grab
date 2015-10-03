@@ -10,6 +10,7 @@ from urllib3 import PoolManager, ProxyManager, exceptions
 from urllib3.filepost import encode_multipart_formdata
 from urllib3.fields import RequestField
 from urllib3.util.retry import Retry
+from urllib3.util.timeout import Timeout
 import six
 from six.moves.urllib.parse import urlencode, urlsplit
 import random
@@ -86,6 +87,9 @@ class Urllib3Transport(BaseTransport):
     def __init__(self):
         self.pool = PoolManager(10)
 
+        logger = logging.getLogger('urllib3.connectionpool')
+        logger.setLevel(logging.WARNING)
+
     def reset(self):
         #self.response_header_chunks = []
         #self.response_body_chunks = []
@@ -115,6 +119,9 @@ class Urllib3Transport(BaseTransport):
         req.body_maxsize = grab.config['body_maxsize']
         if grab.config['nobody']:
             req.body_maxsize = 0
+
+        req.timeout = grab.config['timeout']
+        req.connect_timeout = grab.config['connect_timeout']
 
         extra_headers = {}
 
@@ -196,6 +203,7 @@ class Urllib3Transport(BaseTransport):
         # Headers
         headers = extra_headers
         headers.update(grab.config['common_headers'])
+
         if grab.config['headers']:
             headers.update(grab.config['headers'])
         req.headers = headers
@@ -220,6 +228,8 @@ class Urllib3Transport(BaseTransport):
             pool = self.pool
         try:
             retry = Retry(redirect=False, connect=False, read=False)
+            timeout = Timeout(connect=req.connect_timeout,
+                              read=req.timeout)
             #req_headers = dict((make_unicode(x), make_unicode(y))
             #                   for (x, y) in req.headers.items())
             if six.PY3:
@@ -230,7 +240,7 @@ class Urllib3Transport(BaseTransport):
                 req_method = req.method
             res = pool.urlopen(req_method,
                                req_url,
-                               body=req.data, timeout=2,
+                               body=req.data, timeout=timeout,
                                retries=retry, headers=req.headers,
                                preload_content=False)
         except exceptions.ConnectTimeoutError as ex:
