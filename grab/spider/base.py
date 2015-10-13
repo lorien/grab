@@ -523,13 +523,9 @@ class Spider(DeprecatedThingsSpiderMixin):
         """
 
         if task.task_try_count > self.task_try_limit:
-            logger.debug('Task tries (%d) ended: %s / %s' % (
-                          self.task_try_limit, task.name, task.url))
             return False, 'task-try-count'
 
         if task.network_try_count > self.network_try_limit:
-            logger.debug('Network tries (%d) ended: %s / %s' % (
-                          self.network_try_limit, task.name, task.url))
             return False, 'network-try-count'
 
         return True, None
