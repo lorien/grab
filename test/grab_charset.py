@@ -3,6 +3,8 @@
 This test fails in py3.3 environment because `grab.response.body`
 contains <str>, but it should contains <bytes>
 """
+import six
+
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 
@@ -36,3 +38,37 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
         g = build_grab()
         g.go(self.server.get_url())
         self.assertEquals('utf-8', g.doc.charset)
+
+
+    def test_dash_issue(self):
+        HTML = '<strong>&#151;</strong>'
+        self.server.response['get.data'] = HTML
+        g = build_grab()
+        g.go(self.server.get_url())
+
+        # By default &#[128-160]; are fixed
+        self.assertFalse(g.xpath_one('//strong/text()') == six.unichr(151))
+        self.assertTrue(g.xpath_one('//strong/text()') == six.unichr(8212))
+
+        # disable fix-behaviour
+        g.setup(fix_special_entities=False)
+        g.go(self.server.get_url())
+
+        # By default &#[128-160]; are fixed
+        self.assertTrue(g.xpath_one('//strong/text()') == six.unichr(151))
+        self.assertFalse(g.xpath_one('//strong/text()') == six.unichr(8212))
+
+        # Explicitly use unicode_body func
+        g = build_grab()
+        g.go(self.server.get_url())
+        print(':::', g.response.unicode_body())
+        self.assertTrue('&#8212;' in g.response.unicode_body())
+
+    def test_invalid_charset(self):
+        HTML = '''<head><meta http-equiv="Content-Type"
+                    content="text/html; charset=windows-874">'
+                    </head><body>test</body>'''
+        self.server.response['get.data'] = HTML
+        g = build_grab()
+        g.go(self.server.get_url())
+        #print(g.doc.charset)

@@ -28,6 +28,7 @@ from weblib.structured import TreeInterface
 from weblib.text import normalize_space
 from weblib.html import decode_entities, find_refresh_url
 from weblib.rex import normalize_regexp
+import logging
 
 from grab.cookie import CookieManager
 from grab.error import GrabMisuseError, DataNotFound
@@ -53,6 +54,7 @@ _BOM_TABLE = [
 ]
 _FIRST_CHARS = set(char[0] for (char, name) in _BOM_TABLE)
 THREAD_STORAGE = threading.local()
+logger = logging.getLogger('grab.document')
 
 
 def read_bom(data):
@@ -876,7 +878,8 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
             try:
                 codecs.lookup(charset)
             except LookupError:
-                logger.error('Unknown charset found: %s' % charset)
+                logger.error('Unknown charset found: %s.'
+                             ' Using utf-8 istead.' % charset)
                 self.charset = 'utf-8'
             else:
                 self.charset = charset

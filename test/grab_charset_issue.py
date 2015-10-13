@@ -32,3 +32,12 @@ class LXMLExtensionTest(BaseGrabTestCase):
         g.go(self.server.get_url())
         print(':::', g.response.unicode_body())
         self.assertTrue('&#8212;' in g.response.unicode_body())
+
+    def test_invalid_charset(self):
+        HTML = '''<head><meta http-equiv="Content-Type"
+                    content="text/html; charset=windows-874">'
+                    </head><body>test</body>'''
+        self.server.response['get.data'] = HTML
+        g = build_grab()
+        g.go(self.server.get_url())
+        print(g.doc.charset)
