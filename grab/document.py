@@ -326,7 +326,7 @@ class DomTreeExtension(object):
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser
-                body = b'<html></html>'
+                body = '<html></html>'
             start = time.time()
 
             try:

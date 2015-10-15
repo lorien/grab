@@ -9,6 +9,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
+    '''
     def test_body_inmemory_false(self):
         g = build_grab()
         g.setup(body_inmemory=False)
@@ -57,3 +58,10 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             g.doc.body = u'Спутник' 
 
         self.assertRaises(GrabMisuseError, bad_func)
+    '''
+
+    def test_empty_response(self):
+        self.server.response['data'] = b''
+        g = build_grab()
+        g.go(self.server.get_url())
+        g.doc.tree # should not raise exception
