@@ -4,8 +4,7 @@ import logging
 from weblib.error import ResponseNotValid
 
 
-def integrity(integrity_func, integrity_errors=(ResponseNotValid,),
-              ignore_errors=()):
+def integrity(integrity_func, retry_errors=(ResponseNotValid,)):
     """
     Args:
         :param integrity_func: couldb callable or string contains name of
@@ -24,24 +23,17 @@ def integrity(integrity_func, integrity_errors=(ResponseNotValid,),
                         getattr(self, int_func)(grab)
                     else:
                         int_func(grab)
-            except ignore_errors as ex:
-                self.stat.inc(ex.__class__.__name__)
-                grab.meta['integrity_error'] = ex
-                result = func(self, grab, task)
-                if result is not None:
-                    for event in result:
-                        yield event
-            except integrity_errors as ex:
+            except retry_errors as ex:
                 yield task.clone(refresh_cache=True)
-                self.stat.inc(ex.__class__.__name__)
-                #logging.error(ex)
+                error_code = ex.__class__.__name__.replace('_', '-')
+                self.stat.inc('integrity:%s' % error_code)
             except Exception as ex:
                 raise
             else:
-                grab.meta['integrity_error'] = None
                 result = func(self, grab, task)
                 if result is not None:
                     for event in result:
                         yield event
+        func_wrapper._original_func = func
         return func_wrapper
     return build_decorator
