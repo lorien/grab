@@ -2,7 +2,6 @@ from grab.spider import Spider, Task
 from grab.script import crawl
 from grab.util.module import SPIDER_REGISTRY
 
-from test.util import TMP_DIR
 from test.util import BaseGrabTestCase
 
 

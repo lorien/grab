@@ -6,7 +6,7 @@ from grab.error import GrabMisuseError
 from grab.cookie import CookieManager, create_cookie
 import pickle
 
-from test.util import TMP_FILE, build_grab, exclude_transport
+from test.util import temp_file, build_grab, exclude_transport
 from test.util import BaseGrabTestCase
 
 
@@ -80,70 +80,73 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual(self.server.request['cookies']['foo'].value, 'bar')
 
     def test_load_dump(self):
-        g = build_grab()
-        cookies = {'foo': 'bar', 'spam': 'ham'}
-        g.setup(cookies=cookies)
-        g.go(self.server.get_url())
-        g.dump_cookies(TMP_FILE)
-        self.assertEqual(set(cookies.items()),
-                         set((x['name'], x['value'])
-                             for x in json.load(open(TMP_FILE))))
+        with temp_file() as tmp_file:
+            g = build_grab()
+            cookies = {'foo': 'bar', 'spam': 'ham'}
+            g.setup(cookies=cookies)
+            g.go(self.server.get_url())
+            g.dump_cookies(tmp_file)
+            self.assertEqual(set(cookies.items()),
+                             set((x['name'], x['value'])
+                                 for x in json.load(open(tmp_file))))
 
-        g = build_grab()
-        cookies = {'foo': 'bar', 'spam': u'begemot'}
-        g.setup(cookies=cookies)
-        g.go(self.server.get_url())
-        g.dump_cookies(TMP_FILE)
-        self.assertEqual(set(cookies.items()),
-                         set((x['name'], x['value'])
-                             for x in json.load(open(TMP_FILE))))
+            g = build_grab()
+            cookies = {'foo': 'bar', 'spam': u'begemot'}
+            g.setup(cookies=cookies)
+            g.go(self.server.get_url())
+            g.dump_cookies(tmp_file)
+            self.assertEqual(set(cookies.items()),
+                             set((x['name'], x['value'])
+                                 for x in json.load(open(tmp_file))))
 
-        # Test load cookies
-        g = build_grab()
-        cookies = [{'name': 'foo', 'value': 'bar',
-                    'domain': self.server.address},
-                   {'name': 'spam', 'value': u'begemot',
-                    'domain': self.server.address}]
-        json.dump(cookies, open(TMP_FILE, 'w'))
-        g.load_cookies(TMP_FILE)
-        self.assertEqual(set(g.cookies.items()),
-                         set((x['name'], x['value']) for x in cookies))
+            # Test load cookies
+            g = build_grab()
+            cookies = [{'name': 'foo', 'value': 'bar',
+                        'domain': self.server.address},
+                       {'name': 'spam', 'value': u'begemot',
+                        'domain': self.server.address}]
+            json.dump(cookies, open(tmp_file, 'w'))
+            g.load_cookies(tmp_file)
+            self.assertEqual(set(g.cookies.items()),
+                             set((x['name'], x['value']) for x in cookies))
 
     def test_cookiefile_empty(self):
-        g = build_grab()
-        # Empty file should not raise Exception
-        open(TMP_FILE, 'w').write('')
-        g.setup(cookiefile=TMP_FILE)
-        g.go(self.server.get_url())
+        with temp_file() as tmp_file:
+            g = build_grab()
+            # Empty file should not raise Exception
+            open(tmp_file, 'w').write('')
+            g.setup(cookiefile=tmp_file)
+            g.go(self.server.get_url())
 
     def test_cookiefile(self):
-        g = build_grab()
+        with temp_file() as tmp_file:
+            g = build_grab()
 
-        cookies = [{'name': 'spam', 'value': 'ham',
-                    'domain': self.server.address}]
-        json.dump(cookies, open(TMP_FILE, 'w'))
+            cookies = [{'name': 'spam', 'value': 'ham',
+                        'domain': self.server.address}]
+            json.dump(cookies, open(tmp_file, 'w'))
 
-        # One cookie are sent in server reponse
-        # Another cookies is passed via the `cookiefile` option
-        self.server.response['cookies'] = {'godzilla': 'monkey'}.items()
-        g.setup(cookiefile=TMP_FILE, debug=True)
-        g.go(self.server.get_url())
-        self.assertEqual(self.server.request['cookies']['spam'].value, 'ham')
+            # One cookie are sent in server reponse
+            # Another cookies is passed via the `cookiefile` option
+            self.server.response['cookies'] = {'godzilla': 'monkey'}.items()
+            g.setup(cookiefile=tmp_file, debug=True)
+            g.go(self.server.get_url())
+            self.assertEqual(self.server.request['cookies']['spam'].value, 'ham')
 
-        # This is correct reslt of combining two cookies
-        MERGED_COOKIES = [('godzilla', 'monkey'), ('spam', 'ham')]
+            # This is correct reslt of combining two cookies
+            MERGED_COOKIES = [('godzilla', 'monkey'), ('spam', 'ham')]
 
-        # g.cookies should contains merged cookies
-        self.assertEqual(set(MERGED_COOKIES),
-                         set(g.cookies.items()))
+            # g.cookies should contains merged cookies
+            self.assertEqual(set(MERGED_COOKIES),
+                             set(g.cookies.items()))
 
-        # `cookiefile` file should contains merged cookies
-        self.assertEqual(set(MERGED_COOKIES),
-                         set((x['name'], x['value'])
-                             for x in json.load(open(TMP_FILE))))
+            # `cookiefile` file should contains merged cookies
+            self.assertEqual(set(MERGED_COOKIES),
+                             set((x['name'], x['value'])
+                                 for x in json.load(open(tmp_file))))
 
-        # Just ensure it works
-        g.go(self.server.get_url())
+            # Just ensure it works
+            g.go(self.server.get_url())
 
     @exclude_transport('urllib3')
     def test_manual_dns(self):
@@ -279,22 +282,22 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual('2', self.server.request['cookies'].get('bar').value)
 
     def test_cookie_merging_replace_with_cookies_option(self):
+        with temp_file() as tmp_file:
+            init_cookies = [{'name': 'foo', 'value': 'bar',
+                             'domain': self.server.address}]
+            json.dump(init_cookies, open(tmp_file, 'w'))
 
-        init_cookies = [{'name': 'foo', 'value': 'bar',
-                         'domain': self.server.address}]
-        json.dump(init_cookies, open(TMP_FILE, 'w'))
+            g = build_grab(debug=True)
+            g.cookies.load_from_file(tmp_file)
 
-        g = build_grab(debug=True)
-        g.cookies.load_from_file(TMP_FILE)
+            cookies = {
+                'foo': 'bar2',
+                'sex': 'male',
+            }
 
-        cookies = {
-            'foo': 'bar2',
-            'sex': 'male',
-        }
-
-        g.setup(cookies=cookies)
-        g.go(self.server.get_url())
-        self.assertEqual(2, len(self.server.request['cookies'].items()))
+            g.setup(cookies=cookies)
+            g.go(self.server.get_url())
+            self.assertEqual(2, len(self.server.request['cookies'].items()))
 
     def test_cookie_merging_replace(self):
         g = Grab()

@@ -8,6 +8,9 @@ import logging
 from six.moves.urllib.request import urlopen
 import socket
 import time
+from contextlib import contextmanager
+from tempfile import mkdtemp, mkstemp
+from shutil import rmtree
 
 from grab import Grab
 
@@ -17,8 +20,6 @@ TEST_SERVER_PORT = 9876
 ADDRESS = 'localhost'
 EXTRA_PORT1 = TEST_SERVER_PORT + 1
 EXTRA_PORT2 = TEST_SERVER_PORT + 2
-TMP_DIR = None
-TMP_FILE = None
 
 GLOBAL = {
     'backends': [],
@@ -27,28 +28,19 @@ GLOBAL = {
 }
 
 
-def prepare_test_environment():
-    global TMP_DIR, TMP_FILE
-
-    TMP_DIR = tempfile.mkdtemp()
-    TMP_FILE = os.path.join(TMP_DIR, '__temp')
-
-
-def clear_test_environment():
-    clear_directory(TMP_DIR)
+@contextmanager
+def temp_dir(root_dir=None):
+    dir_ = mkdtemp(dir=root_dir)
+    yield dir_
+    rmtree(dir_)
 
 
-def clear_directory(path):
-    for root, dirs, files in os.walk(path):
-        for fname in files:
-            os.unlink(os.path.join(root, fname))
-        for _dir in dirs:
-            shutil.rmtree(os.path.join(root, _dir))
-
-
-def get_temp_file():
-    handler, path = tempfile.mkstemp(dir=TMP_DIR)
-    return path
+@contextmanager
+def temp_file(root_dir=None):
+    fd, file_ = mkstemp(dir=root_dir)
+    yield file_
+    os.close(fd)
+    os.unlink(file_)
 
 
 def build_grab(*args, **kwargs):

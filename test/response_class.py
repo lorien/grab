@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 import os.path
 
-from test.util import TEST_DIR, TMP_DIR, build_grab
+from test.util import TEST_DIR, build_grab, temp_file, temp_dir
 from test.util import BaseGrabTestCase
 
 HTML = """
@@ -18,25 +18,27 @@ class TestResponse(BaseGrabTestCase):
 
     def test_save(self):
         "Test `Response.save` method."
-        img_data = open(IMG_FILE, 'rb').read()
-        temp_file = os.path.join(TMP_DIR, 'file.bin')
-        self.server.response['get.data'] = img_data
+        with temp_dir() as tmp_dir:
+            img_data = open(IMG_FILE, 'rb').read()
+            tmp_file = os.path.join(tmp_dir, 'file.bin')
+            self.server.response['get.data'] = img_data
 
-        g = build_grab()
-        g.go(self.server.get_url())
-        g.response.save(temp_file)
-        self.assertEqual(open(temp_file, 'rb').read(), img_data)
+            g = build_grab()
+            g.go(self.server.get_url())
+            g.response.save(tmp_file)
+            self.assertEqual(open(tmp_file, 'rb').read(), img_data)
 
     def test_save_hash(self):
         "Test `Response.save_hash` method."
-        img_data = open(IMG_FILE, 'rb').read()
-        self.server.response['get.data'] = img_data
+        with temp_dir() as tmp_dir:
+            img_data = open(IMG_FILE, 'rb').read()
+            self.server.response['get.data'] = img_data
 
-        g = build_grab()
-        g.go(self.server.get_url())
-        path = g.response.save_hash(self.server.get_url(), TMP_DIR)
-        test_data = open(os.path.join(TMP_DIR, path), 'rb').read()
-        self.assertEqual(test_data, img_data)
+            g = build_grab()
+            g.go(self.server.get_url())
+            path = g.response.save_hash(self.server.get_url(), tmp_dir)
+            test_data = open(os.path.join(tmp_dir, path), 'rb').read()
+            self.assertEqual(test_data, img_data)
 
     def test_custom_charset(self):
         self.server.response['get.data'] = u'<html><head><meta '\

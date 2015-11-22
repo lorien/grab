@@ -3,7 +3,6 @@ from grab.util.module import (build_spider_registry, SPIDER_REGISTRY,
                               load_spider_class)
 from grab.spider import Spider
 from grab.spider.error import SpiderInternalError
-from test.util import TMP_DIR
 import os
 import sys
 

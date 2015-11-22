@@ -6,8 +6,7 @@ from optparse import OptionParser
 import logging
 from copy import copy
 
-from test.util import (prepare_test_environment, clear_test_environment,
-                       GLOBAL, start_server, stop_server)
+from test.util import GLOBAL, start_server, stop_server
 from weblib.watch import watch
 
 # **********
@@ -129,7 +128,6 @@ def main():
     if opts.backend_postgresql:
         GLOBAL['backends'].append('postgresql')
 
-    prepare_test_environment()
     test_list = []
 
     if opts.test_all:
@@ -179,7 +177,6 @@ def main():
         pyprof2calltree.convert(stats, profile_tree_file)
     else:
         result = runner.run(suite)
-    clear_test_environment()
     if result.wasSuccessful():
         sys.exit(0)
     else:

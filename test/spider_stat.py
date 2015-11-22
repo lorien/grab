@@ -6,7 +6,6 @@ from six import StringIO
 import mock
 import sys
 
-from test.util import TMP_DIR
 from test.util import BaseGrabTestCase, build_spider
 
 

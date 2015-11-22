@@ -2,7 +2,7 @@
 import os
 
 from test.util import BaseGrabTestCase
-from test.util import TMP_DIR, clear_directory, build_grab, exclude_transport
+from test.util import build_grab, exclude_transport, temp_dir
 from grab.base import reset_request_counter
 
 
@@ -11,84 +11,84 @@ class TestCookies(BaseGrabTestCase):
         self.server.reset()
 
     def test_log_option(self):
-        clear_directory(TMP_DIR)
-        reset_request_counter()
+        with temp_dir() as tmp_dir:
+            reset_request_counter()
 
-        log_file_path = os.path.join(TMP_DIR, 'log.html')
-        g = build_grab()
-        g.setup(log_file=log_file_path)
-        self.server.response['get.data'] = 'omsk'
+            log_file_path = os.path.join(tmp_dir, 'log.html')
+            g = build_grab()
+            g.setup(log_file=log_file_path)
+            self.server.response['get.data'] = 'omsk'
 
-        self.assertEqual(os.listdir(TMP_DIR), [])
-        g.go(self.server.get_url())
-        self.assertEqual(os.listdir(TMP_DIR), ['log.html'])
-        self.assertEqual(open(log_file_path).read(), 'omsk')
+            self.assertEqual(os.listdir(tmp_dir), [])
+            g.go(self.server.get_url())
+            self.assertEqual(os.listdir(tmp_dir), ['log.html'])
+            self.assertEqual(open(log_file_path).read(), 'omsk')
 
     def test_log_dir_option(self):
-        clear_directory(TMP_DIR)
-        reset_request_counter()
+        with temp_dir() as tmp_dir:
+            reset_request_counter()
 
-        g = build_grab()
-        g.setup(log_dir=TMP_DIR)
-        self.server.response_once['get.data'] = 'omsk1'
-        self.server.response['get.data'] = 'omsk2'
+            g = build_grab()
+            g.setup(log_dir=tmp_dir)
+            self.server.response_once['get.data'] = 'omsk1'
+            self.server.response['get.data'] = 'omsk2'
 
-        self.assertEqual(os.listdir(TMP_DIR), [])
-        g.go(self.server.get_url())
-        g.go(self.server.get_url())
-        self.assertEqual(sorted(os.listdir(TMP_DIR)),
-                         ['01.html', '01.log', '02.html', '02.log'])
-        self.assertEqual(open(os.path.join(TMP_DIR, '01.html')).read(),
-                         'omsk1')
-        self.assertEqual(open(os.path.join(TMP_DIR, '02.html')).read(),
-                         'omsk2')
+            self.assertEqual(os.listdir(tmp_dir), [])
+            g.go(self.server.get_url())
+            g.go(self.server.get_url())
+            self.assertEqual(sorted(os.listdir(tmp_dir)),
+                             ['01.html', '01.log', '02.html', '02.log'])
+            self.assertEqual(open(os.path.join(tmp_dir, '01.html')).read(),
+                             'omsk1')
+            self.assertEqual(open(os.path.join(tmp_dir, '02.html')).read(),
+                             'omsk2')
 
     def test_log_dir_response_content(self):
-        clear_directory(TMP_DIR)
-        reset_request_counter()
+        with temp_dir() as tmp_dir:
+            reset_request_counter()
 
-        g = build_grab()
-        g.setup(log_dir=TMP_DIR)
-        self.server.response['get.data'] = 'omsk'
-        self.server.response['headers'] = [('X-Engine', 'PHP')]
+            g = build_grab()
+            g.setup(log_dir=tmp_dir)
+            self.server.response['get.data'] = 'omsk'
+            self.server.response['headers'] = [('X-Engine', 'PHP')]
 
-        self.assertEqual(os.listdir(TMP_DIR), [])
-        g.go(self.server.get_url())
-        self.assertEqual(sorted(os.listdir(TMP_DIR)), ['01.html', '01.log'])
-        log_file_content = open(os.path.join(TMP_DIR, '01.log')).read()
-        self.assertTrue('x-engine' in log_file_content.lower())
+            self.assertEqual(os.listdir(tmp_dir), [])
+            g.go(self.server.get_url())
+            self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
+            log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
+            self.assertTrue('x-engine' in log_file_content.lower())
 
     def test_log_dir_request_content_is_empty(self):
-        clear_directory(TMP_DIR)
-        reset_request_counter()
+        with temp_dir() as tmp_dir:
+            reset_request_counter()
 
-        g = build_grab()
-        g.setup(log_dir=TMP_DIR)
-        g.setup(headers={'X-Name': 'spider'}, post='xxxPost')
+            g = build_grab()
+            g.setup(log_dir=tmp_dir)
+            g.setup(headers={'X-Name': 'spider'}, post='xxxPost')
 
-        self.assertEqual(os.listdir(TMP_DIR), [])
-        g.go(self.server.get_url())
-        self.assertEqual(sorted(os.listdir(TMP_DIR)), ['01.html', '01.log'])
-        log_file_content = open(os.path.join(TMP_DIR, '01.log')).read()
-        self.assertFalse('X-Name' in log_file_content)
-        self.assertFalse('xxxPost' in log_file_content)
+            self.assertEqual(os.listdir(tmp_dir), [])
+            g.go(self.server.get_url())
+            self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
+            log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
+            self.assertFalse('X-Name' in log_file_content)
+            self.assertFalse('xxxPost' in log_file_content)
 
     # because urllib3 does not collects request headers
     @exclude_transport('urllib3')
     def test_log_dir_request_content_headers_and_post(self):
-        clear_directory(TMP_DIR)
-        reset_request_counter()
+        with temp_dir() as tmp_dir:
+            reset_request_counter()
 
-        g = build_grab()
-        g.setup(log_dir=TMP_DIR, debug=True)
-        g.setup(headers={'X-Name': 'spider'}, post={'xxx': 'Post'})
+            g = build_grab()
+            g.setup(log_dir=tmp_dir, debug=True)
+            g.setup(headers={'X-Name': 'spider'}, post={'xxx': 'Post'})
 
-        self.assertEqual(os.listdir(TMP_DIR), [])
-        g.go(self.server.get_url())
-        self.assertEqual(sorted(os.listdir(TMP_DIR)), ['01.html', '01.log'])
-        log_file_content = open(os.path.join(TMP_DIR, '01.log')).read()
-        self.assertTrue('x-name' in log_file_content.lower())
-        self.assertTrue('xxx=post' in log_file_content.lower())
+            self.assertEqual(os.listdir(tmp_dir), [])
+            g.go(self.server.get_url())
+            self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
+            log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
+            self.assertTrue('x-name' in log_file_content.lower())
+            self.assertTrue('xxx=post' in log_file_content.lower())
 
     def test_debug_post(self):
         g = build_grab(debug_post=True)
