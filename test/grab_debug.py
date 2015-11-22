@@ -87,6 +87,9 @@ class TestCookies(BaseGrabTestCase):
             g.go(self.server.get_url())
             self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
             log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
+            if not 'x-name' in log_file_content.lower():
+                print('CONTENT OF 01.log:')
+                print(log_file_content)
             self.assertTrue('x-name' in log_file_content.lower())
             self.assertTrue('xxx=post' in log_file_content.lower())
 
