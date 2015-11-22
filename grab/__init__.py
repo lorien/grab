@@ -5,4 +5,4 @@ from grab.upload import UploadContent, UploadFile  # noqa
 from grab.base import Grab  # noqa
 from weblib.logs import default_logging  # noqa
 
-__version__ = '0.6.29'
+__version__ = '0.6.30'

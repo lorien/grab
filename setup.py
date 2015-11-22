@@ -5,7 +5,7 @@ ROOT = os.path.dirname(os.path.realpath(__file__))
 
 setup(
     name='grab',
-    version='0.6.29',
+    version='0.6.30',
     description='Web Scraping Framework',
     long_description=open(os.path.join(ROOT, 'README.rst')).read(),
     url='http://grablib.org',
