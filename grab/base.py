@@ -186,7 +186,8 @@ def default_config():
 
 class Grab(DeprecatedThings):
 
-    __slots__ = ('request_head', 'request_log', 'request_body',
+    __slots__ = ('request_head', 'request_body',
+                 #'request_log',
                  'proxylist', 'config',
                  'transport',
                  'transport_param', 'request_method', 'request_counter',
@@ -200,7 +201,8 @@ class Grab(DeprecatedThings):
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
-    clonable_attributes = ('request_head', 'request_log', 'request_body',
+    clonable_attributes = ('request_head', 'request_body',
+                           #'request_log',
                            'proxylist')
 
     # Complex config items which points to mutable objects
@@ -272,7 +274,7 @@ class Grab(DeprecatedThings):
         """
 
         self.request_head = None
-        self.request_log = None
+        #self.request_log = None
         self.request_body = None
         self.request_method = None
         self.transport.reset()
@@ -580,7 +582,7 @@ class Grab(DeprecatedThings):
         # TODO: Maybe request object?
         self.request_head = self.transport.request_head
         self.request_body = self.transport.request_body
-        self.request_log = self.transport.request_log
+        #self.request_log = self.transport.request_log
 
     def setup_document(self, content, **kwargs):
         """
@@ -666,15 +668,15 @@ class Grab(DeprecatedThings):
             thread_name = '-%s' % thread_name
         file_name = os.path.join(self.config['log_dir'], '%02d%s.log' % (
             self.request_counter, thread_name))
-        with open(file_name, 'w') as out:
-            out.write('Request headers:\n')
+        with open(file_name, 'wb') as out:
+            out.write(b'Request headers:\n')
             out.write(self.request_head)
-            out.write('\n')
-            out.write('Request body:\n')
+            out.write(b'\n')
+            out.write(b'Request body:\n')
             out.write(self.request_body)
-            out.write('\n\n')
-            out.write('Response headers:\n')
-            out.write(self.doc.head.decode('ascii'))
+            out.write(b'\n\n')
+            out.write(b'Response headers:\n')
+            out.write(self.doc.head)
 
         file_extension = 'html'
         file_name = os.path.join(self.config['log_dir'], '%02d%s.%s' % (

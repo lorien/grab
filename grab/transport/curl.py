@@ -104,9 +104,9 @@ class CurlTransport(BaseTransport):
         self.verbose_logging = False
 
         # Maybe move to super-class???
-        self.request_head = ''
-        self.request_body = ''
-        self.request_log = ''
+        self.request_head = b''
+        self.request_body = b''
+        #self.request_log = ''
 
     def header_processor(self, chunk):
         """
@@ -156,9 +156,18 @@ class CurlTransport(BaseTransport):
         """
 
         if _type == pycurl.INFOTYPE_HEADER_OUT:
+            if isinstance(text, six.text_type):
+                text = text.encode('utf-8')
             self.request_head += text
 
         if _type == pycurl.INFOTYPE_DATA_OUT:
+            # Untill 7.19.5.2 version
+            # pycurl gives unicode in `text` variable
+            # WTF??? Probably that codes would fails
+            # or does unexpected things if you use
+            # pycurl<7.19.5.2
+            if isinstance(text, six.text_type):
+                text = text.encode('utf-8')
             self.request_body += text
 
         """

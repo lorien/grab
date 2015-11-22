@@ -87,9 +87,9 @@ class TestCookies(BaseGrabTestCase):
             g.go(self.server.get_url())
             self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
             log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
-            if not 'x-name' in log_file_content.lower():
-                print('CONTENT OF 01.log:')
-                print(log_file_content)
+            #if not 'x-name' in log_file_content.lower():
+            #    print('CONTENT OF 01.log:')
+            #    print(log_file_content)
             self.assertTrue('x-name' in log_file_content.lower())
             self.assertTrue('xxx=post' in log_file_content.lower())
 
@@ -99,6 +99,13 @@ class TestCookies(BaseGrabTestCase):
         self.server.response['post.data'] = 'x'
         g.go(self.server.get_url())
         self.assertEqual(b'x', g.doc.body)
+
+    def test_debug_nonascii_post(self):
+        g = build_grab(debug=True)
+        g.setup(post=u'фыва'.encode('cp1251'))
+        g.go(self.server.get_url())
+        g.setup(multipart_post=[('x', u'фыва'.encode('cp1251'))])
+        g.go(self.server.get_url())
 
     def test_debug_post_integer_bug(self):
         g = build_grab(debug_post=True)
