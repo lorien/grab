@@ -6,11 +6,12 @@ import logging
 from weblib.http import (normalize_url, normalize_post_data,
                          normalize_http_values)
 from weblib.encoding import make_str, decode_pairs
-from urllib3 import PoolManager, ProxyManager, exceptions
+from urllib3 import PoolManager, ProxyManager, exceptions, make_headers
 from urllib3.filepost import encode_multipart_formdata
 from urllib3.fields import RequestField
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
+from urllib3.exceptions import ProxySchemeUnknown
 import six
 from six.moves.urllib.parse import urlencode, urlsplit
 import random
@@ -76,8 +77,6 @@ class Request(object):
 
     def get_full_url(self):
         return self.url
-
-
 
 
 class Urllib3Transport(BaseTransport):
@@ -219,11 +218,15 @@ class Urllib3Transport(BaseTransport):
 
         if req.proxy:
             if req.proxy_userpwd:
-                auth = '%s@' % req.proxy_userpwd
+                headers = make_headers(proxy_basic_auth=req.proxy_userpwd)
             else:
-                auth = ''
-            proxy_url = '%s://%s%s' % (req.proxy_type, auth, req.proxy)
-            pool = ProxyManager(proxy_url)
+                headers = None
+            proxy_url = '%s://%s' % (req.proxy_type, req.proxy)
+            try:
+                pool = ProxyManager(proxy_url, proxy_headers=headers)
+            except ProxySchemeUnknown:
+                raise GrabMisuseError('Urllib3 transport does '
+                                      'not support %s proxies' % req.proxy_type)
         else:
             pool = self.pool
         try:
