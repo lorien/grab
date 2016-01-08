@@ -10,7 +10,7 @@ If you need to submit custom HTTP headers, you can specify any number of them
 via :ref:`option_headers` option. A common case is to emulate an AJAX request::
 
     >>> g = Grab()
-    >>> g.setup(header={'X-Requested-With': 'XMLHttpRequest'})
+    >>> g.setup(headers={'X-Requested-With': 'XMLHttpRequest'})
 
 Bear in mind, that except headers in :ref:`option_headers` option (that is
 empty by default) Grab also generates a bunch of headers to emulate a typical
