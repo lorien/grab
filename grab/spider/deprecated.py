@@ -5,8 +5,6 @@ that add back-ward compatibility support into `Spider` class
 Supported deprecated methods:
     * add_item
     * inc_count
-    * start_timer
-    * stop_timer
     * setup_grab
     * valid_response_code
 
@@ -15,9 +13,6 @@ Supported deprecated attributes:
     * counters
     * grab_config
     * taskq
-
-Supported deprecated context managers
-    * save_timer
 """
 from contextlib import contextmanager
 
@@ -37,16 +32,6 @@ class DeprecatedThingsSpiderMixin(object):
              'Use `Spider::stat.inc` method instead.')
         self.stat.inc(key, count)
 
-    def start_timer(self, key):
-        warn('Method `Spider::start_timer` is deprecated. '
-             'Use `Spider::timer.start` method instead.')
-        self.timer.start(key)
-
-    def stop_timer(self, key):
-        warn('Method `Spider::stop_timer` is deprecated. '
-             'Use `Spider::timer.stop` method instead.')
-        self.timer.stop(key)
-
     @property
     def items(self):
         warn('Attribute `Spider::items` is deprecated. '
@@ -58,16 +43,6 @@ class DeprecatedThingsSpiderMixin(object):
         warn('Attribute `Spider::counters` is deprecated. '
              'Use `Spider::stat.counters` attribute instead.')
         return self.stat.counters
-
-    @contextmanager
-    def save_timer(self, key):
-        warn('Method `Spider::save_timer` is deprecated. '
-             'Use `Spider::timer.log_time` method instead.')
-        self.timer.start(key)
-        try:
-            yield
-        finally:
-            self.timer.stop(key)
 
     def get_grab_config(self):
         warn('Using `grab_config` attribute is deprecated. Override '

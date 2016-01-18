@@ -109,19 +109,19 @@ class Timer(object):
         self.time_points[key] = time.time()
 
     def stop(self, key):
-        start = self.time_points[key]
-        total = time.time() - start
-        self.timers[key] += total
+        elapsed = time.time() - self.time_points[key]
+        self.timers[key] += elapsed
         del self.time_points[key]
-        return total
+        return elapsed
 
     def inc_timer(self, key, value):
         self.timers[key] += value
 
     @contextmanager
     def log_time(self, key):
-        self.start(key)
+        """Threadsafe"""
+        start = time.time()
         try:
             yield
         finally:
-            self.stop(key)
+            self.timers[key] += (time.time() - start)

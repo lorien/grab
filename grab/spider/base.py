@@ -20,6 +20,7 @@ from traceback import format_exc
 import multiprocessing
 import threading
 from datetime import datetime
+from threading import Thread
 
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
@@ -132,7 +133,6 @@ class Spider(DeprecatedThingsSpiderMixin):
                  only_cache=False,
                  config=None,
                  slave=None,
-                 max_task_generator_chunk=None,
                  args=None,
                  # New options start here
                  taskq=None,
@@ -213,9 +213,6 @@ class Spider(DeprecatedThingsSpiderMixin):
         else:
             self.args = args
 
-
-        self.max_task_generator_chunk = max_task_generator_chunk
-        self.timer.start('total')
         if config is not None:
             self.config = config
         else:
@@ -226,7 +223,6 @@ class Spider(DeprecatedThingsSpiderMixin):
         else:
             self.meta = {}
 
-        self.task_generator_enabled = False
         self.only_cache = only_cache
 
         self.thread_number = (
@@ -536,7 +532,7 @@ class Spider(DeprecatedThingsSpiderMixin):
         else:
             return randint(*RANDOM_TASK_PRIORITY_RANGE)
 
-    def process_task_generator(self):
+    def task_generator_wrapper(self, task_generator):
         """
         Load new tasks from `self.task_generator_object`
         Create new tasks.
@@ -545,35 +541,35 @@ class Spider(DeprecatedThingsSpiderMixin):
         then load new tasks from tasks file.
         """
 
-        if self.task_generator_enabled:
-            queue_size = self.task_queue.size()
-            if self.max_task_generator_chunk is not None:
-                min_limit = min(self.max_task_generator_chunk,
-                                self.thread_number * 10)
-            else:
+        while True:
+            with self.timer.log_time('task_generator'):
+                queue_size = self.task_queue.size()
                 min_limit = self.thread_number * 10
             if queue_size < min_limit:
-                logger_verbose.debug(
-                    'Task queue contains less tasks (%d) than '
-                    'allowed limit (%d). Trying to add '
-                    'new tasks.' % (queue_size, min_limit))
-                try:
-                    for x in six.moves.range(min_limit - queue_size):
-                        item = next(self.task_generator_object)
-                        logger_verbose.debug('Got new item from generator. '
-                                             'Processing it.')
-                        self.process_handler_result(item)
-                except StopIteration:
-                    # If generator have no values to yield
-                    # then disable it
-                    logger_verbose.debug('Task generator has no more tasks. '
-                                         'Disabling it')
-                    self.task_generator_enabled = False
+                with self.timer.log_time('task_generator'):
+                    logger_verbose.debug(
+                        'Task queue contains less tasks (%d) than '
+                        'allowed limit (%d). Trying to add '
+                        'new tasks.' % (queue_size, min_limit))
+                    try:
+                        for x in six.moves.range(min_limit - queue_size):
+                            item = next(task_generator)
+                            logger_verbose.debug('Got new item from generator. '
+                                                 'Processing it.')
+                            self.process_handler_result(item)
+                    except StopIteration:
+                        # If generator have no values to yield
+                        # then disable it
+                        logger_verbose.debug('Task generator has no more tasks. '
+                                             'Disabling it')
+                        break
+            else:
+                time.sleep(0.1)
 
-    def start_task_generator(self):
+    def start_task_generators(self):
         """
         Process `self.initial_urls` list and `self.task_generator`
-        method.  Generate first portion of tasks.
+        method.
         """
 
         logger_verbose.debug('Processing initial urls')
@@ -581,10 +577,11 @@ class Spider(DeprecatedThingsSpiderMixin):
             for url in self.initial_urls:
                 self.add_task(Task('initial', url=url))
 
-        self.task_generator_object = self.task_generator()
-        self.task_generator_enabled = True
-        # Initial call to task generator before spider has started working
-        self.process_task_generator()
+        self._task_generator_list = []
+        th = Thread(target=self.task_generator_wrapper,
+                    args=[self.task_generator()])
+        th.start()
+        self._task_generator_list.append(th)
 
     def get_task_from_queue(self):
         start = time.time()
@@ -927,17 +924,17 @@ class Spider(DeprecatedThingsSpiderMixin):
 
     def is_ready_to_shutdown(self):
         # Things should be true to shutdown spider
-        # 1) No active network connections
-        # 2) Network result queue is empty
-        # 3) Task queue is empty
-        # 4) Parser pipeline is ready to shutdown
-        # 5) Task generator has completed
+        # 1) No active task handlers (task_* functions)
+        # 2) All task generators has completed work
+        # 3) No active network threads
+        # 4) Task queue is empty
+        # 5) Network result queue is empty
         return (
-            self.parser_pipeline.is_waiting_shutdown()
-            and not self.task_generator_enabled
-            and not self.transport.get_active_threads_number()
-            and not self.task_queue.size()
-            and not self.network_result_queue.qsize()
+            self.parser_pipeline.is_waiting_shutdown() # (1)
+            and not any(x.isAlive() for x in self._task_generator_list) # (2)
+            and not self.transport.get_active_threads_number() # (3)
+            and not self.task_queue.size() # (4)
+            and not self.network_result_queue.qsize() # (5)
         )
 
     def run(self):
@@ -978,13 +975,9 @@ class Spider(DeprecatedThingsSpiderMixin):
 
             # Initiate task generator. Only in main process!
             with self.timer.log_time('task_generator'):
-                self.start_task_generator()
+                self.start_task_generators()
 
             while self.work_allowed:
-                with self.timer.log_time('task_generator'):
-                    if self.task_generator_enabled:
-                        self.process_task_generator()
-
                 result_from_cache = None
                 free_threads = self.transport.get_free_threads_number()
                 # Load new task only if self.network_result_queue is not full
@@ -997,20 +990,13 @@ class Spider(DeprecatedThingsSpiderMixin):
 
                     task = self.get_task_from_queue()
 
-                    # If no task received from task queue
-                    # try to query task generator
-                    # and then check if spider could be shuted down
-                    if task is None:
-                        if not self.transport.get_active_threads_number():
-                            self.process_task_generator()
-
                     if task is None:
                         # If no task received from task queue
                         # check if spider could be shut down
                         if self.is_ready_to_shutdown():
                             self.shutdown_event.set()
                             self.stop()
-                            break # Break `if self.work_allowed` cycle
+                            break # Break `while self.work_allowed` cycle
                     elif isinstance(task, bool) and (task is True):
                         # Take some sleep to not load CPU
                         if not self.transport.get_active_threads_number():
