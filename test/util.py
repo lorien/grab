@@ -81,7 +81,7 @@ def multiprocess_mode(mode):
                              '--mp-mode=%s' % (
                                  func.__module__,
                                  self.__class__.__name__,
-                                 func.__name__, GLOBAL['mp_mode']))
+                                 func.__name__, mode))
             else:
                 return func(self, *args, **kwargs)
         return wrapper

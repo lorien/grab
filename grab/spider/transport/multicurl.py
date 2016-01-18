@@ -2,6 +2,7 @@ import pycurl
 import select
 import six
 import logging
+from threading import Lock
 
 from grab.error import GrabTooManyRedirectsError
 
@@ -25,6 +26,7 @@ class MulticurlTransport(object):
         self.freelist = []
         self.registry = {}
         self.connection_count = {}
+        self.network_op_lock = Lock()
 
         # Create curl instances
         for x in six.moves.range(self.socket_number):
@@ -74,12 +76,15 @@ class MulticurlTransport(object):
             raise
         else:
             # Add configured curl instance to multi-curl processor
+            self.network_op_lock.acquire()
             self.multi.add_handle(curl)
+            self.network_op_lock.release()
 
     def process_handlers(self):
-        # Ok, frankly I have real bad understanding of
+        # Ok, frankly I have really bad understanding of
         # how to deal with multicurl sockets ;-)
         # It is a sort of miracle that Grab actually works
+        self.network_op_lock.acquire()
         rlist, wlist, xlist = self.multi.fdset()
         if rlist or wlist or xlist:
             timeout = self.multi.timeout()
@@ -92,6 +97,7 @@ class MulticurlTransport(object):
             status, active_objects = self.multi.perform()
             if status != pycurl.E_CALL_MULTI_PERFORM:
                 break
+        self.network_op_lock.release()
 
     def iterate_results(self):
         while True:

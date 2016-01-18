@@ -7,10 +7,7 @@ try:
 except ImportError:
     from urllib.parse import urljoin
 from random import randint
-try:
-    import Queue as queue
-except ImportError:
-    import queue
+from six.moves import queue
 from copy import deepcopy
 import six
 import os
@@ -20,6 +17,7 @@ from traceback import format_exc
 import multiprocessing
 import threading
 from datetime import datetime
+import threading
 from threading import Thread
 
 from grab.base import Grab
@@ -36,6 +34,7 @@ from weblib.encoding import make_str, make_unicode
 from grab.base import GLOBAL_STATE
 from grab.stat import Stat, Timer
 from grab.spider.parser_pipeline import ParserPipeline
+from grab.spider.cache_pipeline import CachePipeline
 from grab.spider.deprecated import DeprecatedThingsSpiderMixin
 from grab.util.warning import warn
 
@@ -111,7 +110,7 @@ class Spider(DeprecatedThingsSpiderMixin):
     # *************
 
     @classmethod
-    def setup_spider_config(cls, config):
+    def update_spider_config(cls, config):
         pass
 
     @classmethod
@@ -223,8 +222,6 @@ class Spider(DeprecatedThingsSpiderMixin):
         else:
             self.meta = {}
 
-        self.only_cache = only_cache
-
         self.thread_number = (
             thread_number or
             int(self.config.get('thread_number',
@@ -244,10 +241,8 @@ class Spider(DeprecatedThingsSpiderMixin):
         else:
             self.priority_mode = priority_mode
 
-        # Initial cache-subsystem values
-        self.cache_enabled = False
-        self.cache = None
-
+        self.only_cache = only_cache
+        self.cache_pipeline = None
         self.work_allowed = True
         if request_pause is not NULL:
             warn('Option `request_pause` is deprecated and is not '
@@ -267,9 +262,10 @@ class Spider(DeprecatedThingsSpiderMixin):
         self.cache_enabled = True
         mod = __import__('grab.spider.cache_backend.%s' % backend,
                          globals(), locals(), ['foo'])
-        self.cache = mod.CacheBackend(database=database,
-                                      use_compression=use_compression,
-                                      spider=self, **kwargs)
+        cache = mod.CacheBackend(database=database,
+                                 use_compression=use_compression,
+                                 spider=self, **kwargs)
+        self.cache_pipeline = CachePipeline(self, cache)
 
     def setup_queue(self, backend='memory', **kwargs):
         logger.debug('Using %s backend for task queue' % backend)
@@ -532,7 +528,7 @@ class Spider(DeprecatedThingsSpiderMixin):
         else:
             return randint(*RANDOM_TASK_PRIORITY_RANGE)
 
-    def task_generator_wrapper(self, task_generator):
+    def task_generator_thread_wrapper(self, task_generator):
         """
         Load new tasks from `self.task_generator_object`
         Create new tasks.
@@ -578,7 +574,7 @@ class Spider(DeprecatedThingsSpiderMixin):
                 self.add_task(Task('initial', url=url))
 
         self._task_generator_list = []
-        th = Thread(target=self.task_generator_wrapper,
+        th = Thread(target=self.task_generator_thread_wrapper,
                     args=[self.task_generator()])
         th.start()
         self._task_generator_list.append(th)
@@ -610,39 +606,6 @@ class Spider(DeprecatedThingsSpiderMixin):
         grab.config['common_headers'] = grab.common_headers()
         self.update_grab_instance(grab)
         return grab
-
-    def is_task_cacheable(self, task, grab):
-        if (    # cache is disabled for all tasks
-                not self.cache_enabled
-                # cache data should be refreshed
-                or task.get('refresh_cache', False)
-                # cache could not be used
-                or task.get('disable_cache', False)
-                # request type is not cacheable
-                or grab.detect_request_method() != 'GET'):
-            return False
-        else:
-            return True
-
-    def load_task_from_cache(self, task, grab, grab_config_backup):
-        with self.timer.log_time('cache'):
-            with self.timer.log_time('cache.read'):
-                cache_item = self.cache.get_item(
-                    grab.config['url'], timeout=task.cache_timeout)
-                if cache_item is None:
-                    return None
-                else:
-                    with self.timer.log_time('cache.read.prepare_request'):
-                        grab.prepare_request()
-                    with self.timer.log_time('cache.read.load_response'):
-                        self.cache.load_response(grab, cache_item)
-
-                    grab.log_request('CACHED')
-                    self.stat.inc('spider:request-cache')
-
-                    return {'ok': True, 'grab': grab,
-                            'grab_config_backup': grab_config_backup,
-                            'task': task, 'emsg': None}
 
     def is_valid_network_response_code(self, code, task):
         """
@@ -740,7 +703,7 @@ class Spider(DeprecatedThingsSpiderMixin):
                         self.parser_result_queue.put((ex, result['task']))
                         self.stat.inc('parser:handler-not-found')
                     else:
-                        self.process_network_result_with_handler_mp(
+                        self.process_network_result_with_handler(
                             result, handler)
                         self.stat.inc('parser:handler-processed')
                     finally:
@@ -750,10 +713,12 @@ class Spider(DeprecatedThingsSpiderMixin):
                                 'counters': self.stat.counters,
                                 'collections': self.stat.collections,
                             }
-                            self.parser_result_queue.put((data, result['task']))
+                            self.parser_result_queue.put((data,
+                                                          result['task']))
                         if self.parser_mode:
                             if self.parser_requests_per_process:
-                                if process_request_count >= self.parser_requests_per_process:
+                                if (process_request_count >=
+                                        self.parser_requests_per_process):
                                     break
         except Exception as ex:
             logging.error('', exc_info=ex)
@@ -762,11 +727,7 @@ class Spider(DeprecatedThingsSpiderMixin):
             self.waiting_shutdown_event.set()
 
 
-    def process_network_result_with_handler_mp(self, result, handler):
-        """
-        This is like `process_network_result_with_handler` but
-        for multiprocessing version
-        """
+    def process_network_result_with_handler(self, result, handler):
         handler_name = getattr(handler, '__name__', 'NONE')
         try:
             with self.timer.log_time('response_handler'):
@@ -884,36 +845,24 @@ class Spider(DeprecatedThingsSpiderMixin):
                    proxy_type=proxy.proxy_type)
         return proxy
 
-    def submit_task_to_transport(self, task, grab, grab_config_backup):
-        self.stat.inc('spider:request-network')
-        self.stat.inc('spider:task-%s-network' % task.name)
-        with self.timer.log_time('network_transport'):
-            logger_verbose.debug('Submitting task to the transport '
-                                 'layer')
-            try:
-                self.transport.start_task_processing(
-                    task, grab, grab_config_backup)
-            except GrabInvalidUrl:
-                logger.debug('Task %s has invalid URL: %s' % (
-                    task.name, task.url))
-                self.stat.collect('invalid-url', task.url)
-
-    def is_valid_for_cache(self, res):
-        """
-        Check if network transport result could
-        be saved to cache layer.
-
-        res: {ok, grab, grab_config_backup, task, emsg}
-        """
-
-        if res['ok']:
-            if self.cache_enabled:
-                if res['grab'].request_method == 'GET':
-                    if not res['task'].get('disable_cache'):
-                        if self.is_valid_network_response_code(
-                                res['grab'].response.code, res['task']):
-                            return True
-        return False
+    def submit_task_to_transport(self, task, grab):
+        if self.only_cache:
+            self.stat.inc('spider:request-network-disabled-only-cache')
+        else:
+            grab_config_backup = grab.dump_config()
+            self.process_grab_proxy(task, grab)
+            self.stat.inc('spider:request-network')
+            self.stat.inc('spider:task-%s-network' % task.name)
+            with self.timer.log_time('network_transport'):
+                logger_verbose.debug('Submitting task to the transport '
+                                     'layer')
+                try:
+                    self.transport.start_task_processing(
+                        task, grab, grab_config_backup)
+                except GrabInvalidUrl:
+                    logger.debug('Task %s has invalid URL: %s' % (
+                        task.name, task.url))
+                    self.stat.collect('invalid-url', task.url)
 
     def start_api_thread(self):
         from grab.spider.http_api import HttpApiThread
@@ -929,12 +878,15 @@ class Spider(DeprecatedThingsSpiderMixin):
         # 3) No active network threads
         # 4) Task queue is empty
         # 5) Network result queue is empty
+        # 6) Cache is disabled or is in idle mode
         return (
             self.parser_pipeline.is_waiting_shutdown() # (1)
             and not any(x.isAlive() for x in self._task_generator_list) # (2)
             and not self.transport.get_active_threads_number() # (3)
             and not self.task_queue.size() # (4)
             and not self.network_result_queue.qsize() # (5)
+            and (self.cache_pipeline is None
+                 or self.cache_pipeline.is_idle())
         )
 
     def run(self):
@@ -977,28 +929,35 @@ class Spider(DeprecatedThingsSpiderMixin):
             with self.timer.log_time('task_generator'):
                 self.start_task_generators()
 
+            # Work in infinite cycle untill
+            # `self.work_allowed` flag is True
+            shutdown_countdown = 5
             while self.work_allowed:
-                result_from_cache = None
                 free_threads = self.transport.get_free_threads_number()
-                # Load new task only if self.network_result_queue is not full
+                # Load new task only if:
+                # 1) network transport has free threads
+                # 2) network result queue is not full
+                # 3) cache is disabled OR cache has free resources
                 if (self.transport.get_free_threads_number()
                         and (self.network_result_queue.qsize()
-                             < network_result_queue_limit)):
-                    logger_verbose.debug(
-                        'Transport and parser have free resources. '
-                        'Trying to load new task from task queue.')
-
+                             < network_result_queue_limit)
+                        and (self.cache_pipeline is None
+                             or self.cache_pipeline.has_free_resources())):
                     task = self.get_task_from_queue()
-
                     if task is None:
-                        # If no task received from task queue
-                        # check if spider could be shut down
+                        # If received task is None then
+                        # check if spider is ready to be shut down
                         if self.is_ready_to_shutdown():
-                            self.shutdown_event.set()
-                            self.stop()
-                            break # Break `while self.work_allowed` cycle
+                            shutdown_countdown -= 1
+                            time.sleep(0.1)
+                            if shutdown_countdown <= 0:
+                                self.shutdown_event.set()
+                                self.stop()
+                                break # Break from `while self.work_allowed` cycle
                     elif isinstance(task, bool) and (task is True):
-                        # Take some sleep to not load CPU
+                        # If received task is True
+                        # and there is no active network threads then
+                        # take some sleep
                         if not self.transport.get_active_threads_number():
                             time.sleep(0.1)
                     else:
@@ -1008,24 +967,12 @@ class Spider(DeprecatedThingsSpiderMixin):
                         is_valid, reason = self.check_task_limits(task)
                         if is_valid:
                             grab = self.setup_grab_for_task(task)
-                            grab_config_backup = grab.dump_config()
-
-                            result_from_cache = None
-                            if self.is_task_cacheable(task, grab):
-                                result_from_cache = self.load_task_from_cache(
-                                    task, grab, grab_config_backup)
-
-                            if result_from_cache:
-                                logger_verbose.debug(
-                                    'Task data is loaded from the cache. ')
+                            if self.cache_pipeline:
+                                self.cache_pipeline.input_queue.put(
+                                    ('load', (task, grab)),
+                                )
                             else:
-                                if self.only_cache:
-                                    logger.debug('Skipping network request to '
-                                                 '%s' % grab.config['url'])
-                                else:
-                                    self.process_grab_proxy(task, grab)
-                                    self.submit_task_to_transport(
-                                        task, grab, grab_config_backup)
+                                self.submit_task_to_transport(task, grab)
                         else:
                             self.log_rejected_task(task, reason)
                             handler = task.get_fallback_handler(self)
@@ -1044,8 +991,14 @@ class Spider(DeprecatedThingsSpiderMixin):
                 # Result is dict {ok, grab, grab_config_backup, task, emsg}
                 results = [(x, False) for x in
                            self.transport.iterate_results()]
-                if result_from_cache:
-                    results.append((result_from_cache, True))
+                if self.cache_pipeline:
+                    while True:
+                        try:
+                            result = self.cache_pipeline.result_queue.get(False)
+                        except queue.Empty:
+                            break
+                        else:
+                            results.append((result, True))
 
                 # Some sleep to avoid thousands of iterations per second.
                 # If no results from network transport
@@ -1061,20 +1014,14 @@ class Spider(DeprecatedThingsSpiderMixin):
                                 time.sleep(0.1)
 
                 for result, from_cache in results:
-                    if not from_cache:
-                        if self.is_valid_for_cache(result):
-                            with self.timer.log_time('cache'):
-                                with self.timer.log_time('cache.write'):
-                                    self.cache.save_response(
-                                        result['task'].url, result['grab'])
+                    if self.cache_pipeline and not from_cache:
+                        if result['ok']:
+                            self.cache_pipeline.input_queue.put(
+                                ('save', (result['task'], result['grab']))
+                            )
                     self.log_network_result_stats(
                         result, from_cache=from_cache)
                     if self.is_valid_network_result(result):
-                        #handler = self.find_task_handler(result['task'])
-                        #self.process_network_result_with_handler(
-                        #    result, handler)
-                        # MP:
-                        # ***
                         self.network_result_queue.put(result)
                     else:
                         self.log_failed_network_result(result)
@@ -1085,7 +1032,7 @@ class Spider(DeprecatedThingsSpiderMixin):
                                 result['grab_config_backup'])
                             self.add_task(result['task'])
                     if from_cache:
-                        self.stat.inc('spider:task-%s-cache' % task.name)
+                        self.stat.inc('spider:task-%s-cache' % result['task'].name)
                     self.stat.inc('spider:request')
 
                 # MP:

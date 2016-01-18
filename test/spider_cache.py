@@ -63,7 +63,7 @@ class SpiderCacheMixin(object):
     def test_counter(self):
         bot = build_spider(SimpleSpider, meta={'server': self.server})
         self.setup_cache(bot)
-        bot.cache.clear()
+        bot.cache_pipeline.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('one', self.server.get_url()))
         bot.run()
@@ -88,7 +88,7 @@ class SpiderCacheMixin(object):
 
         bot = build_spider(Bug1Spider)
         self.setup_cache(bot)
-        bot.cache.clear()
+        bot.cache_pipeline.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('foo', self.server.get_url()))
         bot.run()
@@ -97,7 +97,7 @@ class SpiderCacheMixin(object):
         bot = build_spider(SimpleSpider, meta={'server': self.server},
                            parser_pool_size=1)
         self.setup_cache(bot)
-        bot.cache.clear()
+        bot.cache_pipeline.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('foo', self.server.get_url()))
         bot.run()
@@ -110,7 +110,7 @@ class SpiderCacheMixin(object):
 
         bot = build_spider(TestSpider, only_cache=True)
         self.setup_cache(bot)
-        bot.cache.clear()
+        bot.cache_pipeline.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('page', self.server.get_url()))
         bot.run()
@@ -123,16 +123,16 @@ class SpiderCacheMixin(object):
 
         bot = build_spider(TestSpider)
         self.setup_cache(bot)
-        bot.cache.clear()
+        bot.cache_pipeline.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('page', self.server.get_url()))
         bot.run()
-        self.assertEqual(bot.cache.size(), 1)
+        self.assertEqual(bot.cache_pipeline.cache.size(), 1)
 
     def test_timeout(self):
         bot = build_spider(SimpleSpider, meta={'server': self.server})
         self.setup_cache(bot)
-        bot.cache.clear()
+        bot.cache_pipeline.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('one', self.server.get_url()))
         bot.add_task(Task('one', self.server.get_url(), delay=2))
@@ -145,7 +145,7 @@ class SpiderCacheMixin(object):
                            parser_pool_size=1)
         self.setup_cache(bot)
         # DO not clear the cache
-        # bot.cache.clear()
+        # bot.cache_pipeline.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('one', self.server.get_url(), priority=1))
         bot.add_task(Task('one', self.server.get_url(),
@@ -164,7 +164,7 @@ class SpiderCacheMixin(object):
 
         bot = build_spider(TestSpider, parser_pool_size=1)
         self.setup_cache(bot)
-        bot.cache.clear()
+        bot.cache_pipeline.cache.clear()
         bot.setup_queue()
         # This task will receive first data from `get.data` iterator
         bot.add_task(Task('page', url=self.server.get_url()))
@@ -190,14 +190,14 @@ class SpiderCacheMixin(object):
 
         bot = build_spider(TestSpider)
         self.setup_cache(bot)
-        bot.cache.clear()
+        bot.cache_pipeline.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.add_task(Task('page', url=self.server.get_url('/foo')))
         bot.run()
-        self.assertEqual(2, bot.cache.size())
-        bot.cache.remove_cache_item(self.server.get_url())
-        self.assertEqual(1, bot.cache.size())
+        self.assertEqual(2, bot.cache_pipeline.cache.size())
+        bot.cache_pipeline.cache.remove_cache_item(self.server.get_url())
+        self.assertEqual(1, bot.cache_pipeline.cache.size())
 
     def test_has_item(self):
         class TestSpider(Spider):
@@ -206,16 +206,16 @@ class SpiderCacheMixin(object):
 
         bot = build_spider(TestSpider)
         self.setup_cache(bot)
-        bot.cache.clear()
+        bot.cache_pipeline.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.add_task(Task('page', url=self.server.get_url('/foo')))
         bot.run()
-        self.assertTrue(bot.cache.has_item(self.server.get_url()))
-        self.assertTrue(bot.cache.has_item(self.server.get_url(), timeout=100))
-        self.assertFalse(bot.cache.has_item(self.server.get_url(), timeout=0))
-        self.assertTrue(bot.cache.has_item(self.server.get_url('/foo')))
-        self.assertFalse(bot.cache.has_item(self.server.get_url('/bar')))
+        self.assertTrue(bot.cache_pipeline.cache.has_item(self.server.get_url()))
+        self.assertTrue(bot.cache_pipeline.cache.has_item(self.server.get_url(), timeout=100))
+        self.assertFalse(bot.cache_pipeline.cache.has_item(self.server.get_url(), timeout=0))
+        self.assertTrue(bot.cache_pipeline.cache.has_item(self.server.get_url('/foo')))
+        self.assertFalse(bot.cache_pipeline.cache.has_item(self.server.get_url('/bar')))
 
 
 class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
@@ -235,13 +235,13 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
         self.server.response['get.data'] = 'x' * (1024 * 1024 * 17)
         bot = build_spider(TestSpider)
         self.setup_cache(bot, use_compression=False)
-        bot.cache.clear()
+        bot.cache_pipeline.cache.clear()
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         patch = mock.Mock()
         with mock.patch('logging.error', patch):
             bot.run()
-        self.assertEqual(bot.cache.size(), 0)
+        self.assertEqual(bot.cache_pipeline.cache.size(), 0)
         self.assertTrue('Document too large' in patch.call_args[0][0])
 
     def test_connection_kwargs(self):
@@ -271,12 +271,12 @@ class SpiderMysqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
 
         bot = build_spider(TestSpider)
         self.setup_cache(bot)
-        bot.cache.cursor.execute('begin')
-        bot.cache.cursor.execute('DROP TABLE cache')
-        bot.cache.cursor.execute('commit')
+        bot.cache_pipeline.cache.cursor.execute('begin')
+        bot.cache_pipeline.cache.cursor.execute('DROP TABLE cache')
+        bot.cache_pipeline.cache.cursor.execute('commit')
         self.setup_cache(bot)
-        bot.cache.clear()
-        self.assertEqual(0, bot.cache.size())
+        bot.cache_pipeline.cache.clear()
+        self.assertEqual(0, bot.cache_pipeline.cache.size())
 
 
 class SpiderPostgresqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
@@ -294,9 +294,9 @@ class SpiderPostgresqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
 
         bot = build_spider(TestSpider)
         self.setup_cache(bot)
-        bot.cache.cursor.execute('begin')
-        bot.cache.cursor.execute('DROP TABLE cache')
-        bot.cache.cursor.execute('commit')
+        bot.cache_pipeline.cache.cursor.execute('begin')
+        bot.cache_pipeline.cache.cursor.execute('DROP TABLE cache')
+        bot.cache_pipeline.cache.cursor.execute('commit')
         self.setup_cache(bot)
-        bot.cache.clear()
-        self.assertEqual(0, bot.cache.size())
+        bot.cache_pipeline.cache.clear()
+        self.assertEqual(0, bot.cache_pipeline.cache.size())

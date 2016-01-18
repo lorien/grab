@@ -74,3 +74,9 @@ class DeprecatedThingsSpiderMixin(object):
         warn('Attribute `Spider::taskq` is deprecated. '
              'Use `Spider::task_queue` attribute.')
         return self.task_queue
+
+    @classmethod
+    def setup_spider_config(cls, config):
+        warn('Method `Spider::setup_spider_config` is deprecated. '
+             'Use `Spider::update_spider_config` method.')
+        cls.update_spider_config(config)

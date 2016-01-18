@@ -404,7 +404,7 @@ class TestSpider(BaseGrabTestCase):
 
     def test_multiple_internal_worker_error(self):
         class TestSpider(Spider):
-            def process_network_result_with_handler_mp(*args, **kwargs):
+            def process_network_result_with_handler(*args, **kwargs):
                 1/0
 
             def task_page(self):
