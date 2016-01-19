@@ -576,6 +576,7 @@ class Spider(DeprecatedThingsSpiderMixin):
         self._task_generator_list = []
         th = Thread(target=self.task_generator_thread_wrapper,
                     args=[self.task_generator()])
+        th.daemon = True
         th.start()
         self._task_generator_list.append(th)
 
