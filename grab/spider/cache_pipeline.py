@@ -24,8 +24,8 @@ class CachePipeline(object):
         return self.idle_event.is_set()
 
     def thread_worker(self):
+        self.idle_event.clear()
         while True:
-            self.idle_event.clear()
             try:
                 action, data = self.input_queue.get(block=False)
             except Empty:
@@ -40,9 +40,10 @@ class CachePipeline(object):
                     if self.is_cache_loading_allowed(task, grab):
                         result = self.load_from_cache(task, grab)
                     if result:
-                        self.result_queue.put(result)
+                        #print('!! PUT RESULT INTO CACHE PIPE RESULT QUEUE (cache)')
+                        self.result_queue.put(('network_result', result))
                     else:
-                        self.spider.submit_task_to_transport(task, grab)
+                        self.result_queue.put(('task', task))
                 elif action == 'save':
                     task, grab = data
                     if self.is_cache_saving_allowed(task, grab):

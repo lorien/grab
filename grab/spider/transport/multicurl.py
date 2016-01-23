@@ -57,27 +57,29 @@ class MulticurlTransport(object):
             return curl
 
     def start_task_processing(self, task, grab, grab_config_backup):
-        curl = self.process_connection_count(self.freelist.pop())
-
-        self.registry[id(curl)] = {
-            'grab': grab,
-            'grab_config_backup': grab_config_backup,
-            'task': task,
-        }
-        grab.transport.curl = curl
+        self.network_op_lock.acquire()
         try:
-            grab.prepare_request()
-            grab.log_request()
-        except Exception:
-            # If some error occurred while processing the request arguments
-            # then we should put curl object back to free list
-            del self.registry[id(curl)]
-            self.freelist.append(curl)
-            raise
-        else:
-            # Add configured curl instance to multi-curl processor
-            self.network_op_lock.acquire()
-            self.multi.add_handle(curl)
+            curl = self.process_connection_count(self.freelist.pop())
+
+            self.registry[id(curl)] = {
+                'grab': grab,
+                'grab_config_backup': grab_config_backup,
+                'task': task,
+            }
+            grab.transport.curl = curl
+            try:
+                grab.prepare_request()
+                grab.log_request()
+            except Exception:
+                # If some error occurred while processing the request arguments
+                # then we should put curl object back to free list
+                del self.registry[id(curl)]
+                self.freelist.append(curl)
+                raise
+            else:
+                # Add configured curl instance to multi-curl processor
+                self.multi.add_handle(curl)
+        finally:
             self.network_op_lock.release()
 
     def process_handlers(self):

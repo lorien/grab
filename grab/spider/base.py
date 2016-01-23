@@ -19,6 +19,7 @@ import threading
 from datetime import datetime
 import threading
 from threading import Thread
+from collections import deque
 
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
@@ -138,7 +139,7 @@ class Spider(DeprecatedThingsSpiderMixin):
                  # MP:
                  network_result_queue=None,
                  parser_result_queue=None,
-                 waiting_shutdown_event=None,
+                 is_parser_idle=None,
                  shutdown_event=None,
                  mp_mode=False,
                  parser_pool_size=None,
@@ -190,7 +191,7 @@ class Spider(DeprecatedThingsSpiderMixin):
         else:
             self.network_result_queue = Queue()
         self.parser_result_queue = parser_result_queue
-        self.waiting_shutdown_event = waiting_shutdown_event
+        self.is_parser_idle = is_parser_idle
         if shutdown_event is not None:
             self.shutdown_event = shutdown_event
         else:
@@ -670,6 +671,7 @@ class Spider(DeprecatedThingsSpiderMixin):
         """
         Main work cycle of spider process working in parser-mode.
         """
+        self.is_parser_idle.clear()
         # Use Stat instance that does not print any logging messages
         if self.parser_mode:
             self.stat = Stat(logging_period=None)
@@ -679,14 +681,17 @@ class Spider(DeprecatedThingsSpiderMixin):
             recent_task_time = time.time()
             while True:
                 try:
-                    result = self.network_result_queue.get(True, 0.1)
+                    result = self.network_result_queue.get(block=False)
                 except queue.Empty:
+                    self.is_parser_idle.set()
+                    time.sleep(0.1)
+                    self.is_parser_idle.clear()
                     logger_verbose.debug('Network result queue is empty')
                     # Set `waiting_shutdown_event` only after 1 seconds
                     # of waiting for tasks to avoid
                     # race-condition issues
-                    if time.time() - recent_task_time > 1:
-                        self.waiting_shutdown_event.set()
+                    #if time.time() - recent_task_time > 1:
+                    #    self.waiting_shutdown_event.set()
                     if self.shutdown_event.is_set():
                         logger_verbose.debug('Got shutdown event')
                         return
@@ -695,8 +700,8 @@ class Spider(DeprecatedThingsSpiderMixin):
                     recent_task_time = time.time()
                     if self.parser_mode:
                         self.stat.reset()
-                    if self.waiting_shutdown_event.is_set():
-                        self.waiting_shutdown_event.clear()
+                    #if self.waiting_shutdown_event.is_set():
+                    #    self.waiting_shutdown_event.clear()
                     try:
                         handler = self.find_task_handler(result['task'])
                     except NoTaskHandler as ex:
@@ -724,8 +729,8 @@ class Spider(DeprecatedThingsSpiderMixin):
         except Exception as ex:
             logging.error('', exc_info=ex)
             raise
-        finally:
-            self.waiting_shutdown_event.set()
+        #finally:
+        #    self.waiting_shutdown_event.set()
 
 
     def process_network_result_with_handler(self, result, handler):
@@ -881,13 +886,17 @@ class Spider(DeprecatedThingsSpiderMixin):
         # 5) Network result queue is empty
         # 6) Cache is disabled or is in idle mode
         return (
-            self.parser_pipeline.is_waiting_shutdown() # (1)
+            not self.parser_result_queue.qsize()
+            and all(x['is_parser_idle'].is_set()
+                    for x in self.parser_pipeline.parser_pool)
             and not any(x.isAlive() for x in self._task_generator_list) # (2)
             and not self.transport.get_active_threads_number() # (3)
             and not self.task_queue.size() # (4)
             and not self.network_result_queue.qsize() # (5)
             and (self.cache_pipeline is None
-                 or self.cache_pipeline.is_idle())
+                 or (self.cache_pipeline.is_idle()
+                     and self.cache_pipeline.input_queue.qsize() == 0
+                     and self.cache_pipeline.result_queue.qsize() == 0))
         )
 
     def run(self):
@@ -907,12 +916,14 @@ class Spider(DeprecatedThingsSpiderMixin):
         else:
             http_api_proc = None
 
+        self.parser_result_queue = Queue()
         self.parser_pipeline = ParserPipeline(
             bot=self,
             mp_mode=self.mp_mode,
             pool_size=self.parser_pool_size,
             shutdown_event=self.shutdown_event,
             network_result_queue=self.network_result_queue,
+            parser_result_queue=self.parser_result_queue,
             requests_per_process=self.parser_requests_per_process,
         )
         network_result_queue_limit = max(10, self.thread_number * 2)
@@ -932,7 +943,8 @@ class Spider(DeprecatedThingsSpiderMixin):
 
             # Work in infinite cycle untill
             # `self.work_allowed` flag is True
-            shutdown_countdown = 5
+            #shutdown_countdown = 0 # !!!
+            pending_tasks = deque()
             while self.work_allowed:
                 free_threads = self.transport.get_free_threads_number()
                 # Load new task only if:
@@ -944,36 +956,40 @@ class Spider(DeprecatedThingsSpiderMixin):
                              < network_result_queue_limit)
                         and (self.cache_pipeline is None
                              or self.cache_pipeline.has_free_resources())):
-                    task = self.get_task_from_queue()
+                    if pending_tasks:
+                        task = pending_tasks.popleft()
+                    else:
+                        task = self.get_task_from_queue()
                     if task is None:
                         # If received task is None then
                         # check if spider is ready to be shut down
-                        if self.is_ready_to_shutdown():
-                            shutdown_countdown -= 1
-                            time.sleep(0.1)
-                            if shutdown_countdown <= 0:
-                                self.shutdown_event.set()
-                                self.stop()
-                                break # Break from `while self.work_allowed` cycle
+                        if not pending_tasks and self.is_ready_to_shutdown():
+                            #shutdown_countdown -= 1
+                            #time.sleep(0.02)
+                            #if shutdown_countdown <= 0:
+                            self.shutdown_event.set()
+                            #print('STOP!!!!!!!!!')
+                            self.stop()
+                            break # Break from `while self.work_allowed` cycle
                     elif isinstance(task, bool) and (task is True):
                         # If received task is True
                         # and there is no active network threads then
                         # take some sleep
                         if not self.transport.get_active_threads_number():
-                            time.sleep(0.1)
+                            time.sleep(0.01)
                     else:
                         logger_verbose.debug('Got new task from task queue: %s'
                                              % task)
                         task.network_try_count += 1
                         is_valid, reason = self.check_task_limits(task)
                         if is_valid:
-                            grab = self.setup_grab_for_task(task)
+                            task_grab = self.setup_grab_for_task(task)
                             if self.cache_pipeline:
                                 self.cache_pipeline.input_queue.put(
-                                    ('load', (task, grab)),
+                                    ('load', (task, task_grab)),
                                 )
                             else:
-                                self.submit_task_to_transport(task, grab)
+                                self.submit_task_to_transport(task, task_grab)
                         else:
                             self.log_rejected_task(task, reason)
                             handler = task.get_fallback_handler(self)
@@ -995,24 +1011,39 @@ class Spider(DeprecatedThingsSpiderMixin):
                 if self.cache_pipeline:
                     while True:
                         try:
-                            result = self.cache_pipeline.result_queue.get(False)
+                            action, result = self.cache_pipeline\
+                                                 .result_queue.get(False)
                         except queue.Empty:
                             break
                         else:
-                            results.append((result, True))
+                            assert action in ('network_result', 'task')
+                            if action == 'network_result':
+                                results.append((result, True))
+                            elif action == 'task':
+                                task = result
+                                task_grab = self.setup_grab_for_task(task)
+                                if (self.transport.get_free_threads_number()
+                                        and (self.network_result_queue.qsize()
+                                             < network_result_queue_limit)):
+                                    self.submit_task_to_transport(task, task_grab)
+                                else:
+                                    pending_tasks.append(task)
 
-                # Some sleep to avoid thousands of iterations per second.
-                # If no results from network transport
-                if not results:
-                    # If task queue is empty (or if there are only
-                    # delayed tasks)
-                    if task is None or bool(task) == True:
-                        # If no network activity
-                        if not self.transport.get_active_threads_number():
-                            # If parser result queue is empty
-                            if not self.parser_pipeline.has_results():
-                                # Just sleep some time, do not kill CPU
-                                time.sleep(0.1)
+                # Take sleep to avoid millions of iterations per second.
+                # 1) If no results from network transport
+                # 2) If task queue is empty (or if there are only delayed tasks)
+                # 3) If no network activity
+                # 4) If parser result queue is empty
+                if (not results
+                    and (task is None or bool(task) == True)
+                    and not self.transport.get_active_threads_number()
+                    and not self.parser_result_queue.qsize()
+                    and (self.cache_pipeline is None
+                         or (self.cache_pipeline.input_queue.qsize() == 0
+                             and self.cache_pipeline.is_idle()
+                             and self.cache_pipeline.result_queue.qsize() == 0))
+                    ):
+                        time.sleep(0.001)
 
                 for result, from_cache in results:
                     if self.cache_pipeline and not from_cache:
@@ -1023,6 +1054,7 @@ class Spider(DeprecatedThingsSpiderMixin):
                     self.log_network_result_stats(
                         result, from_cache=from_cache)
                     if self.is_valid_network_result(result):
+                        #print('!! PUT NETWORK RESULT INTO QUEUE (base.py)')
                         self.network_result_queue.put(result)
                     else:
                         self.log_failed_network_result(result)
@@ -1036,11 +1068,9 @@ class Spider(DeprecatedThingsSpiderMixin):
                         self.stat.inc('spider:task-%s-cache' % result['task'].name)
                     self.stat.inc('spider:request')
 
-                # MP:
-                # ***
                 while True:
                     try:
-                        p_res, p_task = self.parser_pipeline.get_result()
+                        p_res, p_task = self.parser_result_queue.get(block=False)
                     except queue.Empty:
                         break
                     else:

@@ -123,6 +123,7 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
         self.setup_queue(bot)
         bot.run()
         self.assertEqual(bot.stat.collections['numbers'], [1, 3, 4, 2])
+        # TODO: understand why that test fails
 
     def test_clear_collection(self):
         bot = build_spider(self.SimpleSpider)

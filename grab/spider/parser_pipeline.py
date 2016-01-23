@@ -7,7 +7,8 @@ logger = logging.getLogger('grab.spider.parser_pipeline')
 
 class ParserPipeline(object):
     def __init__(self, bot, mp_mode, pool_size, shutdown_event,
-                 network_result_queue, requests_per_process):
+                 network_result_queue, parser_result_queue,
+                 requests_per_process):
         self.bot = bot
         self.mp_mode = mp_mode
 
@@ -20,20 +21,14 @@ class ParserPipeline(object):
                 self.pool_size = multiprocessing.cpu_count()
         self.shutdown_event = shutdown_event
         self.network_result_queue = network_result_queue
+        self.parser_result_queue = parser_result_queue
         self.requests_per_process = requests_per_process
-
-        if self.mp_mode:
-            from multiprocessing import Process, Event, Queue
-        else:
-            from multiprocessing.dummy import Process, Event, Queue
-
-        self.parser_result_queue = Queue()
 
         self.parser_pool = []
         for x in range(self.pool_size):
-            down_event, proc = self.start_parser_process()
+            is_parser_idle, proc = self.start_parser_process()
             self.parser_pool.append({
-                'waiting_shutdown_event': down_event,
+                'is_parser_idle': is_parser_idle,
                 'proc': proc,
             })
 
@@ -42,12 +37,12 @@ class ParserPipeline(object):
             from multiprocessing import Process, Event
         else:
             from multiprocessing.dummy import Process, Event
-        waiting_shutdown_event = Event()
+        is_parser_idle = Event()
         if self.mp_mode:
             bot = self.bot.__class__(
                 network_result_queue=self.network_result_queue,
                 parser_result_queue=self.parser_result_queue,
-                waiting_shutdown_event=waiting_shutdown_event,
+                is_parser_idle=is_parser_idle,
                 shutdown_event=self.shutdown_event,
                 parser_requests_per_process=self.requests_per_process,
                 parser_mode=True,
@@ -62,7 +57,7 @@ class ParserPipeline(object):
             bot = self.bot
             bot.network_result_queue = self.network_result_queue
             bot.parser_result_queue = self.parser_result_queue
-            bot.waiting_shutdown_event = waiting_shutdown_event
+            bot.is_parser_idle = is_parser_idle
             bot.shutdown_event = self.shutdown_event
             bot.parser_requests_per_process = self.requests_per_process,
             bot.meta = self.bot.meta
@@ -70,16 +65,16 @@ class ParserPipeline(object):
         if not self.mp_mode:
             proc.daemon = True
         proc.start()
-        return waiting_shutdown_event, proc
+        return is_parser_idle, proc
 
     def check_pool_health(self):
         for proc in self.parser_pool:
             if not proc['proc'].is_alive():
                 self.bot.stat.inc('parser-pipeline-restore')
                 logger.debug('Restoring died parser process')
-                down_event, new_proc = self.start_parser_process()
+                is_parser_idle, new_proc = self.start_parser_process()
                 self.parser_pool.append({
-                    'waiting_shutdown_event': down_event,
+                    'is_parser_idle': is_parser_idle,
                     'proc': new_proc,
                 })
                 self.parser_pool.remove(proc)
@@ -103,22 +98,3 @@ class ParserPipeline(object):
                     # have daemon=True flag
                     pass
             logger.debug('Finished joining parser process: %s' % pname)
-
-    def has_results(self):
-        return self.parser_result_queue.qsize()
-
-    def is_parser_pool_waiting_shutdown(self):
-        return all(x['waiting_shutdown_event'].is_set()
-                   for x in self.parser_pool)
-
-    def is_waiting_shutdown(self):
-        return (not self.has_results()
-                and self.is_parser_pool_waiting_shutdown())
-
-    def get_result(self):
-        """
-        Returns tuple (result, task)
-
-        Result could be Task, Data, Exception, dict
-        """
-        return self.parser_result_queue.get_nowait()
