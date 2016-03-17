@@ -7,6 +7,7 @@ import six
 
 from test.util import build_grab
 from test.util import BaseGrabTestCase
+from grab import Grab
 
 
 class GrabCharsetDetectionTestCase(BaseGrabTestCase):
@@ -72,3 +73,8 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
         g = build_grab()
         g.go(self.server.get_url())
         #print(g.doc.charset)
+
+    def test_charset_html5(self):
+        g = Grab()
+        g.setup_document(b"<meta charset='windows-1251'>")
+        self.assertEqual('windows-1251', g.response.charset)
