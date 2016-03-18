@@ -78,3 +78,18 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
         g = Grab()
         g.setup_document(b"<meta charset='windows-1251'>")
         self.assertEqual('windows-1251', g.response.charset)
+
+        g.setup_document(b'<meta charset="windows-1252">')
+        self.assertEqual('windows-1252', g.response.charset)
+
+        g.setup_document(b'<meta charset=latin-1>')
+        self.assertEqual('latin-1', g.response.charset)
+
+        g.setup_document(b"<meta charset  =  'windows-1251'  >")
+        self.assertEqual('windows-1251', g.response.charset)
+
+        g.setup_document(b'<meta charset  =  "windows-1252"   >')
+        self.assertEqual('windows-1252', g.response.charset)
+
+        g.setup_document(b'<meta charset  =  latin-1  >')
+        self.assertEqual('latin-1', g.response.charset)

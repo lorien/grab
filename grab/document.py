@@ -43,7 +43,7 @@ RE_DECLARATION_ENCODING = re.compile(br'encoding\s*=\s*["\']([^"\']+)["\']')
 RE_META_CHARSET =\
     re.compile(br'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)', re.I)
 RE_META_CHARSET_HTML5 =\
-    re.compile(br'<meta[^>]+charset\s*=\s*[\'"]([-\w]+)', re.I)
+    re.compile(br'<meta[^>]+charset\s*=\s*[\'"]?([-\w]+)', re.I)
 RE_UNICODE_XML_DECLARATION =\
     re.compile(RE_XML_DECLARATION.pattern.decode('utf-8'), re.I)
 
