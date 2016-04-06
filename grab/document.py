@@ -42,6 +42,8 @@ RE_XML_DECLARATION = re.compile(br'^[^<]{,100}<\?xml[^>]+\?>', re.I)
 RE_DECLARATION_ENCODING = re.compile(br'encoding\s*=\s*["\']([^"\']+)["\']')
 RE_META_CHARSET =\
     re.compile(br'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)', re.I)
+RE_META_CHARSET_HTML5 =\
+    re.compile(br'<meta[^>]+charset\s*=\s*[\'"]?([-\w]+)', re.I)
 RE_UNICODE_XML_DECLARATION =\
     re.compile(RE_XML_DECLARATION.pattern.decode('utf-8'), re.I)
 
@@ -839,10 +841,13 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
 
         if body_chunk:
             # Try to extract charset from http-equiv meta tag
-            try:
-                charset = RE_META_CHARSET.search(body_chunk).group(1)
-            except AttributeError:
-                pass
+            match_charset = RE_META_CHARSET.search(body_chunk)
+            if match_charset:
+                charset = match_charset.group(1)
+            else:
+                match_charset_html5 = RE_META_CHARSET_HTML5.search(body_chunk)
+                if match_charset_html5:
+                    charset = match_charset_html5.group(1)
 
             # TODO: <meta charset="utf-8" />
             bom_enc, bom = read_bom(body_chunk)
