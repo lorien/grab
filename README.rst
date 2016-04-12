@@ -2,19 +2,19 @@ Grab
 ====
 
 .. image:: https://travis-ci.org/lorien/grab.png?branch=master
-    :target: https://travis-ci.org/lorien/grab?branch=master
+:target: https://travis-ci.org/lorien/grab?branch=master
 
 .. image:: https://coveralls.io/repos/lorien/grab/badge.svg?branch=master
-    :target: https://coveralls.io/r/lorien/grab?branch=master
+:target: https://coveralls.io/r/lorien/grab?branch=master
 
 .. image:: https://img.shields.io/pypi/dm/grab.svg
-    :target: https://pypi.python.org/pypi/grab
+:target: https://pypi.python.org/pypi/grab
 
 .. image:: https://img.shields.io/pypi/v/grab.svg
-    :target: https://pypi.python.org/pypi/grab
+:target: https://pypi.python.org/pypi/grab
 
 .. image:: https://readthedocs.org/projects/grab/badge/?version=latest
-    :target: http://docs.grablib.org/en/latest/
+:target: http://docs.grablib.org/en/latest/
 
 
 What is Grab?
@@ -43,26 +43,35 @@ Grab Example
 
 .. code:: python
 
-    from grab import Grab
     import logging
 
+    from grab import Grab
+    from weblib.error import DataNotFound
+
     logging.basicConfig(level=logging.DEBUG)
+
     g = Grab()
+
     g.go('https://github.com/login')
-    g.set_input('login', '***')
-    g.set_input('password', '***')
-    g.submit()
+    g.doc.set_input('login', '****')
+    g.doc.set_input('password', '****')
+    g.doc.submit()
+
     g.doc.save('/tmp/x.html')
 
-    g.doc('//span[contains(@class, "octicon-sign-out")]').assert_exists()
+    try:
+        g.doc('//ul[@id="user-links"]//button[contains(@class, "signout")]').assert_exists()
+    except DataNotFound as e:
+        exit('Login and/or password incorrect.')
+
     home_url = g.doc('//a[contains(@class, "header-nav-link name")]/@href').text()
     repo_url = home_url + '?tab=repositories'
 
     g.go(repo_url)
-    for elem in g.doc.select('//h3[@class="repo-list-name"]/a'):
-        print('%s: %s' % (elem.text(),
-                          g.make_url_absolute(elem.attr('href'))))
 
+    for elem in g.doc.select('//h3[@class="repo-list-name"]/a'):
+        print('{}: {}'.format(elem.text(),
+                              g.make_url_absolute(elem.attr('href'))))
 
 
 Grab::Spider Example
@@ -70,23 +79,28 @@ Grab::Spider Example
 
 .. code:: python
 
-    from grab.spider import Spider, Task
     import logging
+
+    from grab.spider import Spider, Task
+
+    logging.basicConfig(level=logging.DEBUG)
+
 
     class ExampleSpider(Spider):
         def task_generator(self):
-            for lang in ('python', 'ruby', 'perl'):
+            for lang in 'python', 'ruby', 'perl':
                 url = 'https://www.google.com/search?q=%s' % lang
                 yield Task('search', url=url, lang=lang)
-        
-        def task_search(self, grab, task):
-            print('%s: %s' % (task.lang,
-                              grab.doc('//div[@class="s"]//cite').text()))
+
+        @staticmethod
+        def task_search(grab, task):
+            print('{}: {}'.format(task.lang,
+                                  grab.doc('//div[@class="s"]//cite').text()))
 
 
-    logging.basicConfig(level=logging.DEBUG)
-    bot = ExampleSpider()
+    bot = ExampleSpider(thread_number=2)
     bot.run()
+
 
 
 Installation
@@ -114,7 +128,7 @@ Russian mailing list: http://groups.google.com/group/python-grab/
 Contribution
 ============
 
-To report a bug please use github issue tracker: https://github.com/lorien/grab/issues
+To report a bug please use GitHub issue tracker: https://github.com/lorien/grab/issues
 
 If you want to develop new feature in Grab please use issue tracker to
 describe what you want to do or contact me at lorien@lorien.name
