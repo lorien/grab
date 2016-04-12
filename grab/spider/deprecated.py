@@ -14,7 +14,6 @@ Supported deprecated attributes:
     * grab_config
     * taskq
 """
-from contextlib import contextmanager
 
 from grab.util.warning import warn
 

@@ -16,7 +16,6 @@ import six
 from six.moves.urllib.parse import urlencode, urlsplit
 import random
 from six.moves.http_cookiejar import CookieJar
-from six.moves.urllib.parse import urlparse
 
 from grab import error
 from grab.error import GrabMisuseError
@@ -43,7 +42,7 @@ def process_upload_items(items):
     for key, val in items:
         if isinstance(val, UploadContent):
             headers = {'Content-Type': val.content_type}
-            field = RequestField(name=key, data=val.content, 
+            field = RequestField(name=key, data=val.content,
                                  filename=val.filename, headers=headers)
             field.make_multipart(content_type=val.content_type)
             result.append(field)
@@ -196,7 +195,7 @@ class Urllib3Transport(BaseTransport):
             else:
                 grab.config['user_agent'] = generate_user_agent()
 
-        extra_headers['User-Agent'] = grab.config['user_agent'] 
+        extra_headers['User-Agent'] = grab.config['user_agent']
 
 
         # Headers
@@ -312,7 +311,7 @@ class Urllib3Transport(BaseTransport):
         response.url = self._response.get_redirect_location() or self._request.url
 
         import email.message
-        hdr = email.message.Message() 
+        hdr = email.message.Message()
         for key, val in self._response.getheaders().items():
             hdr[key] = val
         response.parse(charset=grab.config['document_charset'],

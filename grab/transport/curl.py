@@ -13,11 +13,9 @@ try:
 except ImportError:
     from urllib.parse import urlsplit
 import pycurl
-import tempfile
-import os
-from weblib.http import (encode_cookies, normalize_http_values,
-                        normalize_post_data, normalize_url)
-from weblib.encoding import make_str, decode_pairs, make_unicode
+from weblib.http import (normalize_http_values,
+                         normalize_post_data, normalize_url)
+from weblib.encoding import make_str, decode_pairs
 import six
 from six.moves.http_cookiejar import CookieJar
 import sys
@@ -445,7 +443,7 @@ class CurlTransport(BaseTransport):
             self.curl.setopt(pycurl.COOKIELIST,
                              self.get_netscape_cookie_spec(cookie,
                                                            request_host))
-            
+
     def get_netscape_cookie_spec(self, cookie, request_host):
         # FIXME: Now cookie.domain could not be None
         # request_host is not needed anymore
