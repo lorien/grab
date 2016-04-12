@@ -74,12 +74,12 @@ If you do not specify filename then:
 .. _grab_file_uploading_custom_content_type:
 
 Custom Content Type
-----------------
+-------------------
 
 With both `UploadFile` and `UploadContent` you can use custom content type.
 
 If you do not specify content type then filename will be used to guess the
-content type e.g. "image.jpg" will have "image/jpeg" conent type and "asdfasdf"
+content type e.g. "image.jpg" will have "image/jpeg" content type and "asdfasdf"
 will be just a "application/octet-stream"
 
 .. code:: python

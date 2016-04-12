@@ -1,4 +1,4 @@
-..  _grab_network_errors:
+.. _grab_network_errors:
 
 Network Errors Handling
 =======================

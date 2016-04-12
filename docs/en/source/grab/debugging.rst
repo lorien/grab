@@ -78,7 +78,7 @@ located at the path passed as the `log_file` option::
 
     >>> g.setup(log_file='log.html')
 
-Of course, each new resposne will overwrite the content of the previous
+Of course, each new response will overwrite the content of the previous
 response.
 
 If you want to log all traffic, then consider using the `log_dir` option, which

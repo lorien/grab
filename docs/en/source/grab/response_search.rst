@@ -1,7 +1,7 @@
 .. _grab_response_search:
 
-Searchng the response body
-==========================
+Searching the response body
+===========================
 
 String search
 -------------

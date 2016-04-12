@@ -5,7 +5,7 @@ Form Processing
 
 Grab can help you process web forms. It can automatically fill all input fields
 that have default values, letting you fill only fields you need.
-The typical workflow is::
+The typical workflow is:
 
 * request a page
 * fill input fields with `set_input` method

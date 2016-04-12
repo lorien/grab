@@ -20,7 +20,7 @@ There are two main parts in Grab library:
 
     2) The Spider API to build asynchronous web crawlers. You write class that
     define handlers for each type of network request. Each handler could spawn
-    new network requests. Network requests are processed simultaneusly with a
+    new network requests. Network requests are processed simultaneously with a
     pool of asynchronous web sockets.
 
 
@@ -61,8 +61,7 @@ Grab User Manual
 Grab::Spider User Manual
 ------------------------
 
-Grab::Spider is a framework to build well-structured asyncronous web-site
-crawlers.
+Grab::Spider is a framework to build well-structured asynchronous web-site crawlers.
 
 .. toctree::
     :maxdepth: 2

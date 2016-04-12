@@ -10,7 +10,7 @@ To run all tests run the command:
 
 .. code:: shell
 
-	./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis --backend-postgres
+    ./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis --backend-postgres
 
 
 .. _usage_testing_control:
@@ -45,7 +45,7 @@ To run Grab tests in different python environments you can use `tox` command::
 
     tox
 
-By default it run full set of tests in two environemnts: python3.4 and python2.7
+By default it run full set of tests in two environments: python3.4 and python2.7
 
 You can specify concrete environment with `-e` option::
 
@@ -84,9 +84,9 @@ Test Coverage
 
 To see test coverage run the commands::
 
-	coverage erase
-	coverage run --source=grab ./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis --backend-postgres
-	coverage report -m
+    coverage erase
+    coverage run --source=grab ./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis --backend-postgres
+    coverage report -m
 
 Also you can use shortcut::
 

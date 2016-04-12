@@ -127,4 +127,3 @@ images.yandex.ru and save found data to the file.
 In this example, we have considered the simple spider. I hope you have got idea
 about how it works. See other parts of :ref:`spider_toc` to get detailed description
 of spider features.
-

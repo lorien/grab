@@ -97,8 +97,8 @@ how to change the type of the HTTP authentication:
 
 .. code:: python
 
-    >>> import pycurl
-    >>> from grab import Grab
-    >>> g = Grab()
-    >>> g.setup(userpwd='root:123')
-    >>> g.transport.curl.setopt(pycurl.HTTPAUTH, pycurl.HTTPAUTH_NTLM)
+    import pycurl
+    from grab import Grab
+    g = Grab()
+    g.setup(userpwd='root:123')
+    g.transport.curl.setopt(pycurl.HTTPAUTH, pycurl.HTTPAUTH_NTLM)

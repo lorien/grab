@@ -46,7 +46,7 @@ tags, then set :ref:`option_follow_refresh` to True.
 Original and Destination URLs
 -----------------------------
 
-You can always get information about what URL you've requested intially and what URL you ended up with::
+You can always get information about what URL you've requested initially and what URL you ended up with::
 
     >>> g = Grab()
     >>> g.go('http://google.com')
@@ -56,7 +56,7 @@ You can always get information about what URL you've requested intially and what
     >>> g.response.url
     'http://www.google.ru/?gws_rd=cr&ei=8spFUo32Huem4gT6ooDwAg'
 
-The initial URL is stored on the config object. The destination URL is writed into `response` object.
+The initial URL is stored on the config object. The destination URL is written into `response` object.
 
 You can even track redirect history with `response.head`::
 
