@@ -2,19 +2,19 @@ Grab
 ====
 
 .. image:: https://travis-ci.org/lorien/grab.png?branch=master
-:target: https://travis-ci.org/lorien/grab?branch=master
+    :target: https://travis-ci.org/lorien/grab?branch=master
 
 .. image:: https://coveralls.io/repos/lorien/grab/badge.svg?branch=master
-:target: https://coveralls.io/r/lorien/grab?branch=master
+    :target: https://coveralls.io/r/lorien/grab?branch=master
 
 .. image:: https://img.shields.io/pypi/dm/grab.svg
-:target: https://pypi.python.org/pypi/grab
+    :target: https://pypi.python.org/pypi/grab
 
 .. image:: https://img.shields.io/pypi/v/grab.svg
-:target: https://pypi.python.org/pypi/grab
+    :target: https://pypi.python.org/pypi/grab
 
 .. image:: https://readthedocs.org/projects/grab/badge/?version=latest
-:target: http://docs.grablib.org/en/latest/
+    :target: http://docs.grablib.org/en/latest/
 
 
 What is Grab?
