@@ -28,7 +28,7 @@ class MulticurlTransport(object):
         self.network_op_lock = Lock()
 
         # Create curl instances
-        for _ in six.moves.range(self.socket_number):
+        for x in six.moves.range(self.socket_number):
             curl = pycurl.Curl()
             self.connection_count[id(curl)] = 0
             self.freelist.append(curl)
