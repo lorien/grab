@@ -34,7 +34,8 @@ def setup_arg_parser(parser):
     parser.add_argument('--parser-pool-size', type=int)
 
 
-def get_lock_key(spider_name, lock_key=None, ignore_lock=False):
+def get_lock_key(spider_name, lock_key=None, ignore_lock=False,
+                 **kwargs):
     # --ignore-lock has highest precedence
     if ignore_lock:
         return None
@@ -66,12 +67,13 @@ def save_list(lst, path):
 
 def main(spider_name, thread_number=None,
          settings_module='settings', network_logs=False,
-         disable_proxy=False,
+         disable_proxy=False, ignore_lock=False,
          disable_report=False,
          disable_default_logs=False,
          api_port=None,
          mp_mode=False,
-         parser_pool_size=None):
+         parser_pool_size=None,
+         *args, **kwargs):
     if disable_default_logs:
         default_logging(propagate_network_logger=network_logs,
                         grab_log=None, network_log=None)

@@ -31,7 +31,7 @@ def underscore_to_camelcase(val):
     return ''.join(x.title() for x in items)
 
 
-def main(project_name, template):
+def main(project_name, template, **kwargs):
     cur_dir = os.getcwd()
     project_dir = os.path.join(cur_dir, project_name)
 
