@@ -61,7 +61,7 @@ Grab Example
 
     try:
         g.doc('//ul[@id="user-links"]//button[contains(@class, "signout")]').assert_exists()
-    except DataNotFound as e:
+    except DataNotFound:
         exit('Login and/or password incorrect.')
 
     home_url = g.doc('//a[contains(@class, "header-nav-link name")]/@href').text()
