@@ -1,7 +1,6 @@
 import pycurl
 import select
 import six
-import logging
 from threading import Lock
 
 from grab.error import GrabTooManyRedirectsError
@@ -29,7 +28,7 @@ class MulticurlTransport(object):
         self.network_op_lock = Lock()
 
         # Create curl instances
-        for x in six.moves.range(self.socket_number):
+        for _ in six.moves.range(self.socket_number):
             curl = pycurl.Curl()
             self.connection_count[id(curl)] = 0
             self.freelist.append(curl)
@@ -167,7 +166,7 @@ class MulticurlTransport(object):
                 if ok:
                     error_abbr = None
                 else:
-                   error_abbr = ERROR_ABBR.get(ecode, 'unknown-%d' % ecode)
+                    error_abbr = ERROR_ABBR.get(ecode, 'unknown-%d' % ecode)
                 yield {'ok': ok,
                        'ecode': ecode,
                        'emsg': emsg,
