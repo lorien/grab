@@ -46,7 +46,6 @@ Grab Example
     import logging
 
     from grab import Grab
-    from weblib.error import DataNotFound
 
     logging.basicConfig(level=logging.DEBUG)
 
@@ -59,10 +58,7 @@ Grab Example
 
     g.doc.save('/tmp/x.html')
 
-    try:
-        g.doc('//ul[@id="user-links"]//button[contains(@class, "signout")]').assert_exists()
-    except DataNotFound:
-        exit('Login and/or password incorrect.')
+    g.doc('//ul[@id="user-links"]//button[contains(@class, "signout")]').assert_exists()
 
     home_url = g.doc('//a[contains(@class, "header-nav-link name")]/@href').text()
     repo_url = home_url + '?tab=repositories'
@@ -70,8 +66,8 @@ Grab Example
     g.go(repo_url)
 
     for elem in g.doc.select('//h3[@class="repo-list-name"]/a'):
-        print('{}: {}'.format(elem.text(),
-                              g.make_url_absolute(elem.attr('href'))))
+        print('%s: %s' % (elem.text(),
+                          g.make_url_absolute(elem.attr('href'))))
 
 
 Grab::Spider Example
@@ -94,8 +90,8 @@ Grab::Spider Example
 
         @staticmethod
         def task_search(grab, task):
-            print('{}: {}'.format(task.lang,
-                                  grab.doc('//div[@class="s"]//cite').text()))
+            print('%s: %s' % (task.lang,
+                              grab.doc('//div[@class="s"]//cite').text()))
 
 
     bot = ExampleSpider(thread_number=2)
