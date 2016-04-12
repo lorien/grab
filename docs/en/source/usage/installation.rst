@@ -103,6 +103,7 @@ install Grab with pip. Here is actual list of Grab dependencies::
     selection
     weblib
     six
+    user_agent
 
 
 .. _installation_upgrade:
@@ -117,4 +118,4 @@ then try to install dependencies manually with the command:
 
 .. code:: shell
 
-    pip install -U lxml pycurl selection weblib six
+    pip install -U lxml pycurl selection weblib six user_agent
