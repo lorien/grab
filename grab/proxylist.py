@@ -1,12 +1,13 @@
 from __future__ import absolute_import
+
 import re
 import itertools
 import logging
-from random import randint
 import six
+from random import randint
 from collections import namedtuple
 
-from grab.error import GrabError, GrabNetworkError
+from grab.error import InvalidProxyLine, GrabNetworkError
 
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
 RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')
@@ -21,10 +22,6 @@ class Proxy(namedtuple('Proxy', PROXY_FIELDS)):
     def get_userpwd(self):
         if self.username:
             return '%s:%s' % (self.username, self.password or '')
-
-
-class InvalidProxyLine(GrabError):
-    pass
 
 
 def parse_proxy_line(line):
@@ -50,7 +47,7 @@ def parse_proxy_line(line):
 
 
 def parse_raw_list_data(data, proxy_type='http', proxy_userpwd=None):
-    "Iterate over proxy servers found in the raw data"
+    """Iterate over proxy servers found in the raw data"""
     if not isinstance(data, six.text_type):
         data = data.decode('utf-8')
     for orig_line in data.splitlines():
@@ -84,7 +81,7 @@ class BaseProxySource(object):
 
 
 class FileProxySource(BaseProxySource):
-    "Proxy source that loads list from the file"
+    """Proxy source that loads list from the file"""
     def __init__(self, path, **kwargs):
         self.path = path
         super(FileProxySource, self).__init__(**kwargs)
@@ -94,7 +91,7 @@ class FileProxySource(BaseProxySource):
 
 
 class WebProxySource(BaseProxySource):
-    "Proxy source that loads list from web resource"
+    """Proxy source that loads list from web resource"""
     def __init__(self, url, **kwargs):
         self.url = url
         super(WebProxySource, self).__init__(**kwargs)
@@ -111,8 +108,7 @@ class WebProxySource(BaseProxySource):
 
 
 class ListProxySource(BaseProxySource):
-    """That proxy source that loads list from
-    python list of strings"""
+    """That proxy source that loads list from python list of strings"""
     def __init__(self, items, **kwargs):
         self.items = items
         super(ListProxySource, self).__init__(**kwargs)
@@ -132,38 +128,38 @@ class ProxyList(object):
         self._list_iter = None
 
     def set_source(self, source):
-        "Set the proxy source and use it to load proxy list"
+        """Set the proxy source and use it to load proxy list"""
         self._source = source
         self.load()
 
     def load_file(self, path, **kwargs):
-        "Load proxy list from file"
+        """Load proxy list from file"""
         self.set_source(FileProxySource(path, **kwargs))
 
     def load_url(self, url, **kwargs):
-        "Load proxy list from web document"
+        """Load proxy list from web document"""
         self.set_source(WebProxySource(url, **kwargs))
 
     def load_list(self, items, **kwargs):
-        "Load proxy list from python list"
+        """Load proxy list from python list"""
         self.set_source(ListProxySource(items, **kwargs))
 
     def load(self):
-        "Load proxy list from configured proxy source"
+        """Load proxy list from configured proxy source"""
         self._list = self._source.load()
         self._list_iter = itertools.cycle(self._list)
 
     def get_random_proxy(self):
-        "Return random proxy"
+        """Return random proxy"""
         idx = randint(0, len(self._list) - 1)
         return self._list[idx]
 
     def get_next_proxy(self):
-        "Return next proxy"
+        """Return next proxy"""
         return next(self._list_iter)
 
     def size(self):
-        "Return number of proxies in the list"
+        """Return number of proxies in the list"""
         return len(self._list)
 
     def __iter__(self):
