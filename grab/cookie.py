@@ -6,13 +6,15 @@ RTFM:
 Some code got from
     https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 """
+
 from __future__ import absolute_import
-from six.moves.http_cookiejar import CookieJar, Cookie
+
 import json
 import logging
+from six.moves.http_cookiejar import CookieJar, Cookie
+from six.moves.urllib.parse import urlparse
 
 from grab.error import GrabMisuseError
-from six.moves.urllib.parse import urlparse
 
 logger = logging.getLogger('grab.cookie')
 COOKIE_ATTRS = ('name', 'value', 'version', 'port', 'domain',
@@ -102,6 +104,7 @@ class MockResponse(object):
         """Make a MockResponse for `cookielib` to read.
         :param headers: a httplib.HTTPMessage or analogous carrying the headers
         """
+
         self._headers = headers
 
     def info(self):
@@ -112,7 +115,7 @@ class MockResponse(object):
 
 
 def create_cookie(name, value, domain, httponly=None, **kwargs):
-    "Creates `cookielib.Cookie` instance"
+    """Creates `cookielib.Cookie` instance"""
 
     if domain == 'localhost':
         domain = ''
@@ -277,6 +280,7 @@ class CookieManager(object):
         :param req: object with httplib.Request interface
             Actually, it have to have `url` and `headers` attributes
         """
+
         mocked_req = MockRequest(req)
         self.cookiejar.add_cookie_header(mocked_req)
         return mocked_req.get_new_headers().get('Cookie') 
