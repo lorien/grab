@@ -15,7 +15,7 @@ It uses this detected charset to
 * convert unicode into bytes data, then some unicode data needs to be sent
   to the server from which the response was received.
 
-The original content of the network response is always accessable at `response.body` attribute.
+The original content of the network response is always accessible at `response.body` attribute.
 A unicode representation of the document body can be obtained by calling `response.unicode_body()`::
 
     >>> g.go('http://mail.ru/')

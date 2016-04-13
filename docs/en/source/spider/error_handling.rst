@@ -6,7 +6,7 @@ Spider Error Handling
 Rules of Network Request Handling
 ---------------------------------
 
-* If request is completed succesfully then the corresponding handler is called
+* If request is completed successfully then the corresponding handler is called
 * If request is failed due the network error, then the task is submitted back
   to the task queue
 * If the request is completed and the handler is called and failed due to any
@@ -20,10 +20,10 @@ Network Errors
 
 Network error is:
 
-* error occured in process of data transmition to or back from the server e.g.
-  connection aborted, connection timeout, server does not accep connection and
+* error occurred in process of data transmission to or back from the server e.g.
+  connection aborted, connection timeout, server does not accept connection and
   so on
-* data transmition has been completed but the HTTP sttus of received document
+* data transmission has been completed but the HTTP status of received document
   differs from 2XX or from 404
 
 Yes, by default documents with 404 status code counts as valid! That makes
@@ -58,7 +58,7 @@ of tries is limited to the `Spider.network_try_limit` and is 10 by default.
 The try's number is stored in the `Task.network_try_count`. If
 `network_try_count` reaches the `network_try_limit` the task is aborted.
 
-When the task is abroted and there is method with name
+When the task is aborted and there is method with name
 `task_<task-name>_fallback` then it is called and receives the failed task as
 first argument.
 
@@ -67,7 +67,7 @@ failed due to the network error. For example, the response contains captcha
 challenge or other invalid data reasoned by the anti-scraping protection.
 You can control number of such tries. Max tries number is configured by
 `Spider.task_try_count`. The try's number is stored in `Task.task_try_count`.
-Keep in mind, that you have to increse `task_try_count` explicitly when you 
+Keep in mind, that you have to increase `task_try_count` explicitly when you
 put task back to task queue.
 
 .. code:: python
@@ -86,7 +86,7 @@ Manual Processing of Failed Tasks
 ---------------------------------
 
 You can disable default mechanism of processing failed tasks and
-process failures manually. Use `raw=True` parameter in Task contstructor.
+process failures manually. Use `raw=True` parameter in Task constructor.
 If the network request would fail then the grab object passed to the handler
 would contain information about failure in two attributes: 
 `grab.response.error_code` and `grab.response.error_msg`

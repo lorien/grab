@@ -27,7 +27,7 @@ Then you can build Grab instance and make simple network request::
 
 Now, we have a `Response` object which provides interface to response's content, cookies, headers and other things.
 
-We've just made a GET requests. To make reqests of other type you need to configure
+We've just made a GET requests. To make requests of other type you need to configure
 Grab instance via `setup` method with `method` option::
 
     >>> g.setup(method='put')
@@ -87,7 +87,7 @@ Also you can upload files via form API::
 Response Content
 ----------------
 
-Consider the simple page retreiving code again::
+Consider the simple page retrieving code again::
 
     >>> g = Grab()
     >>> resp = g.go('http://google.com/')
@@ -105,7 +105,7 @@ If you need original response body then use::
 
     >>> resp.body
 
-Oiriginal content is useful if you need to save some binary content like image:::
+Original content is useful if you need to save some binary content like image::
 
     >>> resp = g.go('http://example.com/some-log.png')
     >>> open('logo.png', 'w').write(resp.body)

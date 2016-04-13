@@ -77,7 +77,7 @@ attribute have not been defined.
 Cloning Task Object
 -------------------
 
-Sometimes it is usefule to create copy of Task object. For example::
+Sometimes it is useful to create copy of Task object. For example::
 
     # task.clone()
     # TODO: example

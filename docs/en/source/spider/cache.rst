@@ -15,7 +15,7 @@ limited disk I/O where the cache storage is hosted.
 Also keep in mind the the spider cache is very simple:
 
 * it allows to cache only GET requests
-* it does not allow to diffirentiate documents with same URL but
+* it does not allow to differentiate documents with same URL but
     different cookies/headers
 * it does not support max-age and other cache headers
 
@@ -57,6 +57,6 @@ Example of custom host name and port for mongodb connection::
 Cache Compression
 -----------------
 
-By defalt cache compression is enabled. That means that all documents placed in
-the cache are compressed with gzip libary. Compression decreases the disk space
+By default cache compression is enabled. That means that all documents placed in
+the cache are compressed with gzip library. Compression decreases the disk space
 required to store the cache and increases the CPU load (a bit).

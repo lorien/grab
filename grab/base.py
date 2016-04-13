@@ -18,7 +18,7 @@ import email
 from datetime import datetime
 import weakref
 import six
-from weblib.html import find_refresh_url, find_base_url
+from weblib.html import find_base_url
 from weblib.http import normalize_http_values
 
 from grab.document import Document

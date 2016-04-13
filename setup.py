@@ -16,9 +16,9 @@ setup(
     install_requires=['lxml', 'pycurl', 'selection', 'weblib>=0.1.10', 'six',
                       'user_agent'],
 
-    license="MIT",
-    keywords="pycurl multicurl curl network parsing grabbing scraping"
-             " lxml xpath data mining",
+    license='MIT',
+    keywords='pycurl multicurl curl network parsing grabbing scraping'
+             ' lxml xpath data mining',
     classifiers=(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',

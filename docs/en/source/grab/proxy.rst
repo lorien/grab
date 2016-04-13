@@ -75,7 +75,8 @@ And here is how to load proxies from the web::
 Automatic Proxy Rotation
 ------------------------
 
-By default, if you set up any non-empty proxy source, Grab starts rotating through proxies from the proxy list for each request. You can disable proxy rotation with :ref:`option_proxy_auto_change` option set to False::
+By default, if you set up any non-empty proxy source, Grab starts rotating through proxies from the proxy list for each request.
+You can disable proxy rotation with :ref:`option_proxy_auto_change` option set to False::
 
     >>> from grab import Grab
     >>> import logging
@@ -111,8 +112,9 @@ Now let's see how Grab works when `proxy_auto_change` is False::
 Getting Proxy From Proxy List
 -----------------------------
 
-Each time you call `g.proxylist.get_next_proxy`, you get the next proxy from the proxy list. When you receive the last proxy in the list, you'll continue receiving proxies from the beginning of the list. You can also use `g.proxylist.get_random_proxy` to pick a random proxy from the proxy list.
-
+Each time you call `g.proxylist.get_next_proxy`, you get the next proxy from the proxy list.
+When you receive the last proxy in the list, you'll continue receiving proxies from the beginning of the list.
+You can also use `g.proxylist.get_random_proxy` to pick a random proxy from the proxy list.
 
 Automatic Proxy List Reloading
 ------------------------------

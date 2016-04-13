@@ -7,7 +7,7 @@ Grab Installaion
 .. _installation_linux:
 
 Installation on Linux
---------------------------
+---------------------
 
 Run the command:
 
@@ -109,7 +109,7 @@ install Grab with pip. Here is actual list of Grab dependencies::
 .. _installation_upgrade:
 
 Upgrade Grab from 0.5.x version to 0.6.x
-------------------------------------
+----------------------------------------
 
 In Grab 0.6.x some features were moved out into separate packages. If
 you install/upgrade Grab with pip command all dependencies should

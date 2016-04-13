@@ -16,7 +16,8 @@ url
 
 The URL of the requested web page. You can use relative URLS, in which case Grab will build
 the absolute url by joining the relative URL with the URL or previously requested document.
-Be aware that Grab does not automatically escape unsafe characters in the URL. This is a design feature. You can use `urllib.quote` and `urllib.quote_plus` functions to make your URLs safe.
+Be aware that Grab does not automatically escape unsafe characters in the URL.
+This is a design feature. You can use `urllib.quote` and `urllib.quote_plus` functions to make your URLs safe.
 
 More info about valid URLs is in `RFC 2396 <http://www.ietf.org/rfc/rfc2396.txt>`_.
 
@@ -157,7 +158,7 @@ post
 :Default: None
 
 Data to be sent with the POST request. Depending on the type of data, the corresponding method
-of handling that data is selected. The default type for POST requests is "application/x-www-form-ulencoded".
+of handling that data is selected. The default type for POST requests is "application/x-www-form-urlencoded".
 
 In case of `dict` or sequence of pairs, the following algorithm is applied to each value:
 
@@ -202,7 +203,7 @@ common_headers
 :Default: None
 
 By default, Grab generates some common HTTP headers to mimic the behaviour of a real web browser.
-If you have trouble with these deafult headers, you can specify your own headers with
+If you have trouble with these default headers, you can specify your own headers with
 this option. Please note that the usual way to specify a header is to use the :ref:`option_headers` option. See details in :ref:`grab_http_headers`.
 
 .. _option_reuse_cookies:
@@ -321,7 +322,10 @@ document_charset
 
 Character set of the document's content.
 By default, document charset is detected automatically.
-In case the character set is incorrectly determined, you can specify it with this option. The value you specified will be used to convert the bytes in the body of the document to the character set specified in :ref:`_option_charset`. After that the converted body will be passed to lxml to build the DOM tree. :ref:`_option_document_charset` is also used to encode non-ascii symbols in POST data.
+In case the character set is incorrectly determined, you can specify it with this option.
+The value you specified will be used to convert the bytes in the body of the document to the character set
+specified in :ref:`_option_charset`. After that the converted body will be passed to lxml to build the DOM tree.
+:ref:`_option_document_charset` is also used to encode non-ascii symbols in POST data.
 
 :Type: string
 :Default: None
@@ -371,7 +375,8 @@ lowercased_tree
 :type: bool
 :Default: False
 
-Convert the content of the document to lowercase before passing it to the lxml library to build the DOM tree. This option does not affect the content of `response.body`, which always stores the original data.
+Convert the content of the document to lowercase before passing it to the lxml library to build the DOM tree.
+This option does not affect the content of `response.body`, which always stores the original data.
 
 
 .. _option_strip_null_bytes:
@@ -382,7 +387,9 @@ strip_null_bytes
 :Type: bool
 :Default: True
 
-Control the removal of null bytes from the body of HTML documents before they a re passed to lxml to build a DOM tree. lxml stops processing HTML documents at the first place where it finds a null byte. To avoid such issues Grab, removes null bytes from the document body by default. This option does not affect the content of `response.body` that always stores the original data.
+Control the removal of null bytes from the body of HTML documents before they a re passed to lxml to build a DOM tree.
+lxml stops processing HTML documents at the first place where it finds a null byte. To avoid such issues Grab,
+removes null bytes from the document body by default. This option does not affect the content of `response.body` that always stores the original data.
 
 
 .. _option_body_inmemory:
@@ -393,7 +400,8 @@ body_inmemory
 :Type: bool
 :Default: True
 
-Control the way the network response is received. By default, Grab downloads data into memory. To handle large files, you can set `body_inmemory=False` to download the network response directly to the disk.
+Control the way the network response is received. By default, Grab downloads data into memory.
+To handle large files, you can set `body_inmemory=False` to download the network response directly to the disk.
 
 
 .. _option_storage_dir:
@@ -415,7 +423,10 @@ body_storage_filename
 :Type: string
 :Default: None
 
-If you use `body_inmemory=False`, you can let Grab automatically choose names for the files where it saves network responses. By default, Grab randomly builds unique names for files. With the `body_storage_filename` option, you can choose the exact file name to save response to. Note that Grab will save every response to that file, so you need to change the `body_storage_filename` option before each new request, or set it to None to enable default randomly generated file names.
+If you use `body_inmemory=False`, you can let Grab automatically choose names for the files where it saves network responses.
+By default, Grab randomly builds unique names for files. With the `body_storage_filename` option, you can choose the
+exact file name to save response to. Note that Grab will save every response to that file, so you need to change
+the `body_storage_filename` option before each new request, or set it to None to enable default randomly generated file names.
 
 
 .. _option_content_type:
@@ -427,7 +438,8 @@ content_type
 :Default: "html"
 :Available values: "html" and "xml"
 
-This option controls which lxml parser is used to process the body of the response. By default, the html parser is used. If you want to parse XML, then you may need to change this option to "xml" to force the use of an XML parser which does not strip the content of CDATA nodes.
+This option controls which lxml parser is used to process the body of the response. By default, the html parser is used.
+If you want to parse XML, then you may need to change this option to "xml" to force the use of an XML parser which does not strip the content of CDATA nodes.
 
 
 .. _option_fix_special_entities:
