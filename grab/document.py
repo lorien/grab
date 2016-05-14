@@ -549,7 +549,7 @@ class FormExtension(object):
     # New method: set_input_by(id=None, number=None, xpath=None)
 
     def submit(self, submit_name=None, make_request=True,
-               url=None, extra_post=None):
+               url=None, extra_post=None, remove_from_post=None):
         """
         Submit default form.
 
@@ -561,6 +561,9 @@ class FormExtension(object):
         :param url: explicitly specify form action url
         :param extra_post: (dict or list of pairs) additional form data which
             will override data automatically extracted from the form.
+
+        :param remove_from_post: (list) contains names of form elements to remove
+            from post request (e. g. for removing named submit)
 
         Following input elements are automatically processed:
 
@@ -597,6 +600,10 @@ class FormExtension(object):
         # if submit element is image
 
         post = self.form_fields()
+
+        for name in remove_from_post:
+            if name in post:
+                del post[name]
 
         # Build list of submit buttons which have a name
         submit_controls = {}
