@@ -6,22 +6,22 @@
 Welcome to Grab's documentation!
 ================================
 
-Grab is python framework for building web scrapers. With Grab you can build web
-scrapers of various complexity: from simple 5-line scripts to complex
-asynchronous web-site crawlers processing millions of web pages. Grab provides
-API for performing network requests and for handling received content e.g.
-interacting with DOM tree of the HTML document.
+Grab is a python framework for building web scrapers. With Grab you can build 
+web scrapers of various complexity, from simple 5-line scripts to complex
+asynchronous website crawlers processing millions of web pages. Grab provides
+an API for performing network requests and for handling the received content 
+e.g.  interacting with DOM tree of the HTML document.
 
-There are two main parts in Grab library:
+There are two main parts in the Grab library:
 
-    1) The single request/response API that allows you build network request,
-    perform it and work with the received content. That API is a wrapper
-    of the pycurl and lxml libraries.
+    1) The single request/response API that allows you to build network 
+    request, perform it and work with the received content. The API is a 
+    wrapper of the pycurl and lxml libraries.
 
-    2) The Spider API to build asynchronous web crawlers. You write class that
-    define handlers for each type of network request. Each handler could spawn
-    new network requests. Network requests are processed simultaneously with a
-    pool of asynchronous web sockets.
+    2) The Spider API to build asynchronous web crawlers. You write classes 
+    that define handlers for each type of network request. Each handler is able
+    to spawn new network requests. Network requests are processed concurrently 
+    with a pool of asynchronous web sockets.
 
 
 Table of Contents
@@ -61,7 +61,8 @@ Grab User Manual
 Grab::Spider User Manual
 ------------------------
 
-Grab::Spider is a framework to build well-structured asynchronous web-site crawlers.
+Grab::Spider is a framework to build well-structured asynchronous web-site 
+crawlers.  
 
 .. toctree::
     :maxdepth: 2
@@ -82,7 +83,8 @@ Grab::Spider is a framework to build well-structured asynchronous web-site crawl
 API Reference
 -------------
 
-Using the API Reference you can get an overview of what modules, classes, and methods exist, what they do, what they return, and what parameters they accept.
+Using the API Reference you can get an overview of what modules, classes, and 
+methods exist, what they do, what they return, and what parameters they accept.  
 
 .. toctree::
     :maxdepth: 2
