@@ -3,8 +3,8 @@
 Setting up the Grab Request
 ===========================
 
-To set up parameters of network request you need to build Grab
-object and configure it. You can do both things in same time:
+To set up specific parameters of a network request you need to build the Grab
+object and configure it. You can do both things at the same time:
 
 .. code:: python
 
@@ -12,7 +12,8 @@ object and configure it. You can do both things in same time:
              user_agent='grab')
     g.request()
 
-Or you can build Grab object with some initial settings and configure it later:
+Or you can build the Grab object with some initial settings and configure it 
+later: 
 
 .. code:: python
 
@@ -20,7 +21,7 @@ Or you can build Grab object with some initial settings and configure it later:
     g.setup(url='http://example.com', method='head')
     g.request()
 
-Also you can pass settings as parameters to `request` or `go` method:
+Also you can pass settings as parameters to `request` or `go`:
 
 .. code:: python
 
@@ -30,20 +31,21 @@ Also you can pass settings as parameters to `request` or `go` method:
     # OR
     g.go('http://example.com', user_agent='grab')
 
-Methods `request` and `go` are almost same except one small thing. You do not
-need to specify the explicit name of first argument of `go` method. First
-argument of `go` method is always `url`. Except this thing all other named
-arguments of `go` and `request` are just passed to `setup` function.
+`request` and `go` are almost same except for one small thing. You do not
+need to specify the explicit name of the first argument with `go`. The first
+argument of the `go` method is always `url`. Except for this, all other named
+arguments of `go` and `request` are just passed to the `setup` function.
 
-Full list of available settings you can see in :ref:`grab_settings`
+For a full list of available settings you can check :ref:`grab_settings`
 
 
 Grab Config Object
 ------------------
 
-Every time you configure a Grab instance, all options go to the special object
-`grab.config` that holds all Grab instance settings. You can receive a copy of
-the config object and also you can setup a Grab instance with the config object:
+Every time you configure a Grab instance, all options are saved in the 
+special object, `grab.config`, that holds all Grab instance settings. You can 
+receive a copy of the config object and also you can setup a Grab instance 
+with the config object: 
 
 .. code:: python
 
@@ -56,8 +58,8 @@ the config object and also you can setup a Grab instance with the config object:
     >>> g2.config['url']
     'http://google.com/'
 
-The Grab config object is simply a `dict` object some of which values are also
-`dict` objects.
+The Grab config object is simply a `dict` object. Some of the values may also
+be a `dict`.
 
 
 .. _grab_configuration_cloning:
@@ -65,15 +67,15 @@ The Grab config object is simply a `dict` object some of which values are also
 Grab Instance Cloning
 ---------------------
 
-If you need to copy a Grab object there is a more elegant way than using
+If you need to copy a Grab object there is a more elegant way than using the
 `dump_config` and `load_config` methods:
 
 .. code:: python
 
     g2 = g1.clone()
 
-Instance `g2` gets the same state as instance `g1`. In particular, `g2` gets
-same cookies.
+`g2` gets the same state as `g1`. In particular, `g2` will have the same 
+cookies.  
 
 There is also `adopt`, which does the opposite of the `clone` method:
 
@@ -81,7 +83,7 @@ There is also `adopt`, which does the opposite of the `clone` method:
 
     g2.adopt(g1)
 
-The `g2` instance receives the state of `g1` instance.
+The `g2` instance receives the state of the `g1` instance.
 
 
 .. _grab_configuration_pycurl:
@@ -90,10 +92,10 @@ Setting Up the Pycurl Object
 ----------------------------
 
 Sometimes you need more detailed control of network requests than Grab allows.
-In such cases you can configure the pycurl object directly. All Grab's network
-features are only the interface to the pycurl library. Any available Grab
-option just sets some option of the pycurl object. Here is a simple example of
-how to change the type of the HTTP authentication:
+In such cases you can configure pycurl directly. All Grab's network
+features are only a wrapper to the pycurl library. Any available Grab
+option just sets some option of the underlying pycurl object. Here is a 
+simple example of how to change the type of the HTTP authentication:
 
 .. code:: python
 
