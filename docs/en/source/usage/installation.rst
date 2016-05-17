@@ -1,6 +1,6 @@
 .. _usage_installation:
 
-Grab Installaion
+Grab Installation
 ================
 
 
