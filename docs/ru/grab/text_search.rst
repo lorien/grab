@@ -17,17 +17,17 @@
 
     >>> g.go('http://forum.omsk.com')
     <grab.response.Response object at 0x1910f10>
-    >>> g.search(u'<title>')
+    >>> g.doc.text_search(u'<title>')
     True
-    >>> g.search(u'Омск')
+    >>> g.doc.text_search(u'Омск')
     True
-    >>> g.search('Омск')
+    >>> g.doc.text_search('Омск')
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
       File "/usr/local/lib/python2.6/dist-packages/grab/ext/text.py", line 36, in search
         raise GrabMisuseError('The anchor should be byte string in non-byte mode')
     grab.error.GrabMisuseError: The anchor should be byte string in non-byte mode
-    >>> g.search(u'Омск'.encode('cp1251'), byte=True)
+    >>> g.doc.text_search(u'Омск'.encode('cp1251'), byte=True)
     True    
 
 Поиск регулярных выражений
@@ -45,7 +45,7 @@
     u'<title>Linode - Xen VPS Hosting</title>'
     >>> g.rex('<title>[^>]+</title>').group(0)
     u'<title>Linode - Xen VPS Hosting</title>'
-    >>> g.rex_text('<title>([^>]+)</title>')
+    >>> g.doc.rex_text('<title>([^>]+)</title>')
     u'Linode - Xen VPS Hosting'
 
 Метод :meth:`~RegexpExtension.assert_rex` по принципу действия аналогичен методу :meth:`~grab.ext.text.TextExtension.assert_substring`.
