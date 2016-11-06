@@ -31,6 +31,10 @@ To build lxml successfully you need to install:
 
     apt-get install libxml2-dev libxslt-dev
 
+If your system has 512Mb RAM or less you might experience issues during instalation
+of Grab dependencies. Installation of lxml requries quite a few RAM. In such case
+enable swap file if it is disabled.
+
 
 .. _installation_windows:
 
