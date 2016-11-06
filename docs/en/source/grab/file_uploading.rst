@@ -38,7 +38,7 @@ form fields:
 .. code:: python
 
     
-    from grab import Grab, UploadContent
+    from grab import Grab, UploadFile
 
     g = Grab()
     g.go('http://example.com/form.php')
