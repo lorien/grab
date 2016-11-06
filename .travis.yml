@@ -4,11 +4,13 @@ python: 2.7
 
 os:
   - linux
-  - osx
 
 matrix:
   allow_failures:
     - os: osx
+    - env: TOX_ENV=py27-mp
+    - env: TOX_ENV=py33-mp
+    - env: TOX_ENV=py34-mp
     - env: TOX_ENV=py27-urllib3
     - env: TOX_ENV=py33-urllib3
     - env: TOX_ENV=py34-urllib3
