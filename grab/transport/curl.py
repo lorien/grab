@@ -152,7 +152,6 @@ class CurlTransport(BaseTransport):
         4: CURLINFO_DATA_OUT
         5: CURLINFO_unrecognized_type
         """
-
         if _type == pycurl.INFOTYPE_HEADER_OUT:
             if isinstance(text, six.text_type):
                 text = text.encode('utf-8')
