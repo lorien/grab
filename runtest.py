@@ -112,6 +112,8 @@ def main():
                       help='Enable multiprocess mode in spider tests')
     parser.add_option('--profile', action='store_true', default=False,
                       help='Do profiling')
+    parser.add_option('-v', '--verbose', action='store_true', default=False,
+                      help='Enable verbose logging')
     opts, args = parser.parse_args()
 
     GLOBAL['transport'] = opts.transport
@@ -142,6 +144,10 @@ def main():
 
     if opts.test:
         test_list += [opts.test]
+
+    if opts.verbose:
+        from grab.spider.base import logger_verbose
+        logger_verbose.setLevel(logging.DEBUG)
 
     GLOBAL['mp_mode'] = opts.mp_mode
 
