@@ -1,17 +1,17 @@
 MONGODB_CONNECTION = {
-    'database': 'test_database',
+    'database': 'grab_test',
 }
 
 MYSQL_CONNECTION = {
-    'database': 'spider_test',
-    'user': 'web',
-    'passwd': 'web-**',
+    'database': 'grab_test',
+    'user': 'root',
+    'passwd': '',
 }
 
 REDIS_CONNECTION = {}
 
 POSTGRESQL_CONNECTION = {
-    'database': 'spider_test',
+    'database': 'grab_test',
 }
 
 try:

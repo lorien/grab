@@ -1,10 +1,10 @@
 MYSQL_CONNECTION = {
-    'database': 'spider_test',
+    'database': 'grab_test',
     'user': 'travis',
     'passwd': '',
 }
 
 POSTGRESQL_CONNECTION = {
-    'database': 'spider_test',
+    'database': 'grab_test',
     'user': 'postgres',
 }

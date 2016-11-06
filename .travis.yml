@@ -34,8 +34,8 @@ install:
   - pip install tox
 
 before_script:
-  - mysql -e 'create database spider_test'
-  - psql -c 'create database spider_test' -U postgres
+  - mysql -e 'create database grab_test'
+  - psql -c 'create database grab_test' -U postgres
 
 script:
     # Override test settings with travis settings 

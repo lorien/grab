@@ -41,6 +41,7 @@ docs/libpeerconnection.log
 /en
 /.v4
 /settings.py
+/test_settings_local.py
 /foo.py
 /run.ini
 /statx
