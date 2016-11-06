@@ -4,23 +4,23 @@ Request Methods
 ===============
 
 
-You can make request of any HTTP method you need. By default Grab
-makes GET request.
+You can make any type of HTTP request you need. By default Grab will make a
+GET request.
 
 .. _grab_request_get:
 
 GET Request
 -----------
 
-GET method is default request method.
+GET is the default request method.
 
 .. code:: python
 
     g = Grab()
     g.go('http://example.com/')
 
-If you need to pass arguments in query string, then you
-have to build URL manually:
+If you need to pass arguments in through the query string, then you
+have to build the URL manually:
 
 .. code:: python
 
@@ -30,8 +30,7 @@ have to build URL manually:
     qs = urlencode({'foo': 'bar', 'arg': 'val'})
     g.go('http://dumpz.org/?%s' % qs)
 
-If your URL contains unsafe characters then you have to escape them
-manually.
+If your URL contains unsafe characters then you must escape them manually.
 
 .. code:: python
 
@@ -47,18 +46,18 @@ manually.
 POST Request
 ------------
 
-To make POST request you have to specify POST data with `post` option.
-Usually, you will want to use dictionary value:
+To make a POST request you have to specify POST data with the `post` option.
+Usually, you will want to use a dictionary:
 
 .. code:: python
 
     g = Grab()
     g.go('http://example.com/', post={'foo': 'bar'})
 
-You can pass unicode strings and numbers in values of `post` dict, they
-will be converted to bytes string automatically. If you want to specify
+You can pass unicode strings and numbers in as values for the `post` dict, 
+they will be converted to byte strings automatically. If you want to specify a
 charset that will be used to convert unicode to byte string, then use
-`request_charset` option
+`request_charset` option.
 
 .. code:: python
 
@@ -66,7 +65,7 @@ charset that will be used to convert unicode to byte string, then use
     g.go('http://example.com/', post={'who': u'конь в пальто'},
          charset='cp1251')
 
-If the `post` option is a string then it is submitted in request as-is:
+If the `post` option is a string then it is submitted as-is:
 
 .. code:: python
 
@@ -74,16 +73,17 @@ If the `post` option is a string then it is submitted in request as-is:
     g.go('http://example.com/', post='raw data')
 
 
-If you want to pass multiple values with same key use the list of tuples:
+If you want to pass multiple values with the same key use the list of tuples
+version:
 
 .. code:: python
 
     g = Grab()
     g.go('http://example.com/', post=[('key', 'val1'), ('key', 'val2')])
 
-By default, Grab compose POST request with 'application/x-www-form-urlencoded` encoding method.
-To enable `multipart/form-data` method use `post_multipart` method instead of
-`post`:
+By default, Grab will compose a POST request with 
+'application/x-www-form-urlencoded` encoding method. To enable 
+`multipart/form-data` use the `post_multipart` argument instead of `post`:
 
 .. code:: python
 
@@ -92,7 +92,7 @@ To enable `multipart/form-data` method use `post_multipart` method instead of
                                                 ('key', 'val2')])
 
 
-To upload file use `grab.upload.UploadFile` class:
+To upload a file, use the `grab.upload.UploadFile` class:
 
 .. code:: python
 
@@ -105,7 +105,7 @@ To upload file use `grab.upload.UploadFile` class:
 PUT Request
 -----------
 
-To make PUT request use both `post` and `method` options:
+To make a PUT request use both the `post` and `method` arguments:
 
 .. code:: python
 
