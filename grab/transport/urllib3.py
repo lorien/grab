@@ -289,12 +289,13 @@ class Urllib3Transport(BaseTransport):
             self._request._response_file.write(self._response.read())#data)
             self._request._response_file.close()
         else:
-            response.body = self._response.read()#data
             if self._request.body_maxsize is not None:
                 #if self.response_body_bytes_read > self.config_body_maxsize:
                 #    logger.debug('Response body max size limit reached: %s' %
                 #                 self.config_body_maxsize)
                 response.body = self._response.read(self._request.body_maxsize)
+            else:
+                response.body = self._response.read()#data
 
         # Clear memory
         #self.response_header_chunks = []
