@@ -964,13 +964,27 @@ class Spider(DeprecatedThingsSpiderMixin):
                         # If received task is None then
                         # check if spider is ready to be shut down
                         if not pending_tasks and self.is_ready_to_shutdown():
-                            #shutdown_countdown -= 1
-                            #time.sleep(0.02)
-                            #if shutdown_countdown <= 0:
-                            self.shutdown_event.set()
-                            #print('STOP!!!!!!!!!')
-                            self.stop()
-                            break # Break from `while self.work_allowed` cycle
+                            # I am afraid there is a bug in `is_ready_to_shutdown`
+                            # because it tries to evaluate too many things
+                            # includig thigs that are being set from other threads,
+                            # so to ensure we are really ready to shutdown I call
+                            # is_ready_to_shutdown a few more times.
+                            # Without this hack some times really rarely times
+                            # the Grab fails to do its job
+                            # A good way to see this bug is to disable this hack
+                            # and run:
+                            # while ./runtest.py -t test.spider_data; do echo "ok"; done;
+                            # And wait a few minutes
+                            really_ready = True
+                            for x in range(10):
+                                if not self.is_ready_to_shutdown():
+                                    really_ready = False
+                                    break
+                                time.sleep(0.001)
+                            if really_ready:
+                                self.shutdown_event.set()
+                                self.stop()
+                                break # Break from `while self.work_allowed` cycle
                     elif isinstance(task, bool) and (task is True):
                         # If received task is True
                         # and there is no active network threads then
