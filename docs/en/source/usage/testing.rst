@@ -11,7 +11,7 @@ To run all tests run the command:
 
 .. code:: shell
 
-    ./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis --backend-postgres
+	./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
 
 
 .. _usage_testing_control:
@@ -87,7 +87,7 @@ Test Coverage
 To see test coverage run the commands::
 
     coverage erase
-    coverage run --source=grab ./runtest.py --test-all --extra --backend-mongo --backend-mysql --backend-redis --backend-postgres
+    coverage run --source=grab ./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
     coverage report -m
 
 Also you can use shortcut::
