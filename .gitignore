@@ -7,41 +7,13 @@
 # setuptools
 dist/
 
-# misc
-log.html
-prof
-prof.kcache
-
-# google chrome
-docs2/libpeerconnection.log
-docs/libpeerconnection.log
-
-/log/
-/data/
-/ghost/
+# development files
+/.env/
 /var/
 /.tox/
-/.py33
 /script/
-/test.py
-/test2.py
-/many_links_prof
-/prof.compiled
-/.venv/
-/settings.py
-/spider.py
 .idea/
 /.coverage
-/.env/
-/.py27/
-/.py34/
 /docs/en/build/
 /docs/ru/_build/
-/build/
-/en
-/.v4
-/settings.py
 /test_settings_local.py
-/foo.py
-/run.ini
-/statx
