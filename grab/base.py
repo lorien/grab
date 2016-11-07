@@ -766,7 +766,7 @@ class Grab(DeprecatedThings):
         """
 
         try:
-            first_head = self.request_head.split('\r\n\r\n')[0]
+            first_head = self.request_head.decode("utf-8").split('\r\n\r\n')[0]
             lines = first_head.split('\r\n')
             lines = [x for x in lines if ':' in x]
             headers = email.message_from_string('\n'.join(lines))
