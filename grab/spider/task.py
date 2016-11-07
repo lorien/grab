@@ -137,7 +137,6 @@ class Task(BaseTask):
         self.use_proxylist = use_proxylist
         self.cache_timeout = cache_timeout
         self.raw = raw
-        self.origin_task_generator = None
         self.callback = callback
         self.coroutines_stack = []
         for key, value in kwargs.items():
@@ -244,10 +243,3 @@ class Task(BaseTask):
                 return getattr(spider, fb_name)
         else:
             return None
-
-
-def inline_task(f):
-    def wrap(self, grab, task):
-        origin_task_generator = f(self, grab, task)
-        self.handler_for_inline_task(None, origin_task_generator)
-    return wrap

@@ -3,7 +3,6 @@ import six
 import grab.spider.base
 from grab import Grab
 from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
-from grab.spider import inline_task
 from test.util import (BaseGrabTestCase, build_grab, build_spider,
                        multiprocess_mode)
 from grab.spider.error import SpiderError
@@ -162,88 +161,6 @@ class TestSpider(BaseGrabTestCase):
         bot.run()
         self.assertEqual(['0_handler', '1_func', '1_func', '1_func'],
                          sorted(tokens))
-
-    @multiprocess_mode(False)
-    def test_inline_task(self):
-
-        def callback(self):
-            self.write(self.request.uri)
-            self.finish()
-
-        self.server.response['get.callback'] = callback
-
-        server = self.server
-
-        class TestSpider(Spider):
-            def add_response(self, grab):
-                self.stat.collect('responses', grab.doc.unicode_body())
-
-            def task_generator(self):
-                url = server.get_url('/?foo=start')
-                yield Task('inline', url=url)
-
-            def subroutine_task(self, grab):
-
-                for x in six.moves.range(2):
-                    url = server.get_url('/?foo=subtask%s' % x)
-                    grab.setup(url=url)
-                    grab = yield Task(grab=grab)
-                    self.add_response(grab)
-                    self.stat.collect('calls', 'subinline%s' % x)
-
-            @inline_task
-            def task_inline(self, grab, task):
-                self.add_response(grab)
-                self.stat.collect('calls', 'generator')
-
-                for x in six.moves.range(3):
-                    url = server.get_url('/?foo=%s' % x)
-                    grab.setup(url=url)
-                    grab = yield Task(grab=grab)
-
-                    self.add_response(grab)
-                    self.stat.collect('calls', 'inline%s' % x)
-
-                    grab = yield self.subroutine_task(grab)
-                    # In this case the grab body will be the same
-                    # as is in subroutine task:  /?foo=subtask1
-                    self.add_response(grab)
-
-                url = server.get_url('/?foo=yield')
-                self.add_task(Task('yield', url=url))
-
-            def task_yield(self, grab, task):
-                self.add_response(grab)
-                self.stat.collect('calls', 'yield')
-
-                url = server.get_url('/?foo=end')
-                yield Task('end', url=url)
-
-            def task_end(self, grab, task):
-                self.add_response(grab)
-                self.stat.collect('calls', 'end')
-
-        bot = build_spider(TestSpider, )
-        bot.run()
-
-        self.assertEqual(['/?foo=start',
-                          '/?foo=0',
-                          '/?foo=subtask0', '/?foo=subtask1', '/?foo=subtask1',
-                          '/?foo=1',
-                          '/?foo=subtask0', '/?foo=subtask1', '/?foo=subtask1',
-                          '/?foo=2',
-                          '/?foo=subtask0', '/?foo=subtask1', '/?foo=subtask1',
-                          '/?foo=yield', '/?foo=end'],
-                         bot.stat.collections['responses'])
-        self.assertEqual(['generator',
-                          'inline0',
-                          'subinline0', 'subinline1',
-                          'inline1',
-                          'subinline0', 'subinline1',
-                          'inline2',
-                          'subinline0', 'subinline1',
-                          'yield', 'end'],
-                         bot.stat.collections['calls'])
 
     def test_task_url_and_grab_options(self):
         class TestSpider(Spider):

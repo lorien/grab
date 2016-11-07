@@ -186,8 +186,6 @@ def main():
     if result.wasSuccessful():
         sys.exit(0)
     else:
-        #print('Result is not successful!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        #import pdb; pdb.set_trace()
         sys.exit(1)
 
 if __name__ == '__main__':

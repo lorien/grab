@@ -753,8 +753,6 @@ class Spider(DeprecatedThingsSpiderMixin):
             self.parser_result_queue.put((ex, result['task']))
 
     def find_task_handler(self, task):
-        if task.origin_task_generator is not None:
-            return self.handler_for_inline_task
         callback = task.get('callback')
         if callback:
             return callback
@@ -766,45 +764,6 @@ class Spider(DeprecatedThingsSpiderMixin):
                                     'task %s' % task.name)
             else:
                 return handler
-
-    def handler_for_inline_task(self, grab, task):
-        # It can be subroutine for the first call,
-        # So we should check it
-        if isinstance(task, types.GeneratorType):
-            coroutines_stack = []
-            sendval = None
-            origin_task_generator = task
-            target = origin_task_generator
-        else:
-            coroutines_stack = task.coroutines_stack
-            sendval = grab
-            origin_task_generator = task.origin_task_generator
-            target = origin_task_generator
-
-        while True:
-            try:
-                result = target.send(sendval)
-                # If it is subroutine we have to initialize it and
-                # save coroutine in the coroutines stack
-                if isinstance(result, types.GeneratorType):
-                    coroutines_stack.append(target)
-                    sendval = None
-                    target = result
-                    origin_task_generator = target
-                else:
-                    new_task = result
-                    new_task.origin_task_generator = origin_task_generator
-                    new_task.coroutines_stack = coroutines_stack
-                    self.add_task(new_task)
-                    return
-            except StopIteration:
-                # If coroutine is over we should check coroutines stack,
-                # may be it is subroutine
-                if coroutines_stack:
-                    target = coroutines_stack.pop()
-                    origin_task_generator = target
-                else:
-                    return
 
     def log_network_result_stats(self, res, from_cache=False):
         # Increase stat counters

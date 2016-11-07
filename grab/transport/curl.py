@@ -290,7 +290,6 @@ class CurlTransport(BaseTransport):
                 if six.PY3:
                     post_items = decode_pairs(post_items,
                                               grab.config['charset'])
-                # import pdb; pdb.set_trace()
                 self.curl.setopt(pycurl.HTTPPOST,
                                  process_upload_items(post_items))
             elif grab.config['post']:
