@@ -70,6 +70,23 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.run()
         self.assertEqual(b'xxx', bot.stat.collections['SAVED_ITEM'][0])
 
+    def test_rps_limit(self):
+        server = self.server
+
+        class TestSpider(Spider):
+            def task_generator(self):
+                for x in six.moves.range(1111):
+                    yield Task('page', url=server.get_url())
+
+            def task_page(self, grab, task):
+                if (self.stat.counters.get('spider:request-processed') - self.stat.counters_prev.get('spider:request-processed',0)) > self.rps_limit:
+                    self.test_passed = False
+
+        bot = TestSpider(rps_limit=20)
+        bot.test_passed = True
+        bot.run()
+        self.assertEqual(bot.test_passed, True)
+
     def test_setup_grab(self):
         # Mulitple calls to `setup_grab` should accumulate
         # changes in config object.

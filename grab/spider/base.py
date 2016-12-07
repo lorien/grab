@@ -43,6 +43,7 @@ DEFAULT_TASK_PRIORITY = 100
 DEFAULT_NETWORK_STREAM_NUMBER = 3
 DEFAULT_TASK_TRY_LIMIT = 5
 DEFAULT_NETWORK_TRY_LIMIT = 5
+DEFAULT_RPS_LIMIT = 0
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
 NULL = object()
 
@@ -128,6 +129,7 @@ class Spider(DeprecatedThingsSpiderMixin):
     def __init__(self, thread_number=None,
                  network_try_limit=None, task_try_limit=None,
                  request_pause=NULL,
+                 rps_limit=None,
                  priority_mode='random',
                  meta=None,
                  only_cache=False,
@@ -160,6 +162,7 @@ class Spider(DeprecatedThingsSpiderMixin):
             of some other physical error
             but task_try_limit limits the number of attempts which
             are scheduled manually in the spider business logic
+        * rps_limit - requests per second limit
         * priority_mode - could be "random" or "const"
         * meta - arbitrary user data
         * retry_rebuild_user_agent - generate new random user-agent for each
@@ -234,6 +237,10 @@ class Spider(DeprecatedThingsSpiderMixin):
             network_try_limit or
             int(self.config.get('network_try_limit',
                                 DEFAULT_NETWORK_TRY_LIMIT)))
+        self.rps_limit = (
+            rps_limit or
+            int(self.config.get('rps_limit',
+                                DEFAULT_RPS_LIMIT)))
 
         self._grab_config = {}
         if priority_mode not in ['random', 'const']:
@@ -345,11 +352,11 @@ class Spider(DeprecatedThingsSpiderMixin):
             else:
                 raise SpiderMisuseError('Method `load_proxylist` received '
                                         'invalid `source_type` argument: %s'
-                                        % source_type) 
+                                        % source_type)
         else:
             raise SpiderMisuseError('Method `load_proxylist` received '
                                     'invalid `source` argument: %s'
-                                    % source) 
+                                    % source)
 
         self.proxylist_enabled = True
         self.proxy = None
@@ -418,7 +425,7 @@ class Spider(DeprecatedThingsSpiderMixin):
         minutes, seconds = divmod(seconds, 60)
         out.append('Time elapsed: %d:%d:%d (H:M:S)' % (
             hours, minutes, seconds))
-        out.append('End time: %s' % 
+        out.append('End time: %s' %
                    datetime.utcnow().strftime('%d %b %Y, %H:%M:%S UTC'))
 
         if timing:
@@ -886,7 +893,7 @@ class Spider(DeprecatedThingsSpiderMixin):
             requests_per_process=self.parser_requests_per_process,
         )
         network_result_queue_limit = max(10, self.thread_number * 2)
-        
+
         try:
             # Run custom things defined by this specific spider
             # By defaut it does nothing
@@ -1026,6 +1033,9 @@ class Spider(DeprecatedThingsSpiderMixin):
                             )
                     self.log_network_result_stats(
                         result, from_cache=from_cache)
+                    if self.stat.counters.get('spider:request-processed') - self.stat.counters_prev.get(
+                            'spider:request-processed') >= self.rps_limit > 0:
+                        time.sleep(1)
                     if self.is_valid_network_result(result):
                         #print('!! PUT NETWORK RESULT INTO QUEUE (base.py)')
                         self.network_result_queue.put(result)
@@ -1085,7 +1095,7 @@ class Spider(DeprecatedThingsSpiderMixin):
         else:
             msg = res['error_abbr']
 
-        self.stat.inc('error:%s' % msg) 
+        self.stat.inc('error:%s' % msg)
         #logger.error(u'Network error: %s' % msg)#%
                      #make_unicode(msg, errors='ignore'))
 
@@ -1131,7 +1141,7 @@ class Spider(DeprecatedThingsSpiderMixin):
                                            task)
         elif result is None:
             pass
-        elif isinstance(result, Exception): 
+        elif isinstance(result, Exception):
             handler = self.find_task_handler(task)
             handler_name = getattr(handler, '__name__', 'NONE')
             self.process_handler_error(handler_name, result, task)
