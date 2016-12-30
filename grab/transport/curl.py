@@ -287,9 +287,9 @@ class CurlTransport(BaseTransport):
                     ignore_classes=(UploadFile, UploadContent),
                 )
                 # py3 hack
-                if six.PY3:
-                    post_items = decode_pairs(post_items,
-                                              grab.config['charset'])
+                #if six.PY3:
+                #    post_items = decode_pairs(post_items,
+                #                              grab.config['charset'])
                 self.curl.setopt(pycurl.HTTPPOST,
                                  process_upload_items(post_items))
             elif grab.config['post']:

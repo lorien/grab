@@ -205,3 +205,17 @@ class TestHtmlForms(BaseGrabTestCase):
             set([('foo', None), ('bar', 'bar-value')]),
             set(g.config['post']),
         )
+
+    def test_unicode_textarea_form(self):
+        html = u'''
+            <form enctype="multipart/form-data" action=""
+                method="post" accept-charset="UTF-8">
+                <textarea name="body">Beställa</textarea>
+                <input type="submit" name="op" value="Save"/>
+            </form>
+        '''.encode('utf-8')
+        self.server.response['get.data'] = html
+        g = build_grab()
+        g.go(self.server.get_url())
+        g.submit()
+        self.assertTrue(u'Beställa'.encode('utf-8') in self.server.request['data'])
