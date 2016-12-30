@@ -318,7 +318,7 @@ class Grab(DeprecatedThings):
 
         for key in self.clonable_attributes:
             setattr(self, key, getattr(g, key))
-            self.cookies = deepcopy(g.cookies)
+        self.cookies = deepcopy(g.cookies)
 
     def dump_config(self):
         """
