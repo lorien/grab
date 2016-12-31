@@ -9,7 +9,6 @@ class GrabSimpleTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    '''
     def test_body_inmemory_false(self):
         with temp_dir() as tmp_dir:
             g = build_grab()
@@ -60,10 +59,23 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             g.doc.body = u'Спутник' 
 
         self.assertRaises(GrabMisuseError, bad_func)
-    '''
 
     def test_empty_response(self):
         self.server.response['data'] = b''
         g = build_grab()
         g.go(self.server.get_url())
         g.doc.tree # should not raise exception
+
+    #def test_emoji_processing(self):
+    #    #html = u'''
+    #    #<html><body>
+    #    #    <span class="a-color-base"> 👍🏻 </span>
+    #    #</body></html>
+    #    #'''.encode('utf-8')
+    #    g = build_grab()
+    #    #print('>>',g.doc('//span').text(),'<<')
+    #    #import grab
+    #    #g = grab.Grab()
+    #    #g.go('https://github.com/lorien/grab/issues/199#issuecomment-269854859')
+    #    g.go('https://en.wikipedia.org/wiki/Emoji')
+    #    g.doc.select("//*")
