@@ -36,7 +36,6 @@ from grab.base import GLOBAL_STATE
 from grab.stat import Stat, Timer
 from grab.spider.parser_pipeline import ParserPipeline
 from grab.spider.cache_pipeline import CachePipeline
-from grab.spider.deprecated import DeprecatedThingsSpiderMixin
 from grab.util.warning import warn
 
 DEFAULT_TASK_PRIORITY = 100
@@ -86,7 +85,7 @@ class SpiderMetaClass(type):
 
 
 @six.add_metaclass(SpiderMetaClass)
-class Spider(DeprecatedThingsSpiderMixin):
+class Spider(object):
     """
     Asynchronous scraping framework.
     """

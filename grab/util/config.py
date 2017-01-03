@@ -24,5 +24,5 @@ def build_spider_config(spider_class, root_config):
     spider_name = spider_class.get_spider_name()
     spider_config = deepcopy(root_config.get(spider_name, {}))
     update_dict(spider_config, root_config['global'], overwrite=False)
-    spider_class.setup_spider_config(spider_config)
+    spider_class.update_spider_config(spider_config)
     return spider_config

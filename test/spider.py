@@ -1,4 +1,5 @@
 import six
+from grab import Grab
 from grab.spider import Spider, Task
 from grab.spider.error import SpiderError, FatalError
 import os
