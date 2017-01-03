@@ -1,4 +1,6 @@
 import six
+from grab import Grab
+from collections import defaultdict
 
 import grab.spider.base
 from grab import Grab
@@ -9,8 +11,6 @@ from grab.spider.error import SpiderError
 
 
 class SimpleSpider(Spider):
-    base_url = 'http://google.com'
-
     def task_baz(self, grab, task):
         self.SAVED_ITEM = grab.response.body
 
@@ -24,7 +24,7 @@ class TestSpider(BaseGrabTestCase):
         grab.spider.base.RANDOM_TASK_PRIORITY_RANGE = (10, 20)
         bot = build_spider(SimpleSpider, priority_mode='random')
         bot.setup_queue()
-        task = Task('baz', url='xxx')
+        task = Task('baz', url='http://xxx.com')
         self.assertEqual(task.priority, None)
         bot.add_task(task)
         self.assertTrue(10 <= task.priority <= 20)
@@ -33,7 +33,7 @@ class TestSpider(BaseGrabTestCase):
         grab.spider.base.DEFAULT_TASK_PRIORITY = 33
         bot = build_spider(SimpleSpider, priority_mode='const')
         bot.setup_queue()
-        task = Task('baz', url='xxx')
+        task = Task('baz', url='http://xxx.com')
         self.assertEqual(task.priority, None)
         bot.add_task(task)
         self.assertEqual(33, task.priority)
@@ -42,7 +42,7 @@ class TestSpider(BaseGrabTestCase):
         grab.spider.base.DEFAULT_TASK_PRIORITY = 33
         bot = build_spider(SimpleSpider, priority_mode='const')
         bot.setup_queue()
-        task = Task('baz', url='xxx', priority=1)
+        task = Task('baz', url='http://xxx.com', priority=1)
         self.assertEqual(1, task.priority)
         bot.add_task(task)
         self.assertEqual(1, task.priority)
@@ -53,39 +53,39 @@ class TestSpider(BaseGrabTestCase):
     def test_task_url(self):
         bot = build_spider(SimpleSpider, )
         bot.setup_queue()
-        task = Task('baz', url='xxx')
-        self.assertEqual('xxx', task.url)
+        task = Task('baz', url='http://xxx.com')
+        self.assertEqual('http://xxx.com', task.url)
         bot.add_task(task)
-        self.assertEqual('http://google.com/xxx', task.url)
+        self.assertEqual('http://xxx.com', task.url)
         self.assertEqual(None, task.grab_config)
 
-        g = Grab(url='yyy')
+        g = Grab(url='http://yyy.com')
         task = Task('baz', grab=g)
         bot.add_task(task)
-        self.assertEqual('http://google.com/yyy', task.url)
-        self.assertEqual('http://google.com/yyy', task.grab_config['url'])
+        self.assertEqual('http://yyy.com', task.url)
+        self.assertEqual('http://yyy.com', task.grab_config['url'])
 
     def test_task_clone(self):
         bot = build_spider(SimpleSpider, )
         bot.setup_queue()
 
-        task = Task('baz', url='xxx')
+        task = Task('baz', url='http://xxx.com')
         bot.add_task(task.clone())
 
         # Pass grab to clone
-        task = Task('baz', url='xxx')
+        task = Task('baz', url='http://xxx.com')
         g = Grab()
         g.setup(url='zzz')
         bot.add_task(task.clone(grab=g))
 
         # Pass grab_config to clone
-        task = Task('baz', url='xxx')
+        task = Task('baz', url='http://xxx.com')
         g = Grab()
         g.setup(url='zzz')
         bot.add_task(task.clone(grab_config=g.config))
 
     def test_task_clone_with_url_param(self):
-        task = Task('baz', url='xxx')
+        task = Task('baz', url='http://xxx.com')
         task.clone(url='http://yandex.ru/')
 
     def test_task_useragent(self):
@@ -333,3 +333,19 @@ class TestSpider(BaseGrabTestCase):
             bot.add_task(Task('page', url='http://ya.ru/'))
         bot.run()
         self.assertTrue(1 < bot.stat.counters['parser-pipeline-restore'])
+
+    def test_task_clone_post_request(self):
+        class TestSpider(Spider):
+            def task_foo(self, grab, task):
+                if not task.get('fin'):
+                    yield task.clone(fin=True)
+
+        bot = build_spider(TestSpider)
+        bot.setup_queue()
+
+        g = Grab()
+        g.setup(url=self.server.get_url(), post={'x': 'y'})
+        task = Task('foo', grab=g)
+        bot.add_task(task)
+        bot.run()
+        self.assertEqual('POST', self.server.request['method'])
