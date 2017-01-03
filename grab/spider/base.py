@@ -781,14 +781,14 @@ class Spider(object):
                 # even if `proxy` options is set with another proxy server
                 grab.setup(connection_reuse=False)
                 if self.proxy_auto_change:
-                    self.proxy = self.change_proxy(task, grab)
+                    self.change_active_proxy(task)
+                if self.proxy:
+                    grab.setup(proxy=self.proxy.get_address(),
+                               proxy_userpwd=self.proxy.get_userpwd(),
+                               proxy_type=self.proxy.proxy_type)
 
-    def change_proxy(self, task, grab):
-        proxy = self.proxylist.get_random_proxy()
-        grab.setup(proxy=proxy.get_address(),
-                   proxy_userpwd=proxy.get_userpwd(),
-                   proxy_type=proxy.proxy_type)
-        return proxy
+    def change_active_proxy(self, task, grab):
+        self.proxy = self.proxylist.get_random_proxy()
 
     def submit_task_to_transport(self, task, grab):
         if self.only_cache:
