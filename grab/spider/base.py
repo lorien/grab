@@ -288,36 +288,26 @@ class Spider(object):
         if self.task_queue is None:
             raise SpiderMisuseError('You should configure task queue before '
                                     'adding tasks. Use `setup_queue` method.')
-        if task.priority is None or not task.priority_is_custom:
+        if task.priority is None or not task.priority_set_explicitly:
             task.priority = self.generate_task_priority()
-            task.priority_is_custom = False
+            task.priority_set_explicitly = False
         else:
-            task.priority_is_custom = True
+            task.priority_set_explicitly = True
 
-        try:
-            if not task.url.startswith(('http://', 'https://', 'ftp://',
-                                        'file://', 'feed://')):
-                if self.base_url is None:
-                    msg = 'Could not resolve relative URL because base_url ' \
-                          'is not specified. Task: %s, URL: %s'\
-                          % (task.name, task.url)
-                    raise SpiderError(msg)
-                else:
-                    warn('Class attribute `Spider::base_url` is deprecated. '
-                         'Use Task objects with absolute URLs')
-                    task.url = urljoin(self.base_url, task.url)
-                    # If task has grab_config object then update it too
-                    if task.grab_config:
-                        task.grab_config['url'] = task.url
-        except Exception as ex:
+        if not task.url.startswith(('http://', 'https://', 'ftp://',
+                                    'file://', 'feed://')):
             self.stat.collect('task-with-invalid-url', task.url)
+            msg = ('It is not allowed to build Task object with '
+                   'relative URL: %s' % task.url)
+            ex = SpiderError(msg)
             if raise_error:
-                raise
+                raise ex
             else:
                 logger.error('', exc_info=ex)
                 return False
 
         # TODO: keep original task priority if it was set explicitly
+        # WTF the previous comment means?
         self.task_queue.put(task, task.priority, schedule_time=task.schedule_time)
         return True
 
@@ -656,15 +646,6 @@ class Spider(object):
                                     % data.handler_key)
             else:
                 return handler
-
-    def is_valid_network_result(self, res):
-        if res['task'].get('raw'):
-            return True
-        if res['ok']:
-            res_code = res['grab'].response.code
-            if self.is_valid_network_response_code(res_code, res['task']):
-                return True
-        return False
 
     def run_parser(self):
         """
@@ -1025,12 +1006,24 @@ class Spider(object):
                             )
                     self.log_network_result_stats(
                         result, from_cache=from_cache)
-                    if self.is_valid_network_result(result):
-                        #print('!! PUT NETWORK RESULT INTO QUEUE (base.py)')
+
+                    is_valid = False
+                    if result['task'].get('raw'):
+                        is_valid = True
+                    elif result['ok']:
+                        res_code = result['grab'].response.code
+                        if self.is_valid_network_response_code(res_code, result['task']):
+                            is_valid = True
+
+                    if is_valid:
                         self.network_result_queue.put(result)
                     else:
                         self.log_failed_network_result(result)
                         # Try to do network request one more time
+                        # TODO:
+                        # Implement valid_try_limit
+                        # Use it if request failed not because of network error
+                        # But because of content integrity check
                         if self.network_try_limit > 0:
                             result['task'].refresh_cache = True
                             result['task'].setup_grab_config(
