@@ -8,6 +8,7 @@ from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
 from test.util import (BaseGrabTestCase, build_grab, build_spider,
                        multiprocess_mode)
 from grab.spider.error import SpiderError
+from weblib.error import ResponseNotValid
 
 
 class SimpleSpider(Spider):
@@ -349,3 +350,15 @@ class TestSpider(BaseGrabTestCase):
         bot.add_task(task)
         bot.run()
         self.assertEqual('POST', self.server.request['method'])
+
+    def test_response_not_valid(self):
+        class SimpleSpider(Spider):
+            def task_page(self, grab, task):
+                self.stat.inc('xxx')
+                raise ResponseNotValid
+
+        bot = SimpleSpider()
+        bot.setup_queue()
+        bot.add_task(Task('page', url=self.server.get_url()))
+        bot.run()
+        self.assertEqual(bot.task_try_limit, bot.stat.counters['xxx'])

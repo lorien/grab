@@ -37,6 +37,7 @@ from grab.stat import Stat, Timer
 from grab.spider.parser_pipeline import ParserPipeline
 from grab.spider.cache_pipeline import CachePipeline
 from grab.util.warning import warn
+from weblib.error import ResponseNotValid
 
 DEFAULT_TASK_PRIORITY = 100
 DEFAULT_NETWORK_STREAM_NUMBER = 3
@@ -542,7 +543,7 @@ class Spider(object):
                             item = next(task_generator)
                             logger_verbose.debug('Got new item from generator. '
                                                  'Processing it.')
-                            self.process_handler_result(item)
+                            self.process_handler_result(item, None)
                     except StopIteration:
                         # If generator have no values to yield
                         # then disable it
@@ -1096,7 +1097,7 @@ class Spider(object):
                               'check_task_limits: %s'
                               % reason)
 
-    def process_handler_result(self, result, task=None):
+    def process_handler_result(self, result, task):
         """
         Process result received from the task handler.
 
@@ -1104,6 +1105,10 @@ class Spider(object):
         * None
         * Task instance
         * Data instance.
+        * dict:
+          * {type: "stat", counters: [], collections: []} 
+        * ResponseNotValid-based exception
+        * Arbitrary exception
         """
 
         if isinstance(result, Task):
@@ -1123,6 +1128,10 @@ class Spider(object):
                                            task)
         elif result is None:
             pass
+        elif isinstance(result, ResponseNotValid):
+            self.add_task(task.clone(refresh_cache=True))
+            error_code = result.__class__.__name__.replace('_', '-')
+            self.stat.inc('integrity:%s' % error_code)
         elif isinstance(result, Exception): 
             handler = self.find_task_handler(task)
             handler_name = getattr(handler, '__name__', 'NONE')
