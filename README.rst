@@ -7,9 +7,6 @@ Grab
 .. image:: https://coveralls.io/repos/lorien/grab/badge.svg?branch=master
     :target: https://coveralls.io/r/lorien/grab?branch=master
 
-.. image:: https://img.shields.io/pypi/dm/grab.svg
-    :target: https://pypi.python.org/pypi/grab
-
 .. image:: https://img.shields.io/pypi/v/grab.svg
     :target: https://pypi.python.org/pypi/grab
 
@@ -20,22 +17,33 @@ Grab
 What is Grab?
 -------------
 
-Grab is a python web scraping framework. Grab provides tons of helpful methods
-to scrape web sites and to process the scraped content:
+Grab is a python web scraping framework. Grab provides a number of helpful methods
+to perform network requests, scrape web sites and process the scraped content:
 
 * Automatic cookies (session) support
-* HTTP and SOCKS proxy with and without authorization
+* HTTP and SOCKS proxy with/without authorization
 * Keep-Alive support
 * IDN support
 * Tools to work with web forms
 * Easy multipart file uploading
 * Flexible customization of HTTP requests
 * Automatic charset detection
-* Powerful API of extracting info from HTML documents with XPATH queries
+* Powerful API to extract data from DOM tree of HTML documents with XPATH queries
 * Asynchronous API to make thousands of simultaneous queries. This part of
-  library called Spider and it is too big to even list its features
-  in this README.
+  library called Spider. See list of spider fetures below.
 * Python 3 ready
+
+Spider is a framework for writing web-site scrapers. Features:
+
+* Rules and conventions to organize the request/parse logic in separate
+  blocks of codes
+* Multiple parallel network requests
+* Automatic processing of network errors (failed tasks go back to task queue)
+* You can create network requests and parse responses with Grab API (see above)
+* HTTP proxy support
+* Caching network results in permanent storage
+* Different backends for task queue (in-memory, redis, mongodb)
+* Tools to debug and collect statistics
 
 
 Grab Example
@@ -102,8 +110,6 @@ Grab::Spider Example
 Installation
 ------------
 
-Pip is recommended way to install Grab and its dependencies:
-
 .. code:: bash
 
     $ pip install -U grab
@@ -116,13 +122,11 @@ Documentation and Help
 
 Documentation: http://docs.grablib.org/en/latest/
 
-English mailing list: http://groups.google.com/group/grab-users/
-
-Russian mailing list: http://groups.google.com/group/python-grab/
+Mailing list (mostly russian): http://groups.google.com/group/python-grab/
 
 
 Contribution
-============
+------------
 
 To report a bug please use GitHub issue tracker: https://github.com/lorien/grab/issues
 
