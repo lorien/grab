@@ -180,7 +180,7 @@ class TestSpider(BaseGrabTestCase):
 
     def test_task_invalid_name(self):
         self.assertRaises(SpiderMisuseError, Task,
-                          'generator', url='http://ya.ru/')
+                          'generator', url='http://example.com')
 
     def test_task_constructor_invalid_args(self):
         # no url, no grab, no grab_config
@@ -193,7 +193,7 @@ class TestSpider(BaseGrabTestCase):
                           grab=1, grab_config=1)
 
     def test_task_clone_invalid_args(self):
-        task = Task('foo', url='http://ya.ru/')
+        task = Task('foo', url='http://example.com')
         # both url and grab
         self.assertRaises(SpiderMisuseError, task.clone,
                           url=1, grab=1)
@@ -331,7 +331,7 @@ class TestSpider(BaseGrabTestCase):
         bot = build_spider(TestSpider, )
         bot.setup_queue()
         for x in range(5):
-            bot.add_task(Task('page', url='http://ya.ru/'))
+            bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
         self.assertTrue(1 < bot.stat.counters['parser-pipeline-restore'])
 
