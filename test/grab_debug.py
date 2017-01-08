@@ -1,5 +1,6 @@
 # coding: utf-8
 import os
+from mock import patch
 
 from test.util import BaseGrabTestCase
 from test.util import build_grab, exclude_transport, temp_dir
@@ -113,3 +114,18 @@ class TestCookies(BaseGrabTestCase):
         self.server.response['post.data'] = 'x'
         g.go(self.server.get_url())
         self.assertEqual(b'x', g.doc.body)
+
+    def test_log_request_extra_argument(self):
+        import grab.base
+
+        g = build_grab()
+        g.go(self.server.get_url())
+        with patch.object(grab.base.logger_network, 'debug') as mocked:
+            g.log_request()
+            args = mocked.mock_calls[0][1]
+            self.assertEqual('', args[3])
+
+        with patch.object(grab.base.logger_network, 'debug') as mocked:
+            g.log_request(extra='zz')
+            args = mocked.mock_calls[0][1]
+            self.assertEqual('[zz] ', args[3])

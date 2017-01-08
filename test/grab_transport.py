@@ -3,6 +3,7 @@ import pickle
 from grab import Grab
 from test.util import BaseGrabTestCase
 from grab.transport.curl import CurlTransport
+from grab.error import GrabMisuseError
 
 
 class FakeTransport(CurlTransport):
@@ -69,3 +70,13 @@ class TestTransportTestCase(BaseGrabTestCase):
             get_curl_transport,
             get_fake_transport,
         )
+
+    def test_invalid_transport_nodot(self):
+        def foo():
+            g = Grab(transport='zzzzzzzzzz')
+        self.assertRaises(GrabMisuseError, foo)
+
+    def test_invalid_transport_not_collable_or_string(self):
+        def foo():
+            g = Grab(transport=4)
+        self.assertRaises(GrabMisuseError, foo)
