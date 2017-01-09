@@ -86,8 +86,10 @@ class TestSpider(BaseGrabTestCase):
         bot.add_task(task.clone(grab_config=g.config))
 
     def test_task_clone_with_url_param(self):
-        task = Task('baz', url='http://xxx.com')
-        task.clone(url='http://yandex.ru/')
+        task = Task('baz', url='http://example.com/path')
+        task2 = task.clone(url='http://example.com/new')
+        self.assertEqual(task2.name, 'baz')
+        self.assertEqual(task2.url, 'http://example.com/new')
 
     def test_task_useragent(self):
         bot = build_spider(SimpleSpider, )
