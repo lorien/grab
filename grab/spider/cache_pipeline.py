@@ -32,6 +32,11 @@ class CachePipeline(object):
                 self.idle_event.set()
                 time.sleep(0.1)
                 self.idle_event.clear()
+                if self.spider.shutdown_event.is_set():
+                    #print('EXITING CACHE PIPELINE')
+                    return self.shutdown()
+                #else:
+                #    print('no shutdown event')
             else:
                 assert action in ('load', 'save')
                 if action == 'load':
@@ -94,3 +99,9 @@ class CachePipeline(object):
                     return {'ok': True, 'task': task, 'grab': grab,
                             'grab_config_backup': grab.dump_config(),
                             'emsg': None}
+
+    def shutdown(self):
+        try:
+            self.cache.close()
+        except AttributeError:
+            print('Cache %s does not support close method' % self.cache)
