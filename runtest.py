@@ -5,9 +5,9 @@ import sys
 from optparse import OptionParser
 import logging
 from copy import copy
+import threading
 
 from test.util import GLOBAL, start_server, stop_server
-from weblib.watch import watch
 
 # **********
 # Grab Tests
@@ -183,6 +183,12 @@ def main():
         pyprof2calltree.convert(stats, profile_tree_file)
     else:
         result = runner.run(suite)
+
+    th_list = list(threading.enumerate())
+    print('Active threads:')
+    for th in th_list:
+        print('Thread: %s' % th)
+
     if result.wasSuccessful():
         sys.exit(0)
     else:
