@@ -549,7 +549,7 @@ class FormExtension(object):
     # New method: set_input_by(id=None, number=None, xpath=None)
 
     def submit(self, submit_name=None, make_request=True,
-               url=None, extra_post=None):
+               url=None, extra_post=None, remove_from_post=None):
         """
         Submit default form.
 
@@ -561,6 +561,7 @@ class FormExtension(object):
         :param url: explicitly specify form action url
         :param extra_post: (dict or list of pairs) additional form data which
             will override data automatically extracted from the form.
+        :param remove_from_post: list of keys to remove from the submitted data
 
         Following input elements are automatically processed:
 
@@ -653,6 +654,10 @@ class FormExtension(object):
 
             for key, value in extra_post_items:
                 post_items.append((key, value))
+
+        if remove_from_post:
+            post_items = [(x, y) for x, y in post_items
+                          if x not in remove_from_post]
 
         if self.form.method == 'POST':
             if 'multipart' in self.form.get('enctype', ''):

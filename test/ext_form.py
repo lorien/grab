@@ -129,30 +129,44 @@ class TestHtmlForms(BaseGrabTestCase):
         self.server.response['get.data'] = POST_FORM % self.server.get_url()
         g.go(self.server.get_url())
         g.set_input('name', 'Alex')
-        g.submit()
+        g.doc.submit()
         self.assertEqualQueryString(self.server.request['data'],
                                     b'name=Alex&secret=123')
 
         # Default submit control
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
         g.go(self.server.get_url())
-        g.submit()
+        g.doc.submit()
         self.assertEqualQueryString(self.server.request['data'],
                                     b'secret=123&submit1=submit1')
 
         # Selected submit control
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
         g.go(self.server.get_url())
-        g.submit(submit_name='submit2')
+        g.doc.submit(submit_name='submit2')
         self.assertEqualQueryString(self.server.request['data'],
                                     b'secret=123&submit2=submit2')
 
         # Default submit control if submit control name is invalid
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
         g.go(self.server.get_url())
-        g.submit(submit_name='submit3')
+        g.doc.submit(submit_name='submit3')
         self.assertEqualQueryString(self.server.request['data'],
                                     b'secret=123&submit1=submit1')
+
+    def test_submit_remove_from_post_argument(self):
+        g = build_grab()
+        self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
+
+        g.go(self.server.get_url())
+        g.doc.submit(submit_name='submit3')
+        self.assertEqualQueryString(self.server.request['data'],
+                                    b'secret=123&submit1=submit1')
+
+        g.go(self.server.get_url())
+        g.doc.submit(remove_from_post=['submit1'])
+        self.assertEqualQueryString(self.server.request['data'],
+                                    b'secret=123')
 
     def test_set_methods(self):
         g = build_grab()
@@ -191,7 +205,7 @@ class TestHtmlForms(BaseGrabTestCase):
         g = build_grab()
         self.server.response['get.data'] = DISABLED_RADIO_HTML
         g.go(self.server.get_url())
-        g.submit(make_request=False)
+        g.doc.submit(make_request=False)
 
     def test_set_input_by_xpath_regex(self):
         html = b'''
@@ -200,7 +214,7 @@ class TestHtmlForms(BaseGrabTestCase):
         '''
         g = build_grab(html)
         g.set_input_by_xpath('//input[re:test(@id, "^ba")]', 'bar-value')
-        g.submit(make_request=False)
+        g.doc.submit(make_request=False)
         self.assertEqual(
             set([('foo', None), ('bar', 'bar-value')]),
             set(g.config['post']),
@@ -217,5 +231,5 @@ class TestHtmlForms(BaseGrabTestCase):
         self.server.response['get.data'] = html
         g = build_grab()
         g.go(self.server.get_url())
-        g.submit()
+        g.doc.submit()
         self.assertTrue(u'Beställa'.encode('utf-8') in self.server.request['data'])

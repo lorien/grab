@@ -330,11 +330,8 @@ class DeprecatedThings(object):
         return self.doc.set_input_by_xpath(xpath, value)
 
     @deprecated(use_instead='grab.doc.submit')
-    def submit(self, submit_name=None, make_request=True,
-               url=None, extra_post=None):
-        return self.doc.submit(submit_name=submit_name,
-                               make_request=make_request,
-                               url=url, extra_post=extra_post)
+    def submit(self, *args, **kwargs):
+        return self.doc.submit(*args, **kwargs)
 
     @deprecated(use_instead='grab.doc.form_fields')
     def form_fields(self):
