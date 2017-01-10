@@ -68,6 +68,18 @@ class MulticurlTransport(object):
             grab.transport.curl = curl
             try:
                 grab.prepare_request()
+                # Enable pycurl built-in redirect processing
+                # In non-spider mode Grab handles redirects itself
+                # by parsing headers and following Location URls
+                # In spider mode that would require to create
+                # new Task objects for each 30* redirect
+                # Maybe that would be implemented in future
+                # For now multicurl transport just uses builtin pycurl
+                # ability to handle 30* redirects
+                grab.transport.curl.setopt(
+                    pycurl.FOLLOWLOCATION,
+                    1 if grab.config['follow_location'] else 0
+                )
                 grab.log_request()
             except Exception:
                 # If some error occurred while processing the request arguments
