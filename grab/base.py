@@ -450,7 +450,8 @@ class Grab(DeprecatedThings):
                 self.transport.request()
             except error.GrabError:
                 self.reset_temporary_options()
-                self.save_failed_dump()
+                if self.config['log_dir']:
+                    self.save_failed_dump()
                 raise
             else:
                 doc = self.process_request_result()
@@ -563,9 +564,7 @@ class Grab(DeprecatedThings):
         The saved dump could be used for debugging the reason of the failure.
         """
 
-        # This is very untested feature, so
-        # I put it inside try/except to not break
-        # live spiders
+        # try/except for safety, to not break live spiders
         try:
             if self.transport_param == 'urllib3':
                 # TODO: fix exceptions
@@ -573,8 +572,7 @@ class Grab(DeprecatedThings):
             else:
                 self.doc = self.transport.prepare_response(self)
                 self.copy_request_data()
-                if self.config['log_dir']:
-                    self.save_dumps()
+                self.save_dumps()
         except Exception as ex:
             logger.error('', exc_info=ex)
 

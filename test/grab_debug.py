@@ -6,6 +6,7 @@ import threading
 from test.util import BaseGrabTestCase
 from test.util import build_grab, exclude_transport, temp_dir
 from grab.base import reset_request_counter
+from grab.error import GrabTimeoutError
 
 
 class TestCookies(BaseGrabTestCase):
@@ -82,6 +83,28 @@ class TestCookies(BaseGrabTestCase):
             fname = [x for x in files if x.endswith('.log')][0]
             log_file_content = open(os.path.join(tmp_dir, fname)).read()
             self.assertTrue('x-engine' in log_file_content.lower())
+
+    def test_log_dir_response_network_error(self):
+        with temp_dir() as tmp_dir:
+            reset_request_counter()
+
+            g = build_grab()
+            g.setup(log_dir=tmp_dir, timeout=1, user_agent='Perl',
+                    debug=True)
+            self.server.response['get.data'] = 'omsk'
+            self.server.response['headers'] = [('X-Engine', 'PHP')]
+            self.server.response['sleep'] = 2
+
+            self.assertEqual(os.listdir(tmp_dir), [])
+            try:
+                g.go(self.server.get_url())
+            except GrabTimeoutError:
+                pass
+
+            self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
+            log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
+            self.assertTrue('user-agent: perl' in log_file_content.lower())
+
 
     def test_log_dir_request_content_is_empty(self):
         with temp_dir() as tmp_dir:
