@@ -613,13 +613,16 @@ class Grab(DeprecatedThings):
 
         self.doc = doc
 
-    def change_proxy(self):
+    def change_proxy(self, random=True):
         """
         Set random proxy from proxylist.
         """
 
         if self.proxylist.size():
-            proxy = self.proxylist.get_random_proxy()
+            if random:
+                proxy = self.proxylist.get_random_proxy()
+            else:
+                proxy = self.proxylist.get_next_proxy()
             self.setup(proxy=proxy.get_address(),
                        proxy_userpwd=proxy.get_userpwd(),
                        proxy_type=proxy.proxy_type)
