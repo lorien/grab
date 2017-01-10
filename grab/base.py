@@ -760,20 +760,10 @@ class Grab(DeprecatedThings):
 
     @property
     def request_headers(self):
-        """
-        Temporary hack till the time I'll understand
-        where to store request details.
-        """
-
-        try:
-            first_head = self.request_head.decode('utf-8').split('\r\n\r\n')[0]
-            lines = first_head.split('\r\n')
-            lines = [x for x in lines if ':' in x]
-            headers = email.message_from_string('\n'.join(lines))
-            return headers
-        except Exception as ex:
-            logger.error('Could not parse request headers', exc_info=ex)
-            return {}
+        first_head = self.request_head.decode('utf-8').split('\r\n\r\n')[0]
+        lines = first_head.split('\r\n')
+        lines = [x for x in lines if ':' in x]
+        return email.message_from_string('\n'.join(lines))
 
 
 # For backward compatibility
