@@ -158,3 +158,24 @@ class TestProxy(BaseGrabTestCase):
         g.proxylist.load_list(items, proxy_type='socks')
         proxy = g.proxylist.get_next_proxy()
         self.assertEquals(proxy.proxy_type, 'socks')
+
+    def test_setup_with_proxyline(self):
+        g = build_grab()
+        g.setup_with_proxyline('1.1.1.1:8080')
+        self.assertEqual(g.config['proxy'], '1.1.1.1:8080')
+        self.assertEqual(g.config['proxy_userpwd'], None)
+        self.assertEqual(g.config['proxy_type'], 'http')
+
+    def test_setup_with_proxyline_custom_proxy_type(self):
+        g = build_grab()
+        g.setup_with_proxyline('1.1.1.1:8080', proxy_type='socks')
+        self.assertEqual(g.config['proxy'], '1.1.1.1:8080')
+        self.assertEqual(g.config['proxy_userpwd'], None)
+        self.assertEqual(g.config['proxy_type'], 'socks')
+
+    def test_setup_with_proxyline_userpwd(self):
+        g = build_grab()
+        g.setup_with_proxyline('1.1.1.1:8080:user:pass')
+        self.assertEqual(g.config['proxy'], '1.1.1.1:8080')
+        self.assertEqual(g.config['proxy_userpwd'], 'user:pass')
+        self.assertEqual(g.config['proxy_type'], 'http')
