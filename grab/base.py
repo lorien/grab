@@ -775,12 +775,6 @@ class Grab(DeprecatedThings):
             logger.error('Could not parse request headers', exc_info=ex)
             return {}
 
-    def dump(self):
-        """
-        Shortcut for real-time debugging.
-        """
-        self.doc.save('/tmp/x.html')
-
 
 # For backward compatibility
 # WTF???
