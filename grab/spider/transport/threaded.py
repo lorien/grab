@@ -1,0 +1,92 @@
+import six
+from threading import Lock, Thread
+from six.moves.queue import Queue, Empty
+import time
+
+from grab.error import GrabTooManyRedirectsError
+
+ERROR_TOO_MANY_REFRESH_REDIRECTS = -2
+ERROR_ABBR = {
+    ERROR_TOO_MANY_REFRESH_REDIRECTS: 'too-many-refresh-redirects',
+}
+#for key in dir(pycurl):
+#    if key.startswith('E_'):
+#        abbr = key[2:].lower().replace('_', '-')
+#        ERROR_ABBR[getattr(pycurl, key)] = abbr
+
+
+def worker_thread(task_queue, result_queue, freelist):
+    while True:
+        try:
+            task, grab, grab_config_backup = task_queue.get(block=True, timeout=0.1)
+        except Empty:
+            time.sleep(0.1)
+        else:
+            try:
+                freelist.pop()
+                result = {
+                    'ok': True,
+                    'ecode': None,
+                    'emsg': None,
+                    'error_abbr': None,
+                    'grab': grab,
+                    'grab_config_backup': grab_config_backup,
+                    'task': task,
+                }
+                try:
+                    grab.request()
+                except GrabNetworkError as ex:
+                    result.update({
+                        'ok': False,
+                    })
+                result_queue.put(result)
+            finally:
+                freelist.append(1)
+            
+
+class ThreadedTransport(object):
+    def __init__(self, thread_number):
+        self.thread_number = thread_number
+        self.task_queue = Queue()
+        self.result_queue = Queue()
+        #self.registry = {}
+
+        self.workers = []
+        self.freelist = []
+        for x in six.moves.range(self.thread_number):
+            th = Thread(target=worker_thread, args=[self.task_queue,
+                                                    self.result_queue,
+                                                    self.freelist])
+            th.daemon = True
+            self.workers.append(th)
+            self.freelist.append(1)
+            th.start()
+
+    def ready_for_task(self):
+        return len(self.freelist)
+
+    def get_free_threads_number(self):
+        return len(self.freelist)
+
+    def get_active_threads_number(self):
+        return self.thread_number - len(self.freelist)
+
+    def start_task_processing(self, task, grab, grab_config_backup):
+        self.task_queue.put((task, grab, grab_config_backup))
+
+    def process_handlers(self):
+        pass
+
+    def iterate_results(self):
+        while True:
+            try:
+                result = self.result_queue.get(block=True, timeout=0.1)
+            except Empty:
+                break
+            else:
+                # FORMAT: {ok, grab, grab_config_backup, task, emsg, error_abbr}
+
+                #grab.response.error_code = None
+                #grab.response.error_msg = None
+
+                yield result

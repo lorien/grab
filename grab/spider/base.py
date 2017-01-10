@@ -29,6 +29,7 @@ from grab.spider.error import (SpiderError, SpiderMisuseError, FatalError,
 from grab.spider.task import Task
 from grab.spider.data import Data
 from grab.spider.transport.multicurl import MulticurlTransport
+from grab.spider.transport.threaded import ThreadedTransport
 from grab.proxylist import ProxyList, BaseProxySource
 from grab.util.misc import camel_case_to_underscore
 from weblib.encoding import make_str, make_unicode
@@ -147,6 +148,7 @@ class Spider(object):
                  parser_requests_per_process=10000,
                  # http api
                  http_api_port=None,
+                 transport='multicurl',
                  ):
         """
         Arguments:
@@ -178,6 +180,9 @@ class Spider(object):
 
         # API:
         self.http_api_port = http_api_port
+
+        assert transport in ('multicurl', 'threaded')
+        self.transport_name = transport
 
         # MP:
         self.mp_mode = mp_mode
@@ -466,6 +471,11 @@ class Spider(object):
     def create_grab_instance(self, **kwargs):
         # Back-ward compatibility for deprecated `grab_config` attribute
         # Here I use `_grab_config` to not trigger warning messages
+        if self.transport_name == 'multicurl':
+            grab_transport = 'pycurl'
+        elif self.transport_name == 'threaded':
+            grab_transport = 'urllib3'
+        kwargs['transport'] = grab_transport
         if self._grab_config and kwargs:
             merged_config = deepcopy(self._grab_config)
             merged_config.update(kwargs)
@@ -825,6 +835,12 @@ class Spider(object):
         # 4) Task queue is empty
         # 5) Network result queue is empty
         # 6) Cache is disabled or is in idle mode
+
+        #print('parser result queue', self.parser_result_queue.qsize())
+        #print('all parsers are idle', all(x['is_parser_idle'].is_set()
+        #                                  for x in self.parser_pipeline.parser_pool))
+        #print('alive task generators', any(x.isAlive() for x in self._task_generator_list))
+        #print('active network threads', self.transport.get_active_threads_number())
         return (
             not self.parser_result_queue.qsize()
             and all(x['is_parser_idle'].is_set()
@@ -849,7 +865,11 @@ class Spider(object):
             from multiprocessing.dummy import Process, Event, Queue
 
         self.timer.start('total')
-        self.transport = MulticurlTransport(self.thread_number)
+
+        if self.transport_name == 'multicurl':
+            self.transport = MulticurlTransport(self.thread_number)
+        elif self.transport_name == 'threaded':
+            self.transport = ThreadedTransport(self.thread_number)
 
         if self.http_api_port:
             http_api_proc = self.start_api_thread()
@@ -906,7 +926,7 @@ class Spider(object):
                         if not pending_tasks and self.is_ready_to_shutdown():
                             # I am afraid there is a bug in `is_ready_to_shutdown`
                             # because it tries to evaluate too many things
-                            # includig thigs that are being set from other threads,
+                            # includig things that are being set from other threads,
                             # so to ensure we are really ready to shutdown I call
                             # is_ready_to_shutdown a few more times.
                             # Without this hack some times really rarely times
