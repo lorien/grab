@@ -364,3 +364,20 @@ class TestSpider(BaseGrabTestCase):
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
         self.assertEqual(bot.task_try_limit, bot.stat.counters['xxx'])
+
+    def test_task_clone_without_modification(self):
+        class TestSpider(Spider):
+            def task_page(self, grab, task):
+                g2 = grab.clone()
+                yield Task('page2', grab=g2)
+
+            def task_page2(self, grab, task):
+                pass
+
+        bot = build_spider(TestSpider)
+        bot.setup_queue()
+        task = Task('page', url=self.server.get_url())
+        bot.add_task(task)
+        bot.run()
+        self.assertEqual(1, bot.stat.counters['spider:task-page'])
+        self.assertEqual(1, bot.stat.counters['spider:task-page2'])
