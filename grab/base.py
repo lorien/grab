@@ -566,13 +566,14 @@ class Grab(DeprecatedThings):
 
         # try/except for safety, to not break live spiders
         try:
-            if self.transport_param == 'urllib3':
-                # TODO: fix exceptions
-                pass
+            # FIXME
+            if (self.transport.__class__.__name__ == 'Urllib3Transport'
+                and not getattr(self.transport, '_response', None)):
+                self.doc = None
             else:
                 self.doc = self.transport.prepare_response(self)
-                self.copy_request_data()
-                self.save_dumps()
+            self.copy_request_data()
+            self.save_dumps()
         except Exception as ex:
             logger.error('', exc_info=ex)
 
@@ -665,7 +666,8 @@ class Grab(DeprecatedThings):
             out.write(self.request_body)
             out.write(b'\n\n')
             out.write(b'Response headers:\n')
-            out.write(self.doc.head)
+            out.write(self.doc.head if (self.doc and self.doc.head)
+                      else b'')
 
         file_extension = 'html'
         file_name = os.path.join(self.config['log_dir'], '%02d%s.%s' % (

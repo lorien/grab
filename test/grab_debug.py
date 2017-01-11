@@ -84,6 +84,7 @@ class TestCookies(BaseGrabTestCase):
             log_file_content = open(os.path.join(tmp_dir, fname)).read()
             self.assertTrue('x-engine' in log_file_content.lower())
 
+    @exclude_grab_transport('urllib3')
     def test_log_dir_response_network_error(self):
         with temp_dir() as tmp_dir:
             reset_request_counter()
