@@ -4,7 +4,7 @@ environment:
 
 install:
   - "%PYTHON%/python.exe -m pip install tox"
-  - "%PYTHON%/python.exe -m pip install http://www.lfd.uci.edu/~gohlke/pythonlibs/f9r7rmd8/lxml-3.6.4-cp27-cp27m-win_amd64.whl"
+  - "%PYTHON%/python.exe -m pip install https://gist.github.com/jdemaeyer/36d27f9b57f6e33bae0d/raw/b1b3cd5f557226ea614de261c01a4e91102a8e67/lxml-3.5.0-cp27-none-win_amd64.whl"
 
 build: off
 
