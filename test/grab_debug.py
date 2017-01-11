@@ -4,7 +4,7 @@ from mock import patch
 import threading
 
 from test.util import BaseGrabTestCase
-from test.util import build_grab, exclude_transport, temp_dir
+from test.util import build_grab, exclude_grab_transport, temp_dir
 from grab.base import reset_request_counter
 from grab.error import GrabTimeoutError
 
@@ -122,7 +122,7 @@ class TestCookies(BaseGrabTestCase):
             self.assertFalse('xxxPost' in log_file_content)
 
     # because urllib3 does not collects request headers
-    @exclude_transport('urllib3')
+    @exclude_grab_transport('urllib3')
     def test_log_dir_request_content_headers_and_post(self):
         with temp_dir() as tmp_dir:
             reset_request_counter()

@@ -88,7 +88,8 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     parser = OptionParser()
     parser.add_option('-t', '--test', help='Run only specified tests')
-    parser.add_option('--transport', default='pycurl')
+    parser.add_option('--grab-transport', default='pycurl')
+    parser.add_option('--spider-transport', default='multicurl')
     parser.add_option('--test-grab', action='store_true',
                       default=False, help='Run tests for Grab::Spider')
     parser.add_option('--test-spider', action='store_true',
@@ -116,7 +117,8 @@ def main():
                       help='Enable verbose logging')
     opts, args = parser.parse_args()
 
-    GLOBAL['transport'] = opts.transport
+    GLOBAL['grab_transport'] = opts.grab_transport
+    GLOBAL['spider_transport'] = opts.spider_transport
 
     if opts.backend_mongo:
         GLOBAL['backends'].append('mongo')

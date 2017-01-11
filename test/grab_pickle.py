@@ -5,7 +5,7 @@ except ImportError:
     import pickle
 from multiprocessing import Queue
 
-from test.util import BaseGrabTestCase, exclude_transport
+from test.util import BaseGrabTestCase, exclude_grab_transport
 from test.util import build_grab
 
 
@@ -13,7 +13,7 @@ class TestGrab(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    @exclude_transport('urllib3')
+    @exclude_grab_transport('urllib3')
     def test_pickling(self):
         """
         Test that Grab instance could be pickled and unpickled.

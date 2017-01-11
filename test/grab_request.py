@@ -1,5 +1,5 @@
 # coding: utf-8
-from test.util import build_grab, exclude_transport
+from test.util import build_grab, exclude_grab_transport
 from test.util import BaseGrabTestCase
 
 from grab.error import (GrabInternalError, GrabCouldNotResolveHostError,
@@ -39,7 +39,7 @@ class GrabRequestTestCase(BaseGrabTestCase):
         g = build_grab()
         g.go(self.server.get_url())
 
-    @exclude_transport('urllib3')
+    @exclude_grab_transport('urllib3')
     def test_redirect_with_invalid_byte(self):
         url = self.server.get_url()
         invalid_url = b'http://\xa0' + url.encode('ascii')

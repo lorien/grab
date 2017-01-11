@@ -24,7 +24,8 @@ EXTRA_PORT2 = TEST_SERVER_PORT + 2
 GLOBAL = {
     'backends': [],
     'mp_mode': False,
-    'transport': None,
+    'grab_transport': None,
+    'spider_transport': None,
 }
 
 
@@ -45,7 +46,7 @@ def temp_file(root_dir=None):
 
 def build_grab(*args, **kwargs):
     """Builds the Grab instance with default options."""
-    kwargs.setdefault('transport', GLOBAL['transport']) 
+    kwargs.setdefault('transport', GLOBAL['grab_transport'])
     return Grab(*args, **kwargs)
 
 
@@ -53,6 +54,8 @@ def build_spider(cls, **kwargs):
     """Builds the Spider instance with default options. Also handles
     `--mp-mode` option that is configured globally."""
     kwargs.setdefault('mp_mode', GLOBAL['mp_mode'])
+    kwargs.setdefault('grab_transport', GLOBAL['grab_transport'])
+    kwargs.setdefault('transport', GLOBAL['spider_transport'])
     if kwargs['mp_mode']:
         kwargs.setdefault('parser_pool_size', 2)
     else:
@@ -121,13 +124,13 @@ def stop_server():
     #GLOBAL['test_server'].stop()
 
 
-def exclude_transport(*names):
+def exclude_grab_transport(*names):
     def decorator(func):
         def caller(*args, **kwargs):
-            if GLOBAL['transport'] in names:
+            if GLOBAL['grab_transport'] in names:
                 func_name = '%s:%s' % (func.__module__, func.__name__)
-                logger.debug('Running test %s for transport %s is restricted'
-                             % (func_name, GLOBAL['transport']))
+                logger.debug('Running test %s for grab transport %s is restricted'
+                             % (func_name, GLOBAL['grab_transport']))
                 return None
             else:
                 return func(*args, **kwargs)
@@ -135,15 +138,15 @@ def exclude_transport(*names):
     return decorator
 
 
-def only_transport(*names):
+def only_grab_transport(*names):
     def decorator(func):
         def caller(*args, **kwargs):
-            if GLOBAL['transport'] in names:
+            if GLOBAL['grab_transport'] in names:
                 return func(*args, **kwargs)
             else:
                 func_name = '%s:%s' % (func.__module__, func.__name__)
-                logger.debug('Running test %s for transport %s is restricted'
-                             % (func_name, GLOBAL['transport']))
+                logger.debug('Running test %s for grab transport %s is restricted'
+                             % (func_name, GLOBAL['grab_transport']))
                 return None
         return caller
     return decorator

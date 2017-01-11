@@ -96,9 +96,9 @@ class Urllib3Transport(BaseTransport):
         #self.body_file = None
         #self.body_path = None
         # Maybe move to super-class???
-        self.request_head = ''
-        self.request_body = ''
-        self.request_log = ''
+        self.request_head = b''
+        self.request_body = b''
+        self.request_log = b''
         self._request = None
 
     def process_config(self, grab):
@@ -251,9 +251,9 @@ class Urllib3Transport(BaseTransport):
             raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
 
         # WTF?
-        self.request_head = ''
-        self.request_body = ''
-        self.request_log = ''
+        self.request_head = b''
+        self.request_body = b''
+        self.request_log = b''
 
         self._response = res
         #raise error.GrabNetworkError(ex.args[0], ex.args[1])

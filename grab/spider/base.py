@@ -149,6 +149,7 @@ class Spider(object):
                  # http api
                  http_api_port=None,
                  transport='multicurl',
+                 grab_transport='pycurl',
                  ):
         """
         Arguments:
@@ -183,6 +184,9 @@ class Spider(object):
 
         assert transport in ('multicurl', 'threaded')
         self.transport_name = transport
+
+        assert grab_transport in ('pycurl', 'urllib3')
+        self.grab_transport_name = grab_transport
 
         # MP:
         self.mp_mode = mp_mode
@@ -471,11 +475,7 @@ class Spider(object):
     def create_grab_instance(self, **kwargs):
         # Back-ward compatibility for deprecated `grab_config` attribute
         # Here I use `_grab_config` to not trigger warning messages
-        if self.transport_name == 'multicurl':
-            grab_transport = 'pycurl'
-        elif self.transport_name == 'threaded':
-            grab_transport = 'urllib3'
-        kwargs['transport'] = grab_transport
+        kwargs['transport'] = self.grab_transport_name
         if self._grab_config and kwargs:
             merged_config = deepcopy(self._grab_config)
             merged_config.update(kwargs)
