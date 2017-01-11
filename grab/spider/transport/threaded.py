@@ -3,7 +3,7 @@ from threading import Lock, Thread
 from six.moves.queue import Queue, Empty
 import time
 
-from grab.error import GrabTooManyRedirectsError
+from grab.error import GrabTooManyRedirectsError, GrabNetworkError
 
 ERROR_TOO_MANY_REFRESH_REDIRECTS = -2
 ERROR_ABBR = {

@@ -250,6 +250,8 @@ class Urllib3Transport(BaseTransport):
                                body=req.data, timeout=timeout,
                                retries=retry, headers=req.headers,
                                preload_content=False)
+        except exceptions.ReadTimeoutError as ex:
+            raise error.GrabTimeoutError('Read timeout')
         except exceptions.ConnectTimeoutError as ex:
             raise error.GrabConnectionError('Could not create connection')
         except exceptions.ProtocolError as ex:
