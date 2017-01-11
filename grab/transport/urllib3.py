@@ -101,7 +101,10 @@ class Urllib3Transport(BaseTransport):
         self.request_head = b''
         self.request_body = b''
         self.request_log = b''
+
+        self._response = None
         self._request = None
+
 
     def process_config(self, grab):
         req = Request(data=None)
@@ -349,7 +352,7 @@ class Urllib3Transport(BaseTransport):
             response.parse(charset=grab.config['document_charset'],
                            headers=hdr)
 
-            jar = self.extract_cookiejar(self._response, self._request)
+            jar = self.extract_cookiejar()#self._response, self._request)
             response.cookies = CookieManager(jar)
 
             # We do not need anymore cookies stored in the
@@ -359,10 +362,16 @@ class Urllib3Transport(BaseTransport):
         finally:
             self._response.release_conn()
 
-    def extract_cookiejar(self, resp, req):
+    def extract_cookiejar(self):
         jar = CookieJar()
-        jar.extract_cookies(MockResponse(resp._original_response.msg),
-                            MockRequest(req))
+        # self._respose could be None
+        # if this method is called from custom preapre response
+        # function called from spider cache backend
+        if self._response and self._request:
+            jar.extract_cookies(
+                MockResponse(self._response._original_response.msg),
+                MockRequest(self._request),
+            )
         return jar
 
     def process_cookie_options(self, grab, req):
