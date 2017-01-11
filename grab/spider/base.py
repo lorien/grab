@@ -867,9 +867,9 @@ class Spider(object):
         self.timer.start('total')
 
         if self.transport_name == 'multicurl':
-            self.transport = MulticurlTransport(self.thread_number)
+            self.transport = MulticurlTransport(self, self.thread_number)
         elif self.transport_name == 'threaded':
-            self.transport = ThreadedTransport(self.thread_number)
+            self.transport = ThreadedTransport(self, self.thread_number)
 
         if self.http_api_port:
             http_api_proc = self.start_api_thread()

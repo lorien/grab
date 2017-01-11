@@ -18,7 +18,8 @@ for key in dir(pycurl):
 
 
 class MulticurlTransport(object):
-    def __init__(self, socket_number):
+    def __init__(self, spider, socket_number):
+        # spider arg is not used in multicurl transport
         self.socket_number = socket_number
         self.multi = pycurl.CurlMulti()
         self.multi.handles = []

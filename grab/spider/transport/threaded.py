@@ -15,12 +15,14 @@ ERROR_ABBR = {
 #        ERROR_ABBR[getattr(pycurl, key)] = abbr
 
 
-def worker_thread(task_queue, result_queue, freelist):
+def worker_thread(task_queue, result_queue, freelist, shutdown_event):
     while True:
         try:
             task, grab, grab_config_backup = task_queue.get(block=True, timeout=0.1)
         except Empty:
-            time.sleep(0.1)
+            if shutdown_event.is_set():
+                return
+            #time.sleep(0.1)
         else:
             try:
                 freelist.pop()
@@ -45,7 +47,8 @@ def worker_thread(task_queue, result_queue, freelist):
             
 
 class ThreadedTransport(object):
-    def __init__(self, thread_number):
+    def __init__(self, spider, thread_number):
+        self.spider = spider
         self.thread_number = thread_number
         self.task_queue = Queue()
         self.result_queue = Queue()
@@ -56,7 +59,8 @@ class ThreadedTransport(object):
         for x in six.moves.range(self.thread_number):
             th = Thread(target=worker_thread, args=[self.task_queue,
                                                     self.result_queue,
-                                                    self.freelist])
+                                                    self.freelist,
+                                                    self.spider.shutdown_event])
             th.daemon = True
             self.workers.append(th)
             self.freelist.append(1)
@@ -86,7 +90,7 @@ class ThreadedTransport(object):
             else:
                 # FORMAT: {ok, grab, grab_config_backup, task, emsg, error_abbr}
 
-                #grab.response.error_code = None
-                #grab.response.error_msg = None
+                #grab.doc.error_code = None
+                #grab.doc.error_msg = None
 
                 yield result
