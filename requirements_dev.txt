@@ -5,10 +5,6 @@ cssselect
 feedparser
 flake8
 item
-lxml;platform_system!="Windows"
-pycurl;platform_system!="Windows"
-pyquery
-selection
 selenium
 test_server
 tornado
@@ -16,3 +12,7 @@ mock
 runscript
 pyprof2calltree
 urllib3
+pyquery;platform_system!="Windows"
+lxml;platform_system!="Windows"
+pycurl;platform_system!="Windows"
+selection;platform_system!="Windows"
