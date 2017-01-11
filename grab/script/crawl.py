@@ -6,7 +6,7 @@ import six
 
 from grab.util.config import build_spider_config, build_root_config
 from grab.util.module import load_spider_class
-from weblib.logs import default_logging
+from grab.util.log import default_logging
 from weblib.files import clear_directory
 from weblib.encoding import make_str
 
@@ -20,6 +20,8 @@ def setup_arg_parser(parser):
     parser.add_argument('-n', '--network-logs', action='store_true',
                         default=False,
                         help='Dump to console details about network requests')
+    parser.add_argument('--grab-log-file')
+    parser.add_argument('--network-log-file')
     parser.add_argument('--disable-proxy', action='store_true', default=False,
                         help='Disable proxy servers')
     parser.add_argument('--ignore-lock', action='store_true', default=False)
@@ -69,16 +71,17 @@ def main(spider_name, thread_number=None,
          settings_module='settings', network_logs=False,
          disable_proxy=False, ignore_lock=False,
          disable_report=False,
-         disable_default_logs=False,
          api_port=None,
          mp_mode=False,
          parser_pool_size=None,
+         grab_log_file=None,
+         network_log_file=None,
          *args, **kwargs):
-    if disable_default_logs:
-        default_logging(propagate_network_logger=network_logs,
-                        grab_log=None, network_log=None)
-    else:
-        default_logging(propagate_network_logger=network_logs)
+    default_logging(
+        grab_log=grab_log_file,
+        network_log=network_log_file,
+        propagate_network_logger=network_logs,
+    )
 
     root_config = build_root_config(settings_module)
     spider_class = load_spider_class(root_config, spider_name)
