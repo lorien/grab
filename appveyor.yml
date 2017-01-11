@@ -11,4 +11,4 @@ before_test:
   - "cp travis_settings.py test_settings_local.py"
 
 test_script:
-  - "%PYTHON%/python.exe -m tox -e py27"
+  - "%PYTHON%/python.exe -m tox -e appveyor"

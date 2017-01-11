@@ -5,8 +5,8 @@ cssselect
 feedparser
 flake8
 item
-lxml
-pycurl
+lxml;platform_system!="Windows"
+pycurl;platform_system!="Windows"
 pyquery
 selection
 selenium
