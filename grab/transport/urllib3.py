@@ -16,9 +16,10 @@ import six
 from six.moves.urllib.parse import urlencode, urlsplit
 import random
 from six.moves.http_cookiejar import CookieJar
+import time
 
 from grab import error
-from grab.error import GrabMisuseError
+from grab.error import GrabMisuseError, GrabTimeoutError
 from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.response import Response
 from grab.upload import UploadFile, UploadContent
@@ -70,6 +71,7 @@ class Request(object):
         self.proxy_type = proxy_type
         self.headers = headers
         self.body_maxsize = body_maxsize
+        self.op_started = None
 
         self._response_file = None
         self._response_path = None
@@ -114,9 +116,8 @@ class Urllib3Transport(BaseTransport):
         method = grab.detect_request_method()
         req.method = make_str(method)
 
-        req.body_maxsize = grab.config['body_maxsize']
-        if grab.config['nobody']:
-            req.body_maxsize = 0
+        req.config_body_maxsize = grab.config['body_maxsize']
+        req.config_nobody = grab.config['nobody']
 
         req.timeout = grab.config['timeout']
         req.connect_timeout = grab.config['connect_timeout']
@@ -230,6 +231,9 @@ class Urllib3Transport(BaseTransport):
             pool = self.pool
         try:
             retry = Retry(redirect=False, connect=False, read=False)
+            # The read timeout is not total response time timeout
+            # It is the timeout on read of next data chunk from the server
+            # Total response timeout is handled by Grab
             timeout = Timeout(connect=req.connect_timeout,
                               read=req.timeout)
             #req_headers = dict((make_unicode(x), make_unicode(y))
@@ -240,6 +244,7 @@ class Urllib3Transport(BaseTransport):
             else:
                 req_url = make_str(req.url)
                 req_method = req.method
+            req.op_started = time.time()
             res = pool.urlopen(req_method,
                                req_url,
                                body=req.data, timeout=timeout,
@@ -269,62 +274,87 @@ class Urllib3Transport(BaseTransport):
         #            sys.exc_info()[2])
 
     def prepare_response(self, grab):
-        #if self.body_file:
-        #    self.body_file.close()
-        response = Response()
+        try:
+            #if self.body_file:
+            #    self.body_file.close()
+            response = Response()
 
-        head = ''
-        for key, val in self._response.getheaders().items():
-            head += '%s: %s\r\n' % (key, val)
-        head += '\r\n'
-        response.head = make_str(head, encoding='latin', errors='ignore')
+            head = ''
+            for key, val in self._response.getheaders().items():
+                head += '%s: %s\r\n' % (key, val)
+            head += '\r\n'
+            response.head = make_str(head, encoding='latin', errors='ignore')
 
-        #if self.body_path:
-        #    response.body_path = self.body_path
-        #else:
-        #    response.body = b''.join(self.response_body_chunks)
-        if self._request._response_path:
-            response.body_path = self._request._response_path
-            # Quick dirty hack, actullay, response is fully read into memory
-            self._request._response_file.write(self._response.read())#data)
-            self._request._response_file.close()
-        else:
-            if self._request.body_maxsize is not None:
-                #if self.response_body_bytes_read > self.config_body_maxsize:
-                #    logger.debug('Response body max size limit reached: %s' %
-                #                 self.config_body_maxsize)
-                response.body = self._response.read(self._request.body_maxsize)
+            #if self.body_path:
+            #    response.body_path = self.body_path
+            #else:
+            #    response.body = b''.join(self.response_body_chunks)
+            def read_with_timeout():
+                if self._request.config_nobody:
+                    return b''
+                maxsize = self._request.config_body_maxsize
+                chunks = []
+                if maxsize:
+                    chunk_size = maxsize + 1
+                else:
+                    chunk_size = 10000
+                total_size = 0
+                while True:
+                    chunk = self._response.read(chunk_size)
+                    if chunk:
+                        total_size += len(chunk)
+                        chunks.append(chunk)
+                        if maxsize and total_size > maxsize:
+                            logger.debug('Response body max size limit reached: %s' %
+                                         maxsize)
+                    else:
+                        break
+                    if self._request.timeout:
+                        if time.time() - self._request.op_started > self._request.timeout:
+                            raise GrabTimeoutError
+                data = b''.join(chunks)
+                if maxsize:
+                    data = data[:maxsize]
+                return data
+
+            if self._request._response_path:
+                response.body_path = self._request._response_path
+                # FIXME: Quick dirty hack, actullay, response is fully read into memory
+                self._request._response_file.write(read_with_timeout())
+                self._request._response_file.close()
             else:
-                response.body = self._response.read()#data
+                response.body = read_with_timeout()
 
-        # Clear memory
-        #self.response_header_chunks = []
+            # Clear memory
+            #self.response_header_chunks = []
 
-        response.code = self._response.status
-        #response.total_time = self.curl.getinfo(pycurl.TOTAL_TIME)
-        #response.connect_time = self.curl.getinfo(pycurl.CONNECT_TIME)
-        #response.name_lookup_time = self.curl.getinfo(pycurl.NAMELOOKUP_TIME)
-        #response.download_size = self.curl.getinfo(pycurl.SIZE_DOWNLOAD)
-        #response.upload_size = self.curl.getinfo(pycurl.SIZE_UPLOAD)
-        #response.download_speed = self.curl.getinfo(pycurl.SPEED_DOWNLOAD)
-        #response.remote_ip = self.curl.getinfo(pycurl.PRIMARY_IP)
+            response.code = self._response.status
+            #response.total_time = self.curl.getinfo(pycurl.TOTAL_TIME)
+            #response.connect_time = self.curl.getinfo(pycurl.CONNECT_TIME)
+            #response.name_lookup_time = self.curl.getinfo(pycurl.NAMELOOKUP_TIME)
+            #response.download_size = self.curl.getinfo(pycurl.SIZE_DOWNLOAD)
+            #response.upload_size = self.curl.getinfo(pycurl.SIZE_UPLOAD)
+            #response.download_speed = self.curl.getinfo(pycurl.SPEED_DOWNLOAD)
+            #response.remote_ip = self.curl.getinfo(pycurl.PRIMARY_IP)
 
-        response.url = self._response.get_redirect_location() or self._request.url
+            response.url = self._response.get_redirect_location() or self._request.url
 
-        import email.message
-        hdr = email.message.Message()
-        for key, val in self._response.getheaders().items():
-            hdr[key] = val
-        response.parse(charset=grab.config['document_charset'],
-                       headers=hdr)
+            import email.message
+            hdr = email.message.Message()
+            for key, val in self._response.getheaders().items():
+                hdr[key] = val
+            response.parse(charset=grab.config['document_charset'],
+                           headers=hdr)
 
-        jar = self.extract_cookiejar(self._response, self._request)
-        response.cookies = CookieManager(jar)
+            jar = self.extract_cookiejar(self._response, self._request)
+            response.cookies = CookieManager(jar)
 
-        # We do not need anymore cookies stored in the
-        # curl instance so drop them
-        #self.curl.setopt(pycurl.COOKIELIST, 'ALL')
-        return response
+            # We do not need anymore cookies stored in the
+            # curl instance so drop them
+            #self.curl.setopt(pycurl.COOKIELIST, 'ALL')
+            return response
+        finally:
+            self._response.release_conn()
 
     def extract_cookiejar(self, resp, req):
         jar = CookieJar()
