@@ -2,7 +2,7 @@
 from grab import GrabMisuseError, GrabError
 from grab.error import GrabTooManyRedirectsError
 from grab.base import reset_request_counter
-from test.util import build_grab
+from test.util import build_grab, temp_file
 from test.util import BaseGrabTestCase
 import six
 import tempfile
@@ -104,12 +104,11 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertEqual(g.request_counter, 13)
 
     def test_download(self):
-        fd, path = tempfile.mkstemp()
-        g = build_grab()
-        self.server.response['get.data'] = 'FOO'
-        length = g.download(self.server.get_url(), path)
-        self.assertEqual(3, length)
-        os.unlink(path)
+        with temp_file() as save_file:
+            g = build_grab()
+            self.server.response['get.data'] = 'FOO'
+            length = g.download(self.server.get_url(), save_file)
+            self.assertEqual(3, length)
 
     def test_make_url_absolute(self):
         g = build_grab()

@@ -44,7 +44,7 @@ def temp_file(root_dir=None):
     os.close(fd)
     try:
         os.unlink(file_)
-    except IOError:
+    except (IOError, OSError):
         if 'Windows' in platform.system():
             logger.error('Ignoring IOError raised when trying to delete '
                          'temp file %s created in `temp_file` context '
