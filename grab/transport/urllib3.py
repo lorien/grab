@@ -296,10 +296,11 @@ class Urllib3Transport(BaseTransport):
                     return b''
                 maxsize = self._request.config_body_maxsize
                 chunks = []
+                default_chunk_size = 10000
                 if maxsize:
-                    chunk_size = maxsize + 1
+                    chunk_size = min(default_chunk_size, maxsize + 1)
                 else:
-                    chunk_size = 10000
+                    chunk_size = default_chunk_size
                 total_size = 0
                 while True:
                     chunk = self._response.read(chunk_size)
