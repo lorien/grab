@@ -13,7 +13,7 @@ setup(
     author_email='lorien@lorien.name',
 
     packages=find_packages(exclude=['test', 'test.files']),
-    install_requires=['weblib>=0.1.10', 'six',
+    install_requires=['weblib>=0.1.23', 'six',
                       'user_agent'],
     extras_require={
         'lxml': ['lxml', 'selection'],
