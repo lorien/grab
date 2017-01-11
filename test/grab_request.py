@@ -71,6 +71,7 @@ class GrabRequestTestCase(BaseGrabTestCase):
         self.assertEquals('OPTIONS', self.server.request['method'])
         self.assertTrue('Content-Length' not in self.server.request['headers'])
 
+    @exclude_grab_transport('urllib3')
     def test_request_headers(self):
         g = build_grab(debug=True)
         g.setup(headers={'Foo': 'Bar'})
