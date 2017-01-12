@@ -7,6 +7,9 @@ environment:
 cache:
   - '%LXML_CACHE_DIR%'
 
+services:
+  - mongodb
+
 install:
   - "%PYTHON%/python.exe -m pip install tox"
   - ps: >-
