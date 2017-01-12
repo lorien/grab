@@ -22,18 +22,9 @@ install:
         Write-Host "Updating lxml binaries";
         Start-Process -FilePath "git" -ArgumentList "pull" -WorkingDirectory "$env:LXML_CACHE_DIR" -Wait;
       }
-
-# before_build and build steps install and run redis
-before_build:
-- choco install redis-64
-- redis-server --service-install
-- redis-server --service-start
-- nuget restore .\Hangfire.Redis.StackExchange.sln
-
-build:
-  publish_nuget: true
-  publish_nuget_symbols: true
-  verbosity: minimal
+  - choco install redis-64
+  - redis-server --service-install
+  - redis-server --service-start
 
 before_test:
   - "cp appveyor_settings.py test_settings_local.py"
