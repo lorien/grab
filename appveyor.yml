@@ -12,9 +12,9 @@ install:
   - dir
 
   # Add Python
-  #- reg ADD HKCU\Software\Python\PythonCore\2.7\InstallPath /ve /d "C:\Python27" /t REG_SZ /f
-  #- reg ADD HKLM\Software\Python\PythonCore\2.7\InstallPath /ve /d "C:\Python27" /t REG_SZ /f
-  #- set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - reg ADD HKCU\Software\Python\PythonCore\2.7\InstallPath /ve /d "C:\Python27" /t REG_SZ /f
+  - reg ADD HKLM\Software\Python\PythonCore\2.7\InstallPath /ve /d "C:\Python27" /t REG_SZ /f
+  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 
   # Enable CygWin
   - set PATH=C:\cygwin\bin;%PATH%
