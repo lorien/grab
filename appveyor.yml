@@ -26,6 +26,8 @@ install:
   - redis-server --service-install
   - redis-server --service-start
 
+build: off
+
 before_test:
   - "cp appveyor_settings.py test_settings_local.py"
 
