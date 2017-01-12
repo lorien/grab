@@ -7,5 +7,5 @@ MYSQL_CONNECTION = {
 POSTGRESQL_CONNECTION = {
     'database': 'grab_test',
     'user': 'postgres',
-    'passwd': 'Password12!',
+    'password': 'Password12!',
 }
