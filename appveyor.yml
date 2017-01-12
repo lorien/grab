@@ -1,34 +1,44 @@
 environment:
   global:
     LXML_CACHE_DIR: "%APPVEYOR_BUILD_FOLDER%\\lxml-binaries"
+    MYSQLCLIENT_CACHE_DIR: "%APPVEYOR_BUILD_FOLDER%\\mysqlclient-binaries"
   matrix:
     - PYTHON: "C:\\Python27"
       LXML_BINARY: lxml-3.5.0-cp27-none-win32.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp27-cp27m-win32.whl
 
     - PYTHON: "C:\\Python27-x64"
       LXML_BINARY: lxml-3.5.0-cp27-none-win_amd64.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp27-cp27m-win_amd64.whl
 
-    - PYTHON: "C:\\Python33"
-      LXML_BINARY: lxml-3.5.0-cp33-none-win32.whl
+    #- PYTHON: "C:\\Python33"
+    #  LXML_BINARY: lxml-3.5.0-cp33-none-win32.whl
+    #  MYSQLCLIENT_BINARY: absent
 
-    - PYTHON: "C:\\Python33-x64"
-      LXML_BINARY: lxml-3.5.0-cp33-none-win_amd64.whl
+    #- PYTHON: "C:\\Python33-x64"
+    #  LXML_BINARY: lxml-3.5.0-cp33-none-win_amd64.whl
+    #  MYSQLCLIENT_BINARY: absent
 
     - PYTHON: "C:\\Python34"
       LXML_BINARY: lxml-3.5.0-cp34-none-win32.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp34-cp34m-win32.whl
 
     - PYTHON: "C:\\Python34-x64"
       LXML_BINARY: lxml-3.5.0-cp34-none-win_amd64.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp34-cp34m-win_amd64.whl
 
     - PYTHON: "C:\\Python35"
       LXML_BINARY: lxml-3.5.0-cp35-none-win32.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp35-cp35m-win32.whl
 
     - PYTHON: "C:\\Python35-x64"
       LXML_BINARY: lxml-3.5.0-cp35-none-win_amd64.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp35-cp35m-win_amd64.whl
 
 
 cache:
   - '%LXML_CACHE_DIR%'
+  - '%MYSQLCLIENT_CACHE_DIR%'
 
 services:
   - mongodb
@@ -44,6 +54,14 @@ install:
       } Else {
         Write-Host "Updating lxml binaries";
         Start-Process -FilePath "git" -ArgumentList "pull" -WorkingDirectory "$env:LXML_CACHE_DIR" -Wait;
+      }
+  - ps: >-
+      If(!(Test-Path $env:MYSQLCLIENT_CACHE_DIR)) {
+        Write-Host "Downloading mysqlclient binaries";
+        Start-Process -FilePath "git" -ArgumentList "clone https://gist.github.com/63b34431b7da72a1eec274d5f310a0ad.git $env:MYSQLCLIENT_CACHE_DIR" -Wait;
+      } Else {
+        Write-Host "Updating mysqlclient binaries";
+        Start-Process -FilePath "git" -ArgumentList "pull" -WorkingDirectory "$env:MYSQLCLIENT_CACHE_DIR" -Wait;
       }
   - choco install redis-64
   - redis-server --service-install
