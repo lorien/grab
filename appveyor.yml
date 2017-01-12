@@ -3,97 +3,97 @@ environment:
     - PYTHON: "C:\\Python27-x64"
 
 install:
-  # Examine the environment
-  - echo %PATH%
-  - echo %INCLUDE%
-  - echo %LIB%
-  - choco source list
-  - dir C:\
-  - dir
-
-  # Add Python
-  - reg ADD HKCU\Software\Python\PythonCore\2.7\InstallPath /ve /d "C:\Python27" /t REG_SZ /f
-  - reg ADD HKLM\Software\Python\PythonCore\2.7\InstallPath /ve /d "C:\Python27" /t REG_SZ /f
-  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-
-  # Enable CygWin
-  - set PATH=C:\cygwin\bin;%PATH%
-
-  # Install OS-level prereqs for lxml installation: libxml2, libxslt, zlib,
-  # libiconv (needs iconv.lib). This approach uses the binary libraries
-  # that are linked from the lxml site.
-
-  - echo set _PWD=%%%%~dp0>tmp_prereq_dir.bat
-  - call tmp_prereq_dir.bat
-  - rm tmp_prereq_dir.bat
-
-  - set _PREREQ_DIR=prereqs
-  - set _PREREQ_ABSDIR=%_PWD%%_PREREQ_DIR%
-  - echo Installing lxml prereqs into %_PREREQ_ABSDIR%
-  - mkdir %_PREREQ_DIR%
-
-  - set _PKGFILE=libxml2-2.7.8.win32.zip
-  - set _PKGDIR=libxml2-2.7.8.win32
-  - wget -q -P %_PREREQ_DIR% ftp://ftp.zlatkovic.com/libxml/%_PKGFILE%
-  - unzip -q -d %_PREREQ_DIR% %_PREREQ_DIR%/%_PKGFILE%
-  - set INCLUDE=%_PREREQ_ABSDIR%\%_PKGDIR%\include;%INCLUDE%
-  - set LIB=%_PREREQ_ABSDIR%\%_PKGDIR%\lib;%LIB%
-  - set PATH=%_PREREQ_ABSDIR%\%_PKGDIR%\bin;%PATH%
-
-  - set _PKGFILE=libxslt-1.1.26.win32.zip
-  - set _PKGDIR=libxslt-1.1.26.win32
-  - wget -q -P %_PREREQ_DIR% ftp://ftp.zlatkovic.com/libxml/%_PKGFILE%
-  - unzip -q -d %_PREREQ_DIR% %_PREREQ_DIR%/%_PKGFILE%
-  - set INCLUDE=%_PREREQ_ABSDIR%\%_PKGDIR%\include;%INCLUDE%
-  - set LIB=%_PREREQ_ABSDIR%\%_PKGDIR%\lib;%LIB%
-  - set PATH=%_PREREQ_ABSDIR%\%_PKGDIR%\bin;%PATH%
-
-  - set _PKGFILE=zlib-1.2.5.win32.zip
-  - set _PKGDIR=zlib-1.2.5
-  - wget -q -P %_PREREQ_DIR% ftp://ftp.zlatkovic.com/libxml/%_PKGFILE%
-  - unzip -q -d %_PREREQ_DIR% %_PREREQ_DIR%/%_PKGFILE%
-  - set INCLUDE=%_PREREQ_ABSDIR%\%_PKGDIR%\include;%INCLUDE%
-  - set LIB=%_PREREQ_ABSDIR%\%_PKGDIR%\lib;%LIB%
-  - set PATH=%_PREREQ_ABSDIR%\%_PKGDIR%\bin;%PATH%
-
-  - set _PKGFILE=iconv-1.9.2.win32.zip
-  - set _PKGDIR=iconv-1.9.2.win32
-  - wget -q -P %_PREREQ_DIR% ftp://ftp.zlatkovic.com/libxml/%_PKGFILE%
-  - unzip -q -d %_PREREQ_DIR% %_PREREQ_DIR%/%_PKGFILE%
-  - set INCLUDE=%_PREREQ_ABSDIR%\%_PKGDIR%\include;%INCLUDE%
-  - set LIB=%_PREREQ_ABSDIR%\%_PKGDIR%\lib;%LIB%
-  - set PATH=%_PREREQ_ABSDIR%\%_PKGDIR%\bin;%PATH%
-
-  - find %_PREREQ_DIR%
-  - echo %PATH%
-  - echo %INCLUDE%
-  - echo %LIB%
+#  # Examine the environment
+#  - echo %PATH%
+#  - echo %INCLUDE%
+#  - echo %LIB%
+#  - choco source list
+#  - dir C:\
+#  - dir
+#
+#  # Add Python
+#  - reg ADD HKCU\Software\Python\PythonCore\2.7\InstallPath /ve /d "C:\Python27" /t REG_SZ /f
+#  - reg ADD HKLM\Software\Python\PythonCore\2.7\InstallPath /ve /d "C:\Python27" /t REG_SZ /f
+#  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+#
+#  # Enable CygWin
+#  - set PATH=C:\cygwin\bin;%PATH%
+#
+#  # Install OS-level prereqs for lxml installation: libxml2, libxslt, zlib,
+#  # libiconv (needs iconv.lib). This approach uses the binary libraries
+#  # that are linked from the lxml site.
+#
+#  - echo set _PWD=%%%%~dp0>tmp_prereq_dir.bat
+#  - call tmp_prereq_dir.bat
+#  - rm tmp_prereq_dir.bat
+#
+#  - set _PREREQ_DIR=prereqs
+#  - set _PREREQ_ABSDIR=%_PWD%%_PREREQ_DIR%
+#  - echo Installing lxml prereqs into %_PREREQ_ABSDIR%
+#  - mkdir %_PREREQ_DIR%
+#
+#  - set _PKGFILE=libxml2-2.7.8.win32.zip
+#  - set _PKGDIR=libxml2-2.7.8.win32
+#  - wget -q -P %_PREREQ_DIR% ftp://ftp.zlatkovic.com/libxml/%_PKGFILE%
+#  - unzip -q -d %_PREREQ_DIR% %_PREREQ_DIR%/%_PKGFILE%
+#  - set INCLUDE=%_PREREQ_ABSDIR%\%_PKGDIR%\include;%INCLUDE%
+#  - set LIB=%_PREREQ_ABSDIR%\%_PKGDIR%\lib;%LIB%
+#  - set PATH=%_PREREQ_ABSDIR%\%_PKGDIR%\bin;%PATH%
+#
+#  - set _PKGFILE=libxslt-1.1.26.win32.zip
+#  - set _PKGDIR=libxslt-1.1.26.win32
+#  - wget -q -P %_PREREQ_DIR% ftp://ftp.zlatkovic.com/libxml/%_PKGFILE%
+#  - unzip -q -d %_PREREQ_DIR% %_PREREQ_DIR%/%_PKGFILE%
+#  - set INCLUDE=%_PREREQ_ABSDIR%\%_PKGDIR%\include;%INCLUDE%
+#  - set LIB=%_PREREQ_ABSDIR%\%_PKGDIR%\lib;%LIB%
+#  - set PATH=%_PREREQ_ABSDIR%\%_PKGDIR%\bin;%PATH%
+#
+#  - set _PKGFILE=zlib-1.2.5.win32.zip
+#  - set _PKGDIR=zlib-1.2.5
+#  - wget -q -P %_PREREQ_DIR% ftp://ftp.zlatkovic.com/libxml/%_PKGFILE%
+#  - unzip -q -d %_PREREQ_DIR% %_PREREQ_DIR%/%_PKGFILE%
+#  - set INCLUDE=%_PREREQ_ABSDIR%\%_PKGDIR%\include;%INCLUDE%
+#  - set LIB=%_PREREQ_ABSDIR%\%_PKGDIR%\lib;%LIB%
+#  - set PATH=%_PREREQ_ABSDIR%\%_PKGDIR%\bin;%PATH%
+#
+#  - set _PKGFILE=iconv-1.9.2.win32.zip
+#  - set _PKGDIR=iconv-1.9.2.win32
+#  - wget -q -P %_PREREQ_DIR% ftp://ftp.zlatkovic.com/libxml/%_PKGFILE%
+#  - unzip -q -d %_PREREQ_DIR% %_PREREQ_DIR%/%_PKGFILE%
+#  - set INCLUDE=%_PREREQ_ABSDIR%\%_PKGDIR%\include;%INCLUDE%
+#  - set LIB=%_PREREQ_ABSDIR%\%_PKGDIR%\lib;%LIB%
+#  - set PATH=%_PREREQ_ABSDIR%\%_PKGDIR%\bin;%PATH%
+#
+#  - find %_PREREQ_DIR%
+#  - echo %PATH%
+#  - echo %INCLUDE%
+#  - echo %LIB%
 
   #- pip install tox
   - "%PYTHON%/python.exe -m pip install tox"
 
-  # Verify that the commands used in tox.ini are available
-  #- tox --version
-  - make --version
-  - pip --version
-  - python --version
-
-  # Verify that the commands used in makefile are available
-  - sh --version
-  - bash --version
-  - rm --version
-  - mv --version
-  #- mkdir --version
-  - xargs --version
-  - grep --version
-  - sed --version
-  - tar --version
-  - find --version
+#  # Verify that the commands used in tox.ini are available
+#  #- tox --version
+#  - make --version
+#  - pip --version
+#  - python --version
+#
+#  # Verify that the commands used in makefile are available
+#  - sh --version
+#  - bash --version
+#  - rm --version
+#  - mv --version
+#  #- mkdir --version
+#  - xargs --version
+#  - grep --version
+#  - sed --version
+#  - tar --version
+#  - find --version
 
 build: off
 
-before_test:
-  - "cp travis_settings.py test_settings_local.py"
+#before_test:
+#  - "cp travis_settings.py test_settings_local.py"
 
 test_script:
   - "%PYTHON%/python.exe -m tox -e py-appveyor"
