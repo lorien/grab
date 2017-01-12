@@ -3,6 +3,10 @@ environment:
     LXML_CACHE_DIR: "%APPVEYOR_BUILD_FOLDER%\\lxml-binaries"
   matrix:
     - PYTHON: "C:\\Python27-x64"
+      LXML_BINARY: lxml-3.5.0-cp27-none-win_amd64.whl
+
+    - PYTHON: "C:\\Python27"
+      LXML_BINARY: lxml-3.5.0-cp27-none-win32.whl
 
 cache:
   - '%LXML_CACHE_DIR%'
