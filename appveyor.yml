@@ -9,6 +9,8 @@ cache:
 
 services:
   - mongodb
+  - mysql
+  - postgresql
 
 install:
   - "%PYTHON%/python.exe -m pip install tox"
@@ -21,10 +23,20 @@ install:
         Start-Process -FilePath "git" -ArgumentList "pull" -WorkingDirectory "$env:LXML_CACHE_DIR" -Wait;
       }
 
-build: off
+# before_build and build steps install and run redis
+before_build:
+- choco install redis-64
+- redis-server --service-install
+- redis-server --service-start
+- nuget restore .\Hangfire.Redis.StackExchange.sln
 
-#before_test:
-#  - "cp travis_settings.py test_settings_local.py"
+build:
+  publish_nuget: true
+  publish_nuget_symbols: true
+  verbosity: minimal
+
+before_test:
+  - "cp appveyor_settings.py test_settings_local.py"
 
 test_script:
   - "%PYTHON%/python.exe -m tox -e py-appveyor"
