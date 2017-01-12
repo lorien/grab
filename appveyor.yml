@@ -31,8 +31,8 @@ build: off
 before_test:
   - "cp appveyor_settings.py test_settings_local.py"
   - ps: |
-      $env:MYSQL_PWD="Password12!"
-      $cmd = '"C:\Program Files\MySql\MySQL Server 5.7\bin\mysql" -e "create database grab_test;" --user=root'
+      $env:MYSQL_PWD="Password12!";
+      $cmd = '"C:\Program Files\MySql\MySQL Server 5.7\bin\mysql" -e "create database grab_test;" --user=root';
       iex "& $cmd"
   - cmd: |
       SET PGUSER=postgres
