@@ -2,11 +2,30 @@ environment:
   global:
     LXML_CACHE_DIR: "%APPVEYOR_BUILD_FOLDER%\\lxml-binaries"
   matrix:
+    - PYTHON: "C:\\Python27"
+      LXML_BINARY: lxml-3.5.0-cp27-none-win32.whl
+
     - PYTHON: "C:\\Python27-x64"
       LXML_BINARY: lxml-3.5.0-cp27-none-win_amd64.whl
 
-    - PYTHON: "C:\\Python27"
-      LXML_BINARY: lxml-3.5.0-cp27-none-win32.whl
+    - PYTHON: "C:\\Python33"
+      LXML_BINARY: lxml-3.5.0-cp33-none-win32.whl
+
+    - PYTHON: "C:\\Python33-x64"
+      LXML_BINARY: lxml-3.5.0-cp33-none-win_amd64.whl
+
+    - PYTHON: "C:\\Python34"
+      LXML_BINARY: lxml-3.5.0-cp34-none-win32.whl
+
+    - PYTHON: "C:\\Python34-x64"
+      LXML_BINARY: lxml-3.5.0-cp34-none-win_amd64.whl
+
+    - PYTHON: "C:\\Python35"
+      LXML_BINARY: lxml-3.5.0-cp35-none-win32.whl
+
+    - PYTHON: "C:\\Python35-x64"
+      LXML_BINARY: lxml-3.5.0-cp35-none-win_amd64.whl
+
 
 cache:
   - '%LXML_CACHE_DIR%'
@@ -29,6 +48,7 @@ install:
   - choco install redis-64
   - redis-server --service-install
   - redis-server --service-start
+  - "%PYTHON%/python.exe --version"
 
 build: off
 
