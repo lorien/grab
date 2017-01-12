@@ -31,14 +31,14 @@ build: off
 before_test:
   - "cp appveyor_settings.py test_settings_local.py"
   - ps: >-
-    $env:MYSQL_PWD="Password12!"
-    $cmd = '"C:\Program Files\MySql\MySQL Server 5.7\bin\mysql" -e "create database grab_test;" --user=root'
-    iex "& $cmd"
+      $env:MYSQL_PWD="Password12!"
+      $cmd = '"C:\Program Files\MySql\MySQL Server 5.7\bin\mysql" -e "create database grab_test;" --user=root'
+      iex "& $cmd"
   - cmd: >-
-    SET PGUSER=postgres
-    SET PGPASSWORD=Password12!
-    PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
-    createdb YourDatabase
+      SET PGUSER=postgres
+      SET PGPASSWORD=Password12!
+      PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
+      createdb YourDatabase
 
 test_script:
   - "%PYTHON%/python.exe -m tox -e py-appveyor"
