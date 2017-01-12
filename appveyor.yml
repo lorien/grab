@@ -38,7 +38,7 @@ before_test:
       SET PGUSER=postgres
       SET PGPASSWORD=Password12!
       PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
-      createdb YourDatabase
+      createdb grab_test
 
 test_script:
   - "%PYTHON%/python.exe -m tox -e py-appveyor"
