@@ -69,10 +69,11 @@ install:
   - echo %INCLUDE%
   - echo %LIB%
 
+  #- pip install tox
   - "%PYTHON%/python.exe -m pip install tox"
 
   # Verify that the commands used in tox.ini are available
-  - tox --version
+  #- tox --version
   - make --version
   - pip --version
   - python --version
