@@ -2,6 +2,10 @@ language: python
 
 python: 3.6
 
+branches:
+  except:
+    - wintest
+
 os:
   - linux
   - osx
