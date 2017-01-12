@@ -16,6 +16,9 @@ install:
   #- reg ADD HKLM\Software\Python\PythonCore\2.7\InstallPath /ve /d "C:\Python27" /t REG_SZ /f
   #- set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 
+  # Enable CygWin
+  - set PATH=C:\cygwin\bin;%PATH%
+
   # Install OS-level prereqs for lxml installation: libxml2, libxslt, zlib,
   # libiconv (needs iconv.lib). This approach uses the binary libraries
   # that are linked from the lxml site.
