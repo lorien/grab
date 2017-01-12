@@ -1,44 +1,43 @@
 environment:
   global:
-    LXML_CACHE_DIR: "%APPVEYOR_BUILD_FOLDER%\\lxml-binaries"
-    MYSQLCLIENT_CACHE_DIR: "%APPVEYOR_BUILD_FOLDER%\\mysqlclient-binaries"
+    WHEEL_CACHE_DIR: "%APPVEYOR_BUILD_FOLDER%\\wheels"
+
   matrix:
     - PYTHON: "C:\\Python27"
-      LXML_BINARY: lxml-3.5.0-cp27-none-win32.whl
+      LXML_BINARY: lxml-3.7.2-cp27-cp27m-win32.whl
       MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp27-cp27m-win32.whl
 
     - PYTHON: "C:\\Python27-x64"
-      LXML_BINARY: lxml-3.5.0-cp27-none-win_amd64.whl
+      LXML_BINARY: lxml-3.7.2-cp27-cp27m-win_amd64.whl
       MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp27-cp27m-win_amd64.whl
 
     #- PYTHON: "C:\\Python33"
-    #  LXML_BINARY: lxml-3.5.0-cp33-none-win32.whl
+    #  LXML_BINARY: absent 
     #  MYSQLCLIENT_BINARY: absent
 
     #- PYTHON: "C:\\Python33-x64"
-    #  LXML_BINARY: lxml-3.5.0-cp33-none-win_amd64.whl
+    #  LXML_BINARY: absent 
     #  MYSQLCLIENT_BINARY: absent
 
     - PYTHON: "C:\\Python34"
-      LXML_BINARY: lxml-3.5.0-cp34-none-win32.whl
+      LXML_BINARY: lxml-3.7.2-cp34-cp34m-win32.whl
       MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp34-cp34m-win32.whl
 
     - PYTHON: "C:\\Python34-x64"
-      LXML_BINARY: lxml-3.5.0-cp34-none-win_amd64.whl
+      LXML_BINARY: lxml-3.7.2-cp34-cp34m-win_amd64.whl
       MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp34-cp34m-win_amd64.whl
 
     - PYTHON: "C:\\Python35"
-      LXML_BINARY: lxml-3.5.0-cp35-none-win32.whl
+      LXML_BINARY: lxml-3.7.2-cp35-cp35m-win32.whl
       MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp35-cp35m-win32.whl
 
     - PYTHON: "C:\\Python35-x64"
-      LXML_BINARY: lxml-3.5.0-cp35-none-win_amd64.whl
+      LXML_BINARY: lxml-3.7.2-cp35-cp35m-win_amd64.whl
       MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp35-cp35m-win_amd64.whl
 
 
 cache:
-  - '%LXML_CACHE_DIR%'
-  - '%MYSQLCLIENT_CACHE_DIR%'
+  - '%WHEEL_CACHE_DIR%'
 
 services:
   - mongodb
@@ -48,20 +47,12 @@ services:
 install:
   - "%PYTHON%/python.exe -m pip install tox"
   - ps: >-
-      If(!(Test-Path $env:LXML_CACHE_DIR)) {
-        Write-Host "Downloading lxml binaries";
-        Start-Process -FilePath "git" -ArgumentList "clone https://gist.github.com/36d27f9b57f6e33bae0d.git $env:LXML_CACHE_DIR" -Wait;
+      If(!(Test-Path $env:WHEEL_CACHE_DIR)) {
+        Write-Host "Downloading wheel binary dir";
+        Start-Process -FilePath "git" -ArgumentList "clone https://gist.github.com/63b34431b7da72a1eec274d5f310a0ad.git $env:WHEEL_CACHE_DIR" -Wait;
       } Else {
-        Write-Host "Updating lxml binaries";
-        Start-Process -FilePath "git" -ArgumentList "pull" -WorkingDirectory "$env:LXML_CACHE_DIR" -Wait;
-      }
-  - ps: >-
-      If(!(Test-Path $env:MYSQLCLIENT_CACHE_DIR)) {
-        Write-Host "Downloading mysqlclient binaries";
-        Start-Process -FilePath "git" -ArgumentList "clone https://gist.github.com/63b34431b7da72a1eec274d5f310a0ad.git $env:MYSQLCLIENT_CACHE_DIR" -Wait;
-      } Else {
-        Write-Host "Updating mysqlclient binaries";
-        Start-Process -FilePath "git" -ArgumentList "pull" -WorkingDirectory "$env:MYSQLCLIENT_CACHE_DIR" -Wait;
+        Write-Host "Updating wheel binary dir";
+        Start-Process -FilePath "git" -ArgumentList "pull" -WorkingDirectory "$env:WHEEL_CACHE_DIR" -Wait;
       }
   - choco install redis-64
   - redis-server --service-install
