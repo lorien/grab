@@ -608,7 +608,7 @@ class Spider(object):
     def is_valid_network_response_code(self, code, task):
         """
         Answer the question: if the response could be handled via
-        usual task handler or the task faield and should be processed as error.
+        usual task handler or the task failed and should be processed as error.
         """
 
         return (code < 400 or code == 404 or
