@@ -782,7 +782,7 @@ class Spider(object):
 
 
     def process_grab_proxy(self, task, grab):
-        "Assign new proxy from proxylist to the task"
+        """Assign new proxy from proxylist to the task"""
 
         if task.use_proxylist:
             if self.proxylist_enabled:

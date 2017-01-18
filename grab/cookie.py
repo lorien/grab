@@ -112,7 +112,7 @@ class MockResponse(object):
 
 
 def create_cookie(name, value, domain, httponly=None, **kwargs):
-    "Creates `cookielib.Cookie` instance"
+    """Creates `cookielib.Cookie` instance"""
 
     if domain == 'localhost':
         domain = ''
