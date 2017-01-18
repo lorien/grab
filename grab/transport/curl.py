@@ -15,7 +15,7 @@ except ImportError:
 import pycurl
 from weblib.http import (normalize_http_values,
                          normalize_post_data, normalize_url)
-from weblib.encoding import make_str, decode_pairs
+from weblib.encoding import make_str
 import six
 from six.moves.http_cookiejar import CookieJar
 import sys

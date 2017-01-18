@@ -1,7 +1,8 @@
 from __future__ import absolute_import
-import types
+
 import logging
 import time
+
 try:
     from urlparse import urljoin
 except ImportError:
@@ -12,12 +13,8 @@ from copy import deepcopy
 import six
 import os
 from weblib import metric
-from contextlib import contextmanager
 from traceback import format_exc
-import multiprocessing
-import threading
 from datetime import datetime
-import threading
 from threading import Thread
 from collections import deque
 
@@ -32,7 +29,6 @@ from grab.spider.transport.multicurl import MulticurlTransport
 from grab.spider.transport.threaded import ThreadedTransport
 from grab.proxylist import ProxyList, BaseProxySource
 from grab.util.misc import camel_case_to_underscore
-from weblib.encoding import make_str, make_unicode
 from grab.base import GLOBAL_STATE
 from grab.stat import Stat, Timer
 from grab.spider.parser_pipeline import ParserPipeline
@@ -191,9 +187,9 @@ class Spider(object):
         # MP:
         self.mp_mode = mp_mode
         if self.mp_mode:
-            from multiprocessing import Process, Event, Queue
+            from multiprocessing import Event, Queue
         else:
-            from multiprocessing.dummy import Process, Event, Queue
+            from multiprocessing.dummy import Event, Queue
 
         if network_result_queue is not None:
             self.network_result_queue = network_result_queue
@@ -860,9 +856,9 @@ class Spider(object):
         Main method. All work is done here.
         """
         if self.mp_mode:
-            from multiprocessing import Process, Event, Queue
+            from multiprocessing import Event, Queue
         else:
-            from multiprocessing.dummy import Process, Event, Queue
+            from multiprocessing.dummy import Event, Queue
 
         self.timer.start('total')
 
