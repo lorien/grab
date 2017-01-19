@@ -1,6 +1,6 @@
 language: python
 
-python: 3.6
+python: 3.5
 
 branches:
   except:
@@ -8,40 +8,29 @@ branches:
 
 os:
   - linux
-  - osx
+#  - osx
 
 matrix:
-  allow_failures:
-    - os: osx
-    - env: TOX_ENV=py35
+  include:
     - env: TOX_ENV=py36
-    - env: TOX_ENV=py27-mp
-    - env: TOX_ENV=py33-mp
-    - env: TOX_ENV=py34-mp
-    - env: TOX_ENV=py35-mp
+      python: 3.6
     - env: TOX_ENV=py36-mp
+      python: 3.6
+  allow_failures:
     - env: TOX_ENV=py27-urllib3
-    - env: TOX_ENV=py33-urllib3
     - env: TOX_ENV=py34-urllib3
-    - env: TOX_ENV=py35-urllib3
-    - env: TOX_ENV=py36-urllib3
 
 env:
   - TOX_ENV=py27
   - TOX_ENV=py33
   - TOX_ENV=py34
   - TOX_ENV=py35
-  - TOX_ENV=py36
   - TOX_ENV=py27-mp
   - TOX_ENV=py33-mp
   - TOX_ENV=py34-mp
   - TOX_ENV=py35-mp
-  - TOX_ENV=py36-mp
   - TOX_ENV=py27-urllib3
-  - TOX_ENV=py33-urllib3
   - TOX_ENV=py34-urllib3
-  - TOX_ENV=py35-urllib3
-  - TOX_ENV=py36-urllib3
 
 services:
   - mongodb
