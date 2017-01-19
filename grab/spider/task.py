@@ -143,6 +143,10 @@ class Task(BaseTask):
         self.raw = raw
         self.callback = callback
         self.coroutines_stack = []
+
+        self.schedule_time = None
+        self.original_delay = None
+
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -157,9 +161,6 @@ class Task(BaseTask):
         if delay:
             self.schedule_time = datetime.utcnow() + timedelta(seconds=delay)
             self.original_delay = delay
-        else:
-            self.schedule_time = None
-            self.original_delay = None
 
     def setup_grab_config(self, grab_config):
         self.grab_config = copy_config(grab_config)

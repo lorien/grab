@@ -9,7 +9,8 @@ import mimetypes
 class BaseUploadObject(object):
     __slots__ = ()
 
-    def find_content_type(self, filename):
+    @staticmethod
+    def find_content_type(filename):
         ctype, encoding = mimetypes.guess_type(filename)
         if ctype is None:
             return 'application/octet-stream'
@@ -31,7 +32,8 @@ class UploadContent(BaseUploadObject):
         else:
             self.content_type = content_type
 
-    def get_random_filename(self):
+    @staticmethod
+    def get_random_filename():
         return md5(make_str(str(time.time()))).hexdigest()[:10]
 
 

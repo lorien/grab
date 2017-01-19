@@ -3,9 +3,10 @@ This module contains Stat class. It is used inside
 Grab::Spider to collect statistics about events happening
 during the scraping session.
 """
+
+import time
 import logging
 from collections import defaultdict
-import time
 from contextlib import contextmanager
 
 from grab.util.warning import warn
@@ -21,12 +22,14 @@ class Stat(object):
                  extra_speed_keys=None):
         self.speed_key = speed_key
         self.setup_speed_keys(speed_key, extra_speed_keys)
+
         self.time = time.time()
         self.logging_ignore_prefixes = ['spider:', 'parser:']
         self.logging_period = logging_period
         self.count_prev = 0
         self.logger_name = logger_name
         self.logger = logging.getLogger(logger_name)
+
         self.setup_logging_file(log_file)
         self.reset()
 

@@ -1,10 +1,11 @@
 from __future__ import absolute_import
+
+import six
 from weblib.etree import get_node_text
 from weblib.text import find_number
 from weblib.const import NULL
 from weblib.error import DataNotFound
 from weblib.encoding import make_unicode
-import six
 
 from grab.util.warning import warn, deprecated
 from grab.error import GrabMisuseError
@@ -12,12 +13,12 @@ from grab import error
 
 
 class DeprecatedThings(object):
-    __slots__ = ()
-
     """
     This super-class contains all deprecated things that are
     still in Grab class for back-ward compatibility.
     """
+
+    __slots__ = ()
 
     # Deprecated methods from grab.ext.text module
     # ********************************************

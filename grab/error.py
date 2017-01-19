@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 """
 Custom exception which Grab instance could generate.
 
@@ -13,6 +12,9 @@ Exception
 | -> weblib.error.WeblibError
      |-> DataNotFound <- IndexError
 """
+
+from __future__ import absolute_import
+
 from weblib.error import DataNotFound  # noqa
 
 
@@ -80,4 +82,8 @@ class GrabInvalidUrl(GrabError):
 
 
 class GrabInternalError(GrabError):
+    pass
+
+
+class InvalidProxyLine(GrabError):
     pass

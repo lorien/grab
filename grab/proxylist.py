@@ -1,12 +1,13 @@
 from __future__ import absolute_import
+
 import re
 import itertools
 import logging
-from random import randint
 import six
+from random import randint
 from collections import namedtuple
 
-from grab.error import GrabError, GrabNetworkError
+from grab.error import InvalidProxyLine, GrabNetworkError
 
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
 RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')
@@ -21,10 +22,6 @@ class Proxy(namedtuple('Proxy', PROXY_FIELDS)):
     def get_userpwd(self):
         if self.username:
             return '%s:%s' % (self.username, self.password or '')
-
-
-class InvalidProxyLine(GrabError):
-    pass
 
 
 def parse_proxy_line(line):
@@ -111,8 +108,7 @@ class WebProxySource(BaseProxySource):
 
 
 class ListProxySource(BaseProxySource):
-    """That proxy source that loads list from
-    python list of strings"""
+    """That proxy source that loads list from python list of strings"""
     def __init__(self, items, **kwargs):
         self.items = items
         super(ListProxySource, self).__init__(**kwargs)
