@@ -1,6 +1,6 @@
 # coding: utf-8
 from test.util import build_grab, only_grab_transport
-from test.util import BaseGrabTestCase
+from test.util import BaseGrabTestCase, temp_file
 
 
 class GrabSimpleTestCase(BaseGrabTestCase):
@@ -57,21 +57,21 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         g.go(self.server.get_url())
         self.assertEqual(self.server.request['headers']['user-agent'], 'foo')
 
-        # user agent from file should be loaded
-        path = '/tmp/__ua.txt'
-        open(path, 'w').write('GOD')
-        g.setup(user_agent=None, user_agent_file=path)
-        g.go(self.server.get_url())
-        self.assertEqual(self.server.request['headers']['user-agent'], 'GOD')
+        with temp_file() as ua_file:
+            # user agent from file should be loaded
+            open(ua_file, 'w').write('GOD')
+            g.setup(user_agent=None, user_agent_file=ua_file)
+            g.go(self.server.get_url())
+            self.assertEqual(self.server.request['headers']['user-agent'], 'GOD')
 
-        # random user agent from file should be loaded
-        path = '/tmp/__ua.txt'
-        open(path, 'w').write('GOD1\nGOD2')
-        g.setup(user_agent=None, user_agent_file=path)
-        g.go(self.server.get_url())
-        self.assertTrue(self.server.request['headers']['user-agent']
-                        in ('GOD1', 'GOD2'))
-        ua = g.config['user_agent']
+        with temp_file() as ua_file:
+            # random user agent from file should be loaded
+            open(ua_file, 'w').write('GOD1\nGOD2')
+            g.setup(user_agent=None, user_agent_file=ua_file)
+            g.go(self.server.get_url())
+            self.assertTrue(self.server.request['headers']['user-agent']
+                            in ('GOD1', 'GOD2'))
+            ua = g.config['user_agent']
 
         # User-agent should not change
         g.go(self.server.get_url())

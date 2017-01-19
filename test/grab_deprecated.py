@@ -6,7 +6,7 @@ from tempfile import mkstemp
 import os
 import re
 
-from test.util import build_grab
+from test.util import build_grab, temp_file
 from test.util import BaseGrabTestCase
 
 
@@ -87,13 +87,11 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertEqual(g.doc('//form').node(), g.form)
 
     def test_load_proxylist_text_file(self):
-        fh, path = mkstemp()
-        with open(path, 'w') as out:
-            out.write('1.1.1.1:8080')
-        g = build_grab()
-        g.load_proxylist(path, 'text_file', auto_init=True, auto_change=False)
-        self.assertEqual(g.config['proxy'], '1.1.1.1:8080')
-        os.unlink(path)
+        with temp_file() as proxy_file:
+            open(proxy_file, 'w').write('1.1.1.1:8080')
+            g = build_grab()
+            g.load_proxylist(proxy_file, 'text_file', auto_init=True, auto_change=False)
+            self.assertEqual(g.config['proxy'], '1.1.1.1:8080')
 
     def test_load_proxylist_url(self):
         self.server.response['data'] = b'1.1.1.1:9090'
