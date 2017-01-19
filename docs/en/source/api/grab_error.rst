@@ -18,5 +18,9 @@ Custom exception classes for Grab.
 .. autoclass:: GrabConnectionError
 .. autoclass:: GrabAuthError
 .. autoclass:: GrabTooManyRedirectsError
-.. autoclass:: GrabDeprecationWarning
 .. autoclass:: GrabInvalidUrl
+
+
+
+.. module:: grab.util.warning
+.. autoclass:: GrabDeprecationWarning

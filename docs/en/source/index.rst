@@ -92,6 +92,9 @@ methods exist, what they do, what they return, and what parameters they accept.
     api/grab_base
     api/grab_error
     api/grab_cookie
+    api/grab_spider_base
+    api/grab_document
+    api/grab_spider_task
 
 
 Indices and tables
