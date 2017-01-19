@@ -797,7 +797,7 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
         """
         Parse headers.
 
-        This method is called after Grab instance performes network request.
+        This method is called after Grab instance performs network request.
         """
 
         if headers:

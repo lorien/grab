@@ -18,7 +18,7 @@ class Task(BaseTask):
                  priority=None, priority_set_explicitly=True,
                  network_try_count=0, task_try_count=1,
                  disable_cache=False, refresh_cache=False,
-                 valid_status=[], use_proxylist=True,
+                 valid_status=None, use_proxylist=True,
                  cache_timeout=None, delay=0,
                  raw=False, callback=None,
                  fallback_name=None,
@@ -124,6 +124,11 @@ class Task(BaseTask):
             self.grab_config = None
             self.url = url
 
+        if valid_status is None:
+            self.valid_status = []
+        else:
+            self.valid_status = valid_status
+
         self.process_delay_option(delay)
 
         self.fallback_name = fallback_name
@@ -133,7 +138,6 @@ class Task(BaseTask):
         self.task_try_count = task_try_count
         self.disable_cache = disable_cache
         self.refresh_cache = refresh_cache
-        self.valid_status = valid_status
         self.use_proxylist = use_proxylist
         self.cache_timeout = cache_timeout
         self.raw = raw
@@ -193,12 +197,12 @@ class Task(BaseTask):
                                     'used together')
 
         if (kwargs.get('url') is not None and
-                kwargs.get('grab_config') is not None):
+                    kwargs.get('grab_config') is not None):
             raise SpiderMisuseError('Options url and grab_config could not '
                                     'be used together')
 
         if (kwargs.get('grab') is not None and
-                kwargs.get('grab_config') is not None):
+                    kwargs.get('grab_config') is not None):
             raise SpiderMisuseError('Options grab and grab_config could not '
                                     'be used together')
 
