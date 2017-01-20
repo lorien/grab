@@ -26,8 +26,6 @@ from grab.upload import UploadFile, UploadContent
 from grab.transport.base import BaseTransport
 from user_agent import generate_user_agent
 
-logger = logging.getLogger('grab.transport.urllib3')
-
 
 def make_unicode(val, encoding='utf-8', errors='strict'):
     if isinstance(val, six.binary_type):
@@ -304,15 +302,15 @@ class Urllib3Transport(BaseTransport):
                     chunk_size = min(default_chunk_size, maxsize + 1)
                 else:
                     chunk_size = default_chunk_size
-                total_size = 0
+                bytes_read = 0
                 while True:
                     chunk = self._response.read(chunk_size)
                     if chunk:
-                        total_size += len(chunk)
+                        bytes_read += len(chunk)
                         chunks.append(chunk)
-                        if maxsize and total_size > maxsize:
-                            logger.debug('Response body max size limit reached: %s' %
-                                         maxsize)
+                        if maxsize and bytes_read > maxsize:
+                            # reached limit on bytes to read
+                            break
                     else:
                         break
                     if self._request.timeout:
