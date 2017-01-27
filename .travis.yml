@@ -29,8 +29,10 @@ env:
   - TOX_ENV=py33-mp
   - TOX_ENV=py34-mp
   - TOX_ENV=py35-mp
-  - TOX_ENV=py27-urllib3
-  - TOX_ENV=py34-urllib3
+  - TOX_ENV=py27-threaded-pycurl
+  - TOX_ENV=py34-threaded-pycurl
+  - TOX_ENV=py27-threaded-urllib3
+  - TOX_ENV=py34-threaded-urllib3
 
 services:
   - mongodb
