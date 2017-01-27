@@ -84,7 +84,12 @@ class ThreadedTransport(object):
     def iterate_results(self):
         while True:
             try:
-                result = self.result_queue.get(block=True, timeout=0.1)
+                # Should be block=False
+                # but then urllib3 cache tests fails :(
+                # TRY to fix it with same method as in cache pipeline
+                # lock when inc/dec counter of active tasks + check 
+                # that lenght of queues is zero
+                result = self.result_queue.get(block=True, timeout=0.001)
             except Empty:
                 break
             else:

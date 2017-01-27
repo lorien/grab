@@ -1,4 +1,4 @@
-from threading import Event, Thread
+from threading import Event, Thread, Lock
 from six.moves.queue import Queue, Empty
 import time
 
@@ -7,10 +7,11 @@ class CachePipeline(object):
     def __init__(self, spider, cache):
         self.spider = spider
         self.cache = cache
-        self.idle_event = Event()
         self.queue_size = 100
         self.input_queue = Queue()
         self.result_queue = Queue()
+        self.active_tasks = 0
+        self.active_tasks_lock = Lock()
 
         self.thread = Thread(target=self.thread_worker)
         self.thread.daemon = True
@@ -21,40 +22,50 @@ class CachePipeline(object):
                 and self.result_queue.qsize() < self.queue_size)
 
     def is_idle(self):
-        return self.idle_event.is_set()
+        self.active_tasks_lock.acquire()
+        try:
+            return (self.active_tasks == 0
+                    and self.input_queue.qsize() == 0
+                    and self.result_queue.qsize() == 0)
+        finally:
+            self.active_tasks_lock.release()
 
     def thread_worker(self):
-        self.idle_event.clear()
         while True:
             try:
                 action, data = self.input_queue.get(block=False)
             except Empty:
-                self.idle_event.set()
                 time.sleep(0.1)
-                self.idle_event.clear()
                 if self.spider.shutdown_event.is_set():
                     #print('EXITING CACHE PIPELINE')
                     return self.shutdown()
                 #else:
                 #    print('no shutdown event')
             else:
-                assert action in ('load', 'save')
-                if action == 'load':
-                    task, grab = data
-                    result = None
-                    if self.is_cache_loading_allowed(task, grab):
-                        result = self.load_from_cache(task, grab)
-                    if result:
-                        #print('!! PUT RESULT INTO CACHE PIPE RESULT QUEUE (cache)')
-                        self.result_queue.put(('network_result', result))
-                    else:
-                        self.result_queue.put(('task', task))
-                elif action == 'save':
-                    task, grab = data
-                    if self.is_cache_saving_allowed(task, grab):
-                        with self.spider.timer.log_time('cache'):
-                            with self.spider.timer.log_time('cache.write'):
-                                self.cache.save_response(task.url, grab)
+                try:
+                    assert action in ('load', 'save')
+                    if action == 'load':
+                        task, grab = data
+                        result = None
+                        if self.is_cache_loading_allowed(task, grab):
+                            result = self.load_from_cache(task, grab)
+                        if result:
+                            #print('!! PUT RESULT INTO CACHE PIPE RESULT QUEUE (cache)')
+                            self.result_queue.put(('network_result', result))
+                        else:
+                            self.result_queue.put(('task', task))
+                    elif action == 'save':
+                        task, grab = data
+                        if self.is_cache_saving_allowed(task, grab):
+                            with self.spider.timer.log_time('cache'):
+                                with self.spider.timer.log_time('cache.write'):
+                                    self.cache.save_response(task.url, grab)
+                finally:
+                    self.active_tasks_lock.acquire()
+                    try:
+                        self.active_tasks -= 1
+                    finally:
+                        self.active_tasks_lock.release()
 
     def is_cache_loading_allowed(self, task, grab):
         # 1) cache data should be refreshed
@@ -105,3 +116,23 @@ class CachePipeline(object):
             self.cache.close()
         except AttributeError:
             print('Cache %s does not support close method' % self.cache)
+
+    def get_ready_results(self):
+        res = []
+        while True:
+            try:
+                action, result = self.result_queue.get(block=False)
+            except Empty:
+                break
+            else:
+                res.append((action, result))
+                assert action in ('network_result', 'task')
+        return res
+
+    def add_task(self, task):
+        self.input_queue.put(task)
+        self.active_tasks_lock.acquire()
+        try:
+            self.active_tasks += 1
+        finally:
+            self.active_tasks_lock.release()

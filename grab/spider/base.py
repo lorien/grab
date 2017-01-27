@@ -877,9 +877,10 @@ class Spider(object):
             and not self.task_queue.size()  # (4)
             and not self.network_result_queue.qsize()  # (5)
             and (self.cache_pipeline is None
-                 or (self.cache_pipeline.is_idle()
-                     and self.cache_pipeline.input_queue.qsize() == 0
-                     and self.cache_pipeline.result_queue.qsize() == 0))
+                 or self.cache_pipeline.is_idle())
+            #     or (self.cache_pipeline.is_idle()
+            #         and self.cache_pipeline.input_queue.qsize() == 0
+            #         and self.cache_pipeline.result_queue.qsize() == 0))
         )
 
     def run(self):
@@ -962,6 +963,10 @@ class Spider(object):
                             # and run:
                             # while ./runtest.py -t test.spider_data; do echo "ok"; done;
                             # And wait a few minutes
+                            # TODO: iterate over all run body while waiting
+                            # this safety time
+                            # this is required because the code emulates async loop
+                            # and need to check/trigger events
                             really_ready = True
                             for x in range(10):
                                 if not self.is_ready_to_shutdown():
@@ -986,8 +991,9 @@ class Spider(object):
                         if is_valid:
                             task_grab = self.setup_grab_for_task(task)
                             if self.cache_pipeline:
-                                self.cache_pipeline.input_queue.put(
-                                    ('load', (task, task_grab)),
+                                # CACHE:
+                                self.cache_pipeline.add_task(
+                                   ('load', (task, task_grab)),
                                 )
                             else:
                                 self.submit_task_to_transport(task, task_grab)
@@ -1010,25 +1016,20 @@ class Spider(object):
                 results = [(x, False) for x in
                            self.transport.iterate_results()]
                 if self.cache_pipeline:
-                    while True:
-                        try:
-                            action, result = self.cache_pipeline \
-                                .result_queue.get(False)
-                        except queue.Empty:
-                            break
-                        else:
-                            assert action in ('network_result', 'task')
-                            if action == 'network_result':
-                                results.append((result, True))
-                            elif action == 'task':
-                                task = result
-                                task_grab = self.setup_grab_for_task(task)
-                                if (self.transport.get_free_threads_number()
-                                    and (self.network_result_queue.qsize()
-                                             < network_result_queue_limit)):
-                                    self.submit_task_to_transport(task, task_grab)
-                                else:
-                                    pending_tasks.append(task)
+                    # CACHE: for action, result in self.cache_pipeline.get_ready_results()
+                    for action, result in self.cache_pipeline.get_ready_results():
+                        assert action in ('network_result', 'task')
+                        if action == 'network_result':
+                            results.append((result, True))
+                        elif action == 'task':
+                            task = result
+                            task_grab = self.setup_grab_for_task(task)
+                            if (self.transport.get_free_threads_number()
+                                and (self.network_result_queue.qsize()
+                                         < network_result_queue_limit)):
+                                self.submit_task_to_transport(task, task_grab)
+                            else:
+                                pending_tasks.append(task)
 
                 # Take sleep to avoid millions of iterations per second.
                 # 1) If no results from network transport
@@ -1040,17 +1041,20 @@ class Spider(object):
                     and not self.transport.get_active_threads_number()
                     and not self.parser_result_queue.qsize()
                     and (self.cache_pipeline is None
-                         or (self.cache_pipeline.input_queue.qsize() == 0
-                             and self.cache_pipeline.is_idle()
-                             and self.cache_pipeline.result_queue.qsize() == 0))
+                         or self.cache_pipeline.is_idle())
+                         # CACHE: is_idle()
+                         #or (self.cache_pipeline.input_queue.qsize() == 0
+                         #    and self.cache_pipeline.is_idle()
+                         #    and self.cache_pipeline.result_queue.qsize() == 0))
                     ):
                     time.sleep(0.001)
 
                 for result, from_cache in results:
                     if self.cache_pipeline and not from_cache:
                         if result['ok']:
-                            self.cache_pipeline.input_queue.put(
-                                ('save', (result['task'], result['grab']))
+                            # CACHE: 
+                            self.cache_pipeline.add_task(
+                               ('save', (result['task'], result['grab'])),
                             )
                     self.log_network_result_stats(
                         result, from_cache=from_cache)
