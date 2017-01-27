@@ -611,7 +611,6 @@ class Spider(object):
         self._task_generator_list.append(th)
 
     def get_task_from_queue(self):
-        start = time.time()
         try:
             with self.timer.log_time('task_queue'):
                 return self.task_queue.get()
@@ -868,20 +867,26 @@ class Spider(object):
         #                                  for x in self.parser_pipeline.parser_pool))
         # print('alive task generators', any(x.isAlive() for x in self._task_generator_list))
         # print('active network threads', self.transport.get_active_threads_number())
-        return (
-            not self.parser_result_queue.qsize()
-            and all(x['is_parser_idle'].is_set()
-                    for x in self.parser_pipeline.parser_pool)
-            and not any(x.isAlive() for x in self._task_generator_list)  # (2)
-            and not self.transport.get_active_threads_number()  # (3)
-            and not self.task_queue.size()  # (4)
-            and not self.network_result_queue.qsize()  # (5)
-            and (self.cache_pipeline is None
-                 or self.cache_pipeline.is_idle())
-            #     or (self.cache_pipeline.is_idle()
-            #         and self.cache_pipeline.input_queue.qsize() == 0
-            #         and self.cache_pipeline.result_queue.qsize() == 0))
-        )
+        #print('!IS READY: cache is idle: %s' % self.cache_pipeline.is_idle())
+        try:
+            if self.cache_pipeline:
+                #print('!settings cache to pause')
+                self.cache_pipeline.pause()
+            return (
+                not self.parser_result_queue.qsize()
+                and all(x['is_parser_idle'].is_set()
+                        for x in self.parser_pipeline.parser_pool)
+                and not any(x.isAlive() for x in self._task_generator_list)  # (2)
+                and not self.transport.get_active_threads_number()  # (3)
+                and not self.task_queue.size()  # (4)
+                and not self.network_result_queue.qsize()  # (5)
+                and (self.cache_pipeline is None
+                     or self.cache_pipeline.is_idle())
+            )
+        finally:
+            #print('!resuming cache')
+            if self.cache_pipeline:
+                self.cache_pipeline.resume()
 
     def run(self):
         """
@@ -933,7 +938,9 @@ class Spider(object):
             # `self.work_allowed` flag is True
             # shutdown_countdown = 0 # !!!
             pending_tasks = deque()
+            shutdown_countdown = 10
             while self.work_allowed:
+                #print('!')
                 free_threads = self.transport.get_free_threads_number()
                 # Load new task only if:
                 # 1) network transport has free threads
@@ -948,10 +955,15 @@ class Spider(object):
                         task = pending_tasks.popleft()
                     else:
                         task = self.get_task_from_queue()
+                        #if task and task is not True:
+                        #    print('NEW TASK: %s [delay=%s]'
+                        #          % (task, task.original_delay))
+                    #print('!asked for new task, got %s' % task)
                     if task is None:
                         # If received task is None then
                         # check if spider is ready to be shut down
                         if not pending_tasks and self.is_ready_to_shutdown():
+                            #print('!ready-to-shutdown is OK')
                             # I am afraid there is a bug in `is_ready_to_shutdown`
                             # because it tries to evaluate too many things
                             # includig things that are being set from other threads,
@@ -963,20 +975,18 @@ class Spider(object):
                             # and run:
                             # while ./runtest.py -t test.spider_data; do echo "ok"; done;
                             # And wait a few minutes
-                            # TODO: iterate over all run body while waiting
+                            # Iterate over all run body while waiting
                             # this safety time
                             # this is required because the code emulates async loop
                             # and need to check/trigger events
-                            really_ready = True
-                            for x in range(10):
-                                if not self.is_ready_to_shutdown():
-                                    really_ready = False
-                                    break
-                                time.sleep(0.001)
-                            if really_ready:
+                            time.sleep(0.01)
+                            shutdown_countdown -= 1
+                            if shutdown_countdown == 0:
                                 self.shutdown_event.set()
                                 self.stop()
-                                break  # Break from `while self.work_allowed` cycle
+                                break
+                        else:
+                            shutdown_counter = 10
                     elif isinstance(task, bool) and (task is True):
                         # If received task is True
                         # and there is no active network threads then
@@ -995,6 +1005,7 @@ class Spider(object):
                                 self.cache_pipeline.add_task(
                                    ('load', (task, task_grab)),
                                 )
+                                #print('!sent to cache')
                             else:
                                 self.submit_task_to_transport(task, task_grab)
                         else:
@@ -1015,9 +1026,11 @@ class Spider(object):
                 # Result is dict {ok, grab, grab_config_backup, task, emsg}
                 results = [(x, False) for x in
                            self.transport.iterate_results()]
+                #print('!network results: %s' % results)
                 if self.cache_pipeline:
                     # CACHE: for action, result in self.cache_pipeline.get_ready_results()
                     for action, result in self.cache_pipeline.get_ready_results():
+                        print('thing from cache: %s:%s' % (action, result))
                         assert action in ('network_result', 'task')
                         if action == 'network_result':
                             results.append((result, True))
@@ -1050,6 +1063,7 @@ class Spider(object):
                     time.sleep(0.001)
 
                 for result, from_cache in results:
+                    #print('!processing result %s' % result)
                     if self.cache_pipeline and not from_cache:
                         if result['ok']:
                             # CACHE: 

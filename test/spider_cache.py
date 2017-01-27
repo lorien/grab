@@ -58,9 +58,10 @@ class SimpleSpider(Spider):
 class SpiderCacheMixin(object):
     def setUp(self):
         self.server.reset()
-        self.server.response['get.data'] = ContentGenerator(self.server)
+        #self.server.response['get.data'] = ContentGenerator(self.server)
 
     def test_counter(self):
+        self.server.response['get.data'] = ContentGenerator(self.server)
         bot = build_spider(SimpleSpider, meta={'server': self.server})
         self.setup_cache(bot)
         bot.cache_pipeline.cache.clear()
@@ -76,6 +77,7 @@ class SpiderCacheMixin(object):
         # * request same URL
         # * got exception
 
+        self.server.response['get.data'] = ContentGenerator(self.server)
         server = self.server
 
         class Bug1Spider(Spider):
@@ -94,6 +96,7 @@ class SpiderCacheMixin(object):
         bot.run()
 
     def test_something(self):
+        self.server.response['get.data'] = ContentGenerator(self.server)
         bot = build_spider(SimpleSpider, meta={'server': self.server},
                            parser_pool_size=1)
         self.setup_cache(bot)
@@ -104,6 +107,7 @@ class SpiderCacheMixin(object):
         self.assertEqual([1, 1, 1, 2], bot.stat.collections['resp_counters'])
 
     def test_only_cache_task(self):
+        self.server.response['get.data'] = ContentGenerator(self.server)
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 self.stat.collect('points', 1)
@@ -117,6 +121,7 @@ class SpiderCacheMixin(object):
         self.assertEqual(bot.stat.collections['points'], [])
 
     def test_cache_size(self):
+        self.server.response['get.data'] = ContentGenerator(self.server)
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass
@@ -130,6 +135,7 @@ class SpiderCacheMixin(object):
         self.assertEqual(bot.cache_pipeline.cache.size(), 1)
 
     def test_timeout(self):
+        self.server.response['get.data'] = ContentGenerator(self.server)
         bot = build_spider(SimpleSpider, meta={'server': self.server})
         self.setup_cache(bot)
         bot.cache_pipeline.cache.clear()
@@ -162,6 +168,8 @@ class SpiderCacheMixin(object):
             def task_page(self, grab, task):
                 self.stat.collect('points', grab.doc.body)
 
+        self.server.response['data'] = iter([b'a', b'b'])
+
         bot = build_spider(TestSpider, parser_pool_size=1)
         self.setup_cache(bot)
         bot.cache_pipeline.cache.clear()
@@ -173,17 +181,18 @@ class SpiderCacheMixin(object):
         bot.add_task(Task('page', url=self.server.get_url(),
                      delay=1, cache_timeout=10))
         # This task will be spawned in 2 seconds and will not
-        # receive cached data (cache timeout = 1.5 sec < 2 sec)
+        # receive cached data (cache timeout = 0.5 sec < 2 sec)
         # So, this task will receive next data from `get.data` iterator
         bot.add_task(Task('page', url=self.server.get_url(),
                      delay=2, cache_timeout=0.5))
 
-        self.server.response['get.data'] = iter([b'a', b'b'])
+        self.assertEqual(3, bot.task_queue.size())
         bot.run()
         self.assertEqual(bot.stat.collections['points'],
                          [b'a', b'a', b'b'])
 
     def test_remove_cache_item(self):
+        self.server.response['get.data'] = ContentGenerator(self.server)
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass
@@ -200,6 +209,7 @@ class SpiderCacheMixin(object):
         self.assertEqual(1, bot.cache_pipeline.cache.size())
 
     def test_has_item(self):
+        self.server.response['get.data'] = ContentGenerator(self.server)
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass
@@ -227,6 +237,7 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
         bot.setup_cache(backend='mongo', **config)
 
     def test_too_large_document(self):
+        self.server.response['get.data'] = ContentGenerator(self.server)
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass
@@ -245,6 +256,7 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
         self.assertTrue('Document too large' in patch.call_args[0][0])
 
     def test_connection_kwargs(self):
+        self.server.response['get.data'] = ContentGenerator(self.server)
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass
@@ -265,6 +277,8 @@ class SpiderMysqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
         bot.setup_cache(backend='mysql', **config)
 
     def test_create_table(self):
+        self.server.response['get.data'] = ContentGenerator(self.server)
+
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass
@@ -288,6 +302,8 @@ class SpiderPostgresqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
         bot.setup_cache(backend='postgresql', **config)
 
     def test_create_table(self):
+        self.server.response['get.data'] = ContentGenerator(self.server)
+
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass
