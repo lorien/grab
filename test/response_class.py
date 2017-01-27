@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 import os.path
 
-from test.util import TEST_DIR, build_grab, temp_file, temp_dir
+from test.util import TEST_DIR, build_grab, temp_dir
 from test.util import BaseGrabTestCase
 
 HTML = """

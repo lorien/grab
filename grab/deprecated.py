@@ -87,7 +87,7 @@ class DeprecatedThings(object):
             raise GrabMisuseError('Method `find_link` accepts only '
                                   'byte-string argument')
         href_pattern = make_unicode(href_pattern)
-        for elem, attr, link, pos in self.tree.iterlinks():
+        for elem, _, link, _ in self.tree.iterlinks():
             if elem.tag == 'a' and href_pattern in link:
                 return link
         return None
@@ -103,7 +103,7 @@ class DeprecatedThings(object):
         if make_absolute:
             self.tree.make_links_absolute(self.response.url)
 
-        for elem, attr, link, pos in self.tree.iterlinks():
+        for elem, _, link, _ in self.tree.iterlinks():
             if elem.tag == 'a':
                 match = rex.search(link)
                 if match:

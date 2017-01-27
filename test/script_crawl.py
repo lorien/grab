@@ -25,7 +25,7 @@ class FailSpider(Spider):
         yield Task('page', url=self.url)
 
     def task_page(self, grab, task):
-        1/0
+        raise Exception('Shit happens!')
 
 
 class ScriptCrawlTestCase(BaseGrabTestCase):

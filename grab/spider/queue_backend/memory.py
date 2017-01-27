@@ -33,7 +33,7 @@ class QueueBackend(QueueInterface):
         self.schedule_list = [x for idx, x in enumerate(self.schedule_list)
                               if idx not in removed_indexes]
 
-        priority, task = self.queue_object.get(block=False)
+        _, task = self.queue_object.get(block=False)
         return task
 
     def size(self):

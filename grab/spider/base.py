@@ -1,12 +1,6 @@
 from __future__ import absolute_import
-
 import logging
 import time
-
-try:
-    from urlparse import urljoin
-except ImportError:
-    from urllib.parse import urljoin
 from random import randint
 from six.moves import queue
 from copy import deepcopy
@@ -578,7 +572,7 @@ class Spider(object):
                         'allowed limit (%d). Trying to add '
                         'new tasks.' % (queue_size, min_limit))
                     try:
-                        for x in six.moves.range(min_limit - queue_size):
+                        for _ in six.moves.range(min_limit - queue_size):
                             item = next(task_generator)
                             logger_verbose.debug('Got new item from generator. '
                                                  'Processing it.')
@@ -697,7 +691,6 @@ class Spider(object):
         self.prepare_parser()
         process_request_count = 0
         try:
-            recent_task_time = time.time()
             while True:
                 try:
                     result = self.network_result_queue.get(block=False)
@@ -706,21 +699,13 @@ class Spider(object):
                     time.sleep(0.1)
                     self.is_parser_idle.clear()
                     logger_verbose.debug('Network result queue is empty')
-                    # Set `waiting_shutdown_event` only after 1 seconds
-                    # of waiting for tasks to avoid
-                    # race-condition issues
-                    # if time.time() - recent_task_time > 1:
-                    #    self.waiting_shutdown_event.set()
                     if self.shutdown_event.is_set():
                         logger_verbose.debug('Got shutdown event')
                         return
                 else:
                     process_request_count += 1
-                    recent_task_time = time.time()
                     if self.parser_mode:
                         self.stat.reset()
-                    # if self.waiting_shutdown_event.is_set():
-                    #    self.waiting_shutdown_event.clear()
                     try:
                         handler = self.find_task_handler(result['task'])
                     except NoTaskHandler as ex:
@@ -748,8 +733,6 @@ class Spider(object):
         except Exception as ex:
             logging.error('', exc_info=ex)
             raise
-            # finally:
-            #    self.waiting_shutdown_event.set()
 
     def process_network_result_with_handler(self, result, handler):
         handler_name = getattr(handler, '__name__', 'NONE')
@@ -893,9 +876,9 @@ class Spider(object):
         Main method. All work is done here.
         """
         if self.mp_mode:
-            from multiprocessing import Event, Queue
+            from multiprocessing import Queue
         else:
-            from multiprocessing.dummy import Event, Queue
+            from multiprocessing.dummy import Queue
 
         self.timer.start('total')
 
@@ -941,7 +924,6 @@ class Spider(object):
             shutdown_countdown = 10
             while self.work_allowed:
                 #print('!')
-                free_threads = self.transport.get_free_threads_number()
                 # Load new task only if:
                 # 1) network transport has free threads
                 # 2) network result queue is not full
@@ -986,7 +968,7 @@ class Spider(object):
                                 self.stop()
                                 break
                         else:
-                            shutdown_counter = 10
+                            shutdown_countdown = 10
                     elif isinstance(task, bool) and (task is True):
                         # If received task is True
                         # and there is no active network threads then

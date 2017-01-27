@@ -23,7 +23,7 @@ class TestSpider(BaseGrabTestCase):
                 yield Data('foo', num=1)
 
             def data_foo(self, num):
-                1/0
+                raise Exception('Shit happens!')
 
         bot = build_spider(TestSpider)
         bot.setup_queue()

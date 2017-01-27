@@ -25,7 +25,7 @@ class ParserPipeline(object):
         self.requests_per_process = requests_per_process
 
         self.parser_pool = []
-        for x in range(self.pool_size):
+        for _ in range(self.pool_size):
             is_parser_idle, proc = self.start_parser_process()
             self.parser_pool.append({
                 'is_parser_idle': is_parser_idle,

@@ -167,12 +167,10 @@ class CurlTransport(BaseTransport):
                 text = text.encode('utf-8')
             self.request_body += text
 
-        """
-        if _type == pycurl.INFOTYPE_TEXT:
-            if self.request_log is None:
-                self.request_log = ''
-            self.request_log += text
-        """
+        #if _type == pycurl.INFOTYPE_TEXT:
+        #    if self.request_log is None:
+        #        self.request_log = ''
+        #    self.request_log += text
 
         if self.verbose_logging:
             if _type in (pycurl.INFOTYPE_TEXT, pycurl.INFOTYPE_HEADER_IN,

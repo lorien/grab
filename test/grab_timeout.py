@@ -1,10 +1,7 @@
 # coding: utf-8
-from test.util import build_grab, exclude_grab_transport
+from test.util import build_grab
 from test.util import BaseGrabTestCase
-import tornado.gen
-from tornado.ioloop import IOLoop
-
-from grab.error import (GrabInternalError, GrabTimeoutError)
+from grab.error import GrabTimeoutError
 
 
 class GrabTimeoutCase(BaseGrabTestCase):
@@ -17,7 +14,7 @@ class GrabTimeoutCase(BaseGrabTestCase):
             server.set_status(200)
             server.write('x')
             server.write('y')
-            for x in range(4):
+            for _ in range(4):
                 yield {'type': 'sleep', 'time': 0.5}
                 server.write('y')
                 server.flush()

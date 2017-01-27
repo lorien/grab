@@ -1,12 +1,10 @@
 # coding: utf-8
-from grab import GrabMisuseError, GrabError
-from grab.error import GrabTooManyRedirectsError
-from grab.base import reset_request_counter
+import six
+
 from test.util import build_grab, temp_file
 from test.util import BaseGrabTestCase
-import six
-import tempfile
-import os
+from grab import GrabMisuseError, GrabError
+from grab.base import reset_request_counter
 
 
 class GrabApiTestCase(BaseGrabTestCase):
@@ -93,7 +91,7 @@ class GrabApiTestCase(BaseGrabTestCase):
 
         # Make 10 requests in concurrent threads
         threads = []
-        for x in six.moves.range(10):
+        for _ in six.moves.range(10):
             th = threading.Thread(target=func)
             threads.append(th)
             th.start()

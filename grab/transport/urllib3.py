@@ -13,7 +13,7 @@ from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
 from urllib3.exceptions import ProxySchemeUnknown
 import six
-from six.moves.urllib.parse import urlencode, urlsplit
+from six.moves.urllib.parse import urlsplit
 import random
 from six.moves.http_cookiejar import CookieJar
 import time

@@ -3,8 +3,7 @@ from grab.util.module import (build_spider_registry, SPIDER_REGISTRY,
                               load_spider_class)
 from grab.spider import Spider
 from grab.spider.error import SpiderInternalError
-import os
-import sys
+
 
 class BaseSpider(Spider):
     class Meta:
@@ -57,6 +56,6 @@ class UtilModuleTestCase(TestCase):
 
     def test_load_spider_class_error(self):
         cfg = self.build_config(['test.util_module'])
-        reg = build_spider_registry(cfg)
+        build_spider_registry(cfg)
         self.assertRaises(SpiderInternalError, load_spider_class,
                           cfg, 'first_spider_zzz')

@@ -1,7 +1,4 @@
 # coding: utf-8
-import mock
-import pycurl
-
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 
@@ -10,21 +7,19 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_nonascii_hostname(self):
-        pass
-        """
-        # ******************************
-        # Does not work on python3, why?
-        # On python3 real network call is performed
-        # ******************************
-        g = build_grab()
-        with mock.patch.object(g.transport.curl, 'perform'):
-            with mock.patch.object(g.transport.curl, 'setopt') as patch:
-                g.go('http://превед.рф/')
-                args = dict((x[0][0], x[0][1]) for x in patch.call_args_list) 
-                self.assertEqual(args[pycurl.URL],
-                                 'http://xn--b1aebb1cg.xn--p1ai/')
-        """
+    #def test_nonascii_hostname(self):
+    #    #TODO: FIXME
+    #    # ******************************
+    #    # Does not work on python3, why?
+    #    # On python3 real network call is performed
+    #    # ******************************
+    #    g = build_grab()
+    #    with mock.patch.object(g.transport.curl, 'perform'):
+    #        with mock.patch.object(g.transport.curl, 'setopt') as patch:
+    #            g.go('http://превед.рф/')
+    #            args = dict((x[0][0], x[0][1]) for x in patch.call_args_list) 
+    #            self.assertEqual(args[pycurl.URL],
+    #                             'http://xn--b1aebb1cg.xn--p1ai/')
 
     def test_nonascii_path(self):
         g = build_grab()

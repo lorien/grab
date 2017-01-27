@@ -2,7 +2,7 @@ import six
 from threading import Thread
 from six.moves.queue import Queue, Empty
 
-from grab.error import GrabTooManyRedirectsError, GrabNetworkError
+from grab.error import GrabNetworkError
 
 ERROR_TOO_MANY_REFRESH_REDIRECTS = -2
 ERROR_ABBR = {
@@ -31,7 +31,7 @@ def worker_thread(task_queue, result_queue, freelist, shutdown_event):
                 }
                 try:
                     grab.request()
-                except GrabNetworkError as ex:
+                except GrabNetworkError:
                     result.update({
                         'ok': False,
                     })
@@ -49,7 +49,7 @@ class ThreadedTransport(object):
 
         self.workers = []
         self.freelist = []
-        for x in six.moves.range(self.thread_number):
+        for _ in six.moves.range(self.thread_number):
             th = Thread(target=worker_thread, args=[self.task_queue,
                                                     self.result_queue,
                                                     self.freelist,

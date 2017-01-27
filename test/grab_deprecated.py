@@ -1,9 +1,6 @@
 # coding: utf-8
-from weblib.etree import parse_html
 from weblib.error import DataNotFound
 from grab.error import GrabMisuseError
-from tempfile import mkstemp
-import os
 import re
 
 from test.util import build_grab, temp_file

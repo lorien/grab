@@ -1,13 +1,7 @@
 import os
-import shutil
-import tempfile
-import functools
 from test_server import TestServer
 from unittest import TestCase
 import logging
-from six.moves.urllib.request import urlopen
-import socket
-import time
 from contextlib import contextmanager
 from tempfile import mkdtemp, mkstemp
 from shutil import rmtree
@@ -75,7 +69,7 @@ def build_spider(cls, **kwargs):
 class BaseGrabTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.server = start_server()#GLOBAL['test_server']
+        cls.server = start_server()
 
     def setUp(self):
         self.server.reset()
@@ -105,32 +99,7 @@ def start_server():
     server = TestServer(address=ADDRESS, port=TEST_SERVER_PORT,
                         extra_ports=[EXTRA_PORT1, EXTRA_PORT2])
     server.start()
-    '''
-    # Ensure that test server works
-    old_timeout = socket.getdefaulttimeout()
-    ok = False
-    for x in range(6):
-        socket.setdefaulttimeout(0.5)
-        try:
-            urlopen('http://localhost:%d/' % TEST_SERVER_PORT).read()
-        except Exception as ex:
-            logger.error('', exc_info=ex)
-            time.sleep(0.1)
-        else:
-            ok = True
-            break
-    socket.setdefaulttimeout(old_timeout)
-    if not ok:
-        raise Exception('Test server does not respond.')
-    else:
-    '''
-    #GLOBAL['test_server'] = server
     return server
-
-
-def stop_server():
-    logger.debug('Stopping test server')
-    #GLOBAL['test_server'].stop()
 
 
 def exclude_grab_transport(*names):

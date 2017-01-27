@@ -1,10 +1,4 @@
-import six
 from grab.spider import Spider, Task
-from tempfile import mkstemp
-import os
-from six import StringIO
-import mock
-import sys
 
 from test.util import BaseGrabTestCase, build_spider
 
@@ -30,7 +24,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 self.stat.inc('foo')
 
             def task_page_fail(self, grab, task):
-                1/0
+                raise Exception('Shit happens!')
 
         bot = build_spider(TestSpider)
         bot.setup_queue()
@@ -53,5 +47,5 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
-        stats = bot.render_stats()
-        stats = bot.render_stats(timing=True)
+        bot.render_stats()
+        bot.render_stats(timing=True)

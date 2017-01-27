@@ -1,5 +1,4 @@
 import functools
-import logging
 
 from weblib.error import ResponseNotValid
 

@@ -1,9 +1,6 @@
-import six
 from grab.spider import Spider, Task
-from grab.spider.error import SpiderError, FatalError
+from grab.spider.error import SpiderError
 import os
-import signal
-import mock
 from grab.spider.decorators import integrity
 
 from test.util import BaseGrabTestCase, build_spider, multiprocess_mode
@@ -69,7 +66,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         class TestSpider(Spider):
             def task_generator(self):
-                for x in range(3):
+                for _ in range(3):
                     yield Task('page', url=url)
 
             def task_page(self, grab, task):
@@ -91,28 +88,26 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.run()
         self.assertEqual(1, len(set(bot.stat.collections['pid'])))
 
-    '''
-    @multiprocess_mode(True)
-    def test_task_callback(self):
-        """
-        This freezes the sipder in MP-mode
-        Traceback (most recent call last):
-          File "/usr/lib/python2.7/multiprocessing/queues.py", line 266, in _feed
-            send(obj)
-        PicklingError: Can't pickle <class 'test.spider_multiprocess.FuncWithState'>: attribute lookup test.spider_multiprocess.FuncWithState failed
+    #@multiprocess_mode(True)
+    #def test_task_callback(self):
+    #    """
+    #    This freezes the sipder in MP-mode
+    #    Traceback (most recent call last):
+    #      File "/usr/lib/python2.7/multiprocessing/queues.py", line 266, in _feed
+    #        send(obj)
+    #    PicklingError: Can't pickle <class 'test.spider_multiprocess.FuncWithState'>: attribute lookup test.spider_multiprocess.FuncWithState failed
 
-        """
-        class TestSpider(Spider):
-            def task_page(self, grab, task):
-                pass
+    #    """
+    #    class TestSpider(Spider):
+    #        def task_page(self, grab, task):
+    #            pass
 
-        class FuncWithState(object):
-            def __call__(self, grab, task):
-                pass
+    #    class FuncWithState(object):
+    #        def __call__(self, grab, task):
+    #            pass
 
-        func = FuncWithState()
-        bot = build_spider(TestSpider)
-        bot.setup_queue()
-        bot.add_task(Task(url=self.server.get_url(), callback=func))
-        bot.run()
-    '''
+    #    func = FuncWithState()
+    #    bot = build_spider(TestSpider)
+    #    bot.setup_queue()
+    #    bot.add_task(Task(url=self.server.get_url(), callback=func))
+    #    bot.run()

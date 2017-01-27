@@ -208,9 +208,9 @@ class Grab(DeprecatedThings):
     # Complex config items which points to mutable objects
     mutable_config_keys = copy(MUTABLE_CONFIG_KEYS)
 
-    """
-    Public methods
-    """
+    #
+    # Public methods
+    #
 
     def __init__(self, document_body=None,
                  transport='pycurl', **kwargs):
@@ -631,9 +631,9 @@ class Grab(DeprecatedThings):
             logger.debug('Proxy list is empty')
 
 
-    """
-    Private methods
-    """
+    # 
+    # Private methods
+    #
 
     def common_headers(self):
         """

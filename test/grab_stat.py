@@ -1,7 +1,4 @@
-# coding: utf-8
-from test.util import build_grab
 from test.util import BaseGrabTestCase
-import six
 
 from grab.stat import Stat
 

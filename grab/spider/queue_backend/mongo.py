@@ -12,7 +12,6 @@ import pymongo
 from datetime import datetime
 
 from grab.spider.queue_backend.base import QueueInterface
-from grab.spider.error import SpiderMisuseError
 
 logger = logging.getLogger('grab.spider.queue_backend.mongo')
 

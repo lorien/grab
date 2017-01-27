@@ -53,7 +53,7 @@ def main(project_name, template, **kwargs):
             'PROJECT_NAME': project_name,
             'PROJECT_NAME_CAMELCASE': project_name_camelcase,
         }
-        for base, dir_names, file_names in os.walk(project_dir):
+        for base, _, file_names in os.walk(project_dir):
             for file_name in file_names:
                 if file_name.endswith('.py'):
                     file_path = os.path.join(base, file_name)

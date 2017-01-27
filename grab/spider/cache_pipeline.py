@@ -1,4 +1,4 @@
-from threading import Event, Thread, Lock
+from threading import Event, Thread
 from six.moves.queue import Queue, Empty
 import time
 

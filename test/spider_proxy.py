@@ -51,7 +51,7 @@ class TestSpiderCase(BaseGrabTestCase):
             bot = build_spider(SimpleSpider, thread_number=1)
             bot.load_proxylist(proxy_file, 'text_file')
             bot.setup_queue()
-            for x in six.moves.range(10):
+            for _ in six.moves.range(10):
                 bot.add_task(Task('baz', 'http://yandex.ru'))
             bot.run()
 
@@ -85,7 +85,7 @@ class TestSpiderCase(BaseGrabTestCase):
             bot = build_spider(SimpleSpider, thread_number=1)
             bot.load_proxylist(proxy_file, 'text_file', auto_change=False)
             bot.setup_queue()
-            for x in six.moves.range(1):
+            for _ in six.moves.range(1):
                 bot.add_task(Task('baz', 'http://yandex.ru'))
             bot.run()
 

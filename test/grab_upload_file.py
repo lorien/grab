@@ -1,11 +1,8 @@
 # coding: utf-8
-from grab import UploadContent, UploadFile
-import tempfile
 import os
-import pycurl
 
-from test.util import build_grab
-from test.util import BaseGrabTestCase
+from grab import UploadContent, UploadFile
+from test.util import build_grab, temp_file, BaseGrabTestCase
 
 
 class TestUploadContent(BaseGrabTestCase):
@@ -84,66 +81,66 @@ class TestUploadContent(BaseGrabTestCase):
     # ****************
 
     def test_upload_file(self):
-        g = self.prepare_form_grab()
-        fh, file_path = tempfile.mkstemp()
-        data = b'foo'
-        with open(file_path, 'wb') as out:
-            out.write(data)
-        upload_data = UploadFile(file_path)
-        g.doc.set_input('image', upload_data)
-        g.doc.submit(make_request=False)
-        post = dict(g.config['multipart_post'])
-        self.assertTrue(isinstance(post['image'], UploadFile))
+        with temp_file() as file_path:
+            g = self.prepare_form_grab()
+            data = b'foo'
+            with open(file_path, 'wb') as out:
+                out.write(data)
+            upload_data = UploadFile(file_path)
+            g.doc.set_input('image', upload_data)
+            g.doc.submit(make_request=False)
+            post = dict(g.config['multipart_post'])
+            self.assertTrue(isinstance(post['image'], UploadFile))
 
-        g.doc.submit()
-        self.assertEqual(data,
-                         self.server.request['files']['image'][0]['body'])
-        filename = os.path.split(file_path)[1]
-        self.assertEqual(filename,
-                         self.server.request['files']['image'][0]['filename'])
-        self.assertEqual(
-            'application/octet-stream',
-            self.server.request['files']['image'][0]['content_type'])
+            g.doc.submit()
+            self.assertEqual(data,
+                             self.server.request['files']['image'][0]['body'])
+            _, filename = os.path.split(file_path)
+            self.assertEqual(filename,
+                             self.server.request['files']['image'][0]['filename'])
+            self.assertEqual(
+                'application/octet-stream',
+                self.server.request['files']['image'][0]['content_type'])
 
     def test_upload_file_custom_filename(self):
-        g = self.prepare_form_grab()
-        fh, file_path = tempfile.mkstemp()
-        data = b'foo'
-        with open(file_path, 'wb') as out:
-            out.write(data)
-        upload_data = UploadFile(file_path, filename='avatar.jpg')
-        g.doc.set_input('image', upload_data)
-        g.doc.submit(make_request=False)
-        post = dict(g.config['multipart_post'])
-        self.assertTrue(isinstance(post['image'], UploadFile))
+        with temp_file() as file_path:
+            g = self.prepare_form_grab()
+            data = b'foo'
+            with open(file_path, 'wb') as out:
+                out.write(data)
+            upload_data = UploadFile(file_path, filename='avatar.jpg')
+            g.doc.set_input('image', upload_data)
+            g.doc.submit(make_request=False)
+            post = dict(g.config['multipart_post'])
+            self.assertTrue(isinstance(post['image'], UploadFile))
 
-        g.doc.submit()
-        self.assertEqual(data,
-                         self.server.request['files']['image'][0]['body'])
-        self.assertEqual('avatar.jpg',
-                         self.server.request['files']['image'][0]['filename'])
-        self.assertEqual(
-            'image/jpeg',
-            self.server.request['files']['image'][0]['content_type'])
+            g.doc.submit()
+            self.assertEqual(data,
+                             self.server.request['files']['image'][0]['body'])
+            self.assertEqual('avatar.jpg',
+                             self.server.request['files']['image'][0]['filename'])
+            self.assertEqual(
+                'image/jpeg',
+                self.server.request['files']['image'][0]['content_type'])
 
     def test_upload_file_custom_content_type(self):
-        g = self.prepare_form_grab()
-        fh, file_path = tempfile.mkstemp()
-        data = b'foo'
-        with open(file_path, 'wb') as out:
-            out.write(data)
-        upload_data = UploadFile(file_path, filename='avatar.jpg',
-                                 content_type='application/grab')
-        g.doc.set_input('image', upload_data)
-        g.doc.submit(make_request=False)
-        post = dict(g.config['multipart_post'])
-        self.assertTrue(isinstance(post['image'], UploadFile))
+        with temp_file() as file_path:
+            g = self.prepare_form_grab()
+            data = b'foo'
+            with open(file_path, 'wb') as out:
+                out.write(data)
+            upload_data = UploadFile(file_path, filename='avatar.jpg',
+                                     content_type='application/grab')
+            g.doc.set_input('image', upload_data)
+            g.doc.submit(make_request=False)
+            post = dict(g.config['multipart_post'])
+            self.assertTrue(isinstance(post['image'], UploadFile))
 
-        g.doc.submit()
-        self.assertEqual(data,
-                         self.server.request['files']['image'][0]['body'])
-        self.assertEqual('avatar.jpg',
-                         self.server.request['files']['image'][0]['filename'])
-        self.assertEqual(
-            'application/grab',
-            self.server.request['files']['image'][0]['content_type'])
+            g.doc.submit()
+            self.assertEqual(data,
+                             self.server.request['files']['image'][0]['body'])
+            self.assertEqual('avatar.jpg',
+                             self.server.request['files']['image'][0]['filename'])
+            self.assertEqual(
+                'application/grab',
+                self.server.request['files']['image'][0]['content_type'])

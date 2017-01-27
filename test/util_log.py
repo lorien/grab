@@ -1,7 +1,5 @@
 # coding: utf-8
 from unittest import TestCase
-import sys
-from six import BytesIO
 
 from grab.util.log import repr_value, print_dict
 
@@ -32,16 +30,3 @@ class LogModuleTestCase(TestCase):
         print_dict({'foo': 'bar'})
         print_dict({u'foo': u'bar'})
         print_dict({u'foo': 1})
-
-"""
-def repr_value(val):
-    if isinstance(val, six.text_type):
-        return val.encode('utf-8')
-    elif isinstance(val, (list, tuple)):
-        return '[%s]' % ', '.join(repr_value(x) for x in val)
-    elif isinstance(val, dict):
-        return '{%s}' % ', '.join('%s: %s' % (repr_value(x), repr_value(y))
-                                  for x, y in val.items())
-    else:
-        return str(val)
-"""

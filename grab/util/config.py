@@ -1,10 +1,11 @@
 from copy import deepcopy
-from grab.util.default_config import DEFAULT_SPIDER_GLOBAL_CONFIG
 import importlib
+
+from grab.util.default_config import DEFAULT_SPIDER_GLOBAL_CONFIG
 
 
 def update_dict(target, source, overwrite=False):
-    for key, val in source.items():
+    for key in source.keys():
         if key not in target or overwrite:
             target[key] = deepcopy(source[key])
     return target

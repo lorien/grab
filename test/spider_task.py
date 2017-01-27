@@ -1,14 +1,11 @@
-import six
-from grab import Grab
-from collections import defaultdict
+from weblib.error import ResponseNotValid
 
-import grab.spider.base
 from grab import Grab
+import grab.spider.base
 from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
 from test.util import (BaseGrabTestCase, build_grab, build_spider,
                        multiprocess_mode)
 from grab.spider.error import SpiderError
-from weblib.error import ResponseNotValid
 
 
 class SimpleSpider(Spider):
@@ -325,14 +322,14 @@ class TestSpider(BaseGrabTestCase):
     def test_multiple_internal_worker_error(self):
         class TestSpider(Spider):
             def process_network_result_with_handler(*args, **kwargs):
-                1/0
+                raise Exception('Shit happens!')
 
             def task_page(self):
                 pass
 
         bot = build_spider(TestSpider, )
         bot.setup_queue()
-        for x in range(5):
+        for _ in range(5):
             bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
         self.assertTrue(1 < bot.stat.counters['parser-pipeline-restore'])

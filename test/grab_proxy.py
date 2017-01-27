@@ -2,7 +2,6 @@
 from test.util import build_grab, temp_file
 from test.util import (BaseGrabTestCase, TEST_SERVER_PORT,
                        EXTRA_PORT1, EXTRA_PORT2)
-from test_server import TestServer
 import six
 from grab.proxylist import BaseProxySource
 

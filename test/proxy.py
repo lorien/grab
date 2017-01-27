@@ -2,7 +2,6 @@
 from test.util import build_grab, get_temp_file
 from test.util import BaseGrabTestCase
 
-from grab import Grab
 from grab.proxylist import ProxyList
 
 DEFAULT_PLIST_DATA = \

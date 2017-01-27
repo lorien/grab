@@ -4,10 +4,9 @@ import unittest
 import sys
 from optparse import OptionParser
 import logging
-from copy import copy
 import threading
 
-from test.util import GLOBAL, start_server, stop_server
+from test.util import GLOBAL
 
 # **********
 # Grab Tests
@@ -60,10 +59,8 @@ GRAB_TEST_LIST = (
     'test.script_crawl',
     #'test.script_start_project',
     'test.grab_error',
-    'test.selector_deprecated',
     'test.grab_deprecated',
     'test.ext_pyquery',
-    'test.tools_deprecated',
 )
 
 # ************
@@ -116,7 +113,7 @@ def main():
                       help='Do profiling')
     parser.add_option('-v', '--verbose', action='store_true', default=False,
                       help='Enable verbose logging')
-    opts, args = parser.parse_args()
+    opts, _ = parser.parse_args()
 
     GLOBAL['grab_transport'] = opts.grab_transport
     GLOBAL['spider_transport'] = opts.spider_transport
@@ -170,8 +167,6 @@ def main():
                     suite.addTest(test)
 
     runner = unittest.TextTestRunner()
-    #start_server()
-
 
     if opts.profile:
         import cProfile

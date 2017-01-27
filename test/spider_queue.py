@@ -34,7 +34,7 @@ class SpiderQueueMixin(object):
         bot = build_spider(self.SimpleSpider)
         self.setup_queue(bot)
         bot.task_queue.clear()
-        for x in six.moves.range(5):
+        for _ in six.moves.range(5):
             bot.add_task(Task('page', url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
         bot.run()

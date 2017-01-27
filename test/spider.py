@@ -2,9 +2,6 @@ import six
 from grab import Grab
 from grab.spider import Spider, Task
 from grab.spider.error import SpiderError, FatalError
-import os
-import signal
-import mock
 
 from test.util import BaseGrabTestCase, build_spider
 
@@ -85,7 +82,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         class TestSpider(Spider):
             def task_generator(self):
-                for x in six.moves.range(1111):
+                for _ in six.moves.range(1111):
                     yield Task('page', url=server.get_url())
 
             def task_page(self, grab, task):
@@ -119,19 +116,17 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
 
-    """
-    # DOES NOT WORK
-    def test_keyboard_interrupt(self):
-        class TestSpider(Spider):
-            def task_page(self, grab, task):
-                os.kill(os.getpid(), signal.SIGINT)
+    ## TODO: FIXME: DOES NOT WORK
+    #def test_keyboard_interrupt(self):
+    #    class TestSpider(Spider):
+    #        def task_page(self, grab, task):
+    #            os.kill(os.getpid(), signal.SIGINT)
 
-        bot = build_spider(TestSpider)
-        bot.setup_queue()
-        bot.add_task(Task('page', url=self.server.get_url()))
-        bot.run()
-        self.assertTrue(bot.interrupted)
-    """
+    #    bot = build_spider(TestSpider)
+    #    bot.setup_queue()
+    #    bot.add_task(Task('page', url=self.server.get_url()))
+    #    bot.run()
+    #    self.assertTrue(bot.interrupted)
 
     def test_fallback_handler_by_default_name(self):
         class TestSpider(Spider):
@@ -222,13 +217,13 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         bot = build_spider(TestSpider)
         bot.setup_queue()
-        for x in six.moves.range(5):
+        for _ in six.moves.range(5):
             bot.add_task(Task('page', url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
         bot.run()
         self.assertEqual(0, bot.task_queue.size())
 
-        for x in six.moves.range(5):
+        for _ in six.moves.range(5):
             bot.add_task(Task('keyboard_interrupt_page', url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
         bot.run()

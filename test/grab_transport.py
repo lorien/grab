@@ -73,10 +73,10 @@ class TestTransportTestCase(BaseGrabTestCase):
 
     def test_invalid_transport_nodot(self):
         def foo():
-            g = Grab(transport='zzzzzzzzzz')
+            Grab(transport='zzzzzzzzzz')
         self.assertRaises(GrabMisuseError, foo)
 
     def test_invalid_transport_not_collable_or_string(self):
         def foo():
-            g = Grab(transport=4)
+            Grab(transport=4)
         self.assertRaises(GrabMisuseError, foo)

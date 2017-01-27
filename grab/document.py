@@ -918,7 +918,7 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
         Save response body to file.
         """
 
-        path_dir, path_fname = os.path.split(path)
+        path_dir = os.path.split(path)[0]
         if not os.path.exists(path_dir):
             try:
                 os.makedirs(path_dir)
@@ -999,7 +999,7 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
         Save response in temporary file and open it in GUI browser.
         """
 
-        fh, path = tempfile.mkstemp()
+        _, path = tempfile.mkstemp()
         self.save(path)
         webbrowser.open('file://' + path)
 

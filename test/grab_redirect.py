@@ -1,4 +1,3 @@
-from grab import Grab
 from grab.error import GrabTooManyRedirectsError
 from test.util import BaseGrabTestCase, build_grab
 

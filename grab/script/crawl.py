@@ -91,7 +91,7 @@ def main(spider_name, thread_number=None,
     if hasattr(spider_class, 'setup_arg_parser'):
         parser = ArgumentParser()
         spider_class.setup_arg_parser(parser)
-        opts, trash = parser.parse_known_args()
+        opts, _ = parser.parse_known_args()
         spider_args = vars(opts)
 
     bot = spider_class(

@@ -1,13 +1,10 @@
-from grab.spider import Spider, Task
-from grab.script import crawl
-from grab.util.module import SPIDER_REGISTRY
 from unittest import TestCase
 import os
-import subprocess
-from grab.script import start_project
-from grab.error import GrabError
 from argparse import ArgumentParser
 
+from grab.spider import Spider
+from grab.script import start_project
+from grab.error import GrabError
 from test.util import temp_dir
 
 
