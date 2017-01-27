@@ -1,7 +1,6 @@
 import six
-from threading import Lock, Thread
+from threading import Thread
 from six.moves.queue import Queue, Empty
-import time
 
 from grab.error import GrabTooManyRedirectsError, GrabNetworkError
 
@@ -9,10 +8,6 @@ ERROR_TOO_MANY_REFRESH_REDIRECTS = -2
 ERROR_ABBR = {
     ERROR_TOO_MANY_REFRESH_REDIRECTS: 'too-many-refresh-redirects',
 }
-#for key in dir(pycurl):
-#    if key.startswith('E_'):
-#        abbr = key[2:].lower().replace('_', '-')
-#        ERROR_ABBR[getattr(pycurl, key)] = abbr
 
 
 def worker_thread(task_queue, result_queue, freelist, shutdown_event):
@@ -22,7 +17,6 @@ def worker_thread(task_queue, result_queue, freelist, shutdown_event):
         except Empty:
             if shutdown_event.is_set():
                 return
-            #time.sleep(0.1)
         else:
             try:
                 freelist.pop()
@@ -52,7 +46,6 @@ class ThreadedTransport(object):
         self.thread_number = thread_number
         self.task_queue = Queue()
         self.result_queue = Queue()
-        #self.registry = {}
 
         self.workers = []
         self.freelist = []
@@ -84,18 +77,11 @@ class ThreadedTransport(object):
     def iterate_results(self):
         while True:
             try:
-                # Should be block=False
-                # but then urllib3 cache tests fails :(
-                # TRY to fix it with same method as in cache pipeline
-                # lock when inc/dec counter of active tasks + check 
-                # that lenght of queues is zero
-                result = self.result_queue.get(block=True, timeout=0.001)
+                result = self.result_queue.get_nowait()
             except Empty:
                 break
             else:
                 # FORMAT: {ok, grab, grab_config_backup, task, emsg, error_abbr}
-
                 #grab.doc.error_code = None
                 #grab.doc.error_msg = None
-
                 yield result
