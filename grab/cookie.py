@@ -279,4 +279,4 @@ class CookieManager(object):
         """
         mocked_req = MockRequest(req)
         self.cookiejar.add_cookie_header(mocked_req)
-        return mocked_req.get_new_headers().get('Cookie') 
+        return mocked_req.get_new_headers().get('Cookie')

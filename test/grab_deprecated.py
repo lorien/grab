@@ -127,20 +127,6 @@ class GrabApiTestCase(BaseGrabTestCase):
         g.assert_css('h1')
         self.assertRaises(DataNotFound, g.assert_css, 'h2')
 
-    def test_deprecated_filter_argument(self):
-        data = b'''<h1>tet</h1>'''
-        g = build_grab(data)
-        self.assertRaises(GrabMisuseError, g.xpath_number, '//h1',
-                          filter=lambda: True)
-        self.assertRaises(GrabMisuseError, g.xpath_text, '//h1',
-                          filter=lambda: True)
-        self.assertRaises(GrabMisuseError, g.xpath_list, '//h1',
-                          filter=lambda: True)
-        self.assertRaises(GrabMisuseError, g.xpath_one, '//h1',
-                          filter=lambda: True)
-        self.assertRaises(GrabMisuseError, g.xpath, '//h1',
-                          filter=lambda: True)
-
     def test_css(self):
         data = b'''<h1>tet</h1>'''
         g = build_grab(data)

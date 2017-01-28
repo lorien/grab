@@ -56,7 +56,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         g.doc.body = b'def'
 
         def bad_func():
-            g.doc.body = u'Спутник' 
+            g.doc.body = u'Спутник'
 
         self.assertRaises(GrabMisuseError, bad_func)
 
@@ -79,3 +79,8 @@ class GrabSimpleTestCase(BaseGrabTestCase):
     #    #g.go('https://github.com/lorien/grab/issues/199#issuecomment-269854859')
     #    g.go('https://en.wikipedia.org/wiki/Emoji')
     #    g.doc.select("//*")
+
+    def test_doc_tree_notags_document(self):
+        data = b'test'
+        g = build_grab(data)
+        self.assertEqual(g.doc('//html').text(), 'test')

@@ -291,7 +291,8 @@ class DomTreeExtension(object):
         else:
             return self.build_html_tree()
 
-    def _build_dom(self, content, mode):
+    @classmethod
+    def _build_dom(cls, content, mode):
         assert mode in ('html', 'xml')
         if mode == 'html':
             if not hasattr(THREAD_STORAGE, 'html_parser'):
@@ -331,11 +332,12 @@ class DomTreeExtension(object):
             try:
                 self._lxml_tree = self._build_dom(body, 'html')
             except Exception as ex:
+                # WTF: does this really could happens?
                 if (isinstance(ex, ParserError)
                         and 'Document is empty' in str(ex)
                         and '<html' not in body):
                     # Fix for "just a string" body
-                    body = '<html>%s</html>'.format(body)
+                    body = '<html>%s</html>' % body
                     self._lxml_tree = self._build_dom(body, 'html')
 
                 elif (isinstance(ex, TypeError)
@@ -960,7 +962,7 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
         rel_path = hashed_path(location, ext=ext)
         path = os.path.join(basedir, rel_path)
         if not os.path.exists(path):
-            path_dir, path_fname = os.path.split(path)
+            path_dir, _ = os.path.split(path)
             try:
                 os.makedirs(path_dir)
             except OSError:

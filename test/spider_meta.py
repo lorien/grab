@@ -12,19 +12,19 @@ class SpiderMetaTestCase(BaseGrabTestCase):
             pass
         self.assertEqual(Child.Meta.abstract, False)
 
-        class Child(Spider):
+        class AnotherChild(Spider):
             class Meta:
                 abstract = True
-        self.assertEqual(Child.Meta.abstract, True)
+        self.assertEqual(AnotherChild.Meta.abstract, True)
 
         class ChildOfChild(Child):
             pass
         self.assertEqual(ChildOfChild.Meta.abstract, False)
 
-        class ChildOfChild(Child):
+        class AnoterhChildOfChild(Child):
             class Meta:
                 abstract = True
-        self.assertEqual(ChildOfChild.Meta.abstract, True)
+        self.assertEqual(AnoterhChildOfChild.Meta.abstract, True)
 
     def test_meta_inheritance(self):
         class SomeSpider(Spider):

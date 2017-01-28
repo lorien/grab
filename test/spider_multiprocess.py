@@ -1,5 +1,4 @@
 from grab.spider import Spider, Task
-from grab.spider.error import SpiderError
 import os
 from grab.spider.decorators import integrity
 

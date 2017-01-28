@@ -79,7 +79,7 @@ class TestSpider(BaseGrabTestCase):
         self.assertEqual({'age': 22}, data.get('person'))
 
     def test_things_yiled_from_data_handler(self):
-        server = self.server 
+        server = self.server
 
         class TestSpider(Spider):
             def prepare(self):

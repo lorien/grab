@@ -33,7 +33,7 @@ class QueueBackend(QueueInterface):
 
         self.collection.ensure_index('priority')
 
-        super(QueueInterface, self).__init__()
+        super(QueueBackend, self).__init__(spider_name, **kwargs)
 
     def size(self):
         return self.collection.count()

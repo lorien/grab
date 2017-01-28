@@ -17,7 +17,7 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
     #    with mock.patch.object(g.transport.curl, 'perform'):
     #        with mock.patch.object(g.transport.curl, 'setopt') as patch:
     #            g.go('http://превед.рф/')
-    #            args = dict((x[0][0], x[0][1]) for x in patch.call_args_list) 
+    #            args = dict((x[0][0], x[0][1]) for x in patch.call_args_list)
     #            self.assertEqual(args[pycurl.URL],
     #                             'http://xn--b1aebb1cg.xn--p1ai/')
 

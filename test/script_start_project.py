@@ -2,7 +2,6 @@ from unittest import TestCase
 import os
 from argparse import ArgumentParser
 
-from grab.spider import Spider
 from grab.script import start_project
 from grab.error import GrabError
 from test.util import temp_dir

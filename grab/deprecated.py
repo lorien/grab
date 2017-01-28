@@ -113,38 +113,27 @@ class DeprecatedThings(object):
         return None
 
     @deprecated(use_instead='grab.doc.select().node()')
-    def xpath(self, path, default=NULL, filter=None):
-        if filter is not None:
-            raise GrabMisuseError('Argument `filter` is not supported anymore')
+    def xpath(self, path, default=NULL):
         return self.doc.select(path).node(default=default)
 
     @deprecated(use_instead='grab.doc.select().one()')
-    def xpath_one(self, path, default=NULL, filter=None):
-        if filter is not None:
-            raise GrabMisuseError('Argument `filter` is not supported anymore')
+    def xpath_one(self, path, default=NULL):
         return self.doc.select(path).node(default=default)
 
     @deprecated(use_instead='grab.doc.select()')
-    def xpath_list(self, path, filter=None):
-        if filter is not None:
-            raise GrabMisuseError('Argument `filter` is not supported anymore')
+    def xpath_list(self, path):
         return self.doc.select(path).node_list()
 
     @deprecated(use_instead='grab.doc.select().text()')
-    def xpath_text(self, path, default=NULL, filter=None, smart=False,
+    def xpath_text(self, path, default=NULL, smart=False,
                    normalize_space=True):
-        if filter is not None:
-            raise GrabMisuseError('Argument `filter` is not supported anymore')
         return self.doc.select(path).text(default=default, smart=smart,
                                           normalize_space=normalize_space)
 
     @deprecated(use_instead='grab.doc.select().number()')
-    def xpath_number(self, path, default=NULL, filter=None,
-                     ignore_spaces=False,
+    def xpath_number(self, path, default=NULL, ignore_spaces=False,
                      smart=False, make_int=True):
 
-        if filter is not None:
-            raise GrabMisuseError('Argument `filter` is not supported anymore')
         return self.doc.select(path).number(default=default, smart=smart,
                                             ignore_spaces=ignore_spaces,
                                             make_int=make_int)

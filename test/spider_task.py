@@ -321,7 +321,7 @@ class TestSpider(BaseGrabTestCase):
 
     def test_multiple_internal_worker_error(self):
         class TestSpider(Spider):
-            def process_network_result_with_handler(*args, **kwargs):
+            def process_network_result_with_handler(self, *args, **kwargs):
                 raise Exception('Shit happens!')
 
             def task_page(self):

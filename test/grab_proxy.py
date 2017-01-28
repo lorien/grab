@@ -43,7 +43,7 @@ class TestProxy(BaseGrabTestCase):
             g.load_proxylist(tmp_file, 'text_file')
             self.assertEqual(g.config['proxy_auto_change'], True)
             servers = set()
-            for x in six.moves.range(10):
+            for _ in six.moves.range(10):
                 g.go('http://yandex.ru')
                 servers.add(g.config['proxy'])
 
@@ -98,7 +98,7 @@ class TestProxy(BaseGrabTestCase):
         g.proxylist.load_list(items)
         g.go('http://yandex.ru')
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
-        self.assertTrue(g.doc.headers['listen-port'] in 
+        self.assertTrue(g.doc.headers['listen-port'] in
                         (str(TEST_SERVER_PORT), str(EXTRA_PORT1)))
 
     def test_custom_proxysource(self):

@@ -41,7 +41,7 @@ REQUEST_COUNTER = itertools.count(1)
 GLOBAL_STATE = {
     'dom_build_time': 0,
 }
-MUTABLE_CONFIG_KEYS = ['post', 'multipart_post', 'headers', 'cookies']
+MUTABLE_CONFIG_KEYS = ('post', 'multipart_post', 'headers', 'cookies')
 TRANSPORT_CACHE = {}
 TRANSPORT_ALIAS = {
     'pycurl': 'grab.transport.curl.CurlTransport',
@@ -631,11 +631,12 @@ class Grab(DeprecatedThings):
             logger.debug('Proxy list is empty')
 
 
-    # 
+    #
     # Private methods
     #
 
-    def common_headers(self):
+    @classmethod
+    def common_headers(cls):
         """
         Build headers which sends typical browser.
         """

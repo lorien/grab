@@ -98,10 +98,10 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         self.assertEqual('test_spider', TestSpider.get_spider_name())
 
-        class TestSpider(Spider):
+        class TestSpider2(Spider):
             spider_name = 'foo_bar'
 
-        self.assertEqual('foo_bar', TestSpider.get_spider_name())
+        self.assertEqual('foo_bar', TestSpider2.get_spider_name())
 
     def test_handler_result_none(self):
         class TestSpider(Spider):

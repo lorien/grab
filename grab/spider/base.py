@@ -729,7 +729,7 @@ class Spider(object):
                             if self.parser_requests_per_process:
                                 if (process_request_count >=
                                         self.parser_requests_per_process):
-                                    break
+                                    return
         except Exception as ex:
             logging.error('', exc_info=ex)
             raise
@@ -796,7 +796,7 @@ class Spider(object):
         if task.use_proxylist:
             if self.proxylist_enabled:
                 # Need this to work around
-                # pycurl feature/bug: 
+                # pycurl feature/bug:
                 # pycurl instance uses previously connected proxy server
                 # even if `proxy` options is set with another proxy server
                 grab.setup(connection_reuse=False)
@@ -1048,7 +1048,7 @@ class Spider(object):
                     #print('!processing result %s' % result)
                     if self.cache_pipeline and not from_cache:
                         if result['ok']:
-                            # CACHE: 
+                            # CACHE:
                             self.cache_pipeline.add_task(
                                ('save', (result['task'], result['grab'])),
                             )
@@ -1153,7 +1153,7 @@ class Spider(object):
         * Task instance
         * Data instance.
         * dict:
-          * {type: "stat", counters: [], collections: []} 
+          * {type: "stat", counters: [], collections: []}
         * ResponseNotValid-based exception
         * Arbitrary exception
         """

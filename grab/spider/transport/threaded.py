@@ -38,7 +38,7 @@ def worker_thread(task_queue, result_queue, freelist, shutdown_event):
                 result_queue.put(result)
             finally:
                 freelist.append(1)
-            
+
 
 class ThreadedTransport(object):
     def __init__(self, spider, thread_number):

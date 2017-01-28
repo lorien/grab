@@ -7,7 +7,7 @@ class QueueInterface(object):
     def __init__(self, spider_name, **kwargs):
         pass
 
-    def put(self, task, priority):
+    def put(self, task, priority, schedule_time=None):
         raise NotImplementedError
 
     def get(self):
