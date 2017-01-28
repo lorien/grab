@@ -13,9 +13,6 @@ Grab
 .. image:: https://api.codacy.com/project/badge/Grade/18465ca1458b4c5e99026aafa5b58e98
    :target: https://www.codacy.com/app/lorien/grab?utm_source=github.com&utm_medium=referral&utm_content=lorien/grab&utm_campaign=badger
 
-.. image:: https://img.shields.io/pypi/v/grab.svg
-    :target: https://pypi.python.org/pypi/grab
-
 .. image:: https://readthedocs.org/projects/grab/badge/?version=latest
     :target: http://docs.grablib.org/en/latest/
 

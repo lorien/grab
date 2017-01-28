@@ -332,7 +332,7 @@ class DomTreeExtension(object):
             try:
                 self._lxml_tree = self._build_dom(body, 'html')
             except Exception as ex:
-                # WTF: does this really could happens?
+                # WTF: write test for this case
                 if (isinstance(ex, ParserError)
                         and 'Document is empty' in str(ex)
                         and '<html' not in body):
@@ -340,12 +340,13 @@ class DomTreeExtension(object):
                     body = '<html>%s</html>' % body
                     self._lxml_tree = self._build_dom(body, 'html')
 
+                # WTF: write test for this case
                 elif (isinstance(ex, TypeError)
                       and "object of type 'NoneType' has no len" in str(ex)
                       and '<html' not in body):
 
                     # Fix for smth like "<frameset></frameset>"
-                    body = '<html>%s</html>'.format(body)
+                    body = '<html>%s</html>' % body
                     self._lxml_tree = self._build_dom(body, 'html')
                 else:
                     raise

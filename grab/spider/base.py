@@ -691,7 +691,8 @@ class Spider(object):
         self.prepare_parser()
         process_request_count = 0
         try:
-            while True:
+            work_permitted = True
+            while work_permitted:
                 try:
                     result = self.network_result_queue.get(block=False)
                 except queue.Empty:
@@ -729,7 +730,7 @@ class Spider(object):
                             if self.parser_requests_per_process:
                                 if (process_request_count >=
                                         self.parser_requests_per_process):
-                                    return
+                                    work_permitted = False
         except Exception as ex:
             logging.error('', exc_info=ex)
             raise
