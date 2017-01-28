@@ -32,7 +32,11 @@ before_install:
       brew services start mysql
       brew unlink postgres
       brew install postgres
-      brew services start postgres
+      export PG_DATA=$(brew --prefix)/var/postgres
+      rm -rf $PG_DATA
+      initdb $PG_DATA -E utf8
+      pg_ctl -w start -l postgres.log --pgdata ${PG_DATA}
+      createuser -s postgres
     fi
 
 install:
