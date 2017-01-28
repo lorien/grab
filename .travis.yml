@@ -1,57 +1,27 @@
 language: python
 
-python: 3.5
+python: 2.7
 
-branches:
-  except:
-    - wintest
-
-os:
-  - linux
-#  - osx
+# sudo: required
 
 matrix:
   include:
-    - env: TOX_ENV=py36
-      python: 3.6
-    - env: TOX_ENV=py36-mp
-      python: 3.6
-  allow_failures:
-    - env: TOX_ENV=py27-urllib3
-    - env: TOX_ENV=py34-urllib3
-
-env:
-  - TOX_ENV=py27
-  - TOX_ENV=py33
-  - TOX_ENV=py34
-  - TOX_ENV=py35
-  - TOX_ENV=py27-mp
-  - TOX_ENV=py33-mp
-  - TOX_ENV=py34-mp
-  - TOX_ENV=py35-mp
-  - TOX_ENV=py27-threaded-pycurl
-  - TOX_ENV=py34-threaded-pycurl
-  - TOX_ENV=py27-threaded-urllib3
-  - TOX_ENV=py34-threaded-urllib3
-
-services:
-  - mongodb
-  - redis-server
+    - os: osx
+      language: generic
+      env: TOX_ENV=py27-nobackend
 
 install:
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
   - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
-  - pip install tox
-
-before_script:
-  - mysql -e 'create database grab_test'
-  - psql -c 'create database grab_test' -U postgres
+  - |
+    if [[ $TRAVIS_OS_NAME ]]; then
+      brew update
+      brew install python2
+    fi
+  - pip install -U pip setuptoos tox
 
 script:
-    # Override test settings with travis settings 
-    - cp travis_settings.py test_settings_local.py
-    # Run tests and find out the test coverage
     - tox -e $TOX_ENV
 
-after_success:
-  - coveralls
+#after_success:
+#  - coveralls
