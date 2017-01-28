@@ -9,6 +9,8 @@ matrix:
     - os: osx
       language: generic
       env: TOX_ENV=py27-nobackend
+  exclude:
+    - python: 2.7 # hack to exclude default no-env travis job
 
 install:
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
@@ -16,7 +18,7 @@ install:
   - |
     if [[ $TRAVIS_OS_NAME ]]; then
       brew update
-      brew install python2
+      brew install python
     fi
   - pip install -U pip setuptoos tox
 
