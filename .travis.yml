@@ -2,15 +2,22 @@ language: python
 
 python: 2.7
 
-# sudo: required
+sudo: required
 
 matrix:
   include:
     - os: osx
       language: generic
       env: TOX_ENV=py27-nobackend
+    - os: osx
+      language: generic
+      env: TOX_ENV=py34-nobackend
   exclude:
     - python: 2.7 # hack to exclude default no-env travis job
+
+services:
+  - mongodb
+  - redis-server
 
 install:
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
@@ -19,11 +26,23 @@ install:
     if [[ $TRAVIS_OS_NAME ]]; then
       brew update
       brew unlink python
-      brew install python
+      brew unlink python3
+      if [[ TOX_ENV == py2* ]]; then
+        brew install python
+      else
+        brew install python3
+      fi
     fi
   - pip install -U pip setuptools tox
 
+before_script:
+  - mysql -e 'create database grab_test'
+  - psql -c 'create database grab_test' -U postgres
+
 script:
+    # Override test settings with travis settings 
+    - cp travis_settings.py test_settings_local.py
+    # Run tests and find out the test coverage
     - tox -e $TOX_ENV
 
 #after_success:
