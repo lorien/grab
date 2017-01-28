@@ -30,6 +30,7 @@ before_install:
       brew services start redis
       brew install mysql
       brew services start mysql
+      brew unlink postgres
       brew install postgres
       brew services start postgres
     fi
