@@ -8,10 +8,10 @@ matrix:
   include:
     - os: osx
       language: generic
-      env: TOX_ENV=py27-nobackend
+      env: TOX_ENV=py27
     - os: osx
       language: generic
-      env: TOX_ENV=py34-nobackend
+      env: TOX_ENV=py36
   exclude:
     - python: 2.7 # hack to exclude default no-env travis job
 
@@ -70,5 +70,5 @@ script:
     # Run tests and find out the test coverage
     - tox -e $TOX_ENV
 
-#after_success:
-#  - coveralls
+after_success:
+  - coveralls
