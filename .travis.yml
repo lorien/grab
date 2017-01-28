@@ -55,8 +55,8 @@ install:
     fi
 
 before_script:
-  - mysql -e 'create database grab_test'
-  - psql -c 'create database grab_test' -U postgres
+  - mysql -u root -e 'create database grab_test'
+  - psql -U postgres -c 'create database grab_test'
 
 script:
     # Override test settings with travis settings 
