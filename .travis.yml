@@ -21,7 +21,7 @@ install:
       brew unlink python
       brew install python
     fi
-  - pip install -U pip setuptoos tox
+  - pip install -U pip setuptools tox
 
 script:
     - tox -e $TOX_ENV
