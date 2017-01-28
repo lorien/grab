@@ -18,6 +18,7 @@ install:
   - |
     if [[ $TRAVIS_OS_NAME ]]; then
       brew update
+      brew unlink python
       brew install python
     fi
   - pip install -U pip setuptoos tox
