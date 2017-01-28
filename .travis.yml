@@ -38,6 +38,9 @@ before_install:
       pg_ctl -w start -l postgres.log --pgdata ${PG_DATA}
       createuser -s postgres
     fi
+  - cat /etc/hosts
+  - cat /etc/resolv.conf
+  - hostname
 
 install:
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
