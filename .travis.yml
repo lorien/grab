@@ -18,7 +18,6 @@ matrix:
 services:
   - mongodb
   - redis-server
-  - postgresql
 
 before_install:
   - |
@@ -31,6 +30,8 @@ before_install:
       brew services start redis
       brew install mysql
       brew services start mysql
+      brew install postgres
+      brew services start postgres
     fi
 
 install:
