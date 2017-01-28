@@ -19,11 +19,22 @@ services:
   - mongodb
   - redis-server
 
+before_install:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew update
+      brew install mongodb
+      sudo mkdir -p /data/db
+      brew services start mongodb
+      brew install redis
+      brew services start redis
+    fi
+
 install:
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
   - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
   - |
-    if [[ $TRAVIS_OS_NAME ]]; then
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update
       brew unlink python
       brew unlink python3
@@ -33,7 +44,12 @@ install:
         brew install python3
       fi
     fi
-  - pip install -U pip setuptools tox
+  - |
+    if [[ TOX_ENV == py2* ]]; then
+      pip install -U pip setuptools tox
+    else
+      pip3 install -U pip setuptools tox
+    fi
 
 before_script:
   - mysql -e 'create database grab_test'
