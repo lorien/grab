@@ -41,6 +41,7 @@ before_install:
   - cat /etc/hosts
   - cat /etc/resolv.conf
   - hostname
+  - ulimit -a
 
 install:
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
