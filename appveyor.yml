@@ -68,6 +68,7 @@ install:
       }
   - choco install redis-64
   - redis-server --service-install
+
   - redis-server --service-start
   - "%PYTHON%/python.exe --version"
   - ps: |
