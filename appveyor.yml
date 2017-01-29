@@ -43,7 +43,7 @@ environment:
     #  LXML_BINARY: lxml-3.7.2-cp36-cp36m-win_amd64.whl
     #  MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp36-cp36m-win_amd64.whl
     #
-    - PYTHON: "C:\\Python27"
+    - PYTHON: "C:\\Python27-x64"
       LXML_BINARY: lxml-3.7.2-cp27-cp27m-win_amd64.whl
       MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp27-cp27m-win_amd64.whl
       PYCURL_BINARY: pycurl-7.19.5.3.win-amd64-py2.7.msi
