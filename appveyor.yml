@@ -70,7 +70,7 @@ install:
   - redis-server --service-install
   - redis-server --service-start
   - "%PYTHON%/python.exe --version"
-  - msiexec /i wheels/%PYCURL_BINARY /quiet
+  - msiexec /i wheels/%PYCURL_BINARY% /quiet
 
 build: off
 
