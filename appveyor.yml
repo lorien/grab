@@ -70,13 +70,12 @@ install:
   - redis-server --service-install
   - redis-server --service-start
   - "%PYTHON%/python.exe --version"
-  - cmd: |
-      IF "%PYCURL_BINARY:~-3%" == "msi" (
-        msiexec /i %WHEEL_CACHE_DIR%\\%PYCURL_BINARY% /quiet
-      ) ELSE (
-        python -m pip install %WHEEL_CACHE_DIR%\\%PYCURL_BINARY%
-      )
-        
+  - ps: |
+    If ("$env:PYCURL_BINARY".EndsWith("msi")) {
+      Start-Process -FilePath "msiexec" -ArgumentList "/i $env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY /quiet" 
+    } Else {
+      Start-Process -FilePath "python" -ArgumentList "-m pip install $env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY"
+    }
 
 build: off
 
