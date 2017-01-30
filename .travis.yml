@@ -54,7 +54,7 @@ services:
   - mongodb
   - redis-server
 
-before_install:
+install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       ulimit -n 2048 # by default travis osx has "ulimit -n 256"
