@@ -4,8 +4,10 @@ python: 2.7
 
 sudo: required
 
-env:
-  global:
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+  - "$HOME/.pyenv"
 
 matrix:
   include:
