@@ -20,6 +20,9 @@ matrix:
   exclude:
     - python: 2.7 # hack to exclude default no-env travis job
 
+# Enable extra mongodb and redis services on linux
+# Mysql and postgres services are enabled on linux by default
+# That does not work on osx (see below custom instructions for osx)
 services:
   - mongodb
   - redis-server
@@ -27,7 +30,7 @@ services:
 before_install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      ulimit -n 2048
+      ulimit -n 2048 # by default travis osx has "ulimit -n 256"
       brew update
       brew install mongodb
       sudo mkdir -p /data/db
@@ -45,8 +48,6 @@ before_install:
       createuser -s postgres
       brew upgrade pyenv
     fi
-
-install:
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
   - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
 
@@ -60,8 +61,9 @@ before_script:
     else
       cp travis_osx_settings.py test_settings_local.py
     fi
+  # Install custom pyton version on OSX
   - |
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       if [[ ! -z "$VIRTUAL_ENV" ]]; then deactivate; fi
       eval "$(pyenv init -)"
       pyenv install "$PYENV_VERSION"
