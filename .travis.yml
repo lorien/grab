@@ -4,11 +4,17 @@ python: 2.7
 
 sudo: required
 
+env:
+  global:
+   - PYENV_ROOT="$HOME/.pyenv"
+   - PYENV_PACKAGE="https://github.com/yyuu/pyenv/archive/v1.0.7.tar.gz"
+   - PYENV_VERSION="3.6.0"
+
 matrix:
   include:
-    - os: osx
-      language: generic
-      env: TOX_ENV=py27
+    #- os: osx
+    #  language: generic
+    #  env: TOX_ENV=py27
     - os: osx
       language: generic
       env: TOX_ENV=py36
@@ -77,8 +83,15 @@ before_script:
     fi
 
 script:
-    # Run tests and find out the test coverage
-    - tox -e $TOX_ENV
+
+  - if [[ ! -z "$VIRTUAL_ENV" ]]; then deactivate; fi
+  #- curl -fsSL $PYENV_PACKAGE | tar -xz -C "$PYENV_ROOT" --strip-components 1
+  #- export PATH="$PYENV_ROOT/bin:$PATH"
+  - eval "$(pyenv init -)"
+  - pyenv install "$PYENV_VERSION"
+  - pyenv global "$PYENV_VERSION"
+  # Run tests and find out the test coverage
+  - tox -e $TOX_ENV
 
 after_success:
   - coveralls
