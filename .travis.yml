@@ -15,8 +15,10 @@ matrix:
       env: TOX_ENV=py34
     - os: linux
       env: TOX_ENV=py35
+      python: 3.5
     - os: linux
       env: TOX_ENV=py36
+      python: 3.6
     - os: osx
       language: generic
       env:
