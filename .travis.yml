@@ -53,23 +53,24 @@ before_install:
 install:
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
   - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      brew update
-      brew unlink python
-      brew unlink python3
-      if [[ TOX_ENV == py2* ]]; then
-        brew install python
-      else
-        brew install python3
-      fi
-    fi
-  - |
-    if [[ TOX_ENV == py2* ]]; then
-      pip install -U pip setuptools tox
-    else
-      pip3 install -U pip setuptools tox
-    fi
+  #- |
+  #  if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+  #    brew update
+  #    brew unlink python
+  #    brew unlink python3
+  #    if [[ TOX_ENV == py2* ]]; then
+  #      brew install python
+  #    else
+  #      brew install python3
+  #    fi
+  #  fi
+  #- |
+  #  if [[ TOX_ENV == py2* ]]; then
+  #    pip install -U pip setuptools tox
+  #  else
+  #    pip3 install -U pip setuptools tox
+  #  fi
+  - brew upgrade pyenv
 
 before_script:
   - mysql -u root -e 'create database grab_test'
@@ -90,6 +91,7 @@ script:
   - eval "$(pyenv init -)"
   - pyenv install "$PYENV_VERSION"
   - pyenv global "$PYENV_VERSION"
+  - python -m pip install -U pip setuptools tox
   # Run tests and find out the test coverage
   - tox -e $TOX_ENV
 
