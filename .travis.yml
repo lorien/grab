@@ -11,6 +11,14 @@ matrix:
   include:
     - os: linux
       env: TOX_ENV=py27
+    #- os: linux
+    #  env: TOX_ENV=py33
+    #- os: linux
+    #  env: TOX_ENV=py34
+    #- os: linux
+    #  env: TOX_ENV=py35
+    #- os: linux
+    #  env: TOX_ENV=py36
     #- os: osx
     #  language: generic
     #  env:
@@ -87,8 +95,8 @@ before_script:
       eval "$(pyenv init -)"
       pyenv install "$PYENV_VERSION"
       pyenv global "$PYENV_VERSION"
-      python -m pip install -U pip setuptools tox
     fi
+  - python -m pip install -U pip setuptools tox
 
 script:
   - tox -e $TOX_ENV
