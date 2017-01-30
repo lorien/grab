@@ -6,9 +6,6 @@ sudo: required
 
 env:
   global:
-   - PYENV_ROOT="$HOME/.pyenv"
-   - PYENV_PACKAGE="https://github.com/yyuu/pyenv/archive/v1.0.7.tar.gz"
-   - PYENV_VERSION="3.6.0"
 
 matrix:
   include:
@@ -17,7 +14,9 @@ matrix:
     #  env: TOX_ENV=py27
     - os: osx
       language: generic
-      env: TOX_ENV=py36
+      env:
+        - TOX_ENV=py36
+        - PYENV_VERSION="3.6.0"
   exclude:
     - python: 2.7 # hack to exclude default no-env travis job
 
@@ -28,6 +27,7 @@ services:
 before_install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      ulimit -n 2048
       brew update
       brew install mongodb
       sudo mkdir -p /data/db
@@ -43,17 +43,12 @@ before_install:
       initdb $PG_DATA -E utf8
       pg_ctl -w start -l postgres.log --pgdata ${PG_DATA}
       createuser -s postgres
+      brew upgrade pyenv
     fi
-  - cat /etc/hosts
-  - cat /etc/resolv.conf
-  - hostname
-  - ulimit -n 2048
-  - ulimit -a
 
 install:
   # Deal with issue on Travis builders re: multiprocessing.Queue :(
   - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
-  - brew upgrade pyenv
 
 before_script:
   - mysql -u root -e 'create database grab_test'
@@ -65,11 +60,14 @@ before_script:
     else
       cp travis_osx_settings.py test_settings_local.py
     fi
-  - if [[ ! -z "$VIRTUAL_ENV" ]]; then deactivate; fi
-  - eval "$(pyenv init -)"
-  - pyenv install "$PYENV_VERSION"
-  - pyenv global "$PYENV_VERSION"
-  - python -m pip install -U pip setuptools tox
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      if [[ ! -z "$VIRTUAL_ENV" ]]; then deactivate; fi
+      eval "$(pyenv init -)"
+      pyenv install "$PYENV_VERSION"
+      pyenv global "$PYENV_VERSION"
+      python -m pip install -U pip setuptools tox
+    fi
 
 script:
   - tox -e $TOX_ENV
