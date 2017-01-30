@@ -68,10 +68,15 @@ install:
 before_script:
   - mysql -u root -e 'create database grab_test'
   - psql -U postgres -c 'create database grab_test'
+  # Override test settings with travis settings 
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      cp travis_linux_settings.py test_settings_local.py
+    else
+      cp travis_osx_settings.py test_settings_local.py
+    fi
 
 script:
-    # Override test settings with travis settings 
-    - cp travis_settings.py test_settings_local.py
     # Run tests and find out the test coverage
     - tox -e $TOX_ENV
 
