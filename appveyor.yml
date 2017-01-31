@@ -71,8 +71,12 @@ install:
 
   - redis-server --service-start
   - "%PYTHON%/python.exe --version"
-  - ps: >-
-    If ("$env:PYCURL_BINARY".EndsWith("msi")) { Start-Process -FilePath "msiexec" -ArgumentList "/i $env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY /quiet" -Wait; } Else { Start-Process -FilePath "python" -ArgumentList "-m pip install $env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY" -Wait; }
+  - ps: |
+      If ("$env:PYCURL_BINARY".EndsWith("msi")) {
+        Start-Process -FilePath "msiexec" -ArgumentList "/i $env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY /quiet" -Wait;
+      } Else {
+        Start-Process -FilePath "python" -ArgumentList "-m pip install -U pycurl" -Wait;
+      }
 
 build: off
 
