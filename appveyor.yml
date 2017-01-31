@@ -74,8 +74,8 @@ install:
   - redis-server --service-start
   - "%PYTHON%/python.exe --version"
   - '%PYTHON%/python.exe -c "import platform; print(platform.architecture())"'
-  - 'echo "msi package: %WHEEL_CACHE_DIR%/%PYCURL_BINARY%"'
-  - 'msiexec /i "%WHEEL_CACHE_DIR%/%PYCURL_BINARY%" /qn /log msi.log'
+  - 'echo "msi package: %WHEEL_CACHE_DIR%\%PYCURL_BINARY%"'
+  - 'msiexec /i "%WHEEL_CACHE_DIR%\%PYCURL_BINARY%" /qn /log msi.log'
   - type msi.log
   - python -c "import pycurl; print(pycurl.version)"
   #- ps: |
