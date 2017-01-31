@@ -73,9 +73,9 @@ install:
   - "%PYTHON%/python.exe --version"
   - ps: |
     If ("$env:PYCURL_BINARY".EndsWith("msi")) {
-      Start-Process -FilePath "msiexec" -ArgumentList "/i $env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY /quiet" 
+      Start-Process -FilePath "msiexec" -ArgumentList "/i $env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY /quiet";
     } Else {
-      Start-Process -FilePath "python" -ArgumentList "-m pip install $env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY"
+      Start-Process -FilePath "python" -ArgumentList "-m pip install $env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY";
     }
 
 build: off
