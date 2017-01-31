@@ -73,9 +73,10 @@ install:
 
   - redis-server --service-start
   - "%PYTHON%/python.exe --version"
+  - '%PYTHON%/python.exe -c "import platform; print(platform.architecture())"'
   - ps: |
       If ("$env:PYCURL_BINARY".EndsWith("exe")) {
-        Write-Host "Installing pycurl via msiexec";
+        Write-Host "Installing pycurl exe package with easy_install";
         Start-Process -FilePath "easy_install" -ArgumentList "$env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY" -Wait;
       } Else {
         Write-Host "Installing pycurl with python -m pip";
