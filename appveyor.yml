@@ -10,6 +10,7 @@ environment:
     - PYTHON: "C:\\Python27-x64"
       LXML_BINARY: lxml-3.7.2-cp27-cp27m-win_amd64.whl
       MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp27-cp27m-win_amd64.whl
+      PYCURL_VERSION: 7.43.0
 
     #- PYTHON: "C:\\Python33"
     #  LXML_BINARY: absent 
@@ -46,7 +47,8 @@ environment:
     - PYTHON: "C:\\Python27-x64"
       LXML_BINARY: lxml-3.7.2-cp27-cp27m-win_amd64.whl
       MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp27-cp27m-win_amd64.whl
-      PYCURL_BINARY: pycurl-7.19.5.3.win-amd64-py2.7.msi
+      #PYCURL_BINARY: pycurl-7.19.5.3.win-amd64-py2.7.msi
+      PYCURL_VERSION: 7.19.5.3
 
 cache:
   - '%WHEEL_CACHE_DIR%'
@@ -71,12 +73,12 @@ install:
 
   - redis-server --service-start
   - "%PYTHON%/python.exe --version"
-  - ps: |
-      If ("$env:PYCURL_BINARY".EndsWith("msi")) {
-        Start-Process -FilePath "msiexec" -ArgumentList "/i $env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY /quiet" -Wait;
-      } Else {
-        Start-Process -FilePath "python" -ArgumentList "-m pip install -U pycurl" -Wait;
-      }
+  #- ps: |
+  #    If ("$env:PYCURL_BINARY".EndsWith("msi")) {
+  #      Start-Process -FilePath "msiexec" -ArgumentList "/i $env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY /quiet" -Wait;
+  #    } Else {
+  #      Start-Process -FilePath "python" -ArgumentList "-m pip install -U pycurl" -Wait;
+  #    }
 
 build: off
 
