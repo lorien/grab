@@ -19,9 +19,13 @@ install:
         Write-Host "Updating wheel binary dir";
         Start-Process -FilePath "git" -ArgumentList "pull" -WorkingDirectory "$env:WHEEL_CACHE_DIR" -Wait;
       }
-  - python --version
+  - echo %PYTHON%
+  - echo %VIRTUAL_ENV%
+  - python --version; python -c 'import platform; print(platform.architecture())'
 
 build: off
 
 test_script:
-  - python --version
+  - echo %PYTHON%
+  - echo %VIRTUAL_ENV%
+  - python --version; python -c 'import platform; print(platform.architecture())'
