@@ -21,11 +21,11 @@ install:
       }
   - echo %PYTHON%
   - python --version
-  - python -c 'import platform; print(platform.architecture())'
+  - python -c "import platform; print(platform.architecture())"
 
 build: off
 
 test_script:
   - echo %PYTHON%
   - python --version
-  - python -c 'import platform; print(platform.architecture())'
+  - python -c "import platform; print(platform.architecture())"
