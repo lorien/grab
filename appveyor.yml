@@ -3,51 +3,38 @@ environment:
     WHEEL_CACHE_DIR: "%APPVEYOR_BUILD_FOLDER%\\wheels"
 
   matrix:
-    #- PYTHON: "C:\\Python27"
-    #  LXML_BINARY: lxml-3.7.2-cp27-cp27m-win32.whl
-    #  MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp27-cp27m-win32.whl
+    - PYTHON: "C:\\Python27"
+      LXML_BINARY: lxml-3.7.2-cp27-cp27m-win32.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp27-cp27m-win32.whl
 
-    #- PYTHON: "C:\\Python27-x64"
-    #  LXML_BINARY: lxml-3.7.2-cp27-cp27m-win_amd64.whl
-    #  MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp27-cp27m-win_amd64.whl
-    #  PYCURL_VERSION: 7.43.0
-
-    #- PYTHON: "C:\\Python33"
-    #  LXML_BINARY: absent 
-    #  MYSQLCLIENT_BINARY: absent
-
-    #- PYTHON: "C:\\Python33-x64"
-    #  LXML_BINARY: absent 
-    #  MYSQLCLIENT_BINARY: absent
-
-    #- PYTHON: "C:\\Python34"
-    #  LXML_BINARY: lxml-3.7.2-cp34-cp34m-win32.whl
-    #  MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp34-cp34m-win32.whl
-
-    #- PYTHON: "C:\\Python34-x64"
-    #  LXML_BINARY: lxml-3.7.2-cp34-cp34m-win_amd64.whl
-    #  MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp34-cp34m-win_amd64.whl
-
-    #- PYTHON: "C:\\Python35"
-    #  LXML_BINARY: lxml-3.7.2-cp35-cp35m-win32.whl
-    #  MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp35-cp35m-win32.whl
-
-    #- PYTHON: "C:\\Python35-x64"
-    #  LXML_BINARY: lxml-3.7.2-cp35-cp35m-win_amd64.whl
-    #  MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp35-cp35m-win_amd64.whl
-
-    #- PYTHON: "C:\\Python36"
-    #  LXML_BINARY: lxml-3.7.2-cp36-cp36m-win32.whl
-    #  MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp36-cp36m-win32.whl
-
-    #- PYTHON: "C:\\Python36-x64"
-    #  LXML_BINARY: lxml-3.7.2-cp36-cp36m-win_amd64.whl
-    #  MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp36-cp36m-win_amd64.whl
-    #
     - PYTHON: "C:\\Python27-x64"
       LXML_BINARY: lxml-3.7.2-cp27-cp27m-win_amd64.whl
       MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp27-cp27m-win_amd64.whl
-      PYCURL_BINARY: pycurl-7.19.5.3-cp27-none-linux_x86_64.whl
+      PYCURL_VERSION: 7.43.0
+
+    - PYTHON: "C:\\Python34"
+      LXML_BINARY: lxml-3.7.2-cp34-cp34m-win32.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp34-cp34m-win32.whl
+
+    - PYTHON: "C:\\Python34-x64"
+      LXML_BINARY: lxml-3.7.2-cp34-cp34m-win_amd64.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp34-cp34m-win_amd64.whl
+
+    - PYTHON: "C:\\Python35"
+      LXML_BINARY: lxml-3.7.2-cp35-cp35m-win32.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp35-cp35m-win32.whl
+
+    - PYTHON: "C:\\Python35-x64"
+      LXML_BINARY: lxml-3.7.2-cp35-cp35m-win_amd64.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp35-cp35m-win_amd64.whl
+
+    - PYTHON: "C:\\Python36"
+      LXML_BINARY: lxml-3.7.2-cp36-cp36m-win32.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp36-cp36m-win32.whl
+
+    - PYTHON: "C:\\Python36-x64"
+      LXML_BINARY: lxml-3.7.2-cp36-cp36m-win_amd64.whl
+      MYSQLCLIENT_BINARY: mysqlclient-1.3.9-cp36-cp36m-win_amd64.whl
 
 cache:
   - '%WHEEL_CACHE_DIR%'
@@ -72,21 +59,7 @@ install:
 
   - redis-server --service-start
   - "%PYTHON%/python.exe --version"
-  - '%PYTHON%/python.exe -c "import platform; print(platform.architecture())"'
-  - 'echo "msi package: %WHEEL_CACHE_DIR%\%PYCURL_BINARY%"'
-  #- 'msiexec /i "%WHEEL_CACHE_DIR%\%PYCURL_BINARY%" /qn /log msi.log'
-  #- type msi.log
   - "python -m pip install -U pip setuptools"
-  - 'python -m pip install "%WHEEL_CACHE_DIR%\%PYCURL_BINARY%"'
-  - python -c "import pycurl; print(pycurl.version)"
-  #- ps: |
-  #    If ("$env:PYCURL_BINARY".EndsWith("exe")) {
-  #      Write-Host "Installing pycurl exe package with easy_install";
-  #      Start-Process -FilePath "easy_install" -ArgumentList "$env:WHEEL_CACHE_DIR/$env:PYCURL_BINARY" -Wait;
-  #    } Else {
-  #      Write-Host "Installing pycurl with python -m pip";
-  #      Start-Process -FilePath "python" -ArgumentList "-m pip install -U pycurl" -Wait;
-  #    }
 
 build: off
 
