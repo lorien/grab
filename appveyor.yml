@@ -20,10 +20,12 @@ install:
         Start-Process -FilePath "git" -ArgumentList "pull" -WorkingDirectory "$env:WHEEL_CACHE_DIR" -Wait;
       }
   - echo %PYTHON%
-  - python -V; python -c 'import platform; print(platform.architecture())'
+  - python --version
+  - python -c 'import platform; print(platform.architecture())'
 
 build: off
 
 test_script:
   - echo %PYTHON%
-  - python -V; python -c 'import platform; print(platform.architecture())'
+  - python --version
+  - python -c 'import platform; print(platform.architecture())'
