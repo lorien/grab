@@ -76,7 +76,8 @@ install:
   - 'echo "msi package: %WHEEL_CACHE_DIR%\%PYCURL_BINARY%"'
   #- 'msiexec /i "%WHEEL_CACHE_DIR%\%PYCURL_BINARY%" /qn /log msi.log'
   #- type msi.log
-  - 'python -m pip install %WHEEL_CACHE_DIR%\%PYCURL_BINARY%"'
+  - "python -m pip install -U pip setuptools"
+  - 'python -m pip install "%WHEEL_CACHE_DIR%\%PYCURL_BINARY%"'
   - python -c "import pycurl; print(pycurl.version)"
   #- ps: |
   #    If ("$env:PYCURL_BINARY".EndsWith("exe")) {
