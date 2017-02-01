@@ -12,6 +12,7 @@ cache:
 
 # wtf
 install:
+  - set FOO="%PYTHON%/foo"
   - ps: >-
       If(!(Test-Path $env:WHEEL_CACHE_DIR)) {
         Write-Host "Downloading wheel binary dir";
@@ -24,6 +25,8 @@ install:
   - python --version
   - python -c "import platform; print(platform.architecture())"
   - %PYTHON%/python -c "import platform; print(platform.architecture())"
+  - %PYTHON%/python -m easy_install "%WHEEL_CACHE_DIR%/pycurl-7.19.5.3.win-amd64-py2.7.exe"
+  - %PYTHON%/python -c "import pycurl; print(pycurl.version)"
 
 build: off
 
@@ -32,3 +35,4 @@ test_script:
   - python --version
   - python -c "import platform; print(platform.architecture())"
   - %PYTHON%/python -c "import platform; print(platform.architecture())"
+  - echo "Foo: %FOO%"
