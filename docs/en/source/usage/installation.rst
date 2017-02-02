@@ -41,9 +41,13 @@ enable swap file if it is disabled.
 Installation on Windows
 -----------------------
 
-1) Install lxml. You can get lxml here: http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
+1) Install lxml. You can get lxml here http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 
-2) Install pycurl. You can get pycurl here: http://www.lfd.uci.edu/~gohlke/pythonlibs/#pycurl
+2) Install pycurl.
+
+.. warning::
+
+    Do not use the recent version of pycurl (7.43.0 at the moment). This version fails randomly on windows platform. Use 7.19.5.3 version. You can get it here https://bintray.com/pycurl/pycurl/pycurl/view#files
 
 3) Install Grab
 
