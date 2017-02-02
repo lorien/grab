@@ -4,7 +4,7 @@ Grab
 .. image:: https://travis-ci.org/lorien/grab.png?branch=master
     :target: https://travis-ci.org/lorien/grab?branch=master
 
-.. image:: https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva
+.. image:: https://ci.appveyor.com/api/projects/status/uxj24vjin7gptdlg
     :target: https://ci.appveyor.com/project/lorien/grab
 
 .. image:: https://coveralls.io/repos/lorien/grab/badge.svg?branch=master
