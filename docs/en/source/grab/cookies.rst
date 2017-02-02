@@ -33,4 +33,4 @@ With the :ref:`option_cookiefile` option, you can specify the path to the file t
 cookies for each request. Grab will load any cookies from that file before each network request, and after a response
 is received Grab will save all cookies to that file.
 
-More details about `grab.cookies` you can get in :ref:`api_grab_cookie`
+More details about `grab.cookies` you can get in :ref:`API grab.cookie <api_grab_cookie>`

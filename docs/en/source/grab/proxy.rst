@@ -10,7 +10,7 @@ To make Grab send requests through a proxy server, use the :ref:`option_proxy` o
 
     g.setup(proxy='example.com:8080')
 
-If the proxy server requires authentication, use the :ref:`option_proxy_usrpwd` option
+If the proxy server requires authentication, use the :ref:`option_proxy_userpwd` option
 to specify the username and password::
 
     g.setup(proxy='example.com:8080', proxy_userpwd='root:777')

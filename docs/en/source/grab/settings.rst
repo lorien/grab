@@ -1,7 +1,7 @@
-.. _grab_options:
+.. _grab_settings:
 
-Grab Options
-============
+Grab Settings
+=============
 
 Network options
 ---------------
@@ -300,6 +300,16 @@ proxy_type
 
 Type of proxy server. Available values are "http", "socks4" and "socks5".
 
+.. _option_proxy_auto_change:
+
+proxy_auto_change
+^^^^^^^^^^^^^^^^^
+
+:Type: bool
+:Default: True
+
+If Grab should change the proxy before every network request.
+
 Response Processing Options
 ---------------------------
 
@@ -320,26 +330,34 @@ compression, pass the empty string to this option.
 document_charset
 ^^^^^^^^^^^^^^^^
 
-Character set of the document's content.
-By default, document charset is detected automatically.
-In case the character set is incorrectly determined, you can specify it with this option.
-The value you specified will be used to convert the bytes in the body of the document to the character set
-specified in :ref:`_option_charset`. After that the converted body will be passed to lxml to build the DOM tree.
-:ref:`_option_document_charset` is also used to encode non-ascii symbols in POST data.
-
 :Type: string
 :Default: None
+
+The character set of the document's content.
+By default Grab detects the charset of the document automatically. If it detects the charset incorrectly you can specify exact charset with this option.
+The charset is used to get unicode representation of the document content and also to build DOM tree.
 
 .. _option_charset:
 
 charset
 ^^^^^^^
 
-Character set that the content of the document should be converted to.
-This option is only useful in case :ref:`option_document_charset` is not 'utf-8' (e.g., if content is a *bytestring*). Otherwise, this option won't affect the resulting content.
-
 :Type: string
 :Default: 'utf-8'
+
+To send a request to the network Grab should convert all unicode data into bytes. It uses the `charset` for encoding. For example:
+
+.. code:: python
+
+    g.setup(post=b'abc')
+    
+no conversion required. But if
+
+.. code:: python
+
+    g.setup(post='Превед, медвед!')
+    
+then the unicode data has to be converted to `charset` encoding. By default that would be utf-8.
 
 .. _option_nobody:
 
