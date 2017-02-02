@@ -34,7 +34,7 @@ class CachePipeline(object):
                 action, data = self.input_queue.get(True, 0.1)
             except Empty:
                 if self.spider.shutdown_event.is_set():
-                    print('EXITING CACHE PIPELINE')
+                    #print('!CACHE: EXITING CACHE PIPELINE')
                     return self.shutdown()
                 #else:
                 #    print('no shutdown event')
