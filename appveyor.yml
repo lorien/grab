@@ -10,7 +10,7 @@ environment:
 cache:
   - '%WHEEL_CACHE_DIR%'
 
-# wtf
+# 2
 install:
   - set FOO="%PYTHON%/foo"
   - ps: >-
