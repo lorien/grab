@@ -185,7 +185,7 @@ def main():
     th_list = list(threading.enumerate())
     print('Active threads:')
     for th in th_list:
-        print('Thread: %s [%s]' % (th, th._Thread__target))
+        print('Thread: %s [%s]' % (th, getattr(th, '_Thread__target', None)))
 
     if result.wasSuccessful():
         sys.exit(0)
