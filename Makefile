@@ -48,5 +48,8 @@ upload:
 doc:
 	sh -c 'cd docs/en; make html'
 
+doc_open:
+	x-www-browser docs/en/build/html/index.html
+
 doc_ru:
 	sh -c 'cd docs/ru; make html'

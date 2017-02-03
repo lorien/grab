@@ -117,7 +117,7 @@ Installation
 
     $ pip install -U grab
 
-See details here http://docs.grablib.org/en/latest/usage/installation.html
+See details about installing Grab on different platforms here http://docs.grablib.org/en/latest/usage/installation.html
 
 
 Documentation and Help
