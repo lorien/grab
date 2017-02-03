@@ -19,9 +19,38 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 import os.path
 import sys
+from unittest.mock import MagicMock
+
 SOURCE_DIR = os.path.dirname(os.path.realpath(__file__))
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(SOURCE_DIR)))
 sys.path.insert(0, PROJECT_DIR)
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+            return MagicMock()
+
+MOCK_MODULES = [
+    'user_agent',
+    'selection',
+    'lxml',
+    'lxml.html',
+    'lxml.etree',
+    'pycurl',
+    'weblib',
+    'weblib.html',
+    'weblib.error',
+    'weblib.encoding',
+    'weblib.http',
+    'weblib.files',
+    'weblib.structured',
+    'weblib.text',
+    'weblib.rex',
+    'weblib.const',
+    'weblib.etree',
+    'weblib.logs',
+]
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------
 

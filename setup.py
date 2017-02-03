@@ -19,7 +19,6 @@ setup(
         'user_agent',
         'selection',
         'lxml;platform_system!="Windows"',
-        'lxml;platform_system!="Windows"',
         'pycurl;platform_system!="Windows"',
     ],
     extras_require={

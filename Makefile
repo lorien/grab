@@ -46,7 +46,7 @@ upload:
 	python setup.py sdist upload
 
 doc:
-	sh -c 'cd docs/en; make html'
+	tox -e doc
 
 doc_open:
 	x-www-browser docs/en/build/html/index.html
