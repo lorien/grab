@@ -31,24 +31,11 @@ class Mock(MagicMock):
             return MagicMock()
 
 MOCK_MODULES = [
-    'user_agent',
     'selection',
     'lxml',
     'lxml.html',
     'lxml.etree',
     'pycurl',
-    'weblib',
-    'weblib.html',
-    'weblib.error',
-    'weblib.encoding',
-    'weblib.http',
-    'weblib.files',
-    'weblib.structured',
-    'weblib.text',
-    'weblib.rex',
-    'weblib.const',
-    'weblib.etree',
-    'weblib.logs',
 ]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
