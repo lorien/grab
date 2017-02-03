@@ -13,13 +13,17 @@ setup(
     author_email='lorien@lorien.name',
 
     packages=find_packages(exclude=['test', 'test.files']),
-    install_requires=['weblib>=0.1.23', 'six',
-                      'user_agent'],
+    install_requires=[
+        'weblib>=0.1.23',
+        'six',
+        'user_agent',
+        'selection',
+        'lxml;platform_system!="Windows"',
+        'lxml;platform_system!="Windows"',
+        'pycurl;platform_system!="Windows"',
+    ],
     extras_require={
-        'lxml': ['lxml', 'selection'],
-        'pycurl': ['pycurl'],
-        'urllib3': ['urllib3'],
-        'full': ['lxml', 'selection', 'pycurl', 'urllib3'],
+        'full': ['urllib3'],
     },
 
     license='MIT',
