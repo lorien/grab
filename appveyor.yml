@@ -123,7 +123,7 @@ install:
   - choco install redis-64
   - redis-server --service-install
   - redis-server --service-start
-  - "%PYTHON%/python.exe -m pip install tox pip setuptools"
+  - "%PYTHON%/python.exe -m pip install -U tox pip setuptools"
   - "%PYTHON%/python.exe --version"
 
 build: off
