@@ -17,7 +17,7 @@ import codecs
 from datetime import datetime
 import time
 from lxml.html import HTMLParser
-from lxml.etree import XMLParser, parse, ParserError
+from lxml.etree import XMLParser, ParserError
 from selection import XpathSelector
 import six
 from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
@@ -31,6 +31,7 @@ from weblib.text import normalize_space
 from weblib.html import decode_entities, find_refresh_url
 from weblib.rex import normalize_regexp
 import logging
+import defusedxml.lxml
 
 from grab.cookie import CookieManager
 from grab.error import GrabMisuseError, DataNotFound
@@ -293,20 +294,18 @@ class DomTreeExtension(object):
 
     @classmethod
     def _build_dom(cls, content, mode):
-        from defusedxml.lxml import parse
-
         assert mode in ('html', 'xml')
         if mode == 'html':
             if not hasattr(THREAD_STORAGE, 'html_parser'):
                 THREAD_STORAGE.html_parser = HTMLParser()
-            dom = parse(StringIO(content),
-                        parser=THREAD_STORAGE.html_parser)
+            dom = defusedxml.lxml.parse(StringIO(content),
+                                        parser=THREAD_STORAGE.html_parser)
             return dom.getroot()
         else:
             if not hasattr(THREAD_STORAGE, 'xml_parser'):
                 THREAD_STORAGE.xml_parser = XMLParser()
-            dom = parse(BytesIO(content),
-                        parser=THREAD_STORAGE.xml_parser)
+            dom = defusedxml.lxml.parse(BytesIO(content),
+                                        parser=THREAD_STORAGE.xml_parser)
             return dom.getroot()
 
     def build_html_tree(self):
