@@ -1,29 +1,6 @@
-"""
-This module contains `print_dict` function that is useful
-to dump content of dictionary in human acceptable representation.
-"""
-import six
 import logging
-
-
-def repr_value(val):
-    if isinstance(val, six.text_type):
-        return val.encode('utf-8')
-    elif isinstance(val, (list, tuple)):
-        return b'[' + b', '.join(repr_value(x) for x in val) + b']'
-    elif isinstance(val, dict):
-        return b'{' + b', '.join((repr_value(x) + b': ' + repr_value(y))
-                               for x, y in val.items()) + b'}'
-    else:
-        return six.b(str(val))
-
-
-def print_dict(dic):
-    print(b'[---')
-    for key, val in sorted(dic.items(), key=lambda x: x[0]):
-        print(repr_value(key) + b': ' + repr_value(val))
-    print(b'---]')
-
+import sys
+from contextlib import contextmanager
 
 
 def default_logging(grab_log=None,#'/tmp/grab.log',
@@ -52,3 +29,27 @@ def default_logging(grab_log=None,#'/tmp/grab.log',
         hdl = logging.FileHandler(grab_log, mode)
         grab_logger.addHandler(hdl)
         grab_logger.setLevel(level)
+
+
+class StderrProxy(object):
+    def __init__(self):
+        if not hasattr(sys, '_orig_stderr'):
+            sys._orig_stderr = sys.stderr
+        self.buf = []
+
+    @contextmanager
+    def record(self):
+        self.buf = []
+        try:
+            sys.stderr = self
+            yield
+        finally:
+            sys.stderr = sys._orig_stderr
+
+    def write(self, data):
+        sys._orig_stderr.write(data)
+        self.buf.append(data)
+
+    def getvalue(self):
+        return ''.join(self.buf)
+        #return 'def body_processor(self, chunk):\nKeyboardInterrupt'

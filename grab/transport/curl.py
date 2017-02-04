@@ -27,6 +27,7 @@ from grab.error import GrabMisuseError
 from grab.response import Response
 from grab.upload import UploadFile, UploadContent
 from grab.transport.base import BaseTransport
+from grab.util.log import StderrProxy
 
 logger = logging.getLogger('grab.transport.curl')
 
@@ -117,7 +118,7 @@ class CurlTransport(BaseTransport):
         self.request_body = b''
         #self.request_log = ''
 
-        self.curl.grab_callback_interrupted = True
+        self.curl.grab_callback_interrupted = False
 
     def header_processor(self, chunk):
         """
@@ -469,8 +470,10 @@ class CurlTransport(BaseTransport):
 
     def request(self):
 
+        stderr_proxy = StderrProxy()
         try:
-            self.curl.perform()
+            with stderr_proxy.record():
+                self.curl.perform()
         except pycurl.error as ex:
             # CURLE_WRITE_ERROR (23)
             # An error occurred when writing received data to a local file, or
@@ -481,10 +484,16 @@ class CurlTransport(BaseTransport):
             # Also this error is raised when curl receives KeyboardInterrupt
             # while it is processing some callback function
             # (WRITEFUNCTION, HEADERFUNCTIO, etc)
+            # If you think WTF then see details here:
+            # https://github.com/pycurl/pycurl/issues/413
+            if self.has_pycurl_hidden_sigint(stderr_proxy.getvalue()):
+                raise KeyboardInterrupt
             if 23 == ex.args[0]:
                 if getattr(self.curl, 'grab_callback_interrupted', None) is True:
-                    pass
-                    #self.curl.grab_callback_interrupted = False
+                    # This is expected error caused by
+                    # interruptted execution of body_processor callback
+                    # FIXME: is it set automatically?
+                    self.curl.grab_callback_interrupted = False
                 else:
                     raise error.GrabNetworkError(ex.args[0], ex.args[1])
             else:
@@ -503,8 +512,21 @@ class CurlTransport(BaseTransport):
                 else:
                     raise error.GrabNetworkError(ex.args[0], ex.args[1])
         except Exception as ex: # pylint: disable=broad-except
+            if self.has_pycurl_hidden_sigint(stderr_proxy.getvalue()):
+                raise KeyboardInterrupt
             six.reraise(error.GrabInternalError, error.GrabInternalError(ex),
                         sys.exc_info()[2])
+        else:
+            if self.has_pycurl_hidden_sigint(stderr_proxy.getvalue()):
+                raise KeyboardInterrupt
+
+    def has_pycurl_hidden_sigint(self, log):
+        """
+        Check if the log content contains the token
+        that originated while pycurl caught the `KeyboardInterrupt`
+        and converted it into `pycurl.error`
+        """
+        return 'KeyboardInterrupt' in log
 
     def prepare_response(self, grab):
         if self.body_file:

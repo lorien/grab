@@ -62,6 +62,8 @@ GRAB_TEST_LIST = (
     'test.grab_error',
     'test.grab_deprecated',
     'test.ext_pyquery',
+    # process control
+    'test.grab_sigint',
 )
 
 # ************

@@ -9,6 +9,10 @@ cache:
   - "$HOME/.cache/pip"
   - "$HOME/.pyenv"
 
+branches:
+  except:
+    - wintest
+
 matrix:
   include:
     - os: linux
@@ -43,6 +47,8 @@ matrix:
         - PYENV_VERSION="3.6.0"
   exclude:
     - python: 2.7 # hack to exclude default no-env travis job
+  #allow_failures:
+  #  - os: osx
 
 # Enable extra mongodb and redis services on linux
 # Mysql and postgres services are enabled on linux by default

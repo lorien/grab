@@ -111,6 +111,7 @@ class MulticurlTransport(object):
             pass
 
         while True:
+            # FIXME: should it be wrapped into pycurl sigint workaround
             status, _ = self.multi.perform()
             if status != pycurl.E_CALL_MULTI_PERFORM:
                 break

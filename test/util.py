@@ -132,5 +132,18 @@ def only_grab_transport(*names):
     return decorator
 
 
+def skip_test_if(condition, why_message):
+    def decorator(func):
+        def caller(*args, **kwargs):
+            if condition():
+                func_name = '%s:%s' % (func.__module__, func.__name__)
+                logger.debug('Skipping test %s because %s' % (func_name, why_message))
+                return None
+            else:
+                return func(*args, **kwargs)
+        return caller
+    return decorator
+
+
 def reset_request_counter():
     grab.base.REQUEST_COUNTER = itertools.count(1)

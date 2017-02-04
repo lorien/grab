@@ -3,10 +3,9 @@
 build: venv deps develop
 
 venv:
-	virtualenv --no-site-packages --python=python3.4 .env
+	virtualenv --no-site-packages --python=python3 .env
 	
 deps:
-	.env/bin/pip install -r requirements.txt
 	.env/bin/pip install -r requirements_dev.txt
 	.env/bin/pip install -r requirements_dev_backend.txt
 

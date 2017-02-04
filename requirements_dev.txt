@@ -18,3 +18,4 @@ pycurl;platform_system!="Windows"
 # to fix appveyor
 item;platform_system!="Windows"
 pylint
+psutil
