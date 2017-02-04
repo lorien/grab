@@ -81,6 +81,7 @@ class Spider(object):
     """
     Asynchronous scraping framework.
     """
+    spider_name = None
 
     # You can define here some urls and initial tasks
     # with name "initial" will be created from these
@@ -91,6 +92,8 @@ class Spider(object):
     initial_urls = None
 
     class Meta:
+        # pylint: disable=no-init
+        #
         # Meta.abstract means that this class will not be
         # collected to spider registry by `grab crawl` CLI command.
         # The Meta is inherited by descendant classes BUT
@@ -107,7 +110,7 @@ class Spider(object):
 
     @classmethod
     def get_spider_name(cls):
-        if hasattr(cls, 'spider_name'):
+        if cls.spider_name:
             return cls.spider_name
         else:
             return camel_case_to_underscore(cls.__name__)
@@ -123,7 +126,6 @@ class Spider(object):
                  meta=None,
                  only_cache=False,
                  config=None,
-                 slave=None,
                  args=None,
                  # New options start here
                  taskq=None,
@@ -162,12 +164,6 @@ class Spider(object):
         * taskq=None,
         * newtork_response_queue=None,
         """
-
-        if slave is not None:
-            raise SpiderConfigurtionError(
-                'Slave mode is not supported anymore. '
-                'Use `mp_mode=True` option to run multiple HTML'
-                ' parser processes.')
 
         # API:
         self.http_api_port = http_api_port
@@ -242,7 +238,6 @@ class Spider(object):
             self.priority_mode = priority_mode
 
         self.only_cache = only_cache
-        self.cache_pipeline = None
         self.work_allowed = True
         if request_pause is not NULL:
             warn('Option `request_pause` is deprecated and is not '
@@ -253,6 +248,11 @@ class Spider(object):
         self.proxy = None
         self.proxy_auto_change = False
         self.interrupted = False
+
+        self._task_generator_list = []
+        self.cache_pipeline = None
+        self.parser_pipeline = None
+        self.transport = None
 
     def setup_cache(self, backend='mongo', database=None, use_compression=True,
                     **kwargs):
@@ -268,7 +268,6 @@ class Spider(object):
         if database is None:
             raise SpiderMisuseError('setup_cache method requires database '
                                     'option')
-        self.cache_enabled = True
         mod = __import__('grab.spider.cache_backend.%s' % backend,
                          globals(), locals(), ['foo'])
         cache = mod.CacheBackend(database=database,
@@ -284,7 +283,7 @@ class Spider(object):
             Should be one of the following: 'memory', 'redis' or 'mongo'.
         :param kwargs: Additional credentials for backend.
         """
-        logger.debug('Using %s backend for task queue' % backend)
+        logger.debug('Using %s backend for task queue', backend)
         mod = __import__('grab.spider.queue_backend.%s' % backend,
                          globals(), locals(), ['foo'])
         self.task_queue = mod.QueueBackend(spider_name=self.get_spider_name(),
@@ -337,8 +336,7 @@ class Spider(object):
         self.work_allowed = False
 
     def load_proxylist(self, source, source_type=None, proxy_type='http',
-                       auto_init=True, auto_change=True,
-                       **kwargs):
+                       auto_init=True, auto_change=True):
         """
         Load proxy list.
 
@@ -519,7 +517,7 @@ class Spider(object):
         tasks is big.
         """
 
-        if False:
+        if False: # pylint: disable=using-constant-test
             # Some magic to make this function empty generator
             yield ':-)'
         return
@@ -570,7 +568,7 @@ class Spider(object):
                     logger_verbose.debug(
                         'Task queue contains less tasks (%d) than '
                         'allowed limit (%d). Trying to add '
-                        'new tasks.' % (queue_size, min_limit))
+                        'new tasks.', queue_size, min_limit)
                     try:
                         for _ in six.moves.range(min_limit - queue_size):
                             item = next(task_generator)
@@ -594,7 +592,7 @@ class Spider(object):
 
         logger_verbose.debug('Processing initial urls')
         if self.initial_urls:
-            for url in self.initial_urls:
+            for url in self.initial_urls: # pylint: disable=not-an-iterable
                 self.add_task(Task('initial', url=url))
 
         self._task_generator_list = []
@@ -613,7 +611,7 @@ class Spider(object):
             if size:
                 logger_verbose.debug(
                     'No ready-to-go tasks, Waiting for '
-                    'scheduled tasks (%d)' % size)
+                    'scheduled tasks (%d)', size)
                 return True
             else:
                 logger_verbose.debug('Task queue is empty.')
@@ -644,10 +642,10 @@ class Spider(object):
         self.stat.inc('spider:error-%s' % ex.__class__.__name__.lower())
 
         if hasattr(ex, 'tb'):
-            logger.error('Error in %s function' % func_name)
+            logger.error('Error in %s function', func_name)
             logger.error(ex.tb)
         else:
-            logger.error('Error in %s function' % func_name, exc_info=ex)
+            logger.error('Error in %s function', func_name, exc_info=ex)
 
         # Looks strange but I really have some problems with
         # serializing exception into string
@@ -750,7 +748,7 @@ class Spider(object):
         except NoDataHandler as ex:
             ex.tb = format_exc()
             self.parser_result_queue.put((ex, result['task']))
-        except Exception as ex:
+        except Exception as ex: # pylint: disable=broad-except
             ex.tb = format_exc()
             self.parser_result_queue.put((ex, result['task']))
 
@@ -808,7 +806,7 @@ class Spider(object):
                                proxy_userpwd=self.proxy.get_userpwd(),
                                proxy_type=self.proxy.proxy_type)
 
-    def change_active_proxy(self, task, grab):
+    def change_active_proxy(self, task, grab): # pylint: disable=unused-argument
         self.proxy = self.proxylist.get_random_proxy()
 
     def submit_task_to_transport(self, task, grab):
@@ -826,8 +824,8 @@ class Spider(object):
                     self.transport.start_task_processing(
                         task, grab, grab_config_backup)
                 except GrabInvalidUrl:
-                    logger.debug('Task %s has invalid URL: %s' % (
-                        task.name, task.url))
+                    logger.debug('Task %s has invalid URL: %s', 
+                                 task.name, task.url)
                     self.stat.collect('invalid-url', task.url)
 
     def start_api_thread(self):
@@ -970,16 +968,16 @@ class Spider(object):
                                 break
                         else:
                             shutdown_countdown = 10
-                    elif isinstance(task, bool) and (task is True):
+                    elif task is True:
                         # If received task is True
                         # and there is no active network threads then
                         # take some sleep
                         if not self.transport.get_active_threads_number():
                             time.sleep(0.01)
                     else:
-                        logger_verbose.debug('Got new task from task queue: %s'
-                                             % task)
-                        task.network_try_count += 1
+                        logger_verbose.debug('Got new task from task queue: %s',
+                                             task)
+                        task.network_try_count += 1 # pylint: disable=no-member
                         is_valid, reason = self.check_task_limits(task)
                         if is_valid:
                             task_grab = self.setup_grab_for_task(task)
@@ -993,7 +991,9 @@ class Spider(object):
                                 self.submit_task_to_transport(task, task_grab)
                         else:
                             self.log_rejected_task(task, reason)
+                            # pylint: disable=no-member
                             handler = task.get_fallback_handler(self)
+                            # pylint: enable=no-member
                             if handler:
                                 handler(task)
 
@@ -1096,8 +1096,8 @@ class Spider(object):
 
             logger_verbose.debug('Work done')
         except KeyboardInterrupt:
-            logger.info('\nGot ^C signal in process %d. Stopping.'
-                        % os.getpid())
+            logger.info('\nGot ^C signal in process %d. Stopping.',
+                        os.getpid())
             self.interrupted = True
             raise
         finally:
@@ -1117,7 +1117,7 @@ class Spider(object):
             # Stop parser processes
             self.shutdown_event.set()
             self.parser_pipeline.shutdown()
-            logger.debug('Main process [pid=%s]: work done' % os.getpid())
+            logger.debug('Main process [pid=%s]: work done', os.getpid())
 
     def log_failed_network_result(self, res):
         # Log the error
@@ -1131,9 +1131,8 @@ class Spider(object):
         # make_unicode(msg, errors='ignore'))
 
     def log_rejected_task(self, task, reason):
-        logger_verbose.debug('Task %s is rejected due to '
-                             '%s limit'
-                             % (task.name, reason))
+        logger_verbose.debug('Task %s is rejected due to %s limit',
+                             task.name, reason)
         if reason == 'task-try-count':
             self.stat.collect('task-count-rejected',
                               task.url)
@@ -1171,9 +1170,9 @@ class Spider(object):
                     for something in data_result:
                         self.process_handler_result(something, task)
 
-            except Exception as ex:
-                self.process_handler_error('data_%s' % result.handler_key, ex,
-                                           task)
+            except Exception as ex: # pylint: disable=broad-except
+                self.process_handler_error('data_%s' % result.handler_key,
+                                           ex, task)
         elif result is None:
             pass
         elif isinstance(result, ResponseNotValid):
