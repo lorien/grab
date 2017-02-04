@@ -42,6 +42,8 @@ class CacheBackend(object):
                 break
         if not found:
             self.create_cache_table(self.mysql_engine)
+        # FIXME: why `use_compression` is not used?
+        self.use_compression = use_compression
 
     def connect(self):
         self.conn = MySQLdb.connect(**self.connection_config)
@@ -49,6 +51,7 @@ class CacheBackend(object):
         self.cursor = self.conn.cursor()
 
     def execute(self, *args):
+        # pylint: disable=no-member
         try:
             self.cursor.execute(*args)
         except (AttributeError, MySQLdb.OperationalError):

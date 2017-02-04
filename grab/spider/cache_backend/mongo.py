@@ -94,10 +94,10 @@ class CacheBackend(object):
         }
         try:
             self.db.cache.save(item, w=1)
-        except Exception as ex:
+        except Exception as ex: # pylint: disable=broad-except
             if 'document too large' in six.text_type(ex):
                 logging.error('Document too large. It was not saved into mongo'
-                              ' cache. Url: %s' % url)
+                              ' cache. Url: %s', url)
             else:
                 raise
 

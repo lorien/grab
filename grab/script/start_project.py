@@ -31,7 +31,7 @@ def underscore_to_camelcase(val):
     return ''.join(x.title() for x in items)
 
 
-def main(project_name, template, **kwargs):
+def main(project_name, template, **kwargs): # pylint: disable=unused-argument
     cur_dir = os.getcwd()
     project_dir = os.path.join(cur_dir, project_name)
 
@@ -45,7 +45,7 @@ def main(project_name, template, **kwargs):
     if os.path.exists(project_dir):
         raise GrabError('Directory %s already exists' % project_dir)
     else:
-        logger.debug('Copying %s to %s' % (template_path, project_dir))
+        logger.debug('Copying %s to %s', template_path, project_dir)
         shutil.copytree(template_path, project_dir)
 
         project_name_camelcase = underscore_to_camelcase(project_name)

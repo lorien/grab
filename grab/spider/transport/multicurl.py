@@ -18,8 +18,11 @@ for key in dir(pycurl):
 
 
 class MulticurlTransport(object):
-    def __init__(self, spider, socket_number):
-        # spider arg is not used in multicurl transport
+    def __init__(self, spider, socket_number): # pylint: disable=unused-argument
+        """
+        Args:
+            spider: argument is not used in multicurl transport
+        """
         self.socket_number = socket_number
         self.multi = pycurl.CurlMulti()
         self.multi.handles = []
@@ -140,8 +143,10 @@ class MulticurlTransport(object):
                 # while it is processing some callback function
                 # (WRITEFUNCTION, HEADERFUNCTIO, etc)
                 if ecode == 23:
-                    if getattr(curl, '_callback_interrupted', None) is True:
-                        curl._callback_interrupted = False
+                    if curl.grab_callback_interrupted is True:
+                        # FIXME: that flag should be set automatically
+                        # FIXME: write tests to test this flag
+                        curl.grab_callback_interrupted = False
                         results.append((True, curl, None, None))
                     else:
                         results.append((False, curl, ecode, emsg))

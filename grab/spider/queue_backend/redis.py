@@ -22,18 +22,18 @@ class QueueBackend(QueueInterface):
             queue_name = 'task_queue_%s' % spider_name
         self.queue_name = queue_name
         self.queue_object = PriorityQueue(queue_name, **kwargs)
-        logging.debug('Redis queue key: %s' % self.queue_name)
+        logging.debug('Redis queue key: %s', self.queue_name)
 
     def put(self, task, priority, schedule_time=None):
+        if schedule_time is not None:
+            raise SpiderMisuseError('Redis task queue does not support '
+                                    'delayed task')
         # Add attribute with random value
         # This is required because qr library
         # does not allow to store multiple values with same hash
         # in the PriorityQueue
 
-        if schedule_time is not None:
-            raise SpiderMisuseError('Redis task queue does not support '
-                                    'delayed task')
-        task._rnd = random.random()
+        task.redis_qr_rnd = random.random()
         self.queue_object.push(task, priority)
 
     def get(self):

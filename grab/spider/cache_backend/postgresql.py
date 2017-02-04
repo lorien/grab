@@ -47,6 +47,9 @@ class CacheBackend(object):
         if not found:
             self.create_cache_table()
 
+        # FIXME: why `use_compression` is not used?
+        self.use_compression = use_compression
+
     def create_cache_table(self):
         self.cursor.execute('BEGIN')
         self.cursor.execute('''

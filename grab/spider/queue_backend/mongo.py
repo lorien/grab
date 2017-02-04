@@ -29,7 +29,7 @@ class QueueBackend(QueueInterface):
         self.queue_name = queue_name
         conn = pymongo.MongoClient(**kwargs)
         self.collection = conn[self.database][self.queue_name]
-        logger.debug('Using collection: %s' % self.collection)
+        logger.debug('Using collection: %s', self.collection)
 
         self.collection.ensure_index('priority')
 
