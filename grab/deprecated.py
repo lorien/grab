@@ -302,8 +302,8 @@ class DeprecatedThings(object):
     # **********************************************
 
     @deprecated(use_instead='grab.doc.choose_form')
-    def choose_form(self, **kwargs):
-        return self.doc.choose_form(**kwargs)
+    def choose_form(self, *args, **kwargs):
+        return self.doc.choose_form(*args, **kwargs)
 
     @property
     def form(self):
