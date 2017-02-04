@@ -13,7 +13,7 @@ Exception
      |-> DataNotFound <- IndexError
 """
 from __future__ import absolute_import
-from weblib.error import DataNotFound  # noqa
+from weblib.error import DataNotFound  # noqa pylint: disable=unused-import
 
 
 class GrabError(Exception):

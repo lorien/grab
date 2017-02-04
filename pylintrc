@@ -1,9 +1,9 @@
 [MASTER]
 jobs=4
-extension-pkg-whitelist=pycurl,MySQLdb
+extension-pkg-whitelist=pycurl,MySQLdb,lxml
 
 [TYPECHEK]
-ignored-modules=six.moves.urllib, six.moves.http_cookiejar, six.moves.queue
+ignored-modules=six.moves.urllib, six.moves.http_cookiejar, six.moves.queue, six.moves.socketserver, six.moves.SimpleHTTPServer
 
 [MESSAGES CONTROL]
 disable=missing-docstring

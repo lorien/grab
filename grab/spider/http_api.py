@@ -59,12 +59,13 @@ class ReuseTCPServer(TCPServer):
 class HttpApiThread(threading.Thread):
     def __init__(self, spider, *args, **kwargs):
         self.spider = spider
+        self.server = None
         super(HttpApiThread, self).__init__(*args, **kwargs)
 
     def run(self):
         ApiHandler.spider = self.spider
         self.server = ReuseTCPServer(("", self.spider.http_api_port),
                                      ApiHandler)
-        logging.debug('Serving HTTP API on localhost:%d'
-                      % self.spider.http_api_port)
+        logging.debug('Serving HTTP API on localhost:%d',
+                      self.spider.http_api_port)
         self.server.serve_forever()

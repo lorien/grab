@@ -1,2 +1,2 @@
 from __future__ import absolute_import
-from weblib.const import NULL  # noqa
+from weblib.const import NULL  # noqa pylint: disable=unused-import

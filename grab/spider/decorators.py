@@ -33,6 +33,6 @@ def integrity(integrity_func, retry_errors=(ResponseNotValid,)):
                 if result is not None:
                     for event in result:
                         yield event
-        func_wrapper._original_func = func
+        func_wrapper._original_func = func # pylint: disable=protected-access
         return func_wrapper
     return build_decorator

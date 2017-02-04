@@ -247,54 +247,63 @@ class DeprecatedThings(object):
 
     # Backward compat.
     def _get_response(self):
+        warn('The `Grab.response` attribute is deprecated. '
+             'Use `Grab.doc` instead.')
         return self.doc
 
     def _set_response(self, val):
+        warn('The `Grab.response` attribute is deprecated. '
+             'Use `Grab.doc` instead.')
+        # pylint: disable=assigning-non-slot, attribute-defined-outside-init
         self.doc = val
 
     response = property(_get_response, _set_response)
 
     @deprecated(use_instead='grab.setup_document')
     def fake_response(self, *args, **kwargs):
-        return self.setup_document(*args, **kwargs)
+        return self.setup_document(*args, **kwargs) # pylint: disable=no-member
 
     # Cookies
     # *******
     @deprecated(use_instead='grab.cookies.load_from_file')
-    def load_cookies(self, path, file_required=True):
-        self.cookies.load_from_file(path)
+    def load_cookies(self, path, file_required=None):
+        if file_required is not None:
+            warn('The option `file_required` is no longer supported')
+        self.cookies.load_from_file(path) # pylint: disable=no-member
 
     @deprecated(use_instead='grab.cookies.save_to_file')
     def dump_cookies(self, path):
-        self.cookies.save_to_file(path)
+        self.cookies.save_to_file(path) # pylint: disable=no-member
 
     @deprecated(use_instead='grab.proxylist.load_file OR '
                             'grab.proxylist.load_url')
     def load_proxylist(self, source, source_type, proxy_type='http',
-                       auto_init=True, auto_change=True,
-                       **kwargs):
+                       auto_init=True, auto_change=True):
         # self.proxylist = ProxyList(source, source_type,
         #                            proxy_type=proxy_type, **kwargs)
         if source_type == 'text_file':
+            # pylint: disable=no-member
             self.proxylist.load_file(source, proxy_type=proxy_type)
+            # pylint: enable=no-member
         elif source_type == 'url':
+            # pylint: disable=no-member
             self.proxylist.load_url(source, proxy_type=proxy_type)
+            # pylint: enable=no-member
         else:
             raise error.GrabMisuseError(
                 'Unknown proxy source type: %s' % source_type)
 
         # self.proxylist.setup(auto_change=auto_change, auto_init=auto_init)
-        self.setup(proxy_auto_change=auto_change)
+        self.setup(proxy_auto_change=auto_change) # pylint: disable=no-member
         if not auto_change and auto_init:
-            self.change_proxy()
+            self.change_proxy() # pylint: disable=no-member
 
     # Methods from deprecated grab.ext.form module
     # **********************************************
 
     @deprecated(use_instead='grab.doc.choose_form')
-    def choose_form(self, number=None, id=None, name=None, xpath=None):
-        return self.doc.choose_form(number=number, id=id,
-                                    name=name, xpath=xpath)
+    def choose_form(self, **kwargs):
+        return self.doc.choose_form(**kwargs)
 
     @property
     def form(self):

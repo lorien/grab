@@ -12,7 +12,7 @@ import json
 import logging
 
 from grab.error import GrabMisuseError
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import urlparse, urlunparse
 
 logger = logging.getLogger('grab.cookie')
 COOKIE_ATTRS = ('name', 'value', 'version', 'port', 'domain',

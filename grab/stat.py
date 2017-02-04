@@ -81,8 +81,9 @@ class Stat(object):
 
     def print_progress_line(self):
         now = time.time()
-        self.logger.debug('%s [%s]' % (self.get_speed_line(now),
-                                       self.get_counter_line()))
+        self.logger.debug('%s [%s]',
+                          self.get_speed_line(now),
+                          self.get_counter_line())
 
     def inc(self, key, delta=1):
         self.counters[key] += delta

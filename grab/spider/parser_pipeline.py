@@ -85,7 +85,7 @@ class ParserPipeline(object):
                 pname = proc['proc'].pid
             else:
                 pname = proc['proc'].name
-            logger.debug('Started shutdown of parser process: %s' % pname)
+            logger.debug('Started shutdown of parser process: %s', pname)
             proc['proc'].join(
                 PARSER_PROCESS_JOIN_TIMEOUT)
             if proc['proc'].is_alive():
@@ -97,4 +97,4 @@ class ParserPipeline(object):
                     # non-mp mode parser threads
                     # have daemon=True flag
                     pass
-            logger.debug('Finished joining parser process: %s' % pname)
+            logger.debug('Finished joining parser process: %s', pname)

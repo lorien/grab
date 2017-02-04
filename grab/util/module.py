@@ -36,10 +36,9 @@ def build_spider_registry(config):
                             pass
                         else:
                             spider_name = val.get_spider_name()
-                            logger.debug(
-                                'Module `%s`, found spider `%s` '
-                                'with name `%s`' % (
-                                    path, val.__name__, spider_name))
+                            logger.debug('Module `%s`, found spider `%s` '
+                                         'with name `%s`',
+                                         path, val.__name__, spider_name)
                             if spider_name in SPIDER_REGISTRY:
                                 mod = SPIDER_REGISTRY[spider_name].__module__
                                 raise SpiderInternalError(
@@ -61,7 +60,7 @@ def load_spider_class(config, spider_name):
         return SPIDER_REGISTRY[spider_name]
 
 
-def build_spider_instance(cls, settings_module, **kwargs):
+def build_spider_instance(cls, settings_module):
     root_config = build_root_config(settings_module)
     spider_config = build_spider_config(cls, root_config)
     return cls(config=spider_config)
