@@ -36,8 +36,7 @@ def setup_arg_parser(parser):
     parser.add_argument('--parser-pool-size', type=int)
 
 
-def get_lock_key(spider_name, lock_key=None, ignore_lock=False,
-                 **kwargs):
+def get_lock_key(spider_name, lock_key=None, ignore_lock=False):
     # --ignore-lock has highest precedence
     if ignore_lock:
         return None
@@ -76,7 +75,7 @@ def main(spider_name, thread_number=None,
          parser_pool_size=None,
          grab_log_file=None,
          network_log_file=None,
-         *args, **kwargs):
+         **kwargs): # pylint: disable=unused-argument
     default_logging(
         grab_log=grab_log_file,
         network_log=network_log_file,
@@ -136,7 +135,7 @@ def main(spider_name, thread_number=None,
         logger.debug(stats)
 
     pid = os.getpid()
-    logger.debug('Spider pid is %d' % pid)
+    logger.debug('Spider pid is %d', pid)
 
     if not disable_report:
         if spider_config.get('save_report'):
