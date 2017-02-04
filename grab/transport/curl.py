@@ -92,6 +92,7 @@ class CurlTransport(BaseTransport):
 
     def __init__(self):
         self.curl = pycurl.Curl()
+        self.reset()
 
     def reset(self):
         super(CurlTransport, self).reset()
@@ -101,10 +102,14 @@ class CurlTransport(BaseTransport):
         self.response_body_bytes_read = 0
         self.verbose_logging = False
 
+        self.config_nobody = None
+
         # Maybe move to super-class???
         self.request_head = b''
         self.request_body = b''
         #self.request_log = ''
+
+        self.curl.grab_callback_interrupted = True
 
     def header_processor(self, chunk):
         """
@@ -121,7 +126,7 @@ class CurlTransport(BaseTransport):
         """
 
         if self.config_nobody:
-            self.curl._callback_interrupted = True
+            self.curl.grab_callback_interrupted = True
             return 0
 
         bytes_read = len(chunk)
@@ -133,9 +138,9 @@ class CurlTransport(BaseTransport):
             self.response_body_chunks.append(chunk)
         if self.config_body_maxsize is not None:
             if self.response_body_bytes_read > self.config_body_maxsize:
-                logger.debug('Response body max size limit reached: %s' %
+                logger.debug('Response body max size limit reached: %s',
                              self.config_body_maxsize)
-                self.curl._callback_interrupted = True
+                self.curl.grab_callback_interrupted = True
                 return 0
 
         # Returning None implies that all bytes were written
@@ -181,7 +186,7 @@ class CurlTransport(BaseTransport):
                     pycurl.INFOTYPE_HEADER_OUT: '>',
                 }
                 marker = marker_types[_type]
-                logger.debug('%s: %s' % (marker, text.rstrip()))
+                logger.debug('%s: %s', marker, text.rstrip())
 
     def process_config(self, grab):
         """
@@ -189,8 +194,10 @@ class CurlTransport(BaseTransport):
         """
 
         # Copy some config for future usage
+        # pylint: disable=attribute-defined-outside-init
         self.config_nobody = grab.config['nobody']
         self.config_body_maxsize = grab.config['body_maxsize']
+        # pylint: enable=attribute-defined-outside-init
 
         try:
             request_url = normalize_url(grab.config['url'])
@@ -231,7 +238,9 @@ class CurlTransport(BaseTransport):
             self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
 
         if grab.config['verbose_logging']:
+            # pylint: disable=attribute-defined-outside-init
             self.verbose_logging = True
+            # pylint: enable=attribute-defined-outside-init
 
         # User-Agent
         if grab.config['user_agent'] is None:
@@ -262,11 +271,11 @@ class CurlTransport(BaseTransport):
         # self.curl.setopt(pycurl.SSLVERSION, pycurl.SSLVERSION_SSLv3)
 
         if grab.request_method in ('POST', 'PUT'):
-            if (grab.config['post'] is None and
-                grab.config['multipart_post'] is None):
-                    raise GrabMisuseError('Neither `post` or `multipart_post`'
-                                          ' options was specified for the %s'
-                                          ' request' % grab.request_method)
+            if (grab.config['post'] is None
+                    and grab.config['multipart_post'] is None):
+                raise GrabMisuseError('Neither `post` or `multipart_post`'
+                                      ' options was specified for the %s'
+                                      ' request' % grab.request_method)
 
         if grab.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
@@ -462,15 +471,16 @@ class CurlTransport(BaseTransport):
             # CURLE_WRITE_ERROR (23)
             # An error occurred when writing received data to a local file, or
             # an error was returned to libcurl from a write callback.
-            # This exception should be ignored if _callback_interrupted flag
+            # This exception should be ignored if grab_callback_interrupted flag
             # is enabled (this happens when nohead or nobody options enabled)
             #
             # Also this error is raised when curl receives KeyboardInterrupt
             # while it is processing some callback function
             # (WRITEFUNCTION, HEADERFUNCTIO, etc)
             if 23 == ex.args[0]:
-                if getattr(self.curl, '_callback_interrupted', None) is True:
-                    self.curl._callback_interrupted = False
+                if getattr(self.curl, 'grab_callback_interrupted', None) is True:
+                    pass
+                    #self.curl.grab_callback_interrupted = False
                 else:
                     raise error.GrabNetworkError(ex.args[0], ex.args[1])
             else:
@@ -488,7 +498,7 @@ class CurlTransport(BaseTransport):
                                                              ex.args[1])
                 else:
                     raise error.GrabNetworkError(ex.args[0], ex.args[1])
-        except Exception as ex:
+        except Exception as ex: # pylint: disable=broad-except
             six.reraise(error.GrabInternalError, error.GrabInternalError(ex),
                         sys.exc_info()[2])
 
@@ -505,8 +515,10 @@ class CurlTransport(BaseTransport):
             response.body = b''.join(self.response_body_chunks)
 
         # Clear memory
+        # pylint: disable=attribute-defined-outside-init
         self.response_header_chunks = []
         self.response_body_chunks = []
+        # pylint: enable=attribute-defined-outside-init
 
         response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         response.total_time = self.curl.getinfo(pycurl.TOTAL_TIME)
@@ -587,7 +599,7 @@ class CurlTransport(BaseTransport):
         """
 
         state['curl'] = pycurl.Curl()
-        self.__dict__ = state
+        self.__dict__ = state # pylint: disable=attribute-defined-outside-init
 
 
 # from grab.base import BaseGrab
