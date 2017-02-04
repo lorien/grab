@@ -91,20 +91,28 @@ class CurlTransport(BaseTransport):
     """
 
     def __init__(self):
+        super(CurlTransport, self).__init__()
         self.curl = pycurl.Curl()
+
+        # this assignments makes pylint happy
+        self.config_nobody = None
+        self.config_body_maxsize = None
+        self.request_head = None
+        self.request_body = None
+        self.verbose_logging = None
+        self.response_header_chunks = None
+        self.response_body_chunks = None
         self.reset()
 
     def reset(self):
         super(CurlTransport, self).reset()
-
         self.response_header_chunks = []
         self.response_body_chunks = []
         self.response_body_bytes_read = 0
         self.verbose_logging = False
-
         self.config_nobody = None
-
-        # Maybe move to super-class???
+        self.config_body_maxsize = 0
+        # FIXME: maybe move to super-class???
         self.request_head = b''
         self.request_body = b''
         #self.request_log = ''
@@ -194,10 +202,8 @@ class CurlTransport(BaseTransport):
         """
 
         # Copy some config for future usage
-        # pylint: disable=attribute-defined-outside-init
         self.config_nobody = grab.config['nobody']
         self.config_body_maxsize = grab.config['body_maxsize']
-        # pylint: enable=attribute-defined-outside-init
 
         try:
             request_url = normalize_url(grab.config['url'])
@@ -238,9 +244,7 @@ class CurlTransport(BaseTransport):
             self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
 
         if grab.config['verbose_logging']:
-            # pylint: disable=attribute-defined-outside-init
             self.verbose_logging = True
-            # pylint: enable=attribute-defined-outside-init
 
         # User-Agent
         if grab.config['user_agent'] is None:
@@ -515,10 +519,8 @@ class CurlTransport(BaseTransport):
             response.body = b''.join(self.response_body_chunks)
 
         # Clear memory
-        # pylint: disable=attribute-defined-outside-init
         self.response_header_chunks = []
         self.response_body_chunks = []
-        # pylint: enable=attribute-defined-outside-init
 
         response.code = self.curl.getinfo(pycurl.HTTP_CODE)
         response.total_time = self.curl.getinfo(pycurl.TOTAL_TIME)

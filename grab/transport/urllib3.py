@@ -87,6 +87,7 @@ class Urllib3Transport(BaseTransport):
     Grab network transport based on urllib3 library.
     """
     def __init__(self):
+        super(Urllib3Transport, self).__init__()
         self.pool = PoolManager(10)
 
         logger = logging.getLogger('urllib3.connectionpool')
@@ -220,7 +221,6 @@ class Urllib3Transport(BaseTransport):
 
         # Cookies
         self.process_cookie_options(grab, req)
-
 
         self._request = req
 

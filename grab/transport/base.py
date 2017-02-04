@@ -3,6 +3,11 @@ import os
 
 
 class BaseTransport(object):
+    def __init__(self):
+        # these assignments makes pylint happy
+        self.body_file = None
+        self.body_path = None
+
     def reset(self):
         self.body_file = None
         self.body_path = None
