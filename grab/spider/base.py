@@ -1013,7 +1013,7 @@ class Spider(object):
                 if self.cache_pipeline:
                     # CACHE: for action, result in self.cache_pipeline.get_ready_results()
                     for action, result in self.cache_pipeline.get_ready_results():
-                        print('thing from cache: %s:%s' % (action, result))
+                        #print('thing from cache: %s:%s' % (action, result))
                         assert action in ('network_result', 'task')
                         if action == 'network_result':
                             results.append((result, True))

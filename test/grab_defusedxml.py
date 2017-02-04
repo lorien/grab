@@ -16,12 +16,15 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
     def test_lxml_security_bug(self):
         with temp_dir() as tmp_dir:
-            inj_file = os.path.join(tmp_dir, 'injection')
-            with open(inj_file, 'w') as out:
+            injection_path = os.path.join(tmp_dir, 'injection')
+            with open(injection_path, 'w') as out:
                 out.write('Hey there!')
+            # Prepare file:// URL valid for both linux and windows
+            injection_url = 'file:///%s' % (injection_path.lstrip('/')
+                                                          .replace('\\', '/'))
             bad_xml = (
                 '<!DOCTYPE external ['
-                '<!ENTITY ee SYSTEM "file://' + inj_file + '">'
+                '<!ENTITY ee SYSTEM "' + injection_url + '">'
                 ']>'
                 '<root>&ee;</root>'
             ).encode()
@@ -30,16 +33,19 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
     def test_grab_parse_defensedxml(self):
         with temp_dir() as tmp_dir:
-            inj_file = os.path.join(tmp_dir, 'injection')
-            xml_file = os.path.join(tmp_dir, 'bad.xml')
-            with open(inj_file, 'w') as out:
+            injection_path = os.path.join(tmp_dir, 'injection')
+            with open(injection_path, 'w') as out:
                 out.write('Hey there!')
+            # Prepare file:// URL valid for both linux and windows
+            injection_url = 'file:///%s' % (injection_path.lstrip('/')
+                                                          .replace('\\', '/'))
             bad_xml = (
                 '<!DOCTYPE external ['
-                '<!ENTITY ee SYSTEM "file://' + inj_file + '">'
+                '<!ENTITY ee SYSTEM "' + injection_url + '">'
                 ']>'
                 '<root>&ee;</root>'
             ).encode()
+            xml_file = os.path.join(tmp_dir, 'bad.xml')
             with open(xml_file, 'wb') as out:
                 out.write(bad_xml)
             g = build_grab(content_type='xml')
