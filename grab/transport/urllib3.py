@@ -12,10 +12,10 @@ from urllib3.fields import RequestField
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
 from urllib3.exceptions import ProxySchemeUnknown
-import six
-from six.moves.urllib.parse import urlsplit
 import random
+from six.moves.urllib.parse import urlsplit
 from six.moves.http_cookiejar import CookieJar
+import six
 import time
 
 from grab import error
@@ -70,9 +70,13 @@ class Request(object):
         self.headers = headers
         self.body_maxsize = body_maxsize
         self.op_started = None
+        self.timeout = None
+        self.connect_timeout = None
+        self.config_nobody = None
+        self.config_body_maxsize = None
 
-        self._response_file = None
-        self._response_path = None
+        self.response_file = None
+        self.response_path = None
 
     def get_full_url(self):
         return self.url
@@ -87,6 +91,13 @@ class Urllib3Transport(BaseTransport):
 
         logger = logging.getLogger('urllib3.connectionpool')
         logger.setLevel(logging.WARNING)
+
+        self.request_head = b''
+        self.request_body = b''
+        self.request_log = b''
+
+        self._response = None
+        self._request = None
 
     def reset(self):
         #self.response_header_chunks = []
@@ -136,8 +147,8 @@ class Urllib3Transport(BaseTransport):
                 grab.config['body_storage_dir'],
                 grab.config['body_storage_filename'],
                 create_dir=grab.config['body_storage_create_dir'])
-            req._response_file = file_
-            req._response_path = path_
+            req.response_file = file_
+            req.response_path = path_
 
         if grab.config['multipart_post'] is not None:
             post_data = grab.config['multipart_post']
@@ -170,11 +181,11 @@ class Urllib3Transport(BaseTransport):
             req.data = post_data
 
         if method in ('POST', 'PUT'):
-            if (grab.config['post'] is None and
-                grab.config['multipart_post'] is None):
-                    raise GrabMisuseError('Neither `post` or `multipart_post`'
-                                          ' options was specified for the %s'
-                                          ' request' % method)
+            if (grab.config['post'] is None
+                    and grab.config['multipart_post'] is None):
+                raise GrabMisuseError('Neither `post` or `multipart_post`'
+                                      ' options was specified for the %s'
+                                      ' request' % method)
         # Proxy
         if grab.config['proxy']:
             req.proxy = grab.config['proxy']
@@ -320,11 +331,11 @@ class Urllib3Transport(BaseTransport):
                     data = data[:maxsize]
                 return data
 
-            if self._request._response_path:
-                response.body_path = self._request._response_path
+            if self._request.response_path:
+                response.body_path = self._request.response_path
                 # FIXME: Quick dirty hack, actullay, response is fully read into memory
-                self._request._response_file.write(read_with_timeout())
-                self._request._response_file.close()
+                self._request.response_file.write(read_with_timeout())
+                self._request.response_file.close()
             else:
                 response.body = read_with_timeout()
 
@@ -366,7 +377,9 @@ class Urllib3Transport(BaseTransport):
         # function called from spider cache backend
         if self._response and self._request:
             jar.extract_cookies(
+                # pylint: disable=protected-access
                 MockResponse(self._response._original_response.msg),
+                # pylint: enable=protected-access
                 MockRequest(self._request),
             )
         return jar
