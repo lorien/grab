@@ -4,7 +4,7 @@ import six
 from test.util import build_grab, temp_file
 from test.util import BaseGrabTestCase
 from grab import GrabMisuseError, GrabError
-from grab.base import reset_request_counter
+from test.util import reset_request_counter
 
 
 class GrabApiTestCase(BaseGrabTestCase):

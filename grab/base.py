@@ -55,12 +55,6 @@ logger = logging.getLogger('grab.base')
 logger_network = logging.getLogger('grab.network')
 
 
-def reset_request_counter():
-    global REQUEST_COUNTER
-
-    REQUEST_COUNTER = itertools.count(1)
-
-
 def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
     """
     Copy grab config with correct handling of mutable config values.
@@ -224,6 +218,13 @@ class Grab(DeprecatedThings):
         self.config['common_headers'] = self.common_headers()
         self.cookies = CookieManager()
         self.proxylist = ProxyList()
+
+        # makes pylint happy
+        self.request_counter = None
+        self.request_head = None
+        self.request_body = None
+        self.request_method = None
+
         self.setup_transport(transport)
         self.reset()
         if kwargs:
@@ -277,6 +278,7 @@ class Grab(DeprecatedThings):
         #self.request_log = None
         self.request_body = None
         self.request_method = None
+        self.request_counter = None
         self.transport.reset()
 
     def clone(self, **kwargs):
@@ -407,7 +409,9 @@ class Grab(DeprecatedThings):
         Send request details to logging system.
         """
 
+        # pylint: disable=no-member
         thread_name = threading.currentThread().getName().lower()
+        # pylint: enable=no-member
         if thread_name == 'mainthread':
             thread_name = ''
         else:
@@ -508,8 +512,8 @@ class Grab(DeprecatedThings):
                         new_items.append((key, value))
                     post = '\n'.join('%-25s: %s' % x for x in new_items)
             if post:
-                logger_network.debug('[%02d] POST request:\n%s\n'
-                                     % (self.request_counter, post))
+                logger_network.debug('[%02d] POST request:\n%s\n',
+                                     self.request_counter, post)
 
         # It's important to delete old POST data after request is performed.
         # If POST data is not cleared then next request will try to use them
@@ -574,7 +578,7 @@ class Grab(DeprecatedThings):
                 self.doc = self.transport.prepare_response(self)
             self.copy_request_data()
             self.save_dumps()
-        except Exception as ex:
+        except Exception as ex: # pylint: disable=broad-except
             logger.error('', exc_info=ex)
 
     def copy_request_data(self):
@@ -652,7 +656,9 @@ class Grab(DeprecatedThings):
         }
 
     def save_dumps(self):
+        # pylint: disable=no-member
         thread_name = threading.currentThread().getName().lower()
+        # pylint: enable=no-member
         if thread_name == 'mainthread':
             thread_name = ''
         else:

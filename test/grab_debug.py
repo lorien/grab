@@ -5,7 +5,7 @@ import threading
 
 from test.util import BaseGrabTestCase
 from test.util import build_grab, exclude_grab_transport, temp_dir
-from grab.base import reset_request_counter
+from test.util import reset_request_counter
 from grab.error import GrabTimeoutError
 
 

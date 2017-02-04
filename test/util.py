@@ -6,8 +6,10 @@ from contextlib import contextmanager
 from tempfile import mkdtemp, mkstemp
 from shutil import rmtree
 import platform
+import itertools
 
 from grab import Grab
+import grab.base
 
 logger = logging.getLogger('test.util')
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -128,3 +130,7 @@ def only_grab_transport(*names):
                 return None
         return caller
     return decorator
+
+
+def reset_request_counter():
+    grab.base.REQUEST_COUNTER = itertools.count(1)
