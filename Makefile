@@ -13,12 +13,6 @@ deps:
 develop:
 	.env/bin/python setup.py develop
 
-flake:
-	flake8 grab test setup.py
-
-flake_verbose:
-	flake8 grab test setup.py --show-pep8
-
 test:
 	tox -e py34
 
@@ -45,11 +39,5 @@ clean:
 upload:
 	python setup.py sdist upload
 
-doc:
-	tox -e doc
-
 doc_open:
 	x-www-browser docs/en/build/html/index.html
-
-doc_ru:
-	sh -c 'cd docs/ru; make html'

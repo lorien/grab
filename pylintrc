@@ -1,0 +1,12 @@
+[MASTER]
+jobs=4
+extension-pkg-whitelist=pycurl
+
+[TYPECHEK]
+ignored-modules=six.moves.urllib, six.moves.http_cookiejar
+
+[MESSAGES CONTROL]
+disable=missing-docstring
+
+[REPORTS]
+reports=no
