@@ -180,7 +180,7 @@ class TestCookies(BaseGrabTestCase):
             'foo': big_value,
         })
         g.go(self.server.get_url())
-        self.assertEqual(self.server.request['data'], b'foo=%s' % big_value.encode())
+        self.assertEqual(self.server.request['data'], ('foo=%s' % big_value).encode())
 
     def test_log_request_extra_argument(self):
         import grab.base
