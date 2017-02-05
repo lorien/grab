@@ -13,6 +13,7 @@ setup(
     author_email='lorien@lorien.name',
 
     packages=find_packages(exclude=['test', 'test.files']),
+    include_package_data=True,
     install_requires=[
         'weblib>=0.1.23',
         'six',
