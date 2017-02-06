@@ -1,5 +1,12 @@
 # Grab Change Log
 
+## [0.6.35] - 2017-02-06
+### Fixed
+- Fix bug in deprecated grab.choose_form method
+- Add default project templates files to the distribution, by @rushter
+# Fix #222: debug_post option fails with big post data
+# Fix #148: pycurl ignores sigint signal
+
 ## [0.6.34] - 2017-02-04
 ### Added
 - Start running Grab tests in OSX environment on travis CI
