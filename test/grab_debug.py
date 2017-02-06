@@ -166,6 +166,22 @@ class TestCookies(BaseGrabTestCase):
         g.go(self.server.get_url())
         self.assertEqual(b'x', g.doc.body)
 
+    def test_debug_post_big_str(self):
+        g = build_grab(debug_post=True)
+        big_value = 'x' * 1000
+        g.setup(post=big_value)
+        g.go(self.server.get_url())
+        self.assertEqual(self.server.request['data'], big_value.encode())
+
+    def test_debug_post_dict_big_value(self):
+        g = build_grab(debug_post=True)
+        big_value = 'x' * 1000
+        g.setup(post={
+            'foo': big_value,
+        })
+        g.go(self.server.get_url())
+        self.assertEqual(self.server.request['data'], ('foo=%s' % big_value).encode())
+
     def test_log_request_extra_argument(self):
         import grab.base
 

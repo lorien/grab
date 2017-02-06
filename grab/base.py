@@ -19,7 +19,7 @@ from datetime import datetime
 import weakref
 import six
 from weblib.html import find_base_url
-from weblib.http import normalize_http_values
+from weblib.http import normalize_http_values, normalize_unicode
 
 from grab.document import Document
 from grab import error
@@ -499,14 +499,16 @@ class Grab(DeprecatedThings):
                 post = list(post.items())
             if post:
                 if isinstance(post, six.string_types):
-                    post = post[:self.config['debug_post_limit']] + '...'
+                    post = normalize_unicode(
+                        post[:self.config['debug_post_limit']]) + b'...'
                 else:
-                    items = normalize_http_values(post, charset='utf-8')
+                    items = normalize_http_values(
+                        post, charset=self.config['charset'])
                     new_items = []
                     for key, value in items:
                         if len(value) > self.config['debug_post_limit']:
                             value = value[
-                                :self.config['debug_post_limit']] + '...'
+                                :self.config['debug_post_limit']] + b'...'
                         else:
                             value = value
                         new_items.append((key, value))
