@@ -33,8 +33,8 @@ def default_logging(grab_log=None,#'/tmp/grab.log',
 
 class StderrProxy(object):
     def __init__(self):
-        if not hasattr(sys, '_orig_stderr'):
-            sys._orig_stderr = sys.stderr
+        if not hasattr(sys, 'grab_orig_stderr'):
+            sys.grab_orig_stderr = sys.stderr
         self.buf = []
 
     @contextmanager
@@ -44,10 +44,10 @@ class StderrProxy(object):
             sys.stderr = self
             yield
         finally:
-            sys.stderr = sys._orig_stderr
+            sys.stderr = sys.grab_orig_stderr
 
     def write(self, data):
-        sys._orig_stderr.write(data)
+        sys.grab_orig_stderr.write(data)
         self.buf.append(data)
 
     def get_output(self):
