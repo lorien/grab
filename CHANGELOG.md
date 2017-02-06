@@ -4,8 +4,8 @@
 ### Fixed
 - Fix bug in deprecated grab.choose_form method
 - Add default project templates files to the distribution, by @rushter
-# Fix #222: debug_post option fails with big post data
-# Fix #148: pycurl ignores sigint signal
+- Fix #222: debug_post option fails with big post data
+- Fix #148: pycurl ignores sigint signal
 
 ## [0.6.34] - 2017-02-04
 ### Added
