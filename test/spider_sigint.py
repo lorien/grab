@@ -19,16 +19,27 @@ atexit.register(shutdown)
 
 SCRIPT_TPL = '''
 import sys
+from grab.spider import Spider, Task
 from grab import Grab
 import logging
 import os
 import grab
 logging.error('PATH: ' + grab.__file__)
 logging.error('PID: ' + str(os.getpid()))
-g = Grab(%s)
+
+class TestSpider(Spider):
+    def task_generator(self):
+        for x in range(100):
+            g = Grab(%s)
+            g.setup(url="%s")
+            yield Task('page', grab=g)
+
+    def task_page(self, grab, task):
+        pass
+
 try:
-    for x in range(100):
-        g.go('%s')
+    bot = TestSpider(thread_number=2)
+    bot.run()
 except KeyboardInterrupt:
     logging.error('EXITING WITH CODE 13')
     sys.exit(13)

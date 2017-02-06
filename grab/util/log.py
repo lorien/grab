@@ -50,6 +50,6 @@ class StderrProxy(object):
         sys._orig_stderr.write(data)
         self.buf.append(data)
 
-    def getvalue(self):
+    def get_output(self):
         return ''.join(self.buf)
         #return 'def body_processor(self, chunk):\nKeyboardInterrupt'

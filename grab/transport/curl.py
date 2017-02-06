@@ -486,7 +486,7 @@ class CurlTransport(BaseTransport):
             # (WRITEFUNCTION, HEADERFUNCTIO, etc)
             # If you think WTF then see details here:
             # https://github.com/pycurl/pycurl/issues/413
-            if self.has_pycurl_hidden_sigint(stderr_proxy.getvalue()):
+            if self.has_pycurl_hidden_sigint(stderr_proxy.get_output()):
                 raise KeyboardInterrupt
             if 23 == ex.args[0]:
                 if getattr(self.curl, 'grab_callback_interrupted', None) is True:
@@ -512,12 +512,12 @@ class CurlTransport(BaseTransport):
                 else:
                     raise error.GrabNetworkError(ex.args[0], ex.args[1])
         except Exception as ex: # pylint: disable=broad-except
-            if self.has_pycurl_hidden_sigint(stderr_proxy.getvalue()):
+            if self.has_pycurl_hidden_sigint(stderr_proxy.get_output()):
                 raise KeyboardInterrupt
             six.reraise(error.GrabInternalError, error.GrabInternalError(ex),
                         sys.exc_info()[2])
         else:
-            if self.has_pycurl_hidden_sigint(stderr_proxy.getvalue()):
+            if self.has_pycurl_hidden_sigint(stderr_proxy.get_output()):
                 raise KeyboardInterrupt
 
     def has_pycurl_hidden_sigint(self, log):

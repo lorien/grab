@@ -2,6 +2,7 @@ import pycurl
 import select
 import six
 from threading import Lock
+from grab.util.log import StderrProxy
 
 from grab.error import GrabTooManyRedirectsError
 
@@ -30,6 +31,7 @@ class MulticurlTransport(object):
         self.registry = {}
         self.connection_count = {}
         self.network_op_lock = Lock()
+        self.stderr_proxy = StderrProxy()
 
         # Create curl instances
         for _ in six.moves.range(self.socket_number):
@@ -111,11 +113,31 @@ class MulticurlTransport(object):
             pass
 
         while True:
-            # FIXME: should it be wrapped into pycurl sigint workaround
-            status, _ = self.multi.perform()
-            if status != pycurl.E_CALL_MULTI_PERFORM:
-                break
+            try:
+                with self.stderr_proxy.record():
+                    status, _ = self.multi.perform()
+            except pycurl.error:
+                if self.has_pycurl_hidden_sigint(
+                    self.stderr_proxy.get_output()):
+                    raise KeyboardInterrupt
+                else:
+                    raise
+            else:
+                if self.has_pycurl_hidden_sigint(
+                    self.stderr_proxy.get_output()):
+                    raise KeyboardInterrupt
+                else:
+                    if status != pycurl.E_CALL_MULTI_PERFORM:
+                        break
         self.network_op_lock.release()
+
+    def has_pycurl_hidden_sigint(self, log):
+        """
+        Check if the log content contains the token
+        that originated while pycurl caught the `KeyboardInterrupt`
+        and converted it into `pycurl.error`
+        """
+        return 'KeyboardInterrupt' in log
 
     def iterate_results(self):
         while True:

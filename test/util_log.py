@@ -10,5 +10,5 @@ class LogModuleTestCase(TestCase):
         with proxy.record():
             sys.stderr.write('one-1')
             sys.stderr.write('two-2')
-        val = proxy.getvalue()
+        val = proxy.get_output()
         self.assertEqual('one-1two-2', val)

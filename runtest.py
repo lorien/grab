@@ -64,6 +64,7 @@ GRAB_TEST_LIST = (
     'test.ext_pyquery',
     # process control
     'test.grab_sigint',
+    'test.spider_sigint',
 )
 
 # ************
