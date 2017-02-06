@@ -24,6 +24,7 @@ GRAB_TEST_LIST = (
     'test.grab_debug', # TODO: fix tests excluded for urllib3
     # Response processing
     'test.grab_xml_processing',
+    'test.grab_html_processing',
     'test.grab_response_body_processing',
     'test.grab_charset',
     'test.grab_redirect',
