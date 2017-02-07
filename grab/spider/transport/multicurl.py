@@ -2,7 +2,7 @@ import pycurl
 import select
 import six
 from threading import Lock
-from grab.util.log import StderrProxy
+from grab.util.log import PycurlSigintHandler
 
 from grab.error import GrabTooManyRedirectsError
 
@@ -31,7 +31,7 @@ class MulticurlTransport(object):
         self.registry = {}
         self.connection_count = {}
         self.network_op_lock = Lock()
-        self.stderr_proxy = StderrProxy()
+        self.sigint_handler = PycurlSigintHandler()
 
         # Create curl instances
         for _ in six.moves.range(self.socket_number):
@@ -95,7 +95,8 @@ class MulticurlTransport(object):
                 raise
             else:
                 # Add configured curl instance to multi-curl processor
-                self.multi.add_handle(curl)
+                with self.sigint_handler.handle_sigint():
+                    self.multi.add_handle(curl)
         finally:
             self.network_op_lock.release()
 
@@ -104,45 +105,28 @@ class MulticurlTransport(object):
         # how to deal with multicurl sockets ;-)
         # It is a sort of miracle that Grab actually works
         self.network_op_lock.acquire()
-        rlist, wlist, xlist = self.multi.fdset()
+        with self.sigint_handler.handle_sigint():
+            rlist, wlist, xlist = self.multi.fdset()
         if rlist or wlist or xlist:
-            timeout = self.multi.timeout()
+            with self.sigint_handler.handle_sigint():
+                timeout = self.multi.timeout()
             if timeout and timeout > 0:
                 select.select(rlist, wlist, xlist, timeout / 1000.0)
         else:
             pass
 
         while True:
-            try:
-                with self.stderr_proxy.record():
-                    status, _ = self.multi.perform()
-            except pycurl.error:
-                if self.has_pycurl_hidden_sigint(
-                    self.stderr_proxy.get_output()):
-                    raise KeyboardInterrupt
-                else:
-                    raise
-            else:
-                if self.has_pycurl_hidden_sigint(
-                    self.stderr_proxy.get_output()):
-                    raise KeyboardInterrupt
-                else:
-                    if status != pycurl.E_CALL_MULTI_PERFORM:
-                        break
+            with self.sigint_handler.handle_sigint():
+                status, _ = self.multi.perform()
+            if status != pycurl.E_CALL_MULTI_PERFORM:
+                break
         self.network_op_lock.release()
-
-    def has_pycurl_hidden_sigint(self, log):
-        """
-        Check if the log content contains the token
-        that originated while pycurl caught the `KeyboardInterrupt`
-        and converted it into `pycurl.error`
-        """
-        return 'KeyboardInterrupt' in log
 
     def iterate_results(self):
         while True:
             #try:
-            queued_messages, ok_list, fail_list = self.multi.info_read()
+            with self.sigint_handler.handle_sigint():
+                queued_messages, ok_list, fail_list = self.multi.info_read()
             #except Exception as ex:
             #    # Usually that should not happen
             #    logging.error('', exc_info=ex)
@@ -216,7 +200,8 @@ class MulticurlTransport(object):
                        'grab_config_backup': grab_config_backup,
                        'task': task}
 
-                self.multi.remove_handle(curl)
+                with self.sigint_handler.handle_sigint():
+                    self.multi.remove_handle(curl)
                 curl.reset()
                 self.freelist.append(curl)
 
