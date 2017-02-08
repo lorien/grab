@@ -18,3 +18,4 @@ dist/
 /docs/ru/_build/
 /test_settings_local.py
 /test.py
+/.python-version
