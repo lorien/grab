@@ -10,39 +10,36 @@ from test.util import GLOBAL
 
 # **********
 # Grab Tests
-# * pycurl transport
-# * extensions
 # **********
 
-# TODO:
-# * test redirect and response.url after redirect
+# FIXME:
+# * Test redirect and response.url after redirect
 GRAB_TEST_LIST = (
-    # Internal API
+    # *** Internal API
     'test.grab_api',
     'test.grab_transport',
     'test.response_class',
-    'test.grab_debug', # TODO: fix tests excluded for urllib3
-    # Response processing
+    'test.grab_debug', # FIXME: fix tests excluded for urllib3
+    # *** Response processing
     'test.grab_xml_processing',
     'test.grab_response_body_processing',
     'test.grab_charset',
     'test.grab_redirect',
     'test.grab_defusedxml',
-    # Network
+    # *** Network
     'test.grab_get_request',
     'test.grab_post_request',
-    'test.grab_request', # TODO: fix tests excluded for urllib3
+    'test.grab_request', # FIXME: fix tests excluded for urllib3
     'test.grab_user_agent',
-    'test.grab_cookies', # TODO: fix tests excluded for urllib3
+    'test.grab_cookies', # FIXME: fix tests excluded for urllib3
     'test.grab_url_processing',
     'test.grab_timeout',
-    # Refactor
+    # *** Refactor
     'test.grab_proxy',
     'test.grab_upload_file',
     'test.grab_limit_option',
     'test.grab_charset_issue',
-    'test.grab_pickle', # TODO: fix tests excluded for urllib3
-    # *** Extension sub-system
+    'test.grab_pickle', # FIXME: fix tests excluded for urllib3
     # *** Extensions
     'test.ext_text',
     'test.ext_rex',
@@ -58,11 +55,10 @@ GRAB_TEST_LIST = (
     # *** grab.export
     'test.util_config',
     'test.script_crawl',
-    #'test.script_start_project',
     'test.grab_error',
     'test.grab_deprecated',
     'test.ext_pyquery',
-    # process control
+    # *** process control
     'test.grab_sigint',
     'test.spider_sigint',
 )
