@@ -62,7 +62,7 @@ class PycurlSigintHandler(TextIOBase):
         with self.record():
             try:
                 yield
-            except Exception:
+            except Exception: # pylint: disable=broad-except
                 if 'KeyboardInterrupt' in self.get_output():
                     raise KeyboardInterrupt
                 else:
