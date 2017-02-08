@@ -1,6 +1,7 @@
 import logging
 import sys
 from contextlib import contextmanager
+from io import TextIOBase
 
 
 def default_logging(grab_log=None,#'/tmp/grab.log',
@@ -31,25 +32,41 @@ def default_logging(grab_log=None,#'/tmp/grab.log',
         grab_logger.setLevel(level)
 
 
-class StderrProxy(object):
+class PycurlSigintHandler(TextIOBase):
+    # TextIOBase to avoid errors in py36: https://bugs.python.org/issue29130
     def __init__(self):
-        if not hasattr(sys, 'grab_orig_stderr'):
-            sys.grab_orig_stderr = sys.stderr
+        self.orig_stderr = None
         self.buf = []
 
     @contextmanager
     def record(self):
+        # NB: it is not thread-safe
         self.buf = []
+        self.orig_stderr = sys.stderr
         try:
             sys.stderr = self
             yield
         finally:
-            sys.stderr = sys.grab_orig_stderr
+            sys.stderr = self.orig_stderr
 
     def write(self, data):
-        sys.grab_orig_stderr.write(data)
+        self.orig_stderr.write(data)
         self.buf.append(data)
 
     def get_output(self):
         return ''.join(self.buf)
-        #return 'def body_processor(self, chunk):\nKeyboardInterrupt'
+
+
+    @contextmanager
+    def handle_sigint(self):
+        with self.record():
+            try:
+                yield
+            except Exception:
+                if 'KeyboardInterrupt' in self.get_output():
+                    raise KeyboardInterrupt
+                else:
+                    raise
+            else:
+                if 'KeyboardInterrupt' in self.get_output():
+                    raise KeyboardInterrupt
