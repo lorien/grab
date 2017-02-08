@@ -1,6 +1,7 @@
 import logging
 import sys
 from contextlib import contextmanager
+from io import TextIOBase
 
 
 def default_logging(grab_log=None,#'/tmp/grab.log',
@@ -31,10 +32,9 @@ def default_logging(grab_log=None,#'/tmp/grab.log',
         grab_logger.setLevel(level)
 
 
-class PycurlSigintHandler(object):
+class PycurlSigintHandler(TextIOBase):
+    # TextIOBase to avoid errors in py36: https://bugs.python.org/issue29130
     def __init__(self):
-        #if not hasattr(sys, '_orig_stderr'):
-        #    sys._orig_stderr = sys.stderr
         self.orig_stderr = None
         self.buf = []
 
@@ -47,7 +47,7 @@ class PycurlSigintHandler(object):
             sys.stderr = self
             yield
         finally:
-            sys.stderr = self.orig_stderr#sys._orig_stderr
+            sys.stderr = self.orig_stderr
 
     def write(self, data):
         self.orig_stderr.write(data)
@@ -55,7 +55,6 @@ class PycurlSigintHandler(object):
 
     def get_output(self):
         return ''.join(self.buf)
-        #return 'def body_processor(self, chunk):\nKeyboardInterrupt'
 
 
     @contextmanager
