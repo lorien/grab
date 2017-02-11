@@ -83,8 +83,8 @@ class CachePipeline(object):
 
         if grab.request_method == 'GET':
             if not task.get('disable_cache'):
-                if self.spider.is_valid_network_response_code(
-                        grab.response.code, task):
+                if self.spider.is_valid_network_response_code(grab.doc.code,
+                                                              task):
                     return True
         return False
 

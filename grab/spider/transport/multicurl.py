@@ -181,8 +181,8 @@ class MulticurlTransport(object):
                 #    emsg = 'Internal grab error'
                 #    ok = False
 
-                grab.response.error_code = ecode
-                grab.response.error_msg = emsg
+                grab.doc.error_code = ecode
+                grab.doc.error_msg = emsg
 
                 # Free resources
                 del self.registry[curl_id]

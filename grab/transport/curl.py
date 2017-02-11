@@ -24,7 +24,7 @@ from user_agent import generate_user_agent
 from grab.cookie import create_cookie, CookieManager
 from grab import error
 from grab.error import GrabMisuseError
-from grab.response import Response
+from grab.document import Document
 from grab.upload import UploadFile, UploadContent
 from grab.transport.base import BaseTransport
 from grab.util.log import PycurlSigintHandler
@@ -516,7 +516,7 @@ class CurlTransport(BaseTransport):
     def prepare_response(self, grab):
         if self.body_file:
             self.body_file.close()
-        response = Response()
+        response = Document()
 
         response.head = b''.join(self.response_header_chunks)
 

@@ -248,12 +248,12 @@ class DeprecatedThings(object):
     # Backward compat.
     def _get_response(self):
         warn('The `Grab.response` attribute is deprecated. '
-             'Use `Grab.doc` instead.')
+             'Use `Grab.doc` instead.', stacklevel=3)
         return self.doc
 
     def _set_response(self, val):
         warn('The `Grab.response` attribute is deprecated. '
-             'Use `Grab.doc` instead.')
+             'Use `Grab.doc` instead.', stacklevel=3)
         # pylint: disable=assigning-non-slot, attribute-defined-outside-init
         self.doc = val
 
@@ -268,7 +268,8 @@ class DeprecatedThings(object):
     @deprecated(use_instead='grab.cookies.load_from_file')
     def load_cookies(self, path, file_required=None):
         if file_required is not None:
-            warn('The option `file_required` is no longer supported')
+            warn('The option `file_required` is no longer supported',
+                 stacklevel=3)
         self.cookies.load_from_file(path) # pylint: disable=no-member
 
     @deprecated(use_instead='grab.cookies.save_to_file')
@@ -308,7 +309,7 @@ class DeprecatedThings(object):
     @property
     def form(self):
         warn('The `Grab.form` attribute is deprecated. '
-             'Use `Grab.doc.form` instead.')
+             'Use `Grab.doc.form` instead.', stacklevel=3)
         return self.doc.form
 
     @deprecated(use_instead='grab.doc.set_input')
