@@ -9,7 +9,7 @@ class GrabHTMLProcessingTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_xml_with_declaration(self):
+    def test_parse_document(self):
         """
         Simple test that verifies Grab can
         parse HTML pages with emoji
@@ -17,6 +17,7 @@ class GrabHTMLProcessingTestCase(BaseGrabTestCase):
         https://github.com/lorien/grab/issues/199
         """
         for fname in glob('test/files/dump/*.html'):
+            print('Parsing %s document' % fname)
             g = build_grab()
             self.server.response['data'] = open(fname, 'rb').read()
             g.go(self.server.get_url())
