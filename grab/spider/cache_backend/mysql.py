@@ -6,7 +6,7 @@ CacheItem interface:
 'body': string,
 'head': string,
 'response_code': int,
-'cookies': None,#grab.response.cookies,
+'cookies': None,#grab.doc.cookies,
 
 TODO: WTF with cookies???
 """
@@ -18,7 +18,7 @@ import marshal
 import time
 from weblib.encoding import make_str
 
-from grab.response import Response
+from grab.document import Document
 from grab.cookie import CookieManager
 
 logger = logging.getLogger('grab.spider.cache_backend.mysql')
@@ -123,30 +123,30 @@ class CacheBackend(object):
         body = cache_item['body']
 
         def custom_prepare_response_func(transport, grab):
-            response = Response()
-            response.head = cache_item['head']
-            response.body = body
-            response.code = cache_item['response_code']
-            response.download_size = len(body)
-            response.upload_size = 0
-            response.download_speed = 0
-            response.url = cache_item['response_url']
-            response.parse(charset=grab.config['document_charset'])
-            response.cookies = CookieManager(transport.extract_cookiejar())
-            response.from_cache = True
-            return response
+            doc = Document()
+            doc.head = cache_item['head']
+            doc.body = body
+            doc.code = cache_item['response_code']
+            doc.download_size = len(body)
+            doc.upload_size = 0
+            doc.download_speed = 0
+            doc.url = cache_item['response_url']
+            doc.parse(charset=grab.config['document_charset'])
+            doc.cookies = CookieManager(transport.extract_cookiejar())
+            doc.from_cache = True
+            return doc
 
         grab.process_request_result(custom_prepare_response_func)
 
     def save_response(self, url, grab):
-        body = grab.response.body
+        body = grab.doc.body
 
         item = {
             'url': url,
-            'response_url': grab.response.url,
+            'response_url': grab.doc.url,
             'body': body,
-            'head': grab.response.head,
-            'response_code': grab.response.code,
+            'head': grab.doc.head,
+            'response_code': grab.doc.code,
             'cookies': None,
         }
         self.set_item(url, item)

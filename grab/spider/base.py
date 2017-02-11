@@ -775,19 +775,19 @@ class Spider(object):
             self.stat.inc('spider:task-%s-initial' % res['task'].name)
 
         # Update traffic statistics
-        if res['grab'] and res['grab'].response:
-            resp = res['grab'].response
-            self.timer.inc_timer('network-name-lookup', resp.name_lookup_time)
-            self.timer.inc_timer('network-connect', resp.connect_time)
-            self.timer.inc_timer('network-total', resp.total_time)
+        if res['grab'] and res['grab'].doc:
+            doc = res['grab'].doc
+            self.timer.inc_timer('network-name-lookup', doc.name_lookup_time)
+            self.timer.inc_timer('network-connect', doc.connect_time)
+            self.timer.inc_timer('network-total', doc.total_time)
             if from_cache:
                 self.stat.inc('spider:download-size-with-cache',
-                              resp.download_size)
+                              doc.download_size)
                 self.stat.inc('spider:upload-size-with-cache',
-                              resp.upload_size)
+                              doc.upload_size)
             else:
-                self.stat.inc('spider:download-size', resp.download_size)
-                self.stat.inc('spider:upload-size', resp.upload_size)
+                self.stat.inc('spider:download-size', doc.download_size)
+                self.stat.inc('spider:upload-size', doc.upload_size)
 
     def process_grab_proxy(self, task, grab):
         """Assign new proxy from proxylist to the task"""
@@ -1060,7 +1060,7 @@ class Spider(object):
                     if result['task'].get('raw'):
                         is_valid = True
                     elif result['ok']:
-                        res_code = result['grab'].response.code
+                        res_code = result['grab'].doc.code
                         if self.is_valid_network_response_code(res_code, result['task']):
                             is_valid = True
 
@@ -1122,7 +1122,7 @@ class Spider(object):
     def log_failed_network_result(self, res):
         # Log the error
         if res['ok']:
-            msg = 'http-%s' % res['grab'].response.code
+            msg = 'http-%s' % res['grab'].doc.code
         else:
             msg = res['error_abbr']
 

@@ -21,7 +21,7 @@ import time
 from grab import error
 from grab.error import GrabMisuseError, GrabTimeoutError
 from grab.cookie import CookieManager, MockRequest, MockResponse
-from grab.response import Response
+from grab.document import Document
 from grab.upload import UploadFile, UploadContent
 from grab.transport.base import BaseTransport
 from user_agent import generate_user_agent
@@ -290,7 +290,7 @@ class Urllib3Transport(BaseTransport):
         try:
             #if self.body_file:
             #    self.body_file.close()
-            response = Response()
+            response = Document()
 
             head = ''
             for key, val in self._response.getheaders().items():

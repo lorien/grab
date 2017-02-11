@@ -950,7 +950,7 @@ class Document(TextExtension, RegexpExtension, PyqueryExtension,
 
             >>> url = 'http://yandex.ru/logo.png'
             >>> g.go(url)
-            >>> g.response.save_hash(url, 'some_dir', ext='png')
+            >>> g.doc.save_hash(url, 'some_dir', ext='png')
             'e8/dc/f2918108788296df1facadc975d32b361a6a.png'
             # the file was saved to $PWD/some_dir/e8/dc/...
 

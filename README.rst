@@ -99,8 +99,7 @@ Grab::Spider Example
                 url = 'https://www.google.com/search?q=%s' % lang
                 yield Task('search', url=url, lang=lang)
 
-        @staticmethod
-        def task_search(grab, task):
+        def task_search(self, grab, task):
             print('%s: %s' % (task.lang,
                               grab.doc('//div[@class="s"]//cite').text()))
 
