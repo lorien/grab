@@ -17,35 +17,35 @@ matrix:
   include:
     - os: linux
       env: TOX_ENV=pylint-warnings
-    - os: linux
-      env: TOX_ENV=py27
-    - os: linux
-      env: TOX_ENV=py34
-    - os: linux
-      env: TOX_ENV=py35
-      python: 3.5
-    - os: linux
-      env: TOX_ENV=py36
-      python: 3.6
+    #- os: linux
+    #  env: TOX_ENV=py27
+    #- os: linux
+    #  env: TOX_ENV=py34
+    #- os: linux
+    #  env: TOX_ENV=py35
+    #  python: 3.5
+    #- os: linux
+    #  env: TOX_ENV=py36
+    #  python: 3.6
     - os: osx
       language: generic
       env:
-        - TOX_ENV=py27
+        - TOX_ENV=py-html
         - PYENV_VERSION="2.7.13"
     - os: osx
       language: generic
       env:
-        - TOX_ENV=py34
+        - TOX_ENV=py-html
         - PYENV_VERSION="3.4.6"
     - os: osx
       language: generic
       env:
-        - TOX_ENV=py35
+        - TOX_ENV=py-html
         - PYENV_VERSION="3.5.3"
     - os: osx
       language: generic
       env:
-        - TOX_ENV=py36
+        - TOX_ENV=py-html
         - PYENV_VERSION="3.6.0"
   exclude:
     - python: 2.7 # hack to exclude default no-env travis job
