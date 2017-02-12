@@ -1,5 +1,15 @@
 # Grab Change Log
 
+## [0.6.36] - 2017-02-12
+### Added
+- Add pylint to default test set
+
+### Fixed
+- Fix #229: using deprecated response object inside Grab
+
+### Removed
+- Remove spider project template and start_project script
+
 ## [0.6.35] - 2017-02-06
 ### Fixed
 - Fix bug in deprecated grab.choose_form method
