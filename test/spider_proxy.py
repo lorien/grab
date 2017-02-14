@@ -1,10 +1,10 @@
 from test_server import TestServer
 import six
 
-from grab import Grab
-from grab.spider import Spider, Task
 from test.util import (BaseGrabTestCase, TEST_SERVER_PORT,
                        build_spider, ADDRESS, temp_file)
+from grab import Grab
+from grab.spider import Spider, Task
 from grab.proxylist import BaseProxySource, Proxy
 
 EXTRA_PORT1 = TEST_SERVER_PORT + 1
@@ -36,7 +36,7 @@ class TestSpiderCase(BaseGrabTestCase):
             bot.load_proxylist(proxy_file, 'text_file')
             bot.setup_queue()
             bot.add_task(Task('baz', grab=Grab(url='http://yandex.ru',
-                              debug=True)))
+                                               debug=True)))
             bot.run()
 
             self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')

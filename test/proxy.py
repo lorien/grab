@@ -14,8 +14,8 @@ class GrabProxyTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_no_proxy_list(self):
-        g = build_grab()
-        self.assertEqual(0, g.proxylist.size())
+        grab = build_grab()
+        self.assertEqual(0, grab.proxylist.size())
 
 
 class ProxyListTestCase(BaseGrabTestCase):
@@ -28,30 +28,30 @@ class ProxyListTestCase(BaseGrabTestCase):
         return path
 
     def test_basic(self):
-        pl = ProxyList()
-        self.assertEqual(0, pl.size())
+        plist = ProxyList()
+        self.assertEqual(0, plist.size())
 
 
     def test_file_proxy_source(self):
         with temp_file() as path:
-            pl = ProxyList()
+            plist = ProxyList()
             self.generate_plist_file(path)
-            pl.load_file(path)
-            self.assertEqual(2, pl.size())
+            plist.load_file(path)
+            self.assertEqual(2, plist.size())
 
     def test_web_proxy_source(self):
-        pl = ProxyList()
+        plist = ProxyList()
         self.server.response['data'] = DEFAULT_PLIST_DATA
-        pl.load_url(self.server.get_url())
-        self.assertEqual(2, pl.size())
+        plist.load_url(self.server.get_url())
+        self.assertEqual(2, plist.size())
 
     def test_get_next_proxy(self):
         with temp_file() as path:
-            pl = ProxyList()
+            plist = ProxyList()
             self.generate_plist_file(path, 'foo:1\nbar:1')
-            pl.load_file(path)
-            self.assertEqual(pl.get_next_proxy().host, 'foo')
-            self.assertEqual(pl.get_next_proxy().host, 'bar')
-            self.assertEqual(pl.get_next_proxy().host, 'foo')
-            pl.load_file(path)
-            self.assertEqual(pl.get_next_proxy().host, 'foo')
+            plist.load_file(path)
+            self.assertEqual(plist.get_next_proxy().host, 'foo')
+            self.assertEqual(plist.get_next_proxy().host, 'bar')
+            self.assertEqual(plist.get_next_proxy().host, 'foo')
+            plist.load_file(path)
+            self.assertEqual(plist.get_next_proxy().host, 'foo')

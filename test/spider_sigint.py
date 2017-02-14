@@ -35,9 +35,10 @@ why there such many workarounds in the code of the test.
 import signal
 import time
 from subprocess import Popen
-from psutil import Process, NoSuchProcess
 import platform
 import logging
+
+from psutil import Process, NoSuchProcess
 
 from test.util import BaseGrabTestCase
 from test.util import temp_file, only_grab_transport
@@ -112,7 +113,7 @@ class BaseKeyboardInterruptTestCase(object):
                 out.write(self.script_tpl % ('', self.server.get_url()))
                 # pylint: enable=no-member
             ret_codes = []
-            for x in range(10):
+            for _ in range(10):
                 logging.error('step-1')
                 proc = Popen('python %s' % path, shell=True)
                 logging.error('step-2')
@@ -126,7 +127,7 @@ class BaseKeyboardInterruptTestCase(object):
                     # because in very rare cases the only
                     # sigint signals is ignored :-/
                     # do not send too fast
-                    for x in range(1):
+                    for _ in range(1):
                         try:
                             logging.error('sending sigint')
                             child.send_signal(SIGNAL_INT)
@@ -134,7 +135,7 @@ class BaseKeyboardInterruptTestCase(object):
                             break
                         else:
                             time.sleep(1)
-                if platform.system() == 'Darwin': 
+                if platform.system() == 'Darwin':
                     # On OSX the Popen(shell=True) spawns only
                     # one process, no child
                     logging.error('Killing parent')
@@ -143,7 +144,7 @@ class BaseKeyboardInterruptTestCase(object):
                     # because in very rare cases the only
                     # sigint signals is ignored :-/
                     # do not send too fast
-                    for x in range(1):
+                    for _ in range(1):
                         try:
                             logging.error('sending sigint')
                             parent.send_signal(SIGNAL_INT)
@@ -153,8 +154,8 @@ class BaseKeyboardInterruptTestCase(object):
                             time.sleep(1)
                 logging.error('step-4')
                 ret = None
-                for x in range(20):
-                    print('before proc-poll-%d' % x)
+                for step in range(20):
+                    print('before proc-poll-%d' % step)
                     ret = proc.poll()
                     if ret is not None:
                         break
@@ -174,15 +175,15 @@ class BaseKeyboardInterruptTestCase(object):
                     except NoSuchProcess:
                         pass
                 logging.error('step-5')
-                # FIXME: find out the reasonf of segfault 
+                # FIXME: find out the reasonf of segfault
                 # the 130 signal means the program was terminated by ctrl-c
                 print('RET CODE: %s' % ret)
                 ret_codes.append(ret)
 
             # Could fail in 10% (1 of 10)
             # pylint: disable=no-member
-            self.assertTrue(9 <= sum(1 for x in ret_codes
-                                     if x in (13, 130, 139)))
+            self.assertTrue(sum(1 for x in ret_codes
+                                if x in (13, 130, 139)) >= 9)
             # pylint: enable=no-member
 
 

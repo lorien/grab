@@ -22,7 +22,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
             def task_page(self, dummy_grab, dummy_task):
                 yield Data('foo', num=1)
 
-            def data_foo(self, dummy_num):
+            def data_foo(self, num): # pylint: disable=unused-argument
                 raise Exception('Shit happens!')
 
         bot = build_spider(TestSpider)

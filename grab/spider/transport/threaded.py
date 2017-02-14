@@ -1,5 +1,6 @@
-import six
 from threading import Thread
+
+import six
 from six.moves.queue import Queue, Empty
 
 from grab.error import GrabNetworkError
@@ -50,14 +51,16 @@ class ThreadedTransport(object):
         self.workers = []
         self.freelist = []
         for _ in six.moves.range(self.thread_number):
-            th = Thread(target=worker_thread, args=[self.task_queue,
-                                                    self.result_queue,
-                                                    self.freelist,
-                                                    self.spider.shutdown_event])
-            th.daemon = True
-            self.workers.append(th)
+            thread = Thread(target=worker_thread, args=[
+                self.task_queue,
+                self.result_queue,
+                self.freelist,
+                self.spider.shutdown_event
+            ])
+            thread.daemon = True
+            self.workers.append(thread)
             self.freelist.append(1)
-            th.start()
+            thread.start()
 
     def ready_for_task(self):
         return len(self.freelist)

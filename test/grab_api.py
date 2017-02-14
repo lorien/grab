@@ -3,8 +3,8 @@ import six
 
 from test.util import build_grab, temp_file
 from test.util import BaseGrabTestCase
-from grab import GrabMisuseError, GrabError
 from test.util import reset_request_counter
+from grab import GrabMisuseError, GrabError
 
 
 class GrabApiTestCase(BaseGrabTestCase):
@@ -12,43 +12,43 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_incorrect_option_name(self):
-        g = build_grab()
-        self.assertRaises(GrabMisuseError, g.setup,
+        grab = build_grab()
+        self.assertRaises(GrabMisuseError, grab.setup,
                           save_the_word=True)
 
     def test_clone(self):
-        g = build_grab()
+        grab = build_grab()
         self.server.response['get.data'] = 'Moon'
-        g.go(self.server.get_url())
-        self.assertTrue(b'Moon' in g.response.body)
+        grab.go(self.server.get_url())
+        self.assertTrue(b'Moon' in grab.response.body)
         self.server.response['post.data'] = 'Foo'
-        g2 = g.clone(method='post', post='')
-        g2.go(self.server.get_url())
-        self.assertTrue(b'Foo' in g2.response.body)
+        grab2 = grab.clone(method='post', post='')
+        grab2.go(self.server.get_url())
+        self.assertTrue(b'Foo' in grab2.response.body)
 
     def test_empty_clone(self):
-        g = build_grab()
-        g.clone()
+        grab = build_grab()
+        grab.clone()
 
     def test_adopt(self):
-        g = build_grab()
+        grab = build_grab()
         self.server.response['get.data'] = 'Moon'
-        g.go(self.server.get_url())
-        g2 = build_grab()
-        self.assertEqual(g2.config['url'], None)
-        g2.adopt(g)
-        self.assertTrue(b'Moon' in g2.response.body)
-        self.assertEqual(g2.config['url'], self.server.get_url())
+        grab.go(self.server.get_url())
+        grab2 = build_grab()
+        self.assertEqual(grab2.config['url'], None)
+        grab2.adopt(grab)
+        self.assertTrue(b'Moon' in grab2.response.body)
+        self.assertEqual(grab2.config['url'], self.server.get_url())
 
     def test_empty_adopt(self):
-        g = build_grab()
-        g2 = build_grab()
-        g2.adopt(g)
+        grab = build_grab()
+        grab2 = build_grab()
+        grab2.adopt(grab)
 
     def test_default_content_for_fake_response(self):
         content = b'<strong>test</strong>'
-        g = build_grab(document_body=content)
-        self.assertEqual(g.response.body, content)
+        grab = build_grab(document_body=content)
+        self.assertEqual(grab.response.body, content)
 
     def test_inheritance(self):
         from grab import Grab
@@ -78,63 +78,63 @@ class GrabApiTestCase(BaseGrabTestCase):
         import threading
 
         reset_request_counter()
-        g = build_grab()
-        g.go(self.server.get_url())
-        self.assertEqual(g.request_counter, 1)
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        self.assertEqual(grab.request_counter, 1)
 
-        g.go(self.server.get_url())
-        self.assertEqual(g.request_counter, 2)
+        grab.go(self.server.get_url())
+        self.assertEqual(grab.request_counter, 2)
 
         def func():
-            g = build_grab()
-            g.go(self.server.get_url())
+            grab = build_grab()
+            grab.go(self.server.get_url())
 
         # Make 10 requests in concurrent threads
         threads = []
         for _ in six.moves.range(10):
-            th = threading.Thread(target=func)
-            threads.append(th)
-            th.start()
-        for th in threads:
-            th.join()
+            thread = threading.Thread(target=func)
+            threads.append(thread)
+            thread.start()
+        for thread in threads:
+            thread.join()
 
-        g.go(self.server.get_url())
-        self.assertEqual(g.request_counter, 13)
+        grab.go(self.server.get_url())
+        self.assertEqual(grab.request_counter, 13)
 
     def test_download(self):
         with temp_file() as save_file:
-            g = build_grab()
+            grab = build_grab()
             self.server.response['get.data'] = 'FOO'
-            length = g.download(self.server.get_url(), save_file)
+            length = grab.download(self.server.get_url(), save_file)
             self.assertEqual(3, length)
 
     def test_make_url_absolute(self):
-        g = build_grab()
+        grab = build_grab()
         self.server.response['get.data'] = '<base href="http://foo/bar/">'
-        g.go(self.server.get_url())
-        absolute_url = g.make_url_absolute('/foobar', resolve_base=True)
+        grab.go(self.server.get_url())
+        absolute_url = grab.make_url_absolute('/foobar', resolve_base=True)
         self.assertEqual(absolute_url, 'http://foo/foobar')
-        g = build_grab()
-        absolute_url = g.make_url_absolute('/foobar')
+        grab = build_grab()
+        absolute_url = grab.make_url_absolute('/foobar')
         self.assertEqual(absolute_url, '/foobar')
 
     def test_error_request(self):
-        g = build_grab()
-        g.setup(post={'foo': 'bar'})
+        grab = build_grab()
+        grab.setup(post={'foo': 'bar'})
 
-        self.assertRaises(GrabError, g.go,
+        self.assertRaises(GrabError, grab.go,
                           url='Could-not-resolve-host-address')
-        self.assertEqual(g.config['post'], None)
-        self.assertEqual(g.config['multipart_post'], None)
-        self.assertEqual(g.config['method'], None)
-        self.assertEqual(g.config['body_storage_filename'], None)
+        self.assertEqual(grab.config['post'], None)
+        self.assertEqual(grab.config['multipart_post'], None)
+        self.assertEqual(grab.config['method'], None)
+        self.assertEqual(grab.config['body_storage_filename'], None)
 
     def test_setup_document(self):
         data = b'''
         <h1>test</h1>
         '''
-        g = build_grab(data)
-        self.assertTrue(b'test' in g.doc.body)
+        grab = build_grab(data)
+        self.assertTrue(b'test' in grab.doc.body)
 
     def test_setup_document_invalid_input(self):
         data = u'''

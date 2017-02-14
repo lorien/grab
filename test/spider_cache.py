@@ -1,11 +1,12 @@
 # coding: utf-8
-from grab.spider import Spider, Task
-import mock
 from copy import deepcopy
+
+import mock
 
 from test.util import BaseGrabTestCase, build_spider
 from test_settings import (MONGODB_CONNECTION, MYSQL_CONNECTION,
                            POSTGRESQL_CONNECTION)
+from grab.spider import Spider, Task
 
 
 class ContentGenerator(object):
@@ -56,10 +57,6 @@ class SimpleSpider(Spider):
 
 
 class SpiderCacheMixin(object):
-    def setUp(self):
-        self.server.reset()
-        #self.server.response['get.data'] = ContentGenerator(self.server)
-
     def test_counter(self):
         self.server.response['get.data'] = ContentGenerator(self.server)
         bot = build_spider(SimpleSpider, meta={'server': self.server})
@@ -179,12 +176,12 @@ class SpiderCacheMixin(object):
         # This task will be spawned in 1 second and will
         # receive cached data  (cache timeout = 1.5sec > 1sec)
         bot.add_task(Task('page', url=self.server.get_url(),
-                     delay=1, cache_timeout=10))
+                          delay=1, cache_timeout=10))
         # This task will be spawned in 2 seconds and will not
         # receive cached data (cache timeout = 0.5 sec < 2 sec)
         # So, this task will receive next data from `get.data` iterator
         bot.add_task(Task('page', url=self.server.get_url(),
-                     delay=2, cache_timeout=0.5))
+                          delay=2, cache_timeout=0.5))
 
         self.assertEqual(3, bot.task_queue.size())
         bot.run()

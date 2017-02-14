@@ -9,34 +9,34 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
     def test_get(self):
         self.server.response['get.data'] = 'Final Countdown'
-        g = build_grab()
-        g.go(self.server.get_url())
-        self.assertTrue(b'Final Countdown' in g.response.body)
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        self.assertTrue(b'Final Countdown' in grab.response.body)
 
     def test_body_content(self):
         self.server.response['get.data'] = 'Simple String'
-        g = build_grab()
-        g.go(self.server.get_url())
-        self.assertEqual(b'Simple String', g.response.body)
-        # self.assertEqual('Simple String' in g.response.runtime_body)
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        self.assertEqual(b'Simple String', grab.response.body)
+        # self.assertEqual('Simple String' in grab.response.runtime_body)
 
     def test_status_code(self):
         self.server.response['get.data'] = 'Simple String'
-        g = build_grab()
-        g.go(self.server.get_url())
-        self.assertEqual(200, g.response.code)
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        self.assertEqual(200, grab.response.code)
 
     def test_depreated_hammer_mode_options(self):
         self.server.response['get.data'] = 'foo'
-        g = build_grab()
-        g.setup(hammer_mode=True)
-        g.go(self.server.get_url())
+        grab = build_grab()
+        grab.setup(hammer_mode=True)
+        grab.go(self.server.get_url())
 
-        g.setup(hammer_timeouts=((1, 1), (2, 2)))
-        g.go(self.server.get_url())
+        grab.setup(hammer_timeouts=((1, 1), (2, 2)))
+        grab.go(self.server.get_url())
 
     def test_parsing_response_headers(self):
         self.server.response['headers'] = [('Hello', 'Grab')]
-        g = build_grab()
-        g.go(self.server.get_url())
-        self.assertTrue(g.response.headers['Hello'] == 'Grab')
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        self.assertTrue(grab.response.headers['Hello'] == 'Grab')

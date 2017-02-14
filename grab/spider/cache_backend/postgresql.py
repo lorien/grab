@@ -13,12 +13,15 @@ import zlib
 import logging
 import marshal
 import time
+
 from weblib.encoding import make_str
 
 from grab.document import Document
 from grab.cookie import CookieManager
 
+# pylint: disable=invalid-name
 logger = logging.getLogger('grab.spider.cache_backend.postgresql')
+# pylint: enable=invalid-name
 
 
 class CacheBackend(object):
@@ -73,8 +76,8 @@ class CacheBackend(object):
             if timeout is None:
                 query = ""
             else:
-                ts = int(time.time()) - timeout
-                query = " AND timestamp > %d" % ts
+                moment = int(time.time()) - timeout
+                query = " AND timestamp > %d" % moment
             sql = '''
                   SELECT data
                   FROM cache
@@ -147,15 +150,15 @@ class CacheBackend(object):
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
         self.cursor.execute('BEGIN')
-        ts = int(time.time())
+        moment = int(time.time())
         sql = '''
               UPDATE cache SET timestamp = %s, data = %s WHERE id = %s;
               INSERT INTO cache (id, timestamp, data)
               SELECT %s, %s, %s WHERE NOT EXISTS
                 (SELECT 1 FROM cache WHERE id = %s);
               '''
-        self.cursor.execute(sql, (ts, psycopg2.Binary(data), _hash,
-                            _hash, ts, psycopg2.Binary(data), _hash))
+        self.cursor.execute(sql, (moment, psycopg2.Binary(data), _hash,
+                                  _hash, moment, psycopg2.Binary(data), _hash))
         self.cursor.execute('COMMIT')
 
     def pack_database_value(self, val):
@@ -177,15 +180,14 @@ class CacheBackend(object):
             if timeout is None:
                 query = ""
             else:
-                ts = int(time.time()) - timeout
-                query = " AND timestamp > %d" % ts
+                moment = int(time.time()) - timeout
+                query = " AND timestamp > %d" % moment
             self.cursor.execute('''
                 SELECT id
                 FROM cache
                 WHERE id = %%s %(query)s
                 LIMIT 1
-                ''' % {'query': query},
-                (_hash,))
+                ''' % {'query': query}, (_hash,))
             row = self.cursor.fetchone()
         return True if row else False
 

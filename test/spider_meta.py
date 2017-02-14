@@ -36,17 +36,17 @@ class SpiderMetaTestCase(BaseGrabTestCase):
         class SomeSpider(Spider):
             # pylint: disable=no-init
             class Meta:
-                foo = 'bar'
+                some_foo = 'bar'
 
         class Child(SomeSpider):
             pass
 
-        self.assertEqual(Child.Meta.foo, 'bar')
+        self.assertEqual(Child.Meta.some_foo, 'bar')
 
     def test_explicit_existence_of_abstract(self):
         class SomeSpider(Spider):
             # pylint: disable=no-init
             class Meta:
-                foo = 'bar'
+                some_foo = 'bar'
 
         self.assertEqual(SomeSpider.Meta.abstract, False)

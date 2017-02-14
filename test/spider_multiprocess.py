@@ -1,8 +1,8 @@
-from grab.spider import Spider, Task
 import os
-from grab.spider.decorators import integrity
 
 from test.util import BaseGrabTestCase, build_spider, multiprocess_mode
+from grab.spider import Spider, Task
+from grab.spider.decorators import integrity
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
@@ -96,7 +96,8 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     #    Traceback (most recent call last):
     #      File "/usr/lib/python2.7/multiprocessing/queues.py", line 266, in _feed
     #        send(obj)
-    #    PicklingError: Can't pickle <class 'test.spider_multiprocess.FuncWithState'>: attribute lookup test.spider_multiprocess.FuncWithState failed
+    #    PicklingError: Can't pickle <class 'test.spider_multiprocess.FuncWithState'>:
+    # attribute lookup test.spider_multiprocess.FuncWithState failed
 
     #    """
     #    class TestSpider(Spider):

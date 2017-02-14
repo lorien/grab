@@ -41,13 +41,17 @@ class UtilConfigTestCase(TestCase):
                 self.assertEqual(cfg['global'][key], val)
 
     def test_build_spider_config_empty(self):
-        class TestSpider(Spider): pass
+        class TestSpider(Spider):
+            pass
+
         root_cfg = build_root_config('test.files.settings_minimal')
         cfg = build_spider_config(TestSpider, root_cfg)
         self.assertEqual(cfg, DEFAULT_SPIDER_GLOBAL_CONFIG)
 
     def test_build_spider_config_overwrite(self):
-        class TestSpider(Spider): pass
+        class TestSpider(Spider):
+            pass
+
         root_cfg = build_root_config('test.files.settings_test_spider')
         cfg = build_spider_config(TestSpider, root_cfg)
         for key, val in  DEFAULT_SPIDER_GLOBAL_CONFIG.items():

@@ -1,17 +1,20 @@
-from six.moves.SimpleHTTPServer import SimpleHTTPRequestHandler
-from six.moves.socketserver import TCPServer
 import logging
 import os
 import threading
 import json
+
+from six.moves.SimpleHTTPServer import SimpleHTTPRequestHandler
+from six.moves.socketserver import TCPServer
 from weblib.encoding import make_str
 
+# pylint: disable=invalid-name
 logger = logging.getLogger('grab.spider.http_api')
+# pylint: enable=invalid-name
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 
 class ApiHandler(SimpleHTTPRequestHandler):
-    def do_GET(self):
+    def do_GET(self): # pylint: disable=invalid-name
         if self.path == '/':
             self.home()
         elif self.path == '/api/info':

@@ -2,7 +2,7 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 import logging
-# import urllib
+import sys
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -12,13 +12,13 @@ try:
     from urlparse import urlsplit
 except ImportError:
     from urllib.parse import urlsplit
+
 import pycurl
 from weblib.http import (normalize_http_values,
                          normalize_post_data, normalize_url)
 from weblib.encoding import make_str
 import six
 from six.moves.http_cookiejar import CookieJar
-import sys
 from user_agent import generate_user_agent
 
 from grab.cookie import create_cookie, CookieManager
@@ -29,9 +29,9 @@ from grab.upload import UploadFile, UploadContent
 from grab.transport.base import BaseTransport
 from grab.util.log import PycurlSigintHandler
 
+# pylint: disable=invalid-name
 logger = logging.getLogger('grab.transport.curl')
-
-# @lorien: I do not understand these signals. Maybe you?
+# pylint: enable=invalid-name
 
 # We should ignore SIGPIPE when using pycurl.NOSIGNAL - see
 # the libcurl tutorial for more info.
@@ -39,6 +39,7 @@ logger = logging.getLogger('grab.transport.curl')
 # http://curl.haxx.se/mail/curlpython-2005-06/0004.html
 # http://curl.haxx.se/mail/lib-2010-03/0114.html
 
+# FIXME: is NOSIGNAL option is required?
 # CURLOPT_NOSIGNAL
 # Pass a long. If it is 1, libcurl will not use any functions that install
 # signal handlers or any functions that cause signals to be sent to the
@@ -486,7 +487,7 @@ class CurlTransport(BaseTransport):
             # (WRITEFUNCTION, HEADERFUNCTIO, etc)
             # If you think WTF then see details here:
             # https://github.com/pycurl/pycurl/issues/413
-            if 23 == ex.args[0]:
+            if ex.args[0] == 23:
                 if getattr(self.curl, 'grab_callback_interrupted', None) is True:
                     # This is expected error caused by
                     # interruptted execution of body_processor callback

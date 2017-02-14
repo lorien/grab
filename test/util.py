@@ -1,5 +1,4 @@
 import os
-from test_server import TestServer
 from unittest import TestCase
 import logging
 from contextlib import contextmanager
@@ -8,10 +7,12 @@ from shutil import rmtree
 import platform
 import itertools
 
-from grab import Grab
-import grab.base
+from test_server import TestServer
 
-logger = logging.getLogger('test.util')
+from grab import Grab
+from grab import base
+
+logger = logging.getLogger('test.util') # pylint: disable=invalid-name
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_SERVER_PORT = 9876
 ADDRESS = 'localhost'
@@ -35,9 +36,9 @@ def temp_dir(root_dir=None):
 
 @contextmanager
 def temp_file(root_dir=None):
-    fd, file_ = mkstemp(dir=root_dir)
+    fdesc, file_ = mkstemp(dir=root_dir)
     yield file_
-    os.close(fd)
+    os.close(fdesc)
     try:
         os.unlink(file_)
     except (IOError, OSError):
@@ -147,4 +148,4 @@ def skip_test_if(condition, why_message):
 
 
 def reset_request_counter():
-    grab.base.REQUEST_COUNTER = itertools.count(1)
+    base.REQUEST_COUNTER = itertools.count(1)

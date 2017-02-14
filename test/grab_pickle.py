@@ -19,16 +19,16 @@ class TestGrab(BaseGrabTestCase):
         Test that Grab instance could be pickled and unpickled.
         """
 
-        g = build_grab()
+        grab = build_grab()
         self.server.response['get.data'] =\
             '<form><textarea name="text">the cat</textarea></form>'
-        g.go(self.server.get_url())
-        g.set_input('text', 'foobar')
-        data = pickle.dumps(g, pickle.HIGHEST_PROTOCOL)
+        grab.go(self.server.get_url())
+        grab.set_input('text', 'foobar')
+        data = pickle.dumps(grab, pickle.HIGHEST_PROTOCOL)
 
         def func(pickled_grab, resultq):
-            g2 = pickle.loads(pickled_grab)
-            text = g2.doc.select('//textarea').text()
+            grab2 = pickle.loads(pickled_grab)
+            text = grab2.doc.select('//textarea').text()
             resultq.put(text)
 
         result_queue = Queue()

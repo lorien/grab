@@ -1,7 +1,8 @@
 # coding: utf-8
 import os
-from mock import patch
 import threading
+
+from mock import patch
 
 from test.util import BaseGrabTestCase
 from test.util import build_grab, exclude_grab_transport, temp_dir
@@ -17,28 +18,28 @@ class TestCookies(BaseGrabTestCase):
         with temp_dir() as tmp_dir:
             reset_request_counter()
 
-            log_file_path = os.path.join(tmp_dir, 'log.html')
-            g = build_grab()
-            g.setup(log_file=log_file_path)
+            log_file_path = os.path.join(tmp_dir, 'lograb.html')
+            grab = build_grab()
+            grab.setup(log_file=log_file_path)
             self.server.response['get.data'] = 'omsk'
 
             self.assertEqual(os.listdir(tmp_dir), [])
-            g.go(self.server.get_url())
-            self.assertEqual(os.listdir(tmp_dir), ['log.html'])
+            grab.go(self.server.get_url())
+            self.assertEqual(os.listdir(tmp_dir), ['lograb.html'])
             self.assertEqual(open(log_file_path).read(), 'omsk')
 
     def test_log_dir_option(self):
         with temp_dir() as tmp_dir:
             reset_request_counter()
 
-            g = build_grab()
-            g.setup(log_dir=tmp_dir)
+            grab = build_grab()
+            grab.setup(log_dir=tmp_dir)
             self.server.response_once['get.data'] = 'omsk1'
             self.server.response['get.data'] = 'omsk2'
 
             self.assertEqual(os.listdir(tmp_dir), [])
-            g.go(self.server.get_url())
-            g.go(self.server.get_url())
+            grab.go(self.server.get_url())
+            grab.go(self.server.get_url())
             self.assertEqual(sorted(os.listdir(tmp_dir)),
                              ['01.html', '01.log', '02.html', '02.log'])
             self.assertEqual(open(os.path.join(tmp_dir, '01.html')).read(),
@@ -50,13 +51,13 @@ class TestCookies(BaseGrabTestCase):
         with temp_dir() as tmp_dir:
             reset_request_counter()
 
-            g = build_grab()
-            g.setup(log_dir=tmp_dir)
+            grab = build_grab()
+            grab.setup(log_dir=tmp_dir)
             self.server.response['get.data'] = 'omsk'
             self.server.response['headers'] = [('X-Engine', 'PHP')]
 
             self.assertEqual(os.listdir(tmp_dir), [])
-            g.go(self.server.get_url())
+            grab.go(self.server.get_url())
             self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
             log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
             self.assertTrue('x-engine' in log_file_content.lower())
@@ -65,18 +66,18 @@ class TestCookies(BaseGrabTestCase):
         with temp_dir() as tmp_dir:
             reset_request_counter()
 
-            g = build_grab()
-            g.setup(log_dir=tmp_dir)
+            grab = build_grab()
+            grab.setup(log_dir=tmp_dir)
             self.server.response['get.data'] = 'omsk'
             self.server.response['headers'] = [('X-Engine', 'PHP')]
 
             self.assertEqual(os.listdir(tmp_dir), [])
 
             def func():
-                g.go(self.server.get_url())
-            th = threading.Thread(target=func)
-            th.start()
-            th.join()
+                grab.go(self.server.get_url())
+            thread = threading.Thread(target=func)
+            thread.start()
+            thread.join()
 
             files = os.listdir(tmp_dir)
             self.assertEqual(2, len([x for x in files if '01-thread' in x]))
@@ -89,16 +90,16 @@ class TestCookies(BaseGrabTestCase):
         with temp_dir() as tmp_dir:
             reset_request_counter()
 
-            g = build_grab()
-            g.setup(log_dir=tmp_dir, timeout=1, user_agent='Perl',
-                    debug=True)
+            grab = build_grab()
+            grab.setup(log_dir=tmp_dir, timeout=1, user_agent='Perl',
+                       debug=True)
             self.server.response['get.data'] = 'omsk'
             self.server.response['headers'] = [('X-Engine', 'PHP')]
             self.server.response['sleep'] = 2
 
             self.assertEqual(os.listdir(tmp_dir), [])
             try:
-                g.go(self.server.get_url())
+                grab.go(self.server.get_url())
             except GrabTimeoutError:
                 pass
 
@@ -111,12 +112,12 @@ class TestCookies(BaseGrabTestCase):
         with temp_dir() as tmp_dir:
             reset_request_counter()
 
-            g = build_grab()
-            g.setup(log_dir=tmp_dir)
-            g.setup(headers={'X-Name': 'spider'}, post='xxxPost')
+            grab = build_grab()
+            grab.setup(log_dir=tmp_dir)
+            grab.setup(headers={'X-Name': 'spider'}, post='xxxPost')
 
             self.assertEqual(os.listdir(tmp_dir), [])
-            g.go(self.server.get_url())
+            grab.go(self.server.get_url())
             self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
             log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
             self.assertFalse('X-Name' in log_file_content)
@@ -128,12 +129,12 @@ class TestCookies(BaseGrabTestCase):
         with temp_dir() as tmp_dir:
             reset_request_counter()
 
-            g = build_grab()
-            g.setup(log_dir=tmp_dir, debug=True)
-            g.setup(headers={'X-Name': 'spider'}, post={'xxx': 'Post'})
+            grab = build_grab()
+            grab.setup(log_dir=tmp_dir, debug=True)
+            grab.setup(headers={'X-Name': 'spider'}, post={'xxx': 'Post'})
 
             self.assertEqual(os.listdir(tmp_dir), [])
-            g.go(self.server.get_url())
+            grab.go(self.server.get_url())
             self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
             log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
             #if not 'x-name' in log_file_content.lower():
@@ -143,56 +144,56 @@ class TestCookies(BaseGrabTestCase):
             self.assertTrue('xxx=post' in log_file_content.lower())
 
     def test_debug_post(self):
-        g = build_grab(debug_post=True)
-        g.setup(post={'foo': 'bar'})
+        grab = build_grab(debug_post=True)
+        grab.setup(post={'foo': 'bar'})
         self.server.response['post.data'] = 'x'
-        g.go(self.server.get_url())
-        self.assertEqual(b'x', g.doc.body)
+        grab.go(self.server.get_url())
+        self.assertEqual(b'x', grab.doc.body)
 
     def test_debug_nonascii_post(self):
-        g = build_grab(debug=True)
-        g.setup(post=u'фыва'.encode('cp1251'))
-        g.go(self.server.get_url())
+        grab = build_grab(debug=True)
+        grab.setup(post=u'фыва'.encode('cp1251'))
+        grab.go(self.server.get_url())
 
     def test_debug_nonascii_multipart_post(self):
-        g = build_grab(debug=True)
-        g.setup(charset='cp1251', multipart_post=[('x', u'фыва'.encode('cp1251'))])
-        g.go(self.server.get_url())
+        grab = build_grab(debug=True)
+        grab.setup(charset='cp1251', multipart_post=[('x', u'фыва'.encode('cp1251'))])
+        grab.go(self.server.get_url())
 
     def test_debug_post_integer_bug(self):
-        g = build_grab(debug_post=True)
-        g.setup(post={'foo': 3})
+        grab = build_grab(debug_post=True)
+        grab.setup(post={'foo': 3})
         self.server.response['post.data'] = 'x'
-        g.go(self.server.get_url())
-        self.assertEqual(b'x', g.doc.body)
+        grab.go(self.server.get_url())
+        self.assertEqual(b'x', grab.doc.body)
 
     def test_debug_post_big_str(self):
-        g = build_grab(debug_post=True)
+        grab = build_grab(debug_post=True)
         big_value = 'x' * 1000
-        g.setup(post=big_value)
-        g.go(self.server.get_url())
+        grab.setup(post=big_value)
+        grab.go(self.server.get_url())
         self.assertEqual(self.server.request['data'], big_value.encode())
 
     def test_debug_post_dict_big_value(self):
-        g = build_grab(debug_post=True)
+        grab = build_grab(debug_post=True)
         big_value = 'x' * 1000
-        g.setup(post={
+        grab.setup(post={
             'foo': big_value,
         })
-        g.go(self.server.get_url())
+        grab.go(self.server.get_url())
         self.assertEqual(self.server.request['data'], ('foo=%s' % big_value).encode())
 
     def test_log_request_extra_argument(self):
-        import grab.base
+        from grab import base
 
-        g = build_grab()
-        g.go(self.server.get_url())
-        with patch.object(grab.base.logger_network, 'debug') as mocked:
-            g.log_request()
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        with patch.object(base.logger_network, 'debug') as mocked:
+            grab.log_request()
             args = mocked.mock_calls[0][1]
             self.assertEqual('', args[3])
 
-        with patch.object(grab.base.logger_network, 'debug') as mocked:
-            g.log_request(extra='zz')
+        with patch.object(base.logger_network, 'debug') as mocked:
+            grab.log_request(extra='zz')
             args = mocked.mock_calls[0][1]
             self.assertEqual('[zz] ', args[3])

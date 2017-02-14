@@ -5,7 +5,6 @@
 """
 The core of grab package: the Grab class.
 """
-from __future__ import absolute_import
 import logging
 import os
 from random import randint
@@ -13,11 +12,12 @@ from copy import copy, deepcopy
 import threading
 import itertools
 import collections
-from six.moves.urllib.parse import urljoin
 import email
 from datetime import datetime
 import weakref
+
 import six
+from six.moves.urllib.parse import urljoin
 from weblib.html import find_base_url
 from weblib.http import normalize_http_values, normalize_unicode
 
@@ -48,11 +48,13 @@ TRANSPORT_ALIAS = {
     'urllib3': 'grab.transport.urllib3.Urllib3Transport',
 }
 
+# pylint: disable=invalid-name
 logger = logging.getLogger('grab.base')
 # Logger to handle network activity
 # It is done as separate logger to allow you easily
 # control network logging separately from other grab logs
 logger_network = logging.getLogger('grab.network')
+# pylint: enable=invalid-name
 
 
 def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
@@ -191,7 +193,7 @@ class Grab(DeprecatedThings):
                  # Dirty hack to make it possible to inherit Grab from
                  # multiple base classes with __slots__
                  '_doc',
-                 )
+                )
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
@@ -291,22 +293,22 @@ class Grab(DeprecatedThings):
         :param **kwargs: overrides settings of cloned grab instance
         """
 
-        g = Grab(transport=self.transport_param)
-        g.config = self.dump_config()
+        grab = Grab(transport=self.transport_param)
+        grab.config = self.dump_config()
 
-        g.doc = self.doc.copy()
-        g.doc.grab = weakref.proxy(g)
+        grab.doc = self.doc.copy()
+        grab.doc.grab = weakref.proxy(grab)
 
         for key in self.clonable_attributes:
-            setattr(g, key, getattr(self, key))
-        g.cookies = deepcopy(self.cookies)
+            setattr(grab, key, getattr(self, key))
+        grab.cookies = deepcopy(self.cookies)
 
         if kwargs:
-            g.setup(**kwargs)
+            grab.setup(**kwargs)
 
-        return g
+        return grab
 
-    def adopt(self, g):
+    def adopt(self, grab):
         """
         Copy the state of another `Grab` instance.
 
@@ -314,13 +316,13 @@ class Grab(DeprecatedThings):
         then restore the state from it.
         """
 
-        self.load_config(g.config)
+        self.load_config(grab.config)
 
-        self.doc = g.doc.copy(new_grab=self)
+        self.doc = grab.doc.copy(new_grab=self)
 
         for key in self.clonable_attributes:
-            setattr(self, key, getattr(g, key))
-        self.cookies = deepcopy(g.cookies)
+            setattr(self, key, getattr(grab, key))
+        self.cookies = deepcopy(grab.cookies)
 
     def dump_config(self):
         """
@@ -367,7 +369,7 @@ class Grab(DeprecatedThings):
                 kwargs['url'] = self.make_url_absolute(kwargs['url'])
         self.config.update(kwargs)
 
-    def go(self, url, **kwargs):
+    def go(self, url, **kwargs): # pylint: disable=invalid-name
         """
         Go to ``url``
 
@@ -574,7 +576,7 @@ class Grab(DeprecatedThings):
         try:
             # FIXME
             if (self.transport.__class__.__name__ == 'Urllib3Transport'
-                and not getattr(self.transport, '_response', None)):
+                    and not getattr(self.transport, '_response', None)):
                 self.doc = None
             else:
                 self.doc = self.transport.prepare_response(self)

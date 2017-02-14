@@ -2,12 +2,14 @@
 """
 See details here: https://github.com/tiran/defusedxml/blob/master/README.md
 """
-from test.util import temp_dir, build_grab, exclude_grab_transport
-from test.util import BaseGrabTestCase
 import os
+
 from lxml.etree import parse
 from six import BytesIO
 from defusedxml import EntitiesForbidden
+
+from test.util import temp_dir, build_grab, exclude_grab_transport
+from test.util import BaseGrabTestCase
 
 
 class GrabSimpleTestCase(BaseGrabTestCase):
@@ -21,7 +23,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
                 out.write('Hey there!')
             # Prepare file:// URL valid for both linux and windows
             injection_url = 'file:///%s' % (injection_path.lstrip('/')
-                                                          .replace('\\', '/'))
+                                            .replace('\\', '/'))
             bad_xml = (
                 '<!DOCTYPE external ['
                 '<!ENTITY ee SYSTEM "' + injection_url + '">'
@@ -39,7 +41,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
                 out.write('Hey there!')
             # Prepare file:// URL valid for both linux and windows
             injection_url = 'file:///%s' % (injection_path.lstrip('/')
-                                                          .replace('\\', '/'))
+                                            .replace('\\', '/'))
             bad_xml = (
                 '<!DOCTYPE external ['
                 '<!ENTITY ee SYSTEM "' + injection_url + '">'
@@ -49,6 +51,6 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             xml_file = os.path.join(tmp_dir, 'bad.xml')
             with open(xml_file, 'wb') as out:
                 out.write(bad_xml)
-            g = build_grab(content_type='xml')
-            g.go('file://%s' % xml_file)
-            self.assertRaises(EntitiesForbidden, g.doc, '//title')
+            grab = build_grab(content_type='xml')
+            grab.go('file://%s' % xml_file)
+            self.assertRaises(EntitiesForbidden, grab.doc, '//title')

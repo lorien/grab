@@ -1,11 +1,11 @@
-import six
-from grab.spider import Spider, Task
-from grab.spider.error import SpiderMisuseError
 from unittest import TestCase
-from grab.spider.queue_backend.base import QueueInterface
+import six
 
 from test.util import BaseGrabTestCase, build_spider
 from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
+from grab.spider.queue_backend.base import QueueInterface
+from grab.spider import Spider, Task
+from grab.spider.error import SpiderMisuseError
 
 
 class SpiderQueueMixin(object):
@@ -88,8 +88,9 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
         self.setup_queue(bot)
         bot.task_queue.clear()
 
-        for x in six.moves.range(5):
-            bot.add_task(Task('page', url=self.server.get_url(), delay=x+1))
+        for delay in six.moves.range(5):
+            bot.add_task(Task('page', url=self.server.get_url(),
+                              delay=delay + 1))
 
         self.assertEqual(5, len(bot.task_queue.schedule_list))
         bot.task_queue.clear()

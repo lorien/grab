@@ -15,10 +15,10 @@ HTML = b"""
 class DocExtensionTest(TestCase):
     def setUp(self):
         # Create fake grab instance with fake response
-        self.g = build_grab(document_body=HTML)
+        self.grab = build_grab(document_body=HTML)
 
     def test_extension_in_general(self):
-        self.assertTrue(self.g.doc)
+        self.assertTrue(self.grab.doc)
 
     def test_select_method(self):
-        self.assertEqual('test', self.g.doc.select('//h1').text())
+        self.assertEqual('test', self.grab.doc.select('//h1').text())

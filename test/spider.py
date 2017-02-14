@@ -170,7 +170,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.run()
         self.assertEqual(bot.points, [1])
 
-    #AFTER THIS: BAD
     def test_check_task_limits_invalid_value(self):
         class TestSpider(Spider):
             def task_page(self, grab, task):

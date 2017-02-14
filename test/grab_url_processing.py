@@ -13,25 +13,25 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
     #    # Does not work on python3, why?
     #    # On python3 real network call is performed
     #    # ******************************
-    #    g = build_grab()
-    #    with mock.patch.object(g.transport.curl, 'perform'):
-    #        with mock.patch.object(g.transport.curl, 'setopt') as patch:
-    #            g.go('http://превед.рф/')
+    #    grab = build_grab()
+    #    with mock.patch.object(grab.transport.curl, 'perform'):
+    #        with mock.patch.object(grab.transport.curl, 'setopt') as patch:
+    #            grab.go('http://превед.рф/')
     #            args = dict((x[0][0], x[0][1]) for x in patch.call_args_list)
     #            self.assertEqual(args[pycurl.URL],
-    #                             'http://xn--b1aebb1cg.xn--p1ai/')
+    #                             'http://xn--b1aebb1cgrab.xn--p1ai/')
 
     def test_nonascii_path(self):
-        g = build_grab()
+        grab = build_grab()
         self.server.response['data'] = 'medved'
-        g.go(self.server.get_url(u'/превед'))
-        self.assertEqual(b'medved', g.doc.body)
+        grab.go(self.server.get_url(u'/превед'))
+        self.assertEqual(b'medved', grab.doc.body)
         self.assertEqual('/%D0%BF%D1%80%D0%B5%D0%B2%D0%B5%D0%B4',
-                          self.server.request['path'])
+                         self.server.request['path'])
 
     def test_nonascii_query(self):
-        g = build_grab()
+        grab = build_grab()
         self.server.response['data'] = 'medved'
-        g.go(self.server.get_url(u'/search?q=превед'))
-        self.assertEqual(b'medved', g.doc.body)
+        grab.go(self.server.get_url(u'/search?q=превед'))
+        self.assertEqual(b'medved', grab.doc.body)
         self.assertEqual(u'превед', self.server.request['args']['q'])

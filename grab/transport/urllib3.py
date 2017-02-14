@@ -1,8 +1,10 @@
 # Copyright: 2015, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://getdata.pro)
 # License: MIT
-from __future__ import absolute_import
 import logging
+import random
+import time
+
 from weblib.http import (normalize_url, normalize_post_data,
                          normalize_http_values)
 from weblib.encoding import make_str, decode_pairs
@@ -12,11 +14,10 @@ from urllib3.fields import RequestField
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
 from urllib3.exceptions import ProxySchemeUnknown
-import random
 from six.moves.urllib.parse import urlsplit
 from six.moves.http_cookiejar import CookieJar
 import six
-import time
+from user_agent import generate_user_agent
 
 from grab import error
 from grab.error import GrabMisuseError, GrabTimeoutError
@@ -24,7 +25,6 @@ from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.document import Document
 from grab.upload import UploadFile, UploadContent
 from grab.transport.base import BaseTransport
-from user_agent import generate_user_agent
 
 
 def make_unicode(val, encoding='utf-8', errors='strict'):

@@ -197,12 +197,12 @@ class Task(BaseTask):
                                     'used together')
 
         if (kwargs.get('url') is not None and
-                    kwargs.get('grab_config') is not None):
+                kwargs.get('grab_config') is not None):
             raise SpiderMisuseError('Options url and grab_config could not '
                                     'be used together')
 
         if (kwargs.get('grab') is not None and
-                    kwargs.get('grab_config') is not None):
+                kwargs.get('grab_config') is not None):
             raise SpiderMisuseError('Options grab and grab_config could not '
                                     'be used together')
 

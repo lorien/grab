@@ -1,17 +1,18 @@
 from weblib.error import ResponseNotValid
 
+from test.util import (BaseGrabTestCase, build_grab, build_spider,
+                       multiprocess_mode)
 from grab import Grab
 from grab.spider import base
 from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
-from test.util import (BaseGrabTestCase, build_grab, build_spider,
-                       multiprocess_mode)
 from grab.spider.error import SpiderError
 
 
 class SimpleSpider(Spider):
     def task_baz(self, grab, dummy_task):
         # pylint: disable=attribute-defined-outside-init
-        self.SAVED_ITEM = grab.response.body
+        pass
+        #self.SAVED_ITEM = grab.doc.body
 
 
 class TestSpiderTestCase(BaseGrabTestCase):
@@ -58,8 +59,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
         self.assertEqual('http://xxx.com', task.url)
         self.assertEqual(None, task.grab_config)
 
-        g = Grab(url='http://yyy.com')
-        task = Task('baz', grab=g)
+        grab = Grab(url='http://yyy.com')
+        task = Task('baz', grab=grab)
         bot.add_task(task)
         self.assertEqual('http://yyy.com', task.url)
         self.assertEqual('http://yyy.com', task.grab_config['url'])
@@ -73,15 +74,15 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
         # Pass grab to clone
         task = Task('baz', url='http://xxx.com')
-        g = Grab()
-        g.setup(url='zzz')
-        bot.add_task(task.clone(grab=g))
+        grab = Grab()
+        grab.setup(url='zzz')
+        bot.add_task(task.clone(grab=grab))
 
         # Pass grab_config to clone
         task = Task('baz', url='http://xxx.com')
-        g = Grab()
-        g.setup(url='zzz')
-        bot.add_task(task.clone(grab_config=g.config))
+        grab = Grab()
+        grab.setup(url='zzz')
+        bot.add_task(task.clone(grab_config=grab.config))
 
     def test_task_clone_with_url_param(self):
         task = Task('baz', url='http://example.com/path')
@@ -93,11 +94,11 @@ class TestSpiderTestCase(BaseGrabTestCase):
         bot = build_spider(SimpleSpider, )
         bot.setup_queue()
 
-        g = Grab()
-        g.setup(url=self.server.get_url())
-        g.setup(user_agent='Foo')
+        grab = Grab()
+        grab.setup(url=self.server.get_url())
+        grab.setup(user_agent='Foo')
 
-        task = Task('baz', grab=g)
+        task = Task('baz', grab=grab)
         bot.add_task(task.clone())
         bot.run()
         self.assertEqual(self.server.request['headers']['User-Agent'], 'Foo')
@@ -114,7 +115,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
     def test_task_raw(self):
         class TestSpider(Spider):
             def task_page(self, grab, dummy_task):
-                self.stat.collect('codes', grab.response.code)
+                self.stat.collect('codes', grab.doc.code)
 
         self.server.response['code'] = 502
 
@@ -175,10 +176,10 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
         bot = build_spider(TestSpider, )
         bot.setup_queue()
-        g = Grab()
-        g.setup(url=self.server.get_url())
+        grab = Grab()
+        grab.setup(url=self.server.get_url())
         self.assertRaises(SpiderMisuseError, Task,
-                          'page', grab=g, url=self.server.get_url())
+                          'page', grab=grab, url=self.server.get_url())
 
     def test_task_invalid_name(self):
         self.assertRaises(SpiderMisuseError, Task,
@@ -207,50 +208,50 @@ class TestSpiderTestCase(BaseGrabTestCase):
                           grab=1, grab_config=1)
 
     def test_task_clone_grab_config_and_url(self):
-        g = build_grab()
-        g.setup(url='http://foo.com/')
-        task = Task('foo', grab=g)
+        grab = build_grab()
+        grab.setup(url='http://foo.com/')
+        task = Task('foo', grab=grab)
         task2 = task.clone(url='http://bar.com/')
         self.assertEqual(task2.url, 'http://bar.com/')
         self.assertEqual(task2.grab_config['url'], 'http://bar.com/')
 
     def test_task_clone_kwargs(self):
-        g = build_grab()
-        g.setup(url='http://foo.com/')
-        task = Task('foo', grab=g, cache_timeout=1)
+        grab = build_grab()
+        grab.setup(url='http://foo.com/')
+        task = Task('foo', grab=grab, cache_timeout=1)
         task2 = task.clone(cache_timeout=2)
         self.assertEqual(2, task2.cache_timeout)
 
     def test_task_comparison(self):
-        t1 = Task('foo', url='http://foo.com/', priority=1)
-        t2 = Task('foo', url='http://foo.com/', priority=2)
-        t3 = Task('foo', url='http://foo.com/')
+        task1 = Task('foo', url='http://foo.com/', priority=1)
+        task2 = Task('foo', url='http://foo.com/', priority=2)
+        task3 = Task('foo', url='http://foo.com/')
         # If both tasks have priorities then task are
         # compared by their priorities
-        self.assertTrue(t1 < t2)
+        self.assertTrue(task1 < task2)
         # If any of compared tasks does not have priority
         # than tasks are equal
-        self.assertTrue(t1 == t3)
-        self.assertTrue(t3 == t3)
+        self.assertTrue(task1 == task3)
+        self.assertTrue(task3 == task3)
 
     def test_task_get_fallback_handler(self):
         class TestSpider(Spider):
-            def zz(self, task):
+            def do_smth(self, task):
                 pass
 
             def task_bar_fallback(self, task):
                 pass
 
 
-        t1 = Task('foo', url='http://foo.com/', fallback_name='zz')
-        t2 = Task('bar', url='http://foo.com/')
-        t3 = Task(url='http://foo.com/')
+        task1 = Task('foo', url='http://foo.com/', fallback_name='do_smth')
+        task2 = Task('bar', url='http://foo.com/')
+        task3 = Task(url='http://foo.com/')
 
         bot = build_spider(TestSpider, )
 
-        self.assertEqual(t1.get_fallback_handler(bot), bot.zz)
-        self.assertEqual(t2.get_fallback_handler(bot), bot.task_bar_fallback)
-        self.assertEqual(t3.get_fallback_handler(bot), None)
+        self.assertEqual(task1.get_fallback_handler(bot), bot.do_smth)
+        self.assertEqual(task2.get_fallback_handler(bot), bot.task_bar_fallback)
+        self.assertEqual(task3.get_fallback_handler(bot), None)
 
     def test_update_grab_instance(self):
         class TestSpider(Spider):
@@ -324,12 +325,17 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
     def test_multiple_internal_worker_error(self):
         class TestSpider(Spider):
+            """
+            This class derived from Spider super-class
+            contains fatal bug in overriden `process_network_result`
+            method
+            """
             # pylint: disable=unused-argument
-            def process_network_result_with_handler(self, *args, **kwargs):
+            def process_network_result(self, *args, **kwargs):
                 raise Exception('Shit happens!')
             # pylint: enable=unused-argument
 
-            def task_page(self):
+            def task_page(self, dummy_grab, dummy_task):
                 pass
 
         bot = build_spider(TestSpider, )
@@ -337,7 +343,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         for _ in range(5):
             bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
-        self.assertTrue(1 < bot.stat.counters['parser-pipeline-restore'])
+        self.assertTrue(bot.stat.counters['parser-pipeline-restore'] > 1)
 
     def test_task_clone_post_request(self):
         class TestSpider(Spider):
@@ -348,9 +354,9 @@ class TestSpiderTestCase(BaseGrabTestCase):
         bot = build_spider(TestSpider)
         bot.setup_queue()
 
-        g = Grab()
-        g.setup(url=self.server.get_url(), post={'x': 'y'})
-        task = Task('foo', grab=g)
+        grab = Grab()
+        grab.setup(url=self.server.get_url(), post={'x': 'y'})
+        task = Task('foo', grab=grab)
         bot.add_task(task)
         bot.run()
         self.assertEqual('POST', self.server.request['method'])
@@ -370,8 +376,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
     def test_task_clone_without_modification(self):
         class TestSpider(Spider):
             def task_page(self, grab, dummy_task):
-                g2 = grab.clone()
-                yield Task('page2', grab=g2)
+                grab2 = grab.clone()
+                yield Task('page2', grab=grab2)
 
             def task_page2(self, grab, task):
                 pass

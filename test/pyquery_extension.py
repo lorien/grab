@@ -32,11 +32,11 @@ HTML = u"""
 class PyqueryExtensionTest(BaseGrabTestCase):
     def setUp(self):
         # Create fake grab instance with fake response
-        self.g = Grab(HTML, charset='cp1251')
+        self.grab = Grab(HTML, charset='cp1251')
 
     def test_some_things(self):
         from pyquery import PyQuery
 
-        self.assertEqual(self.g.pyquery('#num-1').text(), u'item #100 2')
-        self.assertEqual(self.g.pyquery('li').filter(
+        self.assertEqual(self.grab.pyquery('#num-1').text(), u'item #100 2')
+        self.assertEqual(self.grab.pyquery('li').filter(
             lambda x: '#2' in PyQuery(x).text()).text(), u'item #2')

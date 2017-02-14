@@ -13,23 +13,26 @@ TODO: WTF with cookies???
 from hashlib import sha1
 import zlib
 import logging
+import time
+
+import six
 import pymongo
 from bson import Binary
-import time
-import six
 from weblib.encoding import make_str
 
 from grab.document import Document
 from grab.cookie import CookieManager
 
+# pylint: disable=invalid-name
 logger = logging.getLogger('grab.spider.cache_backend.mongo')
+# pylint: enable=invalid-name
 
 
 class CacheBackend(object):
     def __init__(self, database, use_compression=True, spider=None, **kwargs):
         self.spider = spider
         self.conn = pymongo.MongoClient(**kwargs)
-        self.db = self.conn[database]
+        self.dbase = self.conn[database]
         self.use_compression = use_compression
 
     def get_item(self, url, timeout=None):
@@ -39,11 +42,11 @@ class CacheBackend(object):
 
         _hash = self.build_hash(url)
         if timeout is not None:
-            ts = int(time.time()) - timeout
-            query = {'_id': _hash, 'timestamp': {'$gt': ts}}
+            moment = int(time.time()) - timeout
+            query = {'_id': _hash, 'timestamp': {'$gt': moment}}
         else:
             query = {'_id': _hash}
-        return self.db.cache.find_one(query)
+        return self.dbase.cache.find_one(query)
 
     def build_hash(self, url):
         utf_url = make_str(url)
@@ -51,7 +54,7 @@ class CacheBackend(object):
 
     def remove_cache_item(self, url):
         _hash = self.build_hash(url)
-        self.db.cache.remove({'_id': _hash})
+        self.dbase.cache.remove({'_id': _hash})
 
     def load_response(self, grab, cache_item):
         grab.setup_document(cache_item['body'])
@@ -93,7 +96,7 @@ class CacheBackend(object):
             'cookies': None,
         }
         try:
-            self.db.cache.save(item, w=1)
+            self.dbase.cache.save(item, w=1)
         except Exception as ex: # pylint: disable=broad-except
             if 'document too large' in six.text_type(ex):
                 logging.error('Document too large. It was not saved into mongo'
@@ -102,10 +105,10 @@ class CacheBackend(object):
                 raise
 
     def clear(self):
-        self.db.cache.remove()
+        self.dbase.cache.remove()
 
     def size(self):
-        return self.db.cache.count()
+        return self.dbase.cache.count()
 
     def has_item(self, url, timeout=None):
         """
@@ -114,11 +117,11 @@ class CacheBackend(object):
 
         _hash = self.build_hash(url)
         if timeout is not None:
-            ts = int(time.time()) - timeout
-            query = {'_id': _hash, 'timestamp': {'$gt': ts}}
+            moment = int(time.time()) - timeout
+            query = {'_id': _hash, 'timestamp': {'$gt': moment}}
         else:
             query = {'_id': _hash}
-        doc = self.db.cache.find_one(query, {'id': 1})
+        doc = self.dbase.cache.find_one(query, {'id': 1})
         return doc is not None
 
     def close(self):

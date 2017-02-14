@@ -6,14 +6,17 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-from bson import Binary
 import logging
-import pymongo
 from datetime import datetime
+
+from bson import Binary
+import pymongo
 
 from grab.spider.queue_backend.base import QueueInterface
 
+# pylint: disable=invalid-name
 logger = logging.getLogger('grab.spider.queue_backend.mongo')
+# pylint: enable=invalid-name
 
 
 class QueueBackend(QueueInterface):

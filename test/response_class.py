@@ -23,9 +23,9 @@ class TestResponse(BaseGrabTestCase):
             tmp_file = os.path.join(tmp_dir, 'file.bin')
             self.server.response['get.data'] = img_data
 
-            g = build_grab()
-            g.go(self.server.get_url())
-            g.response.save(tmp_file)
+            grab = build_grab()
+            grab.go(self.server.get_url())
+            grab.response.save(tmp_file)
             self.assertEqual(open(tmp_file, 'rb').read(), img_data)
 
     def test_save_hash(self):
@@ -34,9 +34,9 @@ class TestResponse(BaseGrabTestCase):
             img_data = open(IMG_FILE, 'rb').read()
             self.server.response['get.data'] = img_data
 
-            g = build_grab()
-            g.go(self.server.get_url())
-            path = g.response.save_hash(self.server.get_url(), tmp_dir)
+            grab = build_grab()
+            grab.go(self.server.get_url())
+            path = grab.response.save_hash(self.server.get_url(), tmp_dir)
             test_data = open(os.path.join(tmp_dir, path), 'rb').read()
             self.assertEqual(test_data, img_data)
 
@@ -45,10 +45,10 @@ class TestResponse(BaseGrabTestCase):
             u'http-equiv="Content-Type" content="text/html; '\
             u'charset=utf8;charset=cp1251" /></head><body>'\
             u'<h1>крокодил</h1></body></html>'.encode('utf-8')
-        g = build_grab()
-        g.setup(document_charset='utf-8')
-        g.go(self.server.get_url())
-        self.assertTrue(u'крокодил' in g.response.unicode_body())
+        grab = build_grab()
+        grab.setup(document_charset='utf-8')
+        grab.go(self.server.get_url())
+        self.assertTrue(u'крокодил' in grab.response.unicode_body())
 
     def test_xml_declaration(self):
         """
@@ -58,8 +58,8 @@ class TestResponse(BaseGrabTestCase):
         self.server.response['get.data'] = """<?xml version="1.0" encoding="UTF-8"?>
         <html><body><h1>тест</h1></body></html>
         """
-        g = build_grab()
-        g.go(self.server.get_url())
-        ubody = g.response.unicode_body()
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        ubody = grab.response.unicode_body()
         self.assertTrue(u'тест' in ubody)
         self.assertTrue('<?xml' in ubody)

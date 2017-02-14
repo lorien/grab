@@ -1,17 +1,17 @@
-from __future__ import absolute_import
 import re
 import itertools
 import logging
 from random import randint
-import six
 from collections import namedtuple
+
+import six
 
 from grab.error import GrabError, GrabNetworkError
 
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
 RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')
 PROXY_FIELDS = ('host', 'port', 'username', 'password', 'proxy_type')
-logger = logging.getLogger('grab.proxylist')
+logger = logging.getLogger('grab.proxylist') # pylint: disable=invalid-name
 
 
 class Proxy(namedtuple('Proxy', PROXY_FIELDS)):

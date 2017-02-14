@@ -1,6 +1,7 @@
 from threading import Event, Thread
-from six.moves.queue import Queue, Empty
 import time
+
+from six.moves.queue import Queue, Empty
 
 
 class CachePipeline(object):
