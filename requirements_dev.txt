@@ -19,3 +19,4 @@ pycurl;platform_system!="Windows"
 item;platform_system!="Windows"
 pylint
 psutil
+tox

@@ -51,7 +51,7 @@ class TestUploadContent(BaseGrabTestCase):
         g.doc.submit()
         self.assertEqual(data,
                          self.server.request['files']['image'][0]['body'])
-        self.assertTrue(
+        self.assertEqual(
             10, len(self.server.request['files']['image'][0]['filename']))
         self.assertEqual(
             'application/octet-stream',
@@ -70,7 +70,7 @@ class TestUploadContent(BaseGrabTestCase):
         g.doc.submit()
         self.assertEqual(data,
                          self.server.request['files']['image'][0]['body'])
-        self.assertTrue(
+        self.assertEqual(
             10, len(self.server.request['files']['image'][0]['filename']))
         self.assertEqual(
             'application/grab',

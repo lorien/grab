@@ -112,8 +112,10 @@ class GrabApiTestCase(BaseGrabTestCase):
         data = b'''<form><input type="text" id="f" name="foo" value="val">
             </form>'''
         g = build_grab(data)
+        # pylint: disable=no-member
         self.assertEqual(g.doc('//input').node().value,
                          g.pyquery('input')[0].value)
+        # pylint: enable=no-member
 
     def test_assert_xpath(self):
         data = b'''<h1>tet</h1>'''
@@ -141,10 +143,10 @@ class GrabApiTestCase(BaseGrabTestCase):
         data = b'''<a href="http://ya.ru/">ya.ru</a>'''
         g = build_grab(data)
         self.assertEqual('http://ya.ru/',
-                         g.find_link_rex(re.compile('ya\.ru'),
+                         g.find_link_rex(re.compile(r'ya\.ru'),
                                          make_absolute=True))
         self.assertEqual(None,
-                         g.find_link_rex(re.compile('google\.ru'),
+                         g.find_link_rex(re.compile(r'google\.ru'),
                                          make_absolute=True))
 
     def test_find_link(self):

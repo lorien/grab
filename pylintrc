@@ -1,6 +1,7 @@
 [MASTER]
 jobs=4
 extension-pkg-whitelist=pycurl,MySQLdb,lxml
+ignore=invalid_import.py
 
 [TYPECHEK]
 ignored-modules=six.moves.urllib, six.moves.http_cookiejar, six.moves.queue, six.moves.socketserver, six.moves.SimpleHTTPServer

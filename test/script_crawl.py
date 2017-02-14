@@ -15,7 +15,7 @@ class TestSpider(Spider):
     def task_generator(self):
         yield Task('page', url=self.url)
 
-    def task_page(self, grab, task):
+    def task_page(self, grab, dummy_task):
         self.points.append(grab.response.body)
 
 
@@ -24,7 +24,7 @@ class FailSpider(Spider):
     def task_generator(self):
         yield Task('page', url=self.url)
 
-    def task_page(self, grab, task):
+    def task_page(self, dummy_grab, dummy_task):
         raise Exception('Shit happens!')
 
 
@@ -38,7 +38,7 @@ class ScriptCrawlTestCase(BaseGrabTestCase):
         SPIDER_REGISTRY.clear()
         crawl.main('test_spider', settings_module='test.files.crawl_settings',
                    disable_report=True)
-        self.assertEquals(TestSpider.points, [b'1'])
+        self.assertEqual(TestSpider.points, [b'1'])
 
     def test_crawl_save_lists(self):
         FailSpider.url = self.server.get_url()

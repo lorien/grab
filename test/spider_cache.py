@@ -40,7 +40,7 @@ class SimpleSpider(Spider):
         counter = grab.doc.select('//span[@id="counter"]').number()
         self.stat.collect('resp_counters', counter)
 
-    def task_one(self, grab, task):
+    def task_one(self, grab, dummy_task):
         self.process_counter(grab)
 
     def task_foo(self, grab, task):
@@ -81,7 +81,7 @@ class SpiderCacheMixin(object):
         server = self.server
 
         class Bug1Spider(Spider):
-            def task_foo(self, grab, task):
+            def task_foo(self, grab, dummy_task):
                 grab.setup(url=server.get_url())
                 yield Task('bar', grab=grab)
 
@@ -109,7 +109,7 @@ class SpiderCacheMixin(object):
     def test_only_cache_task(self):
         self.server.response['get.data'] = ContentGenerator(self.server)
         class TestSpider(Spider):
-            def task_page(self, grab, task):
+            def task_page(self, dummy_grab, dummy_task):
                 self.stat.collect('points', 1)
 
         bot = build_spider(TestSpider, only_cache=True)
@@ -165,7 +165,7 @@ class SpiderCacheMixin(object):
 
     def test_task_cache_timeout(self):
         class TestSpider(Spider):
-            def task_page(self, grab, task):
+            def task_page(self, grab, dummy_task):
                 self.stat.collect('points', grab.doc.body)
 
         self.server.response['data'] = iter([b'a', b'b'])
@@ -253,7 +253,9 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
         with mock.patch('logging.error', patch):
             bot.run()
         self.assertEqual(bot.cache_pipeline.cache.size(), 0)
+        # pylint: disable=unsubscriptable-object
         self.assertTrue('Document too large' in patch.call_args[0][0])
+        # pylint: enable=unsubscriptable-object
 
     def test_connection_kwargs(self):
         self.server.response['get.data'] = ContentGenerator(self.server)

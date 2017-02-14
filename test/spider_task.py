@@ -1,7 +1,7 @@
 from weblib.error import ResponseNotValid
 
 from grab import Grab
-import grab.spider.base
+from grab.spider import base
 from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
 from test.util import (BaseGrabTestCase, build_grab, build_spider,
                        multiprocess_mode)
@@ -9,17 +9,18 @@ from grab.spider.error import SpiderError
 
 
 class SimpleSpider(Spider):
-    def task_baz(self, grab, task):
+    def task_baz(self, grab, dummy_task):
+        # pylint: disable=attribute-defined-outside-init
         self.SAVED_ITEM = grab.response.body
 
 
-class TestSpider(BaseGrabTestCase):
+class TestSpiderTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
     def test_task_priority(self):
         # Automatic random priority
-        grab.spider.base.RANDOM_TASK_PRIORITY_RANGE = (10, 20)
+        base.RANDOM_TASK_PRIORITY_RANGE = (10, 20)
         bot = build_spider(SimpleSpider, priority_mode='random')
         bot.setup_queue()
         task = Task('baz', url='http://xxx.com')
@@ -28,7 +29,7 @@ class TestSpider(BaseGrabTestCase):
         self.assertTrue(10 <= task.priority <= 20)
 
         # Automatic constant priority
-        grab.spider.base.DEFAULT_TASK_PRIORITY = 33
+        base.DEFAULT_TASK_PRIORITY = 33
         bot = build_spider(SimpleSpider, priority_mode='const')
         bot.setup_queue()
         task = Task('baz', url='http://xxx.com')
@@ -37,7 +38,7 @@ class TestSpider(BaseGrabTestCase):
         self.assertEqual(33, task.priority)
 
         # Automatic priority does not override explictily setted priority
-        grab.spider.base.DEFAULT_TASK_PRIORITY = 33
+        base.DEFAULT_TASK_PRIORITY = 33
         bot = build_spider(SimpleSpider, priority_mode='const')
         bot.setup_queue()
         task = Task('baz', url='http://xxx.com', priority=1)
@@ -112,7 +113,7 @@ class TestSpider(BaseGrabTestCase):
 
     def test_task_raw(self):
         class TestSpider(Spider):
-            def task_page(self, grab, task):
+            def task_page(self, grab, dummy_task):
                 self.stat.collect('codes', grab.response.code)
 
         self.server.response['code'] = 502
@@ -134,7 +135,7 @@ class TestSpider(BaseGrabTestCase):
     @multiprocess_mode(False)
     def test_task_callback(self):
         class TestSpider(Spider):
-            def task_page(self, grab, task):
+            def task_page(self, dummy_grab, dummy_task):
                 self.meta['tokens'].append('0_handler')
 
         class FuncWithState(object):
@@ -165,9 +166,11 @@ class TestSpider(BaseGrabTestCase):
     def test_task_url_and_grab_options(self):
         class TestSpider(Spider):
             def setup(self):
+                # pylint: disable=attribute-defined-outside-init
                 self.done = False
 
-            def task_page(self, grab, task):
+            def task_page(self, dummy_grab, dummy_task):
+                # pylint: disable=attribute-defined-outside-init
                 self.done = True
 
         bot = build_spider(TestSpider, )
@@ -259,7 +262,7 @@ class TestSpider(BaseGrabTestCase):
                 yield Task('page', grab=Grab(url=self.meta['server'].get_url(),
                                              timeout=1))
 
-            def task_page(self, grab, task):
+            def task_page(self, grab, dummy_task):
                 self.stat.collect('points', grab.config['timeout'])
 
         bot = build_spider(TestSpider, meta={'server': self.server})
@@ -282,7 +285,7 @@ class TestSpider(BaseGrabTestCase):
                 yield Task('page', grab=Grab(url=self.meta['server'].get_url(),
                                              timeout=76))
 
-            def task_page(self, grab, task):
+            def task_page(self, grab, dummy_task):
                 self.stat.collect('points', grab.config['timeout'])
 
         bot = build_spider(TestSpider, meta={'server': self.server})
@@ -321,8 +324,10 @@ class TestSpider(BaseGrabTestCase):
 
     def test_multiple_internal_worker_error(self):
         class TestSpider(Spider):
+            # pylint: disable=unused-argument
             def process_network_result_with_handler(self, *args, **kwargs):
                 raise Exception('Shit happens!')
+            # pylint: enable=unused-argument
 
             def task_page(self):
                 pass
@@ -336,7 +341,7 @@ class TestSpider(BaseGrabTestCase):
 
     def test_task_clone_post_request(self):
         class TestSpider(Spider):
-            def task_foo(self, grab, task):
+            def task_foo(self, dummy_grab, task):
                 if not task.get('fin'):
                     yield task.clone(fin=True)
 
@@ -351,12 +356,12 @@ class TestSpider(BaseGrabTestCase):
         self.assertEqual('POST', self.server.request['method'])
 
     def test_response_not_valid(self):
-        class SimpleSpider(Spider):
-            def task_page(self, grab, task):
+        class SomeSimpleSpider(Spider):
+            def task_page(self, dummy_grab, dummy_task):
                 self.stat.inc('xxx')
                 raise ResponseNotValid
 
-        bot = SimpleSpider()
+        bot = SomeSimpleSpider()
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
@@ -364,7 +369,7 @@ class TestSpider(BaseGrabTestCase):
 
     def test_task_clone_without_modification(self):
         class TestSpider(Spider):
-            def task_page(self, grab, task):
+            def task_page(self, grab, dummy_task):
                 g2 = grab.clone()
                 yield Task('page2', grab=g2)
 

@@ -30,7 +30,9 @@ class SpiderErrorTestCase(BaseGrabTestCase):
 
         class TestSpider(Spider):
             def task_generator(self):
+                # pylint: disable=attribute-defined-outside-init
                 self.done_counter = 0
+                # pylint: enable=attribute-defined-outside-init
                 yield Task('page', url=server.get_url())
 
             def task_page(self, grab, task):

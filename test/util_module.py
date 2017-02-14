@@ -6,6 +6,7 @@ from grab.spider.error import SpiderInternalError
 
 
 class BaseSpider(Spider):
+    # pylint: disable=no-init
     class Meta:
         abstract = True
 

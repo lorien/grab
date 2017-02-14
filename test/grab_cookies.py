@@ -26,8 +26,8 @@ class TestCookies(BaseGrabTestCase):
         g.setup(cookies={'foo': '1', 'bar': '2'})
         g.go(self.server.get_url())
         self.assertEqual(
-            set(map(lambda item: item.strip(),
-                    self.server.request['headers']['Cookie'].split('; '))),
+            set([x.strip() for x in
+                 self.server.request['headers']['Cookie'].split('; ')]),
             set(['foo=1', 'bar=2']))
 
     def test_session(self):

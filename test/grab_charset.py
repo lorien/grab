@@ -38,7 +38,7 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
         self.server.response['charset'] = 'UTF-8'
         g = build_grab()
         g.go(self.server.get_url())
-        self.assertEquals('utf-8', g.doc.charset)
+        self.assertEqual('utf-8', g.doc.charset)
 
 
     def test_dash_issue(self):

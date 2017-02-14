@@ -40,6 +40,7 @@ GRAB_TEST_LIST = (
     'test.grab_limit_option',
     'test.grab_charset_issue',
     'test.grab_pickle', # FIXME: fix tests excluded for urllib3
+    'test.proxy',
     # *** Extensions
     'test.ext_text',
     'test.ext_rex',

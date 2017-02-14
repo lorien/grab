@@ -1,5 +1,5 @@
 # coding: utf-8
-from test.util import build_grab, get_temp_file
+from test.util import build_grab, temp_file
 from test.util import BaseGrabTestCase
 
 from grab.proxylist import ProxyList
@@ -13,12 +13,6 @@ class GrabProxyTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    def generate_plist_file(self, data=DEFAULT_PLIST_DATA):
-        path = get_temp_file()
-        with open(path, 'w') as out:
-            out.write(data)
-        return path
-
     def test_no_proxy_list(self):
         g = build_grab()
         self.assertEqual(0, g.proxylist.size())
@@ -28,8 +22,7 @@ class ProxyListTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    def generate_plist_file(self, data=DEFAULT_PLIST_DATA):
-        path = get_temp_file()
+    def generate_plist_file(self, path, data=DEFAULT_PLIST_DATA):
         with open(path, 'w') as out:
             out.write(data)
         return path
@@ -40,10 +33,11 @@ class ProxyListTestCase(BaseGrabTestCase):
 
 
     def test_file_proxy_source(self):
-        pl = ProxyList()
-        path = self.generate_plist_file()
-        pl.load_file(path)
-        self.assertEqual(2, pl.size())
+        with temp_file() as path:
+            pl = ProxyList()
+            self.generate_plist_file(path)
+            pl.load_file(path)
+            self.assertEqual(2, pl.size())
 
     def test_web_proxy_source(self):
         pl = ProxyList()
@@ -52,11 +46,12 @@ class ProxyListTestCase(BaseGrabTestCase):
         self.assertEqual(2, pl.size())
 
     def test_get_next_proxy(self):
-        pl = ProxyList()
-        path = self.generate_plist_file('foo:1\nbar:1')
-        pl.load_file(path)
-        self.assertEqual(pl.get_next_proxy().host, 'foo')
-        self.assertEqual(pl.get_next_proxy().host, 'bar')
-        self.assertEqual(pl.get_next_proxy().host, 'foo')
-        pl.load_file(path)
-        self.assertEqual(pl.get_next_proxy().host, 'foo')
+        with temp_file() as path:
+            pl = ProxyList()
+            self.generate_plist_file(path, 'foo:1\nbar:1')
+            pl.load_file(path)
+            self.assertEqual(pl.get_next_proxy().host, 'foo')
+            self.assertEqual(pl.get_next_proxy().host, 'bar')
+            self.assertEqual(pl.get_next_proxy().host, 'foo')
+            pl.load_file(path)
+            self.assertEqual(pl.get_next_proxy().host, 'foo')

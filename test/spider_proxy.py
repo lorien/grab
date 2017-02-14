@@ -15,7 +15,7 @@ PROXY3 = '%s:%d' % (ADDRESS, EXTRA_PORT2)
 
 
 class SimpleSpider(Spider):
-    def task_baz(self, grab, task):
+    def task_baz(self, grab, dummy_task):
         self.stat.collect('ports',
                           int(grab.response.headers.get('Listen-Port', 0)))
 
@@ -103,7 +103,7 @@ class TestSpiderCase(BaseGrabTestCase):
             bot.load_proxylist(proxy_file, 'text_file',
                                auto_change=False, auto_init=False)
             bot.setup_queue()
-            for x in six.moves.range(10):
+            for _ in six.moves.range(10):
                 bot.add_task(Task('baz', self.server.get_url()))
             bot.run()
 
@@ -114,7 +114,7 @@ class TestSpiderCase(BaseGrabTestCase):
 
     def test_spider_custom_proxy_source(self):
         class TestSpider(Spider):
-            def task_page(self, grab, task):
+            def task_page(self, grab, dummy_task):
                 self.stat.collect(
                     'ports', int(grab.response.headers.get('Listen-Port', 0)))
 
@@ -123,6 +123,9 @@ class TestSpiderCase(BaseGrabTestCase):
                 return [
                     Proxy(ADDRESS, TEST_SERVER_PORT, None, None, 'http'),
                 ]
+
+            def load_raw_data(self):
+                return None
 
 
         bot = build_spider(TestSpider)

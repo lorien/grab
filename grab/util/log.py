@@ -34,7 +34,8 @@ def default_logging(grab_log=None,#'/tmp/grab.log',
 
 class PycurlSigintHandler(TextIOBase):
     # TextIOBase to avoid errors in py36: https://bugs.python.org/issue29130
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(PycurlSigintHandler, self).__init__(*args, **kwargs)
         self.orig_stderr = None
         self.buf = []
 

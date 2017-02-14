@@ -23,7 +23,9 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             self.assertTrue(os.path.exists(g.response.body_path))
             self.assertTrue(tmp_dir in g.response.body_path)
             self.assertEqual(b'foo', open(g.response.body_path, 'rb').read())
+            # pylint: disable=protected-access
             self.assertEqual(g.response._bytes_body, None)
+            # pylint: enable=protected-access
             old_path = g.response.body_path
 
             g.go(self.server.get_url())
@@ -42,29 +44,33 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             self.assertEqual(os.path.join(tmp_dir, 'music.mp3'),
                              g.response.body_path)
             self.assertEqual(g.response.body, b'foo')
+            # pylint: disable=protected-access
             self.assertEqual(g.response._bytes_body, None)
+            # pylint: enable=protected-access
 
     def test_body_inmemory_true(self):
         g = build_grab()
         self.server.response['data'] = b'bar'
         g.go(self.server.get_url())
+        # pylint: disable=protected-access
         self.assertEqual(g.response._bytes_body, b'bar')
+        # pylint: enable=protected-access
 
     def test_assign_unicode_to_body(self):
         g = build_grab()
         g.doc.body = b'abc'
         g.doc.body = b'def'
 
-        def bad_func():
+        with self.assertRaises(GrabMisuseError):
             g.doc.body = u'Спутник'
-
-        self.assertRaises(GrabMisuseError, bad_func)
 
     def test_empty_response(self):
         self.server.response['data'] = b''
         g = build_grab()
         g.go(self.server.get_url())
+        # pylint: disable=pointless-statement
         g.doc.tree # should not raise exception
+        # pylint: enable=pointless-statement
 
     #def test_emoji_processing(self):
     #    #html = u'''

@@ -55,7 +55,7 @@ class TestProxy(BaseGrabTestCase):
             g.load_proxylist(tmp_file, 'text_file', auto_change=False)
             self.assertEqual(g.config['proxy_auto_change'], False)
             servers = set()
-            for x in six.moves.range(10):
+            for _ in six.moves.range(10):
                 g.go('http://yandex.ru')
                 servers.add(g.config['proxy'])
             self.assertEqual(len(servers), 1)
@@ -90,7 +90,9 @@ class TestProxy(BaseGrabTestCase):
 
             g.load_proxylist(tmp_file, 'text_file', auto_init=True,
                              auto_change=False)
+            # pylint: disable=unsupported-membership-test
             self.assertTrue('server-' in g.config['proxy'])
+            # pylint: enable=unsupported-membership-test
 
     def test_list_proxysource(self):
         g = build_grab()
@@ -133,18 +135,18 @@ class TestProxy(BaseGrabTestCase):
         g = build_grab()
         items = [PROXY1]
         g.proxylist.load_list(items)
-        self.assertEquals(g.proxylist.get_next_proxy().username, None)
+        self.assertEqual(g.proxylist.get_next_proxy().username, None)
 
         g.proxylist.load_list(items, proxy_userpwd='foo:bar')
         proxy = g.proxylist.get_next_proxy()
-        self.assertEquals(proxy.username, 'foo')
-        self.assertEquals(proxy.password, 'bar')
+        self.assertEqual(proxy.username, 'foo')
+        self.assertEqual(proxy.password, 'bar')
 
         items = [PROXY1 + ':admin:test', PROXY2]
         g.proxylist.load_list(items, proxy_userpwd='foo:bar')
         proxy = g.proxylist.get_next_proxy()
-        self.assertEquals(proxy.username, 'admin')
-        self.assertEquals(proxy.password, 'test')
+        self.assertEqual(proxy.username, 'admin')
+        self.assertEqual(proxy.password, 'test')
 
     def test_global_proxy_type_argument(self):
         g = build_grab()
@@ -152,11 +154,11 @@ class TestProxy(BaseGrabTestCase):
 
         g.proxylist.load_list(items)
         proxy = g.proxylist.get_next_proxy()
-        self.assertEquals(proxy.proxy_type, 'http')
+        self.assertEqual(proxy.proxy_type, 'http')
 
         g.proxylist.load_list(items, proxy_type='socks')
         proxy = g.proxylist.get_next_proxy()
-        self.assertEquals(proxy.proxy_type, 'socks')
+        self.assertEqual(proxy.proxy_type, 'socks')
 
     def test_setup_with_proxyline(self):
         g = build_grab()

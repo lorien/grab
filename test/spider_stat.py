@@ -20,10 +20,10 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 self.stat.logging_period = 0
                 self.stat.inc('foo')
 
-            def task_page_valid(self, grab, task):
+            def task_page_valid(self, dummy_grab, dummy_task):
                 self.stat.inc('foo')
 
-            def task_page_fail(self, grab, task):
+            def task_page_fail(self, dummy_grab, dummy_task):
                 raise Exception('Shit happens!')
 
         bot = build_spider(TestSpider)
