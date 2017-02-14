@@ -7,7 +7,7 @@ ignore=invalid_import.py
 ignored-modules=six.moves.urllib, six.moves.http_cookiejar, six.moves.queue, six.moves.socketserver, six.moves.SimpleHTTPServer
 
 [MESSAGES CONTROL]
-disable=missing-docstring
+disable=C,R,I,fixme,missing-docstring
 
 [REPORTS]
 reports=no
