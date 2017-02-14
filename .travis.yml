@@ -108,6 +108,8 @@ before_script:
 
 script:
   - tox -e $TOX_ENV
+  - if [[ $TOX_ENV != pylint* ]]; then tox -e "$TOX_ENV-threaded-urllib3"; fi
+  - if [[ $TOX_ENV != pylint* ]]; then tox -e "$TOX_ENV-threaded-pycurl"; fi
 
 after_success:
   - coveralls

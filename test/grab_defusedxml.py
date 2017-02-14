@@ -2,7 +2,7 @@
 """
 See details here: https://github.com/tiran/defusedxml/blob/master/README.md
 """
-from test.util import temp_dir, build_grab
+from test.util import temp_dir, build_grab, exclude_grab_transport
 from test.util import BaseGrabTestCase
 import os
 from lxml.etree import parse
@@ -31,6 +31,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             tree = parse(BytesIO(bad_xml))
             self.assertEqual(tree.xpath('//root/text()')[0], 'Hey there!')
 
+    @exclude_grab_transport('urllib3')
     def test_grab_parse_defensedxml(self):
         with temp_dir() as tmp_dir:
             injection_path = os.path.join(tmp_dir, 'injection')
