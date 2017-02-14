@@ -17,3 +17,6 @@ known-standard-library=marshal
 
 [BASIC]
 method-rgx=([a-z_][a-z0-9_]{2,30}|test_[a-z_][a-z0-9_]{2,50})$
+
+[FORMAT]
+max-line-length=79

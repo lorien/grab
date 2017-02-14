@@ -55,9 +55,10 @@ class TestResponse(BaseGrabTestCase):
         unicode_body() should return HTML with xml declaration (if it
         exists in original HTML)
         """
-        self.server.response['get.data'] = """<?xml version="1.0" encoding="UTF-8"?>
-        <html><body><h1>тест</h1></body></html>
-        """
+        self.server.response['get.data'] = (
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<html><body><h1>тест</h1></body></html>'
+        )
         grab = build_grab()
         grab.go(self.server.get_url())
         ubody = grab.response.unicode_body()

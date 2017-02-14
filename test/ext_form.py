@@ -250,4 +250,5 @@ class TestHtmlForms(BaseGrabTestCase):
         grab = build_grab()
         grab.go(self.server.get_url())
         grab.doc.submit()
-        self.assertTrue(u'Beställa'.encode('utf-8') in self.server.request['data'])
+        self.assertTrue(u'Beställa'.encode('utf-8')
+                        in self.server.request['data'])

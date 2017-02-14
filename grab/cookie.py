@@ -18,15 +18,16 @@ COOKIE_ATTRS = ('name', 'value', 'version', 'port', 'domain',
                 'comment_url', 'rfc2109')
 
 
-# Source: https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
+# Source:
+# https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 class MockRequest(object):
     """Wraps a `requests.Request` to mimic a `urllib2.Request`.
-    The code in `cookielib.CookieJar` expects this interface in order to correctly
-    manage cookie policies, i.e., determine whether a cookie can be set, given the
-    domains of the request and the cookie.
-    The original request object is read-only. The client is responsible for collecting
-    the new headers via `get_new_headers()` and interpreting them appropriately. You
-    probably want `get_cookie_header`, defined below.
+    The code in `cookielib.CookieJar` expects this interface in order to
+    correctly manage cookie policies, i.e., determine whether a cookie can be
+    set, given the domains of the request and the cookie.
+    The original request object is read-only. The client is responsible for
+    collecting the new headers via `get_new_headers()` and interpreting them
+    appropriately. You probably want `get_cookie_header`, defined below.
     """
 
     def __init__(self, request):
@@ -64,11 +65,16 @@ class MockRequest(object):
         return name in self._req.headers or name in self._new_headers
 
     def get_header(self, name, default=None):
-        return self._req.headers.get(name, self._new_headers.get(name, default))
+        return self._req.headers.get(name,
+                                     self._new_headers.get(name, default))
 
     def add_header(self, key, val):
-        """cookielib has no legitimate use for this method; add it back if you find one."""
-        raise NotImplementedError("Cookie headers should be added with add_unredirected_header()")
+        """
+        cookielib has no legitimate use for this method;
+        add it back if you find one.
+        """
+        raise NotImplementedError('Cookie headers should be added'
+                                  ' with add_unredirected_header()')
 
     def add_unredirected_header(self, name, value):
         self._new_headers[name] = value

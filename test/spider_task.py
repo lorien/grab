@@ -250,7 +250,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
         bot = build_spider(TestSpider, )
 
         self.assertEqual(task1.get_fallback_handler(bot), bot.do_smth)
-        self.assertEqual(task2.get_fallback_handler(bot), bot.task_bar_fallback)
+        self.assertEqual(task2.get_fallback_handler(bot),
+                         bot.task_bar_fallback)
         self.assertEqual(task3.get_fallback_handler(bot), None)
 
     def test_update_grab_instance(self):

@@ -39,7 +39,8 @@ class TestSpiderCase(BaseGrabTestCase):
                                                debug=True)))
             bot.run()
 
-            self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
+            self.assertEqual(self.server.request['headers']['host'],
+                             'yandex.ru')
             self.assertEqual(1, len(set(bot.stat.collections['ports'])))
 
     def test_setup_proxylist2(self):
@@ -55,7 +56,8 @@ class TestSpiderCase(BaseGrabTestCase):
                 bot.add_task(Task('baz', 'http://yandex.ru'))
             bot.run()
 
-            self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
+            self.assertEqual(self.server.request['headers']['host'],
+                             'yandex.ru')
             self.assertTrue(len(set(bot.stat.collections['ports'])) > 1)
 
     def test_setup_proxylist3(self):
@@ -72,7 +74,8 @@ class TestSpiderCase(BaseGrabTestCase):
                 bot.add_task(Task('baz', 'http://yandex.ru'))
             bot.run()
 
-            self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
+            self.assertEqual(self.server.request['headers']['host'],
+                             'yandex.ru')
             self.assertTrue(len(set(bot.stat.collections['ports'])) > 1)
 
     def test_setup_proxylist4(self):
@@ -89,7 +92,8 @@ class TestSpiderCase(BaseGrabTestCase):
                 bot.add_task(Task('baz', 'http://yandex.ru'))
             bot.run()
 
-            self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
+            self.assertEqual(self.server.request['headers']['host'],
+                             'yandex.ru')
             self.assertEqual(1, len(set(bot.stat.collections['ports'])))
 
     def test_setup_proxylist5(self):
@@ -110,7 +114,8 @@ class TestSpiderCase(BaseGrabTestCase):
             self.assertEqual(self.server.request['headers'].get('host'),
                              '%s:%s' % (ADDRESS, self.server.port))
             self.assertEqual(1, len(set(bot.stat.collections['ports'])))
-            self.assertEqual(bot.stat.collections['ports'][0], self.server.port)
+            self.assertEqual(bot.stat.collections['ports'][0],
+                             self.server.port)
 
     def test_spider_custom_proxy_source(self):
         class TestSpider(Spider):

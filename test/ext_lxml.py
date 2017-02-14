@@ -94,7 +94,8 @@ class LXMLExtensionTest(BaseGrabTestCase):
         self.assertEqual(100, self.grab.xpath_number('//li'))
         self.assertEqual(100, self.grab.xpath_number('//li', make_int=True))
         self.assertEqual('100', self.grab.xpath_number('//li', make_int=False))
-        self.assertEqual(1002, self.grab.xpath_number('//li', ignore_spaces=True))
+        self.assertEqual(1002, self.grab.xpath_number('//li',
+                         ignore_spaces=True))
         self.assertEqual('1002', self.grab.xpath_number(
             '//li', ignore_spaces=True, make_int=False))
         self.assertRaises(DataNotFound, self.grab.xpath_number, '//liza')
@@ -169,9 +170,10 @@ class LXMLExtensionTest(BaseGrabTestCase):
         """
         HTML with XML declaration shuld be processed without errors.
         """
-        self.server.response['get.data'] = """<?xml version="1.0" encoding="UTF-8"?>
-        <html><body><h1>test</h1></body></html>
-        """
+        self.server.response['get.data'] = (
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<html><body><h1>test</h1></body></html>'
+        )
         grab = build_grab()
         grab.go(self.server.get_url())
         self.assertEqual('test', grab.xpath_text('//h1'))

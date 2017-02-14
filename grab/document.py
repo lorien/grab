@@ -281,7 +281,8 @@ class Document(object):
                 pass
 
         with open(path, 'wb') as out:
-            out.write(self._bytes_body if self._bytes_body is not None else b'')
+            out.write(self._bytes_body if self._bytes_body is not None
+                      else b'')
 
     def save_hash(self, location, basedir, ext=None):
         """

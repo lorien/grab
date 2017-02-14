@@ -14,7 +14,8 @@ ERROR_ABBR = {
 def worker_thread(task_queue, result_queue, freelist, shutdown_event):
     while True:
         try:
-            task, grab, grab_config_backup = task_queue.get(block=True, timeout=0.1)
+            task, grab, grab_config_backup = task_queue.get(block=True,
+                                                            timeout=0.1)
         except Empty:
             if shutdown_event.is_set():
                 return
@@ -84,7 +85,8 @@ class ThreadedTransport(object):
             except Empty:
                 break
             else:
-                # FORMAT: {ok, grab, grab_config_backup, task, emsg, error_abbr}
+                # FORMAT: {ok, grab, grab_config_backup, task,
+                #          emsg, error_abbr}
                 #grab.doc.error_code = None
                 #grab.doc.error_msg = None
                 yield result
