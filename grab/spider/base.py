@@ -1,16 +1,19 @@
-from __future__ import absolute_import
+# FIXME: split to modules, make smaller
+# pylint: disable=too-many-lines
 import logging
 import time
 from random import randint
-from six.moves import queue
 from copy import deepcopy
-import six
 import os
-from weblib import metric
 from traceback import format_exc
 from datetime import datetime
 from threading import Thread
 from collections import deque
+
+from six.moves import queue
+import six
+from weblib import metric
+from weblib.error import ResponseNotValid
 
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
@@ -28,7 +31,6 @@ from grab.stat import Stat, Timer
 from grab.spider.parser_pipeline import ParserPipeline
 from grab.spider.cache_pipeline import CachePipeline
 from grab.util.warning import warn
-from weblib.error import ResponseNotValid
 
 DEFAULT_TASK_PRIORITY = 100
 DEFAULT_NETWORK_STREAM_NUMBER = 3
@@ -37,8 +39,10 @@ DEFAULT_NETWORK_TRY_LIMIT = 5
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
 NULL = object()
 
+# pylint: disable=invalid-name
 logger = logging.getLogger('grab.spider.base')
 logger_verbose = logging.getLogger('grab.spider.base.verbose')
+# pylint: disable=invalid-name
 # If you need verbose logging just
 # change logging level of that logger
 logger_verbose.setLevel(logging.FATAL)
@@ -55,7 +59,7 @@ class SpiderMetaClass(type):
         attribute then define it and set to False
     """
 
-    def __new__(cls, name, bases, namespace):
+    def __new__(mcs, name, bases, namespace):
         if 'Meta' not in namespace:
             for base in bases:
                 if hasattr(base, 'Meta'):
@@ -73,7 +77,7 @@ class SpiderMetaClass(type):
         if not hasattr(namespace['Meta'], 'abstract'):
             namespace['Meta'].abstract = False
 
-        return super(SpiderMetaClass, cls).__new__(cls, name, bases, namespace)
+        return super(SpiderMetaClass, mcs).__new__(mcs, name, bases, namespace)
 
 
 @six.add_metaclass(SpiderMetaClass)
@@ -142,7 +146,7 @@ class Spider(object):
                  http_api_port=None,
                  transport='multicurl',
                  grab_transport='pycurl',
-                 ):
+                ):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -323,7 +327,8 @@ class Spider(object):
 
         # TODO: keep original task priority if it was set explicitly
         # WTF the previous comment means?
-        self.task_queue.put(task, task.priority, schedule_time=task.schedule_time)
+        self.task_queue.put(task, task.priority,
+                            schedule_time=task.schedule_time)
         return True
 
     def stop(self):
@@ -347,7 +352,8 @@ class Spider(object):
         :param proxy_type:
             Should be one of the following: 'socks4', 'socks5' or'http'.
         :param auto_change:
-            If set to `True` then automatical random proxy rotation will be used.
+            If set to `True` then automatical random proxy rotation
+            will be used.
 
 
         Proxy source format should be one of the following (for each line):
@@ -572,14 +578,14 @@ class Spider(object):
                     try:
                         for _ in six.moves.range(min_limit - queue_size):
                             item = next(task_generator)
-                            logger_verbose.debug('Got new item from generator. '
-                                                 'Processing it.')
+                            logger_verbose.debug('Got new item from'
+                                                 ' generator. Processing it.')
                             self.process_handler_result(item, None)
                     except StopIteration:
                         # If generator have no values to yield
                         # then disable it
-                        logger_verbose.debug('Task generator has no more tasks. '
-                                             'Disabling it')
+                        logger_verbose.debug('Task generator has no more'
+                                             ' tasks. Disabling it')
                         break
             else:
                 time.sleep(0.1)
@@ -596,11 +602,11 @@ class Spider(object):
                 self.add_task(Task('initial', url=url))
 
         self._task_generator_list = []
-        th = Thread(target=self.task_generator_thread_wrapper,
-                    args=[self.task_generator()])
-        th.daemon = True
-        th.start()
-        self._task_generator_list.append(th)
+        thread = Thread(target=self.task_generator_thread_wrapper,
+                        args=[self.task_generator()])
+        thread.daemon = True
+        thread.start()
+        self._task_generator_list.append(thread)
 
     def get_task_from_queue(self):
         try:
@@ -712,8 +718,7 @@ class Spider(object):
                         self.parser_result_queue.put((ex, result['task']))
                         self.stat.inc('parser:handler-not-found')
                     else:
-                        self.process_network_result_with_handler(
-                            result, handler)
+                        self.process_network_result(result, handler)
                         self.stat.inc('parser:handler-processed')
                     finally:
                         if self.parser_mode:
@@ -733,7 +738,7 @@ class Spider(object):
             logging.error('', exc_info=ex)
             raise
 
-    def process_network_result_with_handler(self, result, handler):
+    def process_network_result(self, result, handler):
         handler_name = getattr(handler, '__name__', 'NONE')
         try:
             with self.timer.log_time('response_handler'):
@@ -771,7 +776,7 @@ class Spider(object):
         self.stat.inc('spider:task')
         self.stat.inc('spider:task-%s' % res['task'].name)
         if (res['task'].network_try_count == 1 and
-                    res['task'].task_try_count == 1):
+                res['task'].task_try_count == 1):
             self.stat.inc('spider:task-%s-initial' % res['task'].name)
 
         # Update traffic statistics
@@ -824,7 +829,7 @@ class Spider(object):
                     self.transport.start_task_processing(
                         task, grab, grab_config_backup)
                 except GrabInvalidUrl:
-                    logger.debug('Task %s has invalid URL: %s', 
+                    logger.debug('Task %s has invalid URL: %s',
                                  task.name, task.url)
                     self.stat.collect('invalid-url', task.url)
 
@@ -846,9 +851,12 @@ class Spider(object):
 
         # print('parser result queue', self.parser_result_queue.qsize())
         # print('all parsers are idle', all(x['is_parser_idle'].is_set()
-        #                                  for x in self.parser_pipeline.parser_pool))
-        # print('alive task generators', any(x.isAlive() for x in self._task_generator_list))
-        # print('active network threads', self.transport.get_active_threads_number())
+        #                                  for x in (self.parser_pipeline
+        #                                            .parser_pool)))
+        # print('alive task generators',
+        #       any(x.isAlive() for x in self._task_generator_list))
+        # print('active network threads',
+        #       self.transport.get_active_threads_number())
         #print('!IS READY: cache is idle: %s' % self.cache_pipeline.is_idle())
         try:
             if self.cache_pipeline:
@@ -858,7 +866,8 @@ class Spider(object):
                 not self.parser_result_queue.qsize()
                 and all(x['is_parser_idle'].is_set()
                         for x in self.parser_pipeline.parser_pool)
-                and not any(x.isAlive() for x in self._task_generator_list)  # (2)
+                and not any(x.isAlive() for x
+                            in self._task_generator_list)  # (2)
                 and not self.transport.get_active_threads_number()  # (3)
                 and not self.task_queue.size()  # (4)
                 and not self.network_result_queue.qsize()  # (5)
@@ -928,10 +937,11 @@ class Spider(object):
                 # 2) network result queue is not full
                 # 3) cache is disabled OR cache has free resources
                 if (self.transport.get_free_threads_number()
-                    and (self.network_result_queue.qsize()
+                        and (self.network_result_queue.qsize()
                              < network_result_queue_limit)
-                    and (self.cache_pipeline is None
-                         or self.cache_pipeline.has_free_resources())):
+                        and (self.cache_pipeline is None
+                             or self.cache_pipeline.has_free_resources())
+                   ):
                     if pending_tasks:
                         task = pending_tasks.popleft()
                     else:
@@ -945,21 +955,24 @@ class Spider(object):
                         # check if spider is ready to be shut down
                         if not pending_tasks and self.is_ready_to_shutdown():
                             #print('!ready-to-shutdown is OK')
-                            # I am afraid there is a bug in `is_ready_to_shutdown`
+                            # I am afraid there is a bug in
+                            # `is_ready_to_shutdown`
                             # because it tries to evaluate too many things
-                            # includig things that are being set from other threads,
-                            # so to ensure we are really ready to shutdown I call
-                            # is_ready_to_shutdown a few more times.
+                            # includig things that are being set from other
+                            # threads, # so to ensure we are really ready to
+                            # shutdown # I call # is_ready_to_shutdown a few
+                            # more times.
                             # Without this hack some times really rarely times
                             # the Grab fails to do its job
-                            # A good way to see this bug is to disable this hack
-                            # and run:
-                            # while ./runtest.py -t test.spider_data; do echo "ok"; done;
+                            # A good way to see this bug is to disable
+                            # this hack and run:
+                            # while ./runtest.py -t test.spider_data; do \
+                            # echo "ok"; done;
                             # And wait a few minutes
                             # Iterate over all run body while waiting
                             # this safety time
-                            # this is required because the code emulates async loop
-                            # and need to check/trigger events
+                            # this is required because the code emulates async
+                            # loop # and need to check/trigger events
                             time.sleep(0.01)
                             shutdown_countdown -= 1
                             if shutdown_countdown == 0:
@@ -975,8 +988,8 @@ class Spider(object):
                         if not self.transport.get_active_threads_number():
                             time.sleep(0.01)
                     else:
-                        logger_verbose.debug('Got new task from task queue: %s',
-                                             task)
+                        logger_verbose.debug('Got new task from task'
+                                             ' queue: %s', task)
                         task.network_try_count += 1 # pylint: disable=no-member
                         is_valid, reason = self.check_task_limits(task)
                         if is_valid:
@@ -984,7 +997,7 @@ class Spider(object):
                             if self.cache_pipeline:
                                 # CACHE:
                                 self.cache_pipeline.add_task(
-                                   ('load', (task, task_grab)),
+                                    ('load', (task, task_grab)),
                                 )
                                 #print('!sent to cache')
                             else:
@@ -1011,8 +1024,10 @@ class Spider(object):
                            self.transport.iterate_results()]
                 #print('!network results: %s' % results)
                 if self.cache_pipeline:
-                    # CACHE: for action, result in self.cache_pipeline.get_ready_results()
-                    for action, result in self.cache_pipeline.get_ready_results():
+                    # CACHE: for action, result in
+                    # self.cache_pipeline.get_ready_results()
+                    for action, result in (self.cache_pipeline
+                                           .get_ready_results()):
                         #print('thing from cache: %s:%s' % (action, result))
                         assert action in ('network_result', 'task')
                         if action == 'network_result':
@@ -1021,28 +1036,30 @@ class Spider(object):
                             task = result
                             task_grab = self.setup_grab_for_task(task)
                             if (self.transport.get_free_threads_number()
-                                and (self.network_result_queue.qsize()
-                                         < network_result_queue_limit)):
+                                    and (self.network_result_queue.qsize()
+                                         < network_result_queue_limit)
+                               ):
                                 self.submit_task_to_transport(task, task_grab)
                             else:
                                 pending_tasks.append(task)
 
                 # Take sleep to avoid millions of iterations per second.
                 # 1) If no results from network transport
-                # 2) If task queue is empty (or if there are only delayed tasks)
+                # 2) If task queue is empty or if there are only delayed tasks
                 # 3) If no network activity
                 # 4) If parser result queue is empty
                 if (not results
-                    and (task is None or bool(task) == True)
-                    and not self.transport.get_active_threads_number()
-                    and not self.parser_result_queue.qsize()
-                    and (self.cache_pipeline is None
-                         or self.cache_pipeline.is_idle())
-                         # CACHE: is_idle()
-                         #or (self.cache_pipeline.input_queue.qsize() == 0
-                         #    and self.cache_pipeline.is_idle()
-                         #    and self.cache_pipeline.result_queue.qsize() == 0))
-                    ):
+                        and (task is None or bool(task) is True)
+                        and not self.transport.get_active_threads_number()
+                        and not self.parser_result_queue.qsize()
+                        and (self.cache_pipeline is None
+                             or self.cache_pipeline.is_idle())
+                        # CACHE: is_idle()
+                        #or (self.cache_pipeline.input_queue.qsize() == 0
+                        #    and self.cache_pipeline.is_idle()
+                        #    and self.cache_pipeline.result_queue.qsize()
+                        #    == 0))
+                   ):
                     time.sleep(0.001)
 
                 for result, from_cache in results:
@@ -1051,7 +1068,7 @@ class Spider(object):
                         if result['ok']:
                             # CACHE:
                             self.cache_pipeline.add_task(
-                               ('save', (result['task'], result['grab'])),
+                                ('save', (result['task'], result['grab'])),
                             )
                     self.log_network_result_stats(
                         result, from_cache=from_cache)
@@ -1061,7 +1078,9 @@ class Spider(object):
                         is_valid = True
                     elif result['ok']:
                         res_code = result['grab'].doc.code
-                        if self.is_valid_network_response_code(res_code, result['task']):
+                        if self.is_valid_network_response_code(
+                                res_code, result['task']
+                            ):
                             is_valid = True
 
                     if is_valid:
@@ -1079,12 +1098,14 @@ class Spider(object):
                                 result['grab_config_backup'])
                             self.add_task(result['task'])
                     if from_cache:
-                        self.stat.inc('spider:task-%s-cache' % result['task'].name)
+                        self.stat.inc('spider:task-%s-cache'
+                                      % result['task'].name)
                     self.stat.inc('spider:request')
 
                 while True:
                     try:
-                        p_res, p_task = self.parser_result_queue.get(block=False)
+                        p_res, p_task = (self.parser_result_queue
+                                         .get(block=False))
                     except queue.Empty:
                         break
                     else:

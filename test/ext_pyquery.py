@@ -9,7 +9,7 @@ class ExtensionPyqueryTestCase(BaseGrabTestCase):
     def test_pyquery_handler(self):
         self.server.response['get.data'] =\
             '<body><h1>Hello world</h1><footer>2014</footer>'
-        g = build_grab()
-        g.go(self.server.get_url())
+        grab = build_grab()
+        grab.go(self.server.get_url())
 
-        self.assertEqual(g.doc.pyquery('h1').text(), 'Hello world')
+        self.assertEqual(grab.doc.pyquery('h1').text(), 'Hello world')

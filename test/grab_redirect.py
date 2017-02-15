@@ -47,60 +47,60 @@ class GrabRedirectTestCase(BaseGrabTestCase):
 
         self.server.response_once['get.data'] =\
             '<meta http-equiv="refresh" content="5; url=%s">' % meta_url
-        g = build_grab()
-        g.go(self.server.get_url())
+        grab = build_grab()
+        grab.go(self.server.get_url())
         self.assertEqual(self.server.request['path'], '/')
-        self.assertEqual(g.response.url, self.server.get_url())
+        self.assertEqual(grab.response.url, self.server.get_url())
 
     def test_follow_refresh_on(self):
         meta_url = self.server.get_url('/foo')
         # Now test meta-auto-redirect
         self.server.response_once['get.data'] =\
             '<meta http-equiv="refresh" content="5; url=%s">' % meta_url
-        g = build_grab()
-        g.setup(follow_refresh=True)
-        g.go(self.server.get_url())
+        grab = build_grab()
+        grab.setup(follow_refresh=True)
+        grab.go(self.server.get_url())
         self.assertEqual(self.server.request['path'], '/foo')
-        self.assertEqual(g.response.url, meta_url)
+        self.assertEqual(grab.response.url, meta_url)
 
     def test_spaces_in_refresh_url(self):
         meta_url = self.server.get_url('/foo')
         # Test spaces in meta tag
         self.server.response_once['get.data'] =\
             "<meta http-equiv='refresh' content='0;url= %s'>" % meta_url
-        g = build_grab()
-        g.setup(follow_refresh=True)
-        g.go(self.server.get_url())
+        grab = build_grab()
+        grab.setup(follow_refresh=True)
+        grab.go(self.server.get_url())
         self.assertEqual(self.server.request['path'], '/foo')
-        self.assertEqual(g.response.url, meta_url)
+        self.assertEqual(grab.response.url, meta_url)
 
     def test_refresh_redirect_limit(self):
         self.server.response['get.callback'] =\
             build_refresh_callback(self.server.get_url(), 10)
 
-        g = build_grab()
-        g.setup(redirect_limit=10, follow_refresh=True)
-        g.go(self.server.get_url())
-        self.assertTrue(b'done' in g.doc.body)
+        grab = build_grab()
+        grab.setup(redirect_limit=10, follow_refresh=True)
+        grab.go(self.server.get_url())
+        self.assertTrue(b'done' in grab.doc.body)
 
         self.server.response['get.callback'] =\
             build_refresh_callback(self.server.get_url(), 10)
-        g.setup(redirect_limit=5, follow_refresh=True)
+        grab.setup(redirect_limit=5, follow_refresh=True)
         self.assertRaises(GrabTooManyRedirectsError,
-                          lambda: g.go(self.server.get_url()))
+                          lambda: grab.go(self.server.get_url()))
 
     def test_redirect_limit(self):
         self.server.response['get.callback'] =\
             build_location_callback(self.server.get_url(), 10)
 
-        g = build_grab()
-        g.setup(redirect_limit=5)
+        grab = build_grab()
+        grab.setup(redirect_limit=5)
 
         self.assertRaises(GrabTooManyRedirectsError,
-                          lambda: g.go(self.server.get_url()))
+                          lambda: grab.go(self.server.get_url()))
 
         self.server.response['get.callback'] =\
             build_location_callback(self.server.get_url(), 10)
-        g.setup(redirect_limit=20)
-        g.go(self.server.get_url())
-        self.assertTrue(b'done' in g.doc.body)
+        grab.setup(redirect_limit=20)
+        grab.go(self.server.get_url())
+        self.assertTrue(b'done' in grab.doc.body)

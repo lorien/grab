@@ -21,6 +21,6 @@ class GrabTimeoutCase(BaseGrabTestCase):
             server.finish()
 
         self.server.response['callback'] = callback
-        g = build_grab()
-        g.setup(timeout=1, url=self.server.get_url())
-        self.assertRaises(GrabTimeoutError, g.request)
+        grab = build_grab()
+        grab.setup(timeout=1, url=self.server.get_url())
+        self.assertRaises(GrabTimeoutError, grab.request)

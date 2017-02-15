@@ -1,11 +1,12 @@
 # coding: utf-8
-from grab.spider import Spider, Task
-import mock
 from copy import deepcopy
+
+import mock
 
 from test.util import BaseGrabTestCase, build_spider
 from test_settings import (MONGODB_CONNECTION, MYSQL_CONNECTION,
                            POSTGRESQL_CONNECTION)
+from grab.spider import Spider, Task
 
 
 class ContentGenerator(object):
@@ -40,7 +41,7 @@ class SimpleSpider(Spider):
         counter = grab.doc.select('//span[@id="counter"]').number()
         self.stat.collect('resp_counters', counter)
 
-    def task_one(self, grab, task):
+    def task_one(self, grab, dummy_task):
         self.process_counter(grab)
 
     def task_foo(self, grab, task):
@@ -56,10 +57,6 @@ class SimpleSpider(Spider):
 
 
 class SpiderCacheMixin(object):
-    def setUp(self):
-        self.server.reset()
-        #self.server.response['get.data'] = ContentGenerator(self.server)
-
     def test_counter(self):
         self.server.response['get.data'] = ContentGenerator(self.server)
         bot = build_spider(SimpleSpider, meta={'server': self.server})
@@ -81,7 +78,7 @@ class SpiderCacheMixin(object):
         server = self.server
 
         class Bug1Spider(Spider):
-            def task_foo(self, grab, task):
+            def task_foo(self, grab, dummy_task):
                 grab.setup(url=server.get_url())
                 yield Task('bar', grab=grab)
 
@@ -109,7 +106,7 @@ class SpiderCacheMixin(object):
     def test_only_cache_task(self):
         self.server.response['get.data'] = ContentGenerator(self.server)
         class TestSpider(Spider):
-            def task_page(self, grab, task):
+            def task_page(self, dummy_grab, dummy_task):
                 self.stat.collect('points', 1)
 
         bot = build_spider(TestSpider, only_cache=True)
@@ -165,7 +162,7 @@ class SpiderCacheMixin(object):
 
     def test_task_cache_timeout(self):
         class TestSpider(Spider):
-            def task_page(self, grab, task):
+            def task_page(self, grab, dummy_task):
                 self.stat.collect('points', grab.doc.body)
 
         self.server.response['data'] = iter([b'a', b'b'])
@@ -179,12 +176,12 @@ class SpiderCacheMixin(object):
         # This task will be spawned in 1 second and will
         # receive cached data  (cache timeout = 1.5sec > 1sec)
         bot.add_task(Task('page', url=self.server.get_url(),
-                     delay=1, cache_timeout=10))
+                          delay=1, cache_timeout=10))
         # This task will be spawned in 2 seconds and will not
         # receive cached data (cache timeout = 0.5 sec < 2 sec)
         # So, this task will receive next data from `get.data` iterator
         bot.add_task(Task('page', url=self.server.get_url(),
-                     delay=2, cache_timeout=0.5))
+                          delay=2, cache_timeout=0.5))
 
         self.assertEqual(3, bot.task_queue.size())
         bot.run()
@@ -221,11 +218,16 @@ class SpiderCacheMixin(object):
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.add_task(Task('page', url=self.server.get_url('/foo')))
         bot.run()
-        self.assertTrue(bot.cache_pipeline.cache.has_item(self.server.get_url()))
-        self.assertTrue(bot.cache_pipeline.cache.has_item(self.server.get_url(), timeout=100))
-        self.assertFalse(bot.cache_pipeline.cache.has_item(self.server.get_url(), timeout=0))
-        self.assertTrue(bot.cache_pipeline.cache.has_item(self.server.get_url('/foo')))
-        self.assertFalse(bot.cache_pipeline.cache.has_item(self.server.get_url('/bar')))
+        self.assertTrue(bot.cache_pipeline.cache
+                        .has_item(self.server.get_url()))
+        self.assertTrue(bot.cache_pipeline.cache
+                        .has_item(self.server.get_url(), timeout=100))
+        self.assertFalse(bot.cache_pipeline.cache
+                         .has_item(self.server.get_url(), timeout=0))
+        self.assertTrue(bot.cache_pipeline.cache
+                        .has_item(self.server.get_url('/foo')))
+        self.assertFalse(bot.cache_pipeline.cache
+                         .has_item(self.server.get_url('/bar')))
 
 
 class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
@@ -253,7 +255,9 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
         with mock.patch('logging.error', patch):
             bot.run()
         self.assertEqual(bot.cache_pipeline.cache.size(), 0)
+        # pylint: disable=unsubscriptable-object
         self.assertTrue('Document too large' in patch.call_args[0][0])
+        # pylint: enable=unsubscriptable-object
 
     def test_connection_kwargs(self):
         self.server.response['get.data'] = ContentGenerator(self.server)

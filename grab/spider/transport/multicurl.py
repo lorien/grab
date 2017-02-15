@@ -1,9 +1,10 @@
-import pycurl
 import select
-import six
 from threading import Lock
-from grab.util.log import PycurlSigintHandler
 
+import pycurl
+import six
+
+from grab.util.log import PycurlSigintHandler
 from grab.error import GrabTooManyRedirectsError
 
 ERROR_TOO_MANY_REFRESH_REDIRECTS = -2
@@ -160,8 +161,8 @@ class MulticurlTransport(object):
                 else:
                     results.append((False, curl, ecode, emsg))
 
-            for ok, curl, ecode, emsg in results:
-                # FORMAT: {ok, grab, grab_config_backup, task, emsg}
+            for is_ok, curl, ecode, emsg in results:
+                # FORMAT: {is_ok, grab, grab_config_backup, task, emsg}
 
                 curl_id = id(curl)
                 task = self.registry[curl_id]['task']
@@ -174,12 +175,12 @@ class MulticurlTransport(object):
                 except GrabTooManyRedirectsError:
                     ecode = ERROR_TOO_MANY_REFRESH_REDIRECTS
                     emsg = 'Too many meta refresh redirects'
-                    ok = False
+                    is_ok = False
                 #except Exception as ex:
                 #    logging.error('', exc_info=ex)
                 #    ecode = ERROR_INTERNAL_GRAB_ERROR
                 #    emsg = 'Internal grab error'
-                #    ok = False
+                #    is_ok = False
 
                 grab.doc.error_code = ecode
                 grab.doc.error_msg = emsg
@@ -188,11 +189,11 @@ class MulticurlTransport(object):
                 del self.registry[curl_id]
                 grab.transport.curl = None
 
-                if ok:
+                if is_ok:
                     error_abbr = None
                 else:
                     error_abbr = ERROR_ABBR.get(ecode, 'unknown-%d' % ecode)
-                yield {'ok': ok,
+                yield {'ok': is_ok,
                        'ecode': ecode,
                        'emsg': emsg,
                        'error_abbr': error_abbr,

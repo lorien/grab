@@ -1,16 +1,16 @@
-import six
-from grab.spider import Spider, Task
-from grab.spider.error import SpiderMisuseError
 from unittest import TestCase
-from grab.spider.queue_backend.base import QueueInterface
+import six
 
 from test.util import BaseGrabTestCase, build_spider
 from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
+from grab.spider.queue_backend.base import QueueInterface
+from grab.spider import Spider, Task
+from grab.spider.error import SpiderMisuseError
 
 
 class SpiderQueueMixin(object):
     class SimpleSpider(Spider):
-        def task_page(self, grab, task):
+        def task_page(self, dummy_grab, task):
             self.stat.collect('url_history', task.url)
             self.stat.collect('priority_history', task.priority)
 
@@ -75,7 +75,7 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
                 yield Task('page', url=server.get_url(), delay=3, num=4)
                 yield Task('page', url=server.get_url(), num=1)
 
-            def task_page(self, grab, task):
+            def task_page(self, dummy_grab, task):
                 self.stat.collect('numbers', task.num)
 
         bot = build_spider(TestSpider, thread_number=1)
@@ -88,8 +88,9 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
         self.setup_queue(bot)
         bot.task_queue.clear()
 
-        for x in six.moves.range(5):
-            bot.add_task(Task('page', url=self.server.get_url(), delay=x+1))
+        for delay in six.moves.range(5):
+            bot.add_task(Task('page', url=self.server.get_url(),
+                              delay=delay + 1))
 
         self.assertEqual(5, len(bot.task_queue.schedule_list))
         bot.task_queue.clear()
@@ -116,7 +117,7 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
                 yield Task('page', url=server.get_url(), delay=0.5, num=3)
                 yield Task('page', url=server.get_url(), delay=1, num=4)
 
-            def task_page(self, grab, task):
+            def task_page(self, dummy_grab, task):
                 self.stat.collect('numbers', task.num)
 
         bot = build_spider(TestSpider)
@@ -149,6 +150,7 @@ class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
 class QueueInterfaceTestCase(TestCase):
     def test_abstract_methods(self):
         """Just to improve test coverage"""
+        # pylint: disable=abstract-method
         class BrokenQueue(QueueInterface):
             pass
 

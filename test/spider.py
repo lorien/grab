@@ -7,7 +7,7 @@ from test.util import BaseGrabTestCase, build_spider
 
 
 class SimpleSpider(Spider):
-    def task_baz(self, grab, task):
+    def task_baz(self, grab, dummy_task):
         self.stat.collect('SAVED_ITEM', grab.response.body)
 
 
@@ -85,7 +85,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 for _ in six.moves.range(1111):
                     yield Task('page', url=server.get_url())
 
-            def task_page(self, grab, task):
+            def task_page(self, dummy_grab, dummy_task):
                 self.stat.inc('count')
 
         bot = build_spider(TestSpider)
@@ -106,9 +106,10 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     def test_handler_result_none(self):
         class TestSpider(Spider):
             def prepare(self):
+                # pylint: disable=attribute-defined-outside-init
                 self.points = []
 
-            def task_page(self, grab, task):
+            def task_page(self, dummy_grab, dummy_task):
                 yield None
 
         bot = build_spider(TestSpider)
@@ -131,12 +132,13 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     def test_fallback_handler_by_default_name(self):
         class TestSpider(Spider):
             def prepare(self):
+                # pylint: disable=attribute-defined-outside-init
                 self.points = []
 
             def task_page(self, grab, task):
                 pass
 
-            def task_page_fallback(self, task):
+            def task_page_fallback(self, dummy_task):
                 self.points.append(1)
 
         self.server.response['code'] = 403
@@ -145,17 +147,18 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
-        self.assertEquals(bot.points, [1])
+        self.assertEqual(bot.points, [1])
 
     def test_fallback_handler_by_fallback_name(self):
         class TestSpider(Spider):
             def prepare(self):
+                # pylint: disable=attribute-defined-outside-init
                 self.points = []
 
             def task_page(self, grab, task):
                 pass
 
-            def fallback_zz(self, task):
+            def fallback_zz(self, dummy_task):
                 self.points.append(1)
 
         self.server.response['code'] = 403
@@ -165,9 +168,8 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.add_task(Task('page', url=self.server.get_url(),
                           fallback_name='fallback_zz'))
         bot.run()
-        self.assertEquals(bot.points, [1])
+        self.assertEqual(bot.points, [1])
 
-    #AFTER THIS: BAD
     def test_check_task_limits_invalid_value(self):
         class TestSpider(Spider):
             def task_page(self, grab, task):
@@ -185,9 +187,10 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     def test_handler_result_invalid(self):
         class TestSpider(Spider):
             def prepare(self):
+                # pylint: disable=attribute-defined-outside-init
                 self.points = []
 
-            def task_page(self, grab, task):
+            def task_page(self, dummy_grab, dummy_task):
                 yield 1
 
         bot = build_spider(TestSpider)
@@ -199,7 +202,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_fatal_error(self):
         class TestSpider(Spider):
-            def task_page(self, grab, task):
+            def task_page(self, dummy_grab, dummy_task):
                 raise FatalError
 
         bot = build_spider(TestSpider)
@@ -209,10 +212,10 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_task_queue_clear(self):
         class TestSpider(Spider):
-            def task_page(self, grab, task):
+            def task_page(self, dummy_grab, dummy_task):
                 self.stop()
 
-            def task_keyboard_interrupt_page(self, grab, task):
+            def task_keyboard_interrupt_page(self, dummy_grab, dummy_task):
                 raise KeyboardInterrupt
 
         bot = build_spider(TestSpider)
@@ -224,7 +227,8 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(0, bot.task_queue.size())
 
         for _ in six.moves.range(5):
-            bot.add_task(Task('keyboard_interrupt_page', url=self.server.get_url()))
+            bot.add_task(Task('keyboard_interrupt_page',
+                              url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
         bot.run()
         self.assertEqual(0, bot.task_queue.size())

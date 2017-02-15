@@ -1,9 +1,9 @@
-from __future__ import absolute_import
 from hashlib import md5
 import time
-from weblib.encoding import make_str
 import os
 import mimetypes
+
+from weblib.encoding import make_str
 
 
 class BaseUploadObject(object):

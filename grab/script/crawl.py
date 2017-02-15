@@ -10,7 +10,9 @@ from grab.util.log import default_logging
 from weblib.files import clear_directory
 from weblib.encoding import make_str
 
+# pylint: disable=invalid-name
 logger = logging.getLogger('grab.script.crawl')
+# pylint: enable=invalid-name
 
 
 def setup_arg_parser(parser):

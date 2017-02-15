@@ -1,6 +1,7 @@
 from threading import Event, Thread
-from six.moves.queue import Queue, Empty
 import time
+
+from six.moves.queue import Queue, Empty
 
 
 class CachePipeline(object):
@@ -51,7 +52,8 @@ class CachePipeline(object):
                         result = self.load_from_cache(task, grab)
                     if result:
                         #print('!CACHE: cached result is None')
-                        #print('!! PUT RESULT INTO CACHE PIPE RESULT QUEUE (cache)')
+                        #print('!! PUT RESULT INTO CACHE PIPE '
+                        #      'RESULT QUEUE (cache)')
                         self.result_queue.put(('network_result', result))
                     else:
                         self.result_queue.put(('task', task))
@@ -97,9 +99,13 @@ class CachePipeline(object):
                 if cache_item is None:
                     return None
                 else:
-                    with self.spider.timer.log_time('cache.read.prepare_request'):
+                    with self.spider.timer.log_time(
+                        'cache.read.prepare_request'
+                        ):
                         grab.prepare_request()
-                    with self.spider.timer.log_time('cache.read.load_response'):
+                    with self.spider.timer.log_time(
+                        'cache.read.load_response'
+                        ):
                         self.cache.load_response(grab, cache_item)
 
                     grab.log_request('CACHED')

@@ -4,7 +4,8 @@
 """
 The Document class is the result of network request made with Grab instance.
 """
-from __future__ import absolute_import
+# FIXME: split to modules, make smaller
+# pylint: disable=too-many-lines
 import weakref
 import re
 from copy import copy
@@ -16,12 +17,13 @@ import webbrowser
 import codecs
 from datetime import datetime
 import time
+import threading
+import logging
+
 from lxml.html import HTMLParser
 from lxml.etree import XMLParser, ParserError
-from selection import XpathSelector
 import six
 from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
-import threading
 from six import BytesIO, StringIO
 from weblib.http import smart_urlencode
 import weblib.encoding
@@ -30,8 +32,8 @@ from weblib.structured import TreeInterface
 from weblib.text import normalize_space
 from weblib.html import decode_entities, find_refresh_url
 from weblib.rex import normalize_regexp
-import logging
 import defusedxml.lxml
+from selection import XpathSelector
 
 from grab.cookie import CookieManager
 from grab.error import GrabMisuseError, DataNotFound
@@ -59,7 +61,7 @@ _BOM_TABLE = [
 ]
 _FIRST_CHARS = set(char[0] for (char, name) in _BOM_TABLE)
 THREAD_STORAGE = threading.local()
-logger = logging.getLogger('grab.document')
+logger = logging.getLogger('grab.document') # pylint: disable=invalid-name
 
 
 def read_bom(data):
@@ -76,8 +78,6 @@ def read_bom(data):
     return None, None
 
 
-#class Document(TextExtension, RegexpExtension, PyqueryExtension,
-#               BodyExtension, DomTreeExtension, FormExtension):
 class Document(object):
     """
     Document (in most cases it is a network response
@@ -93,7 +93,7 @@ class Document(object):
                  'error_code', 'error_msg', 'grab', 'remote_ip',
                  '_lxml_tree', '_strict_lxml_tree', '_pyquery',
                  '_lxml_form', '_file_fields', 'from_cache',
-                 )
+                )
 
     def __init__(self, grab=None):
         if grab is None:
@@ -281,7 +281,8 @@ class Document(object):
                 pass
 
         with open(path, 'wb') as out:
-            out.write(self._bytes_body if self._bytes_body is not None else b'')
+            out.write(self._bytes_body if self._bytes_body is not None
+                      else b'')
 
     def save_hash(self, location, basedir, ext=None):
         """
@@ -674,7 +675,7 @@ class Document(object):
 
     # FormExtension methods
 
-    def choose_form(self, number=None, id=None, name=None, xpath=None): # pylint: disable=redefined-builtin
+    def choose_form(self, number=None, xpath=None, name=None, **kwargs):
         """
         Set the default form.
 
@@ -704,11 +705,12 @@ class Document(object):
             g.choose_form(xpath='//form[contains(@action, "/submit")]')
         """
 
-        if id is not None:
+        id_ = kwargs.pop('id', None)
+        if id_ is not None:
             try:
-                self._lxml_form = self.select('//form[@id="%s"]' % id).node()
+                self._lxml_form = self.select('//form[@id="%s"]' % id_).node()
             except IndexError:
-                raise DataNotFound("There is no form with id: %s" % id)
+                raise DataNotFound("There is no form with id: %s" % id_)
         elif name is not None:
             try:
                 self._lxml_form = self.select(

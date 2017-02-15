@@ -1,8 +1,10 @@
 # coding: utf-8
-from grab import GrabMisuseError
+import os
+
 from test.util import temp_dir, build_grab
 from test.util import BaseGrabTestCase
-import os
+
+from grab import GrabMisuseError
 
 
 class GrabSimpleTestCase(BaseGrabTestCase):
@@ -11,60 +13,69 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
     def test_body_inmemory_false(self):
         with temp_dir() as tmp_dir:
-            g = build_grab()
-            g.setup(body_inmemory=False)
-            self.assertRaises(GrabMisuseError, lambda: g.go(self.server.get_url()))
+            grab = build_grab()
+            grab.setup(body_inmemory=False)
+            with self.assertRaises(GrabMisuseError):
+                grab.go(self.server.get_url())
 
             self.server.response['get.data'] = b'foo'
-            g = build_grab()
-            g.setup(body_inmemory=False)
-            g.setup(body_storage_dir=tmp_dir)
-            g.go(self.server.get_url())
-            self.assertTrue(os.path.exists(g.response.body_path))
-            self.assertTrue(tmp_dir in g.response.body_path)
-            self.assertEqual(b'foo', open(g.response.body_path, 'rb').read())
-            self.assertEqual(g.response._bytes_body, None)
-            old_path = g.response.body_path
+            grab = build_grab()
+            grab.setup(body_inmemory=False)
+            grab.setup(body_storage_dir=tmp_dir)
+            grab.go(self.server.get_url())
+            self.assertTrue(os.path.exists(grab.response.body_path))
+            self.assertTrue(tmp_dir in grab.response.body_path)
+            self.assertEqual(b'foo',
+                             open(grab.response.body_path, 'rb').read())
+            # pylint: disable=protected-access
+            self.assertEqual(grab.response._bytes_body, None)
+            # pylint: enable=protected-access
+            old_path = grab.response.body_path
 
-            g.go(self.server.get_url())
-            self.assertTrue(old_path != g.response.body_path)
+            grab.go(self.server.get_url())
+            self.assertTrue(old_path != grab.response.body_path)
 
         with temp_dir() as tmp_dir:
             self.server.response['get.data'] = 'foo'
-            g = build_grab()
-            g.setup(body_inmemory=False)
-            g.setup(body_storage_dir=tmp_dir)
-            g.setup(body_storage_filename='music.mp3')
-            g.go(self.server.get_url())
-            self.assertTrue(os.path.exists(g.response.body_path))
-            self.assertTrue(tmp_dir in g.response.body_path)
-            self.assertEqual(b'foo', open(g.response.body_path, 'rb').read())
+            grab = build_grab()
+            grab.setup(body_inmemory=False)
+            grab.setup(body_storage_dir=tmp_dir)
+            grab.setup(body_storage_filename='music.mp3')
+            grab.go(self.server.get_url())
+            self.assertTrue(os.path.exists(grab.response.body_path))
+            self.assertTrue(tmp_dir in grab.response.body_path)
+            self.assertEqual(b'foo',
+                             open(grab.response.body_path, 'rb').read())
             self.assertEqual(os.path.join(tmp_dir, 'music.mp3'),
-                             g.response.body_path)
-            self.assertEqual(g.response.body, b'foo')
-            self.assertEqual(g.response._bytes_body, None)
+                             grab.response.body_path)
+            self.assertEqual(grab.response.body, b'foo')
+            # pylint: disable=protected-access
+            self.assertEqual(grab.response._bytes_body, None)
+            # pylint: enable=protected-access
 
     def test_body_inmemory_true(self):
-        g = build_grab()
+        grab = build_grab()
         self.server.response['data'] = b'bar'
-        g.go(self.server.get_url())
-        self.assertEqual(g.response._bytes_body, b'bar')
+        grab.go(self.server.get_url())
+        # pylint: disable=protected-access
+        self.assertEqual(grab.response._bytes_body, b'bar')
+        # pylint: enable=protected-access
 
     def test_assign_unicode_to_body(self):
-        g = build_grab()
-        g.doc.body = b'abc'
-        g.doc.body = b'def'
+        grab = build_grab()
+        grab.doc.body = b'abc'
+        grab.doc.body = b'def'
 
-        def bad_func():
-            g.doc.body = u'Спутник'
-
-        self.assertRaises(GrabMisuseError, bad_func)
+        with self.assertRaises(GrabMisuseError):
+            grab.doc.body = u'Спутник'
 
     def test_empty_response(self):
         self.server.response['data'] = b''
-        g = build_grab()
-        g.go(self.server.get_url())
-        g.doc.tree # should not raise exception
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        # pylint: disable=pointless-statement
+        grab.doc.tree # should not raise exception
+        # pylint: enable=pointless-statement
 
     #def test_emoji_processing(self):
     #    #html = u'''
@@ -72,15 +83,16 @@ class GrabSimpleTestCase(BaseGrabTestCase):
     #    #    <span class="a-color-base"> 👍🏻 </span>
     #    #</body></html>
     #    #'''.encode('utf-8')
-    #    g = build_grab()
-    #    #print('>>',g.doc('//span').text(),'<<')
+    #    grab = build_grab()
+    #    #print('>>',grab.doc('//span').text(),'<<')
     #    #import grab
-    #    #g = grab.Grab()
-    #    #g.go('https://github.com/lorien/grab/issues/199#issuecomment-269854859')
-    #    g.go('https://en.wikipedia.org/wiki/Emoji')
-    #    g.doc.select("//*")
+    #    #grab = grab.Grab()
+    #    #grab.go('https://github.com/lorien/grab/issues/199'
+    #            '#issuecomment-269854859')
+    #    grab.go('https://en.wikipedia.org/wiki/Emoji')
+    #    grab.doc.select("//*")
 
     def test_doc_tree_notags_document(self):
         data = b'test'
-        g = build_grab(data)
-        self.assertEqual(g.doc('//html').text(), 'test')
+        grab = build_grab(data)
+        self.assertEqual(grab.doc('//html').text(), 'test')

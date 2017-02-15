@@ -13,15 +13,18 @@ TODO: WTF with cookies???
 from hashlib import sha1
 import zlib
 import logging
-import MySQLdb
 import marshal
 import time
+
+import MySQLdb
 from weblib.encoding import make_str
 
 from grab.document import Document
 from grab.cookie import CookieManager
 
+# pylint: disable=invalid-name
 logger = logging.getLogger('grab.spider.cache_backend.mysql')
+# pylint: enable=invalid-name
 
 
 class CacheBackend(object):
@@ -83,8 +86,8 @@ class CacheBackend(object):
             if timeout is None:
                 query = ""
             else:
-                ts = int(time.time()) - timeout
-                query = " AND timestamp > %d" % ts
+                moment = int(time.time()) - timeout
+                query = " AND timestamp > %d" % moment
             sql = '''
                   SELECT data
                   FROM cache
@@ -155,13 +158,13 @@ class CacheBackend(object):
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
         self.execute('BEGIN')
-        ts = int(time.time())
+        moment = int(time.time())
         sql = '''
               INSERT INTO cache (id, timestamp, data)
               VALUES(x%s, %s, %s)
               ON DUPLICATE KEY UPDATE timestamp = %s, data = %s
               '''
-        self.execute(sql, (_hash, ts, data, ts, data))
+        self.execute(sql, (_hash, moment, data, moment, data))
         self.execute('COMMIT')
 
     def pack_database_value(self, val):
@@ -183,16 +186,15 @@ class CacheBackend(object):
             if timeout is None:
                 query = ""
             else:
-                ts = int(time.time()) - timeout
-                query = " AND timestamp > %d" % ts
+                moment = int(time.time()) - timeout
+                query = " AND timestamp > %d" % moment
             self.execute('BEGIN')
             self.execute('''
                 SELECT id
                 FROM cache
                 WHERE id = x%%s %(query)s
                 LIMIT 1
-                ''' % {'query': query},
-                (_hash,))
+                ''' % {'query': query}, (_hash,))
             row = self.cursor.fetchone()
             self.execute('COMMIT')
         return True if row else False

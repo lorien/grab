@@ -1,19 +1,21 @@
-from grab.spider import Spider, Task
 import os
-from grab.spider.decorators import integrity
 
 from test.util import BaseGrabTestCase, build_spider, multiprocess_mode
+from grab.spider import Spider, Task
+from grab.spider.decorators import integrity
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
     class SimpleSpider(Spider):
         def prepare(self):
+            # pylint: disable=attribute-defined-outside-init
             self.foo_count = 1
 
         def prepare_parser(self):
+            # pylint: disable=attribute-defined-outside-init
             self.foo_count = 1
 
-        def task_page(self, grab, task):
+        def task_page(self, dummy_grab, task):
             self.foo_count += 1
             if not task.get('last'):
                 yield Task('page', url=self.meta['url'], last=True)
@@ -22,9 +24,9 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             pass
 
         @integrity('check_integrity')
-        def task_page2(self, grab, task):
-            if True:#not task.get('last'):
-                yield task.clone(last=True)
+        def task_page2(self, dummy_grab, task):
+            #if True:#not task.get('last'):
+            yield task.clone(last=True)
 
         def shutdown(self):
             self.foo_count += 1
@@ -68,22 +70,25 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 for _ in range(3):
                     yield Task('page', url=url)
 
-            def task_page(self, grab, task):
+            def task_page(self, dummy_grab, dummy_task):
                 self.stat.collect('pid', os.getpid())
 
         bot = TestSpider(mp_mode=True, parser_pool_size=1)
         bot.run()
         self.assertEqual(1, len(set(bot.stat.collections['pid'])))
 
-        bot = TestSpider(mp_mode=True, parser_pool_size=1, parser_requests_per_process=1)
+        bot = TestSpider(mp_mode=True, parser_pool_size=1,
+                         parser_requests_per_process=1)
         bot.run()
         self.assertEqual(3, len(set(bot.stat.collections['pid'])))
 
-        bot = TestSpider(mp_mode=True, parser_pool_size=1, parser_requests_per_process=2)
+        bot = TestSpider(mp_mode=True, parser_pool_size=1,
+                         parser_requests_per_process=2)
         bot.run()
         self.assertEqual(2, len(set(bot.stat.collections['pid'])))
 
-        bot = TestSpider(mp_mode=True, parser_pool_size=1, parser_requests_per_process=3)
+        bot = TestSpider(mp_mode=True, parser_pool_size=1,
+                         parser_requests_per_process=3)
         bot.run()
         self.assertEqual(1, len(set(bot.stat.collections['pid'])))
 
@@ -92,9 +97,12 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     #    """
     #    This freezes the sipder in MP-mode
     #    Traceback (most recent call last):
-    #      File "/usr/lib/python2.7/multiprocessing/queues.py", line 266, in _feed
+    #      File "/usr/lib/python2.7/multiprocessing/queues.py",
+    #        line 266, in _feed
     #        send(obj)
-    #    PicklingError: Can't pickle <class 'test.spider_multiprocess.FuncWithState'>: attribute lookup test.spider_multiprocess.FuncWithState failed
+    #    PicklingError: Can't pickle
+    # <class 'test.spider_multiprocess.FuncWithState'>:
+    # attribute lookup test.spider_multiprocess.FuncWithState failed
 
     #    """
     #    class TestSpider(Spider):

@@ -11,22 +11,22 @@ class GrabRequestTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_get_method(self):
-        g = build_grab()
-        g.go(self.server.get_url())
-        self.assertEquals('GET', self.server.request['method'])
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        self.assertEqual('GET', self.server.request['method'])
 
     def test_delete_method(self):
-        g = build_grab()
-        g.setup(method='delete')
-        g.go(self.server.get_url())
-        self.assertEquals('DELETE', self.server.request['method'])
+        grab = build_grab()
+        grab.setup(method='delete')
+        grab.go(self.server.get_url())
+        self.assertEqual('DELETE', self.server.request['method'])
 
     def test_put_method(self):
-        g = build_grab()
-        g.setup(method='put', post=b'abc')
-        g.go(self.server.get_url())
-        self.assertEquals('PUT', self.server.request['method'])
-        self.assertEquals('3', self.server.request['headers']['Content-Length'])
+        grab = build_grab()
+        grab.setup(method='put', post=b'abc')
+        grab.go(self.server.get_url())
+        self.assertEqual('PUT', self.server.request['method'])
+        self.assertEqual('3', self.server.request['headers']['Content-Length'])
 
     def test_head_with_invalid_bytes(self):
         def callback(server):
@@ -36,8 +36,8 @@ class GrabRequestTestCase(BaseGrabTestCase):
             server.finish()
 
         self.server.response['callback'] = callback
-        g = build_grab()
-        g.go(self.server.get_url())
+        grab = build_grab()
+        grab.go(self.server.get_url())
 
     @exclude_grab_transport('urllib3')
     def test_redirect_with_invalid_byte(self):
@@ -51,29 +51,29 @@ class GrabRequestTestCase(BaseGrabTestCase):
             server.finish()
 
         self.server.response['callback'] = callback
-        g = build_grab()
+        grab = build_grab()
         # GrabTimeoutError raised when tests are being runned on computer
         # without access to the internet (no DNS service available)
         self.assertRaises((GrabInternalError, GrabCouldNotResolveHostError,
                            GrabTimeoutError),
-                          g.go, self.server.get_url())
+                          grab.go, self.server.get_url())
 
     def test_options_method(self):
-        g = build_grab()
-        g.setup(method='options', post=b'abc')
-        g.go(self.server.get_url())
-        self.assertEquals('OPTIONS', self.server.request['method'])
-        self.assertEquals('3', self.server.request['headers']['Content-Length'])
+        grab = build_grab()
+        grab.setup(method='options', post=b'abc')
+        grab.go(self.server.get_url())
+        self.assertEqual('OPTIONS', self.server.request['method'])
+        self.assertEqual('3', self.server.request['headers']['Content-Length'])
 
-        g = build_grab()
-        g.setup(method='options')
-        g.go(self.server.get_url())
-        self.assertEquals('OPTIONS', self.server.request['method'])
+        grab = build_grab()
+        grab.setup(method='options')
+        grab.go(self.server.get_url())
+        self.assertEqual('OPTIONS', self.server.request['method'])
         self.assertTrue('Content-Length' not in self.server.request['headers'])
 
     @exclude_grab_transport('urllib3')
     def test_request_headers(self):
-        g = build_grab(debug=True)
-        g.setup(headers={'Foo': 'Bar'})
-        g.go(self.server.get_url())
-        self.assertEqual('Bar', g.request_headers['foo'])
+        grab = build_grab(debug=True)
+        grab.setup(headers={'Foo': 'Bar'})
+        grab.go(self.server.get_url())
+        self.assertEqual('Bar', grab.request_headers['foo'])

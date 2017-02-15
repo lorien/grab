@@ -2,8 +2,9 @@ import logging
 import multiprocessing
 
 PARSER_PROCESS_JOIN_TIMEOUT = 3
+# pylint: disable=invalid-name
 logger = logging.getLogger('grab.spider.parser_pipeline')
-
+# pylint: enable=invalid-name
 
 class ParserPipeline(object):
     def __init__(self, bot, mp_mode, pool_size, shutdown_event,

@@ -11,9 +11,9 @@ class GrabXMLProcessingTestCase(BaseGrabTestCase):
         self.server.response['get.data'] =\
             b'<?xml version="1.0" encoding="UTF-8"?>'\
             b'<root><foo>foo</foo></root>'
-        g = build_grab()
-        g.go(self.server.get_url())
-        self.assertTrue(g.xpath_one('//foo').text == 'foo')
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        self.assertTrue(grab.xpath_one('//foo').text == 'foo')
 
     def test_declaration_bug(self):
         """
@@ -25,11 +25,11 @@ class GrabXMLProcessingTestCase(BaseGrabTestCase):
         """
         xml = b'<?xml version="1.0" encoding="UTF-8"?>'\
               b'<tree><leaf>text</leaf></tree>'
-        g = build_grab(document_body=xml)
-        self.assertTrue(g.search(u'text'))
-        self.assertEqual(g.xpath_one('//leaf').text, u'text')
+        grab = build_grab(document_body=xml)
+        self.assertTrue(grab.search(u'text'))
+        self.assertEqual(grab.xpath_one('//leaf').text, u'text')
 
         # Similar bugs
-        g = build_grab(document_body=xml)
-        self.assertTrue(g.rex(u'text'))
-        self.assertEqual(g.xpath_one('//leaf').text, u'text')
+        grab = build_grab(document_body=xml)
+        self.assertTrue(grab.rex(u'text'))
+        self.assertEqual(grab.xpath_one('//leaf').text, u'text')

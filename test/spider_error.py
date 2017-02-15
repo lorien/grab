@@ -30,7 +30,9 @@ class SpiderErrorTestCase(BaseGrabTestCase):
 
         class TestSpider(Spider):
             def task_generator(self):
+                # pylint: disable=attribute-defined-outside-init
                 self.done_counter = 0
+                # pylint: enable=attribute-defined-outside-init
                 yield Task('page', url=server.get_url())
 
             def task_page(self, grab, task):
@@ -43,7 +45,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.run()
 
-    # TODO: FIXME
+    # FIXME: fix
     # That test case ruins the spider instance :(
     #def test_redirect_with_invalid_byte(self):
     #    url = self.server.get_url()
@@ -57,7 +59,8 @@ class SpiderErrorTestCase(BaseGrabTestCase):
 
     #    class TestSpider(Spider):
     #        def task_generator(self):
-    #            #yield Task('page', url='http://www.tripadvisor.com/ShowUrl?&excludeFromVS=false&odc=BusinessListingsUrl&d=4289178&url=1')
+    #        #yield Task('page', url='http://www.tripadvisor.com/ShowUrl?
+             #&excludeFromVS=false&odc=BusinessListingsUrl&d=4289178&url=1')
     #            #yield Task('page', invalid_url)
     #            yield Task('page', url)
 

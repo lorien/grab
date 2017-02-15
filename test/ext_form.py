@@ -79,8 +79,8 @@ class TestHtmlForms(BaseGrabTestCase):
         self.server.reset()
 
         # Create fake grab instance with fake response
-        self.g = build_grab()
-        self.g.fake_response(FORMS)
+        self.grab = build_grab()
+        self.grab.fake_response(FORMS)
 
     def test_choose_form(self):
         """
@@ -88,136 +88,154 @@ class TestHtmlForms(BaseGrabTestCase):
         """
 
         # raise errors
-        self.assertRaises(DataNotFound, self.g.choose_form, 10)
-        self.assertRaises(DataNotFound, self.g.choose_form, id='bad_id')
-        self.assertRaises(DataNotFound, self.g.choose_form, id='fake_form')
-        self.assertRaises(GrabMisuseError, self.g.choose_form)
+        self.assertRaises(DataNotFound, self.grab.choose_form, 10)
+        self.assertRaises(DataNotFound, self.grab.choose_form, id='bad_id')
+        self.assertRaises(DataNotFound, self.grab.choose_form, id='fake_form')
+        self.assertRaises(GrabMisuseError, self.grab.choose_form)
 
         # check results
-        self.g.choose_form(0)
-        self.assertEqual('form', self.g.doc._lxml_form.tag)
-        self.assertEqual('search_form', self.g.doc._lxml_form.get('id'))
+        self.grab.choose_form(0)
+        # pylint: disable=no-member,protected-access
+        self.assertEqual('form', self.grab.doc._lxml_form.tag)
+        self.assertEqual('search_form', self.grab.doc._lxml_form.get('id'))
+        # pylint: enable=no-member,protected-access
 
         # reset current form
-        self.g.doc._lxml_form = None
+        self.grab.doc._lxml_form = None # pylint: disable=protected-access
 
-        self.g.choose_form(id='common_form')
-        self.assertEqual('form', self.g.doc._lxml_form.tag)
-        self.assertEqual('common_form', self.g.doc._lxml_form.get('id'))
-
-        # reset current form
-        self.g.doc._lxml_form = None
-
-        self.g.choose_form(name='dummy')
-        self.assertEqual('form', self.g.doc._lxml_form.tag)
-        self.assertEqual('dummy', self.g.doc._lxml_form.get('name'))
+        self.grab.choose_form(id='common_form')
+        # pylint: disable=no-member,protected-access
+        self.assertEqual('form', self.grab.doc._lxml_form.tag)
+        self.assertEqual('common_form', self.grab.doc._lxml_form.get('id'))
+        # pylint: enable=no-member,protected-access
 
         # reset current form
-        self.g.doc._lxml_form = None
+        self.grab.doc._lxml_form = None # pylint: disable=protected-access
 
-        self.g.choose_form(xpath='//form[contains(@action, "/dummy")]')
-        self.assertEqual('form', self.g.doc._lxml_form.tag)
-        self.assertEqual('dummy', self.g.doc._lxml_form.get('name'))
+        self.grab.choose_form(name='dummy')
+        # pylint: disable=no-member,protected-access
+        self.assertEqual('form', self.grab.doc._lxml_form.tag)
+        self.assertEqual('dummy', self.grab.doc._lxml_form.get('name'))
+        # pylint: enable=no-member,protected-access
 
-    def assertEqualQueryString(self, qs1, qs2):
+        # reset current form
+        self.grab.doc._lxml_form = None # pylint: disable=protected-access
+
+        self.grab.choose_form(xpath='//form[contains(@action, "/dummy")]')
+        # pylint: disable=no-member,protected-access
+        self.assertEqual('form', self.grab.doc._lxml_form.tag)
+        self.assertEqual('dummy', self.grab.doc._lxml_form.get('name'))
+        # pylint: enable=no-member,protected-access
+
+    def assert_equal_qs(self, qs1, qs2):
         args1 = set([(x, y) for x, y in parse_qsl(qs1)])
         args2 = set([(x, y) for x, y in parse_qsl(qs2)])
         self.assertEqual(args1, args2)
 
     def test_submit(self):
-        g = build_grab()
+        grab = build_grab()
         self.server.response['get.data'] = POST_FORM % self.server.get_url()
-        g.go(self.server.get_url())
-        g.set_input('name', 'Alex')
-        g.doc.submit()
-        self.assertEqualQueryString(self.server.request['data'],
-                                    b'name=Alex&secret=123')
+        grab.go(self.server.get_url())
+        grab.set_input('name', 'Alex')
+        grab.doc.submit()
+        self.assert_equal_qs(self.server.request['data'],
+                             b'name=Alex&secret=123')
 
         # Default submit control
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
-        g.go(self.server.get_url())
-        g.doc.submit()
-        self.assertEqualQueryString(self.server.request['data'],
-                                    b'secret=123&submit1=submit1')
+        grab.go(self.server.get_url())
+        grab.doc.submit()
+        self.assert_equal_qs(self.server.request['data'],
+                             b'secret=123&submit1=submit1')
 
         # Selected submit control
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
-        g.go(self.server.get_url())
-        g.doc.submit(submit_name='submit2')
-        self.assertEqualQueryString(self.server.request['data'],
-                                    b'secret=123&submit2=submit2')
+        grab.go(self.server.get_url())
+        grab.doc.submit(submit_name='submit2')
+        self.assert_equal_qs(self.server.request['data'],
+                             b'secret=123&submit2=submit2')
 
         # Default submit control if submit control name is invalid
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
-        g.go(self.server.get_url())
-        g.doc.submit(submit_name='submit3')
-        self.assertEqualQueryString(self.server.request['data'],
-                                    b'secret=123&submit1=submit1')
+        grab.go(self.server.get_url())
+        grab.doc.submit(submit_name='submit3')
+        self.assert_equal_qs(self.server.request['data'],
+                             b'secret=123&submit1=submit1')
 
     def test_submit_remove_from_post_argument(self):
-        g = build_grab()
+        grab = build_grab()
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
 
-        g.go(self.server.get_url())
-        g.doc.submit(submit_name='submit3')
-        self.assertEqualQueryString(self.server.request['data'],
-                                    b'secret=123&submit1=submit1')
+        grab.go(self.server.get_url())
+        grab.doc.submit(submit_name='submit3')
+        self.assert_equal_qs(self.server.request['data'],
+                             b'secret=123&submit1=submit1')
 
-        g.go(self.server.get_url())
-        g.doc.submit(remove_from_post=['submit1'])
-        self.assertEqualQueryString(self.server.request['data'],
-                                    b'secret=123')
+        grab.go(self.server.get_url())
+        grab.doc.submit(remove_from_post=['submit1'])
+        self.assert_equal_qs(self.server.request['data'],
+                             b'secret=123')
 
     def test_set_methods(self):
-        g = build_grab()
+        grab = build_grab()
         self.server.response['get.data'] = FORMS
-        g.go(self.server.get_url())
+        grab.go(self.server.get_url())
 
-        self.assertEqual(g.doc._lxml_form, None)
+        # pylint: disable=protected-access
+        self.assertEqual(grab.doc._lxml_form, None)
+        # pylint: enable=protected-access
 
-        g.set_input('gender', '1')
-        self.assertEqual('common_form', g.doc._lxml_form.get('id'))
+        grab.set_input('gender', '1')
+        # pylint: disable=no-member,protected-access
+        self.assertEqual('common_form', grab.doc._lxml_form.get('id'))
+        # pylint: enable=no-member,protected-access
 
-        self.assertRaises(KeyError, lambda: g.set_input('query', 'asdf'))
+        # pylint: disable=no-member,protected-access
+        self.assertRaises(KeyError, lambda: grab.set_input('query', 'asdf'))
+        # pylint: enable=no-member,protected-access
 
-        g.doc._lxml_form = None
-        g.set_input_by_id('search_box', 'asdf')
-        self.assertEqual('search_form', g.doc._lxml_form.get('id'))
+        grab.doc._lxml_form = None # pylint: disable=protected-access
+        grab.set_input_by_id('search_box', 'asdf')
+        # pylint: disable=no-member,protected-access
+        self.assertEqual('search_form', grab.doc._lxml_form.get('id'))
+        # pylint: enable=no-member,protected-access
 
-        g.choose_form(xpath='//form[@id="common_form"]')
-        g.set_input_by_number(0, 'asdf')
+        grab.choose_form(xpath='//form[@id="common_form"]')
+        grab.set_input_by_number(0, 'asdf')
 
-        g.doc._lxml_form = None
-        g.set_input_by_xpath('//*[@name="gender"]', '2')
-        self.assertEqual('common_form', g.doc._lxml_form.get('id'))
+        # pylint: disable=no-member,protected-access
+        grab.doc._lxml_form = None
+        grab.set_input_by_xpath('//*[@name="gender"]', '2')
+        self.assertEqual('common_form', grab.doc._lxml_form.get('id'))
+        # pylint: enable=no-member,protected-access
 
     def test_html_without_forms(self):
-        g = build_grab()
+        grab = build_grab()
         self.server.response['get.data'] = NO_FORM_HTML
-        g.go(self.server.get_url())
-        self.assertRaises(DataNotFound, lambda: g.form)
+        grab.go(self.server.get_url())
+        self.assertRaises(DataNotFound, lambda: grab.form)
 
     def test_disabled_radio(self):
         """
         Bug #57
         """
 
-        g = build_grab()
+        grab = build_grab()
         self.server.response['get.data'] = DISABLED_RADIO_HTML
-        g.go(self.server.get_url())
-        g.doc.submit(make_request=False)
+        grab.go(self.server.get_url())
+        grab.doc.submit(make_request=False)
 
     def test_set_input_by_xpath_regex(self):
         html = b'''
             <div><form action="" method="post"><input name="foo" type="text">
             <input name="bar" id="bar" type="text">
         '''
-        g = build_grab(html)
-        g.set_input_by_xpath('//input[re:test(@id, "^ba")]', 'bar-value')
-        g.doc.submit(make_request=False)
+        grab = build_grab(html)
+        grab.set_input_by_xpath('//input[re:test(@id, "^ba")]', 'bar-value')
+        grab.doc.submit(make_request=False)
         self.assertEqual(
             set([('foo', None), ('bar', 'bar-value')]),
-            set(g.config['post']),
+            set(grab.config['post']),
         )
 
     def test_unicode_textarea_form(self):
@@ -229,7 +247,8 @@ class TestHtmlForms(BaseGrabTestCase):
             </form>
         '''.encode('utf-8')
         self.server.response['get.data'] = html
-        g = build_grab()
-        g.go(self.server.get_url())
-        g.doc.submit()
-        self.assertTrue(u'Beställa'.encode('utf-8') in self.server.request['data'])
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        grab.doc.submit()
+        self.assertTrue(u'Beställa'.encode('utf-8')
+                        in self.server.request['data'])

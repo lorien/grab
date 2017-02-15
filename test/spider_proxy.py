@@ -1,10 +1,10 @@
 from test_server import TestServer
 import six
 
-from grab import Grab
-from grab.spider import Spider, Task
 from test.util import (BaseGrabTestCase, TEST_SERVER_PORT,
                        build_spider, ADDRESS, temp_file)
+from grab import Grab
+from grab.spider import Spider, Task
 from grab.proxylist import BaseProxySource, Proxy
 
 EXTRA_PORT1 = TEST_SERVER_PORT + 1
@@ -15,7 +15,7 @@ PROXY3 = '%s:%d' % (ADDRESS, EXTRA_PORT2)
 
 
 class SimpleSpider(Spider):
-    def task_baz(self, grab, task):
+    def task_baz(self, grab, dummy_task):
         self.stat.collect('ports',
                           int(grab.response.headers.get('Listen-Port', 0)))
 
@@ -36,10 +36,11 @@ class TestSpiderCase(BaseGrabTestCase):
             bot.load_proxylist(proxy_file, 'text_file')
             bot.setup_queue()
             bot.add_task(Task('baz', grab=Grab(url='http://yandex.ru',
-                              debug=True)))
+                                               debug=True)))
             bot.run()
 
-            self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
+            self.assertEqual(self.server.request['headers']['host'],
+                             'yandex.ru')
             self.assertEqual(1, len(set(bot.stat.collections['ports'])))
 
     def test_setup_proxylist2(self):
@@ -55,7 +56,8 @@ class TestSpiderCase(BaseGrabTestCase):
                 bot.add_task(Task('baz', 'http://yandex.ru'))
             bot.run()
 
-            self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
+            self.assertEqual(self.server.request['headers']['host'],
+                             'yandex.ru')
             self.assertTrue(len(set(bot.stat.collections['ports'])) > 1)
 
     def test_setup_proxylist3(self):
@@ -72,7 +74,8 @@ class TestSpiderCase(BaseGrabTestCase):
                 bot.add_task(Task('baz', 'http://yandex.ru'))
             bot.run()
 
-            self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
+            self.assertEqual(self.server.request['headers']['host'],
+                             'yandex.ru')
             self.assertTrue(len(set(bot.stat.collections['ports'])) > 1)
 
     def test_setup_proxylist4(self):
@@ -89,7 +92,8 @@ class TestSpiderCase(BaseGrabTestCase):
                 bot.add_task(Task('baz', 'http://yandex.ru'))
             bot.run()
 
-            self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
+            self.assertEqual(self.server.request['headers']['host'],
+                             'yandex.ru')
             self.assertEqual(1, len(set(bot.stat.collections['ports'])))
 
     def test_setup_proxylist5(self):
@@ -103,18 +107,19 @@ class TestSpiderCase(BaseGrabTestCase):
             bot.load_proxylist(proxy_file, 'text_file',
                                auto_change=False, auto_init=False)
             bot.setup_queue()
-            for x in six.moves.range(10):
+            for _ in six.moves.range(10):
                 bot.add_task(Task('baz', self.server.get_url()))
             bot.run()
 
             self.assertEqual(self.server.request['headers'].get('host'),
                              '%s:%s' % (ADDRESS, self.server.port))
             self.assertEqual(1, len(set(bot.stat.collections['ports'])))
-            self.assertEqual(bot.stat.collections['ports'][0], self.server.port)
+            self.assertEqual(bot.stat.collections['ports'][0],
+                             self.server.port)
 
     def test_spider_custom_proxy_source(self):
         class TestSpider(Spider):
-            def task_page(self, grab, task):
+            def task_page(self, grab, dummy_task):
                 self.stat.collect(
                     'ports', int(grab.response.headers.get('Listen-Port', 0)))
 
@@ -123,6 +128,9 @@ class TestSpiderCase(BaseGrabTestCase):
                 return [
                     Proxy(ADDRESS, TEST_SERVER_PORT, None, None, 'http'),
                 ]
+
+            def load_raw_data(self):
+                return None
 
 
         bot = build_spider(TestSpider)

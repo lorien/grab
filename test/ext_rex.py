@@ -40,18 +40,18 @@ class ExtensionRexTestCase(BaseGrabTestCase):
         self.server.reset()
 
         # Create fake grab instance with fake response
-        self.g = build_grab()
-        self.g.fake_response(HTML, charset='cp1251')
+        self.grab = build_grab()
+        self.grab.fake_response(HTML, charset='cp1251')
 
     def test_rex(self):
         # Search unicode rex in unicode body - default case
         rex = re.compile(u'(фыва)', re.U)
-        self.assertEqual(u'фыва', self.g.rex(rex).group(1))
+        self.assertEqual(u'фыва', self.grab.rex(rex).group(1))
 
         # Search non-unicode rex in byte-string body
         rex = re.compile(u'(фыва)'.encode('cp1251'))
         self.assertEqual(u'фыва'.encode('cp1251'),
-                         self.g.rex(rex, byte=True).group(1))
+                         self.grab.rex(rex, byte=True).group(1))
 
         # # Search for non-unicode rex in unicode body should fail
         pattern = '(фыва)'
@@ -59,19 +59,19 @@ class ExtensionRexTestCase(BaseGrabTestCase):
         if six.PY3:
             pattern = pattern.encode('utf-8')
         rex = re.compile(pattern)
-        self.assertRaises(DataNotFound, lambda: self.g.rex(rex))
+        self.assertRaises(DataNotFound, lambda: self.grab.rex(rex))
 
         # # Search for unicode rex in byte-string body shuld fail
         rex = re.compile(u'фыва', re.U)
-        self.assertRaises(DataNotFound, lambda: self.g.rex(rex, byte=True))
+        self.assertRaises(DataNotFound, lambda: self.grab.rex(rex, byte=True))
 
         # # Search for unexesting fragment
         rex = re.compile(u'(фыва2)', re.U)
-        self.assertRaises(DataNotFound, lambda: self.g.rex(rex))
+        self.assertRaises(DataNotFound, lambda: self.grab.rex(rex))
 
     def test_assert_rex(self):
-        self.g.assert_rex(re.compile(u'фыва'))
-        self.g.assert_rex(re.compile(u'фыва'.encode('cp1251')), byte=True)
+        self.grab.assert_rex(re.compile(u'фыва'))
+        self.grab.assert_rex(re.compile(u'фыва'.encode('cp1251')), byte=True)
 
     def test_assert_rex_text(self):
-        self.assertEqual(u'ха', self.g.rex_text('<em id="fly-em">([^<]+)'))
+        self.assertEqual(u'ха', self.grab.rex_text('<em id="fly-em">([^<]+)'))

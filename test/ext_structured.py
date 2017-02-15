@@ -54,10 +54,10 @@ XML = b'''
 
 class StructuredExtensionTest(BaseGrabTestCase):
     def setUp(self):
-        self.g = build_grab(document_body=XML)
+        self.grab = build_grab(document_body=XML)
 
     def test_1(self):
-        result = self.g.doc.structure(
+        result = self.grab.doc.structure(
             '//issue',
             title='./title/text()',
             date='./date/text()',
@@ -81,7 +81,7 @@ class StructuredExtensionTest(BaseGrabTestCase):
         )
 
     def test_2(self):
-        result = self.g.doc.structure(
+        result = self.grab.doc.structure(
             '//issue',
             x(
                 './detail',
@@ -107,7 +107,7 @@ class StructuredExtensionTest(BaseGrabTestCase):
         )
 
     def test_3(self):
-        result = self.g.doc.structure(
+        result = self.grab.doc.structure(
             '//issue',
             home_url='./home-url/text()',
             articles=x(

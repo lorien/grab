@@ -1,5 +1,6 @@
-import six
 from threading import Thread
+
+import six
 from six.moves.queue import Queue, Empty
 
 from grab.error import GrabNetworkError
@@ -13,7 +14,8 @@ ERROR_ABBR = {
 def worker_thread(task_queue, result_queue, freelist, shutdown_event):
     while True:
         try:
-            task, grab, grab_config_backup = task_queue.get(block=True, timeout=0.1)
+            task, grab, grab_config_backup = task_queue.get(block=True,
+                                                            timeout=0.1)
         except Empty:
             if shutdown_event.is_set():
                 return
@@ -50,14 +52,16 @@ class ThreadedTransport(object):
         self.workers = []
         self.freelist = []
         for _ in six.moves.range(self.thread_number):
-            th = Thread(target=worker_thread, args=[self.task_queue,
-                                                    self.result_queue,
-                                                    self.freelist,
-                                                    self.spider.shutdown_event])
-            th.daemon = True
-            self.workers.append(th)
+            thread = Thread(target=worker_thread, args=[
+                self.task_queue,
+                self.result_queue,
+                self.freelist,
+                self.spider.shutdown_event
+            ])
+            thread.daemon = True
+            self.workers.append(thread)
             self.freelist.append(1)
-            th.start()
+            thread.start()
 
     def ready_for_task(self):
         return len(self.freelist)
@@ -81,7 +85,8 @@ class ThreadedTransport(object):
             except Empty:
                 break
             else:
-                # FORMAT: {ok, grab, grab_config_backup, task, emsg, error_abbr}
+                # FORMAT: {ok, grab, grab_config_backup, task,
+                #          emsg, error_abbr}
                 #grab.doc.error_code = None
                 #grab.doc.error_msg = None
                 yield result

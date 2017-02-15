@@ -15,81 +15,81 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_document_charset_option(self):
-        g = build_grab()
+        grab = build_grab()
         self.server.response['get.data'] = b'foo'
-        g.go(self.server.get_url())
-        self.assertEqual(b'foo', g.response.body)
+        grab.go(self.server.get_url())
+        self.assertEqual(b'foo', grab.response.body)
 
-        g = build_grab()
+        grab = build_grab()
         self.server.response['get.data'] = u'фуу'.encode('utf-8')
-        g.go(self.server.get_url())
-        self.assertEqual(u'фуу'.encode('utf-8'), g.response.body)
+        grab.go(self.server.get_url())
+        self.assertEqual(u'фуу'.encode('utf-8'), grab.response.body)
 
-        print(g.response.head)
-        self.assertEqual(g.response.charset, 'utf-8')
+        print(grab.response.head)
+        self.assertEqual(grab.response.charset, 'utf-8')
 
-        g = build_grab(document_charset='cp1251')
+        grab = build_grab(document_charset='cp1251')
         self.server.response['get.data'] = u'фуу'.encode('cp1251')
-        g.go(self.server.get_url())
-        self.assertEqual(u'фуу'.encode('cp1251'), g.response.body)
-        self.assertEqual(g.response.charset, 'cp1251')
+        grab.go(self.server.get_url())
+        self.assertEqual(u'фуу'.encode('cp1251'), grab.response.body)
+        self.assertEqual(grab.response.charset, 'cp1251')
 
     def test_document_charset_lowercase(self):
         self.server.response['charset'] = 'UTF-8'
-        g = build_grab()
-        g.go(self.server.get_url())
-        self.assertEquals('utf-8', g.doc.charset)
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        self.assertEqual('utf-8', grab.doc.charset)
 
 
     def test_dash_issue(self):
-        HTML = '<strong>&#151;</strong>'
-        self.server.response['get.data'] = HTML
-        g = build_grab()
-        g.go(self.server.get_url())
+        html = '<strong>&#151;</strong>'
+        self.server.response['get.data'] = html
+        grab = build_grab()
+        grab.go(self.server.get_url())
 
         # By default &#[128-160]; are fixed
-        self.assertFalse(g.xpath_one('//strong/text()') == six.unichr(151))
-        self.assertTrue(g.xpath_one('//strong/text()') == six.unichr(8212))
+        self.assertFalse(grab.xpath_one('//strong/text()') == six.unichr(151))
+        self.assertTrue(grab.xpath_one('//strong/text()') == six.unichr(8212))
 
         # disable fix-behaviour
-        g.setup(fix_special_entities=False)
-        g.go(self.server.get_url())
+        grab.setup(fix_special_entities=False)
+        grab.go(self.server.get_url())
 
         # By default &#[128-160]; are fixed
-        self.assertTrue(g.xpath_one('//strong/text()') == six.unichr(151))
-        self.assertFalse(g.xpath_one('//strong/text()') == six.unichr(8212))
+        self.assertTrue(grab.xpath_one('//strong/text()') == six.unichr(151))
+        self.assertFalse(grab.xpath_one('//strong/text()') == six.unichr(8212))
 
         # Explicitly use unicode_body func
-        g = build_grab()
-        g.go(self.server.get_url())
-        print(':::', g.response.unicode_body())
-        self.assertTrue('&#8212;' in g.response.unicode_body())
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        print(':::', grab.response.unicode_body())
+        self.assertTrue('&#8212;' in grab.response.unicode_body())
 
     def test_invalid_charset(self):
-        HTML = '''<head><meta http-equiv="Content-Type"
+        html = '''<head><meta http-equiv="Content-Type"
                     content="text/html; charset=windows-874">'
                     </head><body>test</body>'''
-        self.server.response['get.data'] = HTML
-        g = build_grab()
-        g.go(self.server.get_url())
-        #print(g.doc.charset)
+        self.server.response['get.data'] = html
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        #print(grab.doc.charset)
 
     def test_charset_html5(self):
-        g = Grab()
-        g.setup_document(b"<meta charset='windows-1251'>")
-        self.assertEqual('windows-1251', g.response.charset)
+        grab = Grab()
+        grab.setup_document(b"<meta charset='windows-1251'>")
+        self.assertEqual('windows-1251', grab.response.charset)
 
-        g.setup_document(b'<meta charset="windows-1252">')
-        self.assertEqual('windows-1252', g.response.charset)
+        grab.setup_document(b'<meta charset="windows-1252">')
+        self.assertEqual('windows-1252', grab.response.charset)
 
-        g.setup_document(b'<meta charset=latin-1>')
-        self.assertEqual('latin-1', g.response.charset)
+        grab.setup_document(b'<meta charset=latin-1>')
+        self.assertEqual('latin-1', grab.response.charset)
 
-        g.setup_document(b"<meta charset  =  'windows-1251'  >")
-        self.assertEqual('windows-1251', g.response.charset)
+        grab.setup_document(b"<meta charset  =  'windows-1251'  >")
+        self.assertEqual('windows-1251', grab.response.charset)
 
-        g.setup_document(b'<meta charset  =  "windows-1252"   >')
-        self.assertEqual('windows-1252', g.response.charset)
+        grab.setup_document(b'<meta charset  =  "windows-1252"   >')
+        self.assertEqual('windows-1252', grab.response.charset)
 
-        g.setup_document(b'<meta charset  =  latin-1  >')
-        self.assertEqual('latin-1', g.response.charset)
+        grab.setup_document(b'<meta charset  =  latin-1  >')
+        self.assertEqual('latin-1', grab.response.charset)

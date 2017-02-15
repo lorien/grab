@@ -6,41 +6,40 @@ RTFM:
 Some code got from
     https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 """
-from __future__ import absolute_import
-from six.moves.http_cookiejar import CookieJar, Cookie
 import json
-import logging
 
-from grab.error import GrabMisuseError
+from six.moves.http_cookiejar import CookieJar, Cookie
 from six.moves.urllib.parse import urlparse, urlunparse
 
-logger = logging.getLogger('grab.cookie')
+from grab.error import GrabMisuseError
+
 COOKIE_ATTRS = ('name', 'value', 'version', 'port', 'domain',
                 'path', 'secure', 'expires', 'discard', 'comment',
                 'comment_url', 'rfc2109')
 
 
-# Source: https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
+# Source:
+# https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 class MockRequest(object):
     """Wraps a `requests.Request` to mimic a `urllib2.Request`.
-    The code in `cookielib.CookieJar` expects this interface in order to correctly
-    manage cookie policies, i.e., determine whether a cookie can be set, given the
-    domains of the request and the cookie.
-    The original request object is read-only. The client is responsible for collecting
-    the new headers via `get_new_headers()` and interpreting them appropriately. You
-    probably want `get_cookie_header`, defined below.
+    The code in `cookielib.CookieJar` expects this interface in order to
+    correctly manage cookie policies, i.e., determine whether a cookie can be
+    set, given the domains of the request and the cookie.
+    The original request object is read-only. The client is responsible for
+    collecting the new headers via `get_new_headers()` and interpreting them
+    appropriately. You probably want `get_cookie_header`, defined below.
     """
 
     def __init__(self, request):
-        self._r = request
+        self._req = request
         self._new_headers = {}
-        self.type = urlparse(self._r.url).scheme
+        self.type = urlparse(self._req.url).scheme
 
     def get_type(self):
         return self.type
 
     def get_host(self):
-        return urlparse(self._r.url).netloc
+        return urlparse(self._req.url).netloc
 
     def get_origin_req_host(self):
         return self.get_host()
@@ -48,11 +47,11 @@ class MockRequest(object):
     def get_full_url(self):
         # Only return the response's URL if the user hadn't set the Host
         # header
-        if not self._r.headers.get('Host'):
-            return self._r.url
+        if not self._req.headers.get('Host'):
+            return self._req.url
         # If they did set it, retrieve it and reconstruct the expected domain
-        host = self._r.headers['Host']
-        parsed = urlparse(self._r.url)
+        host = self._req.headers['Host']
+        parsed = urlparse(self._req.url)
         # Reconstruct the URL as we expect it
         return urlunparse([
             parsed.scheme, host, parsed.path, parsed.params, parsed.query,
@@ -63,14 +62,19 @@ class MockRequest(object):
         return True
 
     def has_header(self, name):
-        return name in self._r.headers or name in self._new_headers
+        return name in self._req.headers or name in self._new_headers
 
     def get_header(self, name, default=None):
-        return self._r.headers.get(name, self._new_headers.get(name, default))
+        return self._req.headers.get(name,
+                                     self._new_headers.get(name, default))
 
     def add_header(self, key, val):
-        """cookielib has no legitimate use for this method; add it back if you find one."""
-        raise NotImplementedError("Cookie headers should be added with add_unredirected_header()")
+        """
+        cookielib has no legitimate use for this method;
+        add it back if you find one.
+        """
+        raise NotImplementedError('Cookie headers should be added'
+                                  ' with add_unredirected_header()')
 
     def add_unredirected_header(self, name, value):
         self._new_headers[name] = value
@@ -132,7 +136,7 @@ def create_cookie(name, value, domain, httponly=None, **kwargs):
         rest={'HttpOnly': httponly},
     )
 
-    for key in kwargs.keys():
+    for key in kwargs:
         if key not in config:
             raise GrabMisuseError('Function `create_cookie` does not accept '
                                   '`%s` argument' % key)
@@ -195,10 +199,10 @@ class CookieManager(object):
 
     @classmethod
     def from_cookie_list(cls, clist):
-        cj = CookieJar()
+        jar = CookieJar()
         for cookie in clist:
-            cj.set_cookie(cookie)
-        return cls(cj)
+            jar.set_cookie(cookie)
+        return cls(jar)
 
     def clear(self):
         self.cookiejar = CookieJar()

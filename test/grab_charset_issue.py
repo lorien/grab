@@ -10,34 +10,34 @@ class LXMLExtensionTest(BaseGrabTestCase):
         self.server.reset()
 
     def test_dash_issue(self):
-        HTML = '<strong>&#151;</strong>'
-        self.server.response['get.data'] = HTML
-        g = build_grab()
-        g.go(self.server.get_url())
+        html = '<strong>&#151;</strong>'
+        self.server.response['get.data'] = html
+        grab = build_grab()
+        grab.go(self.server.get_url())
 
         # By default &#[128-160]; are fixed
-        self.assertFalse(g.xpath_one('//strong/text()') == six.unichr(151))
-        self.assertTrue(g.xpath_one('//strong/text()') == six.unichr(8212))
+        self.assertFalse(grab.xpath_one('//strong/text()') == six.unichr(151))
+        self.assertTrue(grab.xpath_one('//strong/text()') == six.unichr(8212))
 
         # disable fix-behaviour
-        g.setup(fix_special_entities=False)
-        g.go(self.server.get_url())
+        grab.setup(fix_special_entities=False)
+        grab.go(self.server.get_url())
 
         # By default &#[128-160]; are fixed
-        self.assertTrue(g.xpath_one('//strong/text()') == six.unichr(151))
-        self.assertFalse(g.xpath_one('//strong/text()') == six.unichr(8212))
+        self.assertTrue(grab.xpath_one('//strong/text()') == six.unichr(151))
+        self.assertFalse(grab.xpath_one('//strong/text()') == six.unichr(8212))
 
         # Explicitly use unicode_body func
-        g = build_grab()
-        g.go(self.server.get_url())
-        print(':::', g.response.unicode_body())
-        self.assertTrue('&#8212;' in g.response.unicode_body())
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        print(':::', grab.response.unicode_body())
+        self.assertTrue('&#8212;' in grab.response.unicode_body())
 
     def test_invalid_charset(self):
-        HTML = '''<head><meta http-equiv="Content-Type"
+        html = '''<head><meta http-equiv="Content-Type"
                     content="text/html; charset=windows-874">'
                     </head><body>test</body>'''
-        self.server.response['get.data'] = HTML
-        g = build_grab()
-        g.go(self.server.get_url())
-        print(g.doc.charset)
+        self.server.response['get.data'] = html
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        print(grab.doc.charset)

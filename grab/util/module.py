@@ -6,7 +6,7 @@ from grab.spider.error import SpiderInternalError
 from grab.util.config import build_root_config, build_spider_config
 
 SPIDER_REGISTRY = {}
-logger = logging.getLogger('grab.util.module')
+logger = logging.getLogger('grab.util.module') # pylint: disable=invalid-name
 
 
 def build_spider_registry(config):

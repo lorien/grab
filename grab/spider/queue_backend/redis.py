@@ -1,14 +1,14 @@
 """
 Spider task queue backend powered by redis
 """
-from __future__ import absolute_import
-from qr import PriorityQueue
 try:
     import Queue as queue
 except ImportError:
     import queue
 import random
 import logging
+
+from qr import PriorityQueue
 
 from grab.spider.queue_backend.base import QueueInterface
 from grab.spider.error import SpiderMisuseError

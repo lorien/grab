@@ -39,31 +39,32 @@ class TextExtensionTest(BaseGrabTestCase):
         self.server.reset()
 
         # Create fake grab instance with fake response
-        self.g = build_grab()
-        self.g.fake_response(HTML, charset='cp1251')
+        self.grab = build_grab()
+        self.grab.fake_response(HTML, charset='cp1251')
 
     def test_search(self):
-        self.assertTrue(self.g.search(u'фыва'.encode('cp1251'), byte=True))
-        self.assertTrue(self.g.search(u'фыва'))
-        self.assertFalse(self.g.search(u'фыва2'))
+        self.assertTrue(self.grab.search(u'фыва'.encode('cp1251'), byte=True))
+        self.assertTrue(self.grab.search(u'фыва'))
+        self.assertFalse(self.grab.search(u'фыва2'))
 
     def test_search_usage_errors(self):
-        self.assertRaises(GrabMisuseError, self.g.search, u'фыва', byte=True)
+        with self.assertRaises(GrabMisuseError):
+            self.grab.search(u'фыва', byte=True)
         anchor = 'фыва'
         # py3 hack
         if six.PY3:
             anchor = anchor.encode('utf-8')
-        self.assertRaises(GrabMisuseError, self.g.search, anchor)
+        self.assertRaises(GrabMisuseError, self.grab.search, anchor)
 
     def test_assert_substring(self):
-        self.g.assert_substring(u'фыва')
-        self.g.assert_substring(u'фыва'.encode('cp1251'), byte=True)
-        self.assertRaises(DataNotFound, self.g.assert_substring, u'фыва2')
+        self.grab.assert_substring(u'фыва')
+        self.grab.assert_substring(u'фыва'.encode('cp1251'), byte=True)
+        self.assertRaises(DataNotFound, self.grab.assert_substring, u'фыва2')
 
     def test_assert_substrings(self):
-        self.g.assert_substrings((u'фыва',))
-        self.g.assert_substrings((u'фывы нет', u'фыва'))
-        self.g.assert_substrings((u'фыва'.encode('cp1251'), 'где ты фыва?'),
-                                 byte=True)
-        self.assertRaises(DataNotFound, self.g.assert_substrings,
+        self.grab.assert_substrings((u'фыва',))
+        self.grab.assert_substrings((u'фывы нет', u'фыва'))
+        self.grab.assert_substrings((u'фыва'.encode('cp1251'), 'где ты фыва?'),
+                                    byte=True)
+        self.assertRaises(DataNotFound, self.grab.assert_substrings,
                           (u'фыва, вернись', u'фыва-а-а-а'))

@@ -16,7 +16,8 @@ branches:
 matrix:
   include:
     - os: linux
-      env: TOX_ENV=pylint-warnings
+      python: 3.4
+      env: TOX_ENV=pylint
     - os: linux
       env: TOX_ENV=py27
     - os: linux

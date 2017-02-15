@@ -1,12 +1,22 @@
 [MASTER]
 jobs=4
 extension-pkg-whitelist=pycurl,MySQLdb,lxml
+ignore=invalid_import.py
 
 [TYPECHEK]
 ignored-modules=six.moves.urllib, six.moves.http_cookiejar, six.moves.queue, six.moves.socketserver, six.moves.SimpleHTTPServer
 
 [MESSAGES CONTROL]
-disable=missing-docstring
+disable=R,I,fixme,missing-docstring
 
 [REPORTS]
 reports=no
+
+[IMPORTS]
+known-standard-library=marshal
+
+[BASIC]
+method-rgx=([a-z_][a-z0-9_]{2,30}|test_[a-z_][a-z0-9_]{2,50})$
+
+[FORMAT]
+max-line-length=79

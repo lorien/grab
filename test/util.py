@@ -1,5 +1,4 @@
 import os
-from test_server import TestServer
 from unittest import TestCase
 import logging
 from contextlib import contextmanager
@@ -8,10 +7,12 @@ from shutil import rmtree
 import platform
 import itertools
 
-from grab import Grab
-import grab.base
+from test_server import TestServer
 
-logger = logging.getLogger('test.util')
+from grab import Grab
+from grab import base
+
+logger = logging.getLogger('test.util') # pylint: disable=invalid-name
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_SERVER_PORT = 9876
 ADDRESS = 'localhost'
@@ -35,16 +36,16 @@ def temp_dir(root_dir=None):
 
 @contextmanager
 def temp_file(root_dir=None):
-    fd, file_ = mkstemp(dir=root_dir)
+    fdesc, file_ = mkstemp(dir=root_dir)
     yield file_
-    os.close(fd)
+    os.close(fdesc)
     try:
         os.unlink(file_)
     except (IOError, OSError):
         if 'Windows' in platform.system():
-            logger.error('Ignoring IOError raised when trying to delete '
-                         'temp file %s created in `temp_file` context '
-                         'manager' % file_)
+            logger.error('Ignoring IOError raised when trying to delete'
+                         ' temp file %s created in `temp_file` context'
+                         ' manager', file_)
         else:
             raise
 
@@ -85,11 +86,10 @@ def multiprocess_mode(mode):
     def wrapper_builder(func):
         def wrapper(self, *args, **kwargs):
             if mode != GLOBAL['mp_mode']:
-                logger.debug('Skipping %s:%s:%s. Reason: need '
-                             '--mp-mode=%s' % (
-                                 func.__module__,
-                                 self.__class__.__name__,
-                                 func.__name__, mode))
+                logger.debug(
+                    'Skipping %s:%s:%s. Reason: needs --mp-mode=%s',
+                    func.__module__, self.__class__.__name__,
+                    func.__name__, mode)
             else:
                 return func(self, *args, **kwargs)
         return wrapper
@@ -97,7 +97,7 @@ def multiprocess_mode(mode):
 
 
 def start_server():
-    logger.debug('Starting test server on %s:%s' % (ADDRESS, TEST_SERVER_PORT))
+    logger.debug('Starting test server on %s:%s', ADDRESS, TEST_SERVER_PORT)
     server = TestServer(address=ADDRESS, port=TEST_SERVER_PORT,
                         extra_ports=[EXTRA_PORT1, EXTRA_PORT2])
     server.start()
@@ -109,8 +109,9 @@ def exclude_grab_transport(*names):
         def caller(*args, **kwargs):
             if GLOBAL['grab_transport'] in names:
                 func_name = '%s:%s' % (func.__module__, func.__name__)
-                logger.debug('Running test %s for grab transport %s is restricted'
-                             % (func_name, GLOBAL['grab_transport']))
+                logger.debug('Running test %s for grab transport %s is'
+                             ' restricted', func_name,
+                             GLOBAL['grab_transport'])
                 return None
             else:
                 return func(*args, **kwargs)
@@ -125,8 +126,9 @@ def only_grab_transport(*names):
                 return func(*args, **kwargs)
             else:
                 func_name = '%s:%s' % (func.__module__, func.__name__)
-                logger.debug('Running test %s for grab transport %s is restricted'
-                             % (func_name, GLOBAL['grab_transport']))
+                logger.debug('Running test %s for grab transport %s is'
+                             ' restricted', func_name,
+                             GLOBAL['grab_transport'])
                 return None
         return caller
     return decorator
@@ -137,7 +139,8 @@ def skip_test_if(condition, why_message):
         def caller(*args, **kwargs):
             if condition():
                 func_name = '%s:%s' % (func.__module__, func.__name__)
-                logger.debug('Skipping test %s because %s' % (func_name, why_message))
+                logger.debug('Skipping test %s because %s', func_name,
+                             why_message)
                 return None
             else:
                 return func(*args, **kwargs)
@@ -146,4 +149,4 @@ def skip_test_if(condition, why_message):
 
 
 def reset_request_counter():
-    grab.base.REQUEST_COUNTER = itertools.count(1)
+    base.REQUEST_COUNTER = itertools.count(1)
