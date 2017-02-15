@@ -1,6 +1,7 @@
 # Copyright: 2015, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://getdata.pro)
 # License: MIT
+from __future__ import absolute_import
 import logging
 import random
 import time
