@@ -227,7 +227,8 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(0, bot.task_queue.size())
 
         for _ in six.moves.range(5):
-            bot.add_task(Task('keyboard_interrupt_page', url=self.server.get_url()))
+            bot.add_task(Task('keyboard_interrupt_page',
+                              url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
         bot.run()
         self.assertEqual(0, bot.task_queue.size())

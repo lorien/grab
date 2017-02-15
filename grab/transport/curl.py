@@ -479,8 +479,9 @@ class CurlTransport(BaseTransport):
             # CURLE_WRITE_ERROR (23)
             # An error occurred when writing received data to a local file, or
             # an error was returned to libcurl from a write callback.
-            # This exception should be ignored if grab_callback_interrupted flag
-            # is enabled (this happens when nohead or nobody options enabled)
+            # This exception should be ignored if grab_callback_interrupted
+            # flag # is enabled (this happens when nohead or nobody options
+            # enabled)
             #
             # Also this error is raised when curl receives KeyboardInterrupt
             # while it is processing some callback function
@@ -488,7 +489,8 @@ class CurlTransport(BaseTransport):
             # If you think WTF then see details here:
             # https://github.com/pycurl/pycurl/issues/413
             if ex.args[0] == 23:
-                if getattr(self.curl, 'grab_callback_interrupted', None) is True:
+                if getattr(self.curl, 'grab_callback_interrupted',
+                           None) is True:
                     # This is expected error caused by
                     # interruptted execution of body_processor callback
                     # FIXME: is it set automatically?

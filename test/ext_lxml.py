@@ -95,7 +95,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
         self.assertEqual(100, self.grab.xpath_number('//li', make_int=True))
         self.assertEqual('100', self.grab.xpath_number('//li', make_int=False))
         self.assertEqual(1002, self.grab.xpath_number('//li',
-                         ignore_spaces=True))
+                                                      ignore_spaces=True))
         self.assertEqual('1002', self.grab.xpath_number(
             '//li', ignore_spaces=True, make_int=False))
         self.assertRaises(DataNotFound, self.grab.xpath_number, '//liza')

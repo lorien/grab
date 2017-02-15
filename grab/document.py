@@ -705,12 +705,12 @@ class Document(object):
             g.choose_form(xpath='//form[contains(@action, "/submit")]')
         """
 
-        id = kwargs.pop('id') # pylint: disable=redefined-builtin,invalid-name
-        if id is not None:
+        id_ = kwargs.pop('id', None)
+        if id_ is not None:
             try:
-                self._lxml_form = self.select('//form[@id="%s"]' % id).node()
+                self._lxml_form = self.select('//form[@id="%s"]' % id_).node()
             except IndexError:
-                raise DataNotFound("There is no form with id: %s" % id)
+                raise DataNotFound("There is no form with id: %s" % id_)
         elif name is not None:
             try:
                 self._lxml_form = self.select(

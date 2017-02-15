@@ -77,15 +77,18 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.run()
         self.assertEqual(1, len(set(bot.stat.collections['pid'])))
 
-        bot = TestSpider(mp_mode=True, parser_pool_size=1, parser_requests_per_process=1)
+        bot = TestSpider(mp_mode=True, parser_pool_size=1,
+                         parser_requests_per_process=1)
         bot.run()
         self.assertEqual(3, len(set(bot.stat.collections['pid'])))
 
-        bot = TestSpider(mp_mode=True, parser_pool_size=1, parser_requests_per_process=2)
+        bot = TestSpider(mp_mode=True, parser_pool_size=1,
+                         parser_requests_per_process=2)
         bot.run()
         self.assertEqual(2, len(set(bot.stat.collections['pid'])))
 
-        bot = TestSpider(mp_mode=True, parser_pool_size=1, parser_requests_per_process=3)
+        bot = TestSpider(mp_mode=True, parser_pool_size=1,
+                         parser_requests_per_process=3)
         bot.run()
         self.assertEqual(1, len(set(bot.stat.collections['pid'])))
 
@@ -94,9 +97,11 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     #    """
     #    This freezes the sipder in MP-mode
     #    Traceback (most recent call last):
-    #      File "/usr/lib/python2.7/multiprocessing/queues.py", line 266, in _feed
+    #      File "/usr/lib/python2.7/multiprocessing/queues.py",
+    #        line 266, in _feed
     #        send(obj)
-    #    PicklingError: Can't pickle <class 'test.spider_multiprocess.FuncWithState'>:
+    #    PicklingError: Can't pickle
+    # <class 'test.spider_multiprocess.FuncWithState'>:
     # attribute lookup test.spider_multiprocess.FuncWithState failed
 
     #    """

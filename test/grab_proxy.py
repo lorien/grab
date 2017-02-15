@@ -31,7 +31,8 @@ class TestProxy(BaseGrabTestCase):
             grab.change_proxy()
             grab.go('http://yandex.ru')
             self.assertEqual(b'123', grab.response.body)
-            self.assertEqual('yandex.ru', self.server.request['headers']['host'])
+            self.assertEqual('yandex.ru',
+                             self.server.request['headers']['host'])
 
     def test_load_proxylist(self):
         with temp_file() as tmp_file:
@@ -114,7 +115,8 @@ class TestProxy(BaseGrabTestCase):
         grab.change_proxy(random=False)
         grab.go('http://yandex.ru')
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
-        self.assertEqual(grab.doc.headers['listen-port'], str(TEST_SERVER_PORT))
+        self.assertEqual(grab.doc.headers['listen-port'],
+                         str(TEST_SERVER_PORT))
         grab.change_proxy(random=False)
         grab.go('http://yandex.ru')
         self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
@@ -122,13 +124,17 @@ class TestProxy(BaseGrabTestCase):
 
     def test_baseproxysource_constructor_arguments(self):
         src = BaseProxySource()
-        self.assertEqual(src.config, {'proxy_type': 'http', 'proxy_userpwd': None})
+        self.assertEqual(src.config, {'proxy_type': 'http',
+                                      'proxy_userpwd': None})
         src = BaseProxySource(proxy_type='socks')
-        self.assertEqual(src.config, {'proxy_type': 'socks', 'proxy_userpwd': None})
+        self.assertEqual(src.config, {'proxy_type': 'socks',
+                                      'proxy_userpwd': None})
         src = BaseProxySource(proxy_userpwd='foo:bar')
-        self.assertEqual(src.config, {'proxy_type': 'http', 'proxy_userpwd': 'foo:bar'})
+        self.assertEqual(src.config, {'proxy_type': 'http',
+                                      'proxy_userpwd': 'foo:bar'})
         src = BaseProxySource(foo='bar')
-        self.assertEqual(src.config, {'proxy_type': 'http', 'proxy_userpwd': None,
+        self.assertEqual(src.config, {'proxy_type': 'http',
+                                      'proxy_userpwd': None,
                                       'foo': 'bar'})
 
     def test_global_proxy_userpwd_argument(self):

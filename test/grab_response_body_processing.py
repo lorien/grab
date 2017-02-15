@@ -25,7 +25,8 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             grab.go(self.server.get_url())
             self.assertTrue(os.path.exists(grab.response.body_path))
             self.assertTrue(tmp_dir in grab.response.body_path)
-            self.assertEqual(b'foo', open(grab.response.body_path, 'rb').read())
+            self.assertEqual(b'foo',
+                             open(grab.response.body_path, 'rb').read())
             # pylint: disable=protected-access
             self.assertEqual(grab.response._bytes_body, None)
             # pylint: enable=protected-access
@@ -43,7 +44,8 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             grab.go(self.server.get_url())
             self.assertTrue(os.path.exists(grab.response.body_path))
             self.assertTrue(tmp_dir in grab.response.body_path)
-            self.assertEqual(b'foo', open(grab.response.body_path, 'rb').read())
+            self.assertEqual(b'foo',
+                             open(grab.response.body_path, 'rb').read())
             self.assertEqual(os.path.join(tmp_dir, 'music.mp3'),
                              grab.response.body_path)
             self.assertEqual(grab.response.body, b'foo')
@@ -85,7 +87,8 @@ class GrabSimpleTestCase(BaseGrabTestCase):
     #    #print('>>',grab.doc('//span').text(),'<<')
     #    #import grab
     #    #grab = grab.Grab()
-    #    #grab.go('https://github.com/lorien/grab/issues/199#issuecomment-269854859')
+    #    #grab.go('https://github.com/lorien/grab/issues/199'
+    #            '#issuecomment-269854859')
     #    grab.go('https://en.wikipedia.org/wiki/Emoji')
     #    grab.doc.select("//*")
 

@@ -218,11 +218,16 @@ class SpiderCacheMixin(object):
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.add_task(Task('page', url=self.server.get_url('/foo')))
         bot.run()
-        self.assertTrue(bot.cache_pipeline.cache.has_item(self.server.get_url()))
-        self.assertTrue(bot.cache_pipeline.cache.has_item(self.server.get_url(), timeout=100))
-        self.assertFalse(bot.cache_pipeline.cache.has_item(self.server.get_url(), timeout=0))
-        self.assertTrue(bot.cache_pipeline.cache.has_item(self.server.get_url('/foo')))
-        self.assertFalse(bot.cache_pipeline.cache.has_item(self.server.get_url('/bar')))
+        self.assertTrue(bot.cache_pipeline.cache
+                        .has_item(self.server.get_url()))
+        self.assertTrue(bot.cache_pipeline.cache
+                        .has_item(self.server.get_url(), timeout=100))
+        self.assertFalse(bot.cache_pipeline.cache
+                         .has_item(self.server.get_url(), timeout=0))
+        self.assertTrue(bot.cache_pipeline.cache
+                        .has_item(self.server.get_url('/foo')))
+        self.assertFalse(bot.cache_pipeline.cache
+                         .has_item(self.server.get_url('/bar')))
 
 
 class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):

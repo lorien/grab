@@ -187,5 +187,6 @@ class BaseKeyboardInterruptTestCase(object):
             # pylint: enable=no-member
 
 
-class SpiderKeyboardInterruptTestCase(BaseKeyboardInterruptTestCase, BaseGrabTestCase):
+class SpiderKeyboardInterruptTestCase(BaseKeyboardInterruptTestCase,
+                                      BaseGrabTestCase):
     script_tpl = SCRIPT_TPL

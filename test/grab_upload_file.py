@@ -11,9 +11,11 @@ class TestUploadContent(BaseGrabTestCase):
 
     def prepare_form_grab(self):
         url = self.server.get_url()
-        html = ('''<form action="%s" method="post" enctype="multipart/form-data">
-            <input type="file" name="image">
-        </form>''' % url).encode('ascii')
+        html = (
+            '<form action="%s" method="post" enctype="multipart/form-data">'
+            '<input type="file" name="image">'
+            '</form>' % url
+        ).encode('ascii')
         grab = build_grab(html, charset='utf-8')
         return grab
 
@@ -96,8 +98,10 @@ class TestUploadContent(BaseGrabTestCase):
             self.assertEqual(data,
                              self.server.request['files']['image'][0]['body'])
             _, filename = os.path.split(file_path)
-            self.assertEqual(filename,
-                             self.server.request['files']['image'][0]['filename'])
+            self.assertEqual(
+                filename,
+                self.server.request['files']['image'][0]['filename'],
+            )
             self.assertEqual(
                 'application/octet-stream',
                 self.server.request['files']['image'][0]['content_type'])
@@ -117,8 +121,10 @@ class TestUploadContent(BaseGrabTestCase):
             grab.doc.submit()
             self.assertEqual(data,
                              self.server.request['files']['image'][0]['body'])
-            self.assertEqual('avatar.jpg',
-                             self.server.request['files']['image'][0]['filename'])
+            self.assertEqual(
+                'avatar.jpg',
+                self.server.request['files']['image'][0]['filename'],
+            )
             self.assertEqual(
                 'image/jpeg',
                 self.server.request['files']['image'][0]['content_type'])
@@ -139,8 +145,10 @@ class TestUploadContent(BaseGrabTestCase):
             grab.doc.submit()
             self.assertEqual(data,
                              self.server.request['files']['image'][0]['body'])
-            self.assertEqual('avatar.jpg',
-                             self.server.request['files']['image'][0]['filename'])
+            self.assertEqual(
+                'avatar.jpg',
+                self.server.request['files']['image'][0]['filename'],
+            )
             self.assertEqual(
                 'application/grab',
                 self.server.request['files']['image'][0]['content_type'])

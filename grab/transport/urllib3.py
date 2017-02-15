@@ -236,8 +236,8 @@ class Urllib3Transport(BaseTransport):
             try:
                 pool = ProxyManager(proxy_url, proxy_headers=headers)
             except ProxySchemeUnknown:
-                raise GrabMisuseError('Urllib3 transport does '
-                                      'not support %s proxies' % req.proxy_type)
+                raise GrabMisuseError('Urllib3 transport does not support'
+                                      ' %s proxies' % req.proxy_type)
         else:
             pool = self.pool
         try:
@@ -324,7 +324,9 @@ class Urllib3Transport(BaseTransport):
                     else:
                         break
                     if self._request.timeout:
-                        if time.time() - self._request.op_started > self._request.timeout:
+                        if (time.time() - self._request.op_started
+                                > self._request.timeout
+                           ):
                             raise GrabTimeoutError
                 data = b''.join(chunks)
                 if maxsize:
@@ -333,7 +335,8 @@ class Urllib3Transport(BaseTransport):
 
             if self._request.response_path:
                 response.body_path = self._request.response_path
-                # FIXME: Quick dirty hack, actullay, response is fully read into memory
+                # FIXME: Quick dirty hack, actullay, response is fully
+                # read into memory
                 self._request.response_file.write(read_with_timeout())
                 self._request.response_file.close()
             else:
@@ -345,13 +348,15 @@ class Urllib3Transport(BaseTransport):
             response.code = self._response.status
             #response.total_time = self.curl.getinfo(pycurl.TOTAL_TIME)
             #response.connect_time = self.curl.getinfo(pycurl.CONNECT_TIME)
-            #response.name_lookup_time = self.curl.getinfo(pycurl.NAMELOOKUP_TIME)
+            #response.name_lookup_time = (self.curl
+            #                             .getinfo(pycurl.NAMELOOKUP_TIME))
             #response.download_size = self.curl.getinfo(pycurl.SIZE_DOWNLOAD)
             #response.upload_size = self.curl.getinfo(pycurl.SIZE_UPLOAD)
             #response.download_speed = self.curl.getinfo(pycurl.SPEED_DOWNLOAD)
             #response.remote_ip = self.curl.getinfo(pycurl.PRIMARY_IP)
 
-            response.url = self._response.get_redirect_location() or self._request.url
+            response.url = (self._response.get_redirect_location()
+                            or self._request.url)
 
             import email.message
             hdr = email.message.Message()
@@ -409,7 +414,8 @@ class Urllib3Transport(BaseTransport):
             # Trying to guess better domain name by removing leading "www."
             if grab.config['cookies']:
                 if not isinstance(grab.config['cookies'], dict):
-                    raise error.GrabMisuseError('cookies option should be a dict')
+                    raise error.GrabMisuseError('cookies option should'
+                                                ' be a dict')
                 for name, value in grab.config['cookies'].items():
                     grab.cookies.set(
                         name=name,

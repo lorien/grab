@@ -88,7 +88,8 @@ class GrabApiTestCase(BaseGrabTestCase):
         with temp_file() as proxy_file:
             open(proxy_file, 'w').write('1.1.1.1:8080')
             grab = build_grab()
-            grab.load_proxylist(proxy_file, 'text_file', auto_init=True, auto_change=False)
+            grab.load_proxylist(proxy_file, 'text_file', auto_init=True,
+                                auto_change=False)
             self.assertEqual(grab.config['proxy'], '1.1.1.1:8080')
 
     def test_load_proxylist_url(self):

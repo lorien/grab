@@ -132,7 +132,8 @@ class TestCookies(BaseGrabTestCase):
             self.server.response['cookies'] = {'godzilla': 'monkey'}.items()
             grab.setup(cookiefile=tmp_file, debug=True)
             grab.go(self.server.get_url())
-            self.assertEqual(self.server.request['cookies']['spam'].value, 'ham')
+            self.assertEqual(self.server.request['cookies']['spam'].value,
+                             'ham')
 
             # This is correct reslt of combining two cookies
             merged_cookies = [('godzilla', 'monkey'), ('spam', 'ham')]

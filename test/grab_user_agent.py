@@ -62,7 +62,8 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             open(ua_file, 'w').write('GOD')
             grab.setup(user_agent=None, user_agent_file=ua_file)
             grab.go(self.server.get_url())
-            self.assertEqual(self.server.request['headers']['user-agent'], 'GOD')
+            self.assertEqual(self.server.request['headers']['user-agent'],
+                             'GOD')
 
         with temp_file() as ua_file:
             # random user agent from file should be loaded

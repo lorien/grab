@@ -58,7 +58,8 @@ class TestCookies(BaseGrabTestCase):
 
             self.assertEqual(os.listdir(tmp_dir), [])
             grab.go(self.server.get_url())
-            self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
+            self.assertEqual(sorted(os.listdir(tmp_dir)),
+                             ['01.html', '01.log'])
             log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
             self.assertTrue('x-engine' in log_file_content.lower())
 
@@ -103,7 +104,8 @@ class TestCookies(BaseGrabTestCase):
             except GrabTimeoutError:
                 pass
 
-            self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
+            self.assertEqual(sorted(os.listdir(tmp_dir)),
+                             ['01.html', '01.log'])
             log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
             self.assertTrue('user-agent: perl' in log_file_content.lower())
 
@@ -118,7 +120,8 @@ class TestCookies(BaseGrabTestCase):
 
             self.assertEqual(os.listdir(tmp_dir), [])
             grab.go(self.server.get_url())
-            self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
+            self.assertEqual(sorted(os.listdir(tmp_dir)),
+                             ['01.html', '01.log'])
             log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
             self.assertFalse('X-Name' in log_file_content)
             self.assertFalse('xxxPost' in log_file_content)
@@ -135,7 +138,8 @@ class TestCookies(BaseGrabTestCase):
 
             self.assertEqual(os.listdir(tmp_dir), [])
             grab.go(self.server.get_url())
-            self.assertEqual(sorted(os.listdir(tmp_dir)), ['01.html', '01.log'])
+            self.assertEqual(sorted(os.listdir(tmp_dir)),
+                             ['01.html', '01.log'])
             log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
             #if not 'x-name' in log_file_content.lower():
             #    print('CONTENT OF 01.log:')
@@ -157,7 +161,8 @@ class TestCookies(BaseGrabTestCase):
 
     def test_debug_nonascii_multipart_post(self):
         grab = build_grab(debug=True)
-        grab.setup(charset='cp1251', multipart_post=[('x', u'фыва'.encode('cp1251'))])
+        grab.setup(charset='cp1251',
+                   multipart_post=[('x', u'фыва'.encode('cp1251'))])
         grab.go(self.server.get_url())
 
     def test_debug_post_integer_bug(self):
@@ -181,7 +186,8 @@ class TestCookies(BaseGrabTestCase):
             'foo': big_value,
         })
         grab.go(self.server.get_url())
-        self.assertEqual(self.server.request['data'], ('foo=%s' % big_value).encode())
+        self.assertEqual(self.server.request['data'],
+                         ('foo=%s' % big_value).encode())
 
     def test_log_request_extra_argument(self):
         from grab import base

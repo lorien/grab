@@ -48,7 +48,8 @@ class TextExtensionTest(BaseGrabTestCase):
         self.assertFalse(self.grab.search(u'фыва2'))
 
     def test_search_usage_errors(self):
-        self.assertRaises(GrabMisuseError, self.grab.search, u'фыва', byte=True)
+        with self.assertRaises(GrabMisuseError):
+            self.grab.search(u'фыва', byte=True)
         anchor = 'фыва'
         # py3 hack
         if six.PY3:

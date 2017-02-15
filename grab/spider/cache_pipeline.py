@@ -100,11 +100,11 @@ class CachePipeline(object):
                     return None
                 else:
                     with self.spider.timer.log_time(
-                            'cache.read.prepare_request'
+                        'cache.read.prepare_request'
                         ):
                         grab.prepare_request()
                     with self.spider.timer.log_time(
-                            'cache.read.load_response'
+                        'cache.read.load_response'
                         ):
                         self.cache.load_response(grab, cache_item)
 

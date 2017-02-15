@@ -23,5 +23,6 @@ else:
 '''.lstrip()
 
 
-class GrabKeyboardInterruptTestCase(BaseKeyboardInterruptTestCase, BaseGrabTestCase):
+class GrabKeyboardInterruptTestCase(BaseKeyboardInterruptTestCase,
+                                    BaseGrabTestCase):
     script_tpl = SCRIPT_TPL
