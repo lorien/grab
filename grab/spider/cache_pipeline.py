@@ -107,7 +107,6 @@ class CachePipeline(object):
                         'cache.read.load_response'
                         ):
                         self.cache.load_response(grab, cache_item)
-
                     grab.log_request('CACHED')
                     self.spider.stat.inc('spider:request-cache')
 

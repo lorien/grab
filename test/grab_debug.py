@@ -8,6 +8,8 @@ from test.util import BaseGrabTestCase
 from test.util import build_grab, exclude_grab_transport, temp_dir
 from test.util import reset_request_counter
 from grab.error import GrabTimeoutError
+from grab import Grab
+from grab import base
 
 
 class TestCookies(BaseGrabTestCase):
@@ -190,8 +192,6 @@ class TestCookies(BaseGrabTestCase):
                          ('foo=%s' % big_value).encode())
 
     def test_log_request_extra_argument(self):
-        from grab import base
-
         grab = build_grab()
         grab.go(self.server.get_url())
         with patch.object(base.logger_network, 'debug') as mocked:
@@ -203,3 +203,14 @@ class TestCookies(BaseGrabTestCase):
             grab.log_request(extra='zz')
             args = mocked.mock_calls[0][1]
             self.assertEqual('[zz] ', args[3])
+
+    def test_setup_document_logging(self):
+        grab = Grab()
+        grab.setup_document(b'abc')
+        with patch.object(base.logger_network, 'debug') as mocked:
+            grab.log_request()
+            args = mocked.mock_calls[0][1]
+            # request_counter is None and formatted as "NA"
+            self.assertEqual('NA', args[1])
+
+        grab.log_request() #should not raise exception

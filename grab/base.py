@@ -430,10 +430,13 @@ class Grab(DeprecatedThings):
             proxy_info = ''
         if extra:
             extra = '[%s] ' % extra
-        logger_network.debug('[%02d%s] %s%s %s%s',
-                             self.request_counter, thread_name,
-                             extra, self.request_method or 'GET',
-                             self.config['url'], proxy_info)
+        logger_network.debug(
+            '[%s%s] %s%s %s%s',
+            ('%02d' % self.request_counter
+             if self.request_counter is not None else 'NA'),
+            thread_name,
+            extra, self.request_method or 'GET',
+            self.config['url'], proxy_info)
 
     def request(self, **kwargs):
         """
