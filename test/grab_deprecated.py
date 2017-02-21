@@ -40,9 +40,9 @@ class GrabApiTestCase(BaseGrabTestCase):
                 <option value="opt1">opt1</option)
                 <option value="opt2">opt2</option)
             </select>
-            <input type="radio" name="rad1" value="rad1"> 
-            <input type="checkbox" name="cb1" value="cb1"> 
-            <input type="checkbox" name="cb2" value="cb2" checked="checked"> 
+            <input type="radio" name="rad1" value="rad1">
+            <input type="checkbox" name="cb1" value="cb1">
+            <input type="checkbox" name="cb2" value="cb2" checked="checked">
             <input type="text" name="text1" value="text1">
             <textarea name="area1">area1</textarea>
         </form>

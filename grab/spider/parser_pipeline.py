@@ -6,6 +6,7 @@ PARSER_PROCESS_JOIN_TIMEOUT = 3
 logger = logging.getLogger('grab.spider.parser_pipeline')
 # pylint: enable=invalid-name
 
+
 class ParserPipeline(object):
     def __init__(self, bot, mp_mode, pool_size, shutdown_event,
                  network_result_queue, parser_result_queue,

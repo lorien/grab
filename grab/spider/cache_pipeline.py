@@ -90,7 +90,6 @@ class CachePipeline(object):
                     return True
         return False
 
-
     def load_from_cache(self, task, grab):
         with self.spider.timer.log_time('cache'):
             with self.spider.timer.log_time('cache.read'):
@@ -101,11 +100,11 @@ class CachePipeline(object):
                 else:
                     with self.spider.timer.log_time(
                         'cache.read.prepare_request'
-                        ):
+                    ):
                         grab.prepare_request()
                     with self.spider.timer.log_time(
                         'cache.read.load_response'
-                        ):
+                    ):
                         self.cache.load_response(grab, cache_item)
                     grab.log_request('CACHED')
                     self.spider.stat.inc('spider:request-cache')

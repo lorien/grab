@@ -20,11 +20,13 @@ for key in dir(pycurl):
 
 
 class MulticurlTransport(object):
-    def __init__(self, spider, socket_number): # pylint: disable=unused-argument
+    def __init__(self, spider, socket_number):
         """
         Args:
             spider: argument is not used in multicurl transport
         """
+
+        del spider # is not used in this transport
         self.socket_number = socket_number
         self.multi = pycurl.CurlMulti()
         self.multi.handles = []

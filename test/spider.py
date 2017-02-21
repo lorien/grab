@@ -117,7 +117,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
 
-    ## TODO: FIXME: DOES NOT WORK
+    # FIXME: DOES NOT WORK
     #def test_keyboard_interrupt(self):
     #    class TestSpider(Spider):
     #        def task_page(self, grab, task):

@@ -132,7 +132,6 @@ class TestSpiderCase(BaseGrabTestCase):
             def load_raw_data(self):
                 return None
 
-
         bot = build_spider(TestSpider)
         bot.setup_queue()
         bot.load_proxylist(CustomProxySource())

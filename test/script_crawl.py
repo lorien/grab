@@ -19,7 +19,6 @@ class TestSpider(Spider):
         self.points.append(grab.response.body)
 
 
-
 class FailSpider(Spider):
     def task_generator(self):
         yield Task('page', url=self.url)

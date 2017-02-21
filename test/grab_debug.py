@@ -111,7 +111,6 @@ class TestCookies(BaseGrabTestCase):
             log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
             self.assertTrue('user-agent: perl' in log_file_content.lower())
 
-
     def test_log_dir_request_content_is_empty(self):
         with temp_dir() as tmp_dir:
             reset_request_counter()
