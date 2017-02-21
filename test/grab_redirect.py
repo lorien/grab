@@ -7,6 +7,7 @@ def build_location_callback(url, counter):
         'counter': counter,
         'url': url,
     }
+
     def callback(server):
         if meta['counter']:
             server.set_status(301)
@@ -24,6 +25,7 @@ def build_refresh_callback(url, counter):
         'counter': counter,
         'url': url,
     }
+
     def callback(server):
         if meta['counter']:
             server.set_status(200)

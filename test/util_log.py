@@ -4,6 +4,7 @@ import sys
 
 from grab.util.log import PycurlSigintHandler
 
+
 class PycurlSigintHandlerTestCase(TestCase):
     def test_record(self):
         handler = PycurlSigintHandler()

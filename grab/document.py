@@ -84,16 +84,17 @@ class Document(object):
         i.e. result of network request)
     """
 
-    __slots__ = ('status', 'code', 'head', '_bytes_body',
-                 'body_path', 'headers', 'url', 'cookies',
-                 'charset', '_unicode_body',
-                 'bom', 'timestamp',
-                 'name_lookup_time', 'connect_time', 'total_time',
-                 'download_size', 'upload_size', 'download_speed',
-                 'error_code', 'error_msg', 'grab', 'remote_ip',
-                 '_lxml_tree', '_strict_lxml_tree', '_pyquery',
-                 '_lxml_form', '_file_fields', 'from_cache',
-                )
+    __slots__ = (
+        'status', 'code', 'head', '_bytes_body',
+        'body_path', 'headers', 'url', 'cookies',
+        'charset', '_unicode_body',
+        'bom', 'timestamp',
+        'name_lookup_time', 'connect_time', 'total_time',
+        'download_size', 'upload_size', 'download_speed',
+        'error_code', 'error_msg', 'grab', 'remote_ip',
+        '_lxml_tree', '_strict_lxml_tree', '_pyquery',
+        '_lxml_form', '_file_fields', 'from_cache',
+    )
 
     def __init__(self, grab=None):
         if grab is None:
@@ -452,6 +453,7 @@ class Document(object):
         `response.unicode_body()` else the rex is searched in `response.body`.
         """
 
+        # pylint: disable=no-member
         try:
             match = self.rex_search(regexp, flags=flags, byte=byte)
         except DataNotFound:
@@ -460,7 +462,7 @@ class Document(object):
             else:
                 return default
         else:
-            return normalize_space(decode_entities(match.group(1))) # pylint: disable=no-member
+            return normalize_space(decode_entities(match.group(1)))
 
     def rex_search(self, regexp, flags=0, byte=False, default=NULL):
         """
@@ -581,7 +583,6 @@ class Document(object):
         self._unicode_body = None
 
     body = property(_read_body, _write_body)
-
 
     # DomTreeExtension methods
 
@@ -813,7 +814,8 @@ class Document(object):
             self.choose_form_by_element(xpath)
         sel = XpathSelector(self.form)
         elem = sel.select(xpath).node()
-        return self.set_input(elem.get('name'), value) # pylint: disable=no-member
+        # pylint: disable=no-member
+        return self.set_input(elem.get('name'), value)
 
     def set_input_by_number(self, number, value):
         """
@@ -847,7 +849,8 @@ class Document(object):
                     self._lxml_form = parent
                     break
 
-        return self.set_input(elem.get('name'), value) # pylint: disable=no-member
+        # pylint: disable=no-member
+        return self.set_input(elem.get('name'), value)
 
     # FIXME:
     # * Remove set_input_by_id
@@ -900,14 +903,13 @@ class Document(object):
             g.submit()
         """
 
-        # TODO: add .x and .y items
-        # if submit element is image
+        # pylint: disable=no-member
 
         post = self.form_fields()
 
         # Build list of submit buttons which have a name
         submit_controls = {}
-        for elem in self.form.inputs: # pylint: disable=no-member
+        for elem in self.form.inputs:
             if (elem.tag == 'input' and elem.type == 'submit' and
                     elem.get('name') is not None):
                 submit_controls[elem.name] = elem
@@ -933,14 +935,15 @@ class Document(object):
         if url:
             action_url = urljoin(self.url, url)
         else:
-            action_url = urljoin(self.url, self.form.action) # pylint: disable=no-member
+            action_url = urljoin(self.url,
+                                 self.form.action)
 
         # Values from `extra_post` should override values in form
         # `extra_post` allows multiple value of one key
 
         # Process saved values of file fields
-        if self.form.method == 'POST': # pylint: disable=no-member
-            if 'multipart' in self.form.get('enctype', ''): # pylint: disable=no-member
+        if self.form.method == 'POST':
+            if 'multipart' in self.form.get('enctype', ''):
                 for key, obj in self._file_fields.items():
                     post[key] = obj
 
@@ -965,8 +968,8 @@ class Document(object):
             post_items = [(x, y) for x, y in post_items
                           if x not in remove_from_post]
 
-        if self.form.method == 'POST': # pylint: disable=no-member
-            if 'multipart' in self.form.get('enctype', ''): # pylint: disable=no-member
+        if self.form.method == 'POST':
+            if 'multipart' in self.form.get('enctype', ''):
                 self.grab.setup(multipart_post=post_items)
             else:
                 self.grab.setup(post=post_items)

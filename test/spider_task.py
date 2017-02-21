@@ -242,7 +242,6 @@ class TestSpiderTestCase(BaseGrabTestCase):
             def task_bar_fallback(self, task):
                 pass
 
-
         task1 = Task('foo', url='http://foo.com/', fallback_name='do_smth')
         task2 = Task('bar', url='http://foo.com/')
         task3 = Task(url='http://foo.com/')

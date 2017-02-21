@@ -182,18 +182,19 @@ def default_config():
 
 class Grab(DeprecatedThings):
 
-    __slots__ = ('request_head', 'request_body',
-                 #'request_log',
-                 'proxylist', 'config',
-                 'transport',
-                 'transport_param', 'request_method', 'request_counter',
-                 '__weakref__', 'cookies',
-                 'meta',
+    __slots__ = (
+        'request_head', 'request_body',
+        #'request_log',
+        'proxylist', 'config',
+        'transport',
+        'transport_param', 'request_method', 'request_counter',
+        '__weakref__', 'cookies',
+        'meta',
 
-                 # Dirty hack to make it possible to inherit Grab from
-                 # multiple base classes with __slots__
-                 '_doc',
-                )
+        # Dirty hack to make it possible to inherit Grab from
+        # multiple base classes with __slots__
+        '_doc',
+    )
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
@@ -249,7 +250,7 @@ class Grab(DeprecatedThings):
         if isinstance(transport_param, six.string_types):
             if transport_param in TRANSPORT_ALIAS:
                 transport_param = TRANSPORT_ALIAS[transport_param]
-            if not '.' in transport_param:
+            if '.' not in transport_param:
                 raise error.GrabMisuseError('Unknown transport: %s'
                                             % transport_param)
             else:
@@ -445,7 +446,6 @@ class Grab(DeprecatedThings):
         Returns: ``Document`` objects.
         """
 
-
         self.prepare_request(**kwargs)
         refresh_count = 0
 
@@ -637,7 +637,6 @@ class Grab(DeprecatedThings):
                        proxy_type=proxy.proxy_type)
         else:
             logger.debug('Proxy list is empty')
-
 
     #
     # Private methods

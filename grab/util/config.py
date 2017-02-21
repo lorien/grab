@@ -14,7 +14,7 @@ def update_dict(target, source, overwrite=False):
 def build_root_config(settings_mod_path):
     module = importlib.import_module(settings_mod_path)
     config = module.GRAB_SPIDER_CONFIG
-    if not 'global' in config:
+    if 'global' not in config:
         config['global'] = {}
     update_dict(config['global'], DEFAULT_SPIDER_GLOBAL_CONFIG,
                 overwrite=False)

@@ -4,11 +4,10 @@ from contextlib import contextmanager
 from io import TextIOBase
 
 
-def default_logging(grab_log=None,#'/tmp/grab.log',
-                    network_log=None,#'/tmp/grab.network.log',
+def default_logging(grab_log=None, # '/tmp/grab.log',
+                    network_log=None, # '/tmp/grab.network.log',
                     level=logging.DEBUG, mode='a',
-                    propagate_network_logger=False,
-                   ):
+                    propagate_network_logger=False):
     """
     Customize logging output to display all log messages
     except grab network logs.
@@ -56,7 +55,6 @@ class PycurlSigintHandler(TextIOBase):
 
     def get_output(self):
         return ''.join(self.buf)
-
 
     @contextmanager
     def handle_sigint(self):

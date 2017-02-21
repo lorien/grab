@@ -4,6 +4,7 @@ from grab.util.config import (update_dict, build_root_config,
 from grab.util.default_config import DEFAULT_SPIDER_GLOBAL_CONFIG
 from grab.spider import Spider
 
+
 class UtilConfigTestCase(TestCase):
     def test_update_dict(self):
         self.assertEqual(
@@ -34,7 +35,7 @@ class UtilConfigTestCase(TestCase):
 
     def test_build_root_config_overwrite(self):
         cfg = build_root_config('test.files.settings_overwrite')
-        for key, val in  DEFAULT_SPIDER_GLOBAL_CONFIG.items():
+        for key, val in DEFAULT_SPIDER_GLOBAL_CONFIG.items():
             if key == 'spider_modules':
                 self.assertEqual(cfg['global'][key], ['zzz'])
             else:
@@ -54,7 +55,7 @@ class UtilConfigTestCase(TestCase):
 
         root_cfg = build_root_config('test.files.settings_test_spider')
         cfg = build_spider_config(TestSpider, root_cfg)
-        for key, val in  DEFAULT_SPIDER_GLOBAL_CONFIG.items():
+        for key, val in DEFAULT_SPIDER_GLOBAL_CONFIG.items():
             if key == 'spider_modules':
                 self.assertEqual(cfg[key], ['zzz'])
             elif key == 'thread_number':
@@ -70,7 +71,7 @@ class UtilConfigTestCase(TestCase):
 
         root_cfg = build_root_config('test.files.settings_minimal')
         cfg = build_spider_config(TestSpider, root_cfg)
-        for key, val in  DEFAULT_SPIDER_GLOBAL_CONFIG.items():
+        for key, val in DEFAULT_SPIDER_GLOBAL_CONFIG.items():
             if key == 'foo':
                 self.assertEqual(cfg[key], 'bar')
             else:

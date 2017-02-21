@@ -4,6 +4,7 @@ from six import StringIO
 
 from grab.util.warning import warn
 
+
 class GrabErrorTestCase(TestCase):
     def test_warn(self):
         out = StringIO()

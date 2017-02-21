@@ -60,13 +60,13 @@ class SpiderErrorTestCase(BaseGrabTestCase):
     #    class TestSpider(Spider):
     #        def task_generator(self):
     #        #yield Task('page', url='http://www.tripadvisor.com/ShowUrl?
-             #&excludeFromVS=false&odc=BusinessListingsUrl&d=4289178&url=1')
+    #        #&excludeFromVS=false&odc=BusinessListingsUrl&d=4289178&url=1')
     #            #yield Task('page', invalid_url)
     #            yield Task('page', url)
-
+    #
     #        def task_page(self, grab, task):
     #            pass
-
+    #
     #    self.server.response['callback'] = callback
     #    bot = TestSpider()
     #    bot.run()
