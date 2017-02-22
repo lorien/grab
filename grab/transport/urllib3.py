@@ -116,7 +116,6 @@ class Urllib3Transport(BaseTransport):
         self._response = None
         self._request = None
 
-
     def process_config(self, grab):
         req = Request(data=None)
 
@@ -210,7 +209,6 @@ class Urllib3Transport(BaseTransport):
                 grab.config['user_agent'] = generate_user_agent()
 
         extra_headers['User-Agent'] = grab.config['user_agent']
-
 
         # Headers
         headers = extra_headers
@@ -326,8 +324,7 @@ class Urllib3Transport(BaseTransport):
                         break
                     if self._request.timeout:
                         if (time.time() - self._request.op_started
-                                > self._request.timeout
-                           ):
+                                > self._request.timeout):
                             raise GrabTimeoutError
                 data = b''.join(chunks)
                 if maxsize:
@@ -366,7 +363,7 @@ class Urllib3Transport(BaseTransport):
             response.parse(charset=grab.config['document_charset'],
                            headers=hdr)
 
-            jar = self.extract_cookiejar()#self._response, self._request)
+            jar = self.extract_cookiejar() # self._response, self._request)
             response.cookies = CookieManager(jar)
 
             # We do not need anymore cookies stored in the

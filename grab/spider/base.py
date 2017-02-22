@@ -22,8 +22,6 @@ from grab.spider.error import (SpiderError, SpiderMisuseError, FatalError,
                                SpiderConfigurationError)
 from grab.spider.task import Task
 from grab.spider.data import Data
-from grab.spider.transport.multicurl import MulticurlTransport
-from grab.spider.transport.threaded import ThreadedTransport
 from grab.proxylist import ProxyList, BaseProxySource
 from grab.util.misc import camel_case_to_underscore
 from grab.base import GLOBAL_STATE
@@ -145,8 +143,7 @@ class Spider(object):
                  # http api
                  http_api_port=None,
                  transport='multicurl',
-                 grab_transport='pycurl',
-                ):
+                 grab_transport='pycurl'):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -633,6 +630,7 @@ class Spider(object):
         # Generate new common headers
         grab.config['common_headers'] = grab.common_headers()
         self.update_grab_instance(grab)
+        grab.setup_transport(self.grab_transport_name)
         return grab
 
     def is_valid_network_response_code(self, code, task):
@@ -811,8 +809,10 @@ class Spider(object):
                                proxy_userpwd=self.proxy.get_userpwd(),
                                proxy_type=self.proxy.proxy_type)
 
-    def change_active_proxy(self, task, grab): # pylint: disable=unused-argument
+    # pylint: disable=unused-argument
+    def change_active_proxy(self, task, grab):
         self.proxy = self.proxylist.get_random_proxy()
+    # pylint: enable=unused-argument
 
     def submit_task_to_transport(self, task, grab):
         if self.only_cache:
@@ -883,6 +883,7 @@ class Spider(object):
         """
         Main method. All work is done here.
         """
+
         if self.mp_mode:
             from multiprocessing import Queue
         else:
@@ -891,8 +892,12 @@ class Spider(object):
         self.timer.start('total')
 
         if self.transport_name == 'multicurl':
+            from grab.spider.transport.multicurl import MulticurlTransport
+
             self.transport = MulticurlTransport(self, self.thread_number)
         elif self.transport_name == 'threaded':
+            from grab.spider.transport.threaded import ThreadedTransport
+
             self.transport = ThreadedTransport(self, self.thread_number)
 
         if self.http_api_port:
@@ -940,8 +945,7 @@ class Spider(object):
                         and (self.network_result_queue.qsize()
                              < network_result_queue_limit)
                         and (self.cache_pipeline is None
-                             or self.cache_pipeline.has_free_resources())
-                   ):
+                             or self.cache_pipeline.has_free_resources())):
                     if pending_tasks:
                         task = pending_tasks.popleft()
                     else:
@@ -1037,8 +1041,7 @@ class Spider(object):
                             task_grab = self.setup_grab_for_task(task)
                             if (self.transport.get_free_threads_number()
                                     and (self.network_result_queue.qsize()
-                                         < network_result_queue_limit)
-                               ):
+                                         < network_result_queue_limit)):
                                 self.submit_task_to_transport(task, task_grab)
                             else:
                                 pending_tasks.append(task)
@@ -1053,13 +1056,12 @@ class Spider(object):
                         and not self.transport.get_active_threads_number()
                         and not self.parser_result_queue.qsize()
                         and (self.cache_pipeline is None
-                             or self.cache_pipeline.is_idle())
+                             or self.cache_pipeline.is_idle())):
                         # CACHE: is_idle()
                         #or (self.cache_pipeline.input_queue.qsize() == 0
                         #    and self.cache_pipeline.is_idle()
                         #    and self.cache_pipeline.result_queue.qsize()
                         #    == 0))
-                   ):
                     time.sleep(0.001)
 
                 for result, from_cache in results:
@@ -1079,8 +1081,7 @@ class Spider(object):
                     elif result['ok']:
                         res_code = result['grab'].doc.code
                         if self.is_valid_network_response_code(
-                                res_code, result['task']
-                            ):
+                                res_code, result['task']):
                             is_valid = True
 
                     if is_valid:

@@ -3,11 +3,10 @@
 This test case has written to help me
 understand how pycurl lib works with cookies
 """
-import pycurl
 from six import BytesIO
 from six.moves.http_cookiejar import CookieJar
 
-from test.util import BaseGrabTestCase
+from test.util import BaseGrabTestCase, only_grab_transport
 from grab.error import GrabMisuseError
 from grab.cookie import create_cookie
 
@@ -29,7 +28,10 @@ class TestCookies(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
+    @only_grab_transport('pycurl')
     def test_pycurl_cookies(self):
+        import pycurl
+
         self.server.response_once['code'] = 302
         self.server.response_once['cookies'] = {'foo': 'bar', '1': '2'}.items()
         self.server.response_once['headers'] = [

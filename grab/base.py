@@ -47,6 +47,7 @@ TRANSPORT_ALIAS = {
     'pycurl': 'grab.transport.curl.CurlTransport',
     'urllib3': 'grab.transport.urllib3.Urllib3Transport',
 }
+DEFAULT_TRANSPORT = 'pycurl'
 
 # pylint: disable=invalid-name
 logger = logging.getLogger('grab.base')
@@ -182,18 +183,19 @@ def default_config():
 
 class Grab(DeprecatedThings):
 
-    __slots__ = ('request_head', 'request_body',
-                 #'request_log',
-                 'proxylist', 'config',
-                 'transport',
-                 'transport_param', 'request_method', 'request_counter',
-                 '__weakref__', 'cookies',
-                 'meta',
+    __slots__ = (
+        'request_head', 'request_body',
+        #'request_log',
+        'proxylist', 'config',
+        'transport',
+        'transport_param', 'request_method', 'request_counter',
+        '__weakref__', 'cookies',
+        'meta',
 
-                 # Dirty hack to make it possible to inherit Grab from
-                 # multiple base classes with __slots__
-                 '_doc',
-                )
+        # Dirty hack to make it possible to inherit Grab from
+        # multiple base classes with __slots__
+        '_doc',
+    )
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
@@ -209,7 +211,7 @@ class Grab(DeprecatedThings):
     #
 
     def __init__(self, document_body=None,
-                 transport='pycurl', **kwargs):
+                 transport=None, **kwargs):
         """
         Create Grab instance
         """
@@ -226,8 +228,9 @@ class Grab(DeprecatedThings):
         self.request_head = None
         self.request_body = None
         self.request_method = None
+        self.transport_param = transport
+        self.transport = None
 
-        self.setup_transport(transport)
         self.reset()
         if kwargs:
             self.setup(**kwargs)
@@ -244,12 +247,18 @@ class Grab(DeprecatedThings):
 
     doc = property(_get_doc, _set_doc)
 
-    def setup_transport(self, transport_param):
-        self.transport_param = transport_param
+    def setup_transport(self, transport_param, reset=False):
+        if self.transport is not None and not reset:
+            raise error.GrabMisuseError(
+                'Transport is already set up. Use'
+                ' setup_transport(..., reset=True) to explicitly setup'
+                ' new transport')
+        if transport_param is None:
+            transport_param = DEFAULT_TRANSPORT
         if isinstance(transport_param, six.string_types):
             if transport_param in TRANSPORT_ALIAS:
                 transport_param = TRANSPORT_ALIAS[transport_param]
-            if not '.' in transport_param:
+            if '.' not in transport_param:
                 raise error.GrabMisuseError('Unknown transport: %s'
                                             % transport_param)
             else:
@@ -281,7 +290,8 @@ class Grab(DeprecatedThings):
         self.request_body = None
         self.request_method = None
         self.request_counter = None
-        self.transport.reset()
+        if self.transport:
+            self.transport.reset()
 
     def clone(self, **kwargs):
         """
@@ -397,6 +407,8 @@ class Grab(DeprecatedThings):
         transport extension.
         """
 
+        if self.transport is None:
+            self.setup_transport(self.transport_param)
         self.reset()
         self.request_counter = next(REQUEST_COUNTER)
         if kwargs:
@@ -430,10 +442,13 @@ class Grab(DeprecatedThings):
             proxy_info = ''
         if extra:
             extra = '[%s] ' % extra
-        logger_network.debug('[%02d%s] %s%s %s%s',
-                             self.request_counter, thread_name,
-                             extra, self.request_method or 'GET',
-                             self.config['url'], proxy_info)
+        logger_network.debug(
+            '[%s%s] %s%s %s%s',
+            ('%02d' % self.request_counter
+             if self.request_counter is not None else 'NA'),
+            thread_name,
+            extra, self.request_method or 'GET',
+            self.config['url'], proxy_info)
 
     def request(self, **kwargs):
         """
@@ -444,7 +459,6 @@ class Grab(DeprecatedThings):
 
         Returns: ``Document`` objects.
         """
-
 
         self.prepare_request(**kwargs)
         refresh_count = 0
@@ -637,7 +651,6 @@ class Grab(DeprecatedThings):
                        proxy_type=proxy.proxy_type)
         else:
             logger.debug('Proxy list is empty')
-
 
     #
     # Private methods

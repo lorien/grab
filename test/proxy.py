@@ -31,7 +31,6 @@ class ProxyListTestCase(BaseGrabTestCase):
         plist = ProxyList()
         self.assertEqual(0, plist.size())
 
-
     def test_file_proxy_source(self):
         with temp_file() as path:
             plist = ProxyList()

@@ -105,6 +105,7 @@ class SpiderCacheMixin(object):
 
     def test_only_cache_task(self):
         self.server.response['get.data'] = ContentGenerator(self.server)
+
         class TestSpider(Spider):
             def task_page(self, dummy_grab, dummy_task):
                 self.stat.collect('points', 1)
@@ -119,6 +120,7 @@ class SpiderCacheMixin(object):
 
     def test_cache_size(self):
         self.server.response['get.data'] = ContentGenerator(self.server)
+
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass
@@ -161,6 +163,7 @@ class SpiderCacheMixin(object):
         self.assertEqual([1, 2, 2, 3], bot.stat.collections['resp_counters'])
 
     def test_task_cache_timeout(self):
+
         class TestSpider(Spider):
             def task_page(self, grab, dummy_task):
                 self.stat.collect('points', grab.doc.body)
@@ -190,6 +193,7 @@ class SpiderCacheMixin(object):
 
     def test_remove_cache_item(self):
         self.server.response['get.data'] = ContentGenerator(self.server)
+
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass
@@ -207,6 +211,7 @@ class SpiderCacheMixin(object):
 
     def test_has_item(self):
         self.server.response['get.data'] = ContentGenerator(self.server)
+
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass
@@ -240,6 +245,7 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
 
     def test_too_large_document(self):
         self.server.response['get.data'] = ContentGenerator(self.server)
+
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass
@@ -261,6 +267,7 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
 
     def test_connection_kwargs(self):
         self.server.response['get.data'] = ContentGenerator(self.server)
+
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass

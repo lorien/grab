@@ -2,7 +2,7 @@ from grab.spider import Spider, Task
 from grab.script import crawl
 from grab.util.module import SPIDER_REGISTRY
 
-from test.util import BaseGrabTestCase
+from test.util import BaseGrabTestCase, only_grab_transport
 
 
 class TestSpider(Spider):
@@ -10,14 +10,17 @@ class TestSpider(Spider):
     points = []
 
     def prepare(self):
+        #from grab.spider.base import logger_verbose
+        #logger_verbose.setLevel(logging.DEBUG)
         del self.points[:]
 
     def task_generator(self):
+        print('A')
         yield Task('page', url=self.url)
 
     def task_page(self, grab, dummy_task):
+        print('B')
         self.points.append(grab.response.body)
-
 
 
 class FailSpider(Spider):
@@ -32,6 +35,7 @@ class ScriptCrawlTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
+    @only_grab_transport('never')
     def test_crawl(self):
         TestSpider.url = self.server.get_url()
         self.server.response['data'] = b'1'
@@ -40,6 +44,7 @@ class ScriptCrawlTestCase(BaseGrabTestCase):
                    disable_report=True)
         self.assertEqual(TestSpider.points, [b'1'])
 
+    @only_grab_transport('never')
     def test_crawl_save_lists(self):
         FailSpider.url = self.server.get_url()
         self.server.response['data'] = b'1'
