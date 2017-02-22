@@ -47,6 +47,7 @@ TRANSPORT_ALIAS = {
     'pycurl': 'grab.transport.curl.CurlTransport',
     'urllib3': 'grab.transport.urllib3.Urllib3Transport',
 }
+DEFAULT_TRANSPORT = 'pycurl'
 
 # pylint: disable=invalid-name
 logger = logging.getLogger('grab.base')
@@ -210,7 +211,7 @@ class Grab(DeprecatedThings):
     #
 
     def __init__(self, document_body=None,
-                 transport='pycurl', **kwargs):
+                 transport=None, **kwargs):
         """
         Create Grab instance
         """
@@ -227,8 +228,9 @@ class Grab(DeprecatedThings):
         self.request_head = None
         self.request_body = None
         self.request_method = None
+        self.transport_param = transport
+        self.transport = None
 
-        self.setup_transport(transport)
         self.reset()
         if kwargs:
             self.setup(**kwargs)
@@ -245,8 +247,14 @@ class Grab(DeprecatedThings):
 
     doc = property(_get_doc, _set_doc)
 
-    def setup_transport(self, transport_param):
-        self.transport_param = transport_param
+    def setup_transport(self, transport_param, reset=False):
+        if self.transport is not None and not reset:
+            raise error.GrabMisuseError(
+                'Transport is already set up. Use'
+                ' setup_transport(..., reset=True) to explicitly setup'
+                ' new transport')
+        if transport_param is None:
+            transport_param = DEFAULT_TRANSPORT
         if isinstance(transport_param, six.string_types):
             if transport_param in TRANSPORT_ALIAS:
                 transport_param = TRANSPORT_ALIAS[transport_param]
@@ -282,7 +290,8 @@ class Grab(DeprecatedThings):
         self.request_body = None
         self.request_method = None
         self.request_counter = None
-        self.transport.reset()
+        if self.transport:
+            self.transport.reset()
 
     def clone(self, **kwargs):
         """
@@ -398,6 +407,8 @@ class Grab(DeprecatedThings):
         transport extension.
         """
 
+        if self.transport is None:
+            self.setup_transport(self.transport_param)
         self.reset()
         self.request_counter = next(REQUEST_COUNTER)
         if kwargs:

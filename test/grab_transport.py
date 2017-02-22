@@ -1,82 +1,100 @@
 import pickle
+import os
+import sys
 
-from test.util import BaseGrabTestCase
+from test.util import BaseGrabTestCase, only_grab_transport, temp_dir
 from grab import Grab
-from grab.transport.curl import CurlTransport
 from grab.error import GrabMisuseError
 
+FAKE_TRANSPORT_CODE = '''
+from grab.transport.curl import CurlTransport
 
 class FakeTransport(CurlTransport):
-    def prepare_response(self, grab):
-        resp = super(FakeTransport, self).prepare_response(grab)
-        resp.body = b'Faked ' + resp.body
-        return resp
+    pass
+'''
 
 
-def get_curl_transport():
+def get_fake_transport_class():
+    from grab.transport.curl import CurlTransport
+
+    class FakeTransport(CurlTransport):
+        pass
+
+    return FakeTransport
+
+
+def get_fake_transport_instance():
+    return get_fake_transport_class()()
+
+
+def get_curl_transport_instance():
+    from grab.transport.curl import CurlTransport
+
     return CurlTransport()
 
 
-def get_fake_transport():
-    return FakeTransport()
-
-
 class TestTransportTestCase(BaseGrabTestCase):
-    def setUp(self):
-        self.server.reset()
-        self.server.response['get.data'] = 'XYZ'
+    def assert_transport_response(self, transport, response):
+        self.server.response['get.data'] = response
 
-    def transport_option_logic(self, curl_transport, fake_transport):
-        grab = Grab(transport=curl_transport)
+        grab = Grab(transport=transport)
         grab.go(self.server.get_url())
-        self.assertEqual(grab.response.body, b'XYZ')
+        self.assertEqual(grab.response.body, response)
 
         grab2 = grab.clone()
-        grab.go(self.server.get_url())
-        self.assertEqual(grab.response.body, b'XYZ')
+        grab2.go(self.server.get_url())
+        self.assertEqual(grab2.response.body, response)
 
+    def assert_transport_pickle(self, transport, response):
+        grab = Grab(transport=transport)
+        grab2 = grab.clone()
         grab2_data = pickle.dumps(grab2, pickle.HIGHEST_PROTOCOL)
         grab3 = pickle.loads(grab2_data)
         grab3.go(self.server.get_url())
-        self.assertEqual(grab3.response.body, b'XYZ')
+        self.assertEqual(grab3.response.body, response)
 
-        grab = Grab(transport=fake_transport)
-        grab.go(self.server.get_url())
-        self.assertEqual(grab.response.body, b'Faked XYZ')
+    @only_grab_transport('pycurl')
+    def test_transport_option_as_string_curl(self):
+        self.assert_transport_response('grab.transport.curl.CurlTransport',
+                                       b'XYZ')
 
-        grab2 = grab.clone()
-        grab.go(self.server.get_url())
-        self.assertEqual(grab.response.body, b'Faked XYZ')
+    @only_grab_transport('pycurl')
+    def test_transport_option_as_string_fake(self):
+        with temp_dir() as dir_:
+            sys.path.insert(0, dir_)
+            with open(os.path.join(dir_, 'foo.py'), 'w') as out:
+                out.write(FAKE_TRANSPORT_CODE)
+            self.assert_transport_response('foo.FakeTransport', b'XYZ')
+            sys.path.remove(dir_)
 
-        grab2_data = pickle.dumps(grab2, pickle.HIGHEST_PROTOCOL)
-        grab3 = pickle.loads(grab2_data)
-        grab3.go(self.server.get_url())
-        self.assertEqual(grab3.response.body, b'Faked XYZ')
+    @only_grab_transport('pycurl')
+    def test_transport_option_as_class_curl(self):
+        from grab.transport.curl import CurlTransport
 
-    def test_transport_option_as_string(self):
-        self.transport_option_logic(
-            'grab.transport.curl.CurlTransport',
-            'test.grab_transport.FakeTransport',
-        )
+        self.assert_transport_response(CurlTransport, b'XYZ')
 
-    def test_transport_option_as_class(self):
-        self.transport_option_logic(
-            CurlTransport,
-            FakeTransport,
-        )
+    @only_grab_transport('pycurl')
+    def test_transport_option_as_class_fake(self):
+        fake_transport_cls = get_fake_transport_class()
+        self.assert_transport_response(fake_transport_cls, b'XYZ')
 
-    def test_transport_option_as_function(self):
-        self.transport_option_logic(
-            get_curl_transport,
-            get_fake_transport,
-        )
+    @only_grab_transport('pycurl')
+    def test_transport_option_as_function_curl(self):
+        self.assert_transport_response(get_curl_transport_instance, b'XYZ')
 
-    def test_invalid_transport_nodot(self):
-        def func():
-            Grab(transport='zzzzzzzzzz')
-        self.assertRaises(GrabMisuseError, func)
+    @only_grab_transport('pycurl')
+    def test_transport_option_as_function_fake(self):
+        self.assert_transport_response(get_fake_transport_instance, b'XYZ')
+
+    def test_invalid_transport_invalid_alias(self):
+        with self.assertRaises(GrabMisuseError):
+            Grab(transport='zzzzzzzzzz').go(self.server.get_url())
+
+    def test_invalid_transport_invalid_path(self):
+        # AttributeError comes from setup_transport method
+        with self.assertRaises(AttributeError):
+            Grab(transport='test.grab_transport.ZZZ').go(self.server.get_url())
 
     def test_invalid_transport_not_collable_or_string(self):
-        def func():
-            Grab(transport=4)
-        self.assertRaises(GrabMisuseError, func)
+        with self.assertRaises(GrabMisuseError):
+            Grab(transport=13).go(self.server.get_url())

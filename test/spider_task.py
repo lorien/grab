@@ -10,9 +10,7 @@ from grab.spider.error import SpiderError
 
 class SimpleSpider(Spider):
     def task_baz(self, grab, dummy_task):
-        # pylint: disable=attribute-defined-outside-init
         pass
-        #self.SAVED_ITEM = grab.doc.body
 
 
 class TestSpiderTestCase(BaseGrabTestCase):
@@ -367,7 +365,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
                 self.stat.inc('xxx')
                 raise ResponseNotValid
 
-        bot = SomeSimpleSpider()
+        bot = build_spider(SomeSimpleSpider)
         bot.setup_queue()
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()

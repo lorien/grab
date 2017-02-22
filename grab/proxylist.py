@@ -3,10 +3,12 @@ import itertools
 import logging
 from random import randint
 from collections import namedtuple
+from six.moves.urllib.request import urlopen
+from six.moves.urllib.error import URLError
 
 import six
 
-from grab.error import GrabError, GrabNetworkError
+from grab.error import GrabError
 
 RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
 RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')
@@ -100,14 +102,17 @@ class WebProxySource(BaseProxySource):
         super(WebProxySource, self).__init__(**kwargs)
 
     def load_raw_data(self):
-        from grab import Grab
         limit = 3
         for count in range(limit):
             try:
-                return Grab().go(url=self.url).unicode_body()
-            except GrabNetworkError:
+                data = urlopen(self.url, timeout=3).read()
+                return data.decode('utf-8', 'ignore')
+            except URLError:
                 if count >= (limit - 1):
                     raise
+                else:
+                    logger.debug('Failed to retreive proxy list from %s.'
+                                 ' Retrying.', self.url)
 
 
 class ListProxySource(BaseProxySource):

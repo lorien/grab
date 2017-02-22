@@ -22,8 +22,6 @@ from grab.spider.error import (SpiderError, SpiderMisuseError, FatalError,
                                SpiderConfigurationError)
 from grab.spider.task import Task
 from grab.spider.data import Data
-from grab.spider.transport.multicurl import MulticurlTransport
-from grab.spider.transport.threaded import ThreadedTransport
 from grab.proxylist import ProxyList, BaseProxySource
 from grab.util.misc import camel_case_to_underscore
 from grab.base import GLOBAL_STATE
@@ -632,6 +630,7 @@ class Spider(object):
         # Generate new common headers
         grab.config['common_headers'] = grab.common_headers()
         self.update_grab_instance(grab)
+        grab.setup_transport(self.grab_transport_name)
         return grab
 
     def is_valid_network_response_code(self, code, task):
@@ -884,6 +883,7 @@ class Spider(object):
         """
         Main method. All work is done here.
         """
+
         if self.mp_mode:
             from multiprocessing import Queue
         else:
@@ -892,8 +892,12 @@ class Spider(object):
         self.timer.start('total')
 
         if self.transport_name == 'multicurl':
+            from grab.spider.transport.multicurl import MulticurlTransport
+
             self.transport = MulticurlTransport(self, self.thread_number)
         elif self.transport_name == 'threaded':
+            from grab.spider.transport.threaded import ThreadedTransport
+
             self.transport = ThreadedTransport(self, self.thread_number)
 
         if self.http_api_port:

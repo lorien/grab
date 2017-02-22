@@ -2,11 +2,8 @@
 import json
 import pickle
 
-import pycurl
-
-from test.util import temp_file, build_grab, exclude_grab_transport
+from test.util import temp_file, build_grab, only_grab_transport
 from test.util import BaseGrabTestCase
-from grab import Grab
 from grab.error import GrabMisuseError
 from grab.cookie import CookieManager, create_cookie
 
@@ -19,7 +16,7 @@ class TestCookies(BaseGrabTestCase):
         grab = build_grab()
         self.server.response['cookies'] = {'foo': 'bar', '1': '2'}.items()
         grab.go(self.server.get_url())
-        self.assertEqual(grab.response.cookies['foo'], 'bar')
+        self.assertEqual(grab.doc.cookies['foo'], 'bar')
 
     def test_multiple_cookies(self):
         grab = build_grab()
@@ -38,7 +35,7 @@ class TestCookies(BaseGrabTestCase):
         grab.setup(reuse_cookies=True)
         self.server.response['cookies'] = {'foo': 'bar'}.items()
         grab.go(self.server.get_url())
-        self.assertEqual(grab.response.cookies['foo'], 'bar')
+        self.assertEqual(grab.doc.cookies['foo'], 'bar')
         grab.go(self.server.get_url())
         self.assertEqual(self.server.request['headers']['Cookie'], 'foo=bar')
         grab.go(self.server.get_url())
@@ -49,7 +46,7 @@ class TestCookies(BaseGrabTestCase):
         grab.setup(reuse_cookies=False)
         self.server.response['cookies'] = {'foo': 'baz'}.items()
         grab.go(self.server.get_url())
-        self.assertEqual(grab.response.cookies['foo'], 'baz')
+        self.assertEqual(grab.doc.cookies['foo'], 'baz')
         grab.go(self.server.get_url())
         self.assertTrue(len(self.server.request['cookies']) == 0)
 
@@ -58,7 +55,7 @@ class TestCookies(BaseGrabTestCase):
         grab.setup(reuse_cookies=True)
         self.server.response['cookies'] = {'foo': 'bar'}.items()
         grab.go(self.server.get_url())
-        self.assertEqual(grab.response.cookies['foo'], 'bar')
+        self.assertEqual(grab.doc.cookies['foo'], 'bar')
         grab.clear_cookies()
         grab.go(self.server.get_url())
         self.assertTrue(len(self.server.request['cookies']) == 0)
@@ -67,7 +64,7 @@ class TestCookies(BaseGrabTestCase):
         grab = build_grab()
         self.server.response['cookies'] = {'foo': 'bar'}.items()
         grab.go(self.server.get_url())
-        self.assertEqual(grab.response.cookies['foo'], 'bar')
+        self.assertEqual(grab.doc.cookies['foo'], 'bar')
 
         # Setup one-time redirect
         grab = build_grab()
@@ -150,42 +147,51 @@ class TestCookies(BaseGrabTestCase):
             # Just ensure it works
             grab.go(self.server.get_url())
 
-    @exclude_grab_transport('urllib3')
+    @only_grab_transport('pycurl')
     def test_manual_dns(self):
+        import pycurl
+
         grab = build_grab()
+        grab.setup_transport('pycurl')
         grab.transport.curl.setopt(pycurl.RESOLVE,
                                    ['foo:%d:127.0.0.1' % self.server.port])
         self.server.response['get.data'] = 'zzz'
         grab.go('http://foo:%d/' % self.server.port)
-        self.assertEqual(b'zzz', grab.response.body)
+        self.assertEqual(b'zzz', grab.doc.body)
 
-    @exclude_grab_transport('urllib3')
+    @only_grab_transport('pycurl')
     def test_different_domains(self):
+        import pycurl
+
         grab = build_grab()
         names = [
             'foo:%d:127.0.0.1' % self.server.port,
             'bar:%d:127.0.0.1' % self.server.port,
         ]
+        grab.setup_transport('pycurl')
         grab.transport.curl.setopt(pycurl.RESOLVE, names)
 
         self.server.response['cookies'] = {'foo': 'foo'}.items()
         grab.go('http://foo:%d' % self.server.port)
-        self.assertEqual(dict(grab.response.cookies.items()), {'foo': 'foo'})
+        self.assertEqual(dict(grab.doc.cookies.items()), {'foo': 'foo'})
 
         self.server.response['cookies'] = {'bar': 'bar'}.items()
         grab.go('http://bar:%d' % self.server.port)
 
         # response.cookies contains cookies from both domains
         # because it just accumulates cookies over time
-        self.assertEqual(dict(grab.response.cookies.items()),
+        self.assertEqual(dict(grab.doc.cookies.items()),
                          {'foo': 'foo', 'bar': 'bar'})
 
-    @exclude_grab_transport('urllib3')
+    @only_grab_transport('pycurl')
     def test_cookie_domain(self):
-        grab = Grab()
+        import pycurl
+
+        grab = build_grab()
         names = [
             'example.com:%d:127.0.0.1' % self.server.port,
         ]
+        grab.setup_transport('pycurl')
         grab.transport.curl.setopt(pycurl.RESOLVE, names)
         grab.cookies.set('foo', 'bar', domain='example.com')
         grab.go('http://example.com:%d/' % self.server.port)
@@ -219,13 +225,16 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual('bar', mgr['foo'])
         self.assertRaises(KeyError, lambda: mgr['zzz'])
 
-    @exclude_grab_transport('urllib3')
+    @only_grab_transport('pycurl')
     def test_dot_domain(self):
+        import pycurl
+
         grab = build_grab(debug=True)
         names = [
             'foo.bar:%d:127.0.0.1' % self.server.port,
             'www.foo.bar:%d:127.0.0.1' % self.server.port,
         ]
+        grab.setup_transport('pycurl')
         grab.transport.curl.setopt(pycurl.RESOLVE, names)
 
         self.server.response['headers'] = [
@@ -234,7 +243,7 @@ class TestCookies(BaseGrabTestCase):
         ]
 
         grab.go('http://www.foo.bar:%d' % self.server.port)
-        self.assertEqual(dict(grab.response.cookies.items()), {'foo': 'foo'})
+        self.assertEqual(dict(grab.doc.cookies.items()), {'foo': 'foo'})
 
         grab.go('http://www.foo.bar:%d' % self.server.port)
         self.assertEqual('foo',
@@ -262,12 +271,15 @@ class TestCookies(BaseGrabTestCase):
         grab.go(self.server.get_url('/admin/zz'))
         self.assertEqual(2, len(self.server.request['cookies']))
 
-    @exclude_grab_transport('urllib3')
+    @only_grab_transport('pycurl')
     def test_common_case_www_domain(self):
+        import pycurl
+
         grab = build_grab()
         names = [
             'www.foo.bar:%d:127.0.0.1' % self.server.port,
         ]
+        grab.setup_transport('pycurl')
         grab.transport.curl.setopt(pycurl.RESOLVE, names)
 
         # Cookies are set for root domain (not for www subdomain)
@@ -302,7 +314,7 @@ class TestCookies(BaseGrabTestCase):
             self.assertEqual(2, len(self.server.request['cookies'].items()))
 
     def test_cookie_merging_replace(self):
-        grab = Grab()
+        grab = build_grab()
         grab.cookies.set('foo', 'bar', self.server.address)
         grab.cookies.set('foo', 'bar2', self.server.address)
         self.assertEqual(1, len(grab.cookies.items()))
