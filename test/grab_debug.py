@@ -212,4 +212,4 @@ class TestCookies(BaseGrabTestCase):
             # request_counter is None and formatted as "NA"
             self.assertEqual('NA', args[1])
 
-        grab.log_request() #should not raise exception
+        grab.log_request() # should not raise exception
