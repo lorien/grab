@@ -5,7 +5,7 @@ cssselect
 feedparser
 flake8
 selenium
-test_server
+test_server>=0.0.27b1
 tornado
 mock
 runscript
