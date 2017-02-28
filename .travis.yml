@@ -17,7 +17,7 @@ matrix:
   include:
     - os: linux
       python: 3.4
-      env: TOX_ENV=quality
+      env: TOX_ENV=qa
     - os: linux
       env: TOX_ENV=py27
     - os: linux

@@ -1,4 +1,17 @@
-include LICENSE
-include README.rst
+recursive-include docs *
+recursive-exclude docs *.pyc __pycache__
+recursive-include script *.py
+recursive-include test *
+recursive-exclude test *.pyc __pycache__
 include CHANGELOG.md
-recursive-include grab/util/default_project *
+include .flake8
+include LICENSE
+include Makefile
+include pylintrc
+include README.rst
+include requirements_dev_backend.txt
+include requirements_dev.txt
+include requirements_readthedocs.txt
+include runtest.py
+include test_settings.py
+include tox.ini
