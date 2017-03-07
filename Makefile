@@ -36,7 +36,7 @@ clean:
 	find -name '__pycache__' -delete
 
 upload:
-	python setup.py clean sdist upload
+	git push --tags; python setup.py clean sdist upload
 
 doc_open:
 	x-www-browser docs/en/build/html/index.html
