@@ -20,6 +20,7 @@ import six
 from six.moves.urllib.parse import urljoin
 from weblib.html import find_base_url
 from weblib.http import normalize_http_values, normalize_unicode
+import inspect
 
 from grab.document import Document
 from grab import error
@@ -274,7 +275,7 @@ class Grab(DeprecatedThings):
             self.transport = transport_param()
         else:
             raise error.GrabMisuseError('Option `transport` should be string '
-                                        'or callable. Got %s'
+                                        'or class or callable. Got %s'
                                         % type(transport_param))
 
     def reset(self):
