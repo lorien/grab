@@ -1,5 +1,8 @@
-from grab.spider import Spider, Task
+import mock
 
+from six import StringIO
+
+from grab.spider import Spider, Task
 from test.util import BaseGrabTestCase, build_spider
 
 # That URLs breaks Grab's URL normalization process
@@ -70,3 +73,27 @@ class SpiderErrorTestCase(BaseGrabTestCase):
     #    self.server.response['callback'] = callback
     #    bot = TestSpider()
     #    bot.run()
+
+    def test_no_warning(self):
+        """Simple spider should not generate
+        any warnings (warning module sends messages to stderr)
+        """
+        out = StringIO()
+        with mock.patch('sys.stderr', out):
+            server = self.server
+            server.response['data'] = b'<div>test</div>'
+
+            class SimpleSpider(Spider):
+                # pylint: disable=unused-argument
+                initial_urls = [server.get_url()]
+
+                def task_initial(self, grab, task):
+                    yield Task('more', url=server.get_url())
+
+                def task_more(self, grab, task):
+                    print(grab.doc.url)
+                    grab.doc('//div').text()
+
+            bot = build_spider(SimpleSpider)
+            bot.run()
+        self.assertTrue(out.getvalue() == '')
