@@ -20,7 +20,6 @@ import six
 from six.moves.urllib.parse import urljoin
 from weblib.html import find_base_url
 from weblib.http import normalize_http_values, normalize_unicode
-import inspect
 
 from grab.document import Document
 from grab import error
