@@ -73,6 +73,7 @@ crawlers.
     spider/task_queue
     spider/cache
     spider/error_handling
+    spider/transport
 
 ..
     spider/proxy - new

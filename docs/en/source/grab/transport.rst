@@ -13,7 +13,7 @@ Pycurl transport
 The pycurl transport is the default network transport. You can control low-level options
 of pycurl object by accessing `Grab.transport.pycurl` object. For example:
 
-..  code:: shell
+..  code:: python
 
     from grab import Grab
     import pycurl
@@ -28,7 +28,7 @@ Urllib3 transport
 If you want to use Grab in gevent environment then consider to use urllib3 transport.
 The urllib3 uses native python sockets that could be patched by `gevent.monkey.patch_all`.
 
-..  code:: shell
+..  code:: python
 
     import gevent
     import gevent.monkey
@@ -64,7 +64,7 @@ your transport class to `transport` option.
 Here is the crazy example of wget-powered transport. Note that this is
 VERY simple transport that understands only one option: the URL.
 
-..  code:: shell
+..  code:: python
 
     from grab import Grab
     from grab.document import Document
