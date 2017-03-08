@@ -1,7 +1,6 @@
 # coding: utf-8
 from test.util import build_grab, temp_file
-from test.util import (BaseGrabTestCase, TEST_SERVER_PORT,
-                       EXTRA_PORT1, EXTRA_PORT2)
+from test.util import BaseGrabTestCase
 import six
 from grab.proxylist import BaseProxySource
 from test_server import TestServer
@@ -14,7 +13,7 @@ class TestProxy(BaseGrabTestCase):
     def setUpClass(cls):
         super(TestProxy, cls).setUpClass()
         cls.extra_servers = {}
-        for idx in range(3):
+        for _ in range(3):
             serv = TestServer(address=ADDRESS)
             serv.start()
             cls.extra_servers[serv.port] = {
@@ -36,7 +35,7 @@ class TestProxy(BaseGrabTestCase):
     def test_proxy_option(self):
         grab = build_grab()
 
-        proxy='%s:%s' % (ADDRESS, self.server.port)
+        proxy = '%s:%s' % (ADDRESS, self.server.port)
         grab.setup(proxy=proxy, proxy_type='http', debug=True)
         self.server.response['data'] = '123'
 
@@ -46,7 +45,7 @@ class TestProxy(BaseGrabTestCase):
 
     def test_deprecated_setup_proxylist(self):
         with temp_file() as tmp_file:
-            proxy='%s:%s' % (ADDRESS, self.server.port)
+            proxy = '%s:%s' % (ADDRESS, self.server.port)
             grab = build_grab()
             open(tmp_file, 'w').write(proxy)
             grab.load_proxylist(tmp_file, 'text_file')

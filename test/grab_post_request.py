@@ -99,7 +99,7 @@ class TestPostFeature(BaseGrabTestCase):
         self.assertEqual(self.server.request['data'], data.encode('utf-8'))
 
         # Now try cp1251 with charset option
-        self.server.request['charset'] = 'cp1251'#['charset'] = 'cp1251'
+        self.server.request['charset'] = 'cp1251'
         grab = build_grab()
         data = u'фыва'
         grab.setup(post=data, url=self.server.get_url(),
@@ -108,7 +108,7 @@ class TestPostFeature(BaseGrabTestCase):
         self.assertEqual(self.server.request['data'], data.encode('cp1251'))
 
         # Now try dict with unicode value & charset option
-        self.server.request['charset'] = 'cp1251'#['charset'] = 'cp1251'
+        self.server.request['charset'] = 'cp1251'
         grab = build_grab()
         data = u'фыва'
         grab.setup(post={'foo': data}, url=self.server.get_url(),

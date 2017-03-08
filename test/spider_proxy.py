@@ -19,7 +19,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
     def setUpClass(cls):
         super(TestSpiderProxyCase, cls).setUpClass()
         cls.extra_servers = {}
-        for idx in range(3):
+        for _ in range(3):
             serv = TestServer(address=ADDRESS)
             serv.start()
             cls.extra_servers[serv.port] = {
@@ -50,7 +50,6 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             bot.add_task(Task('baz', grab=Grab(url='http://yandex.ru',
                                                debug=True)))
             bot.run()
-            
             serv = [x['server'] for x in self.extra_servers.values()
                     if x['server'].request['done']][0]
             self.assertEqual(serv.request['headers']['host'], 'yandex.ru')
