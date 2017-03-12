@@ -75,7 +75,8 @@ class TestCookies(BaseGrabTestCase):
         ]
         self.server.response_once['code'] = 302
         grab.go(self.server.get_url())
-        self.assertEqual(self.server.request['cookies']['foo'].value, 'bar')
+        self.assertEqual(self.server.request['cookies']['foo']['value'],
+                         'bar')
 
     def test_load_dump(self):
         with temp_file() as tmp_file:
@@ -129,7 +130,7 @@ class TestCookies(BaseGrabTestCase):
             self.server.response['cookies'] = {'godzilla': 'monkey'}.items()
             grab.setup(cookiefile=tmp_file, debug=True)
             grab.go(self.server.get_url())
-            self.assertEqual(self.server.request['cookies']['spam'].value,
+            self.assertEqual(self.server.request['cookies']['spam']['value'],
                              'ham')
 
             # This is correct reslt of combining two cookies
@@ -247,7 +248,7 @@ class TestCookies(BaseGrabTestCase):
 
         grab.go('http://www.foo.bar:%d' % self.server.port)
         self.assertEqual('foo',
-                         self.server.request['cookies'].get('foo').value)
+                         self.server.request['cookies'].get('foo')['value'])
 
     def test_path(self):
         self.server.response['headers'] = [
@@ -292,8 +293,10 @@ class TestCookies(BaseGrabTestCase):
         grab.go('http://www.foo.bar:%d' % self.server.port)
         # submit cookies
         grab.go('http://www.foo.bar:%d' % self.server.port)
-        self.assertEqual('1', self.server.request['cookies'].get('foo').value)
-        self.assertEqual('2', self.server.request['cookies'].get('bar').value)
+        self.assertEqual('1', (self.server.request['cookies']
+                               .get('foo')['value']))
+        self.assertEqual('2', (self.server.request['cookies']
+                               .get('bar')['value']))
 
     def test_cookie_merging_replace_with_cookies_option(self):
         with temp_file() as tmp_file:

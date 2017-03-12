@@ -75,7 +75,7 @@ class TestCookies(BaseGrabTestCase):
         curl.setopt(pycurl.URL, self.server.get_url())
         curl.perform()
         self.assertEqual(2, len(self.server.request['cookies']))
-        self.assertEqual('bar', self.server.request['cookies']['foo'].value)
+        self.assertEqual('bar', self.server.request['cookies']['foo']['value'])
         self.assertEqual(set(('foo', '1')),
                          set(self.server.request['cookies'].keys()))
 
