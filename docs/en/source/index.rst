@@ -54,6 +54,7 @@ Grab User Manual
     grab/response_search
     grab/pycurl
     grab/response
+    grab/transport
 
 
 .. _spider_toc:
@@ -72,6 +73,7 @@ crawlers.
     spider/task_queue
     spider/cache
     spider/error_handling
+    spider/transport
 
 ..
     spider/proxy - new

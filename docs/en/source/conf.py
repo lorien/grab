@@ -36,6 +36,8 @@ MOCK_MODULES = [
     'lxml.html',
     'lxml.etree',
     'pycurl',
+    'defusedxml',
+    'defusedxml.lxml',
 ]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 

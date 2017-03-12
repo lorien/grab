@@ -38,5 +38,5 @@ clean:
 upload:
 	git push --tags; python setup.py clean sdist upload
 
-doc_open:
+viewdoc:
 	x-www-browser docs/en/build/html/index.html
