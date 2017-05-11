@@ -265,7 +265,12 @@ class Urllib3Transport(BaseTransport):
         except exceptions.ConnectTimeoutError as ex:
             raise error.GrabConnectionError('Could not create connection')
         except exceptions.ProtocolError as ex:
-            raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
+            # TODO:
+            # the code
+            # raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
+            # fails
+            # with error TypeError: 'OSError' object is not subscriptable
+            raise error.GrabConnectionError('ProtocolError')#ex.args[1][0], ex.args[1][1])
 
         # WTF?
         self.request_head = b''
