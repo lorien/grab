@@ -15,6 +15,7 @@ from urllib3.fields import RequestField
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
 from urllib3.exceptions import ProxySchemeUnknown
+from urllib3.contrib.socks import SOCKSProxyManager
 from six.moves.urllib.parse import urlsplit
 from six.moves.http_cookiejar import CookieJar
 import six
@@ -232,11 +233,10 @@ class Urllib3Transport(BaseTransport):
             else:
                 headers = None
             proxy_url = '%s://%s' % (req.proxy_type, req.proxy)
-            try:
+            if req.proxy_type == 'socks5':
+                pool = SOCKSProxyManager(proxy_url)#, proxy_headers=headers)
+            else:
                 pool = ProxyManager(proxy_url, proxy_headers=headers)
-            except ProxySchemeUnknown:
-                raise GrabMisuseError('Urllib3 transport does not support'
-                                      ' %s proxies' % req.proxy_type)
         else:
             pool = self.pool
         try:
