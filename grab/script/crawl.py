@@ -36,6 +36,8 @@ def setup_arg_parser(parser):
                         help='Run task handlers (HTML parsers) in separate '
                              'processes')
     parser.add_argument('--parser-pool-size', type=int)
+    parser.add_argument('--grab-transport')
+    parser.add_argument('--spider-transport')
 
 
 def get_lock_key(spider_name, lock_key=None, ignore_lock=False):
@@ -77,6 +79,8 @@ def main(spider_name, thread_number=None,
          parser_pool_size=None,
          grab_log_file=None,
          network_log_file=None,
+         spider_transport=None,
+         grab_transport=None,
          **kwargs): # pylint: disable=unused-argument
     default_logging(
         grab_log=grab_log_file,
@@ -104,6 +108,9 @@ def main(spider_name, thread_number=None,
         http_api_port=api_port,
         mp_mode=mp_mode,
         parser_pool_size=parser_pool_size,
+        transport=spider_transport,
+        grab_transport=grab_transport,
+
     )
     opt_queue = spider_config.get('queue')
     if opt_queue:
