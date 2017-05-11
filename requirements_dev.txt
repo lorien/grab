@@ -20,3 +20,4 @@ item;platform_system!="Windows"
 pylint
 psutil
 tox
+pysocks
