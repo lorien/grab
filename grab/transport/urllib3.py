@@ -14,7 +14,6 @@ from urllib3.filepost import encode_multipart_formdata
 from urllib3.fields import RequestField
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
-from urllib3.exceptions import ProxySchemeUnknown
 from urllib3.contrib.socks import SOCKSProxyManager
 from six.moves.urllib.parse import urlsplit
 from six.moves.http_cookiejar import CookieJar
@@ -234,7 +233,7 @@ class Urllib3Transport(BaseTransport):
                 headers = None
             proxy_url = '%s://%s' % (req.proxy_type, req.proxy)
             if req.proxy_type == 'socks5':
-                pool = SOCKSProxyManager(proxy_url)#, proxy_headers=headers)
+                pool = SOCKSProxyManager(proxy_url) # , proxy_headers=headers)
             else:
                 pool = ProxyManager(proxy_url, proxy_headers=headers)
         else:
@@ -260,17 +259,17 @@ class Urllib3Transport(BaseTransport):
                                body=req.data, timeout=timeout,
                                retries=retry, headers=req.headers,
                                preload_content=False)
-        except exceptions.ReadTimeoutError as ex:
+        except exceptions.ReadTimeoutError:
             raise error.GrabTimeoutError('Read timeout')
-        except exceptions.ConnectTimeoutError as ex:
+        except exceptions.ConnectTimeoutError:
             raise error.GrabConnectionError('Could not create connection')
-        except exceptions.ProtocolError as ex:
+        except exceptions.ProtocolError:
             # TODO:
             # the code
             # raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
             # fails
             # with error TypeError: 'OSError' object is not subscriptable
-            raise error.GrabConnectionError('ProtocolError')#ex.args[1][0], ex.args[1][1])
+            raise error.GrabConnectionError('ProtocolError')
 
         # WTF?
         self.request_head = b''
