@@ -40,7 +40,7 @@ def setup_arg_parser(parser):
     parser.add_argument('--spider-transport')
 
 
-def get_lock_key(spider_name, lock_key=None, ignore_lock=False):
+def get_lock_key(spider_name, lock_key=None, ignore_lock=False, **kwargs):
     # --ignore-lock has highest precedence
     if ignore_lock:
         return None
