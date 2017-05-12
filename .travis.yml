@@ -87,6 +87,9 @@ matrix:
     - env: TOX_ENV=py34-threaded-urllib3
     - env: TOX_ENV=py35-threaded-urllib3
     - env: TOX_ENV=py36-threaded-urllib3
+    - env:
+        - TOX_ENV=py35-threaded-urllib3
+        - PYENV_VERSION="3.5.3"
 
 # Enable extra mongodb and redis services on linux
 # Mysql and postgres services are enabled on linux by default
