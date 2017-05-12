@@ -9,7 +9,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
     def test_data_nohandler_error(self):
         class TestSpider(Spider):
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 yield Data('foo', num=1)
 
         bot = build_spider(TestSpider)
@@ -19,7 +19,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
     def test_exception_from_data_handler(self):
         class TestSpider(Spider):
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 yield Data('foo', num=1)
 
             def data_foo(self, num): # pylint: disable=unused-argument
@@ -37,7 +37,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
                 # pylint: disable=attribute-defined-outside-init
                 self.data_processed = []
 
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 yield Data('foo', number=1)
 
             def data_foo(self, number):
@@ -55,7 +55,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
                 # pylint: disable=attribute-defined-outside-init
                 self.data_processed = []
 
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 yield Data('foo', one=1, two=2, bar='gaz')
 
             def data_foo(self, one, two, **kwargs):
@@ -88,7 +88,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
                 # pylint: disable=attribute-defined-outside-init
                 self.data_processed = []
 
-            def task_page(self, dummy_grab, task):
+            def task_page(self, unused_grab, task):
                 yield Data('foo', count=task.get('count', 1))
 
             def data_foo(self, count):

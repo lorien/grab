@@ -10,7 +10,7 @@ from grab.spider.error import SpiderMisuseError
 
 class SpiderQueueMixin(object):
     class SimpleSpider(Spider):
-        def task_page(self, dummy_grab, task):
+        def task_page(self, unused_grab, task):
             self.stat.collect('url_history', task.url)
             self.stat.collect('priority_history', task.priority)
 
@@ -75,7 +75,7 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
                 yield Task('page', url=server.get_url(), delay=3, num=4)
                 yield Task('page', url=server.get_url(), num=1)
 
-            def task_page(self, dummy_grab, task):
+            def task_page(self, unused_grab, task):
                 self.stat.collect('numbers', task.num)
 
         bot = build_spider(TestSpider, thread_number=1)
@@ -117,7 +117,7 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
                 yield Task('page', url=server.get_url(), delay=0.5, num=3)
                 yield Task('page', url=server.get_url(), delay=1, num=4)
 
-            def task_page(self, dummy_grab, task):
+            def task_page(self, unused_grab, task):
                 self.stat.collect('numbers', task.num)
 
         bot = build_spider(TestSpider)

@@ -9,7 +9,7 @@ from grab.proxylist import BaseProxySource, Proxy
 
 
 class SimpleSpider(Spider):
-    def task_baz(self, grab, dummy_task):
+    def task_baz(self, grab, unused_task):
         self.stat.collect('ports',
                           int(grab.doc.headers.get('Listen-Port', 0)))
 
@@ -127,7 +127,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
         proxy_port = self.server.port
 
         class TestSpider(Spider):
-            def task_page(self, grab, dummy_task):
+            def task_page(self, grab, unused_task):
                 self.stat.collect(
                     'ports', int(grab.doc.headers.get('Listen-Port', 0)))
 

@@ -15,7 +15,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             # pylint: disable=attribute-defined-outside-init
             self.foo_count = 1
 
-        def task_page(self, dummy_grab, task):
+        def task_page(self, unused_grab, task):
             self.foo_count += 1
             if not task.get('last'):
                 yield Task('page', url=self.meta['url'], last=True)
@@ -24,7 +24,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             pass
 
         @integrity('check_integrity')
-        def task_page2(self, dummy_grab, task):
+        def task_page2(self, unused_grab, task):
             #if True:#not task.get('last'):
             yield task.clone(last=True)
 
@@ -70,7 +70,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 for _ in range(3):
                     yield Task('page', url=url)
 
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 self.stat.collect('pid', os.getpid())
 
         bot = TestSpider(mp_mode=True, parser_pool_size=1)

@@ -17,11 +17,11 @@ class MiscTest(BaseGrabTestCase):
             def task_generator(self):
                 yield Task('one', url=server.get_url())
 
-            def task_one(self, grab, dummy_task):
+            def task_one(self, grab, unused_task):
                 self.stat.inc('page_count')
                 yield Task('two', grab=grab)
 
-            def task_two(self, dummy_grab, dummy_task):
+            def task_two(self, unused_grab, unused_task):
                 self.stat.inc('page_count')
 
         bot = build_spider(SimpleSpider, thread_number=1)

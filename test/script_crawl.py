@@ -18,7 +18,7 @@ class TestSpider(Spider):
         #print('A')
         yield Task('page', url=self.url)
 
-    def task_page(self, grab, dummy_task):
+    def task_page(self, grab, unused_task):
         #print('B')
         self.points.append(grab.doc.body)
 
@@ -27,7 +27,7 @@ class FailSpider(Spider):
     def task_generator(self):
         yield Task('page', url=self.url)
 
-    def task_page(self, dummy_grab, dummy_task):
+    def task_page(self, unused_grab, unused_task):
         raise Exception('Shit happens!')
 
 
