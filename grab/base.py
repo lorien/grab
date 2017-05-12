@@ -26,7 +26,6 @@ from grab import error
 from grab.cookie import CookieManager
 from grab.proxylist import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
-from grab.util.warning import warn
 
 __all__ = ('Grab',)
 # This counter will used in enumerating network queries.

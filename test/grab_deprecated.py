@@ -1,23 +1,25 @@
 # coding: utf-8
 import re
-import warnings
 
 from weblib.error import DataNotFound
 
 from test.util import build_grab, temp_file
 from test.util import BaseGrabTestCase
 from grab.error import GrabMisuseError
-import grab.util.warning
 
 
 class GrabApiTestCase(BaseGrabTestCase):
     @classmethod
     def setUpClass(cls):
+        import grab.util.warning
+
         grab.util.warning.DISABLE_WARNINGS = True
         super(GrabApiTestCase, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
+        import grab.util.warning
+
         grab.util.warning.DISABLE_WARNINGS = False
         super(GrabApiTestCase, cls).tearDownClass()
 

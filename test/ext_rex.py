@@ -46,12 +46,16 @@ class ExtensionRexTestCase(BaseGrabTestCase):
     def test_rex(self):
         # Search unicode rex in unicode body - default case
         rex = re.compile(u'(фыва)', re.U)
+        # pylint: disable=no-member
         self.assertEqual(u'фыва', self.grab.doc.rex_search(rex).group(1))
+        # pylint: enable=no-member
 
         # Search non-unicode rex in byte-string body
         rex = re.compile(u'(фыва)'.encode('cp1251'))
+        # pylint: disable=no-member
         self.assertEqual(u'фыва'.encode('cp1251'),
                          self.grab.doc.rex_search(rex, byte=True).group(1))
+        # pylint: enable=no-member
 
         # # Search for non-unicode rex in unicode body should fail
         pattern = '(фыва)'
@@ -63,7 +67,8 @@ class ExtensionRexTestCase(BaseGrabTestCase):
 
         # # Search for unicode rex in byte-string body shuld fail
         rex = re.compile(u'фыва', re.U)
-        self.assertRaises(DataNotFound, lambda: self.grab.doc.rex_search(rex, byte=True))
+        self.assertRaises(DataNotFound,
+                          lambda: self.grab.doc.rex_search(rex, byte=True))
 
         # # Search for unexesting fragment
         rex = re.compile(u'(фыва2)', re.U)
@@ -71,7 +76,9 @@ class ExtensionRexTestCase(BaseGrabTestCase):
 
     def test_assert_rex(self):
         self.grab.doc.rex_assert(re.compile(u'фыва'))
-        self.grab.doc.rex_assert(re.compile(u'фыва'.encode('cp1251')), byte=True)
+        self.grab.doc.rex_assert(re.compile(u'фыва'.encode('cp1251')),
+                                 byte=True)
 
     def test_assert_rex_text(self):
-        self.assertEqual(u'ха', self.grab.doc.rex_text('<em id="fly-em">([^<]+)'))
+        self.assertEqual(u'ха',
+                         self.grab.doc.rex_text('<em id="fly-em">([^<]+)'))

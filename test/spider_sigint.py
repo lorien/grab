@@ -36,7 +36,6 @@ import signal
 import time
 from subprocess import Popen
 import platform
-import logging
 
 from psutil import Process, NoSuchProcess
 
@@ -154,7 +153,7 @@ class BaseKeyboardInterruptTestCase(object):
                             time.sleep(1)
                 #logging.error('step-4')
                 ret = None
-                for step in range(20):
+                for _ in range(20):
                     #print('before proc-poll-%d' % step)
                     ret = proc.poll()
                     if ret is not None:

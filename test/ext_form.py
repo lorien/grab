@@ -90,7 +90,8 @@ class TestHtmlForms(BaseGrabTestCase):
         # raise errors
         self.assertRaises(DataNotFound, self.grab.doc.choose_form, 10)
         self.assertRaises(DataNotFound, self.grab.doc.choose_form, id='bad_id')
-        self.assertRaises(DataNotFound, self.grab.doc.choose_form, id='fake_form')
+        self.assertRaises(DataNotFound, self.grab.doc.choose_form,
+                          id='fake_form')
         self.assertRaises(GrabMisuseError, self.grab.doc.choose_form)
 
         # check results
@@ -191,7 +192,8 @@ class TestHtmlForms(BaseGrabTestCase):
         # pylint: enable=no-member,protected-access
 
         # pylint: disable=no-member,protected-access
-        self.assertRaises(KeyError, lambda: grab.doc.set_input('query', 'asdf'))
+        self.assertRaises(KeyError,
+                          lambda: grab.doc.set_input('query', 'asdf'))
         # pylint: enable=no-member,protected-access
 
         grab.doc._lxml_form = None # pylint: disable=protected-access
@@ -231,7 +233,8 @@ class TestHtmlForms(BaseGrabTestCase):
             <input name="bar" id="bar" type="text">
         '''
         grab = build_grab(html)
-        grab.doc.set_input_by_xpath('//input[re:test(@id, "^ba")]', 'bar-value')
+        grab.doc.set_input_by_xpath('//input[re:test(@id, "^ba")]',
+                                    'bar-value')
         grab.doc.submit(make_request=False)
         self.assertEqual(
             set([('foo', None), ('bar', 'bar-value')]),

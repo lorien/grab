@@ -43,7 +43,8 @@ class TextExtensionTest(BaseGrabTestCase):
         self.grab.setup_document(HTML, charset='cp1251')
 
     def test_search(self):
-        self.assertTrue(self.grab.doc.text_search(u'фыва'.encode('cp1251'), byte=True))
+        self.assertTrue(self.grab.doc.text_search(u'фыва'.encode('cp1251'),
+                                                  byte=True))
         self.assertTrue(self.grab.doc.text_search(u'фыва'))
         self.assertFalse(self.grab.doc.text_search(u'фыва2'))
 
@@ -64,7 +65,8 @@ class TextExtensionTest(BaseGrabTestCase):
     def test_assert_substrings(self):
         self.grab.doc.text_assert_any((u'фыва',))
         self.grab.doc.text_assert_any((u'фывы нет', u'фыва'))
-        self.grab.doc.text_assert_any((u'фыва'.encode('cp1251'), 'где ты фыва?'),
-                                    byte=True)
+        self.grab.doc.text_assert_any((u'фыва'.encode('cp1251'),
+                                       'где ты фыва?'),
+                                      byte=True)
         self.assertRaises(DataNotFound, self.grab.doc.text_assert_any,
                           (u'фыва, вернись', u'фыва-а-а-а'))

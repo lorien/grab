@@ -16,16 +16,20 @@ class LXMLExtensionTest(BaseGrabTestCase):
         grab.go(self.server.get_url())
 
         # By default &#[128-160]; are fixed
-        self.assertFalse(grab.doc.select('//strong/text()').text() == six.unichr(151))
-        self.assertTrue(grab.doc.select('//strong/text()').text() == six.unichr(8212))
+        self.assertFalse(grab.doc.select('//strong/text()').text()
+                         == six.unichr(151))
+        self.assertTrue(grab.doc.select('//strong/text()').text()
+                        == six.unichr(8212))
 
         # disable fix-behaviour
         grab.setup(fix_special_entities=False)
         grab.go(self.server.get_url())
 
         # By default &#[128-160]; are fixed
-        self.assertTrue(grab.doc.select('//strong/text()').text() == six.unichr(151))
-        self.assertFalse(grab.doc.select('//strong/text()').text() == six.unichr(8212))
+        self.assertTrue(grab.doc.select('//strong/text()').text()
+                        == six.unichr(151))
+        self.assertFalse(grab.doc.select('//strong/text()').text()
+                         == six.unichr(8212))
 
         # Explicitly use unicode_body func
         grab = build_grab()
