@@ -63,9 +63,8 @@ matrix:
       env:
         - TOX_ENV=py36
         - PYENV_VERSION="3.6.0"
-  exclude:
-    - python: 2.7 # hack to exclude default no-env travis job
-  allow_failures:
+
+     # threaded + urllib3
     - os: linux
       env: TOX_ENV=py27-threaded-urllib3
     - os: linux
@@ -81,6 +80,13 @@ matrix:
       env:
         - TOX_ENV=py35-threaded-urllib3
         - PYENV_VERSION="3.5.3"
+  exclude:
+    - python: 2.7 # hack to exclude default no-env travis job
+  allow_failures:
+    - env: TOX_ENV=py27-threaded-urllib3
+    - env: TOX_ENV=py34-threaded-urllib3
+    - env: TOX_ENV=py35-threaded-urllib3
+    - env: TOX_ENV=py36-threaded-urllib3
 
 # Enable extra mongodb and redis services on linux
 # Mysql and postgres services are enabled on linux by default
