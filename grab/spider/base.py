@@ -319,7 +319,14 @@ class Spider(object):
             if raise_error:
                 raise ex
             else:
-                logger.error('', exc_info=ex)
+                # Just want to print traceback
+                # Do this to avoid the error
+                # http://bugs.python.org/issue23003
+                # FIXME: use something less awkward
+                try:
+                    raise ex
+                except SpiderError as ex:
+                    logger.error('', exc_info=ex)
                 return False
 
         # TODO: keep original task priority if it was set explicitly
