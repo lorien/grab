@@ -42,7 +42,8 @@ class TestSpiderProxyCase(BaseGrabTestCase):
         with temp_file() as proxy_file:
             content = '\n'.join(x['proxy'] for x in
                                 self.extra_servers.values())
-            open(proxy_file, 'w').write(content)
+            with open(proxy_file, 'w') as out:
+                out.write(content)
             # Simple test, one task
             bot = build_spider(SimpleSpider, thread_number=1)
             bot.load_proxylist(proxy_file, 'text_file')
@@ -59,7 +60,8 @@ class TestSpiderProxyCase(BaseGrabTestCase):
         with temp_file() as proxy_file:
             content = '\n'.join(x['proxy'] for x in
                                 self.extra_servers.values())
-            open(proxy_file, 'w').write(content)
+            with open(proxy_file, 'w') as out:
+                out.write(content)
 
             # By default auto_change is True
             bot = build_spider(SimpleSpider, thread_number=1)
@@ -79,7 +81,8 @@ class TestSpiderProxyCase(BaseGrabTestCase):
         with temp_file() as proxy_file:
             content = '\n'.join(x['proxy'] for x in
                                 self.extra_servers.values())
-            open(proxy_file, 'w').write(content)
+            with open(proxy_file, 'w') as out:
+                out.write(content)
 
             # Disable auto_change
             # By default auto_init is True
@@ -101,7 +104,8 @@ class TestSpiderProxyCase(BaseGrabTestCase):
         with temp_file() as proxy_file:
             content = '\n'.join(x['proxy'] for x in
                                 self.extra_servers.values())
-            open(proxy_file, 'w').write(content)
+            with open(proxy_file, 'w') as out:
+                out.write(content)
             # Disable auto_change
             # Disable auto_init
             # Proxylist will not be used by default

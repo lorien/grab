@@ -12,8 +12,8 @@ class TestContentLimit(BaseGrabTestCase):
         grab.setup(nobody=True)
         self.server.response['get.data'] = 'foo'
         grab.go(self.server.get_url())
-        self.assertEqual(b'', grab.response.body)
-        self.assertTrue(len(grab.response.head) > 0)
+        self.assertEqual(b'', grab.doc.body)
+        self.assertTrue(len(grab.doc.head) > 0)
 
     def test_body_maxsize(self):
         grab = build_grab()
@@ -21,4 +21,4 @@ class TestContentLimit(BaseGrabTestCase):
         self.server.response['get.data'] = 'x' * 1024 * 1024
         grab.go(self.server.get_url())
         # Should be less 50kb
-        self.assertTrue(len(grab.response.body) < 50000)
+        self.assertTrue(len(grab.doc.body) < 50000)

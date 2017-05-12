@@ -13,7 +13,7 @@ class GrabXMLProcessingTestCase(BaseGrabTestCase):
             b'<root><foo>foo</foo></root>'
         grab = build_grab()
         grab.go(self.server.get_url())
-        self.assertTrue(grab.xpath_one('//foo').text == 'foo')
+        self.assertTrue(grab.doc.select('//foo').text() == 'foo')
 
     def test_declaration_bug(self):
         """
@@ -26,10 +26,10 @@ class GrabXMLProcessingTestCase(BaseGrabTestCase):
         xml = b'<?xml version="1.0" encoding="UTF-8"?>'\
               b'<tree><leaf>text</leaf></tree>'
         grab = build_grab(document_body=xml)
-        self.assertTrue(grab.search(u'text'))
-        self.assertEqual(grab.xpath_one('//leaf').text, u'text')
+        self.assertTrue(grab.doc.text_search(u'text'))
+        self.assertEqual(grab.doc.select('//leaf').text(), u'text')
 
         # Similar bugs
         grab = build_grab(document_body=xml)
-        self.assertTrue(grab.rex(u'text'))
-        self.assertEqual(grab.xpath_one('//leaf').text, u'text')
+        self.assertTrue(grab.doc.rex_search(u'text'))
+        self.assertEqual(grab.doc.select('//leaf').text(), u'text')

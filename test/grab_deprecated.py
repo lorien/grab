@@ -1,14 +1,26 @@
 # coding: utf-8
 import re
+import warnings
 
 from weblib.error import DataNotFound
 
 from test.util import build_grab, temp_file
 from test.util import BaseGrabTestCase
 from grab.error import GrabMisuseError
+import grab.util.warning
 
 
 class GrabApiTestCase(BaseGrabTestCase):
+    @classmethod
+    def setUpClass(cls):
+        grab.util.warning.DISABLE_WARNINGS = True
+        super(GrabApiTestCase, cls).setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        grab.util.warning.DISABLE_WARNINGS = False
+        super(GrabApiTestCase, cls).tearDownClass()
+
     def setUp(self):
         self.server.reset()
 
@@ -82,11 +94,12 @@ class GrabApiTestCase(BaseGrabTestCase):
         data = b'''<form><input type="text" id="f" name="foo" value="val">
             </form>'''
         grab = build_grab(data)
-        self.assertEqual(grab.doc('//form').node(), grab.form)
+        self.assertEqual(grab.doc('//form').node(), grab.doc.form)
 
     def test_load_proxylist_text_file(self):
         with temp_file() as proxy_file:
-            open(proxy_file, 'w').write('1.1.1.1:8080')
+            with open(proxy_file, 'w') as out:
+                out.write('1.1.1.1:8080')
             grab = build_grab()
             grab.load_proxylist(proxy_file, 'text_file', auto_init=True,
                                 auto_change=False)
@@ -106,9 +119,9 @@ class GrabApiTestCase(BaseGrabTestCase):
 
     def test_response_property(self):
         grab = build_grab()
-        self.assertEqual(grab.response, grab.doc)
-        grab.response = grab.doc
-        self.assertEqual(grab.response, grab.doc)
+        self.assertEqual(grab.doc, grab.doc)
+        grab.doc = grab.doc
+        self.assertEqual(grab.doc, grab.doc)
 
     def test_pyquery(self):
         data = b'''<form><input type="text" id="f" name="foo" value="val">

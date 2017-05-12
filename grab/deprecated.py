@@ -81,7 +81,7 @@ class DeprecatedThings(object):
         """
 
         if make_absolute:
-            self.tree.make_links_absolute(self.response.url)
+            self.tree.make_links_absolute(self.doc.url)
 
         if isinstance(href_pattern, six.text_type):
             raise GrabMisuseError('Method `find_link` accepts only '
@@ -101,7 +101,7 @@ class DeprecatedThings(object):
         """
 
         if make_absolute:
-            self.tree.make_links_absolute(self.response.url)
+            self.tree.make_links_absolute(self.doc.url)
 
         for elem, _, link, _ in self.tree.iterlinks():
             if elem.tag == 'a':

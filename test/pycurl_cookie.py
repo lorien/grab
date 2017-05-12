@@ -52,7 +52,7 @@ class TestCookies(BaseGrabTestCase):
         curl.perform()
         self.assertEqual(b'foo', buf.getvalue())
 
-        print(curl.getinfo(pycurl.INFO_COOKIELIST))
+        #print(curl.getinfo(pycurl.INFO_COOKIELIST))
         self.assertEqual(2, len(curl.getinfo(pycurl.INFO_COOKIELIST)))
 
         # Just make another request and check that pycurl has

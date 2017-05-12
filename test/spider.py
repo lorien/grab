@@ -8,7 +8,7 @@ from test.util import BaseGrabTestCase, build_spider
 
 class SimpleSpider(Spider):
     def task_baz(self, grab, dummy_task):
-        self.stat.collect('SAVED_ITEM', grab.response.body)
+        self.stat.collect('SAVED_ITEM', grab.doc.body)
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):

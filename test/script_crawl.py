@@ -15,12 +15,12 @@ class TestSpider(Spider):
         del self.points[:]
 
     def task_generator(self):
-        print('A')
+        #print('A')
         yield Task('page', url=self.url)
 
     def task_page(self, grab, dummy_task):
-        print('B')
-        self.points.append(grab.response.body)
+        #print('B')
+        self.points.append(grab.doc.body)
 
 
 class FailSpider(Spider):

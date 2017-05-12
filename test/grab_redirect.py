@@ -52,7 +52,7 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         grab = build_grab()
         grab.go(self.server.get_url())
         self.assertEqual(self.server.request['path'], '/')
-        self.assertEqual(grab.response.url, self.server.get_url())
+        self.assertEqual(grab.doc.url, self.server.get_url())
 
     def test_follow_refresh_on(self):
         meta_url = self.server.get_url('/foo')
@@ -63,7 +63,7 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         grab.setup(follow_refresh=True)
         grab.go(self.server.get_url())
         self.assertEqual(self.server.request['path'], '/foo')
-        self.assertEqual(grab.response.url, meta_url)
+        self.assertEqual(grab.doc.url, meta_url)
 
     def test_spaces_in_refresh_url(self):
         meta_url = self.server.get_url('/foo')
@@ -74,7 +74,7 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         grab.setup(follow_refresh=True)
         grab.go(self.server.get_url())
         self.assertEqual(self.server.request['path'], '/foo')
-        self.assertEqual(grab.response.url, meta_url)
+        self.assertEqual(grab.doc.url, meta_url)
 
     def test_refresh_redirect_limit(self):
         self.server.response['get.callback'] =\

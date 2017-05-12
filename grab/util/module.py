@@ -24,7 +24,7 @@ def build_spider_registry(config):
             mod = __import__(path, None, None, ['foo'])
         except ImportError as ex:
             if path not in six.text_type(ex):
-                logging.error('', exc_info=ex)
+                logger.error('', exc_info=ex)
         else:
             for key in dir(mod):
                 if key == 'Spider':

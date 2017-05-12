@@ -84,19 +84,21 @@ class TestCookies(BaseGrabTestCase):
             cookies = {'foo': 'bar', 'spam': 'ham'}
             grab.setup(cookies=cookies)
             grab.go(self.server.get_url())
-            grab.dump_cookies(tmp_file)
-            self.assertEqual(set(cookies.items()),
-                             set((x['name'], x['value'])
-                                 for x in json.load(open(tmp_file))))
+            grab.cookies.save_to_file(tmp_file)
+            with open(tmp_file) as inp:
+                self.assertEqual(set(cookies.items()),
+                                 set((x['name'], x['value'])
+                                     for x in json.load(inp)))
 
             grab = build_grab()
             cookies = {'foo': 'bar', 'spam': u'begemot'}
             grab.setup(cookies=cookies)
             grab.go(self.server.get_url())
-            grab.dump_cookies(tmp_file)
-            self.assertEqual(set(cookies.items()),
-                             set((x['name'], x['value'])
-                                 for x in json.load(open(tmp_file))))
+            grab.cookies.save_to_file(tmp_file)
+            with open(tmp_file) as inp:
+                self.assertEqual(set(cookies.items()),
+                                 set((x['name'], x['value'])
+                                     for x in json.load(inp)))
 
             # Test load cookies
             grab = build_grab()
@@ -104,8 +106,9 @@ class TestCookies(BaseGrabTestCase):
                         'domain': self.server.address},
                        {'name': 'spam', 'value': u'begemot',
                         'domain': self.server.address}]
-            json.dump(cookies, open(tmp_file, 'w'))
-            grab.load_cookies(tmp_file)
+            with open(tmp_file, 'w') as out:
+                json.dump(cookies, out)
+            grab.cookies.load_from_file(tmp_file)
             self.assertEqual(set(grab.cookies.items()),
                              set((x['name'], x['value']) for x in cookies))
 
@@ -113,7 +116,8 @@ class TestCookies(BaseGrabTestCase):
         with temp_file() as tmp_file:
             grab = build_grab()
             # Empty file should not raise Exception
-            open(tmp_file, 'w').write('')
+            with open(tmp_file, 'w') as out:
+                out.write('')
             grab.setup(cookiefile=tmp_file)
             grab.go(self.server.get_url())
 
@@ -123,7 +127,8 @@ class TestCookies(BaseGrabTestCase):
 
             cookies = [{'name': 'spam', 'value': 'ham',
                         'domain': self.server.address}]
-            json.dump(cookies, open(tmp_file, 'w'))
+            with open(tmp_file, 'w') as out:
+                json.dump(cookies, out)
 
             # One cookie are sent in server reponse
             # Another cookies is passed via the `cookiefile` option
@@ -141,9 +146,10 @@ class TestCookies(BaseGrabTestCase):
                              set(grab.cookies.items()))
 
             # `cookiefile` file should contains merged cookies
-            self.assertEqual(set(merged_cookies),
-                             set((x['name'], x['value'])
-                                 for x in json.load(open(tmp_file))))
+            with open(tmp_file) as inp:
+                self.assertEqual(set(merged_cookies),
+                                 set((x['name'], x['value'])
+                                     for x in json.load(inp)))
 
             # Just ensure it works
             grab.go(self.server.get_url())
@@ -302,7 +308,8 @@ class TestCookies(BaseGrabTestCase):
         with temp_file() as tmp_file:
             init_cookies = [{'name': 'foo', 'value': 'bar',
                              'domain': self.server.address}]
-            json.dump(init_cookies, open(tmp_file, 'w'))
+            with open(tmp_file, 'w') as out:
+                json.dump(init_cookies, out)
 
             grab = build_grab(debug=True)
             grab.cookies.load_from_file(tmp_file)

@@ -28,7 +28,8 @@ class TestCookies(BaseGrabTestCase):
             self.assertEqual(os.listdir(tmp_dir), [])
             grab.go(self.server.get_url())
             self.assertEqual(os.listdir(tmp_dir), ['lograb.html'])
-            self.assertEqual(open(log_file_path).read(), 'omsk')
+            with open(log_file_path) as inp:
+                self.assertEqual(inp.read(), 'omsk')
 
     def test_log_dir_option(self):
         with temp_dir() as tmp_dir:
@@ -44,10 +45,10 @@ class TestCookies(BaseGrabTestCase):
             grab.go(self.server.get_url())
             self.assertEqual(sorted(os.listdir(tmp_dir)),
                              ['01.html', '01.log', '02.html', '02.log'])
-            self.assertEqual(open(os.path.join(tmp_dir, '01.html')).read(),
-                             'omsk1')
-            self.assertEqual(open(os.path.join(tmp_dir, '02.html')).read(),
-                             'omsk2')
+            with open(os.path.join(tmp_dir, '01.html')) as inp:
+                self.assertEqual(inp.read(), 'omsk1')
+            with open(os.path.join(tmp_dir, '02.html')) as inp:
+                self.assertEqual(inp.read(), 'omsk2')
 
     def test_log_dir_response_content(self):
         with temp_dir() as tmp_dir:
@@ -62,7 +63,8 @@ class TestCookies(BaseGrabTestCase):
             grab.go(self.server.get_url())
             self.assertEqual(sorted(os.listdir(tmp_dir)),
                              ['01.html', '01.log'])
-            log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
+            with open(os.path.join(tmp_dir, '01.log')) as inp:
+                log_file_content = inp.read()
             self.assertTrue('x-engine' in log_file_content.lower())
 
     def test_log_dir_response_content_thread(self):
@@ -85,7 +87,8 @@ class TestCookies(BaseGrabTestCase):
             files = os.listdir(tmp_dir)
             self.assertEqual(2, len([x for x in files if '01-thread' in x]))
             fname = [x for x in files if x.endswith('.log')][0]
-            log_file_content = open(os.path.join(tmp_dir, fname)).read()
+            with open(os.path.join(tmp_dir, fname)) as inp:
+                log_file_content = inp.read()
             self.assertTrue('x-engine' in log_file_content.lower())
 
     @exclude_grab_transport('urllib3')
@@ -108,7 +111,8 @@ class TestCookies(BaseGrabTestCase):
 
             self.assertEqual(sorted(os.listdir(tmp_dir)),
                              ['01.html', '01.log'])
-            log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
+            with open(os.path.join(tmp_dir, '01.log')) as inp:
+                log_file_content = inp.read()
             self.assertTrue('user-agent: perl' in log_file_content.lower())
 
     def test_log_dir_request_content_is_empty(self):
@@ -123,7 +127,8 @@ class TestCookies(BaseGrabTestCase):
             grab.go(self.server.get_url())
             self.assertEqual(sorted(os.listdir(tmp_dir)),
                              ['01.html', '01.log'])
-            log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
+            with open(os.path.join(tmp_dir, '01.log')) as inp:
+                log_file_content = inp.read()
             self.assertFalse('X-Name' in log_file_content)
             self.assertFalse('xxxPost' in log_file_content)
 
@@ -141,7 +146,8 @@ class TestCookies(BaseGrabTestCase):
             grab.go(self.server.get_url())
             self.assertEqual(sorted(os.listdir(tmp_dir)),
                              ['01.html', '01.log'])
-            log_file_content = open(os.path.join(tmp_dir, '01.log')).read()
+            with open(os.path.join(tmp_dir, '01.log')) as inp:
+                log_file_content = inp.read()
             #if not 'x-name' in log_file_content.lower():
             #    print('CONTENT OF 01.log:')
             #    print(log_file_content)

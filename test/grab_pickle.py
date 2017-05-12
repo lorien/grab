@@ -23,7 +23,7 @@ class TestGrab(BaseGrabTestCase):
         self.server.response['get.data'] =\
             '<form><textarea name="text">the cat</textarea></form>'
         grab.go(self.server.get_url())
-        grab.set_input('text', 'foobar')
+        grab.doc.set_input('text', 'foobar')
         data = pickle.dumps(grab, pickle.HIGHEST_PROTOCOL)
 
         def func(pickled_grab, resultq):

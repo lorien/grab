@@ -20,11 +20,11 @@ class GrabApiTestCase(BaseGrabTestCase):
         grab = build_grab()
         self.server.response['get.data'] = 'Moon'
         grab.go(self.server.get_url())
-        self.assertTrue(b'Moon' in grab.response.body)
+        self.assertTrue(b'Moon' in grab.doc.body)
         self.server.response['post.data'] = 'Foo'
         grab2 = grab.clone(method='post', post='')
         grab2.go(self.server.get_url())
-        self.assertTrue(b'Foo' in grab2.response.body)
+        self.assertTrue(b'Foo' in grab2.doc.body)
 
     def test_empty_clone(self):
         grab = build_grab()
@@ -37,7 +37,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         grab2 = build_grab()
         self.assertEqual(grab2.config['url'], None)
         grab2.adopt(grab)
-        self.assertTrue(b'Moon' in grab2.response.body)
+        self.assertTrue(b'Moon' in grab2.doc.body)
         self.assertEqual(grab2.config['url'], self.server.get_url())
 
     def test_empty_adopt(self):
@@ -48,7 +48,7 @@ class GrabApiTestCase(BaseGrabTestCase):
     def test_default_content_for_fake_response(self):
         content = b'<strong>test</strong>'
         grab = build_grab(document_body=content)
-        self.assertEqual(grab.response.body, content)
+        self.assertEqual(grab.doc.body, content)
 
     def test_inheritance(self):
         from grab import Grab

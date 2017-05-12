@@ -83,8 +83,24 @@ SPIDER_TEST_LIST = (
 )
 
 
-def main():
+def setup_logging():
     logging.basicConfig(level=logging.DEBUG)
+    for name, level in (
+        ('grab.network', logging.INFO),
+        ('tornado.access', logging.ERROR),
+        ('test.util', logging.INFO),
+        ('grab.util', logging.INFO),
+        ('grab.base', logging.INFO),
+        ('grab.spider.base', logging.INFO),
+        ('grab.spider.parser_pipeline', logging.INFO),
+        ('grab.stat', logging.INFO),
+    ):
+        logger = logging.getLogger(name)
+        logger.setLevel(level)
+
+
+def main():
+    setup_logging()
     parser = OptionParser()
     parser.add_option('-t', '--test', help='Run only specified tests')
     parser.add_option('--grab-transport', default='pycurl')
