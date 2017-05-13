@@ -177,6 +177,7 @@ class MulticurlTransport(object):
 
                 grab.doc.error_code = ecode
                 grab.doc.error_msg = emsg
+                grab.exception = grab_exc
 
                 # Free resources
                 del self.registry[curl_id]

@@ -2,6 +2,7 @@ import mock
 
 from six import StringIO
 
+from grab import GrabTimeoutError
 from grab.spider import Spider, Task
 from test.util import BaseGrabTestCase, build_spider
 
@@ -97,3 +98,24 @@ class SpiderErrorTestCase(BaseGrabTestCase):
             bot = build_spider(SimpleSpider)
             bot.run()
         self.assertTrue(out.getvalue() == '')
+
+    def test_grab_attribute_exception(self):
+        server = self.server
+        server.response['sleep'] = 2
+
+        class SimpleSpider(Spider):
+
+            def task_generator(self):
+                from grab import Grab
+                grab = Grab()
+                grab.setup(url=server.get_url(),
+                           timeout=1)
+                yield Task('page', grab=grab,
+                           raw=True)
+
+            def task_page(self, grab, unused_task):
+                self.meta['exc'] = grab.exception
+
+        bot = SimpleSpider()
+        bot.run()
+        self.assertTrue(isinstance(bot.meta['exc'], GrabTimeoutError))

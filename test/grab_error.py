@@ -33,3 +33,12 @@ class GrabErrorTestCase(TestCase):
             grab.go('http://%s' % NON_ROUTABLE_IP)
         except GrabNetworkError as ex: # pylint: disable=broad-except
             self.assertTrue(isinstance(ex.original_exc, ConnectTimeoutError))
+
+    def test_attribute_exception(self):
+        grab = build_grab()
+        self.assertTrue(grab.exception is None)
+        try:
+            grab.go('http://%s' % NON_ROUTABLE_IP)
+        except GrabNetworkError:
+            pass
+        self.assertTrue(isinstance(grab.exception, GrabNetworkError))

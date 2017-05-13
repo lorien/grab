@@ -189,7 +189,7 @@ class Grab(DeprecatedThings):
         'transport',
         'transport_param', 'request_method', 'request_counter',
         '__weakref__', 'cookies',
-        'meta',
+        'meta', 'exception',
 
         # Dirty hack to make it possible to inherit Grab from
         # multiple base classes with __slots__
@@ -221,6 +221,7 @@ class Grab(DeprecatedThings):
         self.config['common_headers'] = self.common_headers()
         self.cookies = CookieManager()
         self.proxylist = ProxyList()
+        self.exception = None
 
         # makes pylint happy
         self.request_counter = None
@@ -289,6 +290,7 @@ class Grab(DeprecatedThings):
         self.request_body = None
         self.request_method = None
         self.request_counter = None
+        self.exception = None
         if self.transport:
             self.transport.reset()
 
@@ -457,7 +459,8 @@ class Grab(DeprecatedThings):
 
             try:
                 self.transport.request()
-            except error.GrabError:
+            except error.GrabError as ex:
+                self.exception = ex
                 self.reset_temporary_options()
                 if self.config['log_dir']:
                     self.save_failed_dump()
