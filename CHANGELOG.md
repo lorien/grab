@@ -1,5 +1,20 @@
 # Grab Change Log
 
+## [0.6.37] - 2017-05-13
+### Added
+- Add --spider-transport and --grab-transport options to crawl script
+- Add SOCKS5 proxy support in urllib3 transport
+
+### Fixed
+- Fix #237: urllib3 transport fails without pycurl installed
+- Fix bug: incorrect spider request logging when cache is enabled
+- Fix bug: crawl script fails while trying to process a lock key
+- Fix bug: urllib3 transport fails while trying to throw GrabConnectionError exception
+- Fix bug: Spider add_task method fails while trying to log invalid URL error
+
+# Removed
+- Remove obsoleted hammer_mode and hammer_timeout config options
+
 ## [0.6.36] - 2017-02-12
 ### Added
 - Add pylint to default test set
