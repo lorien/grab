@@ -30,12 +30,14 @@ def worker_thread(task_queue, result_queue, freelist, shutdown_event):
                     'grab': grab,
                     'grab_config_backup': grab_config_backup,
                     'task': task,
+                    'exc': None
                 }
                 try:
                     grab.request()
-                except GrabNetworkError:
+                except GrabNetworkError as ex:
                     result.update({
                         'ok': False,
+                        'exc': ex,
                     })
                 result_queue.put(result)
             finally:

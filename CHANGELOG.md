@@ -1,5 +1,12 @@
 # Grab Change Log
 
+## [0.6.38] - 
+### Added
+- The `.original_exc` of GrabNetworkError (or subclass) points to original exception
+
+### Changed
+- Remove IOError from the ancestors of GrabNetworkError
+
 ## [0.6.37] - 2017-05-13
 ### Added
 - Add --spider-transport and --grab-transport options to crawl script
@@ -12,7 +19,7 @@
 - Fix bug: urllib3 transport fails while trying to throw GrabConnectionError exception
 - Fix bug: Spider add_task method fails while trying to log invalid URL error
 
-# Removed
+### Removed
 - Remove obsoleted hammer_mode and hammer_timeout config options
 
 ## [0.6.36] - 2017-02-12
