@@ -39,11 +39,11 @@ class TestTransportTestCase(BaseGrabTestCase):
 
         grab = Grab(transport=transport)
         grab.go(self.server.get_url())
-        self.assertEqual(grab.response.body, response)
+        self.assertEqual(grab.doc.body, response)
 
         grab2 = grab.clone()
         grab2.go(self.server.get_url())
-        self.assertEqual(grab2.response.body, response)
+        self.assertEqual(grab2.doc.body, response)
 
     def assert_transport_pickle(self, transport, response):
         grab = Grab(transport=transport)
@@ -51,7 +51,7 @@ class TestTransportTestCase(BaseGrabTestCase):
         grab2_data = pickle.dumps(grab2, pickle.HIGHEST_PROTOCOL)
         grab3 = pickle.loads(grab2_data)
         grab3.go(self.server.get_url())
-        self.assertEqual(grab3.response.body, response)
+        self.assertEqual(grab3.doc.body, response)
 
     @only_grab_transport('pycurl')
     def test_transport_option_as_string_curl(self):

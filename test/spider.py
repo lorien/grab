@@ -7,8 +7,8 @@ from test.util import BaseGrabTestCase, build_spider
 
 
 class SimpleSpider(Spider):
-    def task_baz(self, grab, dummy_task):
-        self.stat.collect('SAVED_ITEM', grab.response.body)
+    def task_baz(self, grab, unused_task):
+        self.stat.collect('SAVED_ITEM', grab.doc.body)
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
@@ -27,7 +27,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_network_limit(self):
         class CustomSimpleSpider(SimpleSpider):
-            def create_grab_instance(self):
+            def create_grab_instance(self, **kwargs):
                 return Grab(connect_timeout=1, timeout=1)
 
         self.server.response['get.data'] = 'Hello spider!'
@@ -49,7 +49,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_task_limit(self):
         class CustomSimpleSpider(SimpleSpider):
-            def create_grab_instance(self):
+            def create_grab_instance(self, **kwargs):
                 return Grab(connect_timeout=1, timeout=1)
 
         self.server.response['get.data'] = 'Hello spider!'
@@ -85,7 +85,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 for _ in six.moves.range(1111):
                     yield Task('page', url=server.get_url())
 
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 self.stat.inc('count')
 
         bot = build_spider(TestSpider)
@@ -109,7 +109,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 # pylint: disable=attribute-defined-outside-init
                 self.points = []
 
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 yield None
 
         bot = build_spider(TestSpider)
@@ -138,7 +138,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def task_page(self, grab, task):
                 pass
 
-            def task_page_fallback(self, dummy_task):
+            def task_page_fallback(self, unused_task):
                 self.points.append(1)
 
         self.server.response['code'] = 403
@@ -158,7 +158,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def task_page(self, grab, task):
                 pass
 
-            def fallback_zz(self, dummy_task):
+            def fallback_zz(self, unused_task):
                 self.points.append(1)
 
         self.server.response['code'] = 403
@@ -190,7 +190,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 # pylint: disable=attribute-defined-outside-init
                 self.points = []
 
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 yield 1
 
         bot = build_spider(TestSpider)
@@ -202,7 +202,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_fatal_error(self):
         class TestSpider(Spider):
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 raise FatalError
 
         bot = build_spider(TestSpider)
@@ -212,10 +212,10 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_task_queue_clear(self):
         class TestSpider(Spider):
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 self.stop()
 
-            def task_keyboard_interrupt_page(self, dummy_grab, dummy_task):
+            def task_keyboard_interrupt_page(self, unused_grab, unused_task):
                 raise KeyboardInterrupt
 
         bot = build_spider(TestSpider)

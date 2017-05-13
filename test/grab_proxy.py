@@ -47,8 +47,9 @@ class TestProxy(BaseGrabTestCase):
         with temp_file() as tmp_file:
             proxy = '%s:%s' % (ADDRESS, self.server.port)
             grab = build_grab()
-            open(tmp_file, 'w').write(proxy)
-            grab.load_proxylist(tmp_file, 'text_file')
+            with open(tmp_file, 'w') as out:
+                out.write(proxy)
+            grab.proxylist.load_file(tmp_file)
             self.server.response['get.data'] = '123'
             grab.change_proxy()
             grab.go('http://yandex.ru')
@@ -60,11 +61,12 @@ class TestProxy(BaseGrabTestCase):
         with temp_file() as tmp_file:
             content = '\n'.join(x['proxy'] for x in
                                 self.extra_servers.values())
-            open(tmp_file, 'w').write(content)
+            with open(tmp_file, 'w') as out:
+                out.write(content)
 
             # By default auto_change is True
             grab = build_grab()
-            grab.load_proxylist(tmp_file, 'text_file')
+            grab.proxylist.load_file(tmp_file)
             self.assertEqual(grab.config['proxy_auto_change'], True)
             servers = set()
             for _ in six.moves.range(10):
@@ -74,10 +76,13 @@ class TestProxy(BaseGrabTestCase):
             self.assertTrue(len(servers) > 1)
 
             # Disable auto_change
-            # By default auto_init is True
+            # Change proxy manually
             grab = build_grab()
-            grab.load_proxylist(tmp_file, 'text_file', auto_change=False)
+            grab.proxylist.load_file(tmp_file)
+            grab.setup(proxy_auto_change=False)
+            grab.change_proxy()
             self.assertEqual(grab.config['proxy_auto_change'], False)
+            # TODO: probably call proxy change manually
             servers = set()
             for _ in six.moves.range(10):
                 grab.go('http://yandex.ru')
@@ -85,11 +90,11 @@ class TestProxy(BaseGrabTestCase):
             self.assertEqual(len(servers), 1)
 
             # Disable auto_change
-            # Disable auto_init
+            # By default auto_init is True
             # Proxylist will not be used by default
             grab = build_grab()
-            grab.load_proxylist(tmp_file, 'text_file', auto_change=False,
-                                auto_init=False)
+            grab.proxylist.load_file(tmp_file)
+            grab.setup(proxy_auto_change=False)
             self.assertEqual(grab.config['proxy_auto_change'], False)
             grab.go(self.server.get_url())
             self.assertEqual(grab.config['proxy'], None)
@@ -104,16 +109,16 @@ class TestProxy(BaseGrabTestCase):
             with open(tmp_file, 'w') as out:
                 for num in six.moves.range(10):
                     out.write('server-%d:777\n' % num)
-            grab.load_proxylist(tmp_file, 'text_file', auto_init=False,
-                                auto_change=False)
+            grab.proxylist.load_file(tmp_file)
+            grab.setup(proxy_auto_change=False)
             self.assertEqual(grab.config['proxy'], None)
 
-            grab.load_proxylist(tmp_file, 'text_file', auto_init=False,
-                                auto_change=True)
+            grab.proxylist.load_file(tmp_file)
             self.assertEqual(grab.config['proxy'], None)
 
-            grab.load_proxylist(tmp_file, 'text_file', auto_init=True,
-                                auto_change=False)
+            grab.proxylist.load_file(tmp_file)
+            grab.setup(proxy_auto_change=False)
+            grab.change_proxy()
             # pylint: disable=unsupported-membership-test
             self.assertTrue('server-' in grab.config['proxy'])
             # pylint: enable=unsupported-membership-test

@@ -42,15 +42,29 @@ XML = b"""
 
 
 class LXMLExtensionTest(BaseGrabTestCase):
+    @classmethod
+    def setUpClass(cls):
+        import grab.util.warning
+
+        grab.util.warning.DISABLE_WARNINGS = True
+        super(LXMLExtensionTest, cls).setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        import grab.util.warning
+
+        grab.util.warning.DISABLE_WARNINGS = False
+        super(LXMLExtensionTest, cls).tearDownClass()
+
     def setUp(self):
         self.server.reset()
 
         # Create fake grab instance with fake response
         self.grab = build_grab()
-        self.grab.fake_response(HTML, charset='cp1251')
+        self.grab.setup_document(HTML, charset='cp1251')
 
         from lxml.html import fromstring
-        self.lxml_tree = fromstring(self.grab.response.body)
+        self.lxml_tree = fromstring(self.grab.doc.body)
 
     def test_lxml_text_content_fail(self):
         # lxml node text_content() method do not put spaces between text
@@ -71,6 +85,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
 
     def test_xpath(self):
         self.assertEqual('bee-em', self.grab.xpath_one('//em').get('id'))
+        ####self.grab.xpath_one('//em')
         self.assertEqual('num-2',
                          self.grab.xpath_one(u'//*[text() = "item #2"]')
                          .get('id'))
@@ -146,25 +161,27 @@ class LXMLExtensionTest(BaseGrabTestCase):
         self.assertFalse(self.grab.xpath_exists('//li[@id="num-3"]'))
 
     def test_cdata_issue(self):
-        grab = build_grab()
-        grab.fake_response(XML)
+        self.server.response['data'] = XML
 
         # By default HTML DOM builder is used
         # It handles CDATA incorrectly
+        grab = build_grab()
+        grab.go(self.server.get_url())
         self.assertEqual(None, grab.xpath_one('//weight').text)
-        self.assertEqual(None, grab.tree.xpath('//weight')[0].text)
+        self.assertEqual(None, grab.doc.tree.xpath('//weight')[0].text)
 
         # But XML DOM builder produces valid result
         # self.assertEqual(None, grab.xpath_one('//weight').text)
-        self.assertEqual('30', grab.xml_tree.xpath('//weight')[0].text)
+        grab = build_grab(content_type='xml')
+        grab.go(self.server.get_url())
+        self.assertEqual('30', grab.doc.tree.xpath('//weight')[0].text)
 
         # Use `content_type` option to change default DOM builder
-        grab = build_grab()
-        grab.fake_response(XML)
-        grab.setup(content_type='xml')
-
-        self.assertEqual('30', grab.xpath_one('//weight').text)
-        self.assertEqual('30', grab.tree.xpath('//weight')[0].text)
+        #grab = build_grab()
+        #grab.fake_response(XML)
+        #grab.setup(content_type='xml')
+        #self.assertEqual('30', grab.xpath_one('//weight').text)
+        #self.assertEqual('30', grab.tree.xpath('//weight')[0].text)
 
     def test_xml_declaration(self):
         """

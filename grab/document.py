@@ -757,7 +757,7 @@ class Document(object):
         if self._lxml_form is None:
             forms = [(idx, len(list(x.fields)))
                      for idx, x in enumerate(self.tree.forms)]
-            if len(forms):
+            if forms:
                 idx = sorted(forms, key=lambda x: x[1], reverse=True)[0][0]
                 self.choose_form(idx)
             else:
@@ -918,7 +918,7 @@ class Document(object):
         # to not send multiple submit keys in form data
         # in real life only this key is submitted whose button
         # was pressed
-        if len(submit_controls):
+        if submit_controls:
             # If name of submit control is not given then
             # use the name of first submit control
             if submit_name is None or submit_name not in submit_controls:
@@ -1005,7 +1005,7 @@ class Document(object):
 
             elif elem.tag == 'select':
                 if fields[elem.name] is None:
-                    if len(elem.value_options):
+                    if elem.value_options:
                         fields[elem.name] = elem.value_options[0]
 
             elif getattr(elem, 'type', None) == 'radio':

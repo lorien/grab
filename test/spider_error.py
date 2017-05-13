@@ -91,7 +91,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
                     yield Task('more', url=server.get_url())
 
                 def task_more(self, grab, task):
-                    print(grab.doc.url)
+                    #print(grab.doc.url)
                     grab.doc('//div').text()
 
             bot = build_spider(SimpleSpider)

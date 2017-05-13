@@ -9,7 +9,7 @@ from grab.spider.error import SpiderError
 
 
 class SimpleSpider(Spider):
-    def task_baz(self, grab, dummy_task):
+    def task_baz(self, grab, unused_task):
         pass
 
 
@@ -112,7 +112,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
     def test_task_raw(self):
         class TestSpider(Spider):
-            def task_page(self, grab, dummy_task):
+            def task_page(self, grab, unused_task):
                 self.stat.collect('codes', grab.doc.code)
 
         self.server.response['code'] = 502
@@ -134,7 +134,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
     @multiprocess_mode(False)
     def test_task_callback(self):
         class TestSpider(Spider):
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 self.meta['tokens'].append('0_handler')
 
         class FuncWithState(object):
@@ -168,7 +168,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
                 # pylint: disable=attribute-defined-outside-init
                 self.done = False
 
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 # pylint: disable=attribute-defined-outside-init
                 self.done = True
 
@@ -261,7 +261,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
                 yield Task('page', grab=Grab(url=self.meta['server'].get_url(),
                                              timeout=1))
 
-            def task_page(self, grab, dummy_task):
+            def task_page(self, grab, unused_task):
                 self.stat.collect('points', grab.config['timeout'])
 
         bot = build_spider(TestSpider, meta={'server': self.server})
@@ -284,7 +284,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
                 yield Task('page', grab=Grab(url=self.meta['server'].get_url(),
                                              timeout=76))
 
-            def task_page(self, grab, dummy_task):
+            def task_page(self, grab, unused_task):
                 self.stat.collect('points', grab.config['timeout'])
 
         bot = build_spider(TestSpider, meta={'server': self.server})
@@ -329,11 +329,11 @@ class TestSpiderTestCase(BaseGrabTestCase):
             method
             """
             # pylint: disable=unused-argument
-            def process_network_result(self, *args, **kwargs):
+            def process_network_result(self, result, handler):
                 raise Exception('Shit happens!')
             # pylint: enable=unused-argument
 
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 pass
 
         bot = build_spider(TestSpider, )
@@ -345,7 +345,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
     def test_task_clone_post_request(self):
         class TestSpider(Spider):
-            def task_foo(self, dummy_grab, task):
+            def task_foo(self, unused_grab, task):
                 if not task.get('fin'):
                     yield task.clone(fin=True)
 
@@ -361,7 +361,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
     def test_response_not_valid(self):
         class SomeSimpleSpider(Spider):
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 self.stat.inc('xxx')
                 raise ResponseNotValid
 
@@ -373,7 +373,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
     def test_task_clone_without_modification(self):
         class TestSpider(Spider):
-            def task_page(self, grab, dummy_task):
+            def task_page(self, grab, unused_task):
                 grab2 = grab.clone()
                 yield Task('page2', grab=grab2)
 

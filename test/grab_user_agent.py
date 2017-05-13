@@ -59,7 +59,8 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
         with temp_file() as ua_file:
             # user agent from file should be loaded
-            open(ua_file, 'w').write('GOD')
+            with open(ua_file, 'w') as out:
+                out.write('GOD')
             grab.setup(user_agent=None, user_agent_file=ua_file)
             grab.go(self.server.get_url())
             self.assertEqual(self.server.request['headers']['user-agent'],
@@ -67,7 +68,8 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
         with temp_file() as ua_file:
             # random user agent from file should be loaded
-            open(ua_file, 'w').write('GOD1\nGOD2')
+            with open(ua_file, 'w') as out:
+                out.write('GOD1\nGOD2')
             grab.setup(user_agent=None, user_agent_file=ua_file)
             grab.go(self.server.get_url())
             self.assertTrue(self.server.request['headers']['user-agent']

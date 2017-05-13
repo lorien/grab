@@ -126,6 +126,7 @@ install:
   - redis-cli config set appendonly no
   - redis-cli config set save ""
   - "%PYTHON%/python.exe -m pip install -U tox pip setuptools"
+  - "%PYTHON%/python.exe -m pip install -U win_inet_pton"
   - "%PYTHON%/python.exe --version"
 
 build: off

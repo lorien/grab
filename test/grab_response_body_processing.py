@@ -23,17 +23,17 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             grab.setup(body_inmemory=False)
             grab.setup(body_storage_dir=tmp_dir)
             grab.go(self.server.get_url())
-            self.assertTrue(os.path.exists(grab.response.body_path))
-            self.assertTrue(tmp_dir in grab.response.body_path)
-            self.assertEqual(b'foo',
-                             open(grab.response.body_path, 'rb').read())
+            self.assertTrue(os.path.exists(grab.doc.body_path))
+            self.assertTrue(tmp_dir in grab.doc.body_path)
+            with open(grab.doc.body_path, 'rb') as inp:
+                self.assertEqual(b'foo', inp.read())
             # pylint: disable=protected-access
-            self.assertEqual(grab.response._bytes_body, None)
+            self.assertEqual(grab.doc._bytes_body, None)
             # pylint: enable=protected-access
-            old_path = grab.response.body_path
+            old_path = grab.doc.body_path
 
             grab.go(self.server.get_url())
-            self.assertTrue(old_path != grab.response.body_path)
+            self.assertTrue(old_path != grab.doc.body_path)
 
         with temp_dir() as tmp_dir:
             self.server.response['get.data'] = 'foo'
@@ -42,15 +42,15 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             grab.setup(body_storage_dir=tmp_dir)
             grab.setup(body_storage_filename='music.mp3')
             grab.go(self.server.get_url())
-            self.assertTrue(os.path.exists(grab.response.body_path))
-            self.assertTrue(tmp_dir in grab.response.body_path)
-            self.assertEqual(b'foo',
-                             open(grab.response.body_path, 'rb').read())
+            self.assertTrue(os.path.exists(grab.doc.body_path))
+            self.assertTrue(tmp_dir in grab.doc.body_path)
+            with open(grab.doc.body_path, 'rb') as inp:
+                self.assertEqual(b'foo', inp.read())
             self.assertEqual(os.path.join(tmp_dir, 'music.mp3'),
-                             grab.response.body_path)
-            self.assertEqual(grab.response.body, b'foo')
+                             grab.doc.body_path)
+            self.assertEqual(grab.doc.body, b'foo')
             # pylint: disable=protected-access
-            self.assertEqual(grab.response._bytes_body, None)
+            self.assertEqual(grab.doc._bytes_body, None)
             # pylint: enable=protected-access
 
     def test_body_inmemory_true(self):
@@ -58,7 +58,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         self.server.response['data'] = b'bar'
         grab.go(self.server.get_url())
         # pylint: disable=protected-access
-        self.assertEqual(grab.response._bytes_body, b'bar')
+        self.assertEqual(grab.doc._bytes_body, b'bar')
         # pylint: enable=protected-access
 
     def test_assign_unicode_to_body(self):

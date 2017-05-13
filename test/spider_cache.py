@@ -41,7 +41,7 @@ class SimpleSpider(Spider):
         counter = grab.doc.select('//span[@id="counter"]').number()
         self.stat.collect('resp_counters', counter)
 
-    def task_one(self, grab, dummy_task):
+    def task_one(self, grab, unused_task):
         self.process_counter(grab)
 
     def task_foo(self, grab, task):
@@ -78,7 +78,7 @@ class SpiderCacheMixin(object):
         server = self.server
 
         class Bug1Spider(Spider):
-            def task_foo(self, grab, dummy_task):
+            def task_foo(self, grab, unused_task):
                 grab.setup(url=server.get_url())
                 yield Task('bar', grab=grab)
 
@@ -107,7 +107,7 @@ class SpiderCacheMixin(object):
         self.server.response['get.data'] = ContentGenerator(self.server)
 
         class TestSpider(Spider):
-            def task_page(self, dummy_grab, dummy_task):
+            def task_page(self, unused_grab, unused_task):
                 self.stat.collect('points', 1)
 
         bot = build_spider(TestSpider, only_cache=True)
@@ -165,7 +165,7 @@ class SpiderCacheMixin(object):
     def test_task_cache_timeout(self):
 
         class TestSpider(Spider):
-            def task_page(self, grab, dummy_task):
+            def task_page(self, grab, unused_task):
                 self.stat.collect('points', grab.doc.body)
 
         self.server.response['data'] = iter([b'a', b'b'])

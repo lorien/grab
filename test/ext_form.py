@@ -8,7 +8,7 @@ from grab import DataNotFound, GrabMisuseError
 from test.util import build_grab
 from test.util import BaseGrabTestCase
 
-FORMS = u"""
+FORMS_HTML = u"""
 <head>
     <title>Title</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -80,7 +80,7 @@ class TestHtmlForms(BaseGrabTestCase):
 
         # Create fake grab instance with fake response
         self.grab = build_grab()
-        self.grab.fake_response(FORMS)
+        self.grab.setup_document(FORMS_HTML)
 
     def test_choose_form(self):
         """
@@ -88,13 +88,14 @@ class TestHtmlForms(BaseGrabTestCase):
         """
 
         # raise errors
-        self.assertRaises(DataNotFound, self.grab.choose_form, 10)
-        self.assertRaises(DataNotFound, self.grab.choose_form, id='bad_id')
-        self.assertRaises(DataNotFound, self.grab.choose_form, id='fake_form')
-        self.assertRaises(GrabMisuseError, self.grab.choose_form)
+        self.assertRaises(DataNotFound, self.grab.doc.choose_form, 10)
+        self.assertRaises(DataNotFound, self.grab.doc.choose_form, id='bad_id')
+        self.assertRaises(DataNotFound, self.grab.doc.choose_form,
+                          id='fake_form')
+        self.assertRaises(GrabMisuseError, self.grab.doc.choose_form)
 
         # check results
-        self.grab.choose_form(0)
+        self.grab.doc.choose_form(0)
         # pylint: disable=no-member,protected-access
         self.assertEqual('form', self.grab.doc._lxml_form.tag)
         self.assertEqual('search_form', self.grab.doc._lxml_form.get('id'))
@@ -103,7 +104,7 @@ class TestHtmlForms(BaseGrabTestCase):
         # reset current form
         self.grab.doc._lxml_form = None # pylint: disable=protected-access
 
-        self.grab.choose_form(id='common_form')
+        self.grab.doc.choose_form(id='common_form')
         # pylint: disable=no-member,protected-access
         self.assertEqual('form', self.grab.doc._lxml_form.tag)
         self.assertEqual('common_form', self.grab.doc._lxml_form.get('id'))
@@ -112,7 +113,7 @@ class TestHtmlForms(BaseGrabTestCase):
         # reset current form
         self.grab.doc._lxml_form = None # pylint: disable=protected-access
 
-        self.grab.choose_form(name='dummy')
+        self.grab.doc.choose_form(name='dummy')
         # pylint: disable=no-member,protected-access
         self.assertEqual('form', self.grab.doc._lxml_form.tag)
         self.assertEqual('dummy', self.grab.doc._lxml_form.get('name'))
@@ -121,7 +122,7 @@ class TestHtmlForms(BaseGrabTestCase):
         # reset current form
         self.grab.doc._lxml_form = None # pylint: disable=protected-access
 
-        self.grab.choose_form(xpath='//form[contains(@action, "/dummy")]')
+        self.grab.doc.choose_form(xpath='//form[contains(@action, "/dummy")]')
         # pylint: disable=no-member,protected-access
         self.assertEqual('form', self.grab.doc._lxml_form.tag)
         self.assertEqual('dummy', self.grab.doc._lxml_form.get('name'))
@@ -136,7 +137,7 @@ class TestHtmlForms(BaseGrabTestCase):
         grab = build_grab()
         self.server.response['get.data'] = POST_FORM % self.server.get_url()
         grab.go(self.server.get_url())
-        grab.set_input('name', 'Alex')
+        grab.doc.set_input('name', 'Alex')
         grab.doc.submit()
         self.assert_equal_qs(self.server.request['data'],
                              b'name=Alex&secret=123')
@@ -178,34 +179,35 @@ class TestHtmlForms(BaseGrabTestCase):
 
     def test_set_methods(self):
         grab = build_grab()
-        self.server.response['get.data'] = FORMS
+        self.server.response['get.data'] = FORMS_HTML
         grab.go(self.server.get_url())
 
         # pylint: disable=protected-access
         self.assertEqual(grab.doc._lxml_form, None)
         # pylint: enable=protected-access
 
-        grab.set_input('gender', '1')
+        grab.doc.set_input('gender', '1')
         # pylint: disable=no-member,protected-access
         self.assertEqual('common_form', grab.doc._lxml_form.get('id'))
         # pylint: enable=no-member,protected-access
 
         # pylint: disable=no-member,protected-access
-        self.assertRaises(KeyError, lambda: grab.set_input('query', 'asdf'))
+        self.assertRaises(KeyError,
+                          lambda: grab.doc.set_input('query', 'asdf'))
         # pylint: enable=no-member,protected-access
 
         grab.doc._lxml_form = None # pylint: disable=protected-access
-        grab.set_input_by_id('search_box', 'asdf')
+        grab.doc.set_input_by_id('search_box', 'asdf')
         # pylint: disable=no-member,protected-access
         self.assertEqual('search_form', grab.doc._lxml_form.get('id'))
         # pylint: enable=no-member,protected-access
 
-        grab.choose_form(xpath='//form[@id="common_form"]')
-        grab.set_input_by_number(0, 'asdf')
+        grab.doc.choose_form(xpath='//form[@id="common_form"]')
+        grab.doc.set_input_by_number(0, 'asdf')
 
         # pylint: disable=no-member,protected-access
         grab.doc._lxml_form = None
-        grab.set_input_by_xpath('//*[@name="gender"]', '2')
+        grab.doc.set_input_by_xpath('//*[@name="gender"]', '2')
         self.assertEqual('common_form', grab.doc._lxml_form.get('id'))
         # pylint: enable=no-member,protected-access
 
@@ -213,7 +215,7 @@ class TestHtmlForms(BaseGrabTestCase):
         grab = build_grab()
         self.server.response['get.data'] = NO_FORM_HTML
         grab.go(self.server.get_url())
-        self.assertRaises(DataNotFound, lambda: grab.form)
+        self.assertRaises(DataNotFound, lambda: grab.doc.form)
 
     def test_disabled_radio(self):
         """
@@ -231,7 +233,8 @@ class TestHtmlForms(BaseGrabTestCase):
             <input name="bar" id="bar" type="text">
         '''
         grab = build_grab(html)
-        grab.set_input_by_xpath('//input[re:test(@id, "^ba")]', 'bar-value')
+        grab.doc.set_input_by_xpath('//input[re:test(@id, "^ba")]',
+                                    'bar-value')
         grab.doc.submit(make_request=False)
         self.assertEqual(
             set([('foo', None), ('bar', 'bar-value')]),

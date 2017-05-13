@@ -78,6 +78,66 @@ class SpiderMetaClass(type):
         return super(SpiderMetaClass, mcs).__new__(mcs, name, bases, namespace)
 
 
+class TaskGeneratorWrapperThread(Thread):
+    """
+    Load new tasks from `self.task_generator_object`
+    Create new tasks.
+
+    If task queue size is less than some value
+    then load new tasks from tasks file.
+    """
+
+    def __init__(self, real_generator, spider, *args, **kwargs):
+        from threading import Event
+
+        self.real_generator = real_generator
+        self.spider = spider
+        self.is_paused = Event()
+        self.activity_paused = Event()
+        super(TaskGeneratorWrapperThread, self).__init__(*args, **kwargs)
+
+    def pause(self):
+        self.is_paused.set()
+        self.activity_paused.wait()
+
+    def resume(self):
+        self.activity_paused.clear()
+        self.is_paused.clear()
+
+    def run(self):
+        while True:
+            if self.is_paused.is_set():
+                self.activity_paused.set()
+                while self.is_paused.is_set():
+                    time.sleep(0.01)
+                self.activity_paused.clear()
+            with self.spider.timer.log_time('task_generator'):
+                queue_size = self.spider.task_queue.size()
+                min_limit = self.spider.thread_number * 10
+            if queue_size < min_limit:
+                with self.spider.timer.log_time('task_generator'):
+                    logger_verbose.debug(
+                        'Task queue contains less tasks (%d) than '
+                        'allowed limit (%d). Trying to add '
+                        'new tasks.', queue_size, min_limit)
+                    try:
+                        for _ in six.moves.range(min_limit - queue_size):
+                            if self.is_paused.is_set():
+                                break
+                            item = next(self.real_generator)
+                            logger_verbose.debug('Got new item from'
+                                                 ' generator. Processing it.')
+                            self.spider.process_handler_result(item, None)
+                    except StopIteration:
+                        # If generator have no values to yield
+                        # then disable it
+                        logger_verbose.debug('Task generator has no more'
+                                             ' tasks. Disabling it')
+                        break
+            else:
+                time.sleep(0.1)
+
+
 @six.add_metaclass(SpiderMetaClass)
 class Spider(object):
     """
@@ -319,7 +379,14 @@ class Spider(object):
             if raise_error:
                 raise ex
             else:
-                logger.error('', exc_info=ex)
+                # Just want to print traceback
+                # Do this to avoid the error
+                # http://bugs.python.org/issue23003
+                # FIXME: use something less awkward
+                try:
+                    raise ex
+                except SpiderError as ex:
+                    logger.error('', exc_info=ex)
                 return False
 
         # TODO: keep original task priority if it was set explicitly
@@ -553,40 +620,6 @@ class Spider(object):
         else:
             return randint(*RANDOM_TASK_PRIORITY_RANGE)
 
-    def task_generator_thread_wrapper(self, task_generator):
-        """
-        Load new tasks from `self.task_generator_object`
-        Create new tasks.
-
-        If task queue size is less than some value
-        then load new tasks from tasks file.
-        """
-
-        while True:
-            with self.timer.log_time('task_generator'):
-                queue_size = self.task_queue.size()
-                min_limit = self.thread_number * 10
-            if queue_size < min_limit:
-                with self.timer.log_time('task_generator'):
-                    logger_verbose.debug(
-                        'Task queue contains less tasks (%d) than '
-                        'allowed limit (%d). Trying to add '
-                        'new tasks.', queue_size, min_limit)
-                    try:
-                        for _ in six.moves.range(min_limit - queue_size):
-                            item = next(task_generator)
-                            logger_verbose.debug('Got new item from'
-                                                 ' generator. Processing it.')
-                            self.process_handler_result(item, None)
-                    except StopIteration:
-                        # If generator have no values to yield
-                        # then disable it
-                        logger_verbose.debug('Task generator has no more'
-                                             ' tasks. Disabling it')
-                        break
-            else:
-                time.sleep(0.1)
-
     def start_task_generators(self):
         """
         Process `self.initial_urls` list and `self.task_generator`
@@ -599,8 +632,7 @@ class Spider(object):
                 self.add_task(Task('initial', url=url))
 
         self._task_generator_list = []
-        thread = Thread(target=self.task_generator_thread_wrapper,
-                        args=[self.task_generator()])
+        thread = TaskGeneratorWrapperThread(self.task_generator(), self)
         thread.daemon = True
         thread.start()
         self._task_generator_list.append(thread)
@@ -862,6 +894,9 @@ class Spider(object):
             if self.cache_pipeline:
                 #print('!settings cache to pause')
                 self.cache_pipeline.pause()
+                for th in self._task_generator_list:
+                    if th.isAlive():
+                        th.pause()
             return (
                 not self.parser_result_queue.qsize()
                 and all(x['is_parser_idle'].is_set()
@@ -878,6 +913,9 @@ class Spider(object):
             #print('!resuming cache')
             if self.cache_pipeline:
                 self.cache_pipeline.resume()
+            for th in self._task_generator_list:
+                if th.isAlive():
+                    th.resume()
 
     def run(self):
         """

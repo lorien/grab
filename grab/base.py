@@ -26,7 +26,6 @@ from grab import error
 from grab.cookie import CookieManager
 from grab.proxylist import ProxyList, parse_proxy_line
 from grab.deprecated import DeprecatedThings
-from grab.util.warning import warn
 
 __all__ = ('Grab',)
 # This counter will used in enumerating network queries.
@@ -359,16 +358,6 @@ class Grab(DeprecatedThings):
         """
         Setting up Grab instance configuration.
         """
-
-        if 'hammer_mode' in kwargs:
-            warn('Option `hammer_mode` is deprecated. Grab does not '
-                 'support hammer mode anymore.')
-            del kwargs['hammer_mode']
-
-        if 'hammer_timeouts' in kwargs:
-            warn('Option `hammer_timeouts` is deprecated. Grab does not '
-                 'support hammer mode anymore.')
-            del kwargs['hammer_timeouts']
 
         for key in kwargs:
             if key not in self.config.keys():

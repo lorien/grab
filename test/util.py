@@ -86,10 +86,9 @@ def multiprocess_mode(mode):
     def wrapper_builder(func):
         def wrapper(self, *args, **kwargs):
             if mode != GLOBAL['mp_mode']:
-                logger.debug(
-                    'Skipping %s:%s:%s. Reason: needs --mp-mode=%s',
-                    func.__module__, self.__class__.__name__,
-                    func.__name__, mode)
+                logger.debug('Skipping %s:%s:%s. Reason: needs --mp-mode=%s',
+                             func.__module__, self.__class__.__name__,
+                             func.__name__, mode)
             else:
                 return func(self, *args, **kwargs)
         return wrapper
