@@ -6,6 +6,7 @@ import six
 
 from grab.util.log import PycurlSigintHandler
 from grab.error import GrabTooManyRedirectsError
+from grab.transport.curl import build_grab_exception
 
 ERROR_TOO_MANY_REFRESH_REDIRECTS = -2
 #ERROR_INTERNAL_GRAB_ERROR = -3
@@ -137,34 +138,24 @@ class MulticurlTransport(object):
 
             results = []
             for curl in ok_list:
-                results.append((True, curl, None, None))
+                results.append((True, curl, None, None, None))
             for curl, ecode, emsg in fail_list:
-                # CURLE_WRITE_ERROR (23)
-                # An error occurred when writing received data
-                # to a local file, or
-                # an error was returned to libcurl from a write callback.
-                # This exception should be ignored if _callback_interrupted
-                # flag
-                # is enabled (this happens when nohead or
-                # nobody options enabeld)
-                #
-                # Also this error is raised when curl receives
-                # KeyboardInterrupt
-                # while it is processing some callback function
-                # (WRITEFUNCTION, HEADERFUNCTIO, etc)
-                if ecode == 23:
-                    if curl.grab_callback_interrupted is True:
-                        # FIXME: that flag should be set automatically
-                        # FIXME: write tests to test this flag
-                        curl.grab_callback_interrupted = False
-                        results.append((True, curl, None, None))
-                    else:
-                        results.append((False, curl, ecode, emsg))
+                curl.grab_callback_interrupted = False
+                try:
+                    raise pycurl.error(ecode, emsg)
+                except Exception as exc: # pylint: disable=broad-except
+                    grab_exc = build_grab_exception(exc, curl)
+                # grab_exc could be None if the pycurl error
+                # was expected (could be in case of
+                # body_maxsize and other options)
+                if grab_exc:
+                    results.append((False, curl, ecode, emsg, grab_exc))
                 else:
-                    results.append((False, curl, ecode, emsg))
+                    results.append((True, curl, None, None, None))
 
-            for is_ok, curl, ecode, emsg in results:
-                # FORMAT: {is_ok, grab, grab_config_backup, task, emsg}
+            for is_ok, curl, ecode, emsg, grab_exc in results:
+                # FORMAT: {is_ok, grab, grab_config_backup, task,
+                #          ecode, emsg, error_abbr, exc}
 
                 curl_id = id(curl)
                 task = self.registry[curl_id]['task']
@@ -186,6 +177,7 @@ class MulticurlTransport(object):
 
                 grab.doc.error_code = ecode
                 grab.doc.error_msg = emsg
+                grab.exception = grab_exc
 
                 # Free resources
                 del self.registry[curl_id]
@@ -195,13 +187,16 @@ class MulticurlTransport(object):
                     error_abbr = None
                 else:
                     error_abbr = ERROR_ABBR.get(ecode, 'unknown-%d' % ecode)
-                yield {'ok': is_ok,
-                       'ecode': ecode,
-                       'emsg': emsg,
-                       'error_abbr': error_abbr,
-                       'grab': grab,
-                       'grab_config_backup': grab_config_backup,
-                       'task': task}
+                yield {
+                    'ok': is_ok,
+                    'ecode': ecode,
+                    'emsg': emsg,
+                    'error_abbr': error_abbr,
+                    'exc': grab_exc,
+                    'grab': grab,
+                    'grab_config_backup': grab_config_backup,
+                    'task': task,
+                }
 
                 with self.sigint_handler.handle_sigint():
                     self.multi.remove_handle(curl)

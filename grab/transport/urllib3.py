@@ -259,17 +259,17 @@ class Urllib3Transport(BaseTransport):
                                body=req.data, timeout=timeout,
                                retries=retry, headers=req.headers,
                                preload_content=False)
-        except exceptions.ReadTimeoutError:
-            raise error.GrabTimeoutError('Read timeout')
-        except exceptions.ConnectTimeoutError:
-            raise error.GrabConnectionError('Could not create connection')
-        except exceptions.ProtocolError:
+        except exceptions.ReadTimeoutError as ex:
+            raise error.GrabTimeoutError('ReadTimeoutError', ex)
+        except exceptions.ConnectTimeoutError as ex:
+            raise error.GrabConnectionError('ConnectTimeoutError', ex)
+        except exceptions.ProtocolError as ex:
             # TODO:
             # the code
             # raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
             # fails
             # with error TypeError: 'OSError' object is not subscriptable
-            raise error.GrabConnectionError('ProtocolError')
+            raise error.GrabConnectionError('ProtocolError', ex)
 
         # WTF?
         self.request_head = b''

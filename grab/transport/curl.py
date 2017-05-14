@@ -470,51 +470,19 @@ class CurlTransport(BaseTransport):
         return out
 
     def request(self):
-
         sigint_handler = PycurlSigintHandler()
         try:
             with sigint_handler.handle_sigint():
                 self.curl.perform()
         except pycurl.error as ex:
-            # CURLE_WRITE_ERROR (23)
-            # An error occurred when writing received data to a local file, or
-            # an error was returned to libcurl from a write callback.
-            # This exception should be ignored if grab_callback_interrupted
-            # flag # is enabled (this happens when nohead or nobody options
-            # enabled)
-            #
-            # Also this error is raised when curl receives KeyboardInterrupt
-            # while it is processing some callback function
-            # (WRITEFUNCTION, HEADERFUNCTIO, etc)
-            # If you think WTF then see details here:
-            # https://github.com/pycurl/pycurl/issues/413
-            if ex.args[0] == 23:
-                if getattr(self.curl, 'grab_callback_interrupted',
-                           None) is True:
-                    # This is expected error caused by
-                    # interruptted execution of body_processor callback
-                    # FIXME: is it set automatically?
-                    self.curl.grab_callback_interrupted = False
-                else:
-                    raise error.GrabNetworkError(ex.args[0], ex.args[1])
-            else:
-                if ex.args[0] == 28:
-                    raise error.GrabTimeoutError(ex.args[0], ex.args[1])
-                elif ex.args[0] == 7:
-                    raise error.GrabConnectionError(ex.args[0], ex.args[1])
-                elif ex.args[0] == 67:
-                    raise error.GrabAuthError(ex.args[0], ex.args[1])
-                elif ex.args[0] == 47:
-                    raise error.GrabTooManyRedirectsError(ex.args[0],
-                                                          ex.args[1])
-                elif ex.args[0] == 6:
-                    raise error.GrabCouldNotResolveHostError(ex.args[0],
-                                                             ex.args[1])
-                else:
-                    raise error.GrabNetworkError(ex.args[0], ex.args[1])
+            new_ex = build_grab_exception(ex, self.curl)
+            if new_ex:
+                raise new_ex # pylint: disable=raising-bad-type
         except Exception as ex: # pylint: disable=broad-except
             six.reraise(error.GrabInternalError, error.GrabInternalError(ex),
                         sys.exc_info()[2])
+        finally:
+            self.curl.grab_callback_interrupted = False
 
     def prepare_response(self, grab):
         if self.body_file:
@@ -614,6 +582,45 @@ class CurlTransport(BaseTransport):
         self.__dict__ = state # pylint: disable=attribute-defined-outside-init
 
 
-# from grab.base import BaseGrab
-# class GrabCurl(CurlTransportExtension, BaseGrab):
-    # pass
+def build_grab_exception(ex, curl):
+    """
+    Build Grab exception from the pycurl exception
+
+    Args:
+        ex - the original pycurl exception
+        curl - the Curl instance raised the exception
+    """
+    # CURLE_WRITE_ERROR (23)
+    # An error occurred when writing received data to a local file, or
+    # an error was returned to libcurl from a write callback.
+    # This exception should be ignored if grab_callback_interrupted
+    # flag # is enabled (this happens when nohead or nobody options
+    # enabled)
+    #
+    # Also this error is raised when curl receives KeyboardInterrupt
+    # while it is processing some callback function
+    # (WRITEFUNCTION, HEADERFUNCTIO, etc)
+    # If you think WTF then see details here:
+    # https://github.com/pycurl/pycurl/issues/413
+    if ex.args[0] == 23:
+        if getattr(curl, 'grab_callback_interrupted', None) is True:
+            # If the execution of body_process callback is
+            # interrupted (body_maxsize, nobody and other options)
+            # then the pycurl raised exception with code 23
+            # We should ignore it
+            return None
+        else:
+            return error.GrabNetworkError(ex.args[1], ex)
+    else:
+        if ex.args[0] == 28:
+            return error.GrabTimeoutError(ex.args[1], ex)
+        elif ex.args[0] == 7:
+            return error.GrabConnectionError(ex.args[1], ex)
+        elif ex.args[0] == 67:
+            return error.GrabAuthError(ex.args[1], ex)
+        elif ex.args[0] == 47:
+            return error.GrabTooManyRedirectsError(ex.args[1], ex)
+        elif ex.args[0] == 6:
+            return error.GrabCouldNotResolveHostError(ex.args[1], ex)
+        else:
+            return error.GrabNetworkError(ex.args[1], ex)

@@ -36,8 +36,8 @@ def setup_arg_parser(parser):
                         help='Run task handlers (HTML parsers) in separate '
                              'processes')
     parser.add_argument('--parser-pool-size', type=int)
-    parser.add_argument('--grab-transport')
-    parser.add_argument('--spider-transport')
+    parser.add_argument('--grab-transport', default='pycurl')
+    parser.add_argument('--spider-transport', default='multicurl')
 
 
 def get_lock_key(spider_name, lock_key=None, # pylint: disable=unused-argument

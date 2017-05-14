@@ -5,13 +5,21 @@ Taxonomy:
 
 Exception
 |-> GrabError
-    |-> GrabNetworkError <- IOError
-    |-> Grab*Error
+    |-> GrabNetworkError
+        |-> GrabTimeoutError
+        |-> GrabConnectionError
+        |-> GrabCouldNotResolveHostError
+    |-> GrabAuthError
+    |-> GrabMisuseError
+    |-> GrabTooManyRedirectsError
+    |-> GrabInvalidUrl
+    |-> GrabInternalError
 
 Exception
 | -> weblib.error.WeblibError
      |-> DataNotFound <- IndexError
 """
+
 from __future__ import absolute_import
 from weblib.error import DataNotFound  # noqa pylint: disable=unused-import
 
@@ -22,10 +30,17 @@ class GrabError(Exception):
     """
 
 
-class GrabNetworkError(IOError, GrabError):
+class GrabNetworkError(GrabError):
     """
     Raises in case of network error.
     """
+
+    def __init__(self, *args, **kwargs):
+        if len(args) > 1:
+            self.original_exc = args[1]
+        else:
+            self.original_exc = None
+        super(GrabNetworkError, self).__init__(*args, **kwargs)
 
 
 class GrabTimeoutError(GrabNetworkError):
@@ -33,12 +48,6 @@ class GrabTimeoutError(GrabNetworkError):
     Raises when configured time is outed for the request.
 
     In curl transport it is CURLE_OPERATION_TIMEDOUT (28)
-    """
-
-
-class GrabMisuseError(GrabError):
-    """
-    Indicates incorrect usage of grab API.
     """
 
 
@@ -62,6 +71,12 @@ class GrabAuthError(GrabError):
     Raised when remote server denies authentication credentials.
 
     In curl transport it is CURLE_COULDNT_CONNECT (67)
+    """
+
+
+class GrabMisuseError(GrabError):
+    """
+    Indicates incorrect usage of grab API.
     """
 
 
