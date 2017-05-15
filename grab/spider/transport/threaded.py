@@ -41,11 +41,15 @@ def worker_thread(task_queue, result_queue, freelist, shutdown_event):
                 try:
                     grab.request()
                 except GrabNetworkError as ex:
+                    if ex.original_exc.__class__.__name__ == 'error':
+                        ex_cls = ex
+                    else:
+                        ex_cls = ex.original_exc
                     result.update({
                         'ok': False,
                         'exc': ex,
                         'error_abbr': make_class_abbr(
-                            ex.original_exc.__class__.__name__
+                            ex_cls.__class__.__name__
                         ),
                     })
                 result_queue.put(result)

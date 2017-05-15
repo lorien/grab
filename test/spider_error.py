@@ -4,7 +4,7 @@ from six import StringIO
 
 from grab import GrabTimeoutError, Grab
 from grab.spider import Spider, Task
-from test.util import BaseGrabTestCase, build_spider, only_grab_transport
+from test.util import BaseGrabTestCase, build_spider, run_test_if, GLOBAL
 
 # That URLs breaks Grab's URL normalization process
 # with error "label empty or too long"
@@ -119,8 +119,10 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot.run()
         self.assertTrue(isinstance(bot.meta['exc'], GrabTimeoutError))
 
-    @only_grab_transport('pycurl')
-    def test_stat_error_name_pycurl(self):
+    @run_test_if(lambda: (GLOBAL['spider_transport'] == 'multicurl'
+                          and GLOBAL['grab_transport'] == 'pycurl'),
+                 'multicurl & pycurl')
+    def test_stat_error_name_multi_pycurl(self):
 
         server = self.server
         server.response['sleep'] = 2
@@ -140,8 +142,34 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot.run()
         self.assertTrue('error:operation-timeouted' in bot.stat.counters)
 
-    @only_grab_transport('urllib3')
-    def test_stat_error_name_urllib3(self):
+    @run_test_if(lambda: (GLOBAL['spider_transport'] == 'threaded'
+                          and GLOBAL['grab_transport'] == 'pycurl'),
+                 'threaded & pycurl')
+    def test_stat_error_name_threaded_pycurl(self):
+
+        server = self.server
+        server.response['sleep'] = 2
+
+        class SimpleSpider(Spider):
+            def prepare(self):
+                self.network_try_limit = 1
+
+            def task_generator(self):
+                grab = Grab(url=server.get_url(), timeout=1)
+                yield Task('page', grab=grab)
+
+            def task_page(self, grab, unused_task):
+                pass
+
+        bot = build_spider(SimpleSpider)
+        bot.run()
+        print(bot.stat.counters)
+        self.assertTrue('error:grab-timeout-error' in bot.stat.counters)
+
+    @run_test_if(lambda: (GLOBAL['spider_transport'] == 'threaded'
+                          and GLOBAL['grab_transport'] == 'urllib3'),
+                 'threaded & urllib3')
+    def test_stat_error_name_threaded_urllib3(self):
 
         server = self.server
         server.response['sleep'] = 2

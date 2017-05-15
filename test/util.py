@@ -134,16 +134,60 @@ def only_grab_transport(*names):
     return decorator
 
 
+def exclude_spider_transport(*names):
+    def decorator(func):
+        def caller(*args, **kwargs):
+            if GLOBAL['spider_transport'] in names:
+                func_name = '%s:%s' % (func.__module__, func.__name__)
+                logger.debug('Running test %s for spider transport %s is'
+                             ' restricted', func_name,
+                             GLOBAL['spider_transport'])
+                return None
+            else:
+                return func(*args, **kwargs)
+        return caller
+    return decorator
+
+
+def only_spider_transport(*names):
+    def decorator(func):
+        def caller(*args, **kwargs):
+            if GLOBAL['spider_transport'] in names:
+                return func(*args, **kwargs)
+            else:
+                func_name = '%s:%s' % (func.__module__, func.__name__)
+                logger.debug('Running test %s for spider transport %s is'
+                             ' restricted', func_name,
+                             GLOBAL['spider_transport'])
+                return None
+        return caller
+    return decorator
+
+
 def skip_test_if(condition, why_message):
     def decorator(func):
         def caller(*args, **kwargs):
             if condition():
                 func_name = '%s:%s' % (func.__module__, func.__name__)
-                logger.debug('Skipping test %s because %s', func_name,
-                             why_message)
+                logger.debug('Skipping test %s because %s',
+                             func_name, why_message)
                 return None
             else:
                 return func(*args, **kwargs)
+        return caller
+    return decorator
+
+
+def run_test_if(condition, why_message):
+    def decorator(func):
+        def caller(*args, **kwargs):
+            if condition():
+                return func(*args, **kwargs)
+            else:
+                func_name = '%s:%s' % (func.__module__, func.__name__)
+                logger.debug('Running test %s is restricted because'
+                             ' it is not %s', func_name, why_message)
+                return None
         return caller
     return decorator
 
