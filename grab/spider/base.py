@@ -101,8 +101,11 @@ class TaskGeneratorWrapperThread(Thread):
         self.activity_paused.wait()
 
     def resume(self):
-        self.activity_paused.clear()
         self.is_paused.clear()
+        # Wait for `if self.is_puased.is_set()` branch
+        # to be completed
+        while self.activity_paused.is_set():
+            time.sleep(0.01)
 
     def run(self):
         while True:
@@ -892,11 +895,10 @@ class Spider(object):
         #print('!IS READY: cache is idle: %s' % self.cache_pipeline.is_idle())
         try:
             if self.cache_pipeline:
-                #print('!settings cache to pause')
                 self.cache_pipeline.pause()
-                for th in self._task_generator_list:
-                    if th.isAlive():
-                        th.pause()
+            for th in self._task_generator_list:
+                if th.isAlive():
+                    th.pause()
             return (
                 not self.parser_result_queue.qsize()
                 and all(x['is_parser_idle'].is_set()
