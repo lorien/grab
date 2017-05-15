@@ -2,9 +2,9 @@ import mock
 
 from six import StringIO
 
-from grab import GrabTimeoutError
+from grab import GrabTimeoutError, Grab
 from grab.spider import Spider, Task
-from test.util import BaseGrabTestCase, build_spider
+from test.util import BaseGrabTestCase, build_spider, only_grab_transport
 
 # That URLs breaks Grab's URL normalization process
 # with error "label empty or too long"
@@ -72,7 +72,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
     #            pass
     #
     #    self.server.response['callback'] = callback
-    #    bot = TestSpider()
+    #    bot = build_spider(TestSpider)
     #    bot.run()
 
     def test_no_warning(self):
@@ -106,7 +106,6 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         class SimpleSpider(Spider):
 
             def task_generator(self):
-                from grab import Grab
                 grab = Grab()
                 grab.setup(url=server.get_url(),
                            timeout=1)
@@ -116,6 +115,48 @@ class SpiderErrorTestCase(BaseGrabTestCase):
             def task_page(self, grab, unused_task):
                 self.meta['exc'] = grab.exception
 
-        bot = SimpleSpider()
+        bot = build_spider(SimpleSpider)
         bot.run()
         self.assertTrue(isinstance(bot.meta['exc'], GrabTimeoutError))
+
+    @only_grab_transport('pycurl')
+    def test_stat_error_name_pycurl(self):
+
+        server = self.server
+        server.response['sleep'] = 2
+
+        class SimpleSpider(Spider):
+            def prepare(self):
+                self.network_try_limit = 1
+
+            def task_generator(self):
+                grab = Grab(url=server.get_url(), timeout=1)
+                yield Task('page', grab=grab)
+
+            def task_page(self, grab, unused_task):
+                pass
+
+        bot = build_spider(SimpleSpider)
+        bot.run()
+        self.assertTrue('error:operation-timeouted' in bot.stat.counters)
+
+    @only_grab_transport('urllib3')
+    def test_stat_error_name_urllib3(self):
+
+        server = self.server
+        server.response['sleep'] = 2
+
+        class SimpleSpider(Spider):
+            def prepare(self):
+                self.network_try_limit = 1
+
+            def task_generator(self):
+                grab = Grab(url=server.get_url(), timeout=1)
+                yield Task('page', grab=grab)
+
+            def task_page(self, grab, unused_task):
+                pass
+
+        bot = build_spider(SimpleSpider)
+        bot.run()
+        self.assertTrue('error:read-timeout-error' in bot.stat.counters)
