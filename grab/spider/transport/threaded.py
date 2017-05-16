@@ -4,11 +4,17 @@ import six
 from six.moves.queue import Queue, Empty
 
 from grab.error import GrabNetworkError
+from grab.util.misc import camel_case_to_underscore
 
 ERROR_TOO_MANY_REFRESH_REDIRECTS = -2
 ERROR_ABBR = {
     ERROR_TOO_MANY_REFRESH_REDIRECTS: 'too-many-refresh-redirects',
 }
+
+
+def make_class_abbr(name):
+    val = camel_case_to_underscore(name)
+    return val.replace('_', '-')
 
 
 def worker_thread(task_queue, result_queue, freelist, shutdown_event):
@@ -35,9 +41,16 @@ def worker_thread(task_queue, result_queue, freelist, shutdown_event):
                 try:
                     grab.request()
                 except GrabNetworkError as ex:
+                    if ex.original_exc.__class__.__name__ == 'error':
+                        ex_cls = ex
+                    else:
+                        ex_cls = ex.original_exc
                     result.update({
                         'ok': False,
                         'exc': ex,
+                        'error_abbr': make_class_abbr(
+                            ex_cls.__class__.__name__
+                        ),
                     })
                 result_queue.put(result)
             finally:
