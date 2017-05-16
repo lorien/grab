@@ -7,7 +7,7 @@ ROOT = os.path.dirname(os.path.realpath(__file__))
 setup(
     # Meta data
     name='grab',
-    version='0.6.37',
+    version='0.6.38',
     author='Gregory Petukhov',
     author_email='lorien@lorien.name',
     maintainer='Gregory Petukhov',
