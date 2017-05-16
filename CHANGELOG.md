@@ -1,11 +1,16 @@
 # Grab Change Log
 
-## [0.6.38] - 
+## [0.6.38] - 2017-05-17
+### Fixed
+- Fix "error:None" in spider rps logging
+- Fix race condition bug in task generator
+
 ### Added
-- The `.original_exc` of GrabNetworkError (or subclass) points to original exception
+- Add original_exc attribute to GrabNetworkError (and subclasses) that points to original exception
 
 ### Changed
 - Remove IOError from the ancestors of GrabNetworkError
+- Add default values to --spider-transport and --grab-transport options of crawl script
 
 ## [0.6.37] - 2017-05-13
 ### Added
