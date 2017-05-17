@@ -98,13 +98,19 @@ class TaskGeneratorWrapperThread(Thread):
 
     def pause(self):
         self.is_paused.set()
-        self.activity_paused.wait()
+        while not self.activity_paused.is_set():
+            time.sleep(0.01)
+            if not self.isAlive():
+                break
+        #self.activity_paused.wait()
 
     def resume(self):
         self.is_paused.clear()
         # Wait for `if self.is_puased.is_set()` branch
         # to be completed
         while self.activity_paused.is_set():
+            if not self.isAlive():
+                break
             time.sleep(0.01)
 
     def run(self):
