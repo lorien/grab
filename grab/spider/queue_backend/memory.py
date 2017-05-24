@@ -46,3 +46,6 @@ class QueueBackend(QueueInterface):
         except Empty:
             pass
         self.schedule_list = []
+
+    def close(self):
+        pass

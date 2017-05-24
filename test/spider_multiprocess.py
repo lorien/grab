@@ -1,6 +1,6 @@
 import os
 
-from test.util import BaseGrabTestCase, build_spider, multiprocess_mode
+from test.util import BaseGrabTestCase, build_spider
 from grab.spider import Spider, Task
 from grab.spider.decorators import integrity
 
@@ -34,7 +34,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    @multiprocess_mode(False)
+    #@multiprocess_mode(False)
     def test_spider_nonmp_changes(self):
         """This test tests that in non-multiprocess-mode changes made
         inside handler applied to main spider instance."""
@@ -45,52 +45,52 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.run()
         self.assertEqual(4, bot.foo_count)
 
-    @multiprocess_mode(True)
-    def test_spider_mp_changes(self):
-        bot = build_spider(self.SimpleSpider)
-        bot.setup_queue()
-        bot.meta['url'] = self.server.get_url()
-        bot.add_task(Task('page', self.server.get_url()))
-        bot.run()
-        self.assertEqual(2, bot.foo_count)
+    #@multiprocess_mode(True)
+    #def test_spider_mp_changes(self):
+    #    bot = build_spider(self.SimpleSpider)
+    #    bot.setup_queue()
+    #    bot.meta['url'] = self.server.get_url()
+    #    bot.add_task(Task('page', self.server.get_url()))
+    #    bot.run()
+    #    self.assertEqual(2, bot.foo_count)
 
-    @multiprocess_mode(True)
-    def test_integrity_decorator_in_mp_mode(self):
-        bot = build_spider(self.SimpleSpider)
-        bot.setup_queue()
-        bot.add_task(Task('page2', self.server.get_url()))
-        bot.run()
+    #@multiprocess_mode(True)
+    #def test_integrity_decorator_in_mp_mode(self):
+    #    bot = build_spider(self.SimpleSpider)
+    #    bot.setup_queue()
+    #    bot.add_task(Task('page2', self.server.get_url()))
+    #    bot.run()
 
-    @multiprocess_mode(True)
-    def test_requests_per_process(self):
-        url = self.server.get_url()
+    #@multiprocess_mode(True)
+    #def test_requests_per_process(self):
+    #    url = self.server.get_url()
 
-        class TestSpider(Spider):
-            def task_generator(self):
-                for _ in range(3):
-                    yield Task('page', url=url)
+    #    class TestSpider(Spider):
+    #        def task_generator(self):
+    #            for _ in range(3):
+    #                yield Task('page', url=url)
 
-            def task_page(self, unused_grab, unused_task):
-                self.stat.collect('pid', os.getpid())
+    #        def task_page(self, unused_grab, unused_task):
+    #            self.stat.collect('pid', os.getpid())
 
-        bot = TestSpider(mp_mode=True, parser_pool_size=1)
-        bot.run()
-        self.assertEqual(1, len(set(bot.stat.collections['pid'])))
+    #    bot = TestSpider(mp_mode=True, parser_pool_size=1)
+    #    bot.run()
+    #    self.assertEqual(1, len(set(bot.stat.collections['pid'])))
 
-        bot = TestSpider(mp_mode=True, parser_pool_size=1,
-                         parser_requests_per_process=1)
-        bot.run()
-        self.assertEqual(3, len(set(bot.stat.collections['pid'])))
+    #    bot = TestSpider(mp_mode=True, parser_pool_size=1,
+    #                     parser_requests_per_process=1)
+    #    bot.run()
+    #    self.assertEqual(3, len(set(bot.stat.collections['pid'])))
 
-        bot = TestSpider(mp_mode=True, parser_pool_size=1,
-                         parser_requests_per_process=2)
-        bot.run()
-        self.assertEqual(2, len(set(bot.stat.collections['pid'])))
+    #    bot = TestSpider(mp_mode=True, parser_pool_size=1,
+    #                     parser_requests_per_process=2)
+    #    bot.run()
+    #    self.assertEqual(2, len(set(bot.stat.collections['pid'])))
 
-        bot = TestSpider(mp_mode=True, parser_pool_size=1,
-                         parser_requests_per_process=3)
-        bot.run()
-        self.assertEqual(1, len(set(bot.stat.collections['pid'])))
+    #    bot = TestSpider(mp_mode=True, parser_pool_size=1,
+    #                     parser_requests_per_process=3)
+    #    bot.run()
+    #    self.assertEqual(1, len(set(bot.stat.collections['pid'])))
 
     #@multiprocess_mode(True)
     #def test_task_callback(self):

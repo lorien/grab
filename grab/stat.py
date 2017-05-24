@@ -22,7 +22,7 @@ class Stat(object):
         self.speed_key = speed_key
         self.setup_speed_keys(speed_key, extra_speed_keys)
         self.time = time.time()
-        self.logging_ignore_prefixes = ['spider:', 'parser:']
+        self.logging_ignore_prefixes = ['spider:', 'parser:', 'cache:']
         self.logging_period = logging_period
         self.count_prev = 0
         self.logger_name = logger_name

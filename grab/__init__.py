@@ -6,3 +6,4 @@ from grab.base import Grab  # noqa
 from weblib.logs import default_logging  # noqa
 
 __version__ = '0.6.38'
+version_numeric = tuple(map(int, __version__.split('.')))

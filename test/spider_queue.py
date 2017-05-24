@@ -39,7 +39,6 @@ class SpiderQueueMixin(object):
         self.assertEqual(5, bot.task_queue.size())
         bot.run()
         self.assertEqual(0, bot.task_queue.size())
-        bot.run()
 
     def test_task_queue_render_stats(self):
         bot = build_spider(self.SimpleSpider)
@@ -98,10 +97,10 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
 
 
 class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
-    _backend = 'mongo'
+    _backend = 'mongodb'
 
     def setup_queue(self, bot):
-        bot.setup_queue(backend='mongo', **MONGODB_CONNECTION)
+        bot.setup_queue(backend='mongodb', **MONGODB_CONNECTION)
 
     def test_schedule(self):
         """

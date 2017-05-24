@@ -22,9 +22,8 @@ NON_ROUTABLE_IP = '10.0.0.0'
 
 GLOBAL = {
     'backends': [],
-    'mp_mode': False,
     'grab_transport': None,
-    'spider_transport': None,
+    'network_service': None,
 }
 
 
@@ -58,15 +57,9 @@ def build_grab(*args, **kwargs):
 
 
 def build_spider(cls, **kwargs):
-    """Builds the Spider instance with default options. Also handles
-    `--mp-mode` option that is configured globally."""
-    kwargs.setdefault('mp_mode', GLOBAL['mp_mode'])
+    """Builds the Spider instance with default options."""
     kwargs.setdefault('grab_transport', GLOBAL['grab_transport'])
-    kwargs.setdefault('transport', GLOBAL['spider_transport'])
-    if kwargs['mp_mode']:
-        kwargs.setdefault('parser_pool_size', 2)
-    else:
-        kwargs['parser_pool_size'] = 1
+    kwargs.setdefault('network_service', GLOBAL['network_service'])
     return cls(**kwargs)
 
 
@@ -81,19 +74,6 @@ class BaseGrabTestCase(TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.server.stop()
-
-
-def multiprocess_mode(mode):
-    def wrapper_builder(func):
-        def wrapper(self, *args, **kwargs):
-            if mode != GLOBAL['mp_mode']:
-                logger.debug('Skipping %s:%s:%s. Reason: needs --mp-mode=%s',
-                             func.__module__, self.__class__.__name__,
-                             func.__name__, mode)
-            else:
-                return func(self, *args, **kwargs)
-        return wrapper
-    return wrapper_builder
 
 
 def start_server():
@@ -137,11 +117,11 @@ def only_grab_transport(*names):
 def exclude_spider_transport(*names):
     def decorator(func):
         def caller(*args, **kwargs):
-            if GLOBAL['spider_transport'] in names:
+            if GLOBAL['network_service'] in names:
                 func_name = '%s:%s' % (func.__module__, func.__name__)
                 logger.debug('Running test %s for spider transport %s is'
                              ' restricted', func_name,
-                             GLOBAL['spider_transport'])
+                             GLOBAL['network_service'])
                 return None
             else:
                 return func(*args, **kwargs)
@@ -152,13 +132,13 @@ def exclude_spider_transport(*names):
 def only_spider_transport(*names):
     def decorator(func):
         def caller(*args, **kwargs):
-            if GLOBAL['spider_transport'] in names:
+            if GLOBAL['network_service'] in names:
                 return func(*args, **kwargs)
             else:
                 func_name = '%s:%s' % (func.__module__, func.__name__)
                 logger.debug('Running test %s for spider transport %s is'
                              ' restricted', func_name,
-                             GLOBAL['spider_transport'])
+                             GLOBAL['network_service'])
                 return None
         return caller
     return decorator
