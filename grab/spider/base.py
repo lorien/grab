@@ -5,7 +5,7 @@ import logging
 import time
 from random import randint
 from copy import deepcopy
-from traceback import format_exception, format_tb, format_stack
+from traceback import format_exception, format_stack
 from datetime import datetime
 
 from six.moves.queue import Queue, Empty
@@ -118,24 +118,22 @@ class Spider(object):
     # **************
 
     def __init__(
-        self,
-        thread_number=None,
-        network_try_limit=None, task_try_limit=None,
-        request_pause=NULL,
-        priority_mode='random',
-        meta=None,
-        only_cache=False,
-        config=None,
-        args=None,
-        taskq=None,
-        parser_requests_per_process=10000,
-        parser_pool_size=1,
-        http_api_port=None,
-        network_service='multicurl',
-        grab_transport='pycurl',
-        # Deprecated
-        transport=None,
-    ):
+            self,
+            thread_number=None,
+            network_try_limit=None, task_try_limit=None,
+            request_pause=NULL,
+            priority_mode='random',
+            meta=None,
+            only_cache=False,
+            config=None,
+            args=None,
+            parser_requests_per_process=10000,
+            parser_pool_size=1,
+            http_api_port=None,
+            network_service='multicurl',
+            grab_transport='pycurl',
+            # Deprecated
+            transport=None):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -211,16 +209,25 @@ class Spider(object):
             pool_size=self.parser_pool_size,
         )
         if transport is not None:
-            warn('The "transport" argument of Spider constructor is deprecated.'
-                 ' Use "network_service" argument.')
+            warn('The "transport" argument of Spider constructor is'
+                 ' deprecated. Use "network_service" argument.')
             network_service = transport
         assert network_service in ('multicurl', 'threaded')
         if network_service == 'multicurl':
-            from grab.spider.network_service.multicurl import NetworkServiceMulticurl
-            self.network_service = NetworkServiceMulticurl(self, self.thread_number)
+            from grab.spider.network_service.multicurl import (
+                NetworkServiceMulticurl
+            )
+            self.network_service = NetworkServiceMulticurl(
+                self, self.thread_number
+            )
         elif network_service == 'threaded':
-            from grab.spider.network_service.threaded import NetworkServiceThreaded
-            self.network_service = NetworkServiceThreaded(self, self.thread_number)
+            # pylint: disable=no-name-in-module, import-error
+            from grab.spider.network_service.threaded import (
+                NetworkServiceThreaded
+            )
+            self.network_service = NetworkServiceThreaded(
+                self, self.thread_number
+            )
         self.task_dispatcher = TaskDispatcherService(self)
         if self.http_api_port:
             self.http_api_service = HttpApiService(self)
@@ -301,15 +308,16 @@ class Spider(object):
             if raise_error:
                 raise SpiderError(msg)
             else:
-                logger.error('%s\nTraceback:\n%s' % (
-                    msg,
-                    ''.join(format_stack()),
-                ))
+                logger.error(
+                    '%s\nTraceback:\n%s', msg, ''.join(format_stack()),
+                )
                 return False
         else:
             # TODO: keep original task priority if it was set explicitly
             # WTF the previous comment means?
-            queue.put(task, priority=task.priority, schedule_time=task.schedule_time)
+            queue.put(
+                task, priority=task.priority, schedule_time=task.schedule_time
+            )
             return True
 
     def stop(self):
@@ -555,7 +563,7 @@ class Spider(object):
                 code in task.valid_status)
 
     def process_parser_error(self, func_name, task, exc_info):
-        _, ex, tb = exc_info
+        _, ex, _ = exc_info
         self.stat.inc('spider:error-%s' % ex.__class__.__name__.lower())
 
         logger.error(
@@ -677,7 +685,7 @@ class Spider(object):
             while self.work_allowed:
                 try:
                     exc_info = self.fatal_error_queue.get(True, 0.5)
-                except Empty:  
+                except Empty:
                     pass
                 else:
                     # The trackeback of fatal error MUST BE
@@ -693,7 +701,7 @@ class Spider(object):
         except KeyboardInterrupt:
             self.interrupted = True
             raise
-        except Exception as ex:
+        except Exception:
             raise
         finally:
             # TODO:

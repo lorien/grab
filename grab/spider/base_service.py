@@ -1,10 +1,10 @@
-import time
 from threading import Thread, Event
 import logging
 import sys
-import logging
 
+# pylint: disable=invalid-name
 logger = logging.getLogger('grab.spider.base_service')
+# pylint: enable=invalid-name
 
 
 class ServiceWorker(object):
@@ -30,7 +30,7 @@ class ServiceWorker(object):
         def wrapper(*args, **kwargs):
             try:
                 callback(*args, **kwargs)
-            except Exception as ex:
+            except Exception as ex: # pylint: disable=broad-except
                 logger.error('Spider Service Fatal Error', exc_info=ex)
                 self.spider.fatal_error_queue.put(sys.exc_info())
         return wrapper
@@ -66,6 +66,7 @@ class ServiceWorker(object):
 
 class BaseService(object):
     def create_worker(self, worker_action):
+        # pylint: disable=no-member
         return ServiceWorker(self.spider, worker_action)
 
     def iterate_workers(self, objects):
@@ -96,7 +97,8 @@ class BaseService(object):
         #logging.debug('Service %s resumed' % self.__class__.__name__)
 
     def register_workers(self, *args):
-        self.worker_registry = args 
+        # pylint: disable=attribute-defined-outside-init
+        self.worker_registry = args
 
     def is_busy(self):
         return any(x.is_busy_event.is_set() for x in

@@ -1,8 +1,6 @@
 import time
-from threading import Thread
 
-import six
-from six.moves.queue import Queue, Empty
+from six.moves.queue import Empty
 
 from grab.error import GrabNetworkError
 from grab.util.misc import camel_case_to_underscore
@@ -50,14 +48,20 @@ class NetworkServiceThreaded(BaseService):
                         is_valid, reason = self.spider.check_task_limits(task)
                         if is_valid:
                             grab = self.spider.setup_grab_for_task(task)
-                            # TODO: almost duplicate of Spider.submit_task_to_transport
+                            # TODO: almost duplicate of
+                            # Spider.submit_task_to_transport
                             if self.spider.only_cache:
-                                self.spider.stat.inc('spider:request-network-disabled-only-cache')
+                                self.spider.stat.inc(
+                                    'spider:'
+                                    'request-network-disabled-only-cache'
+                                )
                             else:
                                 grab_config_backup = grab.dump_config()
                                 self.spider.process_grab_proxy(task, grab)
                                 self.spider.stat.inc('spider:request-network')
-                                self.spider.stat.inc('spider:task-%s-network' % task.name)
+                                self.spider.stat.inc(
+                                    'spider:task-%s-network' % task.name
+                                )
 
                                 #self.freelist.pop()
                                 try:
@@ -67,14 +71,17 @@ class NetworkServiceThreaded(BaseService):
                                         'emsg': None,
                                         'error_abbr': None,
                                         'grab': grab,
-                                        'grab_config_backup': grab_config_backup,
+                                        'grab_config_backup': (
+                                            grab_config_backup
+                                        ),
                                         'task': task,
                                         'exc': None
                                     }
                                     try:
                                         grab.request()
                                     except GrabNetworkError as ex:
-                                        if ex.original_exc.__class__.__name__ == 'error':
+                                        if (ex.original_exc.__class__.__name__
+                                                == 'error'):
                                             ex_cls = ex
                                         else:
                                             ex_cls = ex.original_exc
@@ -85,9 +92,8 @@ class NetworkServiceThreaded(BaseService):
                                                 ex_cls.__class__.__name__
                                             ),
                                         })
-                                    self.spider.task_dispatcher.input_queue.put(
-                                        (result, task, None),
-                                    )
+                                    (self.spider.task_dispatcher
+                                     .input_queue.put((result, task, None)))
                                 finally:
                                     pass
                                     #self.freelist.append(1)

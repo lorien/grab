@@ -16,6 +16,8 @@ import logging
 import marshal
 import time
 
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_READ_COMMITTED
 from weblib.encoding import make_str
 
 from grab.document import Document
@@ -28,8 +30,6 @@ logger = logging.getLogger('grab.spider.cache_backend.postgresql')
 
 class CacheBackend(object):
     def __init__(self, database, use_compression=True, spider=None, **kwargs):
-        import psycopg2
-        from psycopg2.extensions import ISOLATION_LEVEL_READ_COMMITTED
 
         self.connection_config = kwargs
         self.database = database
@@ -60,10 +60,9 @@ class CacheBackend(object):
         self.connection.close()
 
     def connect(self):
-        import psycopg2
-        from psycopg2.extensions import ISOLATION_LEVEL_READ_COMMITTED
-
-        self.connection = psycopg2.connect(dbname=self.database, **self.connection_config)
+        self.connection = psycopg2.connect(
+            dbname=self.database, **self.connection_config
+        )
         self.connection.set_isolation_level(ISOLATION_LEVEL_READ_COMMITTED)
         self.cursor = self.connection.cursor()
 
@@ -156,8 +155,6 @@ class CacheBackend(object):
         self.set_item(url, item)
 
     def set_item(self, url, item):
-        import psycopg2
-
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
         self.cursor.execute('BEGIN')

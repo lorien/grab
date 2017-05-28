@@ -1,5 +1,3 @@
-import logging
-from threading import Thread, Event
 import time
 from traceback import format_exc
 import sys
@@ -63,9 +61,9 @@ class ParserService(BaseService):
                     else:
                         self.execute_task_handler(handler, result, task)
                         self.spider.stat.inc('parser:handler-processed')
-                    if self.spider.parser_requests_per_process:                    
-                        if (process_request_count >=                        
-                                self.spider.parser_requests_per_process):          
+                    if self.spider.parser_requests_per_process:
+                        if (process_request_count >=
+                                self.spider.parser_requests_per_process):
                             self.spider.stat.inc(
                                 'parser:handler-req-limit',
                             )
@@ -75,7 +73,6 @@ class ParserService(BaseService):
 
     def execute_task_handler(self, handler, result, task):
         # pylint: disable=broad-except
-        handler_name = getattr(handler, '__name__', 'NONE')
         try:
             handler_result = handler(result['grab'], task)
             if handler_result is None:

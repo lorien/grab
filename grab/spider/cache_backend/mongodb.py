@@ -22,7 +22,6 @@ from weblib.encoding import make_str
 
 from grab.document import Document
 from grab.cookie import CookieManager
-from grab import version_numeric
 
 # pylint: disable=invalid-name
 logger = logging.getLogger('grab.spider.cache_backend.mongodb')
@@ -112,7 +111,7 @@ class CacheBackend(object):
             'is_compressed': self.use_compression,
         }
         try:
-            res = self.dbase.cache.save(item, w=1)
+            self.dbase.cache.save(item, w=1)
         except Exception as ex: # pylint: disable=broad-except
             if 'document too large' in six.text_type(ex):
                 logging.error('Document too large. It was not saved into'

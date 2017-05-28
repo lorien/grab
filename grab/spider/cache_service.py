@@ -1,4 +1,3 @@
-from threading import Event, Thread
 import time
 
 from six.moves.queue import Queue, Empty
@@ -12,8 +11,10 @@ class CacheServiceBase(BaseService):
         self.spider = spider
         self.backend = backend
         self.queue_size_limit = 100
+        # pylint: disable=no-member
         self.input_queue = self.create_input_queue()
         self.worker = self.create_worker(self.worker_callback)
+        # pylint: enable=no-member
         self.register_workers(self.worker)
 
     def stop(self):
@@ -92,7 +93,7 @@ class CacheWriterService(CacheServiceBase):
                     self.backend.save_response(task.url, grab)
 
     def is_write_allowed(self, task, grab):
-        return ( 
+        return (
             grab.request_method == 'GET'
             and not task.get('disable_cache')
             and self.spider.is_valid_network_response_code(

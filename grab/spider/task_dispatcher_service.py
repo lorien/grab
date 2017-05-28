@@ -1,8 +1,3 @@
-from threading import Thread, Event
-import time
-import sys
-import logging
-
 from six.moves.queue import Empty, Queue
 from weblib.error import ResponseNotValid
 
@@ -67,14 +62,15 @@ class TaskDispatcherService(BaseService):
                 handler_name = getattr(handler, '__name__', 'NONE')
             else:
                 handler_name = 'NA'
-            self.spider.process_parser_error(handler_name, task, meta['exc_info'])
+            self.spider.process_parser_error(
+                handler_name, task, meta['exc_info'],
+            )
             if isinstance(result, FatalError):
                 self.spider.fatal_error_queue.put(meta['exc_info'])
         elif isinstance(result, dict) and 'grab' in result:
             if (self.spider.cache_writer_service
-                and not result.get('from_cache')
-                and result['ok']
-            ):
+                    and not result.get('from_cache')
+                    and result['ok']):
                 self.spider.cache_writer_service.input_queue.put(
                     (task, result['grab'])
                 )
@@ -88,7 +84,7 @@ class TaskDispatcherService(BaseService):
             elif result['ok']:
                 res_code = result['grab'].doc.code
                 is_valid = self.spider.is_valid_network_response_code(
-                        res_code, task
+                    res_code, task
                 )
             if is_valid:
                 self.spider.parser_service.input_queue.put((result, task))

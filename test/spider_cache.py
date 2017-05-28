@@ -33,8 +33,8 @@ def content_generator():
 
 def skip_postgres_test(method):
     def wrapper(self):
-        if self._backend == 'postgresql':
-            logging.error('Skipping %s method for postgres' % method.__name__)
+        if self.backend == 'postgresql':
+            logging.error('Skipping %s method for postgres', method.__name__)
         else:
             method(self)
     return wrapper
@@ -68,12 +68,12 @@ class SimpleSpider(Spider):
         self.process_time()
         self.process_pause()
         self.process_counter(grab)
-        for cnt in six.moves.range(3):
+        for _ in six.moves.range(3):
             yield Task('simple', url=self.meta['server'].get_url())
 
 
 class SpiderCacheMixin(object):
-    def setUp(self):
+    def setUp(self): # pylint: disable=invalid-name
         super(SpiderCacheMixin, self).setUp()
         self.server.response['get.data'] = content_generator()
 
@@ -104,7 +104,7 @@ class SpiderCacheMixin(object):
 
     def test_only_cache_task(self):
         bot = self.get_configured_spider(
-           spider_options={'only_cache': True}
+            spider_options={'only_cache': True}
         )
         bot.add_task(Task('simple', self.server.get_url()))
         bot.run()
@@ -149,7 +149,9 @@ class SpiderCacheMixin(object):
         bot.run()
         bot.cache_reader_service.backend.connect()
         self.assertEqual(2, bot.cache_reader_service.backend.size())
-        bot.cache_reader_service.backend.remove_cache_item(self.server.get_url())
+        bot.cache_reader_service.backend.remove_cache_item(
+            self.server.get_url()
+        )
         self.assertEqual(1, bot.cache_reader_service.backend.size())
 
     @skip_postgres_test
@@ -168,7 +170,7 @@ class SpiderCacheMixin(object):
 
 
 class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
-    _backend = 'mongodb'
+    backend = 'mongodb'
 
     def setup_cache(self, bot, **kwargs):
         config = deepcopy(MONGODB_CONNECTION)
@@ -207,7 +209,7 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
 
 
 class SpiderMysqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
-    _backend = 'mysql'
+    backend = 'mysql'
 
     def setup_cache(self, bot, **kwargs):
         config = deepcopy(MYSQL_CONNECTION)
@@ -232,7 +234,7 @@ class SpiderMysqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
 
 
 class SpiderPostgresqlCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
-    _backend = 'postgresql'
+    backend = 'postgresql'
 
     def setup_cache(self, bot, **kwargs):
         config = deepcopy(POSTGRESQL_CONNECTION)

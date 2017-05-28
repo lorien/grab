@@ -1,5 +1,3 @@
-import os
-
 from test.util import BaseGrabTestCase, build_spider
 from grab.spider import Spider, Task
 from grab.spider.decorators import integrity

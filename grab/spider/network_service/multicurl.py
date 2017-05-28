@@ -1,5 +1,6 @@
+# TODO: is Lock still required?
 import select
-from threading import Lock, Thread
+from threading import Lock
 import time
 
 import pycurl
@@ -171,7 +172,9 @@ class NetworkServiceMulticurl(BaseService):
             try:
                 self.network_op_lock.acquire()
                 with self.sigint_handler.handle_sigint():
-                    queued_messages, ok_list, fail_list = self.multi.info_read()
+                    queued_messages, ok_list, fail_list = (
+                        self.multi.info_read()
+                    )
             finally:
                 self.network_op_lock.release()
             #except Exception as ex:

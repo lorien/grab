@@ -1,6 +1,5 @@
 import logging
 import os
-import threading
 import json
 
 from six.moves.SimpleHTTPServer import SimpleHTTPRequestHandler
@@ -102,7 +101,7 @@ class HttpApiService(BaseService):
         #    self.server.shutdown()
         pass
 
-    def worker_callback(self, worker):
+    def worker_callback(self, unused_worker):
         ApiHandler.spider = self.spider
         self.server = ReuseTCPServer(("", self.spider.http_api_port),
                                      ApiHandler)

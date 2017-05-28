@@ -15,12 +15,6 @@ class TaskGeneratorService(BaseService):
     def worker_callback(self, worker):
         while not worker.stop_event.is_set():
             worker.process_pause_signal()
-            #queue_size = self.spider.task_queue.size()
-            if self.spider.cache_reader_service:
-                cache_queue_size = (
-                )
-            else:
-                cache_queue_size = 0
             queue_size = max(
                 self.spider.task_queue.size(),
                 (self.spider.cache_reader_service.input_queue.size()
@@ -30,8 +24,7 @@ class TaskGeneratorService(BaseService):
             if queue_size < self.task_queue_threshold:
                 try:
                     for _ in six.moves.range(
-                        self.task_queue_threshold - queue_size
-                    ):
+                            self.task_queue_threshold - queue_size):
                         if worker.pause_event.is_set():
                             return
                         task = next(self.real_generator)
