@@ -1,3 +1,5 @@
+# TODO: implement is_compressed flag
+# TODO: close method
 """
 CacheItem interface:
 '_id': string,
@@ -34,9 +36,12 @@ class CacheBackend(object):
         self.database = database
         self.connection_config = kwargs
         self.mysql_engine = mysql_engine
-
         self.connect()
-        self.execute('SET TRANSACTION ISOLATION LEVEL READ COMMITTED')
+        self.check_tables()
+        # FIXME: why `use_compression` is not used?
+        self.use_compression = use_compression
+
+    def check_tables(self):
         self.execute('show tables')
         found = False
         for row in self.cursor:
@@ -45,13 +50,16 @@ class CacheBackend(object):
                 break
         if not found:
             self.create_cache_table(self.mysql_engine)
-        # FIXME: why `use_compression` is not used?
-        self.use_compression = use_compression
 
     def connect(self):
-        self.conn = MySQLdb.connect(**self.connection_config)
-        self.conn.select_db(self.database)
-        self.cursor = self.conn.cursor()
+        self.connection = MySQLdb.connect(**self.connection_config)
+        self.connection.select_db(self.database)
+        self.cursor = self.connection.cursor()
+        self.execute('SET TRANSACTION ISOLATION LEVEL READ COMMITTED')
+
+    def close(self):
+        self.cursor.close()
+        self.connection.close()
 
     def execute(self, *args):
         # pylint: disable=no-member
@@ -81,21 +89,20 @@ class CacheBackend(object):
         """
 
         _hash = self.build_hash(url)
-        with self.spider.timer.log_time('cache.read.mysql_query'):
-            self.execute('BEGIN')
-            if timeout is None:
-                query = ""
-            else:
-                moment = int(time.time()) - timeout
-                query = " AND timestamp > %d" % moment
-            sql = '''
-                  SELECT data
-                  FROM cache
-                  WHERE id = x%%s %(query)s
-                  ''' % {'query': query}
-            self.execute(sql, (_hash,))
-            row = self.cursor.fetchone()
-            self.execute('COMMIT')
+        self.execute('BEGIN')
+        if timeout is None:
+            query = ""
+        else:
+            moment = int(time.time()) - timeout
+            query = " AND timestamp > %d" % moment
+        sql = '''
+              SELECT data
+              FROM cache
+              WHERE id = x%%s %(query)s
+              ''' % {'query': query}
+        self.execute(sql, (_hash,))
+        row = self.cursor.fetchone()
+        self.execute('COMMIT')
         if row:
             data = row[0]
             return self.unpack_database_value(data)
@@ -103,14 +110,12 @@ class CacheBackend(object):
             return None
 
     def unpack_database_value(self, val):
-        with self.spider.timer.log_time('cache.read.unpack_data'):
-            dump = zlib.decompress(val)
-            return marshal.loads(dump)
+        dump = zlib.decompress(val)
+        return marshal.loads(dump)
 
     def build_hash(self, url):
-        with self.spider.timer.log_time('cache.read.build_hash'):
-            utf_url = make_str(url)
-            return sha1(utf_url).hexdigest()
+        utf_url = make_str(url)
+        return sha1(utf_url).hexdigest()
 
     def remove_cache_item(self, url):
         _hash = self.build_hash(url)
@@ -182,21 +187,20 @@ class CacheBackend(object):
         """
 
         _hash = self.build_hash(url)
-        with self.spider.timer.log_time('cache.read.mysql_query'):
-            if timeout is None:
-                query = ""
-            else:
-                moment = int(time.time()) - timeout
-                query = " AND timestamp > %d" % moment
-            self.execute('BEGIN')
-            self.execute('''
-                SELECT id
-                FROM cache
-                WHERE id = x%%s %(query)s
-                LIMIT 1
-                ''' % {'query': query}, (_hash,))
-            row = self.cursor.fetchone()
-            self.execute('COMMIT')
+        if timeout is None:
+            query = ""
+        else:
+            moment = int(time.time()) - timeout
+            query = " AND timestamp > %d" % moment
+        self.execute('BEGIN')
+        self.execute('''
+            SELECT id
+            FROM cache
+            WHERE id = x%%s %(query)s
+            LIMIT 1
+            ''' % {'query': query}, (_hash,))
+        row = self.cursor.fetchone()
+        self.execute('COMMIT')
         return True if row else False
 
     def size(self):

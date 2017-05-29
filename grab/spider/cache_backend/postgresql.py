@@ -1,3 +1,5 @@
+# TODO: implement is_compressed flag
+# TODO: close method
 """
 CacheItem interface:
 '_id': string,
@@ -14,6 +16,8 @@ import logging
 import marshal
 import time
 
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_READ_COMMITTED
 from weblib.encoding import make_str
 
 from grab.document import Document
@@ -26,13 +30,11 @@ logger = logging.getLogger('grab.spider.cache_backend.postgresql')
 
 class CacheBackend(object):
     def __init__(self, database, use_compression=True, spider=None, **kwargs):
-        import psycopg2
-        from psycopg2.extensions import ISOLATION_LEVEL_READ_COMMITTED
 
+        self.connection_config = kwargs
+        self.database = database
         self.spider = spider
-        self.conn = psycopg2.connect(dbname=database, **kwargs)
-        self.conn.set_isolation_level(ISOLATION_LEVEL_READ_COMMITTED)
-        self.cursor = self.conn.cursor()
+        self.connect()
         self.cursor.execute("""
             SELECT
                 TABLE_NAME
@@ -53,6 +55,17 @@ class CacheBackend(object):
         # FIXME: why `use_compression` is not used?
         self.use_compression = use_compression
 
+    def close(self):
+        self.cursor.close()
+        self.connection.close()
+
+    def connect(self):
+        self.connection = psycopg2.connect(
+            dbname=self.database, **self.connection_config
+        )
+        self.connection.set_isolation_level(ISOLATION_LEVEL_READ_COMMITTED)
+        self.cursor = self.connection.cursor()
+
     def create_cache_table(self):
         self.cursor.execute('BEGIN')
         self.cursor.execute('''
@@ -71,21 +84,20 @@ class CacheBackend(object):
         """
 
         _hash = self.build_hash(url)
-        with self.spider.timer.log_time('cache.read.postgresql_query'):
-            self.cursor.execute('BEGIN')
-            if timeout is None:
-                query = ""
-            else:
-                moment = int(time.time()) - timeout
-                query = " AND timestamp > %d" % moment
-            sql = '''
-                  SELECT data
-                  FROM cache
-                  WHERE id = %%s %(query)s
-                  ''' % {'query': query}
-            self.cursor.execute(sql, (_hash,))
-            row = self.cursor.fetchone()
-            self.cursor.execute('COMMIT')
+        self.cursor.execute('BEGIN')
+        if timeout is None:
+            query = ""
+        else:
+            moment = int(time.time()) - timeout
+            query = " AND timestamp > %d" % moment
+        sql = '''
+              SELECT data
+              FROM cache
+              WHERE id = %%s %(query)s
+              ''' % {'query': query}
+        self.cursor.execute(sql, (_hash,))
+        row = self.cursor.fetchone()
+        self.cursor.execute('COMMIT')
         if row:
             data = row[0]
             return self.unpack_database_value(data)
@@ -93,14 +105,12 @@ class CacheBackend(object):
             return None
 
     def unpack_database_value(self, val):
-        with self.spider.timer.log_time('cache.read.unpack_data'):
-            dump = zlib.decompress(val)
-            return marshal.loads(dump)
+        dump = zlib.decompress(val)
+        return marshal.loads(dump)
 
     def build_hash(self, url):
-        with self.spider.timer.log_time('cache.read.build_hash'):
-            utf_url = make_str(url)
-            return sha1(utf_url).hexdigest()
+        utf_url = make_str(url)
+        return sha1(utf_url).hexdigest()
 
     def remove_cache_item(self, url):
         _hash = self.build_hash(url)
@@ -145,8 +155,6 @@ class CacheBackend(object):
         self.set_item(url, item)
 
     def set_item(self, url, item):
-        import psycopg2
-
         _hash = self.build_hash(url)
         data = self.pack_database_value(item)
         self.cursor.execute('BEGIN')
@@ -176,19 +184,18 @@ class CacheBackend(object):
         """
 
         _hash = self.build_hash(url)
-        with self.spider.timer.log_time('cache.read.postgresql_query'):
-            if timeout is None:
-                query = ""
-            else:
-                moment = int(time.time()) - timeout
-                query = " AND timestamp > %d" % moment
-            self.cursor.execute('''
-                SELECT id
-                FROM cache
-                WHERE id = %%s %(query)s
-                LIMIT 1
-                ''' % {'query': query}, (_hash,))
-            row = self.cursor.fetchone()
+        if timeout is None:
+            query = ""
+        else:
+            moment = int(time.time()) - timeout
+            query = " AND timestamp > %d" % moment
+        self.cursor.execute('''
+            SELECT id
+            FROM cache
+            WHERE id = %%s %(query)s
+            LIMIT 1
+            ''' % {'query': query}, (_hash,))
+        row = self.cursor.fetchone()
         return True if row else False
 
     def size(self):

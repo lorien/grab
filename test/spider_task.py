@@ -1,7 +1,6 @@
 from weblib.error import ResponseNotValid
 
-from test.util import (BaseGrabTestCase, build_grab, build_spider,
-                       multiprocess_mode)
+from test.util import BaseGrabTestCase, build_grab, build_spider
 from grab import Grab
 from grab.spider import base
 from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
@@ -131,7 +130,6 @@ class TestSpiderTestCase(BaseGrabTestCase):
         bot.run()
         self.assertEqual(2, len(bot.stat.collections['codes']))
 
-    @multiprocess_mode(False)
     def test_task_callback(self):
         class TestSpider(Spider):
             def task_page(self, unused_grab, unused_task):
@@ -321,27 +319,20 @@ class TestSpiderTestCase(BaseGrabTestCase):
         bot.add_task(Task('page', url='http://example.com/'))
         self.assertEqual(1, bot.task_queue.size())
 
-    def test_multiple_internal_worker_error(self):
+    def test_worker_restored(self):
         class TestSpider(Spider):
-            """
-            This class derived from Spider super-class
-            contains fatal bug in overriden `process_network_result`
-            method
-            """
-            # pylint: disable=unused-argument
-            def process_network_result(self, result, handler):
-                raise Exception('Shit happens!')
-            # pylint: enable=unused-argument
-
             def task_page(self, unused_grab, unused_task):
                 pass
 
-        bot = build_spider(TestSpider, )
+        bot = build_spider(
+            TestSpider,
+            parser_requests_per_process=2,
+        )
         bot.setup_queue()
         for _ in range(5):
             bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
-        self.assertTrue(bot.stat.counters['parser-pipeline-restore'] > 1)
+        self.assertTrue(bot.stat.counters['parser:worker-restarted'] == 2)
 
     def test_task_clone_post_request(self):
         class TestSpider(Spider):

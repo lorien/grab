@@ -119,7 +119,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot.run()
         self.assertTrue(isinstance(bot.meta['exc'], GrabTimeoutError))
 
-    @run_test_if(lambda: (GLOBAL['spider_transport'] == 'multicurl'
+    @run_test_if(lambda: (GLOBAL['network_service'] == 'multicurl'
                           and GLOBAL['grab_transport'] == 'pycurl'),
                  'multicurl & pycurl')
     def test_stat_error_name_multi_pycurl(self):
@@ -142,7 +142,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot.run()
         self.assertTrue('error:operation-timeouted' in bot.stat.counters)
 
-    @run_test_if(lambda: (GLOBAL['spider_transport'] == 'threaded'
+    @run_test_if(lambda: (GLOBAL['network_service'] == 'threaded'
                           and GLOBAL['grab_transport'] == 'pycurl'),
                  'threaded & pycurl')
     def test_stat_error_name_threaded_pycurl(self):
@@ -166,7 +166,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         print(bot.stat.counters)
         self.assertTrue('error:grab-timeout-error' in bot.stat.counters)
 
-    @run_test_if(lambda: (GLOBAL['spider_transport'] == 'threaded'
+    @run_test_if(lambda: (GLOBAL['network_service'] == 'threaded'
                           and GLOBAL['grab_transport'] == 'urllib3'),
                  'threaded & urllib3')
     def test_stat_error_name_threaded_urllib3(self):

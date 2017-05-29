@@ -32,12 +32,9 @@ def setup_arg_parser(parser):
                         default=False)
     parser.add_argument('--settings-module', type=str, default='settings')
     parser.add_argument('--api-port', type=int, default=None)
-    parser.add_argument('--mp-mode', action='store_true', default=False,
-                        help='Run task handlers (HTML parsers) in separate '
-                             'processes')
-    parser.add_argument('--parser-pool-size', type=int)
+    parser.add_argument('--parser-pool-size', type=int, default=2)
     parser.add_argument('--grab-transport', default='pycurl')
-    parser.add_argument('--spider-transport', default='multicurl')
+    parser.add_argument('--network-service', default='multicurl')
 
 
 def get_lock_key(spider_name, lock_key=None, # pylint: disable=unused-argument
@@ -76,11 +73,10 @@ def main(spider_name, thread_number=None,
          disable_proxy=False, ignore_lock=False,
          disable_report=False,
          api_port=None,
-         mp_mode=False,
-         parser_pool_size=None,
+         parser_pool_size=2,
          grab_log_file=None,
          network_log_file=None,
-         spider_transport=None,
+         network_service=None,
          grab_transport=None,
          **kwargs): # pylint: disable=unused-argument
     default_logging(
@@ -107,9 +103,8 @@ def main(spider_name, thread_number=None,
         task_try_limit=None,
         args=spider_args,
         http_api_port=api_port,
-        mp_mode=mp_mode,
         parser_pool_size=parser_pool_size,
-        transport=spider_transport,
+        network_service=network_service,
         grab_transport=grab_transport,
 
     )
@@ -138,8 +133,7 @@ def main(spider_name, thread_number=None,
     except KeyboardInterrupt:
         pass
 
-    stats = bot.render_stats(timing=spider_config.get('display_timing'))
-    stats_with_time = bot.render_stats(timing=True)
+    stats = bot.render_stats()
 
     if spider_config.get('display_stats'):
         logger.debug(stats)
@@ -159,9 +153,8 @@ def main(spider_name, thread_number=None,
                     fname_key = key.replace('-', '_')
                     save_list(lst, '%s/%s.txt' % (dir_, fname_key))
                 with open('%s/report.txt' % dir_, 'wb') as out:
-                    out.write(make_str(stats_with_time))
+                    out.write(make_str(stats))
 
     return {
-        'spider_stats': bot.render_stats(timing=False),
-        'spider_timing': bot.render_timing(),
+        'spider_stats': bot.render_stats(),
     }

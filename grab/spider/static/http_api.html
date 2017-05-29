@@ -91,6 +91,12 @@ $.get(location.href + 'api/info', {}, function(data) {
                     <h3>Info</h3>
                     <div>Network threads: {{ data.thread_number }}</div>
                     <div>Parser processes: {{ data.parser_pool_size }}</div>
+                    <div>Task queue: {{ data.task_queue }}</div>
+                    <div>Task dispatcher input q.: {{ data.task_dispatcher_input_queue }}</div>
+                    <div>Parser service input q.: {{ data.parser_service_input_queue }}</div>
+                    <div>Network service active threads: {{ data.network_service_active_threads }}</div>
+                    <div>Cache reader input queue: {{ data.cache_reader_input_queue }}</div>
+                    <div>Cache writer input queue: {{ data.cache_writer_input_queue }}</div>
                 </div>
             </div>
         </div>

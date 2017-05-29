@@ -7,12 +7,12 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_stop_timer_invalid_input(self):
-        class TestSpider(Spider):
-            pass
+    #def test_stop_timer_invalid_input(self):
+    #    class TestSpider(Spider):
+    #        pass
 
-        bot = build_spider(TestSpider)
-        self.assertRaises(KeyError, bot.timer.stop, 'zzz')
+    #    bot = build_spider(TestSpider)
+    #    self.assertRaises(KeyError, bot.timer.stop, 'zzz')
 
     def test_counters_and_collections(self):
         class TestSpider(Spider):
@@ -48,4 +48,3 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.add_task(Task('page', url=self.server.get_url()))
         bot.run()
         bot.render_stats()
-        bot.render_stats(timing=True)
