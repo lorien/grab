@@ -79,6 +79,16 @@ class NetworkServiceThreaded(BaseService):
                                     }
                                     try:
                                         grab.request()
+                                    except UnicodeError as ex:
+                                        if ("encoding with 'idna'"
+                                                " codec failed" in str(ex)):
+                                            result.update({
+                                                'ok': False,
+                                                'exc': ex,
+                                                'error_abbr': 'invalid_url',
+                                            })
+                                        else:
+                                            raise
                                     except GrabNetworkError as ex:
                                         if (ex.original_exc.__class__.__name__
                                                 == 'error'):
