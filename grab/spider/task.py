@@ -19,7 +19,7 @@ class Task(BaseTask):
                  network_try_count=0, task_try_count=1,
                  disable_cache=False, refresh_cache=False,
                  valid_status=None, use_proxylist=True,
-                 cache_timeout=None, delay=0,
+                 cache_timeout=None, delay=None,
                  raw=False, callback=None,
                  fallback_name=None,
                  **kwargs):
@@ -130,6 +130,7 @@ class Task(BaseTask):
             self.valid_status = valid_status
 
         self.process_delay_option(delay)
+        self.cache_timeout = cache_timeout
 
         self.fallback_name = fallback_name
         self.priority_set_explicitly = priority_set_explicitly
@@ -139,7 +140,6 @@ class Task(BaseTask):
         self.disable_cache = disable_cache
         self.refresh_cache = refresh_cache
         self.use_proxylist = use_proxylist
-        self.cache_timeout = cache_timeout
         self.raw = raw
         self.callback = callback
         self.coroutines_stack = []
@@ -156,10 +156,8 @@ class Task(BaseTask):
     def process_delay_option(self, delay):
         if delay:
             self.schedule_time = datetime.utcnow() + timedelta(seconds=delay)
-            self.original_delay = delay
         else:
             self.schedule_time = None
-            self.original_delay = None
 
     def setup_grab_config(self, grab_config):
         self.grab_config = copy_config(grab_config)
@@ -221,11 +219,7 @@ class Task(BaseTask):
         for key, value in kwargs.items():
             setattr(task, key, value)
 
-        # WTF?
-        # The `Task` object can't has `delay` attribute
-        # I think in next line the `process_delay_option` method
-        # always gets None as input argument
-        task.process_delay_option(task.get('delay', None))
+        task.process_delay_option(None)
 
         return task
 
