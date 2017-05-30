@@ -131,15 +131,19 @@ class SpiderCacheMixin(object):
 
     def test_task_cache_timeout(self):
         bot = self.get_configured_spider()
-        bot.add_task(Task('simple', self.server.get_url(), priority=1))
-        bot.add_task(Task('simple', self.server.get_url(),
-                          priority=2, cache_timeout=0, delay=1))
-        bot.add_task(Task('simple', self.server.get_url(),
-                          priority=3, cache_timeout=10, delay=2))
-        bot.add_task(Task('simple', self.server.get_url(),
-                          priority=4, cache_timeout=0, delay=3))
+        bot.add_task(Task(
+            'simple', self.server.get_url()
+        ))
+        bot.add_task(Task(
+            'simple', self.server.get_url(),
+            cache_timeout=0, delay=1
+        ))
+        bot.add_task(Task(
+            'simple', self.server.get_url(),
+            cache_timeout=10, delay=2
+        ))
         bot.run()
-        self.assertEqual([1, 2, 2, 3], bot.stat.collections['cnt'])
+        self.assertEqual([1, 2, 2], bot.stat.collections['cnt'])
 
     @skip_postgres_test
     def test_remove_cache_item(self):
