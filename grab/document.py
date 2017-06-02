@@ -872,6 +872,9 @@ class Document(object):
             will override data automatically extracted from the form.
         :param remove_from_post: list of keys to remove from the submitted data
 
+        :param remove_from_post: (list) contains names of form elements to remove
+            from post request (e. g. for removing named submit)
+
         Following input elements are automatically processed:
 
         * input[type="hidden"] - default value
@@ -906,6 +909,10 @@ class Document(object):
         # pylint: disable=no-member
 
         post = self.form_fields()
+
+        for name in remove_from_post:
+            if name in post:
+                del post[name]
 
         # Build list of submit buttons which have a name
         submit_controls = {}
