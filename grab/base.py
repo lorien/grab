@@ -504,7 +504,16 @@ class Grab(DeprecatedThings):
         if self.config['debug_post']:
             post = self.config['post'] or self.config['multipart_post']
             if isinstance(post, dict):
-                post = list(post.items())
+                result = []
+                for k, vs in post.iteritems():
+                    if isinstance(vs, basestring) or not hasattr(vs, '__iter__'):
+                        vs = [vs]
+                    for v in vs:
+                        if v is not None:
+                            result.append(
+                                (k.encode('utf-8') if isinstance(k, str) else k,
+                                 v.encode('utf-8') if isinstance(v, str) else v))
+                post = result
             if post:
                 if isinstance(post, six.string_types):
                     post = normalize_unicode(
