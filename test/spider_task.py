@@ -216,7 +216,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         grab.setup(url='http://foo.com/')
         task = Task('foo', grab=grab, foo=1)
         task2 = task.clone(foo=2)
-        self.assertEqual(2, task2.foo)
+        self.assertEqual(2, task2.foo) # pylint: disable=no-member
 
     def test_task_comparison(self):
         task1 = Task('foo', url='http://foo.com/', priority=1)
