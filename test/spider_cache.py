@@ -129,22 +129,6 @@ class SpiderCacheMixin(object):
         self.assertEqual([1, 1], bot.stat.collections['cnt'])
         self.assertEqual(1, bot.stat.counters['cache:req-hit'])
 
-    def test_task_cache_timeout(self):
-        bot = self.get_configured_spider()
-        bot.add_task(Task(
-            'simple', self.server.get_url()
-        ))
-        bot.add_task(Task(
-            'simple', self.server.get_url(),
-            cache_timeout=0, delay=1
-        ))
-        bot.add_task(Task(
-            'simple', self.server.get_url(),
-            cache_timeout=10, delay=2
-        ))
-        bot.run()
-        self.assertEqual([1, 2, 2], bot.stat.collections['cnt'])
-
     @skip_postgres_test
     def test_remove_cache_item(self):
         bot = self.get_configured_spider()
@@ -167,8 +151,6 @@ class SpiderCacheMixin(object):
         bot.cache_reader_service.backend.connect()
         backend = bot.cache_reader_service.backend
         self.assertTrue(backend.has_item(self.server.get_url()))
-        self.assertTrue(backend.has_item(self.server.get_url(), timeout=100))
-        self.assertFalse(backend.has_item(self.server.get_url(), timeout=0))
         self.assertTrue(backend.has_item(self.server.get_url('/foo')))
         self.assertFalse(backend.has_item(self.server.get_url('/bar')))
 

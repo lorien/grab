@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from grab.spider.error import SpiderMisuseError
 from grab.base import copy_config
+from grab.util.warning import warn
 
 
 class BaseTask(object):
@@ -68,8 +69,6 @@ class Task(BaseTask):
             :param valid_status: extra status codes which counts as valid
             :param use_proxylist: it means to use proxylist which was
                 configured via `setup_proxylist` method of spider
-            :param cache_timeout: maximum age (in seconds) of cache record to
-                be valid
             :param delay: if specified tells the spider to schedule the task
                 and execute    it after `delay` seconds
             :param raw: if `raw` is True then the network response is
@@ -131,6 +130,11 @@ class Task(BaseTask):
 
         self.process_delay_option(delay)
         self.cache_timeout = cache_timeout
+        if cache_timeout is not None:
+            warn(
+                'Option `cache_timeout` is deprecated and'
+                ' is not supported anymore'
+            )
 
         self.fallback_name = fallback_name
         self.priority_set_explicitly = priority_set_explicitly

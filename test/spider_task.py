@@ -214,9 +214,9 @@ class TestSpiderTestCase(BaseGrabTestCase):
     def test_task_clone_kwargs(self):
         grab = build_grab()
         grab.setup(url='http://foo.com/')
-        task = Task('foo', grab=grab, cache_timeout=1)
-        task2 = task.clone(cache_timeout=2)
-        self.assertEqual(2, task2.cache_timeout)
+        task = Task('foo', grab=grab, foo=1)
+        task2 = task.clone(foo=2)
+        self.assertEqual(2, task2.foo)
 
     def test_task_comparison(self):
         task1 = Task('foo', url='http://foo.com/', priority=1)

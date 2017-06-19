@@ -42,17 +42,13 @@ class CacheBackend(object):
     def close(self):
         self.connection.close()
 
-    def get_item(self, url, timeout=None):
+    def get_item(self, url):
         """
         Returned item should have specific interface. See module docstring.
         """
 
         _hash = self.build_hash(url)
-        if timeout is not None:
-            moment = int(time.time()) - timeout
-            query = {'_id': _hash, 'timestamp': {'$gt': moment}}
-        else:
-            query = {'_id': _hash}
+        query = {'_id': _hash}
         return self.dbase.cache.find_one(query)
 
     def build_hash(self, url):
@@ -125,16 +121,12 @@ class CacheBackend(object):
     def size(self):
         return self.dbase.cache.count()
 
-    def has_item(self, url, timeout=None):
+    def has_item(self, url):
         """
         Test if required item exists in the cache.
         """
 
         _hash = self.build_hash(url)
-        if timeout is not None:
-            moment = int(time.time()) - timeout
-            query = {'_id': _hash, 'timestamp': {'$gt': moment}}
-        else:
-            query = {'_id': _hash}
+        query = {'_id': _hash}
         doc = self.dbase.cache.find_one(query, {'id': 1})
         return doc is not None
