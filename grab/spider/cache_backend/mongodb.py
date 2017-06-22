@@ -42,17 +42,13 @@ class CacheBackend(object):
     def close(self):
         self.connection.close()
 
-    def get_item(self, url, timeout=None):
+    def get_item(self, url):
         """
         Returned item should have specific interface. See module docstring.
         """
 
         _hash = self.build_hash(url)
-        if timeout is not None:
-            moment = int(time.time()) - timeout
-            query = {'_id': _hash, 'timestamp': {'$gt': moment}}
-        else:
-            query = {'_id': _hash}
+        query = {'_id': _hash}
         return self.dbase.cache.find_one(query)
 
     def build_hash(self, url):
@@ -110,14 +106,22 @@ class CacheBackend(object):
             'cookies': None,
             'is_compressed': self.use_compression,
         }
+        #print('Before saving')
         try:
             self.dbase.cache.save(item, w=1)
         except Exception as ex: # pylint: disable=broad-except
+            #from traceback import format_exc
+            #print('FATA ERROR WHILE SAVING CACHE ITEM')
+            #print(format_exc())
             if 'document too large' in six.text_type(ex):
                 logging.error('Document too large. It was not saved into'
                               'mongodb cache. Url: %s', url)
             else:
                 raise
+        #else:
+        #    print('COUNT: %d' % self.dbase.cache.count({'_id': item['_id']}))
+        #finally:
+        #    print('After saving')
 
     def clear(self):
         self.dbase.cache.remove()
@@ -125,16 +129,12 @@ class CacheBackend(object):
     def size(self):
         return self.dbase.cache.count()
 
-    def has_item(self, url, timeout=None):
+    def has_item(self, url):
         """
         Test if required item exists in the cache.
         """
 
         _hash = self.build_hash(url)
-        if timeout is not None:
-            moment = int(time.time()) - timeout
-            query = {'_id': _hash, 'timestamp': {'$gt': moment}}
-        else:
-            query = {'_id': _hash}
+        query = {'_id': _hash}
         doc = self.dbase.cache.find_one(query, {'id': 1})
         return doc is not None

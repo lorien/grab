@@ -58,8 +58,7 @@ class CacheReaderService(CacheServiceBase):
         )
 
     def load_from_cache(self, task, grab):
-        cache_item = self.backend.get_item(
-            grab.config['url'], timeout=task.cache_timeout)
+        cache_item = self.backend.get_item(grab.config['url'])
         if cache_item is None:
             self.spider.stat.inc('cache:req-miss')
         else:

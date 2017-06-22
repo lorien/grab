@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from grab.spider.error import SpiderMisuseError
 from grab.base import copy_config
+from grab.util.warning import warn
 
 
 class BaseTask(object):
@@ -19,7 +20,7 @@ class Task(BaseTask):
                  network_try_count=0, task_try_count=1,
                  disable_cache=False, refresh_cache=False,
                  valid_status=None, use_proxylist=True,
-                 cache_timeout=None, delay=0,
+                 cache_timeout=None, delay=None,
                  raw=False, callback=None,
                  fallback_name=None,
                  **kwargs):
@@ -68,8 +69,6 @@ class Task(BaseTask):
             :param valid_status: extra status codes which counts as valid
             :param use_proxylist: it means to use proxylist which was
                 configured via `setup_proxylist` method of spider
-            :param cache_timeout: maximum age (in seconds) of cache record to
-                be valid
             :param delay: if specified tells the spider to schedule the task
                 and execute    it after `delay` seconds
             :param raw: if `raw` is True then the network response is
@@ -130,6 +129,12 @@ class Task(BaseTask):
             self.valid_status = valid_status
 
         self.process_delay_option(delay)
+        self.cache_timeout = cache_timeout
+        if cache_timeout is not None:
+            warn(
+                'Option `cache_timeout` is deprecated and'
+                ' is not supported anymore'
+            )
 
         self.fallback_name = fallback_name
         self.priority_set_explicitly = priority_set_explicitly
@@ -139,7 +144,6 @@ class Task(BaseTask):
         self.disable_cache = disable_cache
         self.refresh_cache = refresh_cache
         self.use_proxylist = use_proxylist
-        self.cache_timeout = cache_timeout
         self.raw = raw
         self.callback = callback
         self.coroutines_stack = []
@@ -156,10 +160,8 @@ class Task(BaseTask):
     def process_delay_option(self, delay):
         if delay:
             self.schedule_time = datetime.utcnow() + timedelta(seconds=delay)
-            self.original_delay = delay
         else:
             self.schedule_time = None
-            self.original_delay = None
 
     def setup_grab_config(self, grab_config):
         self.grab_config = copy_config(grab_config)
@@ -221,11 +223,7 @@ class Task(BaseTask):
         for key, value in kwargs.items():
             setattr(task, key, value)
 
-        # WTF?
-        # The `Task` object can't has `delay` attribute
-        # I think in next line the `process_delay_option` method
-        # always gets None as input argument
-        task.process_delay_option(task.get('delay', None))
+        task.process_delay_option(None)
 
         return task
 

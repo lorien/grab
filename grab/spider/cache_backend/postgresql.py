@@ -78,23 +78,18 @@ class CacheBackend(object):
         ''')
         self.cursor.execute('COMMIT')
 
-    def get_item(self, url, timeout=None):
+    def get_item(self, url):
         """
         Returned item should have specific interface. See module docstring.
         """
 
         _hash = self.build_hash(url)
         self.cursor.execute('BEGIN')
-        if timeout is None:
-            query = ""
-        else:
-            moment = int(time.time()) - timeout
-            query = " AND timestamp > %d" % moment
         sql = '''
               SELECT data
               FROM cache
-              WHERE id = %%s %(query)s
-              ''' % {'query': query}
+              WHERE id = %s
+          '''
         self.cursor.execute(sql, (_hash,))
         row = self.cursor.fetchone()
         self.cursor.execute('COMMIT')
@@ -178,23 +173,18 @@ class CacheBackend(object):
         self.cursor.execute('TRUNCATE cache')
         self.cursor.execute('COMMIT')
 
-    def has_item(self, url, timeout=None):
+    def has_item(self, url):
         """
         Test if required item exists in the cache.
         """
 
         _hash = self.build_hash(url)
-        if timeout is None:
-            query = ""
-        else:
-            moment = int(time.time()) - timeout
-            query = " AND timestamp > %d" % moment
         self.cursor.execute('''
             SELECT id
             FROM cache
-            WHERE id = %%s %(query)s
+            WHERE id = %%s
             LIMIT 1
-            ''' % {'query': query}, (_hash,))
+        ''', (_hash,))
         row = self.cursor.fetchone()
         return True if row else False
 

@@ -6,7 +6,7 @@ from optparse import OptionParser
 import logging
 import threading
 
-from test.util import GLOBAL
+from tests.util import GLOBAL
 
 # **********
 # Grab Tests
@@ -16,52 +16,52 @@ from test.util import GLOBAL
 # * Test redirect and response.url after redirect
 GRAB_TEST_LIST = (
     # *** Internal API
-    'test.grab_api',
-    'test.grab_transport',
-    'test.response_class',
-    'test.grab_debug', # FIXME: fix tests excluded for urllib3
+    'tests.grab_api',
+    'tests.grab_transport',
+    'tests.response_class',
+    'tests.grab_debug', # FIXME: fix tests excluded for urllib3
     # *** Response processing
-    'test.grab_xml_processing',
-    'test.grab_response_body_processing',
-    'test.grab_charset',
-    'test.grab_redirect',
-    'test.grab_defusedxml',
+    'tests.grab_xml_processing',
+    'tests.grab_response_body_processing',
+    'tests.grab_charset',
+    'tests.grab_redirect',
+    'tests.grab_defusedxml',
     # *** Network
-    'test.grab_get_request',
-    'test.grab_post_request',
-    'test.grab_request', # FIXME: fix tests excluded for urllib3
-    'test.grab_user_agent',
-    'test.grab_cookies', # FIXME: fix tests excluded for urllib3
-    'test.grab_url_processing',
-    'test.grab_timeout',
+    'tests.grab_get_request',
+    'tests.grab_post_request',
+    'tests.grab_request', # FIXME: fix tests excluded for urllib3
+    'tests.grab_user_agent',
+    'tests.grab_cookies', # FIXME: fix tests excluded for urllib3
+    'tests.grab_url_processing',
+    'tests.grab_timeout',
     # *** Refactor
-    'test.grab_proxy',
-    'test.grab_upload_file',
-    'test.grab_limit_option',
-    'test.grab_charset_issue',
-    'test.grab_pickle', # FIXME: fix tests excluded for urllib3
-    'test.proxy',
+    'tests.grab_proxy',
+    'tests.grab_upload_file',
+    'tests.grab_limit_option',
+    'tests.grab_charset_issue',
+    'tests.grab_pickle', # FIXME: fix tests excluded for urllib3
+    'tests.proxy',
     # *** Extensions
-    'test.ext_text',
-    'test.ext_rex',
-    'test.ext_lxml',
-    'test.ext_form',
-    'test.ext_doc',
-    'test.ext_structured',
+    'tests.ext_text',
+    'tests.ext_rex',
+    'tests.ext_lxml',
+    'tests.ext_form',
+    'tests.ext_doc',
+    'tests.ext_structured',
     # *** Pycurl Test
-    'test.pycurl_cookie',
+    'tests.pycurl_cookie',
     # *** util.module
-    'test.util_module',
-    'test.util_log',
+    'tests.util_module',
+    'tests.util_log',
     # *** grab.export
-    'test.util_config',
-    'test.script_crawl',
-    'test.grab_error',
-    'test.grab_deprecated',
-    'test.ext_pyquery',
+    'tests.util_config',
+    'tests.script_crawl',
+    'tests.grab_error',
+    'tests.grab_deprecated',
+    'tests.ext_pyquery',
     # *** process control
-    'test.grab_sigint',
-    'test.spider_sigint',
+    'tests.grab_sigint',
+    'tests.spider_sigint',
 )
 
 # ************
@@ -69,17 +69,17 @@ GRAB_TEST_LIST = (
 # ************
 
 SPIDER_TEST_LIST = (
-    'test.spider_task',
-    'test.spider',
-    'test.spider_proxy',
-    'test.spider_queue',
-    'test.spider_misc',
-    'test.spider_meta',
-    'test.spider_error',
-    'test.spider_cache',
-    #'test.spider_data',
-    'test.spider_stat',
-    'test.spider_multiprocess',
+    'tests.spider_task',
+    'tests.spider',
+    'tests.spider_proxy',
+    'tests.spider_queue',
+    'tests.spider_misc',
+    'tests.spider_meta',
+    'tests.spider_error',
+    'tests.spider_cache',
+    #'tests.spider_data',
+    'tests.spider_stat',
+    'tests.spider_multiprocess',
 )
 
 
@@ -88,7 +88,7 @@ def setup_logging():
     for name, level in (
         ('grab.network', logging.INFO),
         ('tornado.access', logging.ERROR),
-        ('test.util', logging.INFO),
+        ('tests.util', logging.INFO),
         ('grab.util', logging.INFO),
         ('grab.base', logging.INFO),
         ('grab.spider.base', logging.INFO),
