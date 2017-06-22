@@ -106,22 +106,22 @@ class CacheBackend(object):
             'cookies': None,
             'is_compressed': self.use_compression,
         }
-        print('Before saving')
+        #print('Before saving')
         try:
             self.dbase.cache.save(item, w=1)
         except Exception as ex: # pylint: disable=broad-except
-            from traceback import format_exc
-            print('FATA ERROR WHILE SAVING CACHE ITEM')
-            print(format_exc())
+            #from traceback import format_exc
+            #print('FATA ERROR WHILE SAVING CACHE ITEM')
+            #print(format_exc())
             if 'document too large' in six.text_type(ex):
                 logging.error('Document too large. It was not saved into'
                               'mongodb cache. Url: %s', url)
             else:
                 raise
-        else:
-            print('COUNT: %d' % self.dbase.cache.count({'_id': item['_id']}))
-        finally:
-            print('After saving')
+        #else:
+        #    print('COUNT: %d' % self.dbase.cache.count({'_id': item['_id']}))
+        #finally:
+        #    print('After saving')
 
     def clear(self):
         self.dbase.cache.remove()
