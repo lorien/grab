@@ -88,7 +88,7 @@ By default, Grab will compose a POST request with
 .. code:: python
 
     g = Grab()
-    g.go('http://example.com/', post_multipart=[('key', 'val1'),
+    g.go('http://example.com/', multipart_post=[('key', 'val1'),
                                                 ('key', 'val2')])
 
 
@@ -98,7 +98,7 @@ To upload a file, use the `grab.upload.UploadFile` class:
 
     g = Grab()
     g.go('http://example.com/',
-         post_multipart={'foo': 'bar', 'file': UploadFile('/path/to/file')})
+         multipart_post={'foo': 'bar', 'file': UploadFile('/path/to/file')})
 
 .. _grab_request_put:
 
