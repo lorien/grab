@@ -139,7 +139,7 @@ class Spider(object):
         * thread-number - Number of concurrent network streams
         * network_try_limit - How many times try to send request
             again if network error was occurred, use 0 to disable
-        * network_try_limit - Limit of tries to execute some task
+        * task_try_limit - Limit of tries to execute some task
             this is not the same as network_try_limit
             network try limit limits the number of tries which
             are performed automatically in case of network timeout
