@@ -422,9 +422,9 @@ Control the way the network response is received. By default, Grab downloads dat
 To handle large files, you can set `body_inmemory=False` to download the network response directly to the disk.
 
 
-.. _option_storage_dir:
+.. _option_body_storage_dir:
 
-storage_dir
+body_storage_dir
 ^^^^^^^^^^^
 
 :Type: bool
