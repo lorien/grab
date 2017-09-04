@@ -6,6 +6,17 @@
 Welcome to Grab's documentation!
 ================================
 
+Grab Web Resources
+------------------
+
+* Source code: https://github.com/lorien/grab
+* Documentation: http://grablib.org
+* Telegram chat (mostly russian): https://t.me/itforge
+* Mail list (mostly russian): http://groups.google.com/group/python-grab
+
+What is Grab?
+-------------
+
 Grab is a python framework for building web scrapers. With Grab you can build 
 web scrapers of various complexity, from simple 5-line scripts to complex
 asynchronous website crawlers processing millions of web pages. Grab provides
