@@ -49,11 +49,11 @@ class Stat(object):
 
     def get_counter_line(self):
         result = []
-        for key in self.counters.keys():
+        for key in list(self.counters.keys()):
             if not any(key.startswith(x)
                        for x in self.logging_ignore_prefixes):
                 result.append((key, '%s=%d' % (key, self.counters[key])))
-        for key in self.collections.keys():
+        for key in list(self.collections.keys()):
             if not any(key.startswith(x)
                        for x in self.logging_ignore_prefixes):
                 result.append((key,
