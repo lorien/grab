@@ -357,7 +357,7 @@ class CurlTransport(BaseTransport):
             raise error.GrabMisuseError('Invalid method: %s' %
                                         grab.request_method)
 
-        headers = dict(grab.config['common_headers'])
+        headers = grab.config['common_headers'].copy()
         if grab.config['headers']:
             headers.update(grab.config['headers'])
         # This is required to avoid some problems
