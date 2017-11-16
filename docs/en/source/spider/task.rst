@@ -33,7 +33,7 @@ see examples of different task creation. All three examples do the same:
 .. code:: python
 
     # Using `url` argument
-    t = Task('wikipedia', url 'http://wikipedia.org/')
+    t = Task('wikipedia', url='http://wikipedia.org/')
 
     # Using Grab intance
     g = Grab()
