@@ -15,6 +15,7 @@ import collections
 import email
 from datetime import datetime
 import weakref
+import time
 
 import six
 from six.moves.urllib.parse import urljoin
@@ -120,6 +121,8 @@ def default_config():
 
         # Connection
         connection_reuse=True,
+        retries=1,
+        retry_timeout=3,
 
         # Response processing
         nobody=False,
@@ -453,12 +456,23 @@ class Grab(DeprecatedThings):
 
         self.prepare_request(**kwargs)
         refresh_count = 0
+        retries = self.config["retries"]
+        retry_timeout = self.config["retry_timeout"]
 
         while True:
             self.log_request()
-
             try:
-                self.transport.request()
+                while True:
+                    try:
+                        self.transport.request()
+                        break
+                    except error.GrabError as ex:
+                        retries = retries - 1
+                        if retries <= 0:
+                            raise ex
+                        else:
+                            logger.debug('Request has failed with %s retrying in %s seconds' % (ex, retry_timeout))
+                            time.sleep(retry_timeout)
             except error.GrabError as ex:
                 self.exception = ex
                 self.reset_temporary_options()
