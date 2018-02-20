@@ -11,8 +11,8 @@ Grab Web Resources
 
 * Source code: https://github.com/lorien/grab
 * Documentation: http://grablib.org
-* Telegram chat (mostly russian): https://t.me/itforge
-* Mail list (mostly russian): http://groups.google.com/group/python-grab
+* Telegram chat: https://t.me/grab_framework
+* Mail list: http://groups.google.com/group/python-grab
 
 What is Grab?
 -------------
