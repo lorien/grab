@@ -42,7 +42,7 @@ setup(
         'defusedxml',
     ],
     extras_require={
-        'full': ['urllib3'],
+        'full': ['urllib3', 'certifi'],
     },
     # Topics
     classifiers=[
