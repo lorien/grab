@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import logging
 import random
 import time
+import certifi
 
 from weblib.http import (normalize_url, normalize_post_data,
                          normalize_http_values)
@@ -89,7 +90,12 @@ class Urllib3Transport(BaseTransport):
     """
     def __init__(self):
         super(Urllib3Transport, self).__init__()
-        self.pool = PoolManager(10)
+        # http://urllib3.readthedocs.io/en/latest/user-guide.html#certificate-verification
+        self.pool = PoolManager(
+            10,
+            cert_reqs='CERT_REQUIRED',
+            ca_certs=certifi.where()
+        )
 
         logger = logging.getLogger('urllib3.connectionpool')
         logger.setLevel(logging.WARNING)
@@ -233,13 +239,25 @@ class Urllib3Transport(BaseTransport):
                 headers = None
             proxy_url = '%s://%s' % (req.proxy_type, req.proxy)
             if req.proxy_type == 'socks5':
-                pool = SOCKSProxyManager(proxy_url) # , proxy_headers=headers)
+                pool = SOCKSProxyManager(
+                    proxy_url,
+                    cert_reqs='CERT_REQUIRED',
+                    ca_certs=certifi.where()
+                ) # , proxy_headers=headers)
             else:
-                pool = ProxyManager(proxy_url, proxy_headers=headers)
+                pool = ProxyManager(
+                    proxy_url, proxy_headers=headers,
+                    cert_reqs='CERT_REQUIRED',
+                    ca_certs=certifi.where()
+                )
         else:
             pool = self.pool
         try:
-            retry = Retry(redirect=False, connect=False, read=False)
+            # Retries can be disabled by passing False:
+            # http://urllib3.readthedocs.io/en/latest/reference/urllib3.util.html#module-urllib3.util.retry
+            # Do not use False because of:
+            # Converted retries value: False -> Retry(total=False, connect=None, read=None, redirect=0, status=None)
+            retry = Retry(total=False, connect=False, read=False, redirect=0, status=None)
             # The read timeout is not total response time timeout
             # It is the timeout on read of next data chunk from the server
             # Total response timeout is handled by Grab
@@ -257,7 +275,8 @@ class Urllib3Transport(BaseTransport):
             res = pool.urlopen(req_method,
                                req_url,
                                body=req.data, timeout=timeout,
-                               retries=retry, headers=req.headers,
+                               retries=retry,
+                               headers=req.headers,
                                preload_content=False)
         except exceptions.ReadTimeoutError as ex:
             raise error.GrabTimeoutError('ReadTimeoutError', ex)
