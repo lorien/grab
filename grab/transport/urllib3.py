@@ -289,6 +289,8 @@ class Urllib3Transport(BaseTransport):
             # fails
             # with error TypeError: 'OSError' object is not subscriptable
             raise error.GrabConnectionError('ProtocolError', ex)
+        except exceptions.SSLError as ex:
+            raise error.GrabConnectionError('SSLError', ex)
 
         # WTF?
         self.request_head = b''
