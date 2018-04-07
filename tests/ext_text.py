@@ -1,6 +1,7 @@
 # coding: utf-8
-from grab import DataNotFound, GrabMisuseError
 import six
+
+from grab import DataNotFound, GrabMisuseError
 
 from tests.util import build_grab
 from tests.util import BaseGrabTestCase

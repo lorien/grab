@@ -21,3 +21,4 @@ pylint
 psutil
 tox
 pysocks
+certifi

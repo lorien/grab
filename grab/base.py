@@ -16,8 +16,8 @@ import email
 from datetime import datetime
 import weakref
 
-import six
 from six.moves.urllib.parse import urljoin
+import six
 from weblib.html import find_base_url
 from weblib.http import normalize_http_values, normalize_unicode
 

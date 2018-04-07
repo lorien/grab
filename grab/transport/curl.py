@@ -12,14 +12,14 @@ try:
     from urlparse import urlsplit
 except ImportError:
     from urllib.parse import urlsplit
+from six.moves.http_cookiejar import CookieJar
 
-import pycurl
+import six
 from weblib.http import (normalize_http_values,
                          normalize_post_data, normalize_url)
 from weblib.encoding import make_str
-import six
-from six.moves.http_cookiejar import CookieJar
 from user_agent import generate_user_agent
+import pycurl
 
 from grab.cookie import create_cookie, CookieManager
 from grab import error
