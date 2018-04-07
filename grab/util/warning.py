@@ -17,7 +17,7 @@ class GrabDeprecationWarning(UserWarning):
 def warn(msg, stacklevel=2):
     warnings.warn(msg, category=GrabDeprecationWarning, stacklevel=stacklevel)
     frame = sys._getframe() # pylint: disable=protected-access
-    logging.debug('Deprecation Warning\n' +
+    logging.debug('Deprecation Warning\n%s',
                   ''.join(traceback.format_stack(f=frame.f_back)))
 
 

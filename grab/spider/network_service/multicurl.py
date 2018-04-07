@@ -3,8 +3,8 @@ import select
 from threading import Lock
 import time
 
-import pycurl
 import six
+import pycurl
 
 from grab.util.log import PycurlSigintHandler
 from grab.error import GrabTooManyRedirectsError

@@ -2,8 +2,8 @@ import logging
 import os
 import json
 
-from six.moves.SimpleHTTPServer import SimpleHTTPRequestHandler
 from six.moves.socketserver import TCPServer
+from six.moves.SimpleHTTPServer import SimpleHTTPRequestHandler
 from weblib.encoding import make_str
 
 from grab.spider.base_service import BaseService

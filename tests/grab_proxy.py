@@ -1,9 +1,10 @@
 # coding: utf-8
+import six
+from test_server import TestServer
+
+from grab.proxylist import BaseProxySource
 from tests.util import build_grab, temp_file
 from tests.util import BaseGrabTestCase
-import six
-from grab.proxylist import BaseProxySource
-from test_server import TestServer
 
 ADDRESS = '127.0.0.1'
 

@@ -2,13 +2,14 @@ import logging
 import os
 import json
 from argparse import ArgumentParser
+
 import six
+from weblib.files import clear_directory
+from weblib.encoding import make_str
 
 from grab.util.config import build_spider_config, build_root_config
 from grab.util.module import load_spider_class
 from grab.util.log import default_logging
-from weblib.files import clear_directory
-from weblib.encoding import make_str
 
 # pylint: disable=invalid-name
 logger = logging.getLogger('grab.script.crawl')
