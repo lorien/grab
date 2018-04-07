@@ -3,8 +3,9 @@
 This test case has written to help me
 understand how pycurl lib works with cookies
 """
-from six import BytesIO
 from six.moves.http_cookiejar import CookieJar
+
+from six import BytesIO
 
 from tests.util import BaseGrabTestCase, only_grab_transport
 from grab.error import GrabMisuseError

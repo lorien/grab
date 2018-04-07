@@ -19,11 +19,11 @@ from datetime import datetime
 import time
 import threading
 import logging
+from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
 
 from lxml.html import HTMLParser
 from lxml.etree import XMLParser, ParserError
 import six
-from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
 from six import BytesIO, StringIO
 from weblib.http import smart_urlencode
 import weblib.encoding

@@ -5,8 +5,10 @@ from __future__ import absolute_import
 import logging
 import random
 import time
-import certifi
 
+from six.moves.urllib.parse import urlsplit
+from six.moves.http_cookiejar import CookieJar
+import six
 from weblib.http import (normalize_url, normalize_post_data,
                          normalize_http_values)
 from weblib.encoding import make_str, decode_pairs
@@ -16,10 +18,8 @@ from urllib3.fields import RequestField
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
 from urllib3.contrib.socks import SOCKSProxyManager
-from six.moves.urllib.parse import urlsplit
-from six.moves.http_cookiejar import CookieJar
-import six
 from user_agent import generate_user_agent
+import certifi
 
 from grab import error
 from grab.error import GrabMisuseError, GrabTimeoutError
@@ -255,9 +255,16 @@ class Urllib3Transport(BaseTransport):
         try:
             # Retries can be disabled by passing False:
             # http://urllib3.readthedocs.io/en/latest/reference/urllib3.util.html#module-urllib3.util.retry
-            # Do not use False because of:
-            # Converted retries value: False -> Retry(total=False, connect=None, read=None, redirect=0, status=None)
-            retry = Retry(total=False, connect=False, read=False, redirect=0, status=None)
+            # Do not use False because of warning:
+            # Converted retries value: False -> Retry(total=False,
+            # connect=None, read=None, redirect=0, status=None)
+            retry = Retry(
+                total=False,
+                connect=False,
+                read=False,
+                redirect=0,
+                status=None,
+            )
             # The read timeout is not total response time timeout
             # It is the timeout on read of next data chunk from the server
             # Total response timeout is handled by Grab
