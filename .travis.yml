@@ -34,7 +34,10 @@ before_script:
   #    cp travis_osx_settings.py test_settings_local.py
   #  fi
   - mkdir ~/curl_files;
-  - cd ~/curl_files & pwd
+  - cd ~/curl_files; pwd
+  - |
+    cd ~/curl_files;
+    pwd
   #- wget https://curl.haxx.se/download/curl-7.59.0.tar.gz -O ~/curl_files/curl-7.59.0.tar.gz;
   #- cd ~/curl_files & tar -xzf curl-7.59.0.tar.gz;
   #- cd ~/curl_files/curl-7.59.0 & ./configure --prefix=~/curl_lib & make & make install;
