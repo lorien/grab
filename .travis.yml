@@ -9,10 +9,6 @@ cache:
   - "$HOME/.cache/pip"
   - "$HOME/.pyenv"
 
-branches:
-  except:
-    - wintest
-
 matrix:
   include:
     - os: linux
@@ -23,27 +19,29 @@ matrix:
 # Enable extra mongodb and redis services on linux
 # Mysql and postgres services are enabled on linux by default
 # That does not work on osx (see below custom instructions for osx)
-services:
-  - mongodb
-  - redis-server
+#services:
+#  - mongodb
+#  - redis-server
 
 before_script:
-  - mysql -u root -e 'create database grab_test'
-  - psql -U postgres -c 'create database grab_test'
-  # Override test settings with travis settings 
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      cp travis_linux_settings.py test_settings_local.py
-    else
-      cp travis_osx_settings.py test_settings_local.py
-    fi
+  #- mysql -u root -e 'create database grab_test'
+  #- psql -U postgres -c 'create database grab_test'
+  ## Override test settings with travis settings 
+  #- |
+  #  if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+  #    cp travis_linux_settings.py test_settings_local.py
+  #  else
+  #    cp travis_osx_settings.py test_settings_local.py
+  #  fi
   - mkdir ~/curl_files;
-  - wget https://curl.haxx.se/download/curl-7.59.0.tar.gz -O ~/curl_files/curl-7.59.0.tar.gz;
-  - cd ~/curl_files & tar -xzf curl-7.59.0.tar.gz;
-  - cd ~/curl_files/curl-7.59.0 & ./configure --prefix=~/curl_lib & make & make install;
+  - cd ~/curl_files & pwd
+  #- wget https://curl.haxx.se/download/curl-7.59.0.tar.gz -O ~/curl_files/curl-7.59.0.tar.gz;
+  #- cd ~/curl_files & tar -xzf curl-7.59.0.tar.gz;
+  #- cd ~/curl_files/curl-7.59.0 & ./configure --prefix=~/curl_lib & make & make install;
 
 script:
-  - LD_LIBRARY_PATH="/curl_lib/lib" tox -e $TOX_ENV
+  - pip install pycurl; LD_LIBRARY_PATH="/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
+#  - LD_LIBRARY_PATH="/curl_lib/lib" tox -e $TOX_ENV
 
-after_success:
-  - coveralls
+#after_success:
+#  - coveralls
