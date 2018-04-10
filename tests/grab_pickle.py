@@ -3,7 +3,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-from multiprocessing import Queue
+from six.moves.queue import Queue
 
 from tests.util import BaseGrabTestCase, exclude_grab_transport
 from tests.util import build_grab
@@ -32,8 +32,6 @@ class TestGrab(BaseGrabTestCase):
             resultq.put(text)
 
         result_queue = Queue()
-        # p = Process(target=func, args=[data, result_queue])
-        # p.start()
         func(data, result_queue)
 
         text = result_queue.get(block=True, timeout=1)
