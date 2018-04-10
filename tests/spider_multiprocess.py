@@ -1,6 +1,5 @@
 from tests.util import BaseGrabTestCase, build_spider
 from grab.spider import Spider, Task
-from grab.spider.decorators import integrity
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
