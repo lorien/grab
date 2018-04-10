@@ -135,7 +135,7 @@ before_script:
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       if [[ ! -z "$VIRTUAL_ENV" ]]; then deactivate; fi
       eval "$(pyenv init -)"
-      pyenv install "$PYENV_VERSION"
+      pyenv install --skip-existing "$PYENV_VERSION"
       pyenv global "$PYENV_VERSION"
     fi
   - python -m pip install -U pip setuptools tox
