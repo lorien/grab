@@ -45,7 +45,9 @@ before_script:
     make install
 
 script:
-  - pip install pycurl; LD_LIBRARY_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
+  - pip install pycurl
+  - ls -l $HOME/curl_lib/lib
+  - LD_LIBRARY_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
 #  - LD_LIBRARY_PATH="/curl_lib/lib" tox -e $TOX_ENV
 
 #after_success:
