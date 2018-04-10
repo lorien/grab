@@ -40,7 +40,7 @@ before_script:
     wget https://curl.haxx.se/download/curl-7.59.0.tar.gz
     tar -xzf curl-7.59.0.tar.gz
     cd curl-7.59.0
-    ./configure --prefix=~/curl_lib
+    ./configure --prefix=$HOME/curl_lib
     make
     make install
 
