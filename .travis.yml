@@ -119,8 +119,6 @@ install:
       createuser -s postgres
       brew upgrade pyenv
     fi
-  # Deal with issue on Travis builders re: multiprocessing.Queue :(
-  - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
 
 before_script:
   - mysql -u root -e 'create database grab_test'
@@ -137,7 +135,7 @@ before_script:
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       if [[ ! -z "$VIRTUAL_ENV" ]]; then deactivate; fi
       eval "$(pyenv init -)"
-      pyenv install "$PYENV_VERSION"
+      pyenv install --skip-existing "$PYENV_VERSION"
       pyenv global "$PYENV_VERSION"
     fi
   - python -m pip install -U pip setuptools tox
