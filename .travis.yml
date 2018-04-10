@@ -119,8 +119,6 @@ install:
       createuser -s postgres
       brew upgrade pyenv
     fi
-  # Deal with issue on Travis builders re: multiprocessing.Queue :(
-  - "sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm"
 
 before_script:
   - mysql -u root -e 'create database grab_test'
