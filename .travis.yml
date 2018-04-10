@@ -34,6 +34,8 @@ before_script:
   #    cp travis_osx_settings.py test_settings_local.py
   #  fi
   - mkdir ~/curl_files;
+  - cd ~/curl_files;
+  - pwd
   - cd ~/curl_files; pwd
   - |
     cd ~/curl_files;
