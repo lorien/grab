@@ -462,7 +462,7 @@ class CurlTransport(BaseTransport):
             cookie.path,
             'TRUE' if cookie.secure else 'FALSE',
             (str(cookie.expires) if cookie.expires
-             else 'Fri, 31 Dec 9999 23:59:59 GMT'),
+             else '0'),
             cookie.name,
             cookie.value,
         ]
