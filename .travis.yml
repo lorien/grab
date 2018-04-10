@@ -39,8 +39,8 @@ before_script:
     fi
   - mkdir ~/curl_files;
   - wget https://curl.haxx.se/download/curl-7.59.0.tar.gz -O ~/curl_files/curl-7.59.0.tar.gz;
-  - cd ~/curl_files & tar -xzf curl-5.59.0.tar.gz;
-  - cd ~/curl_files/curl-5.59.0 & ./configure --prefix=~/curl_lib & make & make install;
+  - cd ~/curl_files & tar -xzf curl-7.59.0.tar.gz;
+  - cd ~/curl_files/curl-7.59.0 & ./configure --prefix=~/curl_lib & make & make install;
 
 script:
   - LD_LIBRARY_PATH="/curl_lib/lib" tox -e $TOX_ENV
