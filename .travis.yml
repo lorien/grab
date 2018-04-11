@@ -58,6 +58,7 @@ script:
   #- cd $HOME/build/lorien/grab
   #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" tox -e $TOX_ENV
   - python -c 'import pycurl; print(pycurl.__file__)'
+  - ldd /home/travis/virtualenv/python2.7.14/lib/python2.7/site-packages/pycurl.so
 
 #after_success:
 #  - coveralls
