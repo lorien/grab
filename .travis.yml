@@ -162,7 +162,6 @@ before_script:
   #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
 
 script:
-  - export PYCURL_SSL_LIBRARY=zzz
   - tox -e $TOX_ENV
   #- if [[ $TOX_ENV != qa* ]]; then tox -e "$TOX_ENV-threaded-urllib3"; fi
   #- if [[ $TOX_ENV != qa* ]]; then tox -e "$TOX_ENV-threaded-pycurl"; fi
