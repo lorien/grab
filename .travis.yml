@@ -2,7 +2,7 @@ language: python
 
 python: 2.7
 
-sudo: required
+sudo: false
 
 cache:
   directories:
@@ -16,24 +16,7 @@ matrix:
   exclude:
     - python: 2.7 # hack to exclude default no-env travis job
 
-# Enable extra mongodb and redis services on linux
-# Mysql and postgres services are enabled on linux by default
-# That does not work on osx (see below custom instructions for osx)
-#services:
-#  - mongodb
-#  - redis-server
-
 before_script:
-  #- mysql -u root -e 'create database grab_test'
-  #- psql -U postgres -c 'create database grab_test'
-  ## Override test settings with travis settings 
-  #- |
-  #  if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-  #    cp travis_linux_settings.py test_settings_local.py
-  #  else
-  #    cp travis_osx_settings.py test_settings_local.py
-  #  fi
-  - pwd
   - |
     mkdir $HOME/curl_files
     cd $HOME/curl_files
@@ -46,25 +29,7 @@ before_script:
     make install
 
 script:
-  #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" pip install pycurl
-  #- ls -l $HOME/curl_lib/lib
-  #- python -c 'import pycurl; print(pycurl.version)'
-  #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
-  #- LD_RUN_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
-  #- export LD_LIBRARY_PATH="$HOME/curl_lib/lib"
-  #- echo $LD_LIBRARY_PATH
-  #- python -c 'import pycurl; print(pycurl.version)'
-  #- cd $HOME/build/lorien/grab
-  #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" tox -e $TOX_ENV
-  #- python -c 'import pycurl; print(pycurl.__file__)'
-  #- ldd /home/travis/virtualenv/python2.7.14/lib/python2.7/site-packages/pycurl.so
-  - sudo apt-get remove python-pycurl python3-pycurl
-  - sudo apt-get install -y libcurl4-openssl-dev
+  - apt-get remove python-pycurl python3-pycurl
+  - apt-get install -y libcurl4-openssl-dev
   - python -m pip install --no-binary=pycurl -U pycurl
-  - python -c 'import pycurl; print(pycurl.__file__)'
-  - ldd $(python -c 'import pycurl; print(pycurl.__file__)')
-  - python -c 'import pycurl; print(pycurl.version)'
   - LD_LIBRARY_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
-
-#after_success:
-#  - coveralls
