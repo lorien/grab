@@ -59,7 +59,7 @@ script:
   #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" tox -e $TOX_ENV
   #- python -c 'import pycurl; print(pycurl.__file__)'
   #- ldd /home/travis/virtualenv/python2.7.14/lib/python2.7/site-packages/pycurl.so
-  - apt-get install -y libcurl4-openssl-dev
+  - sudo apt-get install -y libcurl4-openssl-dev
   - dpkg -l | grep libcurl
   - python -m pip install -U pycurl
   - ldd $(python -c 'import pycurl; print(pycurl.__file__)')
