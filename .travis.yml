@@ -43,16 +43,22 @@ before_script:
     ./configure --prefix=$HOME/curl_lib
     make
     make install
+  - |
+    cd /tmp
+    wget https://pypi.python.org/packages/77/d9/d272b38e6e25d2686e22f6058820298dadead69340b1c57ff84c87ef81f0/pycurl-7.43.0.1.tar.gz
+    tar -xzf pycurl-7.43.0.1.tar.gz
+    cd pycurl-7.43.0.1
+    python setup.py install
 
 script:
-  - LD_LIBRARY_PATH="$HOME/curl_lib/lib" pip install pycurl
-  - ls -l $HOME/curl_lib/lib
-  - python -c 'import pycurl; print(pycurl.version)'
+  #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" pip install pycurl
+  #- ls -l $HOME/curl_lib/lib
+  #- python -c 'import pycurl; print(pycurl.version)'
   - LD_LIBRARY_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
-  - LD_RUN_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
-  - export LD_LIBRARY_PATH="$HOME/curl_lib/lib"
-  - echo $LD_LIBRARY_PATH
-  - python -c 'import pycurl; print(pycurl.version)'
+  #- LD_RUN_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
+  #- export LD_LIBRARY_PATH="$HOME/curl_lib/lib"
+  #- echo $LD_LIBRARY_PATH
+  #- python -c 'import pycurl; print(pycurl.version)'
 #  - LD_LIBRARY_PATH="/curl_lib/lib" tox -e $TOX_ENV
 
 #after_success:
