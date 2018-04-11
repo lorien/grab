@@ -33,6 +33,7 @@ before_script:
   #  else
   #    cp travis_osx_settings.py test_settings_local.py
   #  fi
+  - pwd
   - |
     mkdir $HOME/curl_files
     cd $HOME/curl_files
