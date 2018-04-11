@@ -52,11 +52,11 @@ script:
   #- python -c 'import pycurl; print(pycurl.version)'
   #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
   #- LD_RUN_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
-  #- export LD_LIBRARY_PATH="$HOME/curl_lib/lib"
+  - export LD_LIBRARY_PATH="$HOME/curl_lib/lib"
   #- echo $LD_LIBRARY_PATH
   #- python -c 'import pycurl; print(pycurl.version)'
   - cd $HOME/build/lorien/grab
-  - LD_LIBRARY_PATH="/curl_lib/lib" tox -e $TOX_ENV
+  - LD_LIBRARY_PATH="$HOME/curl_lib/lib" tox -e $TOX_ENV
 
 #after_success:
 #  - coveralls
