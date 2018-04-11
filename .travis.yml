@@ -44,7 +44,7 @@ before_script:
     ./configure --prefix=$HOME/curl_lib
     make
     make install
-  - python -m pip install -U pip setuptools tox
+  - python -m pip install -U pycurl
 
 script:
   #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" pip install pycurl
@@ -52,11 +52,12 @@ script:
   #- python -c 'import pycurl; print(pycurl.version)'
   #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
   #- LD_RUN_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
-  - export LD_LIBRARY_PATH="$HOME/curl_lib/lib"
+  #- export LD_LIBRARY_PATH="$HOME/curl_lib/lib"
   #- echo $LD_LIBRARY_PATH
   #- python -c 'import pycurl; print(pycurl.version)'
-  - cd $HOME/build/lorien/grab
-  - LD_LIBRARY_PATH="$HOME/curl_lib/lib" tox -e $TOX_ENV
+  #- cd $HOME/build/lorien/grab
+  #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" tox -e $TOX_ENV
+  - python -c 'import pycurl; print(pycurl.__file__)'
 
 #after_success:
 #  - coveralls
