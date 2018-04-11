@@ -9,27 +9,162 @@ cache:
   - "$HOME/.cache/pip"
   - "$HOME/.pyenv"
 
+branches:
+  except:
+    - wintest
+
 matrix:
   include:
-    - os: linux
-      env: TOX_ENV=py27-recent-libcurl
+#    - os: linux
+#      python: 3.4
+#      env: TOX_ENV=qa
+     - os: linux
+       env: TOX_ENV=py27-recent-libcurl
+#    - os: linux
+#      env: TOX_ENV=py27
+#    - os: linux
+#      env: TOX_ENV=py27-threaded-pycurl
+#    - os: linux
+#      env: TOX_ENV=py34
+#    - os: linux
+#      env: TOX_ENV=py34-threaded-pycurl
+#    - os: linux
+#      env: TOX_ENV=py35
+#      python: 3.5
+#    - os: linux
+#      env: TOX_ENV=py35-threaded-pycurl
+#      python: 3.5
+#    - os: linux
+#      env: TOX_ENV=py36
+#      python: 3.6
+#    - os: linux
+#      env: TOX_ENV=py36-threaded-pycurl
+#      python: 3.6
+#    - os: osx
+#      language: generic
+#      env:
+#        - TOX_ENV=py27
+#        - PYENV_VERSION="2.7.13"
+#    - os: osx
+#      language: generic
+#      env:
+#        - TOX_ENV=py34
+#        - PYENV_VERSION="3.4.6"
+#    - os: osx
+#      language: generic
+#      env:
+#        - TOX_ENV=py35
+#        - PYENV_VERSION="3.5.3"
+#    - os: osx
+#      language: generic
+#      env:
+#        - TOX_ENV=py35-threaded-pycurl
+#        - PYENV_VERSION="3.5.3"
+#    - os: osx
+#      language: generic
+#      env:
+#        - TOX_ENV=py36
+#        - PYENV_VERSION="3.6.0"
+#
+#     # threaded + urllib3
+#    - os: linux
+#      env: TOX_ENV=py27-threaded-urllib3
+#    - os: linux
+#      env: TOX_ENV=py34-threaded-urllib3
+#    - os: linux
+#      env: TOX_ENV=py35-threaded-urllib3
+#      python: 3.5
+#    - os: linux
+#      env: TOX_ENV=py36-threaded-urllib3
+#      python: 3.6
+#    - os: osx
+#      language: generic
+#      env:
+#        - TOX_ENV=py35-threaded-urllib3
+#        - PYENV_VERSION="3.5.3"
   exclude:
     - python: 2.7 # hack to exclude default no-env travis job
+#  allow_failures:
+#    - env: TOX_ENV=py27-threaded-urllib3
+#    - env: TOX_ENV=py34-threaded-urllib3
+#    - env: TOX_ENV=py35-threaded-urllib3
+#    - env: TOX_ENV=py36-threaded-urllib3
+#    - env:
+#        - TOX_ENV=py35-threaded-urllib3
+#        - PYENV_VERSION="3.5.3"
 
-before_script:
+# Enable extra mongodb and redis services on linux
+# Mysql and postgres services are enabled on linux by default
+# That does not work on osx (see below custom instructions for osx)
+services:
+  - mongodb
+  - redis-server
+
+install:
   - |
-    mkdir $HOME/curl_files
-    cd $HOME/curl_files
-    pwd
-    wget https://curl.haxx.se/download/curl-7.59.0.tar.gz
-    tar -xzf curl-7.59.0.tar.gz
-    cd curl-7.59.0
-    ./configure --prefix=$HOME/curl_lib
-    make
-    make install
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      ulimit -n 2048 # by default travis osx has "ulimit -n 256"
+      brew update
+      brew install mongodb
+      sudo mkdir -p /data/db
+      brew services start mongodb
+      brew install redis
+      brew services start redis
+      brew install mysql
+      brew services start mysql
+      brew unlink postgres
+      brew install postgres
+      export PG_DATA=$(brew --prefix)/var/postgres
+      rm -rf $PG_DATA
+      initdb $PG_DATA -E utf8
+      pg_ctl -w start -l postgres.log --pgdata ${PG_DATA}
+      createuser -s postgres
+      brew upgrade pyenv
+    fi
+before_script:
+  - mysql -u root -e 'create database grab_test'
+  - psql -U postgres -c 'create database grab_test'
+  # Override test settings with travis settings 
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      cp travis_linux_settings.py test_settings_local.py
+    else
+      cp travis_osx_settings.py test_settings_local.py
+    fi
+  # Install custom pyton version on OSX
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      if [[ ! -z "$VIRTUAL_ENV" ]]; then deactivate; fi
+      eval "$(pyenv init -)"
+      pyenv install --skip-existing "$PYENV_VERSION"
+      pyenv global "$PYENV_VERSION"
+    fi
+  - python -m pip install -U pip setuptools tox
+  - |
+    if [[ "$TOX_ENV" == "py27-recent-libcurl" ]]; then
+      mkdir $HOME/curl_files
+      cd $HOME/curl_files
+      pwd
+      wget https://curl.haxx.se/download/curl-7.59.0.tar.gz
+      tar -xzf curl-7.59.0.tar.gz
+      cd curl-7.59.0
+      ./configure --prefix=$HOME/curl_lib
+      make
+      make install
+    fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      sudo apt-get remove python-pycurl python3-pycurl;
+      sudo apt-get install -y libcurl4-openssl-dev;
+    fi
+  #- python -m pip install --no-binary=pycurl -U pycurl
+  #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
 
 script:
-  - sudo apt-get remove python-pycurl python3-pycurl
-  - sudo apt-get install -y libcurl4-openssl-dev
-  - python -m pip install --no-binary=pycurl -U pycurl
-  - LD_LIBRARY_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
+  - export PYCURL_SSL_LIBRARY=zzz
+  - tox -e $TOX_ENV
+  #- if [[ $TOX_ENV != qa* ]]; then tox -e "$TOX_ENV-threaded-urllib3"; fi
+  #- if [[ $TOX_ENV != qa* ]]; then tox -e "$TOX_ENV-threaded-pycurl"; fi
+
+after_success:
+  - coveralls
