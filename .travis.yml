@@ -43,6 +43,7 @@ before_script:
     ./configure --prefix=$HOME/curl_lib
     make
     make install
+  - python -m pip install -U pip setuptools tox
 
 script:
   #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" pip install pycurl
