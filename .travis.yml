@@ -63,7 +63,7 @@ script:
   - dpkg -l | grep pycurl
   - sudo apt-get install -y libcurl4-openssl-dev
   - dpkg -l | grep libcurl
-  - PYCURL_SSL_LIBRARY=zzz python -m pip install -U pycurl
+  - python -m pip install --no-binary=pycurl -U pycurl
   - python -c 'import pycurl; print(pycurl.__file__)'
   - ldd $(python -c 'import pycurl; print(pycurl.__file__)')
   - python -c 'import pycurl; print(pycurl.version)'
