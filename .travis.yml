@@ -34,17 +34,17 @@ before_script:
   #    cp travis_osx_settings.py test_settings_local.py
   #  fi
   - pwd
-  - |
-    mkdir $HOME/curl_files
-    cd $HOME/curl_files
-    pwd
-    wget https://curl.haxx.se/download/curl-7.59.0.tar.gz
-    tar -xzf curl-7.59.0.tar.gz
-    cd curl-7.59.0
-    ./configure --prefix=$HOME/curl_lib
-    make
-    make install
-  - python -m pip install -U pycurl
+  #- |
+  #  mkdir $HOME/curl_files
+  #  cd $HOME/curl_files
+  #  pwd
+  #  wget https://curl.haxx.se/download/curl-7.59.0.tar.gz
+  #  tar -xzf curl-7.59.0.tar.gz
+  #  cd curl-7.59.0
+  #  ./configure --prefix=$HOME/curl_lib
+  #  make
+  #  make install
+  #- python -m pip install -U pycurl
 
 script:
   #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" pip install pycurl
@@ -59,6 +59,7 @@ script:
   #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" tox -e $TOX_ENV
   - python -c 'import pycurl; print(pycurl.__file__)'
   - ldd /home/travis/virtualenv/python2.7.14/lib/python2.7/site-packages/pycurl.so
+  - dpkg -l | grep libcurl
 
 #after_success:
 #  - coveralls
