@@ -19,6 +19,8 @@ matrix:
       python: 3.4
       env: TOX_ENV=qa
     - os: linux
+      env: TOX_ENV=py27-recent-libcurl
+    - os: linux
       env: TOX_ENV=py27
     - os: linux
       env: TOX_ENV=py27-threaded-pycurl
@@ -119,7 +121,6 @@ install:
       createuser -s postgres
       brew upgrade pyenv
     fi
-
 before_script:
   - mysql -u root -e 'create database grab_test'
   - psql -U postgres -c 'create database grab_test'
@@ -139,11 +140,31 @@ before_script:
       pyenv global "$PYENV_VERSION"
     fi
   - python -m pip install -U pip setuptools tox
+  - |
+    if [[ "$TOX_ENV" == "py27-recent-libcurl" ]]; then
+      mkdir $HOME/curl_files
+      cd $HOME/curl_files
+      pwd
+      wget https://curl.haxx.se/download/curl-7.59.0.tar.gz
+      tar -xzf curl-7.59.0.tar.gz
+      cd curl-7.59.0
+      ./configure --prefix=$HOME/curl_lib
+      make
+      make install
+      cd $HOME/build/lorien/grab
+    fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      sudo apt-get remove python-pycurl python3-pycurl;
+      sudo apt-get install -y libcurl4-openssl-dev;
+    fi
 
 script:
+  - |
+    if [[ "$TOX_ENV" == "py27-recent-libcurl" ]]; then
+      export LD_LIBRARY_PATH="$HOME/curl_lib/lib"
+    fi
   - tox -e $TOX_ENV
-  #- if [[ $TOX_ENV != qa* ]]; then tox -e "$TOX_ENV-threaded-urllib3"; fi
-  #- if [[ $TOX_ENV != qa* ]]; then tox -e "$TOX_ENV-threaded-pycurl"; fi
 
 after_success:
   - coveralls
