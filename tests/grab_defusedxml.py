@@ -3,6 +3,7 @@
 See details here: https://github.com/tiran/defusedxml/blob/master/README.md
 """
 import os
+import logging
 
 from lxml.etree import parse
 from six import BytesIO
@@ -52,5 +53,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             with open(xml_file, 'wb') as out:
                 out.write(bad_xml)
             grab = build_grab(content_type='xml')
-            grab.go('file://%s' % xml_file)
+            file_url = 'file://%s' % xml_file
+            logging.info('Downloading %s' % file_url)
+            grab.go(file_url)
             self.assertRaises(EntitiesForbidden, grab.doc, '//title')
