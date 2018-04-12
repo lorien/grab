@@ -158,11 +158,13 @@ before_script:
       sudo apt-get remove python-pycurl python3-pycurl;
       sudo apt-get install -y libcurl4-openssl-dev;
     fi
-  #- python -m pip install --no-binary=pycurl -U pycurl
-  #- LD_LIBRARY_PATH="$HOME/curl_lib/lib" python -c 'import pycurl; print(pycurl.version)'
 
 script:
-  - LD_LIBRARY_PATH="$HOME/curl_lib/lib" tox -e $TOX_ENV
+  - |
+    if [[ "$TOX_ENV" == "py27-recent-libcurl" ]]; then
+      export LD_LIBRARY_PATH="$HOME/curl_lib/lib"
+    fi
+  - tox -e $TOX_ENV
   #- if [[ $TOX_ENV != qa* ]]; then tox -e "$TOX_ENV-threaded-urllib3"; fi
   #- if [[ $TOX_ENV != qa* ]]; then tox -e "$TOX_ENV-threaded-pycurl"; fi
 
