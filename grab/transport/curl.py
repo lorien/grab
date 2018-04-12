@@ -52,6 +52,7 @@ logger = logging.getLogger('grab.transport.curl')
 # Consider building libcurl with c-ares support to enable
 # asynchronous DNS
 # lookups, which enables nice timeouts for name resolves without signals.
+YEAR_2030_EPOCH_TIME = 1893456000
 
 try:
     import signal
@@ -461,8 +462,7 @@ class CurlTransport(BaseTransport):
             'TRUE',
             cookie.path,
             'TRUE' if cookie.secure else 'FALSE',
-            (str(cookie.expires) if cookie.expires
-             else '0'),
+            str(cookie.expires if cookie.expires else YEAR_2030_EPOCH_TIME),
             cookie.name,
             cookie.value,
         ]
