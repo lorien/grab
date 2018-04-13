@@ -54,6 +54,6 @@ class GrabSimpleTestCase(BaseGrabTestCase):
                 out.write(bad_xml)
             grab = build_grab(content_type='xml')
             file_url = 'file://%s' % xml_file
-            logging.info('Downloading %s' % file_url)
+            logging.info('Downloading %s', file_url)
             grab.go(file_url)
             self.assertRaises(EntitiesForbidden, grab.doc, '//title')
