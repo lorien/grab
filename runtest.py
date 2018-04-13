@@ -15,53 +15,53 @@ from tests.util import GLOBAL
 # FIXME:
 # * Test redirect and response.url after redirect
 GRAB_TEST_LIST = (
-#    # *** Internal API
-#    'tests.grab_api',
-#    'tests.grab_transport',
-#    'tests.response_class',
-#    'tests.grab_debug', # FIXME: fix tests excluded for urllib3
-#    # *** Response processing
-#    'tests.grab_xml_processing',
-#    'tests.grab_response_body_processing',
-#    'tests.grab_charset',
-#    'tests.grab_redirect',
+    # *** Internal API
+    'tests.grab_api',
+    'tests.grab_transport',
+    'tests.response_class',
+    'tests.grab_debug', # FIXME: fix tests excluded for urllib3
+    # *** Response processing
+    'tests.grab_xml_processing',
+    'tests.grab_response_body_processing',
+    'tests.grab_charset',
+    'tests.grab_redirect',
     'tests.grab_defusedxml',
-#    # *** Network
-#    'tests.grab_get_request',
-#    'tests.grab_post_request',
-#    'tests.grab_request', # FIXME: fix tests excluded for urllib3
-#    'tests.grab_user_agent',
-#    'tests.grab_cookies', # FIXME: fix tests excluded for urllib3
-#    'tests.grab_url_processing',
-#    'tests.grab_timeout',
-#    # *** Refactor
-#    'tests.grab_proxy',
-#    'tests.grab_upload_file',
-#    'tests.grab_limit_option',
-#    'tests.grab_charset_issue',
-#    'tests.grab_pickle', # FIXME: fix tests excluded for urllib3
-#    'tests.proxy',
-#    # *** Extensions
-#    'tests.ext_text',
-#    'tests.ext_rex',
-#    'tests.ext_lxml',
-#    'tests.ext_form',
-#    'tests.ext_doc',
-#    'tests.ext_structured',
-#    # *** Pycurl Test
-#    'tests.pycurl_cookie',
-#    # *** util.module
-#    'tests.util_module',
-#    'tests.util_log',
-#    # *** grab.export
-#    'tests.util_config',
-#    'tests.script_crawl',
-#    'tests.grab_error',
-#    'tests.grab_deprecated',
-#    'tests.ext_pyquery',
-#    # *** process control
-#    'tests.grab_sigint',
-#    'tests.spider_sigint',
+    # *** Network
+    'tests.grab_get_request',
+    'tests.grab_post_request',
+    'tests.grab_request', # FIXME: fix tests excluded for urllib3
+    'tests.grab_user_agent',
+    'tests.grab_cookies', # FIXME: fix tests excluded for urllib3
+    'tests.grab_url_processing',
+    'tests.grab_timeout',
+    # *** Refactor
+    'tests.grab_proxy',
+    'tests.grab_upload_file',
+    'tests.grab_limit_option',
+    'tests.grab_charset_issue',
+    'tests.grab_pickle', # FIXME: fix tests excluded for urllib3
+    'tests.proxy',
+    # *** Extensions
+    'tests.ext_text',
+    'tests.ext_rex',
+    'tests.ext_lxml',
+    'tests.ext_form',
+    'tests.ext_doc',
+    'tests.ext_structured',
+    # *** Pycurl Test
+    'tests.pycurl_cookie',
+    # *** util.module
+    'tests.util_module',
+    'tests.util_log',
+    # *** grab.export
+    'tests.util_config',
+    'tests.script_crawl',
+    'tests.grab_error',
+    'tests.grab_deprecated',
+    'tests.ext_pyquery',
+    # *** process control
+    'tests.grab_sigint',
+    'tests.spider_sigint',
 )
 
 # ************
@@ -69,17 +69,17 @@ GRAB_TEST_LIST = (
 # ************
 
 SPIDER_TEST_LIST = (
-#    'tests.spider_task',
-#    'tests.spider',
-#    'tests.spider_proxy',
-#    'tests.spider_queue',
-#    'tests.spider_misc',
-#    'tests.spider_meta',
-#    'tests.spider_error',
-#    'tests.spider_cache',
-#    #'tests.spider_data',
-#    'tests.spider_stat',
-#    'tests.spider_multiprocess',
+    'tests.spider_task',
+    'tests.spider',
+    'tests.spider_proxy',
+    'tests.spider_queue',
+    'tests.spider_misc',
+    'tests.spider_meta',
+    'tests.spider_error',
+    'tests.spider_cache',
+    #'tests.spider_data',
+    'tests.spider_stat',
+    'tests.spider_multiprocess',
 )
 
 
