@@ -49,8 +49,13 @@ class GrabSimpleTestCase(BaseGrabTestCase):
                 '<root>&ee;</root>'
             ).encode()
             xml_file = os.path.join(tmp_dir, 'bad.xml')
+            # On windows, use slashed instead of backslashes to avoid error:
+            # Invalid file://hostname/, expected localhost or 127.0.0.1 or none
+            if '\\' in xml_file:
+                xml_file = xml_file.replace('\\', '/')
             with open(xml_file, 'wb') as out:
                 out.write(bad_xml)
             grab = build_grab(content_type='xml')
-            grab.go('file://%s' % xml_file)
+            file_url = 'file://%s' % xml_file
+            grab.go(file_url)
             self.assertRaises(EntitiesForbidden, grab.doc, '//title')
