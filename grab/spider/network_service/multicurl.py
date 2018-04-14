@@ -11,16 +11,102 @@ from grab.error import GrabTooManyRedirectsError
 from grab.transport.curl import build_grab_exception
 from grab.spider.base_service import BaseService
 
+
 ERROR_TOO_MANY_REFRESH_REDIRECTS = -2
-#ERROR_INTERNAL_GRAB_ERROR = -3
-ERROR_ABBR = {
-    ERROR_TOO_MANY_REFRESH_REDIRECTS: 'too-many-refresh-redirects',
-    #ERROR_INTERNAL_GRAB_ERROR: 'internal-grab-error',
+# Source: https://curl.haxx.se/libcurl/c/libcurl-errors.html
+ERRNUM_PYCURL_TAG = {
+    0: 'E_OK',
+    1: 'E_UNSUPPORTED_PROTOCOL',
+    2: 'E_FAILED_INIT',
+    3: 'E_URL_MALFORMAT',
+    4: 'E_NOT_BUILT_IN',
+    5: 'E_COULDNT_RESOLVE_PROXY',
+    6: 'E_COULDNT_RESOLVE_HOST',
+    7: 'E_COULDNT_CONNECT',
+    8: 'E_FTP_WEIRD_SERVER_REPLY',
+    9: 'E_REMOTE_ACCESS_DENIED',
+    10: 'E_FTP_ACCEPT_FAILED',
+    11: 'E_FTP_WEIRD_PASS_REPLY',
+    12: 'E_FTP_ACCEPT_TIMEOUT',
+    13: 'E_FTP_WEIRD_PASV_REPLY',
+    14: 'E_FTP_WEIRD_227_FORMAT',
+    15: 'E_FTP_CANT_GET_HOST',
+    16: 'E_HTTP2', # CURLE_HTTP2_STREAM
+    17: 'E_FTP_COULDNT_SET_TYPE',
+    18: 'E_PARTIAL_FILE',
+    19: 'E_FTP_COULDNT_RETR_FILE',
+    21: 'E_QUOTE_ERROR',
+    22: 'E_HTTP_RETURNED_ERROR',
+    23: 'E_WRITE_ERROR',
+    25: 'E_UPLOAD_FAILED',
+    26: 'E_READ_ERROR',
+    27: 'E_OUT_OF_MEMORY',
+    28: 'E_OPERATION_TIMEDOUT',
+    30: 'E_FTP_PORT_FAILED',
+    31: 'E_FTP_COULDNT_USE_REST',
+    33: 'E_RANGE_ERROR',
+    34: 'E_HTTP_POST_ERROR',
+    35: 'E_SSL_CONNECT_ERROR',
+    36: 'E_BAD_DOWNLOAD_RESUME',
+    37: 'E_FILE_COULDNT_READ_FILE',
+    38: 'E_LDAP_CANNOT_BIND',
+    39: 'E_LDAP_SEARCH_FAILED',
+    41: 'E_FUNCTION_NOT_FOUND',
+    42: 'E_ABORTED_BY_CALLBACK',
+    43: 'E_BAD_FUNCTION_ARGUMENT',
+    45: 'E_INTERFACE_FAILED',
+    47: 'E_TOO_MANY_REDIRECTS',
+    48: 'E_UNKNOWN_OPTION',
+    49: 'E_TELNET_OPTION_SYNTAX',
+    51: 'E_PEER_FAILED_VERIFICATION',
+    52: 'E_GOT_NOTHING',
+    53: 'E_SSL_ENGINE_NOTFOUND',
+    54: 'E_SSL_ENGINE_SETFAILED',
+    55: 'E_SEND_ERROR',
+    56: 'E_RECV_ERROR',
+    58: 'E_SSL_CERTPROBLEM',
+    59: 'E_SSL_CIPHER',
+    60: 'E_SSL_CACERT',
+    61: 'E_BAD_CONTENT_ENCODING',
+    62: 'E_LDAP_INVALID_URL',
+    63: 'E_FILESIZE_EXCEEDED',
+    64: 'E_USE_SSL_FAILED',
+    65: 'E_SEND_FAIL_REWIND',
+    66: 'E_SSL_ENGINE_INITFAILED',
+    67: 'E_LOGIN_DENIED',
+    68: 'E_TFTP_NOTFOUND',
+    69: 'E_TFTP_PERM',
+    70: 'E_REMOTE_DISK_FULL',
+    71: 'E_TFTP_ILLEGAL',
+    72: 'E_TFTP_UNKNOWNID',
+    73: 'E_REMOTE_FILE_EXISTS',
+    74: 'E_TFTP_NOSUCHUSER',
+    75: 'E_CONV_FAILED',
+    76: 'E_CONV_REQD',
+    77: 'E_SSL_CACERT_BADFILE',
+    78: 'E_REMOTE_FILE_NOT_FOUND',
+    79: 'E_SSH',
+    80: 'E_SSL_SHUTDOWN_FAILED',
+    81: 'E_AGAIN',
+    82: 'E_SSL_CRL_BADFILE',
+    83: 'E_SSL_ISSUER_ERROR',
+    84: 'E_FTP_PRET_FAILED',
+    85: 'E_RTSP_CSEQ_ERROR',
+    86: 'E_RTSP_SESSION_ERROR',
+    87: 'E_FTP_BAD_FILE_LIST',
+    88: 'E_CHUNK_FAILED',
+    89: 'E_NO_CONNECTION_AVAILABLE',
+    90: 'E_SSL_PINNEDPUBKEYNOTMATCH',
+    91: 'E_SSL_INVALIDCERTSTATUS',
+    92: 'E_HTTP2_STREAM',
+    93: 'E_RECURSIVE_API_CALL',
 }
-for key in dir(pycurl):
-    if key.startswith('E_'):
-        abbr = key[2:].lower().replace('_', '-')
-        ERROR_ABBR[getattr(pycurl, key)] = abbr
+ERRNUM_TAG = {
+    ERROR_TOO_MANY_REFRESH_REDIRECTS: 'too-many-refresh-redirects',
+}
+for code, tag in ERRNUM_PYCURL_TAG.items():
+    assert tag.startswith('E_')
+    ERRNUM_TAG[code] = tag[2:].replace('_', '-').lower()
 
 
 class NetworkServiceMulticurl(BaseService):
@@ -235,7 +321,7 @@ class NetworkServiceMulticurl(BaseService):
                 if is_ok:
                     error_abbr = None
                 else:
-                    error_abbr = ERROR_ABBR.get(ecode, 'unknown-%d' % ecode)
+                    error_abbr = ERRNUM_TAG.get(ecode, 'unknown-%d' % ecode)
                 yield {
                     'ok': is_ok,
                     'ecode': ecode,

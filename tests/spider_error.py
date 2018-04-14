@@ -140,7 +140,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
 
         bot = build_spider(SimpleSpider)
         bot.run()
-        self.assertTrue('error:operation-timeouted' in bot.stat.counters)
+        self.assertTrue('error:operation-timedout' in bot.stat.counters)
 
     @run_test_if(lambda: (GLOBAL['network_service'] == 'threaded'
                           and GLOBAL['grab_transport'] == 'pycurl'),
