@@ -22,8 +22,8 @@ class ExtensionPyqueryTestCase(BaseGrabTestCase):
             u'qelben sene bağlı insan başqasına ehtiyac duymaz.'
         )
         self.server.response['get.data'] = (
-            b'<html><body><p>%s</p></body>' % msg.encode('utf-8')
-        )
+            '<html><body><p>%s</p></body>' % msg
+        ).encode('utf-8')
         grab = build_grab()
         grab.go(self.server.get_url())
         self.assertEqual(grab.doc.pyquery('p')[0].text_content(), msg)
