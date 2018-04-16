@@ -517,7 +517,7 @@ class Document(object):
         if not self._pyquery:
             from pyquery import PyQuery
 
-            self._pyquery = PyQuery(self.body)
+            self._pyquery = PyQuery(self.tree)
         return self._pyquery
 
     # BodyExtension methods
