@@ -1,4 +1,6 @@
 # coding: utf-8
+from six.moves.urllib.parse import quote
+
 from tests.util import build_grab
 from tests.util import BaseGrabTestCase
 
@@ -35,3 +37,16 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         grab.go(self.server.get_url(u'/search?q=превед'))
         self.assertEqual(b'medved', grab.doc.body)
         self.assertEqual(u'превед', self.server.request['args']['q'])
+
+    def test_null_byte_url(self):
+        self.server.response_once['code'] = 302
+        self.server.response_once['data'] = 'x'
+        self.server.response['data'] = 'y'
+        redirect_url = self.server.get_url().rstrip('/') + '/\x00/'
+        self.server.response_once['headers'] = [
+            ('Location', redirect_url)
+        ]
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        self.assertEqual(b'y', grab.doc.body)
+        self.assertEqual(grab.doc.url, quote(redirect_url, safe=':./?&'))
