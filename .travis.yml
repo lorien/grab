@@ -123,8 +123,8 @@ install:
     fi
 
 before_script:
-  - mysql -u root -e 'create database grab_test'
-  - psql -U postgres -c 'create database grab_test'
+  #- mysql -u root -e 'create database grab_test'
+  #- psql -U postgres -c 'create database grab_test'
   # Override test settings with travis settings 
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
