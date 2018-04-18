@@ -13,3 +13,9 @@ class PycurlSigintHandlerTestCase(TestCase):
             sys.stderr.write('two-2')
         val = handler.get_output()
         self.assertEqual('one-1two-2', val)
+
+    def test_use_stderr(self):
+        handler = PycurlSigintHandler()
+        sys.stderr.write('FOO!')
+        with handler.record():
+            sys.stderr.write('BAR!')
