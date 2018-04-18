@@ -2,14 +2,9 @@ import time
 
 from six.moves.queue import Empty
 
-from grab.error import GrabNetworkError
+from grab.error import GrabNetworkError, GrabTooManyRedirectsError
 from grab.util.misc import camel_case_to_underscore
 from grab.spider.base_service import BaseService
-
-ERROR_TOO_MANY_REFRESH_REDIRECTS = -2
-ERROR_ABBR = {
-    ERROR_TOO_MANY_REFRESH_REDIRECTS: 'too-many-refresh-redirects',
-}
 
 
 def make_class_abbr(name):
@@ -79,17 +74,30 @@ class NetworkServiceThreaded(BaseService):
                                     }
                                     try:
                                         grab.request()
-                                    except GrabNetworkError as ex:
-                                        if (ex.original_exc.__class__.__name__
-                                                == 'error'):
+                                    except (
+                                            GrabNetworkError,
+                                            GrabTooManyRedirectsError) as ex:
+                                        is_redir_err = isinstance(
+                                            ex, GrabTooManyRedirectsError
+                                        )
+                                        orig_exc_name = (
+                                            ex.original_exc.__class__.__name__
+                                        )
+                                        if (
+                                                is_redir_err or
+                                                orig_exc_name == 'error'):
                                             ex_cls = ex
                                         else:
                                             ex_cls = ex.original_exc
                                         result.update({
                                             'ok': False,
                                             'exc': ex,
-                                            'error_abbr': make_class_abbr(
-                                                ex_cls.__class__.__name__
+                                            'error_abbr': (
+                                                'too-many-redirects'
+                                                if is_redir_err
+                                                else make_class_abbr(
+                                                    ex_cls.__class__.__name__
+                                                )
                                             ),
                                         })
                                     (self.spider.task_dispatcher
