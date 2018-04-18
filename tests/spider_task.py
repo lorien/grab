@@ -378,3 +378,20 @@ class TestSpiderTestCase(BaseGrabTestCase):
         bot.run()
         self.assertEqual(1, bot.stat.counters['spider:task-page'])
         self.assertEqual(1, bot.stat.counters['spider:task-page2'])
+
+    def test_task_generator_no_yield(self):
+        class TestSpider(Spider):
+            def task_page(self, unused_grab, unused_task):
+                self.stat.inc('foo')
+
+            def task_generator(self):
+                # pylint: disable=using-constant-test
+                if False:
+                    yield None
+
+        bot = build_spider(TestSpider)
+        bot.setup_queue()
+        task = Task('page', url=self.server.get_url())
+        bot.add_task(task)
+        bot.run()
+        self.assertEqual(1, bot.stat.counters['foo'])
