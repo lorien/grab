@@ -12,7 +12,7 @@ from grab.transport.curl import build_grab_exception
 from grab.spider.base_service import BaseService
 
 
-ERROR_TOO_MANY_REFRESH_REDIRECTS = -2
+ERROR_TOO_MANY_REDIRECTS = -2
 # Source: https://curl.haxx.se/libcurl/c/libcurl-errors.html
 ERRNUM_PYCURL_TAG = {
     0: 'E_OK',
@@ -102,7 +102,7 @@ ERRNUM_PYCURL_TAG = {
     93: 'E_RECURSIVE_API_CALL',
 }
 ERRNUM_TAG = {
-    ERROR_TOO_MANY_REFRESH_REDIRECTS: 'too-many-refresh-redirects',
+    ERROR_TOO_MANY_REDIRECTS: 'too-many-redirects',
 }
 for code, tag in ERRNUM_PYCURL_TAG.items():
     assert tag.startswith('E_')
@@ -299,7 +299,7 @@ class NetworkServiceMulticurl(BaseService):
                     self.network_op_lock.acquire()
                     grab.process_request_result()
                 except GrabTooManyRedirectsError:
-                    ecode = ERROR_TOO_MANY_REFRESH_REDIRECTS
+                    ecode = ERROR_TOO_MANY_REDIRECTS
                     emsg = 'Too many meta refresh redirects'
                     is_ok = False
                 finally:
