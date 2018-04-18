@@ -1,7 +1,7 @@
 # coding: utf-8
 import os
 
-from tests.util import temp_dir, build_grab
+from tests.util import temp_dir, build_grab, TEST_DIR
 from tests.util import BaseGrabTestCase
 
 from grab import GrabMisuseError
@@ -77,22 +77,18 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         grab.doc.tree # should not raise exception
         # pylint: enable=pointless-statement
 
-    #def test_emoji_processing(self):
-    #    #html = u'''
-    #    #<html><body>
-    #    #    <span class="a-color-base"> 👍🏻 </span>
-    #    #</body></html>
-    #    #'''.encode('utf-8')
-    #    grab = build_grab()
-    #    #print('>>',grab.doc('//span').text(),'<<')
-    #    #import grab
-    #    #grab = grab.Grab()
-    #    #grab.go('https://github.com/lorien/grab/issues/199'
-    #            '#issuecomment-269854859')
-    #    grab.go('https://en.wikipedia.org/wiki/Emoji')
-    #    grab.doc.select("//*")
-
     def test_doc_tree_notags_document(self):
         data = b'test'
         grab = build_grab(data)
         self.assertEqual(grab.doc('//html').text(), 'test')
+
+    def test_github_html_processing(self):
+        """This test is for osx and py3.5
+        See: https://github.com/lorien/grab/issues/199"""
+        path = os.path.join(TEST_DIR, 'files/github_showcases.html')
+        grab = build_grab()
+        if '\\' in path:
+            path = path.replace('\\', '/')
+        grab.go('file://' + path)
+        for elem in grab.doc('//a[contains(@class, "exploregrid-item")]'):
+            print(grab.make_url_absolute(elem.attr('href')))
