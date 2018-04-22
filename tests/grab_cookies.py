@@ -334,3 +334,19 @@ class TestCookies(BaseGrabTestCase):
 
         grab.cookies.set('foo', 'bar2', domain='ya.ru')
         self.assertEqual(2, len(grab.cookies.items()))
+
+    def test_unicode_cookie(self):
+        grab = build_grab()
+        self.server.response['headers'] = [
+            ('Set-Cookie', u'preved=медвед'.encode('utf-8')),
+        ]
+        # request page and receive unicode cookie
+        grab.go(self.server.get_url())
+        # request page one more time, sending cookie
+        # should not fail
+        grab.go(self.server.get_url())
+        # does not work yet, because test_server does not correclty
+        # display request unicode cookies
+        # self.assertEqual(
+        # u'медвед', self.server.request['cookies']['preved']['value']
+        # )
