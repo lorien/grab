@@ -992,6 +992,7 @@ class Document(object):
         """
 
         fields = dict(self.form.fields) # pylint: disable=no-member
+        fields_to_remove = set()
         for elem in self.form.inputs: # pylint: disable=no-member
             # Ignore elements without name
             if not elem.get('name'):
@@ -1001,23 +1002,25 @@ class Document(object):
             # http://www.w3.org/TR/html4/interact/forms.html#h-17.12
             if elem.get('disabled'):
                 if elem.name in fields:
-                    del fields[elem.name]
-
-            elif elem.tag == 'select':
-                if fields[elem.name] is None:
-                    if elem.value_options:
-                        fields[elem.name] = elem.value_options[0]
-
-            elif getattr(elem, 'type', None) == 'radio':
-                if fields[elem.name] is None:
-                    fields[elem.name] = elem.get('value')
-
+                    fields_to_remove.add(elem.name)
             elif getattr(elem, 'type', None) == 'checkbox':
                 if not elem.checked:
                     if elem.name is not None:
-                        if elem.name in fields:
-                            del fields[elem.name]
+                        if elem.name in fields and fields[elem.name] is None:
+                            fields_to_remove.add(elem.name)
+            else:
+                if elem.name in fields_to_remove:
+                    fields_to_remove.remove(elem.name)
+                if elem.tag == 'select':
+                    if fields[elem.name] is None:
+                        if elem.value_options:
+                            fields[elem.name] = elem.value_options[0]
 
+                elif getattr(elem, 'type', None) == 'radio':
+                    if fields[elem.name] is None:
+                        fields[elem.name] = elem.get('value')
+        for fname in fields_to_remove:
+            del fields[fname]
         return fields
 
     def choose_form_by_element(self, xpath):

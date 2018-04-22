@@ -255,3 +255,15 @@ class TestHtmlForms(BaseGrabTestCase):
         grab.doc.submit()
         self.assertTrue(u'Beställa'.encode('utf-8')
                         in self.server.request['data'])
+
+    def test_field_disabled(self):
+        html = b'''
+            <form>
+                <input id="aa" type="radio" name="foo"
+                    value="1" disabled="disabled" />
+                <input id="bb" type="radio" name="foo"
+                    value="2" checked="checked" />
+            </form>
+        '''
+        grab = build_grab(html)
+        self.assertEqual(set(['foo']), set(grab.doc.form_fields().keys()))
