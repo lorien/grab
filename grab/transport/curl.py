@@ -17,7 +17,7 @@ from six.moves.http_cookiejar import CookieJar
 import six
 from weblib.http import (normalize_http_values,
                          normalize_post_data, normalize_url)
-from weblib.encoding import make_str
+from weblib.encoding import make_str, make_unicode
 from user_agent import generate_user_agent
 import pycurl
 
@@ -454,20 +454,22 @@ class CurlTransport(BaseTransport):
     def get_netscape_cookie_spec(self, cookie, request_host):
         # FIXME: Now cookie.domain could not be None
         # request_host is not needed anymore
-        host = cookie.domain or request_host
+        host = make_unicode(cookie.domain) or request_host
         if cookie.get_nonstandard_attr('HttpOnly'):
             host = '#HttpOnly_' + host
         items = [
             host,
-            'TRUE',
-            cookie.path,
-            'TRUE' if cookie.secure else 'FALSE',
-            str(cookie.expires if cookie.expires else YEAR_2030_EPOCH_TIME),
-            cookie.name,
-            cookie.value,
+            u'TRUE',
+            make_unicode(cookie.path),
+            u'TRUE' if cookie.secure else u'FALSE',
+            make_unicode(str(
+                cookie.expires if cookie.expires
+                else YEAR_2030_EPOCH_TIME
+            )),
+            make_unicode(cookie.name),
+            make_unicode(cookie.value),
         ]
-        out = u'\t'.join(items)
-        return out
+        return (u'\t'.join(items)).encode('utf-8')
 
     def request(self):
         sigint_handler = PycurlSigintHandler()
