@@ -28,7 +28,6 @@ from six import BytesIO, StringIO
 from weblib.http import smart_urlencode
 import weblib.encoding
 from weblib.files import hashed_path
-from weblib.structured import TreeInterface
 from weblib.text import normalize_space
 from weblib.html import decode_entities, find_refresh_url
 from weblib.rex import normalize_regexp
@@ -145,9 +144,6 @@ class Document(object):
 
     def select(self, *args, **kwargs):
         return XpathSelector(self.tree).select(*args, **kwargs)
-
-    def structure(self, *args, **kwargs):
-        return TreeInterface(self.tree).structured_xpath(*args, **kwargs)
 
     def parse(self, charset=None, headers=None):
         """

@@ -47,7 +47,6 @@ GRAB_TEST_LIST = (
     'tests.ext_lxml',
     'tests.ext_form',
     'tests.ext_doc',
-    'tests.ext_structured',
     # *** Pycurl Test
     'tests.pycurl_cookie',
     # *** util.module
