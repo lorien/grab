@@ -23,6 +23,7 @@ from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
 
 from lxml.html import HTMLParser
 from lxml.etree import XMLParser, ParserError
+from lxml.html import CheckboxValues, MultipleSelectOptions
 import six
 from six import BytesIO, StringIO
 from weblib.http import smart_urlencode
@@ -988,7 +989,25 @@ class Document(object):
         """
 
         fields = dict(self.form.fields) # pylint: disable=no-member
+
         fields_to_remove = set()
+
+        for key, val in list(fields.items()):
+            if isinstance(val, CheckboxValues):
+                if not len(val):
+                    del fields[key]
+                elif len(val) == 1:
+                    fields[key] = val.pop()
+                else:
+                    fields[key] = list(val)
+            if isinstance(val, MultipleSelectOptions):
+                if not len(val):
+                    del fields[key]
+                elif len(val) == 1:
+                    fields[key] = val.pop()
+                else:
+                    fields[key] = list(val)
+
         for elem in self.form.inputs: # pylint: disable=no-member
             # Ignore elements without name
             if not elem.get('name'):
@@ -1008,7 +1027,7 @@ class Document(object):
                 if elem.name in fields_to_remove:
                     fields_to_remove.remove(elem.name)
                 if elem.tag == 'select':
-                    if fields[elem.name] is None:
+                    if elem.name in fields and fields[elem.name] is None:
                         if elem.value_options:
                             fields[elem.name] = elem.value_options[0]
 

@@ -267,3 +267,106 @@ class TestHtmlForms(BaseGrabTestCase):
         '''
         grab = build_grab(html)
         self.assertEqual(set(['foo']), set(grab.doc.form_fields().keys()))
+
+    def test_checkbox_checked_but_disabled(self):
+        html = b'''
+            <form>
+                <input type="checkbox" name="foo"
+                    value="1" checked="checked" disabled="disabled">
+            </form>
+        '''
+        grab = build_grab(html)
+        self.assertTrue('foo' not in grab.doc.form_fields())
+
+    def test_checkbox_no_checked(self):
+        html = b'''
+            <form>
+                <input type="checkbox" name="foo"
+                    value="1">
+                <input type="checkbox" name="foo"
+                    value="2">
+            </form>
+        '''
+        grab = build_grab(html)
+        self.assertTrue('foo' not in grab.doc.form_fields())
+
+
+    def test_checkbox_one_checked(self):
+        html = b'''
+            <form>
+                <input type="checkbox" name="foo"
+                    value="1" checked="checked">
+                <input type="checkbox" name="foo"
+                    value="2">
+            </form>
+        '''
+        grab = build_grab(html)
+        self.assertEqual('1', grab.doc.form_fields()['foo'])
+
+    def test_checkbox_multi_checked(self):
+        html = b'''
+            <form>
+                <input type="checkbox" name="foo"
+                    value="1" checked="checked">
+                <input type="checkbox" name="foo"
+                    value="2" checked="checked">
+            </form>
+        '''
+        grab = build_grab(html)
+        self.assertEqual(['1', '2'], grab.doc.form_fields()['foo'])
+
+    def test_select_disabled(self):
+        html = b'''
+            <form>
+                <select name="foo" disabled="disabled">
+                    <option value="1">1</option>
+                </select>
+            </form>
+        '''
+        grab = build_grab(html)
+        self.assertTrue('foo' not in grab.doc.form_fields())
+
+    def test_select_not_multiple(self):
+        html = b'''
+            <form>
+                <select name="foo">
+                    <option value="1">1</option>
+                </select>
+            </form>
+        '''
+        grab = build_grab(html)
+        self.assertEqual('1', grab.doc.form_fields()['foo'])
+
+    def test_select_multiple_no_options(self):
+        html = b'''
+            <form>
+                <select name="foo" multiple="multiple">
+                </select>
+            </form>
+        '''
+        grab = build_grab(html)
+        self.assertTrue('foo' not in grab.doc.form_fields())
+
+    def test_select_multiple_one_selected(self):
+        html = b'''
+            <form>
+                <select name="foo" multiple="multiple">
+                    <option value="1">1</option>
+                    <option value="2" selected="selected">2</option>
+                </select>
+            </form>
+        '''
+        grab = build_grab(html)
+        self.assertEqual('2', grab.doc.form_fields()['foo'])
+
+    def test_select_multiple_multi_selected(self):
+        html = b'''
+            <form>
+                <select name="foo" multiple="multiple">
+                    <option value="1" selected="selected">1</option>
+                    <option value="2" selected="selected">2</option>
+                </select>
+            </form>
+        '''
+        grab = build_grab(html)
+        self.assertEqual(['1', '2'], grab.doc.form_fields()['foo'])
