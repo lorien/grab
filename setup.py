@@ -33,7 +33,7 @@ setup(
     include_package_data=True,
     # Dependencies
     install_requires=[
-        'weblib>=0.1.23',
+        'weblib>=0.1.28',
         'six',
         'user_agent',
         'selection',
