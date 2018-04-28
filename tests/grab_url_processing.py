@@ -1,8 +1,10 @@
 # coding: utf-8
 from six.moves.urllib.parse import quote
 
-from tests.util import build_grab
-from tests.util import BaseGrabTestCase
+from tests.util import (
+    build_grab, BaseGrabTestCase, only_grab_transport
+)
+from grab.error import GrabConnectionError
 
 
 class GrabUrlProcessingTestCase(BaseGrabTestCase):
@@ -54,3 +56,16 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         grab.go(self.server.get_url())
         self.assertEqual(b'y', grab.doc.body)
         self.assertEqual(grab.doc.url, quote(redirect_url, safe=':./?&'))
+
+    @only_grab_transport('urllib3')
+    def test_urllib3_idna_error(self):
+        invalid_url = (
+            'http://13354&altProductId=6423589&productId=6423589'
+            '&altProductStoreId=13713&catalogId=10001'
+            '&categoryId=28678&productStoreId=13713'
+            'http://www.textbooksnow.com/webapp/wcs/stores'
+            '/servlet/ProductDisplay?langId=-1&storeId='
+        )
+        grab = build_grab(transport='urllib3')
+        with self.assertRaises(GrabConnectionError):
+            grab.go(invalid_url)

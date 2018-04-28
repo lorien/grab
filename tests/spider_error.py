@@ -4,15 +4,19 @@ from six import StringIO
 
 from grab import GrabTimeoutError, Grab
 from grab.spider import Spider, Task
-from tests.util import BaseGrabTestCase, build_spider, run_test_if, GLOBAL
+from tests.util import (
+    BaseGrabTestCase, build_spider, run_test_if, GLOBAL,
+)
 
 # That URLs breaks Grab's URL normalization process
 # with error "label empty or too long"
-INVALID_URL = 'http://13354&altProductId=6423589&productId=6423589'\
-              '&altProductStoreId=13713&catalogId=10001'\
-              '&categoryId=28678&productStoreId=13713'\
-              'http://www.textbooksnow.com/webapp/wcs/stores'\
-              '/servlet/ProductDisplay?langId=-1&storeId='
+INVALID_URL = (
+    'http://13354&altProductId=6423589&productId=6423589'
+    '&altProductStoreId=13713&catalogId=10001'
+    '&categoryId=28678&productStoreId=13713'
+    'http://www.textbooksnow.com/webapp/wcs/stores'
+    '/servlet/ProductDisplay?langId=-1&storeId='
+)
 
 
 class SpiderErrorTestCase(BaseGrabTestCase):
@@ -93,7 +97,6 @@ class SpiderErrorTestCase(BaseGrabTestCase):
                     yield Task('more', url=server.get_url())
 
                 def task_more(self, grab, task):
-                    #print(grab.doc.url)
                     grab.doc('//div').text()
 
             bot = build_spider(SimpleSpider)
@@ -164,7 +167,6 @@ class SpiderErrorTestCase(BaseGrabTestCase):
 
         bot = build_spider(SimpleSpider)
         bot.run()
-        print(bot.stat.counters)
         self.assertTrue('error:grab-timeout-error' in bot.stat.counters)
 
     @run_test_if(lambda: (GLOBAL['network_service'] == 'threaded'
