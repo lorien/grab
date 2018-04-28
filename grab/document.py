@@ -994,14 +994,14 @@ class Document(object):
 
         for key, val in list(fields.items()):
             if isinstance(val, CheckboxValues):
-                if not len(val):
+                if not len(val): # pylint: disable=len-as-condition
                     del fields[key]
                 elif len(val) == 1:
                     fields[key] = val.pop()
                 else:
                     fields[key] = list(val)
             if isinstance(val, MultipleSelectOptions):
-                if not len(val):
+                if not len(val): # pylint: disable=len-as-condition
                     del fields[key]
                 elif len(val) == 1:
                     fields[key] = val.pop()

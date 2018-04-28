@@ -290,7 +290,6 @@ class TestHtmlForms(BaseGrabTestCase):
         grab = build_grab(html)
         self.assertTrue('foo' not in grab.doc.form_fields())
 
-
     def test_checkbox_one_checked(self):
         html = b'''
             <form>

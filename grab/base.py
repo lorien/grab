@@ -507,10 +507,8 @@ class Grab(DeprecatedThings):
                 post = list(post.items())
             if post:
                 if isinstance(post, six.string_types):
-                    post = make_str(
-                            post[:self.config['debug_post_limit']],
-                            errors='ignore',
-                        ) + b'...'
+                    post = make_str(post[:self.config['debug_post_limit']],
+                                    errors='ignore') + b'...'
                 else:
                     items = normalize_http_values(
                         post, charset=self.config['charset'])
