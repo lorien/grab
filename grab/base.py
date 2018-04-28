@@ -19,7 +19,7 @@ import weakref
 from six.moves.urllib.parse import urljoin
 import six
 from weblib.html import find_base_url
-from weblib.http import normalize_http_values, normalize_unicode
+from weblib.http import normalize_http_values, normalize_post_data
 
 from grab.document import Document
 from grab import error
@@ -507,7 +507,7 @@ class Grab(DeprecatedThings):
                 post = list(post.items())
             if post:
                 if isinstance(post, six.string_types):
-                    post = normalize_unicode(
+                    post = normalize_post_data(
                         post[:self.config['debug_post_limit']]) + b'...'
                 else:
                     items = normalize_http_values(
