@@ -149,3 +149,12 @@ class TestPostFeature(BaseGrabTestCase):
         grab = build_grab()
         grab.setup(method='post')
         self.assertRaises(GrabMisuseError, grab.go, self.server.get_url())
+
+    def test_post_multivalue_key(self):
+        grab = build_grab()
+        grab.setup(post=[('foo', [1, 2])])
+        grab.go(self.server.get_url())
+        self.assertEqual(
+            self.server.request['data'],
+            b'foo=1&foo=2'
+        )
