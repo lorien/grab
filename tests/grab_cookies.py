@@ -325,10 +325,12 @@ class TestCookies(BaseGrabTestCase):
 
     def test_cookie_merging_replace(self):
         grab = build_grab()
-        grab.cookies.set('foo', 'bar', self.server.address)
-        grab.cookies.set('foo', 'bar2', self.server.address)
+        grab.cookies.set('foo', 'bar', 'localhost')
+        grab.cookies.set('foo', 'bar2', 'localhost')
         self.assertEqual(1, len(grab.cookies.items()))
 
+        # Empty domain as same as localhost becuase internally
+        # localhost replaced with empty string
         grab.cookies.set('foo', 'bar3', '')
         self.assertEqual(1, len(grab.cookies.items()))
 

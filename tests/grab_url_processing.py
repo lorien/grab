@@ -28,10 +28,14 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
     def test_nonascii_path(self):
         grab = build_grab()
         self.server.response['data'] = 'medved'
-        grab.go(self.server.get_url(u'/превед'))
+        url = self.server.get_url(u'/превед?foo=bar')
+        grab.go(url)
         self.assertEqual(b'medved', grab.doc.body)
-        self.assertEqual('/%D0%BF%D1%80%D0%B5%D0%B2%D0%B5%D0%B4',
-                         self.server.request['path'])
+        self.assertEqual(
+            #'/%D0%BF%D1%80%D0%B5%D0%B2%D0%B5%D0%B4',
+            u'/превед',
+            self.server.request['path']
+        )
 
     def test_nonascii_query(self):
         grab = build_grab()

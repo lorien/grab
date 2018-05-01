@@ -34,7 +34,7 @@ class TestUploadContent(BaseGrabTestCase):
 
         grab.doc.submit()
         self.assertEqual(data,
-                         self.server.request['files']['image'][0]['body'])
+                         self.server.request['files']['image'][0]['content'])
         self.assertEqual('avatar.jpg',
                          self.server.request['files']['image'][0]['filename'])
         self.assertEqual(
@@ -52,7 +52,7 @@ class TestUploadContent(BaseGrabTestCase):
 
         grab.doc.submit()
         self.assertEqual(data,
-                         self.server.request['files']['image'][0]['body'])
+                         self.server.request['files']['image'][0]['content'])
         self.assertEqual(
             10, len(self.server.request['files']['image'][0]['filename']))
         self.assertEqual(
@@ -71,7 +71,7 @@ class TestUploadContent(BaseGrabTestCase):
 
         grab.doc.submit()
         self.assertEqual(data,
-                         self.server.request['files']['image'][0]['body'])
+                         self.server.request['files']['image'][0]['content'])
         self.assertEqual(
             10, len(self.server.request['files']['image'][0]['filename']))
         self.assertEqual(
@@ -95,8 +95,9 @@ class TestUploadContent(BaseGrabTestCase):
             self.assertTrue(isinstance(post['image'], UploadFile))
 
             grab.doc.submit()
-            self.assertEqual(data,
-                             self.server.request['files']['image'][0]['body'])
+            self.assertEqual(
+                data, self.server.request['files']['image'][0]['content']
+            )
             _, filename = os.path.split(file_path)
             self.assertEqual(
                 filename,
@@ -119,8 +120,9 @@ class TestUploadContent(BaseGrabTestCase):
             self.assertTrue(isinstance(post['image'], UploadFile))
 
             grab.doc.submit()
-            self.assertEqual(data,
-                             self.server.request['files']['image'][0]['body'])
+            self.assertEqual(
+                data, self.server.request['files']['image'][0]['content']
+            )
             self.assertEqual(
                 'avatar.jpg',
                 self.server.request['files']['image'][0]['filename'],
@@ -143,8 +145,9 @@ class TestUploadContent(BaseGrabTestCase):
             self.assertTrue(isinstance(post['image'], UploadFile))
 
             grab.doc.submit()
-            self.assertEqual(data,
-                             self.server.request['files']['image'][0]['body'])
+            self.assertEqual(
+                data, self.server.request['files']['image'][0]['content']
+            )
             self.assertEqual(
                 'avatar.jpg',
                 self.server.request['files']['image'][0]['filename'],

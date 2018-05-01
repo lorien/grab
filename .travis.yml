@@ -82,6 +82,12 @@ matrix:
       env:
         - TOX_ENV=py35-threaded-urllib3
         - PYENV_VERSION="3.5.3"
+
+    # release
+    - os: linux
+      env: TOX_ENV=py2-grab-release
+    - os: linux
+      env: TOX_ENV=py3-grab-release
   exclude:
     - python: 2.7 # hack to exclude default no-env travis job
   allow_failures:

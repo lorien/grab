@@ -60,10 +60,11 @@ class SpiderErrorTestCase(BaseGrabTestCase):
     #    invalid_url = b'http://\xa0' + url.encode('ascii')
 
     #    def callback(server):
-    #        server.set_status(301)
-    #        server.add_header('Location', invalid_url)
-    #        server.write('')
-    #        server.finish()
+    #        # deprecated tornado code
+    #        #server.set_status(301)
+    #        #server.add_header('Location', invalid_url)
+    #        #server.write('')
+    #        #server.finish()
 
     #    class TestSpider(Spider):
     #        def task_generator(self):

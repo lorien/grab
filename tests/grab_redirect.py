@@ -1,3 +1,4 @@
+
 from grab.error import GrabTooManyRedirectsError
 from tests.util import BaseGrabTestCase, build_grab
 
@@ -8,15 +9,23 @@ def build_location_callback(url, counter):
         'url': url,
     }
 
-    def callback(server):
+    def callback():
         if meta['counter']:
-            server.set_status(301)
-            server.set_header('Location', meta['url'])
+            status = 301
+            headers = [('Location', meta['url'])]
+            body = b''
         else:
-            server.set_status(200)
-            server.write('done')
-        server.finish()
+            status = 200
+            headers = []
+            body = b'done'
         meta['counter'] -= 1
+        return {
+            'type': 'response',
+            'status': status,
+            'body': body,
+            'headers': headers,
+        }
+
     return callback
 
 
@@ -26,16 +35,22 @@ def build_refresh_callback(url, counter):
         'url': url,
     }
 
-    def callback(server):
+    def callback():
         if meta['counter']:
-            server.set_status(200)
-            server.write('<html><head><meta '
-                         'http-equiv="refresh" content="5"></head>')
+            status = 200
+            body = (
+                b'<html><head><meta '
+                b'http-equiv="refresh" content="5"></head>'
+            )
         else:
-            server.set_status(200)
-            server.write('done')
-        server.finish()
+            status = 200
+            body = b'done'
         meta['counter'] -= 1
+        return {
+            'type': 'response',
+            'status': status,
+            'body': body
+        }
     return callback
 
 
@@ -92,8 +107,9 @@ class GrabRedirectTestCase(BaseGrabTestCase):
                           lambda: grab.go(self.server.get_url()))
 
     def test_redirect_limit(self):
-        self.server.response['get.callback'] =\
+        self.server.response['get.callback'] = (
             build_location_callback(self.server.get_url(), 10)
+        )
 
         grab = build_grab()
         grab.setup(redirect_limit=5)

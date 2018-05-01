@@ -5,7 +5,7 @@ cssselect
 feedparser
 flake8
 selenium
-test_server>=0.0.29
+test_server>=0.0.30
 mock
 runscript
 pyprof2calltree

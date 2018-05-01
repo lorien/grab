@@ -1,9 +1,8 @@
 # coding: utf-8
-from tests.util import build_grab, exclude_grab_transport
-from tests.util import BaseGrabTestCase
-
 from grab.error import (GrabInternalError, GrabCouldNotResolveHostError,
                         GrabTimeoutError)
+from tests.util import build_grab, exclude_grab_transport
+from tests.util import BaseGrabTestCase
 
 
 class GrabRequestTestCase(BaseGrabTestCase):
@@ -29,11 +28,13 @@ class GrabRequestTestCase(BaseGrabTestCase):
         self.assertEqual('3', self.server.request['headers']['Content-Length'])
 
     def test_head_with_invalid_bytes(self):
-        def callback(server):
-            server.set_status(200)
-            server.add_header('Hello-Bug', b'start\xa0end')
-            server.write('')
-            server.finish()
+        def callback():
+            return {
+                'type': 'response',
+                'status': 200,
+                'headers': [('Hello-Bug', b'start\xa0end')],
+                'body': b'',
+            }
 
         self.server.response['callback'] = callback
         grab = build_grab()
@@ -42,13 +43,15 @@ class GrabRequestTestCase(BaseGrabTestCase):
     @exclude_grab_transport('urllib3')
     def test_redirect_with_invalid_byte(self):
         url = self.server.get_url()
-        invalid_url = b'http://\xa0' + url.encode('ascii')
+        invalid_url = 'http://\xa0' + url # .encode('ascii')
 
-        def callback(server):
-            server.set_status(301)
-            server.add_header('Location', invalid_url)
-            server.write('')
-            server.finish()
+        def callback():
+            return {
+                'type': 'response',
+                'status': 301,
+                'headers': [('Location', invalid_url)],
+                'body': b'',
+            }
 
         self.server.response['callback'] = callback
         grab = build_grab()
