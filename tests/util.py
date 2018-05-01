@@ -15,7 +15,7 @@ from grab import base
 logger = logging.getLogger('tests.util') # pylint: disable=invalid-name
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_SERVER_PORT = 9876
-ADDRESS = 'localhost'
+ADDRESS = '127.0.0.1'
 EXTRA_PORT1 = TEST_SERVER_PORT + 1
 EXTRA_PORT2 = TEST_SERVER_PORT + 2
 NON_ROUTABLE_IP = '10.0.0.0'
@@ -78,8 +78,7 @@ class BaseGrabTestCase(TestCase):
 
 def start_server():
     logger.debug('Starting test server on %s:%s', ADDRESS, TEST_SERVER_PORT)
-    server = TestServer(address=ADDRESS, port=TEST_SERVER_PORT,
-                        extra_ports=[EXTRA_PORT1, EXTRA_PORT2])
+    server = TestServer(address=ADDRESS, port=TEST_SERVER_PORT)
     server.start()
     return server
 
