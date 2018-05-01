@@ -279,12 +279,15 @@ class Urllib3Transport(BaseTransport):
                 req_url = make_str(req.url)
                 req_method = req.method
             req.op_started = time.time()
-            res = pool.urlopen(req_method,
-                               req_url,
-                               body=req.data, timeout=timeout,
-                               retries=retry,
-                               headers=req.headers,
-                               preload_content=False)
+            try:
+                res = pool.urlopen(req_method,
+                                   req_url,
+                                   body=req.data, timeout=timeout,
+                                   retries=retry,
+                                   headers=req.headers,
+                                   preload_content=False)
+            except UnicodeError as ex:
+                raise error.GrabConnectionError('GrabInvalidUrl', ex)
         except exceptions.ReadTimeoutError as ex:
             raise error.GrabTimeoutError('ReadTimeoutError', ex)
         except exceptions.ConnectTimeoutError as ex:
