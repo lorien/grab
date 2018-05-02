@@ -26,6 +26,7 @@ GRAB_TEST_LIST = (
     'tests.grab_charset',
     'tests.grab_redirect',
     'tests.grab_defusedxml',
+    'tests.grab_document',
     # *** Network
     'tests.grab_get_request',
     'tests.grab_post_request',

@@ -328,10 +328,6 @@ class DeprecatedThings(object):
     def set_input_by_xpath(self, xpath, value):
         return self.doc.set_input_by_xpath(xpath, value)
 
-    @deprecated(use_instead='grab.doc.submit')
-    def submit(self, *args, **kwargs):
-        return self.doc.submit(*args, **kwargs)
-
     @deprecated(use_instead='grab.doc.form_fields')
     def form_fields(self):
         return self.doc.form_fields()

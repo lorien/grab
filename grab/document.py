@@ -94,17 +94,14 @@ class Document(object):
         'error_code', 'error_msg', 'grab', 'remote_ip',
         '_lxml_tree', '_strict_lxml_tree', '_pyquery',
         '_lxml_form', '_file_fields', 'from_cache',
+        '_grab_config',
     )
 
     def __init__(self, grab=None):
-        if grab is None:
-            self.grab = None
-        else:
-            if isinstance(grab, weakref.ProxyType):
-                self.grab = grab
-            else:
-                self.grab = weakref.proxy(grab)
-
+        self._grab_config = {}
+        self.grab = None
+        if grab:
+            self.process_grab(grab)
         self.status = None
         self.code = None
         self.head = None
@@ -139,6 +136,19 @@ class Document(object):
         # Form
         self._lxml_form = None
         self._file_fields = {}
+
+    def process_grab(self, grab):
+        # TODO: `self.grab` connection should be removed completely
+        if isinstance(grab, weakref.ProxyType):
+            self.grab = grab
+        else:
+            self.grab = weakref.proxy(grab)
+
+        # Save some grab.config items required to
+        # process content of the document
+        for key in ('content_type', 'fix_special_entities',
+                    'lowercased_tree', 'strip_null_bytes'):
+            self._grab_config[key] = self.grab.config[key]
 
     def __call__(self, query):
         return self.select(query)
@@ -249,14 +259,13 @@ class Document(object):
         Clone the Response object.
         """
 
-        if new_grab is not None:
-            obj = self.__class__(self.grab)  # Response()
-        else:
-            obj = self.__class__(new_grab)
+        obj = self.__class__()
+        obj.process_grab(new_grab if new_grab else self.grab)
 
         copy_keys = ('status', 'code', 'head', 'body', 'total_time',
                      'connect_time', 'name_lookup_time',
-                     'url', 'charset', '_unicode_body')
+                     'url', 'charset', '_unicode_body',
+                     '_grab_config')
         for key in copy_keys:
             setattr(obj, key, getattr(self, key))
 
@@ -589,7 +598,7 @@ class Document(object):
         Return DOM tree of the document built with HTML DOM builder.
         """
 
-        if self.grab.config['content_type'] == 'xml':
+        if self._grab_config['content_type'] == 'xml':
             return self.build_xml_tree()
         else:
             return self.build_html_tree()
@@ -614,11 +623,11 @@ class Document(object):
         from grab.base import GLOBAL_STATE
 
         if self._lxml_tree is None:
-            fix_setting = self.grab.config['fix_special_entities']
+            fix_setting = self._grab_config['fix_special_entities']
             body = self.unicode_body(fix_special_entities=fix_setting).strip()
-            if self.grab.config['lowercased_tree']:
+            if self._grab_config['lowercased_tree']:
                 body = body.lower()
-            if self.grab.config['strip_null_bytes']:
+            if self._grab_config['strip_null_bytes']:
                 body = body.replace(NULL_BYTE, '')
             # py3 hack
             if six.PY3:
@@ -854,16 +863,14 @@ class Document(object):
     # * Remove set_input_by_number
     # * New method: set_input_by(id=None, number=None, xpath=None)
 
-    def submit(self, submit_name=None, make_request=True,
-               url=None, extra_post=None, remove_from_post=None):
+    def get_form_request(
+            self, submit_name=None,
+            url=None, extra_post=None, remove_from_post=None):
         """
         Submit default form.
 
         :param submit_name: name of button which should be "clicked" to
             submit form
-        :param make_request: if `False` then grab instance will be
-            configured with form post data but request will not be
-            performed
         :param url: explicitly specify form action url
         :param extra_post: (dict or list of pairs) additional form data which
             will override data automatically extracted from the form.
@@ -877,27 +884,6 @@ class Document(object):
         * checkbox - ???
 
         Multipart forms are correctly recognized by grab library.
-
-        Example::
-
-            # Assume that we going to some page with some form
-            g.go('some url')
-            # Fill some fields
-            g.set_input('username', 'bob')
-            g.set_input('pwd', '123')
-            # Submit the form
-            g.submit()
-
-            # or we can just fill the form
-            # and do manual submission
-            g.set_input('foo', 'bar')
-            g.submit(make_request=False)
-            g.request()
-
-            # for multipart forms we can specify files
-            from grab import UploadFile
-            g.set_input('img', UploadFile('/path/to/image.png'))
-            g.submit()
         """
 
         # pylint: disable=no-member
@@ -965,21 +951,41 @@ class Document(object):
             post_items = [(x, y) for x, y in post_items
                           if x not in remove_from_post]
 
+        result = {
+            'multipart_post': None,
+            'post': None,
+            'url': None,
+        }
+
         if self.form.method == 'POST':
             if 'multipart' in self.form.get('enctype', ''):
-                self.grab.setup(multipart_post=post_items)
+                result['multipart_post'] = post_items
+                #self.grab.setup(multipart_post=post_items)
             else:
-                self.grab.setup(post=post_items)
-            self.grab.setup(url=action_url)
+                result['post'] = post_items
+                #self.grab.setup(post=post_items)
+            result['url'] = action_url
+            #self.grab.setup(url=action_url)
 
         else:
             url = action_url.split('?')[0] + '?' + smart_urlencode(post_items)
-            self.grab.setup(url=url)
+            result['url'] = url
+            #self.grab.setup(url=url)
 
-        if make_request:
-            return self.grab.request()
-        else:
-            return None
+        return result
+
+        #if make_request:
+        #    return self.grab.request()
+        #else:
+        #    return None
+
+    def submit(self, *args, **kwargs):
+        warn(
+            'Method `Document.submit` is deprecated. '
+            'Use `Grab.submit` method instead.',
+            stacklevel=3
+        )
+        self.grab.submit(*args, **kwargs)
 
     def form_fields(self):
         """
