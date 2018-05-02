@@ -308,7 +308,7 @@ class Grab(DeprecatedThings):
         grab.config = self.dump_config()
 
         grab.doc = self.doc.copy()
-        grab.doc.grab = weakref.proxy(grab)
+        #grab.doc.grab = weakref.proxy(grab)
 
         for key in self.clonable_attributes:
             setattr(grab, key, getattr(self, key))
@@ -494,6 +494,49 @@ class Grab(DeprecatedThings):
                             continue
                 return doc
 
+    def submit(self, make_request=True, **kwargs):
+        """
+        Submit current form.
+
+        :param make_request: if `False` then grab instance will be
+            configured with form post data but request will not be
+            performed
+
+        For details see `Document.submit()` method
+
+        Example::
+
+            # Assume that we going to some page with some form
+            g.go('some url')
+            # Fill some fields
+            g.doc.set_input('username', 'bob')
+            g.doc.set_input('pwd', '123')
+            # Submit the form
+            g.submit()
+
+            # or we can just fill the form
+            # and do manual submission
+            g.doc.set_input('foo', 'bar')
+            g.submit(make_request=False)
+            g.request()
+
+            # for multipart forms we can specify files
+            from grab import UploadFile
+            g.doc.set_input('img', UploadFile('/path/to/image.png'))
+            g.submit()
+        """
+        result = self.doc.get_form_request(**kwargs)
+        if result['multipart_post']:
+            self.setup(multipart_post=result['multipart_post'])
+        if result['post']:
+            self.setup(post=result['post'])
+        if result['url']:
+            self.setup(url=result['url'])
+        if make_request:
+            return self.request()
+        else:
+            return None
+
     def process_request_result(self, prepare_response_func=None):
         """
         Process result of real request performed via transport extension.
@@ -535,9 +578,7 @@ class Grab(DeprecatedThings):
         else:
             self.doc = self.transport.prepare_response(self)
 
-        # Workaround
-        if self.doc.grab is None:
-            self.doc.grab = weakref.proxy(self)
+        self.doc.process_grab(self)
 
         if self.config['reuse_cookies']:
             self.cookies.update(self.doc.cookies)
