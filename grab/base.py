@@ -714,7 +714,7 @@ class Grab(DeprecatedThings):
         else:
             thread_name = '-%s' % thread_name
         file_name = os.path.join(self.config['log_dir'], '%02d%s.log' % (
-            self.request_counter, thread_name))
+            self.request_counter or 1, thread_name))
         with open(file_name, 'wb') as out:
             out.write(b'Request headers:\n')
             out.write(self.request_head)
@@ -728,7 +728,7 @@ class Grab(DeprecatedThings):
 
         file_extension = 'html'
         file_name = os.path.join(self.config['log_dir'], '%02d%s.%s' % (
-            self.request_counter, thread_name, file_extension))
+            self.request_counter or 1, thread_name, file_extension))
         self.doc.save(file_name)
 
     def make_url_absolute(self, url, resolve_base=False):
