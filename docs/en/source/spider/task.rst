@@ -49,11 +49,11 @@ see examples of different task creation. All three examples do the same:
 
 Also you can specify these arguments:
 
-:priority: приоритет задания, целое положительное число, чем меньше число, тем выше приоритет.
-:disable_cache: не использовать кэш паука для этого запроса, сетевой ответ в кэш сохранён не будет
-:refresh_cache: не использовать кэш паука, в случае удачного ответа обновить запись в кэше
-:valid_status: обрабатывать обычным способом указанные статусы. По умолчанию обрабатываются все статусы 2xx, а также статус 404.
-:use_proxylist: использовать заданный глобально для паука список прокси. По умолчанию  опция включена.
+:priority: task priority, it's unsigned natural number, the less number mean the higher priority.
+:disable_cache: don't use spider's cache for this request, network response will not stored into cache as well.
+:refresh_cache: do not use spider's cache, in case of success response it will refresh cache.
+:valid_status: procces the following response codes in task handler. By default only 2xx and 404 statuses will be processed in task handlers.
+:use_proxylist: use spider's global proxy list, by default this oprion is True
 
 
 Task Object as Data Storage
