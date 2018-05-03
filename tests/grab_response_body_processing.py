@@ -1,7 +1,7 @@
 # coding: utf-8
 import os
 
-from tests.util import temp_dir, build_grab
+from tests.util import temp_dir, build_grab, TEST_DIR
 from tests.util import BaseGrabTestCase
 
 from grab import GrabMisuseError
@@ -96,3 +96,21 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         data = b'test'
         grab = build_grab(data)
         self.assertEqual(grab.doc('//html').text(), 'test')
+
+    def test_github_html_processing(self):
+        """This test is for osx and py3.5
+        See: https://github.com/lorien/grab/issues/199
+
+        It should works with recent lxml builds on any platform.
+        In the past it failed on previous lxml releases on macos platform
+        """
+        path = os.path.join(TEST_DIR, 'files/github_showcases.html')
+        with open(path) as inp:
+            data = inp.read()
+        self.server.response['data'] = data
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        items = []
+        for elem in grab.doc('//a[contains(@class, "exploregrid-item")]'):
+            items.append(grab.make_url_absolute(elem.attr('href')))
+        self.assertTrue('tools-for-open-source' in items[2])
