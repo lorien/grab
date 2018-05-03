@@ -105,7 +105,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         In the past it failed on previous lxml releases on macos platform
         """
         path = os.path.join(TEST_DIR, 'files/github_showcases.html')
-        with open(path) as inp:
+        with open(path, 'rb') as inp:
             data = inp.read()
         self.server.response['data'] = data
         grab = build_grab()
