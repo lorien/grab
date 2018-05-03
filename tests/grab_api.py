@@ -1,4 +1,6 @@
 # coding: utf-8
+from copy import deepcopy
+
 import six
 
 from tests.util import build_grab, temp_file
@@ -141,3 +143,17 @@ class GrabApiTestCase(BaseGrabTestCase):
         <h1>test</h1>
         '''
         self.assertRaises(GrabMisuseError, build_grab, data)
+
+    def test_headers_affects_common_headers(self):
+        grab = build_grab()
+        ch_origin = deepcopy(grab.config['common_headers'])
+        # Provide custom header which is also in common_headers
+        grab.setup(headers={'Accept': 'zzz'})
+        # To make request Grab processes config and build result headers
+        # from `config['common_headers']` and `config['headers']
+        # That merge should not change initial `config['common_headers']` value
+        grab.go(self.server.get_url())
+        self.assertEqual(
+            grab.config['common_headers']['Accept'],
+            ch_origin['Accept'],
+        )
