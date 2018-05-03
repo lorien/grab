@@ -179,8 +179,8 @@ def main():
         mod_suite = loader.loadTestsFromName(path)
         for some_suite in mod_suite:
             for test in some_suite:
-                if (not hasattr(test, '_backend') or
-                        test._backend in GLOBAL['backends']):
+                if (not hasattr(test, 'backend') or
+                        test.backend in GLOBAL['backends']):
                     suite.addTest(test)
 
     runner = unittest.TextTestRunner()
