@@ -626,11 +626,6 @@ class Spider(object):
 
         if task.use_proxylist:
             if self.proxylist_enabled:
-                # Need this to work around
-                # pycurl feature/bug:
-                # pycurl instance uses previously connected proxy server
-                # even if `proxy` options is set with another proxy server
-                grab.setup(connection_reuse=False)
                 if self.proxy_auto_change:
                     self.change_active_proxy(task, grab)
                 if self.proxy:
