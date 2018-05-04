@@ -28,11 +28,11 @@ class TestUploadContent(BaseGrabTestCase):
         data = b'foo'
         upload_data = UploadContent(data, filename='avatar.jpg')
         grab.doc.set_input('image', upload_data)
-        grab.doc.submit(make_request=False)
+        grab.submit(make_request=False)
         post = dict(grab.config['multipart_post'])
         self.assertTrue(isinstance(post['image'], UploadContent))
 
-        grab.doc.submit()
+        grab.submit()
         self.assertEqual(data,
                          self.server.request['files']['image'][0]['content'])
         self.assertEqual('avatar.jpg',
@@ -46,11 +46,11 @@ class TestUploadContent(BaseGrabTestCase):
         data = b'foo'
         upload_data = UploadContent(data)
         grab.doc.set_input('image', upload_data)
-        grab.doc.submit(make_request=False)
+        grab.submit(make_request=False)
         post = dict(grab.config['multipart_post'])
         self.assertTrue(isinstance(post['image'], UploadContent))
 
-        grab.doc.submit()
+        grab.submit()
         self.assertEqual(data,
                          self.server.request['files']['image'][0]['content'])
         self.assertEqual(
@@ -65,11 +65,11 @@ class TestUploadContent(BaseGrabTestCase):
         upload_data = UploadContent(data,
                                     content_type='application/grab')
         grab.doc.set_input('image', upload_data)
-        grab.doc.submit(make_request=False)
+        grab.submit(make_request=False)
         post = dict(grab.config['multipart_post'])
         self.assertTrue(isinstance(post['image'], UploadContent))
 
-        grab.doc.submit()
+        grab.submit()
         self.assertEqual(data,
                          self.server.request['files']['image'][0]['content'])
         self.assertEqual(
@@ -90,11 +90,11 @@ class TestUploadContent(BaseGrabTestCase):
                 out.write(data)
             upload_data = UploadFile(file_path)
             grab.doc.set_input('image', upload_data)
-            grab.doc.submit(make_request=False)
+            grab.submit(make_request=False)
             post = dict(grab.config['multipart_post'])
             self.assertTrue(isinstance(post['image'], UploadFile))
 
-            grab.doc.submit()
+            grab.submit()
             self.assertEqual(
                 data, self.server.request['files']['image'][0]['content']
             )
@@ -115,11 +115,11 @@ class TestUploadContent(BaseGrabTestCase):
                 out.write(data)
             upload_data = UploadFile(file_path, filename='avatar.jpg')
             grab.doc.set_input('image', upload_data)
-            grab.doc.submit(make_request=False)
+            grab.submit(make_request=False)
             post = dict(grab.config['multipart_post'])
             self.assertTrue(isinstance(post['image'], UploadFile))
 
-            grab.doc.submit()
+            grab.submit()
             self.assertEqual(
                 data, self.server.request['files']['image'][0]['content']
             )
@@ -140,11 +140,11 @@ class TestUploadContent(BaseGrabTestCase):
             upload_data = UploadFile(file_path, filename='avatar.jpg',
                                      content_type='application/grab')
             grab.doc.set_input('image', upload_data)
-            grab.doc.submit(make_request=False)
+            grab.submit(make_request=False)
             post = dict(grab.config['multipart_post'])
             self.assertTrue(isinstance(post['image'], UploadFile))
 
-            grab.doc.submit()
+            grab.submit()
             self.assertEqual(
                 data, self.server.request['files']['image'][0]['content']
             )
