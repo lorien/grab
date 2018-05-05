@@ -174,9 +174,12 @@ class Document(object):
                 responses = self.head.rsplit(b'\nHTTP/', 1)
                 # Cut off the 'HTTP/*' line from the last response
                 _, response = responses[-1].split(b'\n', 1)
-                response = response.decode('ascii', 'ignore')
+                response = response.decode('utf-8', 'ignore')
             else:
-                response = ''
+                response = u''
+            if six.PY2:
+                # email_from_string does not work with unicode input
+                response = response.encode('utf-8')
             self.headers = email.message_from_string(response)
 
         if charset is None:

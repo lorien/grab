@@ -328,6 +328,9 @@ class Urllib3Transport(BaseTransport):
 
             head = ''
             for key, val in self._response.getheaders().items():
+                if six.PY3:
+                    key = key.encode('latin').decode('utf-8')
+                    val = val.encode('latin').decode('utf-8')
                 head += '%s: %s\r\n' % (key, val)
             head += '\r\n'
             response.head = make_str(head, encoding='latin', errors='ignore')
@@ -394,6 +397,9 @@ class Urllib3Transport(BaseTransport):
             import email.message
             hdr = email.message.Message()
             for key, val in self._response.getheaders().items():
+                if six.PY3:
+                    key = key.encode('latin').decode('utf-8')
+                    val = val.encode('latin').decode('utf-8')
                 hdr[key] = val
             response.parse(charset=grab.config['document_charset'],
                            headers=hdr)
