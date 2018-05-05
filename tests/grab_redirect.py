@@ -1,3 +1,5 @@
+# coding: utf-8
+from six.moves.urllib.parse import quote
 
 from grab.error import GrabTooManyRedirectsError
 from tests.util import BaseGrabTestCase, build_grab
@@ -122,3 +124,17 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         grab.setup(redirect_limit=20)
         grab.go(self.server.get_url())
         self.assertTrue(b'done' in grab.doc.body)
+
+    def test_redirect_utf_location(self):
+        self.server.response_once['code'] = 301
+        self.server.response_once['headers'] = [
+            ('Location', (self.server.get_url() + u'фыва').encode('utf-8')),
+        ]
+        self.server.response_once['data'] = 'content-1'
+        self.server.response['data'] = 'content-2'
+        grab = build_grab(debug=True, follow_location=True)
+        grab.go(self.server.get_url())
+        print('URL', grab.doc.url)
+        self.assertTrue(
+            quote(u'/фыва'.encode('utf-8'), safe='/') in grab.doc.url
+        )
