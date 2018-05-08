@@ -134,7 +134,6 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         self.server.response['data'] = 'content-2'
         grab = build_grab(debug=True, follow_location=True)
         grab.go(self.server.get_url())
-        print('URL', grab.doc.url)
         self.assertTrue(
             quote(u'/фыва'.encode('utf-8'), safe='/') in grab.doc.url
         )

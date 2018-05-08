@@ -251,7 +251,7 @@ class Document(object):
             try:
                 codecs.lookup(charset)
             except LookupError:
-                logger.error('Unknown charset found: %s.'
+                logger.debug('Unknown charset found: %s.'
                              ' Using utf-8 istead.', charset)
                 self.charset = 'utf-8'
             else:
