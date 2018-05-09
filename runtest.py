@@ -62,6 +62,9 @@ GRAB_TEST_LIST = (
     # *** process control
     'tests.grab_sigint',
     'tests.spider_sigint',
+    # *** Other things
+    'tests.raw_server',
+    'tests.lib_weblib',
 )
 
 # ************
