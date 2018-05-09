@@ -97,7 +97,7 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
 
 
 class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
-    _backend = 'mongodb'
+    backend = 'mongodb'
 
     def setup_queue(self, bot):
         bot.setup_queue(backend='mongodb', **MONGODB_CONNECTION)
@@ -132,7 +132,7 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
 
 
 class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
-    _backend = 'redis'
+    backend = 'redis'
 
     def setup_queue(self, bot):
         bot.setup_queue(backend='redis', **REDIS_CONNECTION)
