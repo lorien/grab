@@ -1,5 +1,40 @@
 # Grab Change Log
 
+## [0.6.40] - unreleased
+### Changed
+
+## [0.6.39] - 2018-05-09
+### Fixed
+- Fix bug: task generator works incorrectly
+- Fix bug: pypi package misses http api html file
+- Fix bug: dictionary changed size during iteration in stat logging
+- Fix bug: multiple errors in urllib3 transport and threaded network service
+- Fix short names of errors in stat logging
+- Improve error handling in urrllib3 transport
+- Fix #299: multi-added errors
+- Fix bug: pypi package misses http api html file
+- Fix #285: pyquery extension parses html incorrectly
+- Fix #267: normalize handling of too many redirect error
+- Fix #268: fix processing of utf cookies
+- Fix #241: form_fields() fails on some HTML forms
+- Fix normalize_unicode issue in debug post method
+- Fix #323: urllib3 transport fails with UnicodeError on some invalid URLs
+- Fix #31: support for multivalue form inputs
+- Fix #328, fix #67: remove hard link between document and grab
+- Fix #284: option headers affects content of common_headers
+- Fix #293: processing non-latin chars in Location header
+- Fix #324: refactor response header processing
+
+### Changed
+- Refactor Spider into set of async. services
+- Add certifi dependency into grab[full] setup target
+- Fix #315: use psycopg2-binary package for postgres cache
+- Related to #206: do not use connection_reuse=False for proxy connections in spider
+
+### Removed
+- Remove cache timeout option
+- Remove structured extension
+
 ## [0.6.38] - 2017-05-17
 ### Fixed
 - Fix "error:None" in spider rps logging
