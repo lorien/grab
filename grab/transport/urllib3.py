@@ -11,7 +11,7 @@ from six.moves.http_cookiejar import CookieJar
 import six
 from weblib.http import (normalize_url, normalize_post_data,
                          normalize_http_values)
-from weblib.encoding import make_str, decode_pairs
+from weblib.encoding import make_str, make_unicode, decode_pairs
 from urllib3 import PoolManager, ProxyManager, exceptions, make_headers
 from urllib3.filepost import encode_multipart_formdata
 from urllib3.fields import RequestField
@@ -27,15 +27,6 @@ from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.document import Document
 from grab.upload import UploadFile, UploadContent
 from grab.transport.base import BaseTransport
-
-
-def make_unicode(val, encoding='utf-8', errors='strict'):
-    if isinstance(val, six.binary_type):
-        return val.decode(encoding, errors)
-    elif isinstance(val, six.text_type):
-        return val
-    else:
-        return make_unicode(str(val))
 
 
 def process_upload_items(items):
@@ -129,7 +120,11 @@ class Urllib3Transport(BaseTransport):
             request_url = normalize_url(grab.config['url'])
         except Exception as ex:
             raise error.GrabInvalidUrl(
-                u'%s: %s' % (six.text_type(ex), grab.config['url']))
+                u'%s: %s' % (
+                    six.text_type(ex),
+                    make_unicode(grab.config['url'], errors='ignore')
+                )
+            )
         req.url = request_url
 
         method = grab.detect_request_method()
@@ -321,6 +316,10 @@ class Urllib3Transport(BaseTransport):
         #            sys.exc_info()[2])
 
     def prepare_response(self, grab):
+        # Information about urllib3
+        # On python2 urllib3 headers contains original binary data
+        # On python3 urllib3 headers are converted to unicode
+        # using latin encoding
         try:
             #if self.body_file:
             #    self.body_file.close()
@@ -328,12 +327,15 @@ class Urllib3Transport(BaseTransport):
 
             head = ''
             for key, val in self._response.getheaders().items():
+                if six.PY2:
+                    key = key.decode('utf-8', errors='ignore')
+                    val = val.decode('utf-8', errors='ignore')
                 if six.PY3:
-                    key = key.encode('latin').decode('utf-8')
-                    val = val.encode('latin').decode('utf-8')
+                    key = key.encode('latin').decode('utf-8', errors='ignore')
+                    val = val.encode('latin').decode('utf-8', errors='ignore')
                 head += '%s: %s\r\n' % (key, val)
             head += '\r\n'
-            response.head = make_str(head, encoding='latin', errors='ignore')
+            response.head = make_str(head, encoding='utf-8')
 
             #if self.body_path:
             #    response.body_path = self.body_path
@@ -397,9 +399,14 @@ class Urllib3Transport(BaseTransport):
             import email.message
             hdr = email.message.Message()
             for key, val in self._response.getheaders().items():
+                if six.PY2:
+                    key = key.decode('utf-8', errors='ignore')
+                    val = val.decode('utf-8', errors='ignore')
                 if six.PY3:
-                    key = key.encode('latin').decode('utf-8')
-                    val = val.encode('latin').decode('utf-8')
+                    key = key.encode('latin').decode('utf-8', errors='ignore')
+                    val = val.encode('latin').decode('utf-8', errors='ignore')
+                #if key == 'Location':
+                #    import pdb; pdb.set_trace()
                 hdr[key] = val
             response.parse(charset=grab.config['document_charset'],
                            headers=hdr)

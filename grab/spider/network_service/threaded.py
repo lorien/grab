@@ -3,7 +3,7 @@ import time
 from six.moves.queue import Empty
 
 from grab.error import (
-    GrabNetworkError, GrabTooManyRedirectsError
+    GrabNetworkError, GrabTooManyRedirectsError, GrabInvalidUrl
 )
 from grab.util.misc import camel_case_to_underscore
 from grab.spider.base_service import BaseService
@@ -78,16 +78,21 @@ class NetworkServiceThreaded(BaseService):
                                         grab.request()
                                     except (
                                             GrabNetworkError,
+                                            GrabInvalidUrl,
                                             GrabTooManyRedirectsError) as ex:
                                         is_redir_err = isinstance(
                                             ex, GrabTooManyRedirectsError
                                         )
                                         orig_exc_name = (
                                             ex.original_exc.__class__.__name__
+                                            if hasattr(ex, 'original_exc')
+                                            else None
                                         )
                                         # UnicodeError: see #323
                                         if (
                                                 is_redir_err or
+                                                isinstance(ex, GrabInvalidUrl)
+                                                or
                                                 orig_exc_name == 'error' or
                                                 orig_exc_name ==
                                                 'UnicodeError'):

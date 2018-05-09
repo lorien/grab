@@ -53,33 +53,6 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.run()
 
-    # FIXME: fix
-    # That test case ruins the spider instance :(
-    #def test_redirect_with_invalid_byte(self):
-    #    url = self.server.get_url()
-    #    invalid_url = b'http://\xa0' + url.encode('ascii')
-
-    #    def callback(server):
-    #        # deprecated tornado code
-    #        #server.set_status(301)
-    #        #server.add_header('Location', invalid_url)
-    #        #server.write('')
-    #        #server.finish()
-
-    #    class TestSpider(Spider):
-    #        def task_generator(self):
-    #        #yield Task('page', url='http://www.tripadvisor.com/ShowUrl?
-    #        #&excludeFromVS=false&odc=BusinessListingsUrl&d=4289178&url=1')
-    #            #yield Task('page', invalid_url)
-    #            yield Task('page', url)
-    #
-    #        def task_page(self, grab, task):
-    #            pass
-    #
-    #    self.server.response['callback'] = callback
-    #    bot = build_spider(TestSpider)
-    #    bot.run()
-
     def test_no_warning(self):
         """Simple spider should not generate
         any warnings (warning module sends messages to stderr)
