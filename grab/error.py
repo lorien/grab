@@ -30,9 +30,10 @@ class GrabError(Exception):
     """
 
 
-class GrabNetworkError(GrabError):
+class OriginalExceptionError(object):
     """
-    Raises in case of network error.
+    Exception sub-class which constructor accepts original exception
+    as second argument
     """
 
     def __init__(self, *args, **kwargs):
@@ -40,7 +41,13 @@ class GrabNetworkError(GrabError):
             self.original_exc = args[1]
         else:
             self.original_exc = None
-        super(GrabNetworkError, self).__init__(*args, **kwargs)
+        super(OriginalExceptionError, self).__init__(*args, **kwargs)
+
+
+class GrabNetworkError(OriginalExceptionError, GrabError):
+    """
+    Raises in case of network error.
+    """
 
 
 class GrabTimeoutError(GrabNetworkError):
@@ -94,5 +101,5 @@ class GrabInvalidUrl(GrabError):
     """
 
 
-class GrabInternalError(GrabError):
+class GrabInternalError(OriginalExceptionError, GrabError):
     pass
