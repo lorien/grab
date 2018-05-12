@@ -663,6 +663,7 @@ class Spider(object):
             self.prepare()
             if self.task_queue is None:
                 self.setup_queue()
+            self.process_initial_urls()
             services = [
                 self.task_dispatcher,
                 self.task_generator_service,

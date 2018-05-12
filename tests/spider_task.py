@@ -395,3 +395,17 @@ class TestSpiderTestCase(BaseGrabTestCase):
         bot.add_task(task)
         bot.run()
         self.assertEqual(1, bot.stat.counters['foo'])
+
+    def test_initial_urls(self):
+        url = self.server.get_url()
+
+        class TestSpider(Spider):
+            initial_urls = [url]
+
+            def task_initial(self, unused_grab, unused_task):
+                self.stat.inc('foo', 1)
+
+        bot = build_spider(TestSpider)
+        bot.run()
+
+        self.assertEqual(1, bot.stat.counters['foo'])
