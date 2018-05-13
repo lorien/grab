@@ -1,7 +1,12 @@
 # Grab Change Log
 
-## [0.6.40] - unreleased
-### Changed
+## [0.6.41] - unreleased
+### Fixed
+
+## [0.6.40] - 2018-05-13
+### Fixed
+- Fix #346: spider does not process `initial_urls`
+- Fix #344: raise GrabInvalidUrl for pycurl error #3
 
 ## [0.6.39] - 2018-05-09
 ### Fixed
