@@ -624,5 +624,7 @@ def build_grab_exception(ex, curl):
             return error.GrabTooManyRedirectsError(ex.args[1], ex)
         elif ex.args[0] == 6:
             return error.GrabCouldNotResolveHostError(ex.args[1], ex)
+        elif ex.args[0] == 3:
+            return error.GrabInvalidUrl(ex.args[1], ex)
         else:
             return error.GrabNetworkError(ex.args[1], ex)

@@ -1,6 +1,6 @@
 # coding: utf-8
 from grab.error import (GrabInternalError, GrabCouldNotResolveHostError,
-                        GrabTimeoutError)
+                        GrabTimeoutError, GrabInvalidUrl)
 from tests.util import build_grab, exclude_grab_transport
 from tests.util import BaseGrabTestCase
 
@@ -58,7 +58,7 @@ class GrabRequestTestCase(BaseGrabTestCase):
         # GrabTimeoutError raised when tests are being runned on computer
         # without access to the internet (no DNS service available)
         self.assertRaises((GrabInternalError, GrabCouldNotResolveHostError,
-                           GrabTimeoutError),
+                           GrabTimeoutError, GrabInvalidUrl),
                           grab.go, self.server.get_url())
 
     def test_options_method(self):
