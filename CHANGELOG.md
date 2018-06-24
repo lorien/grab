@@ -1,7 +1,11 @@
 # Grab Change Log
 
-## [0.6.41] - unreleased
+## [0.6.42] - unreleased
 ### Fixed
+
+## [0.6.41] - 2018-06-24
+### Changed
+- Restrict pycurl version to <7.43.0.1 (see #354)
 
 ## [0.6.40] - 2018-05-13
 ### Fixed
