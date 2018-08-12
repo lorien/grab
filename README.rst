@@ -17,6 +17,12 @@ Grab
     :target: http://docs.grablib.org/en/latest/
 
 
+Project Status
+--------------
+
+Project Grab is not abandoned but it is not being actively developed. At current time I am working on another crawling framework which I want to be simple, fast and does not leak memory. New project is located here: https://github.com/lorien/crawler First, I've tried to use mix of asyncio (network) and classic threads (parsing HTML with lxml on multiple CPU cores) but then I've decided to use classic threads for everything for the sake of simplicity. Network requests are processed with pycurl because it is fast, feature-rich and supports socks5 proxies. You can try new framework but be aware it does not have many features yet. In particular, its options to configure network requests are very pure. If you need some option, feel free to create new issue.
+
+
 What is Grab?
 -------------
 
