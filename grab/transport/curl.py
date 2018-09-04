@@ -363,8 +363,15 @@ class CurlTransport(BaseTransport):
             headers.update(grab.config['headers'])
         # This is required to avoid some problems
         headers.update({'Expect': ''})
-        header_tuples = [str('%s: %s' % x) for x
-                         in headers.items()]
+
+        header_tuples = []
+        for k, v in headers.items():
+            if k.endswith(';'):
+                # A way to tell libcurl to send an empty header field.
+                header_tuples.append(str(k))
+            else:
+                header_tuples.append(str('%s: %s' % (k, v)))
+
         self.curl.setopt(pycurl.HTTPHEADER, header_tuples)
 
         self.process_cookie_options(grab, request_url)

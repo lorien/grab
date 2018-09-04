@@ -80,3 +80,15 @@ class GrabRequestTestCase(BaseGrabTestCase):
         grab.setup(headers={'Foo': 'Bar'})
         grab.go(self.server.get_url())
         self.assertEqual('Bar', grab.request_headers['foo'])
+
+    @exclude_grab_transport('urllib3')
+    def test_empty_headers(self):
+        grab = build_grab(debug=True)
+        grab.setup(headers={'No-Foo': ''})
+        grab.go(self.server.get_url())
+        self.assertTrue('No-Foo' not in self.server.request['headers'])
+
+        grab = build_grab(debug=True)
+        grab.setup(headers={'Empty-Foo;': ''})
+        grab.go(self.server.get_url())
+        self.assertEqual('', grab.request_headers['Empty-Foo'])

@@ -51,3 +51,12 @@ HTTP Authentication
 To send HTTP authentication headers, use the :ref:`option_userpwd` option with
 a value of the form "username:password".
 
+
+Empty headers
+--------------
+
+Setting an empty value for a header is a way to remove it from request.
+To actually send empty header field append semicolon at the end of the header name::
+
+    >>> g = Grab()
+    >>> g.setup(headers={'Accept;': ''})
