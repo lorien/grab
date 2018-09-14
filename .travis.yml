@@ -50,6 +50,7 @@ install:
       pg_ctl -w start -l postgres.log --pgdata ${PG_DATA}
       createuser -s postgres
       brew upgrade pyenv
+      brew upgrade openssl
     fi
 
 before_script:
