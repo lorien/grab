@@ -98,7 +98,7 @@ script:
       export LD_LIBRARY_PATH="$HOME/curl_lib/lib"
     fi
   - |
-    if [[ "TRAVIS_OS_NAME" == "osx"; then
+    if [[ "TRAVIS_OS_NAME" == "osx" ]]; then
       export LDFLAGS="-L/usr/local/opt/openssl/lib"
       export CPPFLAGS="-I/usr/local/opt/openssl/include"
     fi
