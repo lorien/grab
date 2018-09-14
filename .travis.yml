@@ -100,8 +100,8 @@ script:
     fi
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      export LDFLAGS="-L/usr/local/opt/openssl/lib"
-      export CPPFLAGS="-I/usr/local/opt/openssl/include"
+      #export LDFLAGS="-L/usr/local/opt/openssl/lib"
+      #export CPPFLAGS="-I/usr/local/opt/openssl/include"
       export PYCURL_SSL_LIBRARY=openssl
     fi
   - tox -e $TOX_ENV
