@@ -21,11 +21,11 @@ import threading
 import logging
 from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
 
+import six
+from six import BytesIO, StringIO
 from lxml.html import HTMLParser
 from lxml.etree import XMLParser, ParserError
 from lxml.html import CheckboxValues, MultipleSelectOptions
-import six
-from six import BytesIO, StringIO
 from weblib.http import smart_urlencode
 import weblib.encoding
 from weblib.files import hashed_path

@@ -53,7 +53,7 @@ class SpiderMetaClass(type):
         attribute then define it and set to False
     """
 
-    def __new__(mcs, name, bases, namespace):
+    def __new__(cls, name, bases, namespace):
         if 'Meta' not in namespace:
             for base in bases:
                 if hasattr(base, 'Meta'):
@@ -71,7 +71,7 @@ class SpiderMetaClass(type):
         if not hasattr(namespace['Meta'], 'abstract'):
             namespace['Meta'].abstract = False
 
-        return super(SpiderMetaClass, mcs).__new__(mcs, name, bases, namespace)
+        return super(SpiderMetaClass, cls).__new__(cls, name, bases, namespace)
 
 
 @six.add_metaclass(SpiderMetaClass)
@@ -691,8 +691,6 @@ class Spider(object):
                         srv.resume()
         except KeyboardInterrupt:
             self.interrupted = True
-            raise
-        except Exception:
             raise
         finally:
             # TODO:

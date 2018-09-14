@@ -49,4 +49,6 @@ class SpiderMetaTestCase(BaseGrabTestCase):
             class Meta:
                 some_foo = 'bar'
 
+        # pylint: disable=no-member
         self.assertEqual(SomeSpider.Meta.abstract, False)
+        # pylint: enable=no-member

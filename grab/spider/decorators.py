@@ -26,8 +26,6 @@ def integrity(integrity_func, retry_errors=(ResponseNotValid,)):
                 yield task.clone(refresh_cache=True)
                 error_code = ex.__class__.__name__.replace('_', '-')
                 self.stat.inc('integrity:%s' % error_code)
-            except Exception as ex:
-                raise
             else:
                 result = func(self, grab, task)
                 if result is not None:
