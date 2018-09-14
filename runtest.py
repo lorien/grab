@@ -107,7 +107,7 @@ def main():
     parser = OptionParser()
     parser.add_option('-t', '--test', help='Run only specified tests')
     parser.add_option('--grab-transport', default='pycurl')
-    parser.add_option('--network-service', default='multicurl')
+    parser.add_option('--network-service', default='threaded')
     parser.add_option('--test-grab', action='store_true',
                       default=False, help='Run tests for Grab::Spider')
     parser.add_option('--test-spider', action='store_true',

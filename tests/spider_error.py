@@ -96,29 +96,6 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot.run()
         self.assertTrue(isinstance(bot.meta['exc'], GrabTimeoutError))
 
-    @run_test_if(lambda: (GLOBAL['network_service'] == 'multicurl'
-                          and GLOBAL['grab_transport'] == 'pycurl'),
-                 'multicurl & pycurl')
-    def test_stat_error_name_multi_pycurl(self):
-
-        server = self.server
-        server.response['sleep'] = 2
-
-        class SimpleSpider(Spider):
-            def prepare(self):
-                self.network_try_limit = 1
-
-            def task_generator(self):
-                grab = Grab(url=server.get_url(), timeout=1)
-                yield Task('page', grab=grab)
-
-            def task_page(self, grab, unused_task):
-                pass
-
-        bot = build_spider(SimpleSpider)
-        bot.run()
-        self.assertTrue('error:operation-timedout' in bot.stat.counters)
-
     @run_test_if(lambda: (GLOBAL['network_service'] == 'threaded'
                           and GLOBAL['grab_transport'] == 'pycurl'),
                  'threaded & pycurl')

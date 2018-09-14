@@ -130,7 +130,7 @@ class Spider(object):
             parser_requests_per_process=10000,
             parser_pool_size=1,
             http_api_port=None,
-            network_service='multicurl',
+            network_service='threaded',
             grab_transport='pycurl',
             # Deprecated
             transport=None):
@@ -212,15 +212,8 @@ class Spider(object):
             warn('The "transport" argument of Spider constructor is'
                  ' deprecated. Use "network_service" argument.')
             network_service = transport
-        assert network_service in ('multicurl', 'threaded')
-        if network_service == 'multicurl':
-            from grab.spider.network_service.multicurl import (
-                NetworkServiceMulticurl
-            )
-            self.network_service = NetworkServiceMulticurl(
-                self, self.thread_number
-            )
-        elif network_service == 'threaded':
+        assert network_service in ('threaded',)
+        if network_service == 'threaded':
             # pylint: disable=no-name-in-module, import-error
             from grab.spider.network_service.threaded import (
                 NetworkServiceThreaded
@@ -647,8 +640,10 @@ class Spider(object):
             self.stat.inc('spider:request-network')
             self.stat.inc('spider:task-%s-network' % task.name)
             try:
+                # pylint: disable=no-member
                 self.network_service.start_task_processing(
                     task, grab, grab_config_backup)
+                # pylint: enable=no-member
             except GrabInvalidUrl:
                 # TODO: log error
                 # TODO: show traceback
