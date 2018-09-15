@@ -23,22 +23,12 @@ matrix:
     - os: linux
       env: TOX_ENV=py27
     - os: linux
-      env: TOX_ENV=py27-threaded-pycurl
-    - os: linux
       env: TOX_ENV=py34
-    - os: linux
-      env: TOX_ENV=py34-threaded-pycurl
     - os: linux
       env: TOX_ENV=py35
       python: 3.5
     - os: linux
-      env: TOX_ENV=py35-threaded-pycurl
-      python: 3.5
-    - os: linux
       env: TOX_ENV=py36
-      python: 3.6
-    - os: linux
-      env: TOX_ENV=py36-threaded-pycurl
       python: 3.6
     - os: osx
       language: generic
@@ -58,29 +48,24 @@ matrix:
     - os: osx
       language: generic
       env:
-        - TOX_ENV=py35-threaded-pycurl
-        - PYENV_VERSION="3.5.3"
-    - os: osx
-      language: generic
-      env:
         - TOX_ENV=py36
         - PYENV_VERSION="3.6.0"
 
-     # threaded + urllib3
+     # urllib3 transport
     - os: linux
-      env: TOX_ENV=py27-threaded-urllib3
+      env: TOX_ENV=py27-urllib3
     - os: linux
-      env: TOX_ENV=py34-threaded-urllib3
+      env: TOX_ENV=py34-urllib3
     - os: linux
-      env: TOX_ENV=py35-threaded-urllib3
+      env: TOX_ENV=py35-urllib3
       python: 3.5
     - os: linux
-      env: TOX_ENV=py36-threaded-urllib3
+      env: TOX_ENV=py36-urllib3
       python: 3.6
     - os: osx
       language: generic
       env:
-        - TOX_ENV=py35-threaded-urllib3
+        - TOX_ENV=py35-urllib3
         - PYENV_VERSION="3.5.3"
 
     # release
@@ -91,12 +76,12 @@ matrix:
   exclude:
     - python: 2.7 # hack to exclude default no-env travis job
   allow_failures:
-    - env: TOX_ENV=py27-threaded-urllib3
-    - env: TOX_ENV=py34-threaded-urllib3
-    - env: TOX_ENV=py35-threaded-urllib3
-    - env: TOX_ENV=py36-threaded-urllib3
+    - env: TOX_ENV=py27-urllib3
+    - env: TOX_ENV=py34-urllib3
+    - env: TOX_ENV=py35-urllib3
+    - env: TOX_ENV=py36-urllib3
     - env:
-        - TOX_ENV=py35-threaded-urllib3
+        - TOX_ENV=py35-urllib3
         - PYENV_VERSION="3.5.3"
 
 # Enable extra mongodb and redis services on linux
@@ -172,6 +157,12 @@ script:
   - |
     if [[ "$TOX_ENV" == "py27-recent-libcurl" ]]; then
       export LD_LIBRARY_PATH="$HOME/curl_lib/lib"
+    fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      export LDFLAGS="-L/usr/local/opt/openssl/lib"
+      export CPPFLAGS="-I/usr/local/opt/openssl/include"
+      export PYCURL_SSL_LIBRARY=openssl
     fi
   - tox -e $TOX_ENV
 
