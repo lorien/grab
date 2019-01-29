@@ -14,8 +14,8 @@ dist/
 /script/
 .idea/
 /.coverage
-/docs/en/build/
-/docs/ru/_build/
+/docs/build/
+/docs/_build/
 /test_settings_local.py
 /test.py
 /.python-version
