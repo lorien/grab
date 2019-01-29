@@ -17,10 +17,24 @@ Grab
     :target: http://docs.grablib.org/en/latest/
 
 
-Project Status
---------------
+Installation
+------------
 
-Project Grab is not abandoned but it is not being actively developed. At current time I am working on another crawling framework which I want to be simple, fast and does not leak memory. New project is located here: https://github.com/lorien/crawler First, I've tried to use mix of asyncio (network) and classic threads (parsing HTML with lxml on multiple CPU cores) but then I've decided to use classic threads for everything for the sake of simplicity. Network requests are processed with pycurl because it is fast, feature-rich and supports socks5 proxies. You can try new framework but be aware it does not have many features yet. In particular, its options to configure network requests are very pure. If you need some option, feel free to create new issue.
+.. code:: bash
+
+    $ pip install -U grab
+
+See details about installing Grab on different platforms here http://docs.grablib.org/en/latest/usage/installation.html
+
+
+Support
+-------
+
+Documentation: https://grablib.org/en/latest/
+
+Telegram Chat: https://t.me/grablab
+
+To report bug please use GitHub issue tracker: https://github.com/lorien/grab/issues
 
 
 What is Grab?
@@ -115,28 +129,3 @@ Grab::Spider Example
 
 
 
-Installation
-------------
-
-.. code:: bash
-
-    $ pip install -U grab
-
-See details about installing Grab on different platforms here http://docs.grablib.org/en/latest/usage/installation.html
-
-
-Documentation and Help
-----------------------
-
-Documentation: http://docs.grablib.org/en/latest/
-
-Mailing list (mostly russian): http://groups.google.com/group/python-grab/
-
-
-Contribution
-------------
-
-To report a bug please use GitHub issue tracker: https://github.com/lorien/grab/issues
-
-If you want to develop new feature in Grab please use issue tracker to
-describe what you want to do or contact me at lorien@lorien.name
