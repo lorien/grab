@@ -40,3 +40,6 @@ upload:
 
 viewdoc:
 	x-www-browser docs/en/build/html/index.html
+
+upload_docs:
+	tox -e doc && rsync -azhP docs/build/html/ web@sam:/web/grablab/docs/

@@ -7,3 +7,5 @@ pip>=9.0.1
 weblib
 user_agent
 sphinx
+mock
+sphinx_rtd_theme
