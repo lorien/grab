@@ -11,7 +11,10 @@ import re
 from copy import copy
 import email
 import os
-import json
+try:
+    import ujson as json
+except ImportError:
+    import json
 import tempfile
 import webbrowser
 import codecs
