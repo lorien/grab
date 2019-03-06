@@ -27,6 +27,63 @@ class NetworkServiceThreaded(BaseService):
         return sum(1 for x in self.iterate_workers(self.worker_registry)
                    if x.is_busy_event.is_set())
 
+    def start_task_processing(self, task, grab, grab_config_backup):
+        # self.freelist.pop()
+        try:
+            result = {
+                'ok': True,
+                'ecode': None,
+                'emsg': None,
+                'error_abbr': None,
+                'grab': grab,
+                'grab_config_backup': (
+                    grab_config_backup
+                ),
+                'task': task,
+                'exc': None
+            }
+            try:
+                grab.request()
+            except (
+                    GrabNetworkError,
+                    GrabInvalidUrl,
+                    GrabTooManyRedirectsError) as ex:
+                is_redir_err = isinstance(
+                    ex, GrabTooManyRedirectsError
+                )
+                orig_exc_name = (
+                    ex.original_exc.__class__.__name__
+                    if hasattr(ex, 'original_exc')
+                    else None
+                )
+                # UnicodeError: see #323
+                if (
+                        is_redir_err or
+                        isinstance(ex, GrabInvalidUrl)
+                        or
+                        orig_exc_name == 'error' or
+                        orig_exc_name ==
+                        'UnicodeError'):
+                    ex_cls = ex
+                else:
+                    ex_cls = ex.original_exc
+                result.update({
+                    'ok': False,
+                    'exc': ex,
+                    'error_abbr': (
+                        'too-many-redirects'
+                        if is_redir_err
+                        else make_class_abbr(
+                            ex_cls.__class__.__name__
+                        )
+                    ),
+                })
+            (self.spider.task_dispatcher
+             .input_queue.put((result, task, None)))
+        finally:
+            pass
+            # self.freelist.append(1)
+
     # TODO: supervisor worker to restore failed worker threads
     def worker_callback(self, worker):
         while not worker.stop_event.is_set():
@@ -45,76 +102,7 @@ class NetworkServiceThreaded(BaseService):
                         is_valid, reason = self.spider.check_task_limits(task)
                         if is_valid:
                             grab = self.spider.setup_grab_for_task(task)
-                            # TODO: almost duplicate of
-                            # Spider.submit_task_to_transport
-                            if self.spider.only_cache:
-                                self.spider.stat.inc(
-                                    'spider:'
-                                    'request-network-disabled-only-cache'
-                                )
-                            else:
-                                grab_config_backup = grab.dump_config()
-                                self.spider.process_grab_proxy(task, grab)
-                                self.spider.stat.inc('spider:request-network')
-                                self.spider.stat.inc(
-                                    'spider:task-%s-network' % task.name
-                                )
-
-                                #self.freelist.pop()
-                                try:
-                                    result = {
-                                        'ok': True,
-                                        'ecode': None,
-                                        'emsg': None,
-                                        'error_abbr': None,
-                                        'grab': grab,
-                                        'grab_config_backup': (
-                                            grab_config_backup
-                                        ),
-                                        'task': task,
-                                        'exc': None
-                                    }
-                                    try:
-                                        grab.request()
-                                    except (
-                                            GrabNetworkError,
-                                            GrabInvalidUrl,
-                                            GrabTooManyRedirectsError) as ex:
-                                        is_redir_err = isinstance(
-                                            ex, GrabTooManyRedirectsError
-                                        )
-                                        orig_exc_name = (
-                                            ex.original_exc.__class__.__name__
-                                            if hasattr(ex, 'original_exc')
-                                            else None
-                                        )
-                                        # UnicodeError: see #323
-                                        if (
-                                                is_redir_err or
-                                                isinstance(ex, GrabInvalidUrl)
-                                                or
-                                                orig_exc_name == 'error' or
-                                                orig_exc_name ==
-                                                'UnicodeError'):
-                                            ex_cls = ex
-                                        else:
-                                            ex_cls = ex.original_exc
-                                        result.update({
-                                            'ok': False,
-                                            'exc': ex,
-                                            'error_abbr': (
-                                                'too-many-redirects'
-                                                if is_redir_err
-                                                else make_class_abbr(
-                                                    ex_cls.__class__.__name__
-                                                )
-                                            ),
-                                        })
-                                    (self.spider.task_dispatcher
-                                     .input_queue.put((result, task, None)))
-                                finally:
-                                    pass
-                                    #self.freelist.append(1)
+                            self.spider.submit_task_to_transport(task, grab)
                         else:
                             self.spider.log_rejected_task(task, reason)
                             # pylint: disable=no-member
