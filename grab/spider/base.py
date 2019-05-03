@@ -130,7 +130,7 @@ class Spider(object):
             parser_requests_per_process=10000,
             parser_pool_size=1,
             http_api_port=None,
-            network_service='multicurl',
+            network_service='threaded',
             grab_transport='pycurl',
             # Deprecated
             transport=None):
