@@ -234,6 +234,9 @@ class CurlTransport(BaseTransport):
         self.curl.setopt(pycurl.NOSIGNAL, 1)
         self.curl.setopt(pycurl.HEADERFUNCTION, self.header_processor)
 
+        if grab.config['resolve']:
+            self.curl.setopt(pycurl.RESOLVE, grab.config['resolve'])
+
         if grab.config['body_inmemory']:
             self.curl.setopt(pycurl.WRITEFUNCTION, self.body_processor)
         else:
