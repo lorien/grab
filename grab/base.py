@@ -136,6 +136,9 @@ def default_config():
         # Network interface
         interface=None,
 
+        # DNS resulution
+        resolve=None,
+
         # Redirects
         follow_refresh=False,
         follow_location=True,
