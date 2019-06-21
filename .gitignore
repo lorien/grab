@@ -19,3 +19,4 @@ dist/
 /test_settings_local.py
 /test.py
 /.python-version
+/.hg/

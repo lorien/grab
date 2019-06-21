@@ -12,6 +12,7 @@ Grab Web Resources
 * Source code: https://github.com/lorien/grab
 * Documentation: http://grablib.org
 * Telegram chat: https://t.me/grablab
+* Telegram chat (ru): https://t.me/grablab_ru
 
 What is Grab?
 -------------

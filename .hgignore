@@ -1,0 +1,25 @@
+syntax: glob
+*.pyc
+*.swp
+*.swo
+*.orig
+*.egg-info/
+
+syntax: regexp
+
+# setuptools
+^dist/
+
+# development files
+^.env/
+^var/
+^\.tox/
+^script/
+^\.idea/
+^\.coverage
+^docs/build/
+^docs/_build/
+^test_settings_local\.py
+^test\.py
+^\.python-version
+^\.git/
