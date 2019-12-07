@@ -13,6 +13,7 @@ try:
 except ImportError:
     from urllib.parse import urlsplit
 from six.moves.http_cookiejar import CookieJar
+from contextlib import contextmanager
 
 import six
 from weblib.http import (normalize_http_values,
@@ -585,6 +586,10 @@ class CurlTransport(BaseTransport):
 
         state['curl'] = pycurl.Curl()
         self.__dict__ = state # pylint: disable=attribute-defined-outside-init
+
+    @contextmanager
+    def wrap_transport_error(self):
+        yield
 
 
 def build_grab_exception(ex, curl):

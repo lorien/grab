@@ -5,6 +5,8 @@ from __future__ import absolute_import
 import logging
 import random
 import time
+from contextlib import contextmanager
+import ssl
 
 from six.moves.urllib.parse import urlsplit
 from six.moves.http_cookiejar import CookieJar
@@ -224,6 +226,26 @@ class Urllib3Transport(BaseTransport):
 
         self._request = req
 
+    @contextmanager
+    def wrap_transport_error(self):
+        try:
+            yield
+        except exceptions.ReadTimeoutError as ex:
+            raise error.GrabTimeoutError('ReadTimeoutError', ex)
+        except exceptions.ConnectTimeoutError as ex:
+            raise error.GrabConnectionError('ConnectTimeoutError', ex)
+        except exceptions.ProtocolError as ex:
+            # TODO:
+            # the code
+            # raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
+            # fails
+            # with error TypeError: 'OSError' object is not subscriptable
+            raise error.GrabConnectionError('ProtocolError', ex)
+        except exceptions.SSLError as ex:
+            raise error.GrabConnectionError('SSLError', ex)
+        except ssl.SSLError as ex:
+            raise error.GrabConnectionError('SSLError', ex)
+
     def request(self):
         req = self._request
 
@@ -247,7 +269,7 @@ class Urllib3Transport(BaseTransport):
                 )
         else:
             pool = self.pool
-        try:
+        with self.wrap_transport_error():
             # Retries can be disabled by passing False:
             # http://urllib3.readthedocs.io/en/latest/reference/urllib3.util.html#module-urllib3.util.retry
             # Do not use False because of warning:
@@ -283,19 +305,19 @@ class Urllib3Transport(BaseTransport):
                                    preload_content=False)
             except UnicodeError as ex:
                 raise error.GrabConnectionError('GrabInvalidUrl', ex)
-        except exceptions.ReadTimeoutError as ex:
-            raise error.GrabTimeoutError('ReadTimeoutError', ex)
-        except exceptions.ConnectTimeoutError as ex:
-            raise error.GrabConnectionError('ConnectTimeoutError', ex)
-        except exceptions.ProtocolError as ex:
-            # TODO:
-            # the code
-            # raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
-            # fails
-            # with error TypeError: 'OSError' object is not subscriptable
-            raise error.GrabConnectionError('ProtocolError', ex)
-        except exceptions.SSLError as ex:
-            raise error.GrabConnectionError('SSLError', ex)
+        #except exceptions.ReadTimeoutError as ex:
+        #    raise error.GrabTimeoutError('ReadTimeoutError', ex)
+        #except exceptions.ConnectTimeoutError as ex:
+        #    raise error.GrabConnectionError('ConnectTimeoutError', ex)
+        #except exceptions.ProtocolError as ex:
+        #    # TODO:
+        #    # the code
+        #    # raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
+        #    # fails
+        #    # with error TypeError: 'OSError' object is not subscriptable
+        #    raise error.GrabConnectionError('ProtocolError', ex)
+        #except exceptions.SSLError as ex:
+        #    raise error.GrabConnectionError('SSLError', ex)
 
         # WTF?
         self.request_head = b''

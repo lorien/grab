@@ -469,7 +469,8 @@ class Grab(DeprecatedThings):
                     self.save_failed_dump()
                 raise
             else:
-                doc = self.process_request_result()
+                with self.transport.wrap_transport_error():
+                    doc = self.process_request_result()
 
                 if self.config['follow_location']:
                     if doc.code in (301, 302, 303, 307, 308):

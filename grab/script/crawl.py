@@ -35,7 +35,7 @@ def setup_arg_parser(parser):
     parser.add_argument('--api-port', type=int, default=None)
     parser.add_argument('--parser-pool-size', type=int, default=2)
     parser.add_argument('--grab-transport', default='pycurl')
-    parser.add_argument('--network-service', default='multicurl')
+    parser.add_argument('--network-service', default='threaded')
 
 
 def get_lock_key(spider_name, lock_key=None, # pylint: disable=unused-argument
