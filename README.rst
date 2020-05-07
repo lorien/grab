@@ -30,8 +30,7 @@ See details about installing Grab on different platforms here http://docs.grabli
 Support
 -------
 
-Documentation: https://grablib.org/en/latest/
-
+Documentation: https://grablab.org/docs/
 Russian telegram chat: https://t.me/grablab_ru
 English telegram chat: https://t.me/grablab
 
