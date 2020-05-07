@@ -31,7 +31,9 @@ Support
 -------
 
 Documentation: https://grablab.org/docs/
+
 Russian telegram chat: https://t.me/grablab_ru
+
 English telegram chat: https://t.me/grablab
 
 To report bug please use GitHub issue tracker: https://github.com/lorien/grab/issues
