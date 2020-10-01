@@ -1,4 +1,4 @@
-Grab
+Grab-amazing web scraping
 ====
 
 .. image:: https://travis-ci.org/lorien/grab.png?branch=master
