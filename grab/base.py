@@ -15,8 +15,9 @@ import collections
 import email
 from datetime import datetime
 import weakref
+import json
 
-from six.moves.urllib.parse import urljoin
+from six.moves.urllib.parse import urljoin, urlencode
 import six
 from weblib.html import find_base_url
 from weblib.http import normalize_http_values, make_str
@@ -45,6 +46,7 @@ TRANSPORT_CACHE = {}
 TRANSPORT_ALIAS = {
     'pycurl': 'grab.transport.curl.CurlTransport',
     'urllib3': 'grab.transport.urllib3.Urllib3Transport',
+    'aiocurl': 'grab.transport.aiocurl.AioCurlTransport',
 }
 DEFAULT_TRANSPORT = 'pycurl'
 
@@ -364,6 +366,15 @@ class Grab(DeprecatedThings):
         Setting up Grab instance configuration.
         """
 
+        json_kwarg = kwargs.pop('json', None)
+        if json_kwarg is not None:
+            if 'headers' in kwargs:
+                headers = kwargs['headers'] = kwargs['headers'].copy()
+            else:
+                headers = kwargs['headers'] = {}
+            headers.update({'Content-Type': 'application/json; charset=utf-8'})
+            kwargs['post'] = json.dumps(json_kwarg)
+
         for key in kwargs:
             if key not in self.config.keys():
                 raise error.GrabMisuseError('Unknown option: %s' % key)
@@ -371,6 +382,15 @@ class Grab(DeprecatedThings):
         if 'url' in kwargs:
             if self.config.get('url'):
                 kwargs['url'] = self.make_url_absolute(kwargs['url'])
+
+        for header_field in ['headers', 'common_headers']:
+            if header_field in kwargs and isinstance(kwargs[header_field], str):
+                headers = {
+                    [y.strip() for y in x.strip('> ').split(':', 1)]
+                    for x in kwargs[header_field].split('\n') if x.strip(' >')
+                }
+                kwargs[header_field] = headers
+
         self.config.update(kwargs)
 
     def go(self, url, **kwargs): # pylint: disable=invalid-name
@@ -405,6 +425,13 @@ class Grab(DeprecatedThings):
             self.setup_transport(self.transport_param)
         self.reset()
         self.request_counter = next(REQUEST_COUNTER)
+        
+        params_kwarg = kwargs.pop('params', {})
+        if params_kwarg:
+            if not kwargs['url'].endswith('?'):
+                kwargs['url'] += '?'
+            kwargs['url'] = kwargs['url'] + urlencode(params_kwarg)
+
         if kwargs:
             self.setup(**kwargs)
         if self.proxylist.size() and self.config['proxy_auto_change']:
@@ -821,3 +848,64 @@ class Grab(DeprecatedThings):
 # For backward compatibility
 # WTF???
 BaseGrab = Grab
+
+
+class AioGrab(Grab):
+    def setup_transport(self, transport_param, reset=False):
+        if transport_param is None:
+            transport_param = 'aiocurl'
+        return super().setup_transport(transport_param, reset=reset)
+
+    async def request(self, **kwargs):
+        """
+        Perform network request.
+
+        You can specify grab settings in ``**kwargs``.
+        Any keyword argument will be passed to ``self.config``.
+
+        Returns: ``Document`` objects.
+        """
+
+        self.prepare_request(**kwargs)
+        refresh_count = 0
+
+        while True:
+            self.log_request()
+
+            try:
+                await self.transport.request()
+            except error.GrabError as ex:
+                self.exception = ex
+                self.reset_temporary_options()
+                if self.config['log_dir']:
+                    self.save_failed_dump()
+                raise
+            else:
+                with self.transport.wrap_transport_error():
+                    doc = self.process_request_result()
+
+                if self.config['follow_location']:
+                    if doc.code in (301, 302, 303, 307, 308):
+                        if doc.headers.get('Location'):
+                            refresh_count += 1
+                            if refresh_count > self.config['redirect_limit']:
+                                raise error.GrabTooManyRedirectsError()
+                            else:
+                                url = doc.headers.get('Location')
+                                self.prepare_request(
+                                    url=self.make_url_absolute(url),
+                                    referer=None)
+                                continue
+
+                if self.config['follow_refresh']:
+                    refresh_url = self.doc.get_meta_refresh_url()
+                    if refresh_url is not None:
+                        refresh_count += 1
+                        if refresh_count > self.config['redirect_limit']:
+                            raise error.GrabTooManyRedirectsError()
+                        else:
+                            self.prepare_request(
+                                url=self.make_url_absolute(refresh_url),
+                                referer=None)
+                            continue
+                return doc
