@@ -309,7 +309,7 @@ class Grab(DeprecatedThings):
         :param **kwargs: overrides settings of cloned grab instance
         """
 
-        grab = Grab(transport=self.transport_param)
+        grab = type(self)(transport=self.transport_param)
         grab.config = self.dump_config()
 
         grab.doc = self.doc.copy()
