@@ -182,6 +182,9 @@ def default_config():
 
         # Internal object to store
         state={},
+
+        # callback that's called after each response
+        response_callback=None,
     )
 
 
@@ -633,6 +636,9 @@ class Grab(DeprecatedThings):
         # Should be called after `copy_request_data`
         if self.config['log_dir']:
             self.save_dumps()
+
+        if self.config['response_callback']:
+            self.config['response_callback'](self)
 
         return self.doc
 
