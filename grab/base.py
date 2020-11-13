@@ -16,6 +16,8 @@ import email
 from datetime import datetime
 import weakref
 import json
+import asyncio
+import traceback
 
 from six.moves.urllib.parse import urljoin, urlencode
 import six
@@ -185,6 +187,9 @@ def default_config():
 
         # callback that's called after each response
         response_callback=None,
+
+        retries=None,
+        retry_delay=0,
     )
 
 
@@ -428,7 +433,7 @@ class Grab(DeprecatedThings):
             self.setup_transport(self.transport_param)
         self.reset()
         self.request_counter = next(REQUEST_COUNTER)
-        
+
         params_kwarg = kwargs.pop('params', {})
         if params_kwarg:
             if not kwargs['url'].endswith('?'):
@@ -863,6 +868,33 @@ class AioGrab(Grab):
         return super().setup_transport(transport_param, reset=reset)
 
     async def request(self, **kwargs):
+        retries = self.config['retries']
+        retry_delay = self.config['retry_delay']
+
+        if 'retries' in kwargs:
+            retries = kwargs.pop('retries')
+        if 'retry_delay' in kwargs:
+            retry_delay = kwargs.pop('retry_delay')
+
+        if retries is None:
+            retries = 0
+
+        for retry in range(retries + 1):
+            self.prepare_request(**kwargs)
+            kwargs = {}
+            config = self.config.copy()
+            try:
+                return await self.request_one()
+            except Exception:
+                if retry < retries:
+                    traceback.print_exc()
+                    print('request to {!r} failed, retry {} out of {} after waiting {} sec'.format(config['url'], retry, retries, retry_delay or 0))
+                    self.config = config
+                    await asyncio.sleep(retry_delay or 0)
+                    continue
+                raise
+
+    async def request_one(self):
         """
         Perform network request.
 
@@ -872,7 +904,6 @@ class AioGrab(Grab):
         Returns: ``Document`` objects.
         """
 
-        self.prepare_request(**kwargs)
         refresh_count = 0
 
         while True:
