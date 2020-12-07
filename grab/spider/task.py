@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from grab.spider.error import SpiderMisuseError
 from grab.base import copy_config
 from grab.util.warning import warn
+from grab.error import raise_feature_is_deprecated
 
 
 class BaseTask(object):
@@ -16,13 +17,21 @@ class Task(BaseTask):
     """
 
     def __init__(self, name=None, url=None, grab=None, grab_config=None,
-                 priority=None, priority_set_explicitly=True,
-                 network_try_count=0, task_try_count=1,
-                 disable_cache=False, refresh_cache=False,
-                 valid_status=None, use_proxylist=True,
-                 cache_timeout=None, delay=None,
-                 raw=False, callback=None,
+                 priority=None,
+                 priority_set_explicitly=True,
+                 network_try_count=0,
+                 task_try_count=1,
+                 valid_status=None,
+                 use_proxylist=True,
+                 delay=None,
+                 raw=False,
+                 callback=None,
                  fallback_name=None,
+                 # deprecated
+                 disable_cache=False,
+                 refresh_cache=False,
+                 cache_timeout=None,
+                 # kwargs
                  **kwargs):
         """
         Create `Task` object.
@@ -61,11 +70,6 @@ class Task(BaseTask):
                 there is `task_try_limit` option in `Spider` instance. Both
                 options `network_try_count` and `network_try_limit` guarantee
                 you that you'll not get infinite loop of restarting some task.
-            :param disable_cache: if `True` disable cache subsystem.
-                The document will be fetched from the Network and it will not
-                be saved to cache.
-            :param refresh_cache: if `True` the document will be fetched from
-                the Network and saved to cache.
             :param valid_status: extra status codes which counts as valid
             :param use_proxylist: it means to use proxylist which was
                 configured via `setup_proxylist` method of spider
@@ -89,6 +93,9 @@ class Task(BaseTask):
             later as attributes or with `get` method which allows to use
             default value if attribute does not exist.
         """
+
+        if disable_cache or refresh_cache or cache_timeout:
+            raise_feature_is_deprecated('Cache feature')
 
         if name == 'generator':
             # The name "generator" is restricted because
@@ -129,20 +136,12 @@ class Task(BaseTask):
             self.valid_status = valid_status
 
         self.process_delay_option(delay)
-        self.cache_timeout = cache_timeout
-        if cache_timeout is not None:
-            warn(
-                'Option `cache_timeout` is deprecated and'
-                ' is not supported anymore'
-            )
 
         self.fallback_name = fallback_name
         self.priority_set_explicitly = priority_set_explicitly
         self.priority = priority
         self.network_try_count = network_try_count
         self.task_try_count = task_try_count
-        self.disable_cache = disable_cache
-        self.refresh_cache = refresh_cache
         self.use_proxylist = use_proxylist
         self.raw = raw
         self.callback = callback
@@ -189,10 +188,6 @@ class Task(BaseTask):
             task.network_try_count = 0
         if 'task_try_count' not in kwargs:
             task.task_try_count = self.task_try_count + 1
-        if 'refresh_cache' not in kwargs:
-            task.refresh_cache = False
-        if 'disable_cache' not in kwargs:
-            task.disable_cache = False
 
         if kwargs.get('url') is not None and kwargs.get('grab') is not None:
             raise SpiderMisuseError('Options url and grab could not be '

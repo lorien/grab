@@ -4,7 +4,8 @@ from grab.error import GrabError
 
 __all__ = ('SpiderError', 'SpiderMisuseError', 'FatalError',
            'SpiderInternalError',
-           'NoTaskHandler', 'NoDataHandler')
+           'NoTaskHandler', 'NoDataHandler',
+           )
 
 
 class SpiderError(GrabError):

@@ -17,8 +17,6 @@ class TaskGeneratorService(BaseService):
             worker.process_pause_signal()
             queue_size = max(
                 self.spider.task_queue.size(),
-                (self.spider.cache_reader_service.input_queue.size()
-                 if self.spider.cache_reader_service else 0),
                 self.spider.parser_service.input_queue.qsize(),
             )
             if queue_size < self.task_queue_threshold:

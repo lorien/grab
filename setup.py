@@ -24,7 +24,6 @@ setup(
         'grab',
         'grab.script',
         'grab.spider',
-        'grab.spider.cache_backend',
         'grab.spider.queue_backend',
         'grab.spider.network_service',
         'grab.transport',

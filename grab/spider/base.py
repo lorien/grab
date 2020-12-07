@@ -1,6 +1,5 @@
 # FIXME: split to modules, make smaller
 # pylint: disable=too-many-lines
-# TODO: cache_service input task queue should be powered by task queue backend
 import logging
 import time
 from random import randint
@@ -13,7 +12,7 @@ import six
 from weblib import metric
 
 from grab.base import Grab
-from grab.error import GrabInvalidUrl
+from grab.error import GrabError, GrabInvalidUrl, raise_feature_is_deprecated
 from grab.spider.error import (
     SpiderError,
     SpiderMisuseError,
@@ -25,7 +24,6 @@ from grab.proxylist import ProxyList, BaseProxySource
 from grab.util.misc import camel_case_to_underscore
 from grab.stat import Stat
 from grab.spider.parser_service import ParserService
-from grab.spider.cache_service import CacheReaderService, CacheWriterService
 from grab.spider.task_generator_service import TaskGeneratorService
 from grab.spider.task_dispatcher_service import TaskDispatcherService
 from grab.spider.http_api_service import HttpApiService
@@ -124,7 +122,6 @@ class Spider(object):
             request_pause=NULL,
             priority_mode='random',
             meta=None,
-            only_cache=False,
             config=None,
             args=None,
             parser_requests_per_process=10000,
@@ -133,7 +130,9 @@ class Spider(object):
             network_service='threaded',
             grab_transport='pycurl',
             # Deprecated
-            transport=None):
+            transport=None,
+            only_cache=False,
+        ):
         """
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -191,7 +190,8 @@ class Spider(object):
                                     '"random" or "const"')
         else:
             self.priority_mode = priority_mode
-        self.only_cache = only_cache
+        if only_cache:
+            raise_feature_is_deprecated('Cache feature')
         self.work_allowed = True
         if request_pause is not NULL:
             warn('Option `request_pause` is deprecated and is not '
@@ -201,8 +201,6 @@ class Spider(object):
         self.proxy = None
         self.proxy_auto_change = False
         self.interrupted = False
-        self.cache_reader_service = None
-        self.cache_writer_service = None
         self.parser_pool_size = parser_pool_size
         self.parser_service = ParserService(
             spider=self,
@@ -230,33 +228,8 @@ class Spider(object):
             self.task_generator(), self,
         )
 
-    def setup_cache(self, backend='mongodb', database=None,
-                    **kwargs):
-        """
-        Setup cache.
-
-        :param backend: Backend name
-            Should be one of the following: 'mongo', 'mysql' or 'postgresql'.
-        :param database: Database name.
-        :param kwargs: Additional credentials for backend.
-
-        """
-        if database is None:
-            raise SpiderMisuseError('setup_cache method requires database '
-                                    'option')
-        if backend == 'mongo':
-            warn('Backend name "mongo" is deprecated. Use "mongodb" instead.')
-            backend = 'mongodb'
-        mod = __import__('grab.spider.cache_backend.%s' % backend,
-                         globals(), locals(), ['foo'])
-        backend = mod.CacheBackend(
-            database=database, spider=self, **kwargs
-        )
-        self.cache_reader_service = CacheReaderService(self, backend)
-        backend = mod.CacheBackend(
-            database=database, spider=self, **kwargs
-        )
-        self.cache_writer_service = CacheWriterService(self, backend)
+    def setup_cache(self, *args, **kwargs):
+        raise_feature_is_deprecated('Cache feature')
 
     def setup_queue(self, backend='memory', **kwargs):
         """
@@ -281,10 +254,7 @@ class Spider(object):
         """
 
         if queue is None:
-            if self.cache_reader_service:
-                queue = self.cache_reader_service.input_queue
-            else:
-                queue = self.task_queue
+            queue = self.task_queue
         if queue is None:
             raise SpiderMisuseError('You should configure task queue before '
                                     'adding tasks. Use `setup_queue` method.')
@@ -605,14 +575,8 @@ class Spider(object):
         # Update traffic statistics
         if res['grab'] and res['grab'].doc:
             doc = res['grab'].doc
-            if res.get('from_cache'):
-                self.stat.inc('spider:download-size-with-cache',
-                              doc.download_size)
-                self.stat.inc('spider:upload-size-with-cache',
-                              doc.upload_size)
-            else:
-                self.stat.inc('spider:download-size', doc.download_size)
-                self.stat.inc('spider:upload-size', doc.upload_size)
+            self.stat.inc('spider:download-size', doc.download_size)
+            self.stat.inc('spider:upload-size', doc.upload_size)
 
     def process_grab_proxy(self, task, grab):
         """Assign new proxy from proxylist to the task"""
@@ -632,24 +596,21 @@ class Spider(object):
     # pylint: enable=unused-argument
 
     def submit_task_to_transport(self, task, grab):
-        if self.only_cache:
-            self.stat.inc('spider:request-network-disabled-only-cache')
-        else:
-            grab_config_backup = grab.dump_config()
-            self.process_grab_proxy(task, grab)
-            self.stat.inc('spider:request-network')
-            self.stat.inc('spider:task-%s-network' % task.name)
-            try:
-                # pylint: disable=no-member
-                self.network_service.start_task_processing(
-                    task, grab, grab_config_backup)
-                # pylint: enable=no-member
-            except GrabInvalidUrl:
-                # TODO: log error
-                # TODO: show traceback
-                logger.debug('Task %s has invalid URL: %s',
-                             task.name, task.url)
-                self.stat.collect('invalid-url', task.url)
+        grab_config_backup = grab.dump_config()
+        self.process_grab_proxy(task, grab)
+        self.stat.inc('spider:request-network')
+        self.stat.inc('spider:task-%s-network' % task.name)
+        try:
+            # pylint: disable=no-member
+            self.network_service.start_task_processing(
+                task, grab, grab_config_backup)
+            # pylint: enable=no-member
+        except GrabInvalidUrl:
+            # TODO: log error
+            # TODO: show traceback
+            logger.debug('Task %s has invalid URL: %s',
+                         task.name, task.url)
+            self.stat.collect('invalid-url', task.url)
 
     def run(self):
         self._started = time.time()
@@ -667,10 +628,6 @@ class Spider(object):
             ]
             if self.http_api_service:
                 self.http_api_service.start()
-            if self.cache_reader_service:
-                services.insert(0, self.cache_reader_service)
-            if self.cache_writer_service:
-                services.insert(0, self.cache_writer_service)
             for srv in services:
                 srv.start()
             while self.work_allowed:
@@ -718,7 +675,7 @@ class Spider(object):
             logger.debug('Work done')
 
     def is_idle(self):
-        result = (
+        return (
             not self.task_generator_service.is_alive()
             and not self.task_queue.size()
             and not self.task_dispatcher.input_queue.qsize()
@@ -727,12 +684,6 @@ class Spider(object):
             and not self.network_service.get_active_threads_number()
             and not self.network_service.is_busy()
         )
-        if result and self.cache_reader_service:
-            result = result and (
-                not self.cache_reader_service.input_queue.size()
-                and not self.cache_writer_service.input_queue.qsize()
-            )
-        return result
 
     def log_failed_network_result(self, res):
         if res['ok']:
@@ -752,3 +703,23 @@ class Spider(object):
             raise SpiderError('Unknown response from '
                               'check_task_limits: %s'
                               % reason)
+
+    # ################
+    # Deprecated Things
+    # #################
+
+    @property
+    def cache_reader_service(self):
+        raise_feature_is_deprecated('Cache feature')
+
+    @cache_reader_service.setter
+    def cache_reader_service(self, val):
+        raise_feature_is_deprecated('Cache feature')
+
+    @property
+    def cache_writer_service(self):
+        raise_feature_is_deprecated('Cache feature')
+
+    @cache_writer_service.setter
+    def cache_writer_service(self, val):
+        raise_feature_is_deprecated('Cache feature')

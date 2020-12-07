@@ -85,7 +85,6 @@ matrix:
         - PYENV_VERSION="3.5.3"
 
 # Enable extra mongodb and redis services on linux
-# Mysql and postgres services are enabled on linux by default
 # That does not work on osx (see below custom instructions for osx)
 services:
   - mongodb
@@ -101,28 +100,10 @@ install:
       brew services start mongodb
       brew install redis
       brew services start redis
-      brew install mysql
-      brew services start mysql
-      brew unlink postgres
-      brew install postgres
-      export PG_DATA=$(brew --prefix)/var/postgres
-      rm -rf $PG_DATA
-      initdb $PG_DATA -E utf8
-      pg_ctl -w start -l postgres.log --pgdata ${PG_DATA}
-      createuser -s postgres
       brew upgrade pyenv
     fi
 
 before_script:
-  - mysql -u root -e 'create database grab_test'
-  - psql -U postgres -c 'create database grab_test'
-  # Override test settings with travis settings 
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      cp travis_linux_settings.py test_settings_local.py
-    else
-      cp travis_osx_settings.py test_settings_local.py
-    fi
   # Install custom pyton version on OSX
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then

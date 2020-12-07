@@ -121,12 +121,6 @@ def main():
     parser.add_option('--backend-redis', action='store_true',
                       default=False,
                       help='Run extra tests that depends on redis')
-    parser.add_option('--backend-mysql', action='store_true',
-                      default=False,
-                      help='Run extra tests that depends on mysql')
-    parser.add_option('--backend-postgresql', action='store_true',
-                      default=False,
-                      help='Run extra tests that depends on postgresql')
     parser.add_option('--mp-mode', action='store_true', default=False,
                       help='Enable multiprocess mode in spider tests')
     parser.add_option('--profile', action='store_true', default=False,
@@ -143,12 +137,6 @@ def main():
 
     if opts.backend_redis:
         GLOBAL['backends'].append('redis')
-
-    if opts.backend_mysql:
-        GLOBAL['backends'].append('mysql')
-
-    if opts.backend_postgresql:
-        GLOBAL['backends'].append('postgresql')
 
     test_list = []
 

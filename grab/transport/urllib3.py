@@ -447,7 +447,6 @@ class Urllib3Transport(BaseTransport):
         jar = CookieJar()
         # self._respose could be None
         # if this method is called from custom preapre response
-        # function called from spider cache backend
         if self._response and self._request:
             jar.extract_cookies(
                 # pylint: disable=protected-access
