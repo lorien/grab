@@ -18,15 +18,12 @@ matrix:
     - os: linux
       env: TOX_ENV=py27-recent-libcurl
     - os: linux
-      python: 3.4
+      python: 3.7
       env: TOX_ENV=qa
     - os: linux
       env: TOX_ENV=py27
     - os: linux
       env: TOX_ENV=py34
-    - os: linux
-      env: TOX_ENV=py35
-      python: 3.5
     - os: linux
       env: TOX_ENV=py36
       python: 3.6
@@ -43,11 +40,6 @@ matrix:
     - os: osx
       language: generic
       env:
-        - TOX_ENV=py35
-        - PYENV_VERSION="3.5.3"
-    - os: osx
-      language: generic
-      env:
         - TOX_ENV=py36
         - PYENV_VERSION="3.6.0"
 
@@ -57,16 +49,8 @@ matrix:
     - os: linux
       env: TOX_ENV=py34-urllib3
     - os: linux
-      env: TOX_ENV=py35-urllib3
-      python: 3.5
-    - os: linux
       env: TOX_ENV=py36-urllib3
       python: 3.6
-    - os: osx
-      language: generic
-      env:
-        - TOX_ENV=py35-urllib3
-        - PYENV_VERSION="3.5.3"
 
     # release
     - os: linux
@@ -77,12 +61,7 @@ matrix:
     - python: 2.7 # hack to exclude default no-env travis job
   allow_failures:
     - env: TOX_ENV=py27-urllib3
-    - env: TOX_ENV=py34-urllib3
-    - env: TOX_ENV=py35-urllib3
     - env: TOX_ENV=py36-urllib3
-    - env:
-        - TOX_ENV=py35-urllib3
-        - PYENV_VERSION="3.5.3"
 
 # Enable extra mongodb and redis services on linux
 # That does not work on osx (see below custom instructions for osx)

@@ -2,8 +2,6 @@
 # on different combinations of versions of pythons and pycurl lib
 # python versions:
 #   - 2.7
-#   - 3.4
-#   - 3.5
 #   - 3.6
 # pycurl versions:
 #   - recent, installed with pip from wheel package
@@ -65,14 +63,6 @@ environment:
     - PYTHON: "C:\\Python27-x64"
       LXML_BINARY: lxml-3.7.2-cp27-cp27m-win_amd64.whl
       PYCURL_BINARY: pycurl-7.19.5.3.win-amd64-py2.7.exe
-
-    - PYTHON: "C:\\Python34"
-      LXML_BINARY: lxml-3.7.2-cp34-cp34m-win32.whl
-      PYCURL_BINARY: pycurl-7.19.5.3.win32-py3.4.exe
-
-    - PYTHON: "C:\\Python34-x64"
-      LXML_BINARY: lxml-3.7.2-cp34-cp34m-win_amd64.whl
-      PYCURL_BINARY: pycurl-7.19.5.3.win-amd64-py3.4.exe
 
     - PYTHON: "C:\\Python35"
       LXML_BINARY: lxml-3.7.2-cp35-cp35m-win32.whl
