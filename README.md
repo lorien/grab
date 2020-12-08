@@ -1,8 +1,6 @@
 # Grab Framework Documentation
 
 ![pytest status](https://github.com/lorien/grab/workflows/test/badge.svg)
-[![travis tests](https://travis-ci.org/lorien/grab.png?branch=master)](https://travis-ci.org/lorien/grab?branch=master)
-[![appveyor tests](https://ci.appveyor.com/api/projects/status/uxj24vjin7gptdlg)](https://ci.appveyor.com/project/lorien/grab)
 [![coveralls](https://coveralls.io/repos/lorien/grab/badge.svg?branch=master)](https://coveralls.io/r/lorien/grab?branch=master)
 [![documentation](https://readthedocs.org/projects/grab/badge/?version=latest)](http://docs.grablib.org/en/latest/)
 
