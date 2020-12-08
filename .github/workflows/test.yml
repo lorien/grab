@@ -20,7 +20,7 @@ jobs:
 
     - name: Install build dependencies
       run: |
-        apt install libcurl4-openssl-dev libxml2-dev libxslt-dev
+        sudo apt-get install libcurl4-openssl-dev libxml2-dev libxslt-dev
 
     - name: Install dependencies
       run: |
