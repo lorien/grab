@@ -17,7 +17,7 @@ matrix:
   include:
     # recent libcurl
     - os: linux
-      env: TOX_ENV=py27-recent-libcurl
+      env: TOX_ENV=py38-recent-libcurl
       python: 3.8
 
     # qa
@@ -26,9 +26,6 @@ matrix:
       python: 3.8
 
     # linux (pycurl transport)
-    - os: linux
-      env: TOX_ENV=py27
-      python: 2.7
     - os: linux
       env: TOX_ENV=py36
       python: 3.6
@@ -43,9 +40,6 @@ matrix:
       python: 3.9
 
      # urllib3 transport
-    - os: linux
-      env: TOX_ENV=py27-urllib3
-      python: 2.7
     - os: linux
       env: TOX_ENV=py36-urllib3
       python: 3.6
@@ -64,25 +58,16 @@ matrix:
     - os: osx
       language: generic
       env:
-        - TOX_ENV=py27
-        - PYENV_VERSION="2.7.13"
-    - os: osx
-      language: generic
-      env:
         - TOX_ENV=py36
         - PYENV_VERSION="3.6.0"
 
     # release (install from pypi)
-    - os: linux
-      env: TOX_ENV=py2-grab-release
-      python: 2.7
     - os: linux
       env: TOX_ENV=py3-grab-release
       python: 3.8
   exclude:
     - python: 3.8 # hack to exclude default no-env travis job
   allow_failures:
-    - env: TOX_ENV=py27-urllib3
     - env: TOX_ENV=py36-urllib3
     - env: TOX_ENV=py37-urllib3
     - env: TOX_ENV=py38-urllib3
@@ -118,7 +103,7 @@ before_script:
       pyenv global "$PYENV_VERSION"
     fi
   - |
-    if [[ "$TOX_ENV" == "py27-recent-libcurl" ]]; then
+    if [[ "$TOX_ENV" == "py38-recent-libcurl" ]]; then
       mkdir $HOME/curl_files
       cd $HOME/curl_files
       pwd
@@ -141,7 +126,7 @@ before_script:
 script:
   # Inject path to recent libcurl library
   - |
-    if [[ "$TOX_ENV" == "py27-recent-libcurl" ]]; then
+    if [[ "$TOX_ENV" == "py38-recent-libcurl" ]]; then
       export LD_LIBRARY_PATH="$HOME/curl_lib/lib"
     fi
   - |

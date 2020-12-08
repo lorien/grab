@@ -1,7 +1,7 @@
 # This is the appveyor configuration to test Grab library
 # on different combinations of versions of pythons and pycurl lib
 # python versions:
-#   - 2.7
+#   - 3.5
 #   - 3.6
 # pycurl versions:
 #   - recent, installed with pip from wheel package
@@ -19,33 +19,6 @@ environment:
 
   matrix:
     # Recent version of pycurl (these tests may fail randomly)
-    #
-    - PYTHON: "C:\\Python27"
-      LXML_BINARY: lxml-3.7.2-cp27-cp27m-win32.whl
-      PYCURL_BINARY: recent
-
-    - PYTHON: "C:\\Python27-x64"
-      LXML_BINARY: lxml-3.7.2-cp27-cp27m-win_amd64.whl
-      PYCURL_BINARY: recent
-
-    ## No wheel available for py3.4
-    #- PYTHON: "C:\\Python34"
-    #  LXML_BINARY: lxml-3.7.2-cp34-cp34m-win32.whl
-    #  PYCURL_BINARY: recent
-
-    ## No wheel available for py3.4
-    #- PYTHON: "C:\\Python34-x64"
-    #  LXML_BINARY: lxml-3.7.2-cp34-cp34m-win_amd64.whl
-    #  PYCURL_BINARY: recent
-
-    - PYTHON: "C:\\Python35"
-      LXML_BINARY: lxml-3.7.2-cp35-cp35m-win32.whl
-      PYCURL_BINARY: recent
-
-    - PYTHON: "C:\\Python35-x64"
-      LXML_BINARY: lxml-3.7.2-cp35-cp35m-win_amd64.whl
-      PYCURL_BINARY: recent
-
     - PYTHON: "C:\\Python36"
       LXML_BINARY: lxml-3.7.2-cp36-cp36m-win32.whl
       PYCURL_BINARY: recent
@@ -55,15 +28,6 @@ environment:
       PYCURL_BINARY: recent
 
     # 7.19.5.3 pycurl (no DNS bug)
-    #
-    - PYTHON: "C:\\Python27"
-      LXML_BINARY: lxml-3.7.2-cp27-cp27m-win32.whl
-      PYCURL_BINARY: pycurl-7.19.5.3.win32-py2.7.exe
-
-    - PYTHON: "C:\\Python27-x64"
-      LXML_BINARY: lxml-3.7.2-cp27-cp27m-win_amd64.whl
-      PYCURL_BINARY: pycurl-7.19.5.3.win-amd64-py2.7.exe
-
     - PYTHON: "C:\\Python35"
       LXML_BINARY: lxml-3.7.2-cp35-cp35m-win32.whl
       PYCURL_BINARY: pycurl-7.19.5.3.win32-py3.5.exe
