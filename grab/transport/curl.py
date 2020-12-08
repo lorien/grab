@@ -12,10 +12,9 @@ try:
     from urlparse import urlsplit
 except ImportError:
     from urllib.parse import urlsplit
-from six.moves.http_cookiejar import CookieJar
+from http.cookiejar import CookieJar
 from contextlib import contextmanager
 
-import six
 from weblib.http import (normalize_http_values,
                          normalize_post_data, normalize_url)
 from weblib.encoding import make_str, make_unicode
@@ -170,7 +169,7 @@ class CurlTransport(BaseTransport):
         5: CURLINFO_unrecognized_type
         """
         if _type == pycurl.INFOTYPE_HEADER_OUT:
-            if isinstance(text, six.text_type):
+            if isinstance(text, str):
                 text = text.encode('utf-8')
             self.request_head += text
 
@@ -180,7 +179,7 @@ class CurlTransport(BaseTransport):
             # WTF??? Probably that codes would fails
             # or does unexpected things if you use
             # pycurl<7.19.5.2
-            if isinstance(text, six.text_type):
+            if isinstance(text, str):
                 text = text.encode('utf-8')
             self.request_body += text
 
@@ -213,11 +212,7 @@ class CurlTransport(BaseTransport):
             request_url = normalize_url(grab.config['url'])
         except Exception as ex:
             raise error.GrabInvalidUrl(
-                u'%s: %s' % (six.text_type(ex), grab.config['url']))
-
-        # py3 hack
-        if not six.PY3:
-            request_url = make_str(request_url)
+                u'%s: %s' % (str(ex), grab.config['url']))
 
         self.curl.setopt(pycurl.URL, request_url)
 
@@ -291,7 +286,7 @@ class CurlTransport(BaseTransport):
         if grab.request_method == 'POST':
             self.curl.setopt(pycurl.POST, 1)
             if grab.config['multipart_post']:
-                if isinstance(grab.config['multipart_post'], six.string_types):
+                if isinstance(grab.config['multipart_post'], str):
                     raise error.GrabMisuseError(
                         'multipart_post option could not be a string')
                 post_items = normalize_http_values(
@@ -299,29 +294,17 @@ class CurlTransport(BaseTransport):
                     charset=grab.config['charset'],
                     ignore_classes=(UploadFile, UploadContent),
                 )
-                # py3 hack
-                #if six.PY3:
-                #    post_items = decode_pairs(post_items,
-                #                              grab.config['charset'])
                 self.curl.setopt(pycurl.HTTPPOST,
                                  process_upload_items(post_items))
             elif grab.config['post']:
                 post_data = normalize_post_data(grab.config['post'],
                                                 grab.config['charset'])
-                # py3 hack
-                # if six.PY3:
-                #    post_data = smart_unicode(post_data,
-                #                              grab.config['charset'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
             else:
                 self.curl.setopt(pycurl.POSTFIELDS, '')
         elif grab.request_method == 'PUT':
             data = grab.config['post']
-            if isinstance(data, six.text_type):
-                # py3 hack
-                # if six.PY3:
-                #    data = data.encode('utf-8')
-                # else:
+            if isinstance(data, str):
                 raise error.GrabMisuseError(
                     'Value of post option could be only '
                     'byte string if PUT method is used')
@@ -331,7 +314,7 @@ class CurlTransport(BaseTransport):
             self.curl.setopt(pycurl.INFILESIZE, len(data))
         elif grab.request_method == 'PATCH':
             data = grab.config['post']
-            if isinstance(data, six.text_type):
+            if isinstance(data, str):
                 raise error.GrabMisuseError(
                     'Value of post option could be only byte '
                     'string if PATCH method is used')
@@ -350,7 +333,7 @@ class CurlTransport(BaseTransport):
         elif grab.request_method == 'OPTIONS':
             data = grab.config['post']
             if data is not None:
-                if isinstance(data, six.text_type):
+                if isinstance(data, str):
                     raise error.GrabMisuseError(
                         'Value of post option could be only byte '
                         'string if PATCH method is used')
@@ -485,8 +468,7 @@ class CurlTransport(BaseTransport):
             if new_ex:
                 raise new_ex # pylint: disable=raising-bad-type
         except Exception as ex: # pylint: disable=broad-except
-            six.reraise(error.GrabInternalError, error.GrabInternalError(ex),
-                        sys.exc_info()[2])
+            raise error.GrabInternalError(ex)
         finally:
             self.curl.grab_callback_interrupted = False
 

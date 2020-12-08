@@ -13,7 +13,7 @@ develop:
 	.env/bin/python setup.py develop
 
 test:
-	tox -e py34
+	tox -e py38
 
 coverage_nobackend:
 	coverage erase

@@ -1,5 +1,4 @@
 import logging
-import six
 
 from grab.spider.base import Spider
 from grab.spider.error import SpiderInternalError
@@ -23,7 +22,7 @@ def build_spider_registry(config):
         try:
             mod = __import__(path, None, None, ['foo'])
         except ImportError as ex:
-            if path not in six.text_type(ex):
+            if path not in str(ex):
                 logger.error('', exc_info=ex)
         else:
             for key in dir(mod):

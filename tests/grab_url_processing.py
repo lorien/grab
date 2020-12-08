@@ -1,5 +1,5 @@
 # coding: utf-8
-from six.moves.urllib.parse import quote
+from urllib.parse import quote
 
 from tests.util import (
     build_grab, BaseGrabTestCase, only_grab_transport

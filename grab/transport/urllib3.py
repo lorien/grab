@@ -8,9 +8,8 @@ import time
 from contextlib import contextmanager
 import ssl
 
-from six.moves.urllib.parse import urlsplit
-from six.moves.http_cookiejar import CookieJar
-import six
+from urllib.parse import urlsplit
+from http.cookiejar import CookieJar
 from weblib.http import (normalize_url, normalize_post_data,
                          normalize_http_values)
 from weblib.encoding import make_str, make_unicode, decode_pairs
@@ -123,7 +122,7 @@ class Urllib3Transport(BaseTransport):
         except Exception as ex:
             raise error.GrabInvalidUrl(
                 u'%s: %s' % (
-                    six.text_type(ex),
+                    str(ex),
                     make_unicode(grab.config['url'], errors='ignore')
                 )
             )
@@ -156,9 +155,9 @@ class Urllib3Transport(BaseTransport):
 
         if grab.config['multipart_post'] is not None:
             post_data = grab.config['multipart_post']
-            if isinstance(post_data, six.binary_type):
+            if isinstance(post_data, bytes):
                 pass
-            elif isinstance(post_data, six.text_type):
+            elif isinstance(post_data, str):
                 raise GrabMisuseError('Option multipart_post data'
                                       ' does not accept unicode.')
             else:
@@ -177,10 +176,6 @@ class Urllib3Transport(BaseTransport):
         elif grab.config['post'] is not None:
             post_data = normalize_post_data(grab.config['post'],
                                             grab.config['charset'])
-            # py3 hack
-            # if six.PY3:
-            #    post_data = smart_unicode(post_data,
-            #                              grab.config['charset'])
             extra_headers['Content-Length'] = len(post_data)
             req.data = post_data
 
@@ -289,12 +284,8 @@ class Urllib3Transport(BaseTransport):
                               read=req.timeout)
             #req_headers = dict((make_unicode(x), make_unicode(y))
             #                   for (x, y) in req.headers.items())
-            if six.PY3:
-                req_url = make_unicode(req.url)
-                req_method = make_unicode(req.method)
-            else:
-                req_url = make_str(req.url)
-                req_method = req.method
+            req_url = make_unicode(req.url)
+            req_method = make_unicode(req.method)
             req.op_started = time.time()
             try:
                 res = pool.urlopen(req_method,
@@ -334,8 +325,7 @@ class Urllib3Transport(BaseTransport):
         #raise error.GrabCouldNotResolveHostError(ex.args[0],
         #                                         ex.args[1])
         #raise error.GrabNetworkError(ex.args[0], ex.args[1])
-        #six.reraise(error.GrabInternalError, error.GrabInternalError(ex),
-        #            sys.exc_info()[2])
+        #raise error.GrabInternalError(ex)
 
     def prepare_response(self, grab):
         # Information about urllib3
@@ -349,12 +339,8 @@ class Urllib3Transport(BaseTransport):
 
             head = ''
             for key, val in self._response.getheaders().items():
-                if six.PY2:
-                    key = key.decode('utf-8', errors='ignore')
-                    val = val.decode('utf-8', errors='ignore')
-                if six.PY3:
-                    key = key.encode('latin').decode('utf-8', errors='ignore')
-                    val = val.encode('latin').decode('utf-8', errors='ignore')
+                key = key.encode('latin').decode('utf-8', errors='ignore')
+                val = val.encode('latin').decode('utf-8', errors='ignore')
                 head += '%s: %s\r\n' % (key, val)
             head += '\r\n'
             response.head = make_str(head, encoding='utf-8')
@@ -421,12 +407,8 @@ class Urllib3Transport(BaseTransport):
             import email.message
             hdr = email.message.Message()
             for key, val in self._response.getheaders().items():
-                if six.PY2:
-                    key = key.decode('utf-8', errors='ignore')
-                    val = val.decode('utf-8', errors='ignore')
-                if six.PY3:
-                    key = key.encode('latin').decode('utf-8', errors='ignore')
-                    val = val.encode('latin').decode('utf-8', errors='ignore')
+                key = key.encode('latin').decode('utf-8', errors='ignore')
+                val = val.encode('latin').decode('utf-8', errors='ignore')
                 #if key == 'Location':
                 #    import pdb; pdb.set_trace()
                 hdr[key] = val

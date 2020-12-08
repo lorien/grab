@@ -1,6 +1,4 @@
 # coding: utf-8
-import six
-
 from grab import DataNotFound, GrabMisuseError
 
 from tests.util import build_grab
@@ -54,8 +52,7 @@ class TextExtensionTest(BaseGrabTestCase):
             self.grab.doc.text_search(u'фыва', byte=True)
         anchor = 'фыва'
         # py3 hack
-        if six.PY3:
-            anchor = anchor.encode('utf-8')
+        anchor = anchor.encode('utf-8')
         self.assertRaises(GrabMisuseError, self.grab.doc.text_search, anchor)
 
     def test_assert_substring(self):

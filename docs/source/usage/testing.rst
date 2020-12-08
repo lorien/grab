@@ -51,11 +51,11 @@ and python2.7
 
 You can specify a specific environment with `-e` option::
 
-    tox -e py34
+    tox -e py38
 
 To run all tests except backend tests, use `-nobackend` suffix::
 
-    tox -e py34-nobackend,py27-nobackend
+    tox -e py38-nobackend
 
 
 .. _usage_testing_database_configuration:

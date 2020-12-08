@@ -7,8 +7,7 @@ from copy import deepcopy
 from traceback import format_exception, format_stack
 from datetime import datetime
 
-from six.moves.queue import Queue, Empty
-import six
+from queue import Queue, Empty
 from weblib import metric
 
 from grab.base import Grab
@@ -72,8 +71,7 @@ class SpiderMetaClass(type):
         return super(SpiderMetaClass, cls).__new__(cls, name, bases, namespace)
 
 
-@six.add_metaclass(SpiderMetaClass)
-class Spider(object):
+class Spider(object, metaclass=SpiderMetaClass):
     """
     Asynchronous scraping framework.
     """
@@ -314,7 +312,7 @@ class Spider(object):
         self.proxylist = ProxyList()
         if isinstance(source, BaseProxySource):
             self.proxylist.set_source(source)
-        elif isinstance(source, six.string_types):
+        elif isinstance(source, str):
             if source_type == 'text_file':
                 self.proxylist.load_file(source, proxy_type=proxy_type)
             elif source_type == 'url':
@@ -538,7 +536,7 @@ class Spider(object):
         # Looks strange but I really have some problems with
         # serializing exception into string
         try:
-            ex_str = six.text_type(ex)
+            ex_str = str(ex)
         except TypeError:
             try:
                 ex_str = ex.decode('utf-8', 'ignore')

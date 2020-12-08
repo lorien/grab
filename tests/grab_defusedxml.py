@@ -5,7 +5,7 @@ See details here: https://github.com/tiran/defusedxml/blob/master/README.md
 import os
 
 from lxml.etree import parse
-from six import BytesIO
+from io import BytesIO
 from defusedxml import EntitiesForbidden
 
 from tests.util import temp_dir, build_grab, exclude_grab_transport

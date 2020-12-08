@@ -1,6 +1,6 @@
 import time
 
-from six.moves.queue import Empty
+from queue import Empty
 
 from grab.error import (
     GrabNetworkError, GrabTooManyRedirectsError, GrabInvalidUrl

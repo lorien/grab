@@ -8,8 +8,8 @@ Some code got from
 """
 import json
 
-from six.moves.http_cookiejar import CookieJar, Cookie
-from six.moves.urllib.parse import urlparse, urlunparse
+from http.cookiejar import CookieJar, Cookie
+from urllib.parse import urlparse, urlunparse
 
 from grab.error import GrabMisuseError
 

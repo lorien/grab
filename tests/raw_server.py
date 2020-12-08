@@ -1,5 +1,5 @@
 from unittest import TestCase
-from six.moves.urllib.request import urlopen
+from urllib.request import urlopen
 
 from .util import start_raw_server, stop_raw_server
 

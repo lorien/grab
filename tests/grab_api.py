@@ -1,8 +1,6 @@
 # coding: utf-8
 from copy import deepcopy
 
-import six
-
 from tests.util import build_grab, temp_file
 from tests.util import BaseGrabTestCase
 from tests.util import reset_request_counter
@@ -93,7 +91,7 @@ class GrabApiTestCase(BaseGrabTestCase):
 
         # Make 10 requests in concurrent threads
         threads = []
-        for _ in six.moves.range(10):
+        for _ in range(10):
             thread = threading.Thread(target=func)
             threads.append(thread)
             thread.start()

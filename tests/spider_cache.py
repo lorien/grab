@@ -3,7 +3,6 @@ import itertools
 import time
 import logging
 
-import six
 import mock
 
 from grab.error import GrabFeatureIsDeprecated

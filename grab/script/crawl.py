@@ -3,7 +3,6 @@ import os
 import json
 from argparse import ArgumentParser
 
-import six
 from weblib.files import clear_directory
 from weblib.encoding import make_str
 
@@ -63,7 +62,7 @@ def save_list(lst, path):
     with open(path, 'wb') as out:
         lines = []
         for item in lst:
-            if isinstance(item, (six.text_type, six.binary_type)):
+            if isinstance(item, (str, bytes)):
                 lines.append(make_str(item))
             else:
                 lines.append(make_str(json.dumps(item)))

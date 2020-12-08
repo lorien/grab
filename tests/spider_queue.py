@@ -1,5 +1,4 @@
 from unittest import TestCase
-import six
 import time
 
 from tests.util import BaseGrabTestCase, build_spider
@@ -35,7 +34,7 @@ class SpiderQueueMixin(object):
         bot = build_spider(self.SimpleSpider)
         self.setup_queue(bot)
         bot.task_queue.clear()
-        for _ in six.moves.range(5):
+        for _ in range(5):
             bot.add_task(Task('page', url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
         bot.run()
@@ -50,7 +49,7 @@ class SpiderQueueMixin(object):
         self.setup_queue(bot)
         bot.task_queue.clear()
 
-        for _ in six.moves.range(5):
+        for _ in range(5):
             bot.add_task(Task('page', url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
         bot.task_queue.clear()
@@ -88,7 +87,7 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
         self.setup_queue(bot)
         bot.task_queue.clear()
 
-        for delay in six.moves.range(5):
+        for delay in range(5):
             bot.add_task(Task('page', url=self.server.get_url(),
                               delay=delay + 1))
 

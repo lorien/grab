@@ -3,7 +3,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-from six.moves.queue import Queue
+from queue import Queue
 
 from tests.util import BaseGrabTestCase, exclude_grab_transport
 from tests.util import build_grab

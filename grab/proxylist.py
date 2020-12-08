@@ -3,10 +3,8 @@ import itertools
 import logging
 from random import randint
 from collections import namedtuple
-from six.moves.urllib.request import urlopen
-from six.moves.urllib.error import URLError
-
-import six
+from urllib.request import urlopen
+from urllib.error import URLError
 
 from grab.error import GrabError
 
@@ -53,7 +51,7 @@ def parse_proxy_line(line):
 
 def parse_raw_list_data(data, proxy_type='http', proxy_userpwd=None):
     """Iterate over proxy servers found in the raw data"""
-    if not isinstance(data, six.text_type):
+    if not isinstance(data, str):
         data = data.decode('utf-8')
     for orig_line in data.splitlines():
         line = orig_line.strip().replace(' ', '')

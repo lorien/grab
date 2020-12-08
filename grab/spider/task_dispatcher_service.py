@@ -1,4 +1,4 @@
-from six.moves.queue import Empty, Queue
+from queue import Empty, Queue
 from weblib.error import ResponseNotValid
 
 from grab.spider.base_service import BaseService

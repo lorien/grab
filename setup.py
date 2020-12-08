@@ -37,7 +37,6 @@ setup(
     # Dependencies
     install_requires=[
         'weblib>=0.1.28',
-        'six',
         'user_agent',
         'selection',
         'lxml;platform_system!="Windows"',
@@ -56,7 +55,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: Implementation :: CPython',
         'License :: OSI Approved :: MIT License',
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',

@@ -3,9 +3,6 @@ jobs=4
 extension-pkg-whitelist=pycurl,lxml
 ignore=invalid_import.py
 
-[TYPECHEK]
-#ignored-modules=six.moves.urllib, six.moves.http_cookiejar, six.moves.queue, six.moves.socketserver, six.moves.SimpleHTTPServer
-
 [MESSAGES CONTROL]
 disable=R,I,fixme,missing-docstring
 

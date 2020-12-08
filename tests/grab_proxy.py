@@ -1,5 +1,4 @@
 # coding: utf-8
-import six
 from test_server import TestServer
 
 from grab.proxylist import BaseProxySource
@@ -70,7 +69,7 @@ class TestProxy(BaseGrabTestCase):
             grab.proxylist.load_file(tmp_file)
             self.assertEqual(grab.config['proxy_auto_change'], True)
             servers = set()
-            for _ in six.moves.range(10):
+            for _ in range(10):
                 grab.go('http://yandex.ru')
                 servers.add(grab.config['proxy'])
 
@@ -85,7 +84,7 @@ class TestProxy(BaseGrabTestCase):
             self.assertEqual(grab.config['proxy_auto_change'], False)
             # TODO: probably call proxy change manually
             servers = set()
-            for _ in six.moves.range(10):
+            for _ in range(10):
                 grab.go('http://yandex.ru')
                 servers.add(grab.config['proxy'])
             self.assertEqual(len(servers), 1)
@@ -108,7 +107,7 @@ class TestProxy(BaseGrabTestCase):
 
             grab = build_grab()
             with open(tmp_file, 'w') as out:
-                for num in six.moves.range(10):
+                for num in range(10):
                     out.write('server-%d:777\n' % num)
             grab.proxylist.load_file(tmp_file)
             grab.setup(proxy_auto_change=False)

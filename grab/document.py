@@ -22,10 +22,9 @@ from datetime import datetime
 import time
 import threading
 import logging
-from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
+from urllib.parse import urlsplit, parse_qs, urljoin
 
-import six
-from six import BytesIO, StringIO
+from io import BytesIO, StringIO
 from lxml.html import HTMLParser
 from lxml.etree import XMLParser, ParserError
 from lxml.html import CheckboxValues, MultipleSelectOptions
@@ -180,13 +179,10 @@ class Document(object):
                 response = response.decode('utf-8', 'ignore')
             else:
                 response = u''
-            if six.PY2:
-                # email_from_string does not work with unicode input
-                response = response.encode('utf-8')
             self.headers = email.message_from_string(response)
 
         if charset is None:
-            if isinstance(self.body, six.text_type):
+            if isinstance(self.body, str):
                 self.charset = 'utf-8'
             else:
                 self.detect_charset()
@@ -248,7 +244,6 @@ class Document(object):
         if charset:
             charset = charset.lower()
             if not isinstance(charset, str):
-                # Convert to unicode (py2.x) or string (py3.x)
                 charset = charset.decode('utf-8')
             # Check that python knows such charset
             try:
@@ -324,7 +319,7 @@ class Document(object):
         returns save_to + path
         """
 
-        if isinstance(location, six.text_type):
+        if isinstance(location, str):
             location = location.encode('utf-8')
         rel_path = hashed_path(location, ext=ext)
         path = os.path.join(basedir, rel_path)
@@ -344,10 +339,7 @@ class Document(object):
         Return response body deserialized into JSON object.
         """
 
-        if six.PY3:
-            return json.loads(self.body.decode(self.charset))
-        else:
-            return json.loads(self.body)
+        return json.loads(self.body.decode(self.charset))
 
     def url_details(self):
         """
@@ -416,17 +408,15 @@ class Document(object):
         If substring is found return True else False.
         """
 
-        if isinstance(anchor, six.text_type):
+        if isinstance(anchor, str):
             if byte:
                 raise GrabMisuseError('The anchor should be bytes string in '
                                       'byte mode')
             else:
                 return anchor in self.unicode_body()
 
-        if not isinstance(anchor, six.text_type):
+        if not isinstance(anchor, str):
             if byte:
-                # if six.PY3:
-                    # return anchor in self.body_as_bytes()
                 return anchor in self.body
             else:
                 raise GrabMisuseError('The anchor should be byte string in '
@@ -493,14 +483,10 @@ class Document(object):
         regexp = normalize_regexp(regexp, flags)
         match = None
         if byte:
-            if not isinstance(regexp.pattern, six.text_type) or not six.PY3:
-                # if six.PY3:
-                    # body = self.body_as_bytes()
-                # else:
-                    # body = self.body
+            if not isinstance(regexp.pattern, str):
                 match = regexp.search(self.body)
         else:
-            if isinstance(regexp.pattern, six.text_type) or not six.PY3:
+            if isinstance(regexp.pattern, str):
                 ubody = self.unicode_body()
                 match = regexp.search(ubody)
         if match:
@@ -584,7 +570,7 @@ class Document(object):
             return self._bytes_body
 
     def _write_body(self, body):
-        if isinstance(body, six.text_type):
+        if isinstance(body, str):
             raise GrabMisuseError('Document.body could be only byte string.')
         elif self.body_path:
             with open(self.body_path, 'wb') as out:
@@ -635,11 +621,7 @@ class Document(object):
                 body = body.lower()
             if self._grab_config['strip_null_bytes']:
                 body = body.replace(NULL_BYTE, '')
-            # py3 hack
-            if six.PY3:
-                body = RE_UNICODE_XML_DECLARATION.sub('', body)
-            else:
-                body = RE_XML_DECLARATION.sub('', body)
+            body = RE_UNICODE_XML_DECLARATION.sub('', body)
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser

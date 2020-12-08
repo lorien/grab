@@ -1,6 +1,4 @@
 # coding: utf-8
-import six
-
 from tests.util import BaseGrabTestCase, only_grab_transport
 
 
@@ -20,8 +18,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         from urllib3 import PoolManager
         from urllib3.exceptions import NewConnectionError
         pool = PoolManager()
-        exc_cls = UnicodeError if six.PY3 else NewConnectionError
         self.assertRaises(
-            exc_cls, pool.request, 'GET', invalid_url,
+            UnicodeError, pool.request, 'GET', invalid_url,
             retries=False
         )

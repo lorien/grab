@@ -16,8 +16,7 @@ import email
 from datetime import datetime
 import weakref
 
-from six.moves.urllib.parse import urljoin
-import six
+from urllib.parse import urljoin
 from weblib.html import find_base_url
 from weblib.http import normalize_http_values, make_str
 
@@ -258,7 +257,7 @@ class Grab(DeprecatedThings):
                 ' new transport')
         if transport_param is None:
             transport_param = DEFAULT_TRANSPORT
-        if isinstance(transport_param, six.string_types):
+        if isinstance(transport_param, str):
             if transport_param in TRANSPORT_ALIAS:
                 transport_param = TRANSPORT_ALIAS[transport_param]
             if '.' not in transport_param:
@@ -553,7 +552,7 @@ class Grab(DeprecatedThings):
             if isinstance(post, dict):
                 post = list(post.items())
             if post:
-                if isinstance(post, six.string_types):
+                if isinstance(post, str):
                     post = make_str(post[:self.config['debug_post_limit']],
                                     errors='ignore') + b'...'
                 else:
@@ -652,7 +651,7 @@ class Grab(DeprecatedThings):
         """
 
         self.reset()
-        if isinstance(content, six.text_type):
+        if isinstance(content, str):
             raise error.GrabMisuseError('Method `setup_document` accepts only '
                                         'byte string in `content` argument.')
 

@@ -4,7 +4,6 @@ from weblib.text import find_number
 from weblib.const import NULL
 from weblib.error import DataNotFound
 from weblib.encoding import make_unicode
-import six
 
 from grab.util.warning import warn, deprecated
 from grab.error import GrabMisuseError
@@ -83,7 +82,7 @@ class DeprecatedThings(object):
         if make_absolute:
             self.tree.make_links_absolute(self.doc.url)
 
-        if isinstance(href_pattern, six.text_type):
+        if isinstance(href_pattern, str):
             raise GrabMisuseError('Method `find_link` accepts only '
                                   'byte-string argument')
         href_pattern = make_unicode(href_pattern)

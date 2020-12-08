@@ -1,7 +1,6 @@
 # coding: utf-8
 import re
 from weblib.error import DataNotFound
-import six
 
 from tests.util import build_grab
 from tests.util import BaseGrabTestCase
@@ -60,8 +59,7 @@ class ExtensionRexTestCase(BaseGrabTestCase):
         # # Search for non-unicode rex in unicode body should fail
         pattern = '(фыва)'
         # py3 hack
-        if six.PY3:
-            pattern = pattern.encode('utf-8')
+        pattern = pattern.encode('utf-8')
         rex = re.compile(pattern)
         self.assertRaises(DataNotFound, lambda: self.grab.doc.rex_search(rex))
 

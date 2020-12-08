@@ -1,5 +1,4 @@
 import time
-import six
 
 from grab.spider.base_service import BaseService
 
@@ -21,7 +20,7 @@ class TaskGeneratorService(BaseService):
             )
             if queue_size < self.task_queue_threshold:
                 try:
-                    for _ in six.moves.range(
+                    for _ in range(
                             self.task_queue_threshold - queue_size):
                         if worker.pause_event.is_set():
                             return

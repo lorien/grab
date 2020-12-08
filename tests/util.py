@@ -147,7 +147,7 @@ def reset_request_counter():
 
 
 def start_raw_server():
-    from six.moves.socketserver import TCPServer, StreamRequestHandler
+    from socketserver import TCPServer, StreamRequestHandler
     from threading import Thread
 
     class RawTCPServer(TCPServer):

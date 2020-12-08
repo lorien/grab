@@ -2,7 +2,7 @@ from threading import Thread
 import socket
 import time
 
-from six.moves.urllib.request import urlopen
+from urllib.request import urlopen
 
 from grab.spider import Spider, Task
 from tests.util import BaseGrabTestCase, build_spider

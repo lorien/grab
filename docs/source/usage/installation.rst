@@ -114,7 +114,7 @@ Run the command:
 You can also install Grab from FreeBSD ports (thanks to Ruslan Makhmatkhanov):
 
 * To install the port: cd /usr/ports/devel/py-grab/ && make install clean
-* To add the package: pkg_add -r py27-grab
+* To add the package: pkg_add -r py37-grab
 
 
 .. _installation_macos:
@@ -148,7 +148,6 @@ install Grab with pip. Here is list of Grab dependencies::
     pycurl
     selection
     weblib
-    six
     user_agent
 
 
@@ -164,4 +163,4 @@ install dependencies manually with the command:
 
 .. code:: shell
 
-    pip install -U lxml pycurl selection weblib six user_agent
+    pip install -U lxml pycurl selection weblib user_agent

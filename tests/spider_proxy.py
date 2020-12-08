@@ -1,5 +1,4 @@
 from test_server import TestServer
-import six
 
 from tests.util import (
     BaseGrabTestCase, TEST_SERVER_PORT,
@@ -69,7 +68,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             bot = build_spider(SimpleSpider, thread_number=1)
             bot.load_proxylist(proxy_file, 'text_file')
             bot.setup_queue()
-            for _ in six.moves.range(10):
+            for _ in range(10):
                 bot.add_task(Task('baz', 'http://yandex.ru'))
             bot.run()
 
@@ -91,7 +90,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             bot = build_spider(SimpleSpider, thread_number=1)
             bot.load_proxylist(proxy_file, 'text_file', auto_change=False)
             bot.setup_queue()
-            for _ in six.moves.range(1):
+            for _ in range(1):
                 bot.add_task(Task('baz', 'http://yandex.ru'))
             bot.run()
 
@@ -115,7 +114,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             bot.load_proxylist(proxy_file, 'text_file',
                                auto_change=False, auto_init=False)
             bot.setup_queue()
-            for _ in six.moves.range(10):
+            for _ in range(10):
                 bot.add_task(Task('baz', self.server.get_url()))
             bot.run()
 
