@@ -3,6 +3,9 @@ import os
 from setuptools import setup
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
+with open('README.md') as inp:
+    README_CONTENT = inp.read()
+
 
 setup(
     # Meta data
@@ -14,7 +17,8 @@ setup(
     maintainer_email='lorien@lorien.name',
     url='http://grablib.org',
     description='Web Scraping Framework',
-    long_description=open(os.path.join(ROOT, 'README.rst')).read(),
+    long_description=README_CONTENT,
+    long_description_content_type='text/markdown',
     download_url='https://pypi.python.org/pypi/grab',
     keywords='pycurl multicurl curl network parsing grabbing scraping'
              ' lxml xpath data mining',
@@ -24,7 +28,6 @@ setup(
         'grab',
         'grab.script',
         'grab.spider',
-        'grab.spider.cache_backend',
         'grab.spider.queue_backend',
         'grab.spider.network_service',
         'grab.transport',
@@ -47,11 +50,10 @@ setup(
     # Topics
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: Implementation :: CPython',
         'License :: OSI Approved :: MIT License',
         'Development Status :: 5 - Production/Stable',

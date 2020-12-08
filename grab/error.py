@@ -14,6 +14,7 @@ Exception
     |-> GrabTooManyRedirectsError
     |-> GrabInvalidUrl
     |-> GrabInternalError
+    |-> GrabFeatureIsDeprecated
 
 Exception
 | -> weblib.error.WeblibError
@@ -103,3 +104,18 @@ class GrabInvalidUrl(GrabError):
 
 class GrabInternalError(OriginalExceptionError, GrabError):
     pass
+
+
+class GrabFeatureIsDeprecated(GrabError):
+    """
+    Raised when user tries to use feature that is deprecated
+    and has been droppped
+    """
+
+
+def raise_feature_is_deprecated(feature_name):
+    raise GrabFeatureIsDeprecated(
+        '%s is not supported anymore. Update your spiders'
+        ' or use old Grab version'
+        % feature_name
+    )

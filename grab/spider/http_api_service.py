@@ -36,10 +36,6 @@ class ApiHandler(SimpleHTTPRequestHandler):
         self.response(404)
 
     def api_info(self):
-        #if result and self.cache_reader_service:
-        #    result = result and (
-        #        not self.cache_reader_service.input_queue.qsize()
-        #        and not self.cache_writer_service.input_queue.qsize()
         info = {
             'counters': self.spider.stat.counters,
             'collections': dict((x, len(y)) for (x, y)
@@ -55,14 +51,6 @@ class ApiHandler(SimpleHTTPRequestHandler):
             ),
             'network_service_active_threads': (
                 self.spider.network_service.get_active_threads_number()
-            ),
-            'cache_reader_input_queue': (
-                self.spider.cache_reader_service.input_queue.size()
-                if self.spider.cache_reader_service else '--'
-            ),
-            'cache_writer_input_queue': (
-                self.spider.cache_writer_service.input_queue.qsize()
-                if self.spider.cache_writer_service else '--'
             ),
         }
         content = make_str(json.dumps(info))

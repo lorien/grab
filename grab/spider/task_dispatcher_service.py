@@ -46,14 +46,11 @@ class TaskDispatcherService(BaseService):
         if meta is None:
             meta = {}
         if isinstance(result, Task):
-            if meta.get('source') == 'cache_reader':
-                self.spider.add_task(result, queue=self.spider.task_queue)
-            else:
-                self.spider.add_task(result)
+            self.spider.add_task(result)
         elif result is None:
             pass
         elif isinstance(result, ResponseNotValid):
-            self.spider.add_task(task.clone(refresh_cache=True))
+            self.spider.add_task(task.clone())
             error_code = result.__class__.__name__.replace('_', '-')
             self.spider.stat.inc('integrity:%s' % error_code)
         elif isinstance(result, Exception):
@@ -68,12 +65,6 @@ class TaskDispatcherService(BaseService):
             if isinstance(result, FatalError):
                 self.spider.fatal_error_queue.put(meta['exc_info'])
         elif isinstance(result, dict) and 'grab' in result:
-            if (self.spider.cache_writer_service
-                    and not result.get('from_cache')
-                    and result['ok']):
-                self.spider.cache_writer_service.input_queue.put(
-                    (task, result['grab'])
-                )
             # TODO: Move to network service
             # starts
             self.spider.log_network_result_stats(result, task)
@@ -96,13 +87,9 @@ class TaskDispatcherService(BaseService):
                 # Use it if request failed not because of network error
                 # But because of content integrity check
                 if self.spider.network_try_limit > 0:
-                    task.refresh_cache = True
                     task.setup_grab_config(
                         result['grab_config_backup'])
                     self.spider.add_task(task)
-            if result.get('from_cache'):
-                self.spider.stat.inc('spider:task-%s-cache'
-                                     % task.name)
             self.spider.stat.inc('spider:request')
         else:
             raise SpiderError('Unknown result received from a service: %s'

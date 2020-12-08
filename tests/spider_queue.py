@@ -1,5 +1,6 @@
 from unittest import TestCase
 import six
+import time
 
 from tests.util import BaseGrabTestCase, build_spider
 from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
@@ -135,7 +136,14 @@ class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
     backend = 'redis'
 
     def setup_queue(self, bot):
-        bot.setup_queue(backend='redis', **REDIS_CONNECTION)
+        # create uniq redis key
+        # if use same key then there might be uncleaned
+        # data from previous tests
+        bot.setup_queue(
+            backend='redis',
+            queue_name=('grab_test_%d' % time.time()),
+            **REDIS_CONNECTION
+        )
 
     def test_delay_error(self):
         bot = build_spider(self.SimpleSpider)

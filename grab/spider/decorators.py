@@ -23,7 +23,7 @@ def integrity(integrity_func, retry_errors=(ResponseNotValid,)):
                     else:
                         int_func(grab)
             except retry_errors as ex:
-                yield task.clone(refresh_cache=True)
+                yield task.clone()
                 error_code = ex.__class__.__name__.replace('_', '-')
                 self.stat.inc('integrity:%s' % error_code)
             else:
