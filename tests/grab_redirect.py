@@ -1,7 +1,5 @@
 # coding: utf-8
-from urllib.parse import unquote
-
-from six.moves.urllib.parse import quote
+from six.moves.urllib.parse import quote, unquote
 
 from grab.error import GrabTooManyRedirectsError
 from tests.util import BaseGrabTestCase, build_grab
