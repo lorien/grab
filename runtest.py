@@ -193,7 +193,7 @@ def main():
     th_list = list(threading.enumerate())
     print('Active threads (%d):' % len(th_list))
     for th in th_list:
-        print('Thread: %s (isAlive:%s)' % (th, th.isAlive()))
+        print('Thread: %s (isAlive:%s)' % (th, th.is_alive()))
 
     if result.wasSuccessful():
         sys.exit(0)

@@ -1,6 +1,6 @@
 language: python
 
-python: 2.7
+python: 3.8
 
 sudo: required
 
@@ -15,18 +15,52 @@ branches:
 
 matrix:
   include:
+    # recent libcurl
     - os: linux
       env: TOX_ENV=py27-recent-libcurl
+      python: 3.8
+
+    # qa
     - os: linux
-      python: 3.7
       env: TOX_ENV=qa
+      python: 3.8
+
+    # linux (pycurl transport)
     - os: linux
       env: TOX_ENV=py27
-    - os: linux
-      env: TOX_ENV=py34
+      python: 2.7
     - os: linux
       env: TOX_ENV=py36
       python: 3.6
+    - os: linux
+      env: TOX_ENV=py37
+      python: 3.7
+    - os: linux
+      env: TOX_ENV=py38
+      python: 3.8
+    - os: linux
+      env: TOX_ENV=py39
+      python: 3.9
+
+     # urllib3 transport
+    - os: linux
+      env: TOX_ENV=py27-urllib3
+      python: 2.7
+    - os: linux
+      env: TOX_ENV=py36-urllib3
+      python: 3.6
+    - os: linux
+      env: TOX_ENV=py37-urllib3
+      python: 3.7
+    - os: linux
+      env: TOX_ENV=py38-urllib3
+      python: 3.8
+    - os: linux
+      env: TOX_ENV=py39-urllib3
+      python: 3.9
+
+
+    # osx
     - os: osx
       language: generic
       env:
@@ -35,33 +69,24 @@ matrix:
     - os: osx
       language: generic
       env:
-        - TOX_ENV=py34
-        - PYENV_VERSION="3.4.6"
-    - os: osx
-      language: generic
-      env:
         - TOX_ENV=py36
         - PYENV_VERSION="3.6.0"
 
-     # urllib3 transport
-    - os: linux
-      env: TOX_ENV=py27-urllib3
-    - os: linux
-      env: TOX_ENV=py34-urllib3
-    - os: linux
-      env: TOX_ENV=py36-urllib3
-      python: 3.6
-
-    # release
+    # release (install from pypi)
     - os: linux
       env: TOX_ENV=py2-grab-release
+      python: 2.7
     - os: linux
       env: TOX_ENV=py3-grab-release
+      python: 3.8
   exclude:
-    - python: 2.7 # hack to exclude default no-env travis job
+    - python: 3.8 # hack to exclude default no-env travis job
   allow_failures:
     - env: TOX_ENV=py27-urllib3
     - env: TOX_ENV=py36-urllib3
+    - env: TOX_ENV=py37-urllib3
+    - env: TOX_ENV=py38-urllib3
+    - env: TOX_ENV=py39-urllib3
     - env: TOX_ENV=qa
 
 # Enable extra mongodb and redis services on linux
