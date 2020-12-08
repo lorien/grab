@@ -62,6 +62,7 @@ matrix:
   allow_failures:
     - env: TOX_ENV=py27-urllib3
     - env: TOX_ENV=py36-urllib3
+    - env: TOX_ENV=qa
 
 # Enable extra mongodb and redis services on linux
 # That does not work on osx (see below custom instructions for osx)
