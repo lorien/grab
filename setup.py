@@ -3,6 +3,9 @@ import os
 from setuptools import setup
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
+with open('README.md') as inp:
+    README_CONTENT = inp.read()
+
 
 setup(
     # Meta data
@@ -14,7 +17,8 @@ setup(
     maintainer_email='lorien@lorien.name',
     url='http://grablib.org',
     description='Web Scraping Framework',
-    long_description=open(os.path.join(ROOT, 'README.rst')).read(),
+    long_description=README_CONTENT,
+    long_description_content_type='text/markdown',
     download_url='https://pypi.python.org/pypi/grab',
     keywords='pycurl multicurl curl network parsing grabbing scraping'
              ' lxml xpath data mining',
