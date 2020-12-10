@@ -10,7 +10,7 @@ Grab Web Resources
 ------------------
 
 * Source code: https://github.com/lorien/grab
-* Documentation: http://grablib.org
+* Documentation: https://grab.readthedocs.io/en/latest/
 * Telegram chat: https://t.me/grablab
 * Telegram chat (ru): https://t.me/grablab_ru
 
