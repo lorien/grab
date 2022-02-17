@@ -1,6 +1,6 @@
 [MASTER]
 jobs=4
-extension-pkg-whitelist=pycurl,MySQLdb,lxml
+extension-pkg-whitelist=pycurl,lxml
 ignore=invalid_import.py
 
 [TYPECHEK]

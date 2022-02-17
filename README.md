@@ -1,34 +1,21 @@
-Grab
-====
+# Grab Framework Documentation
 
-.. image:: https://travis-ci.org/lorien/grab.png?branch=master
-    :target: https://travis-ci.org/lorien/grab?branch=master
-
-.. image:: https://ci.appveyor.com/api/projects/status/uxj24vjin7gptdlg
-    :target: https://ci.appveyor.com/project/lorien/grab
-
-.. image:: https://coveralls.io/repos/lorien/grab/badge.svg?branch=master
-    :target: https://coveralls.io/r/lorien/grab?branch=master
-
-.. image:: https://api.codacy.com/project/badge/Grade/18465ca1458b4c5e99026aafa5b58e98
-   :target: https://www.codacy.com/app/lorien/grab?utm_source=github.com&utm_medium=referral&utm_content=lorien/grab&utm_campaign=badger
-
-.. image:: https://readthedocs.org/projects/grab/badge/?version=latest
-    :target: http://docs.grablib.org/en/latest/
+![pytest status](https://github.com/lorien/grab/workflows/test/badge.svg)
+[![coveralls](https://coveralls.io/repos/lorien/grab/badge.svg?branch=master)](https://coveralls.io/r/lorien/grab?branch=master)
+[![documentation](https://readthedocs.org/projects/grab/badge/?version=latest)](http://docs.grablib.org/en/latest/)
 
 
-Installation
-------------
+## Installation
 
-.. code:: bash
+```shell
 
     $ pip install -U grab
+```
 
 See details about installing Grab on different platforms here http://docs.grablib.org/en/latest/usage/installation.html
 
 
-Support
--------
+## Support
 
 Documentation: https://grablab.org/docs/
 
@@ -39,8 +26,7 @@ English telegram chat: https://t.me/grablab
 To report bug please use GitHub issue tracker: https://github.com/lorien/grab/issues
 
 
-What is Grab?
--------------
+## What is Grab?
 
 Grab is a python web scraping framework. Grab provides a number of helpful methods
 to perform network requests, scrape web sites and process the scraped content:
@@ -71,10 +57,9 @@ Spider is a framework for writing web-site scrapers. Features:
 * Tools to debug and collect statistics
 
 
-Grab Example
-------------
+## Grab Example
 
-.. code:: python
+```python
 
     import logging
 
@@ -101,12 +86,12 @@ Grab Example
     for elem in g.doc.select('//h3[@class="repo-list-name"]/a'):
         print('%s: %s' % (elem.text(),
                           g.make_url_absolute(elem.attr('href'))))
+```
 
 
-Grab::Spider Example
---------------------
+## Grab::Spider Example
 
-.. code:: python
+```python
 
     import logging
 
@@ -128,6 +113,4 @@ Grab::Spider Example
 
     bot = ExampleSpider(thread_number=2)
     bot.run()
-
-
-
+```

@@ -197,7 +197,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
 
     def test_xml_declaration(self):
         """
-        HTML with XML declaration shuld be processed without errors.
+        HTML with XML declaration should be processed without errors.
         """
         self.server.response["get.data"] = (
             '<?xml version="1.0" encoding="UTF-8"?>'

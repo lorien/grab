@@ -7,6 +7,7 @@ import six
 from weblib.files import clear_directory
 from weblib.encoding import make_str
 
+from grab.error import raise_feature_is_deprecated
 from grab.util.config import build_spider_config, build_root_config
 from grab.util.module import load_spider_class
 from grab.util.log import default_logging
@@ -113,9 +114,8 @@ def main(spider_name, thread_number=None,
     if opt_queue:
         bot.setup_queue(**opt_queue)
 
-    opt_cache = spider_config.get('cache')
-    if opt_cache:
-        bot.setup_cache(**opt_cache)
+    if spider_config.get('cache'):
+        raise_feature_is_deprecated('Cache feature')
 
     opt_proxy_list = spider_config.get('proxy_list')
     if opt_proxy_list:

@@ -61,7 +61,7 @@ class ServiceWorker(object):
         self.resume_event.set()
 
     def is_alive(self):
-        return self.thread.isAlive()
+        return self.thread.is_alive()
 
 
 class BaseService(object):

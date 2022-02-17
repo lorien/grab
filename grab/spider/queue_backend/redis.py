@@ -7,11 +7,32 @@ except ImportError:
     import queue
 import random
 import logging
+import pickle
 
-from qr import PriorityQueue
+from redis import StrictRedis
+from fastrq.priorityqueue import PriorityQueue
 
 from grab.spider.queue_backend.base import QueueInterface
 from grab.spider.error import SpiderMisuseError
+
+
+class CustomPriorityQueue(PriorityQueue):
+    def __init__(self, key, **kwargs):
+        # sets `key` to `self._key`
+        super().__init__(key)
+        self._conn_kwargs = kwargs
+
+    # https://github.com/limen/fastrq/blob/master/fastrq/base.py
+    def connect(self):
+        if self._redis is None:
+            self._redis = StrictRedis(
+                decode_responses=False, **self._conn_kwargs
+            )
+        return self._redis
+
+    def clear(self):
+        if self._redis:
+            self._redis.delete(self._key)
 
 
 class QueueBackend(QueueInterface):
@@ -21,7 +42,7 @@ class QueueBackend(QueueInterface):
         if queue_name is None:
             queue_name = 'task_queue_%s' % spider_name
         self.queue_name = queue_name
-        self.queue_object = PriorityQueue(queue_name, **kwargs)
+        self.queue_object = CustomPriorityQueue(queue_name, **kwargs)
         logging.debug('Redis queue key: %s', self.queue_name)
 
     def put(self, task, priority, schedule_time=None):
@@ -34,14 +55,14 @@ class QueueBackend(QueueInterface):
         # in the PriorityQueue
 
         task.redis_qr_rnd = random.random()
-        self.queue_object.push(task, priority)
+        self.queue_object.push({pickle.dumps(task): priority})
 
     def get(self):
         task = self.queue_object.pop()
         if task is None:
             raise queue.Empty()
         else:
-            return task
+            return pickle.loads(task[0])
 
     def size(self):
         return len(self.queue_object)

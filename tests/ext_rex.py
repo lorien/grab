@@ -65,7 +65,7 @@ class ExtensionRexTestCase(BaseGrabTestCase):
         rex = re.compile(pattern)
         self.assertRaises(DataNotFound, lambda: self.grab.doc.rex_search(rex))
 
-        # # Search for unicode rex in byte-string body shuld fail
+        # # Search for unicode rex in byte-string body should fail
         rex = re.compile(u'фыва', re.U)
         self.assertRaises(DataNotFound,
                           lambda: self.grab.doc.rex_search(rex, byte=True))
