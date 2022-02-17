@@ -20,3 +20,6 @@ dist/
 /test.py
 /.python-version
 /.hg/
+/src/
+/test_server
+/build/

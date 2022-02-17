@@ -3,7 +3,7 @@
 build: venv deps develop
 
 venv:
-	virtualenv --no-site-packages --python=python3 .env
+	virtualenv --python=python3 .env
 	
 deps:
 	.env/bin/pip install -r requirements_dev.txt

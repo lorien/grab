@@ -11,34 +11,35 @@ from grab.spider.error import SpiderMisuseError
 class SpiderQueueMixin(object):
     class SimpleSpider(Spider):
         def task_page(self, unused_grab, task):
-            self.stat.collect('url_history', task.url)
-            self.stat.collect('priority_history', task.priority)
+            self.stat.collect("url_history", task.url)
+            self.stat.collect("priority_history", task.priority)
 
     def test_basic_priority(self):
-        bot = build_spider(self.SimpleSpider, parser_pool_size=1,
-                           thread_number=1)
+        bot = build_spider(self.SimpleSpider, parser_pool_size=1, thread_number=1)
         self.setup_queue(bot)
         bot.task_queue.clear()
         requested_urls = {}
         for priority in (4, 2, 1, 5):
-            url = self.server.get_url() + '?p=%d' % priority
+            url = self.server.get_url() + "?p=%d" % priority
             requested_urls[priority] = url
-            bot.add_task(Task('page', url=url,
-                              priority=priority))
+            bot.add_task(Task("page", url=url, priority=priority))
         bot.run()
-        urls = [x[1] for x in sorted(requested_urls.items(),
-                                     key=lambda x: x[0])]
-        self.assertEqual(urls, bot.stat.collections['url_history'])
+        urls = [x[1] for x in sorted(requested_urls.items(), key=lambda x: x[0])]
+        self.assertEqual(urls, bot.stat.collections["url_history"])
 
     def test_queue_length(self):
-        bot = build_spider(self.SimpleSpider)
+        class CustomSpider(self.SimpleSpider):
+            def shutdown(self):
+                self.final_taskq_size = self.task_queue.size()
+
+        bot = build_spider(CustomSpider)
         self.setup_queue(bot)
         bot.task_queue.clear()
         for _ in six.moves.range(5):
-            bot.add_task(Task('page', url=self.server.get_url()))
+            bot.add_task(Task("page", url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
         bot.run()
-        self.assertEqual(0, bot.task_queue.size())
+        self.assertEqual(0, bot.final_taskq_size)
 
     def test_task_queue_render_stats(self):
         bot = build_spider(self.SimpleSpider)
@@ -50,7 +51,7 @@ class SpiderQueueMixin(object):
         bot.task_queue.clear()
 
         for _ in six.moves.range(5):
-            bot.add_task(Task('page', url=self.server.get_url()))
+            bot.add_task(Task("page", url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
         bot.task_queue.clear()
         self.assertEqual(0, bot.task_queue.size())
@@ -58,7 +59,7 @@ class SpiderQueueMixin(object):
 
 class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
     def setup_queue(self, bot):
-        bot.setup_queue(backend='memory')
+        bot.setup_queue(backend="memory")
 
     def test_schedule(self):
         """
@@ -69,18 +70,18 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
 
         class TestSpider(Spider):
             def task_generator(self):
-                yield Task('page', url=server.get_url(), delay=1.5, num=3)
-                yield Task('page', url=server.get_url(), delay=4.5, num=2)
-                yield Task('page', url=server.get_url(), delay=3, num=4)
-                yield Task('page', url=server.get_url(), num=1)
+                yield Task("page", url=server.get_url(), delay=1.5, num=3)
+                yield Task("page", url=server.get_url(), delay=4.5, num=2)
+                yield Task("page", url=server.get_url(), delay=3, num=4)
+                yield Task("page", url=server.get_url(), num=1)
 
             def task_page(self, unused_grab, task):
-                self.stat.collect('numbers', task.num)
+                self.stat.collect("numbers", task.num)
 
         bot = build_spider(TestSpider, thread_number=1)
         self.setup_queue(bot)
         bot.run()
-        self.assertEqual(bot.stat.collections['numbers'], [1, 3, 4, 2])
+        self.assertEqual(bot.stat.collections["numbers"], [1, 3, 4, 2])
 
     def test_schedule_list_clear(self):
         bot = build_spider(self.SimpleSpider)
@@ -88,8 +89,7 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
         bot.task_queue.clear()
 
         for delay in six.moves.range(5):
-            bot.add_task(Task('page', url=self.server.get_url(),
-                              delay=delay + 1))
+            bot.add_task(Task("page", url=self.server.get_url(), delay=delay + 1))
 
         self.assertEqual(5, len(bot.task_queue.schedule_list))
         bot.task_queue.clear()
@@ -97,10 +97,10 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
 
 
 class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
-    backend = 'mongodb'
+    backend = "mongodb"
 
     def setup_queue(self, bot):
-        bot.setup_queue(backend='mongodb', **MONGODB_CONNECTION)
+        bot.setup_queue(backend="mongodb", **MONGODB_CONNECTION)
 
     def test_schedule(self):
         """
@@ -111,18 +111,18 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
 
         class TestSpider(Spider):
             def task_generator(self):
-                yield Task('page', url=server.get_url(), num=1)
-                yield Task('page', url=server.get_url(), delay=1.5, num=2)
-                yield Task('page', url=server.get_url(), delay=0.5, num=3)
-                yield Task('page', url=server.get_url(), delay=1, num=4)
+                yield Task("page", url=server.get_url(), num=1)
+                yield Task("page", url=server.get_url(), delay=1.5, num=2)
+                yield Task("page", url=server.get_url(), delay=0.5, num=3)
+                yield Task("page", url=server.get_url(), delay=1, num=4)
 
             def task_page(self, unused_grab, task):
-                self.stat.collect('numbers', task.num)
+                self.stat.collect("numbers", task.num)
 
         bot = build_spider(TestSpider)
         self.setup_queue(bot)
         bot.run()
-        self.assertEqual(bot.stat.collections['numbers'], [1, 3, 4, 2])
+        self.assertEqual(bot.stat.collections["numbers"], [1, 3, 4, 2])
         # TODO: understand why that test fails
 
     def test_clear_collection(self):
@@ -132,18 +132,20 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
 
 
 class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
-    backend = 'redis'
+    backend = "redis"
 
     def setup_queue(self, bot):
-        bot.setup_queue(backend='redis', **REDIS_CONNECTION)
+        bot.setup_queue(backend="redis", **REDIS_CONNECTION)
 
     def test_delay_error(self):
         bot = build_spider(self.SimpleSpider)
         self.setup_queue(bot)
         bot.task_queue.clear()
-        self.assertRaises(SpiderMisuseError,
-                          bot.add_task,
-                          Task('page', url=self.server.get_url(), delay=1))
+        self.assertRaises(
+            SpiderMisuseError,
+            bot.add_task,
+            Task("page", url=self.server.get_url(), delay=1),
+        )
 
 
 class QueueInterfaceTestCase(TestCase):
@@ -153,7 +155,7 @@ class QueueInterfaceTestCase(TestCase):
         class BrokenQueue(QueueInterface):
             pass
 
-        task_queue = BrokenQueue('spider_name')
+        task_queue = BrokenQueue("spider_name")
         self.assertRaises(NotImplementedError, task_queue.put, None, None)
         self.assertRaises(NotImplementedError, task_queue.get)
         self.assertRaises(NotImplementedError, task_queue.size)

@@ -23,3 +23,4 @@ syntax: regexp
 ^test\.py
 ^\.python-version
 ^\.git/
+^\.py39/
