@@ -1,7 +1,3 @@
-import mock
-
-from six import StringIO
-
 from grab import GrabTimeoutError, Grab
 from grab.spider import Spider, Task
 from tests.util import (

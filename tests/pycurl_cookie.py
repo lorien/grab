@@ -31,7 +31,7 @@ class TestCookies(BaseGrabTestCase):
 
     @only_grab_transport("pycurl")
     def test_pycurl_cookies(self):
-        import pycurl
+        import pycurl  # pylint: disable=import-outside-toplevel
 
         self.server.response_once["status"] = 302
         self.server.response_once["cookies"] = {"foo": "bar", "1": "2"}.items()

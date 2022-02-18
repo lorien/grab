@@ -1,8 +1,6 @@
-from pprint import pprint
-import time
-from urllib.parse import quote
+from pprint import pprint  # pylint: disable=unused-import
 
-from tests.util import build_grab
+from tests.util import build_grab  # pylint: disable=unused-import
 from tests.util import BaseGrabTestCase
 
 

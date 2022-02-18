@@ -90,7 +90,7 @@ class TestCookies(BaseGrabTestCase):
             grab.setup(cookies=cookies)
             grab.go(self.server.get_url())
             grab.cookies.save_to_file(tmp_file)
-            with open(tmp_file) as inp:
+            with open(tmp_file, encoding="utf-8") as inp:
                 self.assertEqual(
                     set(cookies.items()),
                     set((x["name"], x["value"]) for x in json.load(inp)),
@@ -101,7 +101,7 @@ class TestCookies(BaseGrabTestCase):
             grab.setup(cookies=cookies)
             grab.go(self.server.get_url())
             grab.cookies.save_to_file(tmp_file)
-            with open(tmp_file) as inp:
+            with open(tmp_file, encoding="utf-8") as inp:
                 self.assertEqual(
                     set(cookies.items()),
                     set((x["name"], x["value"]) for x in json.load(inp)),
@@ -113,7 +113,7 @@ class TestCookies(BaseGrabTestCase):
                 {"name": "foo", "value": "bar", "domain": self.server.address},
                 {"name": "spam", "value": u"begemot", "domain": self.server.address},
             ]
-            with open(tmp_file, "w") as out:
+            with open(tmp_file, "w", encoding="utf-8") as out:
                 json.dump(cookies, out)
             grab.cookies.load_from_file(tmp_file)
             self.assertEqual(
@@ -124,7 +124,7 @@ class TestCookies(BaseGrabTestCase):
         with temp_file() as tmp_file:
             grab = build_grab()
             # Empty file should not raise Exception
-            with open(tmp_file, "w") as out:
+            with open(tmp_file, "w", encoding="utf-8") as out:
                 out.write("")
             grab.setup(cookiefile=tmp_file)
             grab.go(self.server.get_url())
@@ -134,7 +134,7 @@ class TestCookies(BaseGrabTestCase):
             grab = build_grab()
 
             cookies = [{"name": "spam", "value": "ham", "domain": self.server.address}]
-            with open(tmp_file, "w") as out:
+            with open(tmp_file, "w", encoding="utf-8") as out:
                 json.dump(cookies, out)
 
             # One cookie are sent in server reponse
@@ -151,7 +151,7 @@ class TestCookies(BaseGrabTestCase):
             self.assertEqual(set(merged_cookies), set(grab.cookies.items()))
 
             # `cookiefile` file should contains merged cookies
-            with open(tmp_file) as inp:
+            with open(tmp_file, encoding="utf-8") as inp:
                 self.assertEqual(
                     set(merged_cookies),
                     set((x["name"], x["value"]) for x in json.load(inp)),
@@ -162,7 +162,7 @@ class TestCookies(BaseGrabTestCase):
 
     @only_grab_transport("pycurl")
     def test_manual_dns(self):
-        import pycurl
+        import pycurl  # pylint: disable=import-outside-toplevel
 
         grab = build_grab()
         grab.setup_transport("pycurl")
@@ -175,7 +175,7 @@ class TestCookies(BaseGrabTestCase):
 
     @only_grab_transport("pycurl")
     def test_different_domains(self):
-        import pycurl
+        import pycurl  # pylint: disable=import-outside-toplevel
 
         grab = build_grab()
         names = [
@@ -196,11 +196,13 @@ class TestCookies(BaseGrabTestCase):
         # That does not hold anymore, I guess I have fixed it
         # # response.cookies contains cookies from both domains
         # # because it just accumulates cookies over time
-        # # self.assertEqual(dict(grab.doc.cookies.items()), {"foo": "foo", "bar": "bar"})
+        # # self.assertEqual(
+        # #     dict(grab.doc.cookies.items()), {"foo": "foo", "bar": "bar"}
+        # # )
 
     @only_grab_transport("pycurl")
     def test_cookie_domain(self):
-        import pycurl
+        import pycurl  # pylint: disable=import-outside-toplevel
 
         grab = build_grab()
         names = [
@@ -241,7 +243,7 @@ class TestCookies(BaseGrabTestCase):
 
     @only_grab_transport("pycurl")
     def test_dot_domain(self):
-        import pycurl
+        import pycurl  # pylint: disable=import-outside-toplevel
 
         grab = build_grab(debug=True)
         names = [
@@ -254,7 +256,7 @@ class TestCookies(BaseGrabTestCase):
         self.server.response["headers"] = [
             (
                 "Set-Cookie",
-                "foo=foo; Domain=.foo.bar; " "Expires=Wed, 13 Jan 3000 22:23:01 GMT;",
+                "foo=foo; Domain=.foo.bar; Expires=Wed, 13 Jan 3000 22:23:01 GMT;",
             )
         ]
 
@@ -290,7 +292,7 @@ class TestCookies(BaseGrabTestCase):
 
     @only_grab_transport("pycurl")
     def test_common_case_www_domain(self):
-        import pycurl
+        import pycurl  # pylint: disable=import-outside-toplevel
 
         grab = build_grab()
         names = [
@@ -317,7 +319,7 @@ class TestCookies(BaseGrabTestCase):
             init_cookies = [
                 {"name": "foo", "value": "bar", "domain": self.server.address}
             ]
-            with open(tmp_file, "w") as out:
+            with open(tmp_file, "w", encoding="utf-8") as out:
                 json.dump(init_cookies, out)
 
             grab = build_grab(debug=True)

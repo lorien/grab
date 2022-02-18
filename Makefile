@@ -1,4 +1,4 @@
-.PHONY: build venv deps develop flake flake_verbose test coverage_nobackend coverage coverage_missing clean upload doc doc_ru
+.PHONY: build venv deps clean upload upload_docs test check
 
 build: venv deps develop
 
@@ -9,27 +9,6 @@ deps:
 	.env/bin/pip install -r requirements_dev.txt
 	.env/bin/pip install -r requirements_dev_backend.txt
 
-develop:
-	.env/bin/python setup.py develop
-
-test:
-	tox -e py34
-
-coverage_nobackend:
-	coverage erase
-	coverage run --source=grab ./runtest.py --test-all
-	coverage report -m
-
-coverage:
-	coverage erase
-	coverage run --source=grab ./runtest.py --test-all --backend-mongo --backend-redis
-	coverage report -m
-
-coverage_missing:
-	coverage erase
-	coverage run --source=grab ./runtest.py --test-all --backend-mongo --backend-redis
-	coverage report -m | grep -v '100%' | grep -v Missing | grep -v -- '----' | sort -k 3 -nr
-
 clean:
 	find -name '*.pyc' -delete
 	find -name '*.swp' -delete
@@ -38,8 +17,14 @@ clean:
 upload:
 	git push --tags; python setup.py clean sdist upload
 
-viewdoc:
-	x-www-browser docs/en/build/html/index.html
-
 upload_docs:
 	tox -e doc && rsync -azhP docs/build/html/ web@sam:/web/grablab/docs/
+
+test:
+	./runtest.py --test-all --backend-redis --backend-mongodb
+
+check:
+	python setup.py check -s \
+		&& pylint setup.py grab tests \
+		&& flake8 setup.py grab tests \
+		&& pytype setup.py grab tests

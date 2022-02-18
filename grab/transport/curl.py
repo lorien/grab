@@ -14,9 +14,9 @@ try:
     from urlparse import urlsplit
 except ImportError:
     from urllib.parse import urlsplit
-from six.moves.http_cookiejar import CookieJar
 from contextlib import contextmanager
 
+from six.moves.http_cookiejar import CookieJar
 import six
 from weblib.http import normalize_http_values, normalize_post_data, normalize_url
 from weblib.encoding import make_str, make_unicode
@@ -267,7 +267,7 @@ class CurlTransport(BaseTransport):
         # User-Agent
         if grab.config["user_agent"] is None:
             if grab.config["user_agent_file"] is not None:
-                with open(grab.config["user_agent_file"]) as inf:
+                with open(grab.config["user_agent_file"], encoding="utf-8") as inf:
                     lines = inf.read().splitlines()
                 grab.config["user_agent"] = random.choice(lines)
             else:
@@ -490,7 +490,7 @@ class CurlTransport(BaseTransport):
         except pycurl.error as ex:
             new_ex = build_grab_exception(ex, self.curl)
             if new_ex:
-                raise new_ex  # pylint: disable=raising-bad-type
+                raise new_ex from ex  # pylint: disable=raising-bad-type
         except Exception as ex:  # pylint: disable=broad-except
             six.reraise(
                 error.GrabInternalError, error.GrabInternalError(ex), sys.exc_info()[2]

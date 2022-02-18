@@ -11,6 +11,7 @@ import re
 from copy import copy
 import email
 import os
+
 try:
     import ujson as json
 except ImportError:
@@ -44,27 +45,26 @@ from grab.const import NULL
 from grab.util.warning import warn
 
 NULL_BYTE = chr(0)
-RE_XML_DECLARATION = re.compile(br'^[^<]{,100}<\?xml[^>]+\?>', re.I)
+RE_XML_DECLARATION = re.compile(br"^[^<]{,100}<\?xml[^>]+\?>", re.I)
 RE_DECLARATION_ENCODING = re.compile(br'encoding\s*=\s*["\']([^"\']+)["\']')
-RE_META_CHARSET =\
-    re.compile(br'<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)', re.I)
-RE_META_CHARSET_HTML5 =\
-    re.compile(br'<meta[^>]+charset\s*=\s*[\'"]?([-\w]+)', re.I)
-RE_UNICODE_XML_DECLARATION =\
-    re.compile(RE_XML_DECLARATION.pattern.decode('utf-8'), re.I)
+RE_META_CHARSET = re.compile(br"<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)", re.I)
+RE_META_CHARSET_HTML5 = re.compile(br'<meta[^>]+charset\s*=\s*[\'"]?([-\w]+)', re.I)
+RE_UNICODE_XML_DECLARATION = re.compile(
+    RE_XML_DECLARATION.pattern.decode("utf-8"), re.I
+)
 
 # Bom processing logic was copied from
 # https://github.com/scrapy/w3lib/blob/master/w3lib/encoding.py
 _BOM_TABLE = [
-    (codecs.BOM_UTF32_BE, 'utf-32-be'),
-    (codecs.BOM_UTF32_LE, 'utf-32-le'),
-    (codecs.BOM_UTF16_BE, 'utf-16-be'),
-    (codecs.BOM_UTF16_LE, 'utf-16-le'),
-    (codecs.BOM_UTF8, 'utf-8')
+    (codecs.BOM_UTF32_BE, "utf-32-be"),
+    (codecs.BOM_UTF32_LE, "utf-32-le"),
+    (codecs.BOM_UTF16_BE, "utf-16-be"),
+    (codecs.BOM_UTF16_LE, "utf-16-le"),
+    (codecs.BOM_UTF8, "utf-8"),
 ]
 _FIRST_CHARS = set(char[0] for (char, name) in _BOM_TABLE)
 THREAD_STORAGE = threading.local()
-logger = logging.getLogger('grab.document') # pylint: disable=invalid-name
+logger = logging.getLogger("grab.document")  # pylint: disable=invalid-name
 
 
 def read_bom(data):
@@ -88,16 +88,35 @@ class Document(object):
     """
 
     __slots__ = (
-        'status', 'code', 'head', '_bytes_body',
-        'body_path', 'headers', 'url', 'cookies',
-        'charset', '_unicode_body',
-        'bom', 'timestamp',
-        'name_lookup_time', 'connect_time', 'total_time',
-        'download_size', 'upload_size', 'download_speed',
-        'error_code', 'error_msg', 'grab', 'remote_ip',
-        '_lxml_tree', '_strict_lxml_tree', '_pyquery',
-        '_lxml_form', '_file_fields', 'from_cache',
-        '_grab_config',
+        "status",
+        "code",
+        "head",
+        "_bytes_body",
+        "body_path",
+        "headers",
+        "url",
+        "cookies",
+        "charset",
+        "_unicode_body",
+        "bom",
+        "timestamp",
+        "name_lookup_time",
+        "connect_time",
+        "total_time",
+        "download_size",
+        "upload_size",
+        "download_speed",
+        "error_code",
+        "error_msg",
+        "grab",
+        "remote_ip",
+        "_lxml_tree",
+        "_strict_lxml_tree",
+        "_pyquery",
+        "_lxml_form",
+        "_file_fields",
+        "from_cache",
+        "_grab_config",
     )
 
     def __init__(self, grab=None):
@@ -111,7 +130,7 @@ class Document(object):
         self.headers = None
         self.url = None
         self.cookies = CookieManager()
-        self.charset = 'utf-8'
+        self.charset = "utf-8"
         self.bom = None
         self.timestamp = datetime.utcnow()
         self.name_lookup_time = 0
@@ -149,8 +168,12 @@ class Document(object):
 
         # Save some grab.config items required to
         # process content of the document
-        for key in ('content_type', 'fix_special_entities',
-                    'lowercased_tree', 'strip_null_bytes'):
+        for key in (
+            "content_type",
+            "fix_special_entities",
+            "lowercased_tree",
+            "strip_null_bytes",
+        ):
             self._grab_config[key] = self.grab.config[key]
 
     def __call__(self, query):
@@ -174,20 +197,20 @@ class Document(object):
             # in case of 301/302 redirect
             # Separate responses
             if self.head:
-                responses = self.head.rsplit(b'\nHTTP/', 1)
+                responses = self.head.rsplit(b"\nHTTP/", 1)
                 # Cut off the 'HTTP/*' line from the last response
-                _, response = responses[-1].split(b'\n', 1)
-                response = response.decode('utf-8', 'ignore')
+                _, response = responses[-1].split(b"\n", 1)
+                response = response.decode("utf-8", "ignore")
             else:
-                response = u''
+                response = u""
             if six.PY2:
                 # email_from_string does not work with unicode input
-                response = response.encode('utf-8')
+                response = response.encode("utf-8")
             self.headers = email.message_from_string(response)
 
         if charset is None:
             if isinstance(self.body, six.text_type):
-                self.charset = 'utf-8'
+                self.charset = "utf-8"
             else:
                 self.detect_charset()
         else:
@@ -231,32 +254,32 @@ class Document(object):
 
             # Try to process XML declaration
             if not charset:
-                if body_chunk.startswith(b'<?xml'):
+                if body_chunk.startswith(b"<?xml"):
                     match = RE_XML_DECLARATION.search(body_chunk)
                     if match:
-                        enc_match = RE_DECLARATION_ENCODING.search(
-                            match.group(0))
+                        enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
                         if enc_match:
                             charset = enc_match.group(1)
 
         if not charset:
-            if 'Content-Type' in self.headers:
-                pos = self.headers['Content-Type'].find('charset=')
+            if "Content-Type" in self.headers:
+                pos = self.headers["Content-Type"].find("charset=")
                 if pos > -1:
-                    charset = self.headers['Content-Type'][(pos + 8):]
+                    charset = self.headers["Content-Type"][(pos + 8) :]
 
         if charset:
             charset = charset.lower()
             if not isinstance(charset, str):
                 # Convert to unicode (py2.x) or string (py3.x)
-                charset = charset.decode('utf-8')
+                charset = charset.decode("utf-8")
             # Check that python knows such charset
             try:
                 codecs.lookup(charset)
             except LookupError:
-                logger.debug('Unknown charset found: %s.'
-                             ' Using utf-8 istead.', charset)
-                self.charset = 'utf-8'
+                logger.debug(
+                    "Unknown charset found: %s." " Using utf-8 istead.", charset
+                )
+                self.charset = "utf-8"
             else:
                 self.charset = charset
 
@@ -268,10 +291,19 @@ class Document(object):
         obj = self.__class__()
         obj.process_grab(new_grab if new_grab else self.grab)
 
-        copy_keys = ('status', 'code', 'head', 'body', 'total_time',
-                     'connect_time', 'name_lookup_time',
-                     'url', 'charset', '_unicode_body',
-                     '_grab_config')
+        copy_keys = (
+            "status",
+            "code",
+            "head",
+            "body",
+            "total_time",
+            "connect_time",
+            "name_lookup_time",
+            "url",
+            "charset",
+            "_unicode_body",
+            "_grab_config",
+        )
         for key in copy_keys:
             setattr(obj, key, getattr(self, key))
 
@@ -293,9 +325,8 @@ class Document(object):
             except OSError:
                 pass
 
-        with open(path, 'wb') as out:
-            out.write(self._bytes_body if self._bytes_body is not None
-                      else b'')
+        with open(path, "wb") as out:
+            out.write(self._bytes_body if self._bytes_body is not None else b"")
 
     def save_hash(self, location, basedir, ext=None):
         """
@@ -325,7 +356,7 @@ class Document(object):
         """
 
         if isinstance(location, six.text_type):
-            location = location.encode('utf-8')
+            location = location.encode("utf-8")
         rel_path = hashed_path(location, ext=ext)
         path = os.path.join(basedir, rel_path)
         if not os.path.exists(path):
@@ -334,7 +365,7 @@ class Document(object):
                 os.makedirs(path_dir)
             except OSError:
                 pass
-            with open(path, 'wb') as out:
+            with open(path, "wb") as out:
                 out.write(self._bytes_body)
         return rel_path
 
@@ -370,12 +401,14 @@ class Document(object):
 
         _, path = tempfile.mkstemp()
         self.save(path)
-        webbrowser.open('file://' + path)
+        webbrowser.open("file://" + path)
 
     @property
     def time(self):
-        warn('Attribute `Document.time` is deprecated. '
-             'Use `Document.total_time` instead.')
+        warn(
+            "Attribute `Document.time` is deprecated. "
+            "Use `Document.total_time` instead."
+        )
         return self.total_time
 
     def __getstate__(self):
@@ -384,14 +417,14 @@ class Document(object):
         """
         state = {}
         for cls in type(self).mro():
-            cls_slots = getattr(cls, '__slots__', ())
+            cls_slots = getattr(cls, "__slots__", ())
             for slot in cls_slots:
-                if slot != '__weakref__':
+                if slot != "__weakref__":
                     if hasattr(self, slot):
                         state[slot] = getattr(self, slot)
-        state['_lxml_tree'] = None
-        state['_strict_lxml_tree'] = None
-        state['_lxml_form'] = None
+        state["_lxml_tree"] = None
+        state["_strict_lxml_tree"] = None
+        state["_lxml_form"] = None
         return state
 
     def __setstate__(self, state):
@@ -418,19 +451,21 @@ class Document(object):
 
         if isinstance(anchor, six.text_type):
             if byte:
-                raise GrabMisuseError('The anchor should be bytes string in '
-                                      'byte mode')
+                raise GrabMisuseError(
+                    "The anchor should be bytes string in " "byte mode"
+                )
             else:
                 return anchor in self.unicode_body()
 
         if not isinstance(anchor, six.text_type):
             if byte:
                 # if six.PY3:
-                    # return anchor in self.body_as_bytes()
+                # return anchor in self.body_as_bytes()
                 return anchor in self.body
             else:
-                raise GrabMisuseError('The anchor should be byte string in '
-                                      'non-byte mode')
+                raise GrabMisuseError(
+                    "The anchor should be byte string in " "non-byte mode"
+                )
 
     def text_assert(self, anchor, byte=False):
         """
@@ -438,7 +473,7 @@ class Document(object):
         """
 
         if not self.text_search(anchor, byte=byte):
-            raise DataNotFound(u'Substring not found: %s' % anchor)
+            raise DataNotFound(u"Substring not found: %s" % anchor)
 
     def text_assert_any(self, anchors, byte=False):
         """
@@ -451,8 +486,7 @@ class Document(object):
                 found = True
                 break
         if not found:
-            raise DataNotFound(u'Substrings not found: %s'
-                               % ', '.join(anchors))
+            raise DataNotFound(u"Substrings not found: %s" % ", ".join(anchors))
 
     # RegexpExtension methods
 
@@ -468,9 +502,9 @@ class Document(object):
         # pylint: disable=no-member
         try:
             match = self.rex_search(regexp, flags=flags, byte=byte)
-        except DataNotFound:
+        except DataNotFound as ex:
             if default is NULL:
-                raise DataNotFound('Regexp not found')
+                raise DataNotFound("Regexp not found") from ex
             else:
                 return default
         else:
@@ -495,9 +529,9 @@ class Document(object):
         if byte:
             if not isinstance(regexp.pattern, six.text_type) or not six.PY3:
                 # if six.PY3:
-                    # body = self.body_as_bytes()
+                # body = self.body_as_bytes()
                 # else:
-                    # body = self.body
+                # body = self.body
                 match = regexp.search(self.body)
         else:
             if isinstance(regexp.pattern, six.text_type) or not six.PY3:
@@ -507,7 +541,7 @@ class Document(object):
             return match
         else:
             if default is NULL:
-                raise DataNotFound('Could not find regexp: %s' % regexp)
+                raise DataNotFound("Could not find regexp: %s" % regexp)
             else:
                 return default
 
@@ -527,7 +561,7 @@ class Document(object):
         """
 
         if not self._pyquery:
-            from pyquery import PyQuery
+            from pyquery import PyQuery  # pylint: disable=import-outside-toplevel
 
             self._pyquery = PyQuery(self.tree)
         return self._pyquery
@@ -537,29 +571,30 @@ class Document(object):
     def get_body_chunk(self):
         body_chunk = None
         if self.body_path:
-            with open(self.body_path, 'rb') as inp:
+            with open(self.body_path, "rb") as inp:
                 body_chunk = inp.read(4096)
         elif self._bytes_body:
             body_chunk = self._bytes_body[:4096]
         return body_chunk
 
-    def convert_body_to_unicode(self, body, bom, charset,
-                                ignore_errors, fix_special_entities):
+    def convert_body_to_unicode(
+        self, body, bom, charset, ignore_errors, fix_special_entities
+    ):
         # How could it be unicode???
         # if isinstance(body, unicode):
-            # body = body.encode('utf-8')
+        # body = body.encode('utf-8')
         if bom:
-            body = body[len(self.bom):]
+            body = body[len(self.bom) :]
         if fix_special_entities:
             body = weblib.encoding.fix_special_entities(body)
         if ignore_errors:
-            errors = 'ignore'
+            errors = "ignore"
         else:
-            errors = 'strict'
+            errors = "strict"
         return body.decode(charset, errors).strip()
 
     def read_body_from_file(self):
-        with open(self.body_path, 'rb') as inp:
+        with open(self.body_path, "rb") as inp:
             return inp.read()
 
     def unicode_body(self, ignore_errors=True, fix_special_entities=True):
@@ -585,9 +620,9 @@ class Document(object):
 
     def _write_body(self, body):
         if isinstance(body, six.text_type):
-            raise GrabMisuseError('Document.body could be only byte string.')
+            raise GrabMisuseError("Document.body could be only byte string.")
         elif self.body_path:
-            with open(self.body_path, 'wb') as out:
+            with open(self.body_path, "wb") as out:
                 out.write(body)
             self._bytes_body = None
         else:
@@ -604,71 +639,77 @@ class Document(object):
         Return DOM tree of the document built with HTML DOM builder.
         """
 
-        if self._grab_config['content_type'] == 'xml':
+        if self._grab_config["content_type"] == "xml":
             return self.build_xml_tree()
         else:
             return self.build_html_tree()
 
     @classmethod
     def _build_dom(cls, content, mode):
-        assert mode in ('html', 'xml')
-        if mode == 'html':
-            if not hasattr(THREAD_STORAGE, 'html_parser'):
+        assert mode in ("html", "xml")
+        if mode == "html":
+            if not hasattr(THREAD_STORAGE, "html_parser"):
                 THREAD_STORAGE.html_parser = HTMLParser()
-            dom = defusedxml.lxml.parse(StringIO(content),
-                                        parser=THREAD_STORAGE.html_parser)
+            dom = defusedxml.lxml.parse(
+                StringIO(content), parser=THREAD_STORAGE.html_parser
+            )
             return dom.getroot()
         else:
-            if not hasattr(THREAD_STORAGE, 'xml_parser'):
+            if not hasattr(THREAD_STORAGE, "xml_parser"):
                 THREAD_STORAGE.xml_parser = XMLParser()
-            dom = defusedxml.lxml.parse(BytesIO(content),
-                                        parser=THREAD_STORAGE.xml_parser)
+            dom = defusedxml.lxml.parse(
+                BytesIO(content), parser=THREAD_STORAGE.xml_parser
+            )
             return dom.getroot()
 
     def build_html_tree(self):
-        from grab.base import GLOBAL_STATE
+        from grab.base import GLOBAL_STATE  # pylint: disable=import-outside-toplevel
 
         if self._lxml_tree is None:
-            fix_setting = self._grab_config['fix_special_entities']
+            fix_setting = self._grab_config["fix_special_entities"]
             body = self.unicode_body(fix_special_entities=fix_setting).strip()
-            if self._grab_config['lowercased_tree']:
+            if self._grab_config["lowercased_tree"]:
                 body = body.lower()
-            if self._grab_config['strip_null_bytes']:
-                body = body.replace(NULL_BYTE, '')
+            if self._grab_config["strip_null_bytes"]:
+                body = body.replace(NULL_BYTE, "")
             # py3 hack
             if six.PY3:
-                body = RE_UNICODE_XML_DECLARATION.sub('', body)
+                body = RE_UNICODE_XML_DECLARATION.sub("", body)
             else:
-                body = RE_XML_DECLARATION.sub('', body)
+                body = RE_XML_DECLARATION.sub("", body)
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser
-                body = '<html></html>'
+                body = "<html></html>"
             start = time.time()
 
             try:
-                self._lxml_tree = self._build_dom(body, 'html')
-            except Exception as ex: # pylint: disable=broad-except
+                self._lxml_tree = self._build_dom(body, "html")
+            except Exception as ex:  # pylint: disable=broad-except
                 # FIXME: write test for this case
-                if (isinstance(ex, ParserError)
-                        and 'Document is empty' in str(ex)
-                        and '<html' not in body):
+                if (
+                    isinstance(ex, ParserError)
+                    and "Document is empty" in str(ex)
+                    and "<html" not in body
+                ):
                     # Fix for "just a string" body
-                    body = '<html>%s</html>' % body
-                    self._lxml_tree = self._build_dom(body, 'html')
+                    body = "<html>%s</html>" % body
+                    self._lxml_tree = self._build_dom(body, "html")
 
                 # FIXME: write test for this case
-                elif (isinstance(ex, TypeError)
-                      and "object of type 'NoneType' has no len" in str(ex)
-                      and '<html' not in body):
+                elif (
+                    isinstance(ex, TypeError)
+                    and "object of type 'NoneType' has no len" in str(ex)
+                    and "<html" not in body
+                ):
 
                     # Fix for smth like "<frameset></frameset>"
-                    body = '<html>%s</html>' % body
-                    self._lxml_tree = self._build_dom(body, 'html')
+                    body = "<html>%s</html>" % body
+                    self._lxml_tree = self._build_dom(body, "html")
                 else:
                     raise
 
-            GLOBAL_STATE['dom_build_time'] += (time.time() - start)
+            GLOBAL_STATE["dom_build_time"] += time.time() - start
         return self._lxml_tree
 
     @property
@@ -676,14 +717,16 @@ class Document(object):
         """
         Return DOM-tree of the document built with XML DOM builder.
         """
-        warn('Attribute `grab.xml_tree` is deprecated. '
-             'Use `Grab.doc.tree` attribute '
-             'AND content_type="xml" option instead.')
+        warn(
+            "Attribute `grab.xml_tree` is deprecated. "
+            "Use `Grab.doc.tree` attribute "
+            'AND content_type="xml" option instead.'
+        )
         return self.build_xml_tree()
 
     def build_xml_tree(self):
         if self._strict_lxml_tree is None:
-            self._strict_lxml_tree = self._build_dom(self.body, 'xml')
+            self._strict_lxml_tree = self._build_dom(self.body, "xml")
         return self._strict_lxml_tree
 
     # FormExtension methods
@@ -718,32 +761,32 @@ class Document(object):
             g.choose_form(xpath='//form[contains(@action, "/submit")]')
         """
 
-        id_ = kwargs.pop('id', None)
+        id_ = kwargs.pop("id", None)
         if id_ is not None:
             try:
                 self._lxml_form = self.select('//form[@id="%s"]' % id_).node()
-            except IndexError:
-                raise DataNotFound("There is no form with id: %s" % id_)
+            except IndexError as ex:
+                raise DataNotFound("There is no form with id: %s" % id_) from ex
         elif name is not None:
             try:
-                self._lxml_form = self.select(
-                    '//form[@name="%s"]' % name).node()
-            except IndexError:
-                raise DataNotFound('There is no form with name: %s' % name)
+                self._lxml_form = self.select('//form[@name="%s"]' % name).node()
+            except IndexError as ex:
+                raise DataNotFound("There is no form with name: %s" % name) from ex
         elif number is not None:
             try:
                 self._lxml_form = self.tree.forms[number]
-            except IndexError:
-                raise DataNotFound('There is no form with number: %s' % number)
+            except IndexError as ex:
+                raise DataNotFound("There is no form with number: %s" % number) from ex
         elif xpath is not None:
             try:
                 self._lxml_form = self.select(xpath).node()
-            except IndexError:
-                raise DataNotFound(
-                    'Could not find form with xpath: %s' % xpath)
+            except IndexError as ex:
+                raise DataNotFound("Could not find form with xpath: %s" % xpath) from ex
         else:
-            raise GrabMisuseError('choose_form methods requires one of '
-                                  '[number, id, name, xpath] arguments')
+            raise GrabMisuseError(
+                "choose_form methods requires one of "
+                "[number, id, name, xpath] arguments"
+            )
 
     @property
     def form(self):
@@ -767,13 +810,14 @@ class Document(object):
         """
 
         if self._lxml_form is None:
-            forms = [(idx, len(list(x.fields)))
-                     for idx, x in enumerate(self.tree.forms)]
+            forms = [
+                (idx, len(list(x.fields))) for idx, x in enumerate(self.tree.forms)
+            ]
             if forms:
                 idx = sorted(forms, key=lambda x: x[1], reverse=True)[0][0]
                 self.choose_form(idx)
             else:
-                raise DataNotFound('Response does not contains any form')
+                raise DataNotFound("Response does not contains any form")
         return self._lxml_form
 
     def set_input(self, name, value):
@@ -795,10 +839,10 @@ class Document(object):
 
         if self._lxml_form is None:
             self.choose_form_by_element('.//*[@name="%s"]' % name)
-        elem = self.form.inputs[name] # pylint: disable=no-member
+        elem = self.form.inputs[name]  # pylint: disable=no-member
 
         processed = False
-        if getattr(elem, 'type', None) == 'checkbox':
+        if getattr(elem, "type", None) == "checkbox":
             if isinstance(value, bool):
                 elem.checked = value
                 processed = True
@@ -807,9 +851,9 @@ class Document(object):
             # We need to remember original values of file fields
             # Because lxml will convert UploadContent/UploadFile object to
             # string
-            if getattr(elem, 'type', '').lower() == 'file':
+            if getattr(elem, "type", "").lower() == "file":
                 self._file_fields[name] = value
-                elem.value = ''
+                elem.value = ""
             else:
                 elem.value = value
 
@@ -827,7 +871,7 @@ class Document(object):
         sel = XpathSelector(self.form)
         elem = sel.select(xpath).node()
         # pylint: disable=no-member
-        return self.set_input(elem.get('name'), value)
+        return self.set_input(elem.get("name"), value)
 
     def set_input_by_number(self, number, value):
         """
@@ -839,7 +883,7 @@ class Document(object):
 
         sel = XpathSelector(self.form)
         elem = sel.select('.//input[@type="text"]')[number].node()
-        return self.set_input(elem.get('name'), value)
+        return self.set_input(elem.get("name"), value)
 
     def set_input_by_xpath(self, xpath, value):
         """
@@ -856,13 +900,13 @@ class Document(object):
             # which contains found element
             parent = elem
             while True:
-                parent = parent.getparent() # pylint: disable=no-member
-                if parent.tag == 'form':
+                parent = parent.getparent()  # pylint: disable=no-member
+                if parent.tag == "form":
                     self._lxml_form = parent
                     break
 
         # pylint: disable=no-member
-        return self.set_input(elem.get('name'), value)
+        return self.set_input(elem.get("name"), value)
 
     # FIXME:
     # * Remove set_input_by_id
@@ -870,8 +914,8 @@ class Document(object):
     # * New method: set_input_by(id=None, number=None, xpath=None)
 
     def get_form_request(
-            self, submit_name=None,
-            url=None, extra_post=None, remove_from_post=None):
+        self, submit_name=None, url=None, extra_post=None, remove_from_post=None
+    ):
         """
         Submit default form.
 
@@ -899,8 +943,11 @@ class Document(object):
         # Build list of submit buttons which have a name
         submit_controls = {}
         for elem in self.form.inputs:
-            if (elem.tag == 'input' and elem.type == 'submit' and
-                    elem.get('name') is not None):
+            if (
+                elem.tag == "input"
+                and elem.type == "submit"
+                and elem.get("name") is not None
+            ):
                 submit_controls[elem.name] = elem
 
         # All this code need only for one reason:
@@ -911,8 +958,7 @@ class Document(object):
             # If name of submit control is not given then
             # use the name of first submit control
             if submit_name is None or submit_name not in submit_controls:
-                controls = sorted(submit_controls.values(),
-                                  key=lambda x: x.name)
+                controls = sorted(submit_controls.values(), key=lambda x: x.name)
                 submit_name = controls[0].name
 
             # Form data should contain only one submit control
@@ -924,15 +970,14 @@ class Document(object):
         if url:
             action_url = urljoin(self.url, url)
         else:
-            action_url = urljoin(self.url,
-                                 self.form.action)
+            action_url = urljoin(self.url, self.form.action)
 
         # Values from `extra_post` should override values in form
         # `extra_post` allows multiple value of one key
 
         # Process saved values of file fields
-        if self.form.method == 'POST':
-            if 'multipart' in self.form.get('enctype', ''):
+        if self.form.method == "POST":
+            if "multipart" in self.form.get("enctype", ""):
                 for key, obj in self._file_fields.items():
                     post[key] = obj
 
@@ -954,42 +999,41 @@ class Document(object):
                 post_items.append((key, value))
 
         if remove_from_post:
-            post_items = [(x, y) for x, y in post_items
-                          if x not in remove_from_post]
+            post_items = [(x, y) for x, y in post_items if x not in remove_from_post]
 
         result = {
-            'multipart_post': None,
-            'post': None,
-            'url': None,
+            "multipart_post": None,
+            "post": None,
+            "url": None,
         }
 
-        if self.form.method == 'POST':
-            if 'multipart' in self.form.get('enctype', ''):
-                result['multipart_post'] = post_items
-                #self.grab.setup(multipart_post=post_items)
+        if self.form.method == "POST":
+            if "multipart" in self.form.get("enctype", ""):
+                result["multipart_post"] = post_items
+                # self.grab.setup(multipart_post=post_items)
             else:
-                result['post'] = post_items
-                #self.grab.setup(post=post_items)
-            result['url'] = action_url
-            #self.grab.setup(url=action_url)
+                result["post"] = post_items
+                # self.grab.setup(post=post_items)
+            result["url"] = action_url
+            # self.grab.setup(url=action_url)
 
         else:
-            url = action_url.split('?')[0] + '?' + smart_urlencode(post_items)
-            result['url'] = url
-            #self.grab.setup(url=url)
+            url = action_url.split("?")[0] + "?" + smart_urlencode(post_items)
+            result["url"] = url
+            # self.grab.setup(url=url)
 
         return result
 
-        #if make_request:
+        # if make_request:
         #    return self.grab.request()
-        #else:
+        # else:
         #    return None
 
     def submit(self, *args, **kwargs):
         warn(
-            'Method `Document.submit` is deprecated. '
-            'Use `Grab.submit` method instead.',
-            stacklevel=3
+            "Method `Document.submit` is deprecated. "
+            "Use `Grab.submit` method instead.",
+            stacklevel=3,
         )
         self.grab.submit(*args, **kwargs)
 
@@ -1000,37 +1044,37 @@ class Document(object):
         Fill some fields with reasonable values.
         """
 
-        fields = dict(self.form.fields) # pylint: disable=no-member
+        fields = dict(self.form.fields)  # pylint: disable=no-member
 
         fields_to_remove = set()
 
         for key, val in list(fields.items()):
             if isinstance(val, CheckboxValues):
-                if not len(val): # pylint: disable=len-as-condition
+                if not len(val):  # pylint: disable=len-as-condition
                     del fields[key]
                 elif len(val) == 1:
                     fields[key] = val.pop()
                 else:
                     fields[key] = list(val)
             if isinstance(val, MultipleSelectOptions):
-                if not len(val): # pylint: disable=len-as-condition
+                if not len(val):  # pylint: disable=len-as-condition
                     del fields[key]
                 elif len(val) == 1:
                     fields[key] = val.pop()
                 else:
                     fields[key] = list(val)
 
-        for elem in self.form.inputs: # pylint: disable=no-member
+        for elem in self.form.inputs:  # pylint: disable=no-member
             # Ignore elements without name
-            if not elem.get('name'):
+            if not elem.get("name"):
                 continue
 
             # Do not submit disabled fields
             # http://www.w3.org/TR/html4/interact/forms.html#h-17.12
-            if elem.get('disabled'):
+            if elem.get("disabled"):
                 if elem.name in fields:
                     fields_to_remove.add(elem.name)
-            elif getattr(elem, 'type', None) == 'checkbox':
+            elif getattr(elem, "type", None) == "checkbox":
                 if not elem.checked:
                     if elem.name is not None:
                         if elem.name in fields and fields[elem.name] is None:
@@ -1038,14 +1082,14 @@ class Document(object):
             else:
                 if elem.name in fields_to_remove:
                     fields_to_remove.remove(elem.name)
-                if elem.tag == 'select':
+                if elem.tag == "select":
                     if elem.name in fields and fields[elem.name] is None:
                         if elem.value_options:
                             fields[elem.name] = elem.value_options[0]
 
-                elif getattr(elem, 'type', None) == 'radio':
+                elif getattr(elem, "type", None) == "radio":
                     if fields[elem.name] is None:
-                        fields[elem.name] = elem.get('value')
+                        fields[elem.name] = elem.get("value")
         for fname in fields_to_remove:
             del fields[fname]
         return fields
@@ -1053,9 +1097,9 @@ class Document(object):
     def choose_form_by_element(self, xpath):
         elem = self.select(xpath).node()
         while elem is not None:
-            if elem.tag == 'form': # pylint: disable=no-member
+            if elem.tag == "form":  # pylint: disable=no-member
                 self._lxml_form = elem
                 return
             else:
-                elem = elem.getparent() # pylint: disable=no-member
+                elem = elem.getparent()  # pylint: disable=no-member
         self._lxml_form = None

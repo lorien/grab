@@ -4,10 +4,13 @@ from contextlib import contextmanager
 from io import TextIOBase
 
 
-def default_logging(grab_log=None, # '/tmp/grab.log',
-                    network_log=None, # '/tmp/grab.network.log',
-                    level=logging.DEBUG, mode='a',
-                    propagate_network_logger=False):
+def default_logging(
+    grab_log=None,  # '/tmp/grab.log',
+    network_log=None,  # '/tmp/grab.network.log',
+    level=logging.DEBUG,
+    mode="a",
+    propagate_network_logger=False,
+):
     """
     Customize logging output to display all log messages
     except grab network logs.
@@ -17,14 +20,14 @@ def default_logging(grab_log=None, # '/tmp/grab.log',
 
     logging.basicConfig(level=level)
 
-    network_logger = logging.getLogger('grab.network')
+    network_logger = logging.getLogger("grab.network")
     network_logger.propagate = propagate_network_logger
     if network_log:
         hdl = logging.FileHandler(network_log, mode)
         network_logger.addHandler(hdl)
         network_logger.setLevel(level)
 
-    grab_logger = logging.getLogger('grab')
+    grab_logger = logging.getLogger("grab")
     if grab_log:
         hdl = logging.FileHandler(grab_log, mode)
         grab_logger.addHandler(hdl)
@@ -54,18 +57,18 @@ class PycurlSigintHandler(TextIOBase):
         self.buf.append(data)
 
     def get_output(self):
-        return ''.join(self.buf)
+        return "".join(self.buf)
 
     @contextmanager
     def handle_sigint(self):
         with self.record():
             try:
                 yield
-            except Exception: # pylint: disable=broad-except
-                if 'KeyboardInterrupt' in self.get_output():
-                    raise KeyboardInterrupt
+            except Exception as ex:  # pylint: disable=broad-except
+                if "KeyboardInterrupt" in self.get_output():
+                    raise KeyboardInterrupt from ex
                 else:
                     raise
             else:
-                if 'KeyboardInterrupt' in self.get_output():
+                if "KeyboardInterrupt" in self.get_output():
                     raise KeyboardInterrupt

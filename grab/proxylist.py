@@ -10,19 +10,19 @@ import six
 
 from grab.error import GrabError
 
-RE_SIMPLE_PROXY = re.compile(r'^([^:]+):([^:]+)$')
-RE_AUTH_PROXY = re.compile(r'^([^:]+):([^:]+):([^:]+):([^:]+)$')
-PROXY_FIELDS = ('host', 'port', 'username', 'password', 'proxy_type')
-logger = logging.getLogger('grab.proxylist') # pylint: disable=invalid-name
+RE_SIMPLE_PROXY = re.compile(r"^([^:]+):([^:]+)$")
+RE_AUTH_PROXY = re.compile(r"^([^:]+):([^:]+):([^:]+):([^:]+)$")
+PROXY_FIELDS = ("host", "port", "username", "password", "proxy_type")
+logger = logging.getLogger("grab.proxylist")  # pylint: disable=invalid-name
 
 
-class Proxy(namedtuple('Proxy', PROXY_FIELDS)):
+class Proxy(namedtuple("Proxy", PROXY_FIELDS)):
     def get_address(self):
-        return '%s:%s' % (self.host, self.port)
+        return "%s:%s" % (self.host, self.port)
 
     def get_userpwd(self):
         if self.username:
-            return '%s:%s' % (self.username, self.password or '')
+            return "%s:%s" % (self.username, self.password or "")
 
 
 class InvalidProxyLine(GrabError):
@@ -48,30 +48,30 @@ def parse_proxy_line(line):
         host, port, user, pwd = match.groups()
         return host, port, user, pwd
 
-    raise InvalidProxyLine('Invalid proxy line: %s' % line)
+    raise InvalidProxyLine("Invalid proxy line: %s" % line)
 
 
-def parse_raw_list_data(data, proxy_type='http', proxy_userpwd=None):
+def parse_raw_list_data(data, proxy_type="http", proxy_userpwd=None):
     """Iterate over proxy servers found in the raw data"""
     if not isinstance(data, six.text_type):
-        data = data.decode('utf-8')
+        data = data.decode("utf-8")
     for orig_line in data.splitlines():
-        line = orig_line.strip().replace(' ', '')
-        if line and not line.startswith('#'):
+        line = orig_line.strip().replace(" ", "")
+        if line and not line.startswith("#"):
             try:
                 host, port, username, password = parse_proxy_line(line)
             except InvalidProxyLine as ex:
                 logger.error(ex)
             else:
                 if username is None and proxy_userpwd is not None:
-                    username, password = proxy_userpwd.split(':')
+                    username, password = proxy_userpwd.split(":")
                 yield Proxy(host, port, username, password, proxy_type)
 
 
 class BaseProxySource(object):
-    def __init__(self, proxy_type='http', proxy_userpwd=None, **kwargs):
-        kwargs['proxy_type'] = proxy_type
-        kwargs['proxy_userpwd'] = proxy_userpwd
+    def __init__(self, proxy_type="http", proxy_userpwd=None, **kwargs):
+        kwargs["proxy_type"] = proxy_type
+        kwargs["proxy_userpwd"] = proxy_userpwd
         self.config = kwargs
 
     def load_raw_data(self):
@@ -79,24 +79,29 @@ class BaseProxySource(object):
 
     def load(self):
         data = self.load_raw_data()
-        return list(parse_raw_list_data(
-            data,
-            proxy_type=self.config['proxy_type'],
-            proxy_userpwd=self.config['proxy_userpwd']))
+        return list(
+            parse_raw_list_data(
+                data,
+                proxy_type=self.config["proxy_type"],
+                proxy_userpwd=self.config["proxy_userpwd"],
+            )
+        )
 
 
 class FileProxySource(BaseProxySource):
     """Proxy source that loads list from the file"""
+
     def __init__(self, path, **kwargs):
         self.path = path
         super(FileProxySource, self).__init__(**kwargs)
 
     def load_raw_data(self):
-        return open(self.path).read()
+        return open(self.path, encoding="utf-8").read()
 
 
 class WebProxySource(BaseProxySource):
     """Proxy source that loads list from web resource"""
+
     def __init__(self, url, **kwargs):
         self.url = url
         super(WebProxySource, self).__init__(**kwargs)
@@ -106,24 +111,26 @@ class WebProxySource(BaseProxySource):
         for count in range(limit):
             try:
                 data = urlopen(self.url, timeout=3).read()
-                return data.decode('utf-8', 'ignore')
+                return data.decode("utf-8", "ignore")
             except URLError:
                 if count >= (limit - 1):
                     raise
                 else:
-                    logger.debug('Failed to retreive proxy list from %s.'
-                                 ' Retrying.', self.url)
+                    logger.debug(
+                        "Failed to retreive proxy list from %s." " Retrying.", self.url
+                    )
 
 
 class ListProxySource(BaseProxySource):
     """That proxy source that loads list from
     python list of strings"""
+
     def __init__(self, items, **kwargs):
         self.items = items
         super(ListProxySource, self).__init__(**kwargs)
 
     def load_raw_data(self):
-        return '\n'.join(self.items)
+        return "\n".join(self.items)
 
 
 class ProxyList(object):

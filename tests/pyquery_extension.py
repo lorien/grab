@@ -26,17 +26,21 @@ HTML = u"""
         <li id="num-1">item #100 2</li>
         <li id="num-2">item #2</li>
     </ul>
-""".encode('cp1251')
+""".encode(
+    "cp1251"
+)
 
 
 class PyqueryExtensionTest(BaseGrabTestCase):
     def setUp(self):
         # Create fake grab instance with fake response
-        self.grab = Grab(HTML, charset='cp1251')
+        self.grab = Grab(HTML, charset="cp1251")
 
     def test_some_things(self):
-        from pyquery import PyQuery
+        from pyquery import PyQuery  # pylint: disable=import-outside-toplevel
 
-        self.assertEqual(self.grab.pyquery('#num-1').text(), u'item #100 2')
-        self.assertEqual(self.grab.pyquery('li').filter(
-            lambda x: '#2' in PyQuery(x).text()).text(), u'item #2')
+        self.assertEqual(self.grab.pyquery("#num-1").text(), u"item #100 2")
+        self.assertEqual(
+            self.grab.pyquery("li").filter(lambda x: "#2" in PyQuery(x).text()).text(),
+            u"item #2",
+        )

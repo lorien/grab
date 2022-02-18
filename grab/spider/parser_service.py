@@ -1,5 +1,4 @@
 import time
-from traceback import format_exc
 import sys
 
 from six.moves.queue import Queue
@@ -24,7 +23,7 @@ class ParserService(BaseService):
         to_remove = []
         for worker in self.workers_pool:
             if not worker.is_alive():
-                self.spider.stat.inc('parser:worker-restarted')
+                self.spider.stat.inc("parser:worker-restarted")
                 new_worker = self.create_worker(self.worker_callback)
                 self.workers_pool.append(new_worker)
                 new_worker.start()
@@ -53,19 +52,22 @@ class ParserService(BaseService):
                     try:
                         handler = self.spider.find_task_handler(task)
                     except NoTaskHandler as ex:
-                        ex.tb = format_exc()
+                        # WTF, disabling it for the moment
+                        # ex.tb = format_exc()
                         self.spider.task_dispatcher.input_queue.put(
-                            (ex, task, {'exc_info': sys.exc_info()})
+                            (ex, task, {"exc_info": sys.exc_info()})
                         )
-                        self.spider.stat.inc('parser:handler-not-found')
+                        self.spider.stat.inc("parser:handler-not-found")
                     else:
                         self.execute_task_handler(handler, result, task)
-                        self.spider.stat.inc('parser:handler-processed')
+                        self.spider.stat.inc("parser:handler-processed")
                     if self.spider.parser_requests_per_process:
-                        if (process_request_count >=
-                                self.spider.parser_requests_per_process):
+                        if (
+                            process_request_count
+                            >= self.spider.parser_requests_per_process
+                        ):
                             self.spider.stat.inc(
-                                'parser:handler-req-limit',
+                                "parser:handler-req-limit",
                             )
                             return
                 finally:
@@ -74,7 +76,7 @@ class ParserService(BaseService):
     def execute_task_handler(self, handler, result, task):
         # pylint: disable=broad-except
         try:
-            handler_result = handler(result['grab'], task)
+            handler_result = handler(result["grab"], task)
             if handler_result is None:
                 pass
             else:
@@ -83,7 +85,13 @@ class ParserService(BaseService):
                         (item, task, None),
                     )
         except Exception as ex:
-            self.spider.task_dispatcher.input_queue.put((ex, task, {
-                'exc_info': sys.exc_info(),
-                'from': 'parser',
-            }))
+            self.spider.task_dispatcher.input_queue.put(
+                (
+                    ex,
+                    task,
+                    {
+                        "exc_info": sys.exc_info(),
+                        "from": "parser",
+                    },
+                )
+            )

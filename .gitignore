@@ -23,3 +23,4 @@ dist/
 /src/
 /test_server
 /build/
+/.pytype/

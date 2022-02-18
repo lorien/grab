@@ -1,6 +1,7 @@
 from unittest import TestCase
-import six
 import time
+
+import six
 
 from tests.util import BaseGrabTestCase, build_spider
 from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
@@ -30,6 +31,10 @@ class SpiderQueueMixin(object):
 
     def test_queue_length(self):
         class CustomSpider(self.SimpleSpider):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.final_taskq_size = None
+
             def shutdown(self):
                 self.final_taskq_size = self.task_queue.size()
 

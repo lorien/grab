@@ -12,7 +12,7 @@ import six
 from weblib import metric
 
 from grab.base import Grab
-from grab.error import GrabError, GrabInvalidUrl, raise_feature_is_deprecated
+from grab.error import GrabInvalidUrl, raise_feature_is_deprecated
 from grab.spider.error import (
     SpiderError,
     SpiderMisuseError,
@@ -215,7 +215,10 @@ class Spider(object):
         assert network_service in ("threaded",)
         if network_service == "threaded":
             # pylint: disable=no-name-in-module, import-error
+            # pylint: disable=import-outside-toplevel
             from grab.spider.network_service.threaded import NetworkServiceThreaded
+
+            # pylint: enable=import-outside-toplevel
 
             self.network_service = NetworkServiceThreaded(self, self.thread_number)
         self.task_dispatcher = TaskDispatcherService(self)
@@ -228,7 +231,7 @@ class Spider(object):
             self,
         )
 
-    def setup_cache(self, *args, **kwargs):
+    def setup_cache(self, *args, **kwargs):  # pylint: disable=unused-argument
         raise_feature_is_deprecated("Cache feature")
 
     def setup_queue(self, backend="memory", **kwargs):
@@ -434,14 +437,11 @@ class Spider(object):
         after parsing has been done.
         """
 
-        pass
-
     def update_grab_instance(self, grab):
         """
         Use this method to automatically update config of any
         `Grab` instance created by the spider.
         """
-        pass
 
     def create_grab_instance(self, **kwargs):
         # Back-ward compatibility for deprecated `grab_config` attribute
@@ -569,10 +569,10 @@ class Spider(object):
         else:
             try:
                 handler = getattr(self, "task_%s" % task.name)
-            except AttributeError:
+            except AttributeError as ex:
                 raise NoTaskHandler(
                     "No handler or callback defined for " "task %s" % task.name
-                )
+                ) from ex
             else:
                 return handler
 
@@ -721,7 +721,7 @@ class Spider(object):
         raise_feature_is_deprecated("Cache feature")
 
     @cache_reader_service.setter
-    def cache_reader_service(self, val):
+    def cache_reader_service(self, _):
         raise_feature_is_deprecated("Cache feature")
 
     @property
@@ -729,5 +729,5 @@ class Spider(object):
         raise_feature_is_deprecated("Cache feature")
 
     @cache_writer_service.setter
-    def cache_writer_service(self, val):
+    def cache_writer_service(self, _):
         raise_feature_is_deprecated("Cache feature")

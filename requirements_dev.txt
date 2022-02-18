@@ -18,3 +18,4 @@ psutil
 tox
 pysocks
 certifi
+fastrq

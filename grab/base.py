@@ -563,8 +563,6 @@ class Grab(DeprecatedThings):
                     for key, value in items:
                         if len(value) > self.config["debug_post_limit"]:
                             value = value[: self.config["debug_post_limit"]] + b"..."
-                        else:
-                            value = value
                         new_items.append((key, value))
                     post = "\n".join("%-25s: %s" % x for x in new_items)
             if post:

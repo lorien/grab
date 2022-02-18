@@ -1,19 +1,19 @@
 [MASTER]
 jobs=4
 extension-pkg-whitelist=pycurl,lxml
-ignore=invalid_import.py
+#ignore=invalid_import.py
 
-[TYPECHEK]
+#[TYPECHEK]
 #ignored-modules=six.moves.urllib, six.moves.http_cookiejar, six.moves.queue, six.moves.socketserver, six.moves.SimpleHTTPServer
 
 [MESSAGES CONTROL]
-disable=R,I,fixme,missing-docstring
+disable=R,fixme,missing-docstring,consider-using-f-string
 
-[REPORTS]
-reports=no
+#[REPORTS]
+#reports=no
 
-[IMPORTS]
-known-standard-library=marshal
+#[IMPORTS]
+#known-standard-library=marshal
 
 [BASIC]
 method-rgx=([a-z_][a-z0-9_]{2,30}|test_[a-z_][a-z0-9_]{2,50})$
@@ -22,4 +22,4 @@ variable-rgx=[a-z_][a-z0-9_]{1,30}$
 argument-rgx=[a-z_][a-z0-9_]{1,30}$
 
 [FORMAT]
-max-line-length=79
+max-line-length=88

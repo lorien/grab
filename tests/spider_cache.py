@@ -1,14 +1,6 @@
-from copy import deepcopy
-import itertools
-import time
-import logging
-
-import six
-import mock
-
 from grab.error import GrabFeatureIsDeprecated
-from tests.util import BaseGrabTestCase, build_spider
 from grab.spider import Spider, Task
+from tests.util import BaseGrabTestCase
 
 
 class SimpleSpider(Spider):

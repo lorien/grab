@@ -1,5 +1,6 @@
 # coding: utf-8
 from grab import DataNotFound
+from grab.util import warning
 
 from tests.util import build_grab
 from tests.util import BaseGrabTestCase
@@ -46,16 +47,12 @@ XML = b"""
 class LXMLExtensionTest(BaseGrabTestCase):
     @classmethod
     def setUpClass(cls):
-        import grab.util.warning
-
-        grab.util.warning.DISABLE_WARNINGS = True
+        warning.DISABLE_WARNINGS = True
         super(LXMLExtensionTest, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        import grab.util.warning
-
-        grab.util.warning.DISABLE_WARNINGS = False
+        warning.DISABLE_WARNINGS = False
         super(LXMLExtensionTest, cls).tearDownClass()
 
     def setUp(self):
@@ -65,7 +62,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
         self.grab = build_grab()
         self.grab.setup_document(HTML, charset="cp1251")
 
-        from lxml.html import fromstring
+        from lxml.html import fromstring  # pylint: disable=import-outside-toplevel
 
         self.lxml_tree = fromstring(self.grab.doc.body)
 
@@ -84,7 +81,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
     def test_lxml_xpath(self):
         names = set(x.tag for x in self.lxml_tree.xpath('//div[@id="bee"]//*'))
         self.assertEqual(set(["em", "div", "strong", "style", "script"]), names)
-        xpath_query = '//div[@id="bee"]//*[name() != "script" and ' 'name() != "style"]'
+        xpath_query = '//div[@id="bee"]//*[name() != "script" and name() != "style"]'
         names = set(x.tag for x in self.lxml_tree.xpath(xpath_query))
         self.assertEqual(set(["em", "div", "strong"]), names)
 

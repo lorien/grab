@@ -25,9 +25,7 @@ class CustomPriorityQueue(PriorityQueue):
     # https://github.com/limen/fastrq/blob/master/fastrq/base.py
     def connect(self):
         if self._redis is None:
-            self._redis = StrictRedis(
-                decode_responses=False, **self._conn_kwargs
-            )
+            self._redis = StrictRedis(decode_responses=False, **self._conn_kwargs)
         return self._redis
 
     def clear(self):
@@ -40,15 +38,14 @@ class QueueBackend(QueueInterface):
         super(QueueBackend, self).__init__(spider_name, **kwargs)
         self.spider_name = spider_name
         if queue_name is None:
-            queue_name = 'task_queue_%s' % spider_name
+            queue_name = "task_queue_%s" % spider_name
         self.queue_name = queue_name
         self.queue_object = CustomPriorityQueue(queue_name, **kwargs)
-        logging.debug('Redis queue key: %s', self.queue_name)
+        logging.debug("Redis queue key: %s", self.queue_name)
 
     def put(self, task, priority, schedule_time=None):
         if schedule_time is not None:
-            raise SpiderMisuseError('Redis task queue does not support '
-                                    'delayed task')
+            raise SpiderMisuseError("Redis task queue does not support " "delayed task")
         # Add attribute with random value
         # This is required because qr library
         # does not allow to store multiple values with same hash
@@ -62,7 +59,7 @@ class QueueBackend(QueueInterface):
         if task is None:
             raise queue.Empty()
         else:
-            return pickle.loads(task[0])
+            return pickle.loads(task[0])  # pylint: disable=unsubscriptable-object
 
     def size(self):
         return len(self.queue_object)

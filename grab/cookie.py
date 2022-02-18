@@ -13,9 +13,20 @@ from six.moves.urllib.parse import urlparse, urlunparse
 
 from grab.error import GrabMisuseError
 
-COOKIE_ATTRS = ('name', 'value', 'version', 'port', 'domain',
-                'path', 'secure', 'expires', 'discard', 'comment',
-                'comment_url', 'rfc2109')
+COOKIE_ATTRS = (
+    "name",
+    "value",
+    "version",
+    "port",
+    "domain",
+    "path",
+    "secure",
+    "expires",
+    "discard",
+    "comment",
+    "comment_url",
+    "rfc2109",
+)
 
 
 # Source:
@@ -47,16 +58,22 @@ class MockRequest(object):
     def get_full_url(self):
         # Only return the response's URL if the user hadn't set the Host
         # header
-        if not self._req.headers.get('Host'):
+        if not self._req.headers.get("Host"):
             return self._req.url
         # If they did set it, retrieve it and reconstruct the expected domain
-        host = self._req.headers['Host']
+        host = self._req.headers["Host"]
         parsed = urlparse(self._req.url)
         # Reconstruct the URL as we expect it
-        return urlunparse([
-            parsed.scheme, host, parsed.path, parsed.params, parsed.query,
-            parsed.fragment
-        ])
+        return urlunparse(
+            [
+                parsed.scheme,
+                host,
+                parsed.path,
+                parsed.params,
+                parsed.query,
+                parsed.fragment,
+            ]
+        )
 
     def is_unverifiable(self):
         return True
@@ -65,16 +82,16 @@ class MockRequest(object):
         return name in self._req.headers or name in self._new_headers
 
     def get_header(self, name, default=None):
-        return self._req.headers.get(name,
-                                     self._new_headers.get(name, default))
+        return self._req.headers.get(name, self._new_headers.get(name, default))
 
     def add_header(self, key, val):
         """
         cookielib has no legitimate use for this method;
         add it back if you find one.
         """
-        raise NotImplementedError('Cookie headers should be added'
-                                  ' with add_unredirected_header()')
+        raise NotImplementedError(
+            "Cookie headers should be added" " with add_unredirected_header()"
+        )
 
     def add_unredirected_header(self, name, value):
         self._new_headers[name] = value
@@ -118,36 +135,39 @@ class MockResponse(object):
 def create_cookie(name, value, domain, httponly=None, **kwargs):
     """Creates `cookielib.Cookie` instance"""
 
-    if domain == 'localhost':
-        domain = ''
+    if domain == "localhost":
+        domain = ""
     config = dict(
         name=name,
         value=value,
         version=0,
         port=None,
         domain=domain,
-        path='/',
+        path="/",
         secure=False,
         expires=None,
         discard=True,
         comment=None,
         comment_url=None,
         rfc2109=False,
-        rest={'HttpOnly': httponly},
+        rest={"HttpOnly": httponly},
     )
 
     for key in kwargs:
         if key not in config:
-            raise GrabMisuseError('Function `create_cookie` does not accept '
-                                  '`%s` argument' % key)
+            raise GrabMisuseError(
+                "Function `create_cookie` does not accept " "`%s` argument" % key
+            )
 
     config.update(**kwargs)
-    config['rest']['HttpOnly'] = httponly
+    config["rest"]["HttpOnly"] = httponly
 
-    config['port_specified'] = bool(config['port'])
-    config['domain_specified'] = bool(config['domain'])
-    config['domain_initial_dot'] = (config['domain'] or '').startswith('.')
-    config['path_specified'] = bool(config['path'])
+    config["port_specified"] = bool(config["port"])
+    config["domain_specified"] = bool(config["domain"])
+    # pytype: disable=attribute-error
+    config["domain_initial_dot"] = (config["domain"] or "").startswith(".")
+    # pytype: enable=attribute-error
+    config["path_specified"] = bool(config["path"])
 
     return Cookie(**config)
 
@@ -161,7 +181,7 @@ class CookieManager(object):
     different places.
     """
 
-    __slots__ = ('cookiejar',)
+    __slots__ = ("cookiejar",)
 
     def __init__(self, cookiejar=None):
         if cookiejar is not None:
@@ -171,7 +191,7 @@ class CookieManager(object):
         # self.disable_cookiejar_lock(self.cookiejar)
 
     # def disable_cookiejar_lock(self, cj):
-        # cj._cookies_lock = dummy_threading.RLock()
+    # cj._cookies_lock = dummy_threading.RLock()
 
     def set(self, name, value, domain, **kwargs):
         """Add new cookie or replace existing cookie with same parameters.
@@ -181,8 +201,8 @@ class CookieManager(object):
         :param kwargs: extra attributes of cookie
         """
 
-        if domain == 'localhost':
-            domain = ''
+        if domain == "localhost":
+            domain = ""
 
         self.cookiejar.set_cookie(create_cookie(name, value, domain, **kwargs))
 
@@ -194,8 +214,9 @@ class CookieManager(object):
             for cookie in cookies.cookiejar:
                 self.cookiejar.set_cookie(cookie)
         else:
-            raise GrabMisuseError('Unknown type of cookies argument: %s'
-                                  % type(cookies))
+            raise GrabMisuseError(
+                "Unknown type of cookies argument: %s" % type(cookies)
+            )
 
     @classmethod
     def from_cookie_list(cls, clist):
@@ -210,22 +231,22 @@ class CookieManager(object):
     def __getstate__(self):
         state = {}
         for cls in type(self).mro():
-            cls_slots = getattr(cls, '__slots__', ())
+            cls_slots = getattr(cls, "__slots__", ())
             for slot in cls_slots:
-                if slot != '__weakref__':
+                if slot != "__weakref__":
                     if hasattr(self, slot):
                         state[slot] = getattr(self, slot)
 
-        state['_cookiejar_cookies'] = list(self.cookiejar)
-        del state['cookiejar']
+        state["_cookiejar_cookies"] = list(self.cookiejar)
+        del state["cookiejar"]
 
         return state
 
     def __setstate__(self, state):
-        state['cookiejar'] = CookieJar()
-        for cookie in state['_cookiejar_cookies']:
-            state['cookiejar'].set_cookie(cookie)
-        del state['_cookiejar_cookies']
+        state["cookiejar"] = CookieJar()
+        for cookie in state["_cookiejar_cookies"]:
+            state["cookiejar"].set_cookie(cookie)
+        del state["_cookiejar_cookies"]
 
         for slot, value in state.items():
             setattr(self, slot, value)
@@ -249,16 +270,17 @@ class CookieManager(object):
         Content of file should be a JSON-serialized list of dicts.
         """
 
-        with open(path) as inf:
+        with open(path, encoding="utf-8") as inf:
             data = inf.read()
             if data:
                 items = json.loads(data)
             else:
                 items = {}
         for item in items:
-            extra = dict((x, y) for x, y in item.items()
-                         if x not in ['name', 'value', 'domain'])
-            self.set(item['name'], item['value'], item['domain'], **extra)
+            extra = dict(
+                (x, y) for x, y in item.items() if x not in ["name", "value", "domain"]
+            )
+            self.set(item["name"], item["value"], item["domain"], **extra)
 
     def get_dict(self):
         res = []
@@ -273,7 +295,7 @@ class CookieManager(object):
         Cookies are dumped as JSON-serialized dict of keys and values.
         """
 
-        with open(path, 'w') as out:
+        with open(path, "w", encoding="utf-8") as out:
             out.write(json.dumps(self.get_dict()))
 
     def get_cookie_header(self, req):
@@ -283,4 +305,4 @@ class CookieManager(object):
         """
         mocked_req = MockRequest(req)
         self.cookiejar.add_cookie_header(mocked_req)
-        return mocked_req.get_new_headers().get('Cookie')
+        return mocked_req.get_new_headers().get("Cookie")

@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 
 from grab.spider.error import SpiderMisuseError
 from grab.base import copy_config
-from grab.util.warning import warn
 from grab.error import raise_feature_is_deprecated
 
 
@@ -16,23 +15,29 @@ class Task(BaseTask):
     Task for spider.
     """
 
-    def __init__(self, name=None, url=None, grab=None, grab_config=None,
-                 priority=None,
-                 priority_set_explicitly=True,
-                 network_try_count=0,
-                 task_try_count=1,
-                 valid_status=None,
-                 use_proxylist=True,
-                 delay=None,
-                 raw=False,
-                 callback=None,
-                 fallback_name=None,
-                 # deprecated
-                 disable_cache=False,
-                 refresh_cache=False,
-                 cache_timeout=None,
-                 # kwargs
-                 **kwargs):
+    def __init__(
+        self,
+        name=None,
+        url=None,
+        grab=None,
+        grab_config=None,
+        priority=None,
+        priority_set_explicitly=True,
+        network_try_count=0,
+        task_try_count=1,
+        valid_status=None,
+        use_proxylist=True,
+        delay=None,
+        raw=False,
+        callback=None,
+        fallback_name=None,
+        # deprecated
+        disable_cache=False,
+        refresh_cache=False,
+        cache_timeout=None,
+        # kwargs
+        **kwargs
+    ):
         """
         Create `Task` object.
 
@@ -95,9 +100,9 @@ class Task(BaseTask):
         """
 
         if disable_cache or refresh_cache or cache_timeout:
-            raise_feature_is_deprecated('Cache feature')
+            raise_feature_is_deprecated("Cache feature")
 
-        if name == 'generator':
+        if name == "generator":
             # The name "generator" is restricted because
             # `task_generator` handler could not be created because
             # this name is already used for special method which
@@ -107,20 +112,25 @@ class Task(BaseTask):
         self.name = name
 
         if url is None and grab is None and grab_config is None:
-            raise SpiderMisuseError('Either url, grab or grab_config argument '
-                                    'of Task constructor should not be None')
+            raise SpiderMisuseError(
+                "Either url, grab or grab_config argument "
+                "of Task constructor should not be None"
+            )
 
         if url is not None and grab is not None:
-            raise SpiderMisuseError('Options url and grab could not be used '
-                                    'together')
+            raise SpiderMisuseError(
+                "Options url and grab could not be used " "together"
+            )
 
         if url is not None and grab_config is not None:
-            raise SpiderMisuseError('Options url and grab_config could not be '
-                                    'used together')
+            raise SpiderMisuseError(
+                "Options url and grab_config could not be " "used together"
+            )
 
         if grab is not None and grab_config is not None:
             raise SpiderMisuseError(
-                'Options grab and grab_config could not be used together')
+                "Options grab and grab_config could not be used together"
+            )
 
         if grab:
             self.setup_grab_config(grab.dump_config())
@@ -164,7 +174,7 @@ class Task(BaseTask):
 
     def setup_grab_config(self, grab_config):
         self.grab_config = copy_config(grab_config)
-        self.url = grab_config['url']
+        self.url = grab_config["url"]
 
     def clone(self, **kwargs):
         """
@@ -176,44 +186,45 @@ class Task(BaseTask):
 
         # First, create exact copy of the current Task object
         attr_copy = self.__dict__.copy()
-        if attr_copy.get('grab_config') is not None:
-            del attr_copy['url']
-        if not attr_copy['priority_set_explicitly']:
-            attr_copy['priority'] = None
+        if attr_copy.get("grab_config") is not None:
+            del attr_copy["url"]
+        if not attr_copy["priority_set_explicitly"]:
+            attr_copy["priority"] = None
         task = Task(**attr_copy)
 
         # Reset some task properties if they have not
         # been set explicitly in kwargs
-        if 'network_try_count' not in kwargs:
+        if "network_try_count" not in kwargs:
             task.network_try_count = 0
-        if 'task_try_count' not in kwargs:
+        if "task_try_count" not in kwargs:
             task.task_try_count = self.task_try_count + 1
 
-        if kwargs.get('url') is not None and kwargs.get('grab') is not None:
-            raise SpiderMisuseError('Options url and grab could not be '
-                                    'used together')
+        if kwargs.get("url") is not None and kwargs.get("grab") is not None:
+            raise SpiderMisuseError(
+                "Options url and grab could not be " "used together"
+            )
 
-        if (kwargs.get('url') is not None and
-                kwargs.get('grab_config') is not None):
-            raise SpiderMisuseError('Options url and grab_config could not '
-                                    'be used together')
+        if kwargs.get("url") is not None and kwargs.get("grab_config") is not None:
+            raise SpiderMisuseError(
+                "Options url and grab_config could not " "be used together"
+            )
 
-        if (kwargs.get('grab') is not None and
-                kwargs.get('grab_config') is not None):
-            raise SpiderMisuseError('Options grab and grab_config could not '
-                                    'be used together')
+        if kwargs.get("grab") is not None and kwargs.get("grab_config") is not None:
+            raise SpiderMisuseError(
+                "Options grab and grab_config could not " "be used together"
+            )
 
-        if kwargs.get('grab'):
-            task.setup_grab_config(kwargs['grab'].dump_config())
-            del kwargs['grab']
-        elif kwargs.get('grab_config'):
-            task.setup_grab_config(kwargs['grab_config'])
-            del kwargs['grab_config']
-        elif kwargs.get('url'):
-            task.url = kwargs['url']
+        if kwargs.get("grab"):
+            task.setup_grab_config(kwargs["grab"].dump_config())
+            del kwargs["grab"]
+        elif kwargs.get("grab_config"):
+            task.setup_grab_config(kwargs["grab_config"])
+            del kwargs["grab_config"]
+        elif kwargs.get("url"):
+            task.url = kwargs["url"]
             if task.grab_config:
-                task.grab_config['url'] = kwargs['url']
-            del kwargs['url']
+                task.grab_config["url"] = kwargs["url"]
+            del kwargs["url"]
 
         for key, value in kwargs.items():
             setattr(task, key, value)
@@ -223,7 +234,7 @@ class Task(BaseTask):
         return task
 
     def __repr__(self):
-        return '<Task: %s>' % self.url
+        return "<Task: %s>" % self.url
 
     def __lt__(self, other):
         return self.priority < other.priority
@@ -238,7 +249,7 @@ class Task(BaseTask):
         if self.fallback_name:
             return getattr(spider, self.fallback_name)
         elif self.name:
-            fb_name = 'task_%s_fallback' % self.name
+            fb_name = "task_%s_fallback" % self.name
             if hasattr(spider, fb_name):
                 return getattr(spider, fb_name)
         else:

@@ -1,4 +1,4 @@
-from pprint import pprint
+from pprint import pprint  # pylint: disable=unused-import
 from grab.error import (
     GrabInternalError,
     GrabCouldNotResolveHostError,
