@@ -20,7 +20,7 @@ release:
 
 test:
 	coverage run runtest.py --test-all --backend-redis --backend-mongodb \
-		&& coverage report -m
+		&& coverage report -i -m --incude "grab/*"
 
 check:
 	python setup.py check -s \
