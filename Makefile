@@ -1,9 +1,9 @@
-.PHONY: build venv deps clean upload upload_docs test check
+.PHONY: build venv deps clean release test check
 
 build: venv deps develop
 
 venv:
-	virtualenv --python=python3 .env
+	virtualenv -p python3 .env
 	
 deps:
 	.env/bin/pip install -r requirements_dev.txt
@@ -14,14 +14,13 @@ clean:
 	find -name '*.swp' -delete
 	find -name '__pycache__' -delete
 
-upload:
-	git push --tags; python setup.py clean sdist upload
+release:
+	git push; git push --tags; rm dist/*; python3 setup.py clean sdist; twine upload dist/*
 
-upload_docs:
-	tox -e doc && rsync -azhP docs/build/html/ web@sam:/web/grablab/docs/
 
 test:
-	./runtest.py --test-all --backend-redis --backend-mongodb
+	coverage run runtest.py --test-all --backend-redis --backend-mongodb \
+		&& coverage report -m
 
 check:
 	python setup.py check -s \

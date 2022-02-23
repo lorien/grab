@@ -1,6 +1,5 @@
 bumpversion
 coverage
-coveralls
 cssselect
 feedparser
 flake8
