@@ -2,6 +2,8 @@ import pickle
 import os
 import sys
 
+from test_server import Response
+
 from tests.util import BaseGrabTestCase, only_grab_transport, temp_dir
 from grab import Grab
 from grab.error import GrabMisuseError
@@ -39,7 +41,7 @@ def get_curl_transport_instance():
 
 class TestTransportTestCase(BaseGrabTestCase):
     def assert_transport_response(self, transport, response):
-        self.server.response["get.data"] = response
+        self.server.add_response(Response(data=response), count=2)
 
         grab = Grab(transport=transport)
         grab.go(self.server.get_url())

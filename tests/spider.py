@@ -1,4 +1,7 @@
 import six
+
+from test_server import Response
+
 from grab import Grab
 from grab.spider import Spider, Task
 from grab.spider.error import SpiderError, FatalError
@@ -16,8 +19,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_spider(self):
-        self.server.response["get.data"] = "Hello spider!"
-        self.server.response["sleep"] = 0
+        self.server.add_response(Response(data=b"Hello spider!"))
         bot = build_spider(SimpleSpider)
         bot.setup_queue()
         bot.add_task(Task("baz", self.server.get_url()))
@@ -29,8 +31,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def create_grab_instance(self, **kwargs):
                 return Grab(connect_timeout=1, timeout=1)
 
-        self.server.response["get.data"] = "Hello spider!"
-        self.server.response["sleep"] = 1.1
+        self.server.add_response(Response(data=b"Hello spider!", sleep=1.1))
 
         bot = build_spider(CustomSimpleSpider, network_try_limit=1)
         bot.setup_queue()
@@ -51,8 +52,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def create_grab_instance(self, **kwargs):
                 return Grab(connect_timeout=1, timeout=1)
 
-        self.server.response["get.data"] = "Hello spider!"
-        self.server.response["sleep"] = 1.1
+        self.server.add_response(Response(data="Hello spider!", sleep=1.1))
 
         bot = build_spider(CustomSimpleSpider, network_try_limit=1)
         # bot.setup_grab(connect_timeout=1, timeout=1)
@@ -68,8 +68,8 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(bot.stat.counters["spider:request-network"], 0)
 
     def test_task_retry(self):
-        self.server.response["get.data"] = "xxx"
-        self.server.response_once["status"] = 403
+        self.server.add_response(Response(status=403))
+        self.server.add_response(Response(data=b"xxx"))
         bot = build_spider(SimpleSpider)
         bot.setup_queue()
         bot.add_task(Task("baz", self.server.get_url()))
@@ -78,10 +78,11 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_generator(self):
         server = self.server
+        server.add_response(Response(), count=13)
 
         class TestSpider(Spider):
             def task_generator(self):
-                for _ in six.moves.range(1111):
+                for _ in six.moves.range(13):
                     yield Task("page", url=server.get_url())
 
             def task_page(self, unused_grab, unused_task):
@@ -89,7 +90,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         bot = build_spider(TestSpider)
         bot.run()
-        self.assertEqual(bot.stat.counters["count"], 1111)
+        self.assertEqual(bot.stat.counters["count"], 13)
 
     def test_get_spider_name(self):
         class TestSpider(Spider):
@@ -111,6 +112,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def task_page(self, unused_grab, unused_task):
                 yield None
 
+        self.server.add_response(Response(), count=-1)
         bot = build_spider(TestSpider)
         bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
@@ -128,7 +130,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def task_page_fallback(self, unused_task):
                 self.points.append(1)
 
-        self.server.response["status"] = 403
+        self.server.add_response(Response(status=403))
 
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.setup_queue()
@@ -148,7 +150,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def fallback_zz(self, unused_task):
                 self.points.append(1)
 
-        self.server.response["status"] = 403
+        self.server.add_response(Response(status=403))
 
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.setup_queue()
@@ -182,6 +184,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def task_page(self, unused_grab, unused_task):
                 yield 1
 
+        self.server.add_response(Response(), count=-1)
         bot = build_spider(TestSpider)
         bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
@@ -194,6 +197,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def task_page(self, unused_grab, unused_task):
                 self.stop()
 
+        self.server.add_response(Response(), count=-1)
         bot = build_spider(TestSpider)
         bot.setup_queue()
         for _ in six.moves.range(5):
@@ -207,6 +211,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def task_page(self, unused_grab, unused_task):
                 raise FatalError
 
+        self.server.add_response(Response(), count=-1)
         bot = build_spider(TestSpider)
         bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
