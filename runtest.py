@@ -135,12 +135,6 @@ def main():
         help="Run extra tests that depends on redis",
     )
     parser.add_argument(
-        "--mp-mode",
-        action="store_true",
-        default=False,
-        help="Enable multiprocess mode in spider tests",
-    )
-    parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
@@ -177,8 +171,6 @@ def main():
         from grab.spider.base import logger_verbose
 
         logger_verbose.setLevel(logging.DEBUG)
-
-    GLOBAL["mp_mode"] = opts.mp_mode
 
     # Check tests integrity
     # Ensure that all test modules are imported correctly
