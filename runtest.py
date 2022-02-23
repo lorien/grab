@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-# coding: utf-8
 import unittest
 import sys
-from optparse import OptionParser
+from argparse import ArgumentParser
 import logging
 import threading
 
@@ -104,54 +103,54 @@ def setup_logging():
 
 def main():
     setup_logging()
-    parser = OptionParser()
-    parser.add_option("-t", "--test", help="Run only specified tests")
-    parser.add_option("--grab-transport", default="pycurl")
-    parser.add_option("--network-service", default="threaded")
-    parser.add_option(
+    parser = ArgumentParser()
+    parser.add_argument("-t", "--test", help="Run only specified tests")
+    parser.add_argument("--grab-transport", default="pycurl")
+    parser.add_argument("--network-service", default="threaded")
+    parser.add_argument(
         "--test-grab",
         action="store_true",
         default=False,
         help="Run tests for Grab::Spider",
     )
-    parser.add_option(
+    parser.add_argument(
         "--test-spider", action="store_true", default=False, help="Run tests for Grab"
     )
-    parser.add_option(
+    parser.add_argument(
         "--test-all",
         action="store_true",
         default=False,
         help="Run tests for both Grab and Grab::Spider",
     )
-    parser.add_option(
+    parser.add_argument(
         "--backend-mongodb",
         action="store_true",
         default=False,
         help="Run extra tests that depends on mongodb",
     )
-    parser.add_option(
+    parser.add_argument(
         "--backend-redis",
         action="store_true",
         default=False,
         help="Run extra tests that depends on redis",
     )
-    parser.add_option(
+    parser.add_argument(
         "--mp-mode",
         action="store_true",
         default=False,
         help="Enable multiprocess mode in spider tests",
     )
-    parser.add_option(
+    parser.add_argument(
         "--profile", action="store_true", default=False, help="Do profiling"
     )
-    parser.add_option(
+    parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
         default=False,
         help="Enable verbose logging",
     )
-    opts, _ = parser.parse_args()
+    opts = parser.parse_args()
 
     GLOBAL["grab_transport"] = opts.grab_transport
     GLOBAL["network_service"] = opts.network_service
