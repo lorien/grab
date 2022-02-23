@@ -1,12 +1,13 @@
-# coding: utf-8
 import re
 
+from test_server import Response
 from weblib.error import DataNotFound
+
+from grab.error import GrabMisuseError
+from grab.util import warning
 
 from tests.util import build_grab, temp_file
 from tests.util import BaseGrabTestCase
-from grab.error import GrabMisuseError
-from grab.util import warning
 
 
 class GrabApiTestCase(BaseGrabTestCase):
@@ -105,7 +106,7 @@ class GrabApiTestCase(BaseGrabTestCase):
             self.assertEqual(grab.config["proxy"], "1.1.1.1:8080")
 
     def test_load_proxylist_url(self):
-        self.server.response["data"] = b"1.1.1.1:9090"
+        self.server.add_response(Response(data=b"1.1.1.1:9090"))
         grab = build_grab()
         grab.load_proxylist(
             self.server.get_url(), "url", auto_init=True, auto_change=False

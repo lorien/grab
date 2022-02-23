@@ -1,5 +1,5 @@
 import six
-from test_server import TestServer
+from test_server import TestServer, Response
 
 from tests.util import (
     BaseGrabTestCase,
@@ -44,6 +44,8 @@ class TestSpiderProxyCase(BaseGrabTestCase):
 
     def test_setup_proxylist(self):
         with temp_file() as proxy_file:
+            for item in self.extra_servers.values():
+                item["server"].add_response(Response(), count=-1)
             content = "\n".join(x["proxy"] for x in self.extra_servers.values())
             with open(proxy_file, "w", encoding="utf-8") as out:
                 out.write(content)
@@ -56,13 +58,15 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             serv = [
                 x["server"]
                 for x in self.extra_servers.values()
-                if x["server"].request["done"]
+                if x["server"].request_is_done()
             ][0]
-            self.assertEqual(serv.request["headers"]["host"], "yandex.ru")
+            self.assertEqual(serv.request.headers.get("host"), "yandex.ru")
             self.assertEqual(1, len(set(bot.stat.collections["ports"])))
 
     def test_setup_proxylist2(self):
         with temp_file() as proxy_file:
+            for item in self.extra_servers.values():
+                item["server"].add_response(Response(), count=-1)
             content = "\n".join(x["proxy"] for x in self.extra_servers.values())
             with open(proxy_file, "w", encoding="utf-8") as out:
                 out.write(content)
@@ -78,14 +82,16 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             servers = [
                 x["server"]
                 for x in self.extra_servers.values()
-                if x["server"].request["done"]
+                if x["server"].request_is_done()
             ]
             for serv in servers:
-                self.assertEqual(serv.request["headers"]["host"], "yandex.ru")
+                self.assertEqual(serv.request.headers.get("host"), "yandex.ru")
             self.assertTrue(len(set(bot.stat.collections["ports"])) > 1)
 
     def test_setup_proxylist4(self):
         with temp_file() as proxy_file:
+            for item in self.extra_servers.values():
+                item["server"].add_response(Response())
             content = "\n".join(x["proxy"] for x in self.extra_servers.values())
             with open(proxy_file, "w", encoding="utf-8") as out:
                 out.write(content)
@@ -102,15 +108,18 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             servers = [
                 x["server"]
                 for x in self.extra_servers.values()
-                if x["server"].request["done"]
+                if x["server"].request_is_done()
             ]
             for serv in servers:
-                self.assertEqual(serv.request["headers"]["host"], "yandex.ru")
+                self.assertEqual(serv.request.headers.get("host"), "yandex.ru")
             self.assertEqual(len(servers), 1)
             self.assertEqual(1, len(set(bot.stat.collections["ports"])))
 
     def test_setup_proxylist5(self):
         with temp_file() as proxy_file:
+            self.server.add_response(Response(), count=10)
+            for item in self.extra_servers.values():
+                item["server"].add_response(Response())
             content = "\n".join(x["proxy"] for x in self.extra_servers.values())
             with open(proxy_file, "w", encoding="utf-8") as out:
                 out.write(content)
@@ -127,7 +136,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             bot.run()
 
             self.assertEqual(
-                self.server.request["headers"].get("host"),
+                self.server.request.headers.get("host"),
                 "%s:%s" % (ADDRESS, self.server.port),
             )
             self.assertEqual(1, len(set(bot.stat.collections["ports"])))
@@ -135,6 +144,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
 
     def test_spider_custom_proxy_source(self):
         proxy_port = self.server.port
+        self.server.add_response(Response())
 
         class TestSpider(Spider):
             def task_page(self, grab, unused_task):
@@ -155,5 +165,5 @@ class TestSpiderProxyCase(BaseGrabTestCase):
         bot.add_task(Task("page", url="http://yandex.ru/"))
         bot.run()
 
-        self.assertEqual(self.server.request["headers"]["host"], "yandex.ru")
+        self.assertEqual(self.server.request.headers.get("host"), "yandex.ru")
         self.assertEqual(set(bot.stat.collections["ports"]), set([TEST_SERVER_PORT]))

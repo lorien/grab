@@ -1,10 +1,12 @@
 from weblib.error import ResponseNotValid
+from test_server import Response
 
-from tests.util import BaseGrabTestCase, build_grab, build_spider
 from grab import Grab
 from grab.spider import base
 from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
 from grab.spider.error import SpiderError
+
+from tests.util import BaseGrabTestCase, build_grab, build_spider
 
 
 class SimpleSpider(Spider):
@@ -91,6 +93,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(task2.url, "http://example.com/new")
 
     def test_task_useragent(self):
+        self.server.add_response(Response(), count=1)
         bot = build_spider(
             SimpleSpider,
         )
@@ -103,9 +106,11 @@ class TestSpiderTestCase(BaseGrabTestCase):
         task = Task("baz", grab=grab)
         bot.add_task(task.clone())
         bot.run()
-        self.assertEqual(self.server.request["headers"]["user-agent"], "Foo")
+        self.assertEqual(self.server.request.headers.get("user-agent"), "Foo")
 
     def test_task_nohandler_error(self):
+        self.server.add_response(Response(), count=1)
+
         class TestSpider(Spider):
             pass
 
@@ -121,7 +126,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
             def task_page(self, grab, unused_task):
                 self.stat.collect("codes", grab.doc.code)
 
-        self.server.response["status"] = 502
+        self.server.add_response(Response(status=502), count=4)
 
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.setup_queue()
@@ -138,6 +143,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(2, len(bot.stat.collections["codes"]))
 
     def test_task_callback(self):
+        self.server.add_response(Response(), count=4)
+
         class TestSpider(Spider):
             def task_page(self, unused_grab, unused_task):
                 self.meta["tokens"].append("0_handler")
@@ -258,6 +265,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(task3.get_fallback_handler(bot), None)
 
     def test_update_grab_instance(self):
+        self.server.add_response(Response(), count=2)
+
         class TestSpider(Spider):
             def update_grab_instance(self, grab):
                 grab.setup(timeout=77)
@@ -279,6 +288,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(set([77]), set(bot.stat.collections["points"]))
 
     def test_create_grab_instance(self):
+        self.server.add_response(Response(), count=-1)
+
         class TestSpider(Spider):
             def create_grab_instance(self, **kwargs):
                 grab = super(TestSpider, self).create_grab_instance(**kwargs)
@@ -332,6 +343,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(1, bot.task_queue.size())
 
     def test_worker_restored(self):
+        self.server.add_response(Response(), count=5)
+
         class TestSpider(Spider):
             def task_page(self, unused_grab, unused_task):
                 pass
@@ -347,6 +360,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
         self.assertTrue(bot.stat.counters["parser:worker-restarted"] == 2)
 
     def test_task_clone_post_request(self):
+        self.server.add_response(Response(), count=2)
+
         class TestSpider(Spider):
             def task_foo(self, unused_grab, task):
                 if not task.get("fin"):
@@ -360,9 +375,11 @@ class TestSpiderTestCase(BaseGrabTestCase):
         task = Task("foo", grab=grab)
         bot.add_task(task)
         bot.run()
-        self.assertEqual("POST", self.server.request["method"])
+        self.assertEqual("POST", self.server.request.method)
 
     def test_response_not_valid(self):
+        self.server.add_response(Response(), count=-1)
+
         class SomeSimpleSpider(Spider):
             def task_page(self, unused_grab, unused_task):
                 self.stat.inc("xxx")
@@ -375,6 +392,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(bot.task_try_limit, bot.stat.counters["xxx"])
 
     def test_task_clone_without_modification(self):
+        self.server.add_response(Response(), count=2)
+
         class TestSpider(Spider):
             def task_page(self, grab, unused_task):
                 grab2 = grab.clone()
@@ -392,6 +411,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(1, bot.stat.counters["spider:task-page2"])
 
     def test_task_generator_no_yield(self):
+        self.server.add_response(Response())
+
         class TestSpider(Spider):
             def task_page(self, unused_grab, unused_task):
                 self.stat.inc("foo")
@@ -409,6 +430,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(1, bot.stat.counters["foo"])
 
     def test_initial_urls(self):
+        self.server.add_response(Response())
+
         url = self.server.get_url()
 
         class TestSpider(Spider):

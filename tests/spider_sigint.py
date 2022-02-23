@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Known issues
 
@@ -38,6 +37,7 @@ from subprocess import Popen
 import platform
 
 from psutil import Process, NoSuchProcess
+from test_server import Response
 
 from tests.util import BaseGrabTestCase
 from tests.util import temp_file, only_grab_transport
@@ -105,7 +105,7 @@ class BaseKeyboardInterruptTestCase(object):
         """
         # logging.error('step-0')
         # pylint: disable=no-member
-        self.server.response["sleep"] = 0.01
+        self.server.add_response(Response(sleep=0.01), count=-1)
         # pylint: enable=no-member
         with temp_file() as path:
             with open(path, "w", encoding="utf-8") as out:

@@ -148,14 +148,17 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         grab.go(self.server.get_url())
         self.assertTrue(b"done" in grab.doc.body)
 
-    # WTF, disabling it for the moment
+    # TODO: must be written for both transports: curl and urllib3
+    # they might deal with it in different ways
     # def test_redirect_utf_location(self):
-    #     self.server.response_once["status"] = 301
-    #     self.server.response_once["headers"] = [
-    #         ("Location", (self.server.get_url() + u"фыва").encode("utf-8")),
-    #     ]
-    #     self.server.response_once["data"] = "content-1"
-    #     self.server.response["data"] = "content-2"
-    #     grab = build_grab(debug=True, follow_location=True)
-    #     grab.go(self.server.get_url())
-    #     self.assertTrue(quote(u"/фыва".encode("utf-8"), safe="/") in grab.doc.url)
+    #    def callback():
+    #        url = (self.server.get_url() + u"фыва").encode("utf-8")
+    #        return (
+    #            b"HTTP/1.1 301 OK\nLocation: %s\nLocation-Length: 9\n\ncontent-1" % url
+    #        )
+
+    #    self.server.add_response(Response(raw_callback=callback))
+    #    self.server.add_response(Response(data=b"content-2"))
+    #    grab = build_grab(debug=True, follow_location=True)
+    #    grab.go(self.server.get_url())
+    #    self.assertTrue(quote(u"/фыва".encode("utf-8"), safe="/") in grab.doc.url)

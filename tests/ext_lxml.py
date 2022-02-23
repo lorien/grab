@@ -1,11 +1,12 @@
-# coding: utf-8
+from test_server import Response
+
 from grab import DataNotFound
 from grab.util import warning
 
 from tests.util import build_grab
 from tests.util import BaseGrabTestCase
 
-HTML = u"""
+HTML = """
 <head>
     <title>фыва</title>
     <meta http-equiv="Content-Type" content="text/html; charset=cp1251" />
@@ -29,9 +30,7 @@ HTML = u"""
         <li id="num-1">item #100 2</li>
         <li id="num-2">item #2</li>
     </ul>
-""".encode(
-    "cp1251"
-)
+"""
 
 
 XML = b"""
@@ -60,7 +59,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
 
         # Create fake grab instance with fake response
         self.grab = build_grab()
-        self.grab.setup_document(HTML, charset="cp1251")
+        self.grab.setup_document(HTML.encode("cp1251"), charset="cp1251")
 
         from lxml.html import fromstring  # pylint: disable=import-outside-toplevel
 
@@ -170,7 +169,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
         self.assertFalse(self.grab.xpath_exists('//li[@id="num-3"]'))
 
     def test_cdata_issue(self):
-        self.server.response["data"] = XML
+        self.server.add_response(Response(data=XML), count=2)
 
         # By default HTML DOM builder is used
         # It handles CDATA incorrectly
@@ -196,21 +195,25 @@ class LXMLExtensionTest(BaseGrabTestCase):
         """
         HTML with XML declaration should be processed without errors.
         """
-        self.server.response["get.data"] = (
-            '<?xml version="1.0" encoding="UTF-8"?>'
-            "<html><body><h1>test</h1></body></html>"
+        self.server.add_response(
+            Response(
+                data=(
+                    b'<?xml version="1.0" encoding="UTF-8"?>'
+                    b"<html><body><h1>test</h1></body></html>"
+                )
+            )
         )
         grab = build_grab()
         grab.go(self.server.get_url())
         self.assertEqual("test", grab.xpath_text("//h1"))
 
     def test_empty_document(self):
-        self.server.response["get.data"] = "oops"
+        self.server.add_response(Response(data=b"oops"))
         grab = build_grab()
         grab.go(self.server.get_url())
         grab.xpath_exists("//anytag")
 
-        self.server.response["get.data"] = "<frameset></frameset>"
+        self.server.add_response(Response(data=b"<frameset></frameset>"))
         grab = build_grab()
         grab.go(self.server.get_url())
         grab.xpath_exists("//anytag")

@@ -2,12 +2,14 @@ from unittest import TestCase
 import time
 
 import six
+from test_server import Response
 
-from tests.util import BaseGrabTestCase, build_spider
-from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
 from grab.spider.queue_backend.base import QueueInterface
 from grab.spider import Spider, Task
 from grab.spider.error import SpiderMisuseError
+
+from tests.util import BaseGrabTestCase, build_spider
+from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
 
 
 class SpiderQueueMixin(object):
@@ -17,6 +19,7 @@ class SpiderQueueMixin(object):
             self.stat.collect("priority_history", task.priority)
 
     def test_basic_priority(self):
+        self.server.add_response(Response(), count=5)
         bot = build_spider(self.SimpleSpider, parser_pool_size=1, thread_number=1)
         self.setup_queue(bot)
         bot.task_queue.clear()
@@ -38,6 +41,7 @@ class SpiderQueueMixin(object):
             def shutdown(self):
                 self.final_taskq_size = self.task_queue.size()
 
+        self.server.add_response(Response(), count=5)
         bot = build_spider(CustomSpider)
         self.setup_queue(bot)
         bot.task_queue.clear()
@@ -73,6 +77,7 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
         and then check the order in which they was executed
         """
         server = self.server
+        server.add_response(Response(), count=4)
 
         class TestSpider(Spider):
             def task_generator(self):
@@ -114,6 +119,7 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
         and then check the order in which they was executed
         """
         server = self.server
+        server.add_response(Response(), count=4)
 
         class TestSpider(Spider):
             def task_generator(self):

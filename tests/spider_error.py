@@ -1,3 +1,5 @@
+from test_server import Response
+
 from grab import GrabTimeoutError, Grab
 from grab.spider import Spider, Task
 from tests.util import (
@@ -44,10 +46,12 @@ class SpiderErrorTestCase(BaseGrabTestCase):
             def task_page(self, grab, task):
                 pass
 
-        self.server.response_once["status"] = 301
-        self.server.response_once["headers"] = [
-            ("Location", INVALID_URL),
-        ]
+        self.server.add_response(
+            Response(
+                status=301,
+                headers=[("Location", INVALID_URL)],
+            )
+        )
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.run()
 
@@ -60,7 +64,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
     #    out = StringIO()
     #    with mock.patch("sys.stderr", out):
     #        server = self.server
-    #        server.response["data"] = b"<div>test</div>"
+    #        server.add_response(Response(data=b"<div>test</div>"))
 
     #        class SimpleSpider(Spider):
     #            # pylint: disable=unused-argument
@@ -78,7 +82,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
 
     def test_grab_attribute_exception(self):
         server = self.server
-        server.response["sleep"] = 2
+        server.add_response(Response(sleep=2))
 
         class SimpleSpider(Spider):
             def task_generator(self):
@@ -103,7 +107,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
     def test_stat_error_name_threaded_pycurl(self):
 
         server = self.server
-        server.response["sleep"] = 2
+        server.add_response(Response(sleep=2))
 
         class SimpleSpider(Spider):
             def prepare(self):
@@ -130,7 +134,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
     def test_stat_error_name_threaded_urllib3(self):
 
         server = self.server
-        server.response["sleep"] = 2
+        server.add_response(Response(sleep=2))
 
         class SimpleSpider(Spider):
             def prepare(self):

@@ -1,13 +1,14 @@
-# coding: utf-8
 from copy import deepcopy
 import threading
 
 import six
+from test_server import Response
+
+from grab import Grab, GrabMisuseError, GrabError
 
 from tests.util import build_grab, temp_file
 from tests.util import BaseGrabTestCase
 from tests.util import reset_request_counter
-from grab import Grab, GrabMisuseError, GrabError
 
 
 class GrabApiTestCase(BaseGrabTestCase):
@@ -20,10 +21,10 @@ class GrabApiTestCase(BaseGrabTestCase):
 
     def test_clone(self):
         grab = build_grab()
-        self.server.response["get.data"] = "Moon"
+        self.server.add_response(Response(data=b"Moon"))
         grab.go(self.server.get_url())
         self.assertTrue(b"Moon" in grab.doc.body)
-        self.server.response["post.data"] = "Foo"
+        self.server.add_response(Response(data=b"Foo"))
         grab2 = grab.clone(method="post", post="")
         grab2.go(self.server.get_url())
         self.assertTrue(b"Foo" in grab2.doc.body)
@@ -34,7 +35,7 @@ class GrabApiTestCase(BaseGrabTestCase):
 
     def test_adopt(self):
         grab = build_grab()
-        self.server.response["get.data"] = "Moon"
+        self.server.add_response(Response(data=b"Moon"))
         grab.go(self.server.get_url())
         grab2 = build_grab()
         self.assertEqual(grab2.config["url"], None)
@@ -102,13 +103,13 @@ class GrabApiTestCase(BaseGrabTestCase):
     def test_download(self):
         with temp_file() as save_file:
             grab = build_grab()
-            self.server.response["get.data"] = "FOO"
+            self.server.add_response(Response(data=b"FOO"))
             length = grab.download(self.server.get_url(), save_file)
             self.assertEqual(3, length)
 
     def test_make_url_absolute(self):
         grab = build_grab()
-        self.server.response["get.data"] = '<base href="http://foo/bar/">'
+        self.server.add_response(Response(data=b'<base href="http://foo/bar/">'))
         grab.go(self.server.get_url())
         absolute_url = grab.make_url_absolute("/foobar", resolve_base=True)
         self.assertEqual(absolute_url, "http://foo/foobar")

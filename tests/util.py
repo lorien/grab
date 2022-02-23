@@ -16,7 +16,6 @@ from grab import base
 
 logger = logging.getLogger("tests.util")  # pylint: disable=invalid-name
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
-RAW_SERVER_PORT = 9875
 TEST_SERVER_PORT = 9876
 ADDRESS = "127.0.0.1"
 EXTRA_PORT1 = TEST_SERVER_PORT + 1
@@ -163,39 +162,3 @@ def run_test_if(condition, why_message):
 
 def reset_request_counter():
     base.REQUEST_COUNTER = itertools.count(1)
-
-
-def start_raw_server():
-    class RawTCPServer(TCPServer):
-        allow_reuse_address = True
-        response = {
-            "data": b"HTTP/1.1 200 OK\r\n\r\nraw-server",
-        }
-
-        def get_url(self):
-            return "http://%s:%d/" % (ADDRESS, RAW_SERVER_PORT)
-
-    class RawTCPHandler(StreamRequestHandler):
-        def handle(self):
-            self.rfile.readline()
-            self.wfile.write(self.server.response["data"])
-            # invalid_url = b'http://\xa0zzz'
-            # resp = (
-            #    b'HTTP/1.1 200 OK\r\n' +
-            #    b'URL: %s\r\n'
-            #    b'\r\n'
-            #    b'bar'
-            #    % invalid_url
-            # )
-            # self.wfile.write(resp)
-
-    server = RawTCPServer((ADDRESS, RAW_SERVER_PORT), RawTCPHandler)
-
-    th = Thread(target=server.serve_forever)
-    th.daemon = True
-    th.start()
-    return server
-
-
-def stop_raw_server(server):
-    server.shutdown()

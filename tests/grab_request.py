@@ -1,10 +1,14 @@
 from pprint import pprint  # pylint: disable=unused-import
+
+from test_server import Response
+
 from grab.error import (
     GrabInternalError,
     GrabCouldNotResolveHostError,
     GrabTimeoutError,
     GrabInvalidUrl,
 )
+
 from tests.util import build_grab, exclude_grab_transport
 from tests.util import BaseGrabTestCase
 
@@ -14,22 +18,25 @@ class GrabRequestTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_get_method(self):
+        self.server.add_response(Response())
         grab = build_grab()
         grab.go(self.server.get_url())
-        self.assertEqual("GET", self.server.request["method"])
+        self.assertEqual("GET", self.server.request.method)
 
     def test_delete_method(self):
+        self.server.add_response(Response())
         grab = build_grab()
         grab.setup(method="delete")
         grab.go(self.server.get_url())
-        self.assertEqual("DELETE", self.server.request["method"])
+        self.assertEqual("DELETE", self.server.request.method)
 
     def test_put_method(self):
+        self.server.add_response(Response())
         grab = build_grab()
         grab.setup(method="put", post=b"abc")
         grab.go(self.server.get_url())
-        self.assertEqual("PUT", self.server.request["method"])
-        self.assertEqual("3", self.server.request["headers"]["content-length"])
+        self.assertEqual("PUT", self.server.request.method)
+        self.assertEqual("3", self.server.request.headers.get("content-length"))
 
     def test_head_with_invalid_bytes(self):
         def callback():
@@ -37,10 +44,10 @@ class GrabRequestTestCase(BaseGrabTestCase):
                 "type": "response",
                 "status": 200,
                 "headers": [("Hello-Bug", b"start\xa0end")],
-                "body": b"",
+                "data": b"",
             }
 
-        self.server.response["callback"] = callback
+        self.server.add_response(Response(callback=callback))
         grab = build_grab()
         grab.go(self.server.get_url())
 
@@ -54,10 +61,10 @@ class GrabRequestTestCase(BaseGrabTestCase):
                 "type": "response",
                 "status": 301,
                 "headers": [("Location", invalid_url)],
-                "body": b"",
+                "data": b"",
             }
 
-        self.server.response["callback"] = callback
+        self.server.add_response(Response(callback=callback))
         grab = build_grab()
         # GrabTimeoutError raised when tests are being runned on computer
         # without access to the internet (no DNS service available)
@@ -73,20 +80,23 @@ class GrabRequestTestCase(BaseGrabTestCase):
         )
 
     def test_options_method(self):
+        self.server.add_response(Response())
         grab = build_grab()
         grab.setup(method="options", post=b"abc")
         grab.go(self.server.get_url())
-        self.assertEqual("OPTIONS", self.server.request["method"])
-        self.assertEqual("3", self.server.request["headers"]["content-length"])
+        self.assertEqual("OPTIONS", self.server.request.method)
+        self.assertEqual("3", self.server.request.headers.get("content-length"))
 
+        self.server.add_response(Response())
         grab = build_grab()
         grab.setup(method="options")
         grab.go(self.server.get_url())
-        self.assertEqual("OPTIONS", self.server.request["method"])
-        self.assertTrue("Content-Length" not in self.server.request["headers"])
+        self.assertEqual("OPTIONS", self.server.request.method)
+        self.assertTrue("Content-Length" not in self.server.request.headers)
 
     @exclude_grab_transport("urllib3")
     def test_request_headers(self):
+        self.server.add_response(Response())
         grab = build_grab(debug=True)
         grab.setup(headers={"Foo": "Bar"})
         grab.go(self.server.get_url())
