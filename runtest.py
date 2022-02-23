@@ -141,9 +141,6 @@ def main():
         help="Enable multiprocess mode in spider tests",
     )
     parser.add_argument(
-        "--profile", action="store_true", default=False, help="Do profiling"
-    )
-    parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
@@ -198,21 +195,7 @@ def main():
                     suite.addTest(test)
 
     runner = unittest.TextTestRunner()
-
-    if opts.profile:
-        import cProfile
-        import pyprof2calltree
-        import pstats
-
-        profile_tree_file = "var/test.prof.out"
-        prof = cProfile.Profile()
-        result = prof.runcall(runner.run, suite)
-        stats = pstats.Stats(prof)
-        stats.strip_dirs()
-        pyprof2calltree.convert(stats, profile_tree_file)
-    else:
-        result = runner.run(suite)
-
+    result = runner.run(suite)
     th_list = list(threading.enumerate())
     print("Active threads (%d):" % len(th_list))
     for th in th_list:

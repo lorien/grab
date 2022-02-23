@@ -8,7 +8,6 @@ selenium
 test_server>=0.0.35
 mock
 runscript
-pyprof2calltree
 urllib3
 pyquery;platform_system!="Windows"
 # to fix appveyor
