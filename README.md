@@ -1,7 +1,7 @@
 # Grab Framework Documentation
 
-![pytest status](https://github.com/lorien/grab/workflows/test/badge.svg)
-[![coveralls](https://coveralls.io/repos/lorien/grab/badge.svg?branch=master)](https://coveralls.io/r/lorien/grab?branch=master)
+![Test Status](https://github.com/lorien/grab/workflows/test/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/lorien/grab/badge.svg)](https://coveralls.io/github/lorien/grab)
 [![documentation](https://readthedocs.org/projects/grab/badge/?version=latest)](http://docs.grablib.org/en/latest/)
 
 

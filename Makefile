@@ -1,4 +1,4 @@
-.PHONY: build venv deps clean release test check
+.PHONY: build venv deps clean release test check install_codecov_binary coveralls
 
 build: venv deps develop
 
@@ -27,3 +27,6 @@ check:
 		&& pylint setup.py grab tests \
 		&& flake8 setup.py grab tests \
 		&& pytype setup.py grab tests
+
+coveralls:
+	bash -c "source var/coveralls.env && coveralls"

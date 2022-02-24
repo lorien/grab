@@ -1,4 +1,5 @@
 bumpversion
+coveralls
 coverage
 cssselect
 feedparser
