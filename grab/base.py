@@ -11,7 +11,7 @@ from random import randint
 from copy import copy, deepcopy
 import threading
 import itertools
-import collections
+import collections.abc
 import email
 from datetime import datetime
 import weakref
@@ -259,7 +259,7 @@ class Grab(DeprecatedThings):
                     cls = getattr(mod, cls_name)
                     TRANSPORT_CACHE[(mod_path, cls_name)] = cls
                 self.transport = cls()
-        elif isinstance(transport_param, collections.Callable):
+        elif isinstance(transport_param, collections.abc.Callable):
             self.transport = transport_param()
         else:
             raise error.GrabMisuseError(
