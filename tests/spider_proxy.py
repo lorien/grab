@@ -3,7 +3,6 @@ from test_server import TestServer, Response
 
 from tests.util import (
     BaseGrabTestCase,
-    TEST_SERVER_PORT,
     build_spider,
     ADDRESS,
     temp_file,
@@ -24,7 +23,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
         super(TestSpiderProxyCase, cls).setUpClass()
         cls.extra_servers = {}
         for cnt in range(3):
-            serv = TestServer(address=ADDRESS, port=TEST_SERVER_PORT + 1 + cnt)
+            serv = TestServer(address=ADDRESS, port=0)
             serv.start()
             cls.extra_servers[serv.port] = {
                 "server": serv,
@@ -166,4 +165,4 @@ class TestSpiderProxyCase(BaseGrabTestCase):
         bot.run()
 
         self.assertEqual(self.server.request.headers.get("host"), "yandex.ru")
-        self.assertEqual(set(bot.stat.collections["ports"]), set([TEST_SERVER_PORT]))
+        self.assertEqual(set(bot.stat.collections["ports"]), set([self.server.port]))

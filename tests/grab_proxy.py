@@ -4,7 +4,7 @@ from test_server import TestServer, Response
 
 from grab.proxylist import BaseProxySource
 from tests.util import build_grab, temp_file
-from tests.util import BaseGrabTestCase, TEST_SERVER_PORT
+from tests.util import BaseGrabTestCase
 
 ADDRESS = "127.0.0.1"
 
@@ -15,7 +15,7 @@ class TestProxy(BaseGrabTestCase):
         super(TestProxy, cls).setUpClass()
         cls.extra_servers = {}
         for cnt in range(3):
-            serv = TestServer(address=ADDRESS, port=TEST_SERVER_PORT + 1 + cnt)
+            serv = TestServer(address=ADDRESS, port=0)
             serv.start()
             cls.extra_servers[serv.port] = {
                 "server": serv,
