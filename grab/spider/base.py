@@ -355,7 +355,7 @@ class Spider(object):
         :param grab: Grab instance
         :param task: Task object which should be assigned to next page url
         :param xpath: xpath expression which calculates list of URLS
-        :param \*\*kwargs: extra settings for new task object
+        :param \\**kwargs: extra settings for new task object
 
         Example::
 

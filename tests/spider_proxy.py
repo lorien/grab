@@ -22,7 +22,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
     def setUpClass(cls):
         super(TestSpiderProxyCase, cls).setUpClass()
         cls.extra_servers = {}
-        for cnt in range(3):
+        for _ in range(3):
             serv = TestServer(address=ADDRESS, port=0)
             serv.start()
             cls.extra_servers[serv.port] = {

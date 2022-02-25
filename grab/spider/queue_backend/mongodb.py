@@ -1,11 +1,5 @@
-try:
-    import Queue as queue
-except ImportError:
-    import queue
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+import queue
+import pickle
 import logging
 from datetime import datetime
 

@@ -277,7 +277,10 @@ class TestCookies(BaseGrabTestCase):
                 headers=[
                     (
                         "Set-Cookie",
-                        "foo=foo; Domain=.foo.bar; Expires=Wed, 13 Jan 3000 22:23:01 GMT;",
+                        (
+                            "foo=foo; Domain=.foo.bar;"
+                            " Expires=Wed, 13 Jan 3000 22:23:01 GMT;"
+                        ),
                     )
                 ]
             ),

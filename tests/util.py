@@ -6,9 +6,7 @@ from tempfile import mkdtemp, mkstemp
 from shutil import rmtree
 import platform
 import itertools
-from threading import Thread
 
-from six.moves.socketserver import TCPServer, StreamRequestHandler
 from test_server import TestServer
 
 from grab import Grab

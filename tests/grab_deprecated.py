@@ -1,13 +1,12 @@
 import re
 
-from test_server import Response
 from weblib.error import DataNotFound
+from test_server import Response
+from tests.util import build_grab, temp_file
+from tests.util import BaseGrabTestCase
 
 from grab.error import GrabMisuseError
 from grab.util import warning
-
-from tests.util import build_grab, temp_file
-from tests.util import BaseGrabTestCase
 
 
 class GrabApiTestCase(BaseGrabTestCase):

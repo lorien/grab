@@ -1,4 +1,3 @@
-from unittest import TestCase
 from urllib.request import urlopen
 
 from test_server import Response
@@ -18,16 +17,16 @@ class RawTestCase(BaseGrabTestCase):
         self.assertEqual(res.read(), b"FOO")
 
     def test_sequential_responses(self):
-        def callback():
+        def callback1():
             return b"HTTP/1.1 200 OK\n\nFOO"
 
-        self.server.add_response(Response(raw_callback=callback))
+        self.server.add_response(Response(raw_callback=callback1))
         res = urlopen(self.server.get_url())
         self.assertEqual(res.read(), b"FOO")
 
-        def callback():
+        def callback2():
             return b"HTTP/1.1 200 OK\n\nBAR"
 
-        self.server.add_response(Response(raw_callback=callback))
+        self.server.add_response(Response(raw_callback=callback2))
         res = urlopen(self.server.get_url())
         self.assertEqual(res.read(), b"BAR")

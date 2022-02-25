@@ -252,7 +252,7 @@ class DeprecatedThings(object):
             "The `Grab.response` attribute is deprecated. " "Use `Grab.doc` instead.",
             stacklevel=3,
         )
-        return self.doc
+        return self.doc  # pytype: disable=attribute-error
 
     def _set_response(self, val):
         warn(
@@ -260,7 +260,7 @@ class DeprecatedThings(object):
             stacklevel=3,
         )
         # pylint: disable=assigning-non-slot, attribute-defined-outside-init
-        self.doc = val
+        self.doc = val  # pytype: disable=no-writeable
 
     response = property(_get_response, _set_response)
 

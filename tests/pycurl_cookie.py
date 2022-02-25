@@ -80,7 +80,7 @@ class TestCookies(BaseGrabTestCase):
         curl.perform()
         self.assertEqual(2, len(self.server.get_request().cookies))
         self.assertEqual("bar", self.server.get_request().cookies["foo"].value)
-        req = self.server.get_request()
+        self.server.get_request()
         self.assertEqual(
             set(("foo", "baz")), set(self.server.get_request().cookies.keys())
         )
