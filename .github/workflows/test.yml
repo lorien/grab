@@ -4,26 +4,37 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        os: [ubuntu-latest, macos-latest]
+        python: ['3.7', '3.8', '3.9', '3.10']
     steps:
 
     - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.python }}
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.python }}
 
-    - name: Install build dependencies
+    - name: Install Ubuntu build dependencies
+      if: ${{ startsWith(matrix.os, 'ubuntu') }}
       run: |
         sudo apt-get install libcurl4-openssl-dev libxml2-dev libxslt-dev
+    
+    - name: Install MacOS build dependencies
+      if: ${{ startsWith(matrix.os, 'macos') }}
+      run: |
+        brew install openssl
+
+    - name: Instal pycurl on MacOS
+      if: ${{ startsWith(matrix.os, 'macos') }}
+      run: |
+        PYCURL_SSL_LIBRARY=openssl LDFLAGS="-L/usr/local/opt/openssl/lib" CPPFLAGS="-I/usr/local/opt/openssl/include" pip install -U --no-cache-dir pycurl
 
     - name: Install dependencies
       run: |
-        python -m pip install -U pip
         pip install -U -r requirements_dev.txt
         pip install -U -e .
 
