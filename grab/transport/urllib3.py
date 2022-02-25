@@ -7,7 +7,10 @@ import random
 import time
 from contextlib import contextmanager
 import ssl
+from typing import cast
 
+import urllib.request
+from http.client import HTTPResponse
 from six.moves.urllib.parse import urlsplit
 from six.moves.http_cookiejar import CookieJar
 import six
@@ -457,9 +460,9 @@ class Urllib3Transport(BaseTransport):
         if self._response and self._request:
             jar.extract_cookies(
                 # pylint: disable=protected-access
-                MockResponse(self._response._original_response.msg),
+                cast(HTTPResponse, MockResponse(self._response._original_response.msg)),
                 # pylint: enable=protected-access
-                MockRequest(self._request),
+                cast(urllib.request.Request, MockRequest(self._request)),
             )
         return jar
 

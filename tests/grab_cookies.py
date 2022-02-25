@@ -386,9 +386,13 @@ class TestCookies(BaseGrabTestCase):
 
     def test_unicode_cookie(self):
         grab = build_grab()
-        self.server.add_response(
-            Response(headers=[("Set-Cookie", u"preved=медвед".encode("utf-8"))])
-        )
+
+        def callback():
+            return b"HTTP/1.0 200 OK\nSet-Cookie: preved=%s\n\n" % "медвед".encode(
+                "utf-8"
+            )
+
+        self.server.add_response(Response(raw_callback=callback))
         self.server.add_response(Response())
         # request page and receive unicode cookie
         grab.go(self.server.get_url())

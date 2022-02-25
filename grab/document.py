@@ -20,7 +20,6 @@ import tempfile
 import webbrowser
 import codecs
 from datetime import datetime
-import time
 import threading
 import logging
 from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
@@ -28,7 +27,7 @@ from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
 import six
 from six import BytesIO, StringIO
 from lxml.html import HTMLParser
-from lxml.etree import XMLParser, ParserError
+from lxml.etree import XMLParser, ParserError  # pytype: disable=import-error
 from lxml.html import CheckboxValues, MultipleSelectOptions
 from weblib.http import smart_urlencode
 import weblib.encoding
@@ -561,7 +560,10 @@ class Document(object):
         """
 
         if not self._pyquery:
+            # pytype: disable=import-error
             from pyquery import PyQuery  # pylint: disable=import-outside-toplevel
+
+            # pytype: enable=import-error
 
             self._pyquery = PyQuery(self.tree)
         return self._pyquery
@@ -663,8 +665,6 @@ class Document(object):
             return dom.getroot()
 
     def build_html_tree(self):
-        from grab.base import GLOBAL_STATE  # pylint: disable=import-outside-toplevel
-
         if self._lxml_tree is None:
             fix_setting = self._grab_config["fix_special_entities"]
             body = self.unicode_body(fix_special_entities=fix_setting).strip()
@@ -681,8 +681,6 @@ class Document(object):
                 # Generate minimal empty content
                 # which will not break lxml parser
                 body = "<html></html>"
-            start = time.time()
-
             try:
                 self._lxml_tree = self._build_dom(body, "html")
             except Exception as ex:  # pylint: disable=broad-except
@@ -708,8 +706,6 @@ class Document(object):
                     self._lxml_tree = self._build_dom(body, "html")
                 else:
                     raise
-
-            GLOBAL_STATE["dom_build_time"] += time.time() - start
         return self._lxml_tree
 
     @property

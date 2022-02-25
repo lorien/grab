@@ -5,9 +5,9 @@ from grab.spider.base_service import BaseService
 
 
 class TaskGeneratorService(BaseService):
-    def __init__(self, real_generator, spider):
+    def __init__(self, spider, real_generator):
+        super().__init__(spider)
         self.real_generator = real_generator
-        self.spider = spider
         self.task_queue_threshold = max(200, self.spider.thread_number * 2)
         self.worker = self.create_worker(self.worker_callback)
         self.register_workers(self.worker)
@@ -21,14 +21,13 @@ class TaskGeneratorService(BaseService):
             )
             if queue_size < self.task_queue_threshold:
                 try:
-                    for _ in six.moves.range(
-                            self.task_queue_threshold - queue_size):
+                    for _ in six.moves.range(self.task_queue_threshold - queue_size):
                         if worker.pause_event.is_set():
                             return
                         task = next(self.real_generator)
-                        self.spider.task_dispatcher.input_queue.put((
-                            task, None, {'source': 'task_generator'}
-                        ))
+                        self.spider.task_dispatcher.input_queue.put(
+                            (task, None, {"source": "task_generator"})
+                        )
                 except StopIteration:
                     return
             else:

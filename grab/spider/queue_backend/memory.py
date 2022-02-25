@@ -1,8 +1,5 @@
 from datetime import datetime
-try:
-    from Queue import PriorityQueue, Empty
-except ImportError:
-    from queue import PriorityQueue, Empty
+from queue import PriorityQueue, Empty
 
 from grab.spider.queue_backend.base import QueueInterface
 
@@ -30,8 +27,9 @@ class QueueBackend(QueueInterface):
                 removed_indexes.append(index)
             index += 1
 
-        self.schedule_list = [x for idx, x in enumerate(self.schedule_list)
-                              if idx not in removed_indexes]
+        self.schedule_list = [
+            x for idx, x in enumerate(self.schedule_list) if idx not in removed_indexes
+        ]
 
         _, task = self.queue_object.get(block=False)
         return task

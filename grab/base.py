@@ -15,6 +15,7 @@ import collections.abc
 import email
 from datetime import datetime
 import weakref
+from typing import Dict, Any, Optional, cast
 
 from six.moves.urllib.parse import urljoin
 import six
@@ -37,9 +38,6 @@ __all__ = ("Grab",)
 # creates multiple Grab instances - in case of shared counter
 # grab instances do not overwrite dump logs
 REQUEST_COUNTER = itertools.count(1)
-GLOBAL_STATE = {
-    "dom_build_time": 0,
-}
 MUTABLE_CONFIG_KEYS = ("post", "multipart_post", "headers", "cookies")
 TRANSPORT_CACHE = {}
 TRANSPORT_ALIAS = {
@@ -69,7 +67,7 @@ def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
     return cloned_config
 
 
-def default_config():
+def default_config() -> Dict[str, Any]:
     # TODO: Maybe config should be splitted into two entities:
     # 1) config which is not changed during request
     # 2) changeable settings
@@ -206,7 +204,7 @@ class Grab(DeprecatedThings):
 
         self.meta = {}
         self._doc = None
-        self.config = default_config()
+        self.config: Dict[str, Any] = default_config()
         self.config["common_headers"] = self.common_headers()
         self.cookies = CookieManager()
         self.proxylist = ProxyList()
@@ -764,7 +762,7 @@ class Grab(DeprecatedThings):
         was not called yet.
         """
 
-        method = self.config["method"]
+        method = cast(Optional[str], self.config["method"])
         if method:
             method = method.upper()
         else:

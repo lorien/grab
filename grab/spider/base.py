@@ -12,7 +12,7 @@ import six
 from weblib import metric
 
 from grab.base import Grab
-from grab.error import GrabInvalidUrl, raise_feature_is_deprecated
+from grab.error import raise_feature_is_deprecated
 from grab.spider.error import (
     SpiderError,
     SpiderMisuseError,
@@ -226,10 +226,7 @@ class Spider(object):
             self.http_api_service = HttpApiService(self)
         else:
             self.http_api_service = None
-        self.task_generator_service = TaskGeneratorService(
-            self.task_generator(),
-            self,
-        )
+        self.task_generator_service = TaskGeneratorService(self, self.task_generator())
 
     def setup_cache(self, *args, **kwargs):  # pylint: disable=unused-argument
         raise_feature_is_deprecated("Cache feature")
@@ -610,20 +607,20 @@ class Spider(object):
 
     # pylint: enable=unused-argument
 
-    def submit_task_to_transport(self, task, grab):
-        grab_config_backup = grab.dump_config()
-        self.process_grab_proxy(task, grab)
-        self.stat.inc("spider:request-network")
-        self.stat.inc("spider:task-%s-network" % task.name)
-        try:
-            # pylint: disable=no-member
-            self.network_service.start_task_processing(task, grab, grab_config_backup)
-            # pylint: enable=no-member
-        except GrabInvalidUrl:
-            # TODO: log error
-            # TODO: show traceback
-            logger.debug("Task %s has invalid URL: %s", task.name, task.url)
-            self.stat.collect("invalid-url", task.url)
+    # def submit_task_to_transport(self, task, grab):
+    #    grab_config_backup = grab.dump_config()
+    #    self.process_grab_proxy(task, grab)
+    #    self.stat.inc("spider:request-network")
+    #    self.stat.inc("spider:task-%s-network" % task.name)
+    #    try:
+    #        # pylint: disable=no-member
+    #        self.network_service.start_task_processing(task, grab, grab_config_backup)
+    #        # pylint: enable=no-member
+    #    except GrabInvalidUrl:
+    #        # TODO: log error
+    #        # TODO: show traceback
+    #        logger.debug("Task %s has invalid URL: %s", task.name, task.url)
+    #        self.stat.collect("invalid-url", task.url)
 
     def run(self):
         self._started = time.time()

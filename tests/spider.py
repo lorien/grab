@@ -52,7 +52,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def create_grab_instance(self, **kwargs):
                 return Grab(connect_timeout=1, timeout=1)
 
-        self.server.add_response(Response(data="Hello spider!", sleep=1.1))
+        self.server.add_response(Response(data=b"Hello spider!", sleep=1.1))
 
         bot = build_spider(CustomSimpleSpider, network_try_limit=1)
         # bot.setup_grab(connect_timeout=1, timeout=1)

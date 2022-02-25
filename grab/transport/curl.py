@@ -4,16 +4,10 @@
 import logging
 import sys
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import BytesIO as StringIO
+from io import BytesIO as StringIO
 import random
 
-try:
-    from urlparse import urlsplit
-except ImportError:
-    from urllib.parse import urlsplit
+from urllib.parse import urlsplit
 from contextlib import contextmanager
 
 from six.moves.http_cookiejar import CookieJar

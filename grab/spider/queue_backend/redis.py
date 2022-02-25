@@ -1,16 +1,13 @@
 """
 Spider task queue backend powered by redis
 """
-try:
-    import Queue as queue
-except ImportError:
-    import queue
+import queue
 import random
 import logging
 import pickle
 
 from redis import StrictRedis
-from fastrq.priorityqueue import PriorityQueue
+from fastrq.priorityqueue import PriorityQueue  # pytype: disable=import-error
 
 from grab.spider.queue_backend.base import QueueInterface
 from grab.spider.error import SpiderMisuseError

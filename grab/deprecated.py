@@ -260,7 +260,7 @@ class DeprecatedThings(object):
             stacklevel=3,
         )
         # pylint: disable=assigning-non-slot, attribute-defined-outside-init
-        self.doc = val  # pytype: disable=no-writeable
+        self.doc = val  # pytype: disable=not-writable
 
     response = property(_get_response, _set_response)
 

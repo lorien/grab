@@ -14,7 +14,7 @@ def make_class_abbr(name):
 
 class NetworkServiceThreaded(BaseService):
     def __init__(self, spider, thread_number):
-        self.spider = spider
+        super().__init__(spider)
         self.thread_number = thread_number
         self.worker_pool = []
         for _ in range(self.thread_number):

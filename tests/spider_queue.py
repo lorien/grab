@@ -1,5 +1,6 @@
 from unittest import TestCase
 import time
+from typing import Any
 
 import six
 from test_server import Response
@@ -13,6 +14,11 @@ from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
 
 
 class SpiderQueueMixin(object):
+    server: Any
+    setup_queue: Any
+    stat: Any
+    assertEqual: Any
+
     class SimpleSpider(Spider):
         def task_page(self, unused_grab, task):
             self.stat.collect("url_history", task.url)

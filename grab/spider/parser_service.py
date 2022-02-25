@@ -10,7 +10,7 @@ from grab.spider.error import NoTaskHandler
 
 class ParserService(BaseService):
     def __init__(self, spider, pool_size):
-        self.spider = spider
+        super().__init__(spider)
         self.input_queue = Queue()
         self.pool_size = pool_size
         self.workers_pool = []

@@ -98,7 +98,7 @@ class Task(BaseTask):
             later as attributes or with `get` method which allows to use
             default value if attribute does not exist.
         """
-
+        self.grab_config = None
         if disable_cache or refresh_cache or cache_timeout:
             raise_feature_is_deprecated("Cache feature")
 

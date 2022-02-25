@@ -14,8 +14,6 @@ class CacheUsageRaisesExceptionTestCase(BaseGrabTestCase):
         self.assertRaises(
             GrabFeatureIsDeprecated, lambda: bot.setup_cache(backend="mongodb")
         )
-        self.assertRaises(GrabFeatureIsDeprecated, lambda: bot.cache_reader_service)
-        self.assertRaises(GrabFeatureIsDeprecated, lambda: bot.cache_writer_service)
         self.assertRaises(GrabFeatureIsDeprecated, lambda: Task(disable_cache=True))
         self.assertRaises(GrabFeatureIsDeprecated, lambda: Task(refresh_cache=True))
         self.assertRaises(GrabFeatureIsDeprecated, lambda: Task(cache_timeout=1))

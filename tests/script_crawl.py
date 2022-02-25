@@ -26,6 +26,8 @@ class TestSpider(Spider):
 
 
 class FailSpider(Spider):
+    url = None
+
     def task_generator(self):
         yield Task("page", url=self.url)
 

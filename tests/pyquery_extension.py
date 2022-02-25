@@ -37,7 +37,10 @@ class PyqueryExtensionTest(BaseGrabTestCase):
         self.grab = Grab(HTML, charset="cp1251")
 
     def test_some_things(self):
+        # pytype: disable=import-error
         from pyquery import PyQuery  # pylint: disable=import-outside-toplevel
+
+        # pytype: enable=import-error
 
         self.assertEqual(self.grab.pyquery("#num-1").text(), u"item #100 2")
         self.assertEqual(

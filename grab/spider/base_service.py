@@ -3,7 +3,7 @@ import logging
 import sys
 
 # pylint: disable=invalid-name
-logger = logging.getLogger('grab.spider.base_service')
+logger = logging.getLogger("grab.spider.base_service")
 # pylint: enable=invalid-name
 
 
@@ -11,11 +11,10 @@ class ServiceWorker(object):
     def __init__(self, spider, worker_callback):
         self.spider = spider
         self.thread = Thread(
-            target=self.worker_callback_wrapper(worker_callback),
-            args=[self]
+            target=self.worker_callback_wrapper(worker_callback), args=[self]
         )
         self.thread.daemon = True
-        th_name = 'worker:%s:%s' % (
+        th_name = "worker:%s:%s" % (
             worker_callback.__self__.__class__.__name__,
             worker_callback.__name__,
         )
@@ -30,9 +29,10 @@ class ServiceWorker(object):
         def wrapper(*args, **kwargs):
             try:
                 callback(*args, **kwargs)
-            except Exception as ex: # pylint: disable=broad-except
-                logger.error('Spider Service Fatal Error', exc_info=ex)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.error("Spider Service Fatal Error", exc_info=ex)
                 self.spider.fatal_error_queue.put(sys.exc_info())
+
         return wrapper
 
     def start(self):
@@ -65,6 +65,10 @@ class ServiceWorker(object):
 
 
 class BaseService(object):
+    def __init__(self, spider):
+        self.spider = spider
+        self.worker_registry = []
+
     def create_worker(self, worker_action):
         # pylint: disable=no-member
         return ServiceWorker(self.spider, worker_action)
@@ -89,21 +93,21 @@ class BaseService(object):
     def pause(self):
         for worker in self.iterate_workers(self.worker_registry):
             worker.pause()
-        #logging.debug('Service %s paused' % self.__class__.__name__)
+        # logging.debug('Service %s paused' % self.__class__.__name__)
 
     def resume(self):
         for worker in self.iterate_workers(self.worker_registry):
             worker.resume()
-        #logging.debug('Service %s resumed' % self.__class__.__name__)
+        # logging.debug('Service %s resumed' % self.__class__.__name__)
 
     def register_workers(self, *args):
         # pylint: disable=attribute-defined-outside-init
         self.worker_registry = args
 
     def is_busy(self):
-        return any(x.is_busy_event.is_set() for x in
-                   self.iterate_workers(self.worker_registry))
+        return any(
+            x.is_busy_event.is_set() for x in self.iterate_workers(self.worker_registry)
+        )
 
     def is_alive(self):
-        return any(x.is_alive() for x in
-                   self.iterate_workers(self.worker_registry))
+        return any(x.is_alive() for x in self.iterate_workers(self.worker_registry))

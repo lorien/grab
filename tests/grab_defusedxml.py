@@ -4,7 +4,7 @@ See details here: https://github.com/tiran/defusedxml/blob/master/README.md
 """
 import os
 
-from lxml.etree import parse
+from lxml.etree import parse  # pytype: disable=import-error
 from six import BytesIO
 from defusedxml import EntitiesForbidden
 

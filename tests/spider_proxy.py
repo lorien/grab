@@ -1,3 +1,5 @@
+from typing import Dict
+
 import six
 from test_server import TestServer, Response
 
@@ -18,6 +20,8 @@ class SimpleSpider(Spider):
 
 
 class TestSpiderProxyCase(BaseGrabTestCase):
+    extra_servers: Dict[int, Dict]
+
     @classmethod
     def setUpClass(cls):
         super(TestSpiderProxyCase, cls).setUpClass()

@@ -8,8 +8,8 @@ from grab.spider.error import FatalError, SpiderError
 
 class TaskDispatcherService(BaseService):
     def __init__(self, spider):
+        super().__init__(spider)
         self.input_queue = Queue()
-        self.spider = spider
         self.worker = self.create_worker(self.worker_callback)
         self.register_workers(self.worker)
 
@@ -51,32 +51,32 @@ class TaskDispatcherService(BaseService):
             pass
         elif isinstance(result, ResponseNotValid):
             self.spider.add_task(task.clone())
-            error_code = result.__class__.__name__.replace('_', '-')
-            self.spider.stat.inc('integrity:%s' % error_code)
+            error_code = result.__class__.__name__.replace("_", "-")
+            self.spider.stat.inc("integrity:%s" % error_code)
         elif isinstance(result, Exception):
             if task:
                 handler = self.spider.find_task_handler(task)
-                handler_name = getattr(handler, '__name__', 'NONE')
+                handler_name = getattr(handler, "__name__", "NONE")
             else:
-                handler_name = 'NA'
+                handler_name = "NA"
             self.spider.process_parser_error(
-                handler_name, task, meta['exc_info'],
+                handler_name,
+                task,
+                meta["exc_info"],
             )
             if isinstance(result, FatalError):
-                self.spider.fatal_error_queue.put(meta['exc_info'])
-        elif isinstance(result, dict) and 'grab' in result:
+                self.spider.fatal_error_queue.put(meta["exc_info"])
+        elif isinstance(result, dict) and "grab" in result:
             # TODO: Move to network service
             # starts
             self.spider.log_network_result_stats(result, task)
             # ends
             is_valid = False
-            if task.get('raw'):
+            if task.get("raw"):
                 is_valid = True
-            elif result['ok']:
-                res_code = result['grab'].doc.code
-                is_valid = self.spider.is_valid_network_response_code(
-                    res_code, task
-                )
+            elif result["ok"]:
+                res_code = result["grab"].doc.code
+                is_valid = self.spider.is_valid_network_response_code(res_code, task)
             if is_valid:
                 self.spider.parser_service.input_queue.put((result, task))
             else:
@@ -87,10 +87,8 @@ class TaskDispatcherService(BaseService):
                 # Use it if request failed not because of network error
                 # But because of content integrity check
                 if self.spider.network_try_limit > 0:
-                    task.setup_grab_config(
-                        result['grab_config_backup'])
+                    task.setup_grab_config(result["grab_config_backup"])
                     self.spider.add_task(task)
-            self.spider.stat.inc('spider:request')
+            self.spider.stat.inc("spider:request")
         else:
-            raise SpiderError('Unknown result received from a service: %s'
-                              % result)
+            raise SpiderError("Unknown result received from a service: %s" % result)

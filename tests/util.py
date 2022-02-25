@@ -64,6 +64,8 @@ def build_spider(cls, **kwargs):
 
 
 class BaseGrabTestCase(TestCase):
+    server: TestServer
+
     @classmethod
     def setUpClass(cls):
         cls.server = start_server()
