@@ -115,22 +115,3 @@ Getting Proxy From Proxy List
 Each time you call `g.proxylist.get_next_proxy`, you get the next proxy from the proxy list.
 When you receive the last proxy in the list, you'll continue receiving proxies from the beginning of the list.
 You can also use `g.proxylist.get_random_proxy` to pick a random proxy from the proxy list.
-
-Automatic Proxy List Reloading
-------------------------------
-
-Grab automatically rereads the proxy source each `g.proxylist.reload_time`
-seconds. You can set the value of this option as follows::
-
-    >>> g = Grab()
-    >>> g.proxylist.setup(reload_time=3600) # reload proxy list one time per hour
-    
-
-Proxy Accumulating
-------------------
-
-Be default, Grab overwrites the proxy list each time it reloads the proxy source. You can change that behaviour::
-
-    >>> g.proxylist.setup(accumulate_updates=True)
-
-That will setup Grab to append new proxies to existing ones.
