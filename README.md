@@ -1,8 +1,8 @@
 # Grab Framework Project
 
-![Test Status](https://github.com/lorien/grab/workflows/test/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/lorien/grab/badge.svg)](https://coveralls.io/github/lorien/grab)
-[![documentation](https://grab.readthedocs.io/en/latest/)](https://grab.readthedocs.io/en/latest/)
+![Grab Test Status](https://github.com/lorien/grab/workflows/test/badge.svg)
+[![Grab Test Coverage Status](https://coveralls.io/repos/github/lorien/grab/badge.svg)](https://coveralls.io/github/lorien/grab)
+[![Grab Documentation](https://readthedocs.org/projects/grab/badge/?version=latest)](https://grab.readthedocs.io/en/latest/)
 
 ## Project Status
 
