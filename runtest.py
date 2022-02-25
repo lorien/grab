@@ -30,6 +30,7 @@ GRAB_TEST_LIST = (
     "tests.grab_get_request",
     "tests.grab_post_request",
     "tests.grab_request",  # FIXME: fix tests excluded for urllib3
+    "tests.grab_request_headers",  # FIXME: fix tests excluded for urllib3
     "tests.grab_user_agent",
     "tests.grab_cookies",  # FIXME: fix tests excluded for urllib3
     "tests.grab_url_processing",

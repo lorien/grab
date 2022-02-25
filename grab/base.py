@@ -16,6 +16,7 @@ import email
 from datetime import datetime
 import weakref
 from typing import Dict, Any, Optional, cast
+from email.message import EmailMessage
 
 from six.moves.urllib.parse import urljoin
 import six
@@ -810,11 +811,17 @@ class Grab(object):
             setattr(self, slot, value)
 
     @property
-    def request_headers(self):
-        first_head = self.request_head.decode("utf-8").split("\r\n\r\n")[0]
-        lines = first_head.split("\r\n")
-        lines = [x for x in lines if ":" in x]
-        return email.message_from_string("\n".join(lines))
+    def request_headers(self) -> Optional[EmailMessage]:
+        if self.request_head is None:
+            return None
+        else:
+            first_head = self.request_head.decode("utf-8").split("\r\n\r\n")[0]
+            lines = first_head.split("\r\n")
+            lines = [x for x in lines if ":" in x]
+            return cast(
+                EmailMessage,
+                email.message_from_string("\n".join(lines), _class=EmailMessage),
+            )
 
 
 # For backward compatibility
