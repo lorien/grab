@@ -40,7 +40,7 @@ setup(
         "six",
         "user_agent",
         "selection",
-        'lxml;platform_system!="Windows"',
+        "lxml",
         'pycurl==7.44.1;platform_system!="Windows"',
         "defusedxml",
     ],

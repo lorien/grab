@@ -9,9 +9,9 @@ test_server>=0.0.35
 mock
 runscript
 urllib3
-pyquery;platform_system!="Windows"
+pyquery
 # to fix appveyor
-item;platform_system!="Windows"
+item
 pylint
 psutil
 tox
