@@ -105,3 +105,11 @@ class TestTransportTestCase(BaseGrabTestCase):
     def test_invalid_transport_not_collable_or_string(self):
         with self.assertRaises(GrabMisuseError):
             Grab(transport=13).go(self.server.get_url())
+
+    def test_setup_transport_twice(self):
+        transport = "grab.transport.curl.CurlTransport"
+        grab = Grab()
+        grab.setup_transport(transport)
+        with self.assertRaises(GrabMisuseError) as ex:
+            grab.setup_transport(transport)
+        self.assertTrue("Transport is already set up" in str(ex.exception))
