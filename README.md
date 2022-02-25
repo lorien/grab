@@ -1,32 +1,46 @@
-# Grab Framework Documentation
+# Grab Framework Project
 
 ![Test Status](https://github.com/lorien/grab/workflows/test/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/lorien/grab/badge.svg)](https://coveralls.io/github/lorien/grab)
-[![documentation](https://readthedocs.org/projects/grab/badge/?version=latest)](http://docs.grablib.org/en/latest/)
+[![documentation](https://grab.readthedocs.io/en/latest/)](https://grab.readthedocs.io/en/latest/)
+
+## Project Status
+
+The Grab project is being in a frozen state. It is highly unlikely there will be new features.
+
+Possible things that might happen:
+
+* Refactoring the source code while keeping most of external API unchanged
+* Fixing bugs
+* Annotating source code with type hints
+* Improving quality of source code to comply with pylint and other linters
+* Moving some features into external packages or moving external dependencies inside Grab
+* Fixing memory leaks
+* Improving test coverage
+* Adding more platforms and python versions to test matrix
+* Releasing new versions on pypi
 
 
 ## Installation
 
-```shell
-
-    $ pip install -U grab
+```
+$ pip install -U grab
 ```
 
 See details about installing Grab on different platforms here http://docs.grablib.org/en/latest/usage/installation.html
 
 
-## Support
+## Documentation
 
-Documentation: https://grablab.org/docs/
+Get it here [grab.readthedocs.io](https://grab.readthedocs.io/en/latest/)
 
-Russian telegram chat: https://t.me/grablab_ru
+## Telegram chat groups
 
-English telegram chat: https://t.me/grablab
+- Russian: [t.me/grablab\_ru](https://t.me/grablab_ru)
+- English: [t.me/grablab](https://t.me/grablab)
 
-To report bug please use GitHub issue tracker: https://github.com/lorien/grab/issues
 
-
-## What is Grab?
+## About Grab (very old description)
 
 Grab is a python web scraping framework. Grab provides a number of helpful methods
 to perform network requests, scrape web sites and process the scraped content:
@@ -60,7 +74,6 @@ Spider is a framework for writing web-site scrapers. Features:
 ## Grab Example
 
 ```python
-
     import logging
 
     from grab import Grab
@@ -92,7 +105,6 @@ Spider is a framework for writing web-site scrapers. Features:
 ## Grab::Spider Example
 
 ```python
-
     import logging
 
     from grab.spider import Spider, Task
