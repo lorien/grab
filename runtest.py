@@ -56,7 +56,6 @@ GRAB_TEST_LIST = (
     "tests.util_config",
     "tests.script_crawl",
     "tests.grab_error",
-    "tests.grab_deprecated",
     "tests.ext_pyquery",
     # *** process control
     "tests.grab_sigint",

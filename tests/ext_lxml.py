@@ -85,88 +85,62 @@ class LXMLExtensionTest(BaseGrabTestCase):
         self.assertEqual(set(["em", "div", "strong"]), names)
 
     def test_xpath(self):
-        self.assertEqual("bee-em", self.grab.xpath_one("//em").get("id"))
+        self.assertEqual("bee-em", self.grab.doc.select("//em").node().get("id"))
         ####self.grab.xpath_one('//em')
         self.assertEqual(
-            "num-2", self.grab.xpath_one(u'//*[text() = "item #2"]').get("id")
+            "num-2", self.grab.doc.select(u'//*[text() = "item #2"]').node().get("id")
         )
-        self.assertRaises(DataNotFound, self.grab.xpath_one, '//em[@id="baz"]')
-        self.assertEqual(None, self.grab.xpath_one("//zzz", default=None))
-        self.assertEqual("foo", self.grab.xpath_one("//zzz", default="foo"))
+        self.assertRaises(
+            DataNotFound, lambda: self.grab.doc.select('//em[@id="baz"]').node()
+        )
+        self.assertEqual(None, self.grab.doc.select("//zzz").node(default=None))
+        self.assertEqual("foo", self.grab.doc.select("//zzz").node(default="foo"))
 
     def test_xpath_text(self):
-        self.assertEqual(u"пче ла", self.grab.xpath_text('//*[@id="bee"]', smart=True))
+        self.assertEqual(
+            u"пче ла", self.grab.doc.select('//*[@id="bee"]').text(smart=True)
+        )
         self.assertEqual(
             u"пчела mozilla = 777; body { color: green; }",
-            self.grab.xpath_text('//*[@id="bee"]', smart=False),
+            self.grab.doc.select('//*[@id="bee"]').text(smart=False),
         )
         self.assertEqual(
             u"пче ла му ха item #100 2 item #2",
-            self.grab.xpath_text("/html/body", smart=True),
+            self.grab.doc.select("/html/body").text(smart=True),
         )
-        self.assertRaises(DataNotFound, self.grab.xpath_text, "//code")
-        self.assertEqual(u"bee", self.grab.xpath_one('//*[@id="bee"]/@id'))
-        self.assertRaises(DataNotFound, self.grab.xpath_text, '//*[@id="bee2"]/@id')
+        self.assertRaises(DataNotFound, lambda: self.grab.doc("//code").text())
+        self.assertEqual(u"bee", self.grab.doc.select('//*[@id="bee"]/@id').text())
+        self.assertRaises(
+            DataNotFound, lambda: self.grab.doc.select('//*[@id="bee2"]/@id').text()
+        )
 
     def test_xpath_number(self):
-        self.assertEqual(100, self.grab.xpath_number("//li"))
-        self.assertEqual(100, self.grab.xpath_number("//li", make_int=True))
-        self.assertEqual("100", self.grab.xpath_number("//li", make_int=False))
-        self.assertEqual(1002, self.grab.xpath_number("//li", ignore_spaces=True))
+        self.assertEqual(100, self.grab.doc.select("//li").number())
+        self.assertEqual(100, self.grab.doc.select("//li").number(make_int=True))
+        self.assertEqual("100", self.grab.doc.select("//li").number(make_int=False))
+        self.assertEqual(1002, self.grab.doc.select("//li").number(ignore_spaces=True))
         self.assertEqual(
-            "1002", self.grab.xpath_number("//li", ignore_spaces=True, make_int=False)
+            "1002",
+            self.grab.doc.select("//li").number(ignore_spaces=True, make_int=False),
         )
-        self.assertRaises(DataNotFound, self.grab.xpath_number, "//liza")
-        self.assertEqual("foo", self.grab.xpath_number("//zzz", default="foo"))
+        self.assertRaises(DataNotFound, lambda: self.grab.doc.select("//liza").number())
+        self.assertEqual("foo", self.grab.doc.select("//zzz").number(default="foo"))
 
     def test_xpath_list(self):
         self.assertEqual(
-            ["num-1", "num-2"], [x.get("id") for x in self.grab.xpath_list("//li")]
+            ["num-1", "num-2"],
+            [x.get("id") for x in self.grab.doc.select("//li").node_list()],
         )
-
-    def test_css(self):
-        self.assertEqual("bee-em", self.grab.css_one("em").get("id"))
-        self.assertEqual("num-2", self.grab.css_one("#num-2").get("id"))
-        self.assertRaises(DataNotFound, self.grab.css_one, "em#baz")
-        self.assertEqual("foo", self.grab.css_one("zzz", default="foo"))
-
-    def test_css_text(self):
-        self.assertEqual(u"пче ла", self.grab.css_text("#bee", smart=True))
-        self.assertEqual(
-            u"пче ла му ха item #100 2 item #2",
-            self.grab.css_text("html body", smart=True),
-        )
-        self.assertRaises(DataNotFound, self.grab.css_text, "status")
-        self.assertEqual("foo", self.grab.css_text("zzz", default="foo"))
-
-    def test_css_number(self):
-        self.assertEqual(100, self.grab.css_number("li"))
-        self.assertEqual("100", self.grab.css_number("li", make_int=False))
-        self.assertEqual(1002, self.grab.css_number("li", ignore_spaces=True))
-        self.assertRaises(DataNotFound, self.grab.css_number, "liza")
-        self.assertEqual("foo", self.grab.css_number("zzz", default="foo"))
 
     def test_css_list(self):
         self.assertEqual(
-            ["num-1", "num-2"], [x.get("id") for x in self.grab.css_list("li")]
+            ["num-1", "num-2"],
+            [x.get("id") for x in self.grab.doc.tree.cssselect("li")],
         )
-
-    def test_strip_tags(self):
-        self.assertEqual("foo", self.grab.strip_tags("<b>foo</b>"))
-        self.assertEqual("foo bar", self.grab.strip_tags("<b>foo</b> <i>bar"))
-        self.assertEqual("foobar", self.grab.strip_tags("<b>foo</b><i>bar"))
-        self.assertEqual(
-            "foo bar", self.grab.strip_tags("<b>foo</b><i>bar", smart=True)
-        )
-        self.assertEqual("", self.grab.strip_tags("<b> <div>"))
-
-    def test_css_exists(self):
-        self.assertTrue(self.grab.css_exists("li#num-1"))
-        self.assertFalse(self.grab.css_exists("li#num-3"))
 
     def test_xpath_exists(self):
-        self.assertTrue(self.grab.xpath_exists('//li[@id="num-1"]'))
-        self.assertFalse(self.grab.xpath_exists('//li[@id="num-3"]'))
+        self.assertTrue(self.grab.doc.select('//li[@id="num-1"]').exists())
+        self.assertFalse(self.grab.doc.select('//li[@id="num-3"]').exists())
 
     def test_cdata_issue(self):
         self.server.add_response(Response(data=XML), count=2)
@@ -175,7 +149,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
         # It handles CDATA incorrectly
         grab = build_grab()
         grab.go(self.server.get_url())
-        self.assertEqual(None, grab.xpath_one("//weight").text)
+        self.assertEqual(None, grab.doc.select("//weight").node().text)
         self.assertEqual(None, grab.doc.tree.xpath("//weight")[0].text)
 
         # But XML DOM builder produces valid result
@@ -205,15 +179,15 @@ class LXMLExtensionTest(BaseGrabTestCase):
         )
         grab = build_grab()
         grab.go(self.server.get_url())
-        self.assertEqual("test", grab.xpath_text("//h1"))
+        self.assertEqual("test", grab.doc.select("//h1").text())
 
     def test_empty_document(self):
         self.server.add_response(Response(data=b"oops"))
         grab = build_grab()
         grab.go(self.server.get_url())
-        grab.xpath_exists("//anytag")
+        grab.doc.select("//anytag").exists()
 
         self.server.add_response(Response(data=b"<frameset></frameset>"))
         grab = build_grab()
         grab.go(self.server.get_url())
-        grab.xpath_exists("//anytag")
+        grab.doc.select("//anytag").exists()

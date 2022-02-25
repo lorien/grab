@@ -42,8 +42,10 @@ class PyqueryExtensionTest(BaseGrabTestCase):
 
         # pytype: enable=import-error
 
-        self.assertEqual(self.grab.pyquery("#num-1").text(), u"item #100 2")
+        self.assertEqual(self.grab.doc.pyquery("#num-1").text(), u"item #100 2")
         self.assertEqual(
-            self.grab.pyquery("li").filter(lambda x: "#2" in PyQuery(x).text()).text(),
+            self.grab.doc.pyquery("li")
+            .filter(lambda x: "#2" in PyQuery(x).text())
+            .text(),
             u"item #2",
         )

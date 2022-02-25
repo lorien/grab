@@ -26,7 +26,6 @@ from grab.document import Document
 from grab import error
 from grab.cookie import CookieManager
 from grab.proxylist import ProxyList, parse_proxy_line
-from grab.deprecated import DeprecatedThings
 
 __all__ = ("Grab",)
 # This counter will used in enumerating network queries.
@@ -160,8 +159,7 @@ def default_config() -> Dict[str, Any]:
     )
 
 
-class Grab(DeprecatedThings):
-
+class Grab(object):
     __slots__ = (
         "request_head",
         "request_body",
