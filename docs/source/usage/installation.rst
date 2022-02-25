@@ -1,7 +1,7 @@
 .. _usage_installation:
 
 Grab Installation
-================
+=================
 
 .. _requirement_parsing_error:
 

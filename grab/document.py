@@ -496,7 +496,7 @@ class Document(object):
         matching group.
 
         :param byte: if False then search is performed in
-        `response.unicode_body()` else the rex is searched in `response.body`.
+            `response.unicode_body()` else the rex is searched in `response.body`.
         """
 
         # pylint: disable=no-member
@@ -514,11 +514,11 @@ class Document(object):
         """
         Search the regular expression in response body.
 
-        :param byte: if False then search is performed in
-        `response.unicode_body()` else the rex is searched in `response.body`.
+        :param byte: if False then search is performed in `response.unicode_body()`
+            else the rex is searched in `response.body`.
 
         Note: if you use default non-byte mode than do not forget to build your
-        regular expression with re.U flag.
+            regular expression with re.U flag.
 
         Return found match object or None
 

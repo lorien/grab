@@ -291,7 +291,7 @@ class Grab(DeprecatedThings):
         Cloned instance will have the same state: cookies, referrer, response
         document data
 
-        :param **kwargs: overrides settings of cloned grab instance
+        :param \*\*kwargs: overrides settings of cloned grab instance
         """
 
         grab = Grab(transport=self.transport_param)
@@ -367,7 +367,7 @@ class Grab(DeprecatedThings):
 
         Args:
             :url: could be absolute or relative. If relative then t will be
-            appended to the absolute URL of previous request.
+                appended to the absolute URL of previous request.
         """
 
         return self.request(url=url, **kwargs)

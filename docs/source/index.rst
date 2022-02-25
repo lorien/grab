@@ -6,13 +6,13 @@
 Welcome to Grab's documentation!
 ================================
 
-Grab Web Resources
-------------------
+Useful Links
+------------
 
 * Source code: https://github.com/lorien/grab
-* Documentation: http://grablib.org
-* Telegram chat: https://t.me/grablab
-* Telegram chat (ru): https://t.me/grablab_ru
+* Documentation: https://grab.readthedocs.io/en/latest/
+* Russian Web Scraping Chat Group: https://t.me/grablab_ru
+* English Web Scraping Chat Group: https://t.me/grablab
 
 What is Grab?
 -------------

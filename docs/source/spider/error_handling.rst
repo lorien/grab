@@ -38,7 +38,7 @@ list of additional valid status codes:
 
     t = Task('example', url='http://example.com', valid_status=(500, 501, 502))
 
-Second way is to redefine `valid_response_code` method. In this way you can
+Second way is to redefine `is_valid_network_response_code` method. In this way you can
 implement any logic you want. Method accepts two arguments: status code and
 task object. Method returns boolean value, `True` means that the status code
 is valid:
@@ -46,7 +46,7 @@ is valid:
 .. code:: python
 
     class SomeSpider(Spider):
-        def valid_response_code(self, code, task):
+        def is_valid_network_response_code(self, code, task):
             return code in (200, 301, 302)
 
 

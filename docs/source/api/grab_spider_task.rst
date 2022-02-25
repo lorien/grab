@@ -3,7 +3,7 @@
 .. module:: grab.spider.task
 
 Module grab.spider.task
-================
+=======================
 
 .. autoclass:: Task
    :members:

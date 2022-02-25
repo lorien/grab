@@ -1,4 +1,4 @@
-.PHONY: build venv deps clean release test check install_codecov_binary coveralls
+.PHONY: build venv deps clean release test check install_codecov_binary coveralls docs
 
 build: venv deps develop
 
@@ -30,3 +30,7 @@ check:
 
 coveralls:
 	bash -c "source var/coveralls.env && coveralls"
+
+docs:
+	rm -r docs/_build \
+		&& sphinx-build -b html docs/source docs/_build
