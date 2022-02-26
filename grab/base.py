@@ -617,19 +617,9 @@ class Grab(object):
         The saved dump could be used for debugging the reason of the failure.
         """
 
-        # try/except for safety, to not break live spiders
-        try:
-            # FIXME
-            if self.transport.__class__.__name__ == "Urllib3Transport" and not getattr(
-                self.transport, "_response", None
-            ):
-                self.doc = None
-            else:
-                self.doc = self.transport.prepare_response(self)
-            self.copy_request_data()
-            self.save_dumps()
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.error("", exc_info=ex)
+        self.doc = self.transport.prepare_response(self)
+        self.copy_request_data()
+        self.save_dumps()
 
     def copy_request_data(self):
         # TODO: Maybe request object?

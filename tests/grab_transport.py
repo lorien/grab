@@ -120,3 +120,12 @@ class TestTransportTestCase(BaseGrabTestCase):
 
         grab.setup_transport(None)
         self.assertEqual(grab.transport_param, "grab.transport.curl.CurlTransport")
+
+    def test_setup_transport_callable(self):
+        from grab.transport.curl import (  # pylint: disable=import-outside-toplevel
+            CurlTransport,
+        )
+
+        grab = Grab()
+        grab.setup_transport(CurlTransport)
+        self.assertTrue(isinstance(grab.transport, CurlTransport))

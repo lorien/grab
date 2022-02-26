@@ -350,6 +350,8 @@ class Urllib3Transport(BaseTransport):
         # On python2 urllib3 headers contains original binary data
         # On python3 urllib3 headers are converted to unicode
         # using latin encoding
+        if not self._response:
+            return None
         try:
             # if self.body_file:
             #    self.body_file.close()
