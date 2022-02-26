@@ -10,7 +10,5 @@ include pylintrc
 include README.rst
 include requirements_dev_backend.txt
 include requirements_dev.txt
-include requirements_readthedocs.txt
 include runtest.py
 include test_settings.py
-include tox.ini
