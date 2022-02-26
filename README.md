@@ -6,9 +6,12 @@
 
 ## Project Status
 
-The Grab project is being in a frozen state. It is highly unlikely there will be new features.
+Important notice: pycurl backend is dropped. The only network transport now is urllib3.
 
-Possible things that might happen:
+The project is being in a slow refactoring stage. It might be possible there will no
+be new feaures.
+
+Things that are going to happen (no estimation time):
 
 * Refactoring the source code while keeping most of external API unchanged
 * Fixing bugs
@@ -46,7 +49,7 @@ Grab is a python web scraping framework. Grab provides a number of helpful metho
 to perform network requests, scrape web sites and process the scraped content:
 
 * Automatic cookies (session) support
-* HTTP and SOCKS proxy with/without authorization
+* HTTPS/SOCKS proxy support with/without authentication
 * Keep-Alive support
 * IDN support
 * Tools to work with web forms
@@ -54,19 +57,13 @@ to perform network requests, scrape web sites and process the scraped content:
 * Flexible customization of HTTP requests
 * Automatic charset detection
 * Powerful API to extract data from DOM tree of HTML documents with XPATH queries
-* Asynchronous API to make thousands of simultaneous queries. This part of
-  library called Spider. See list of spider fetures below.
-* Python 3 ready
 
-Spider is a framework for writing web-site scrapers. Features:
+Grab provides interface called Spider to develop multithreaded web-site scrapers:
 
-* Rules and conventions to organize the request/parse logic in separate
-  blocks of codes
+* Rules and conventions to organize crawling logic
 * Multiple parallel network requests
 * Automatic processing of network errors (failed tasks go back to task queue)
 * You can create network requests and parse responses with Grab API (see above)
-* HTTP proxy support
-* Caching network results in permanent storage
 * Different backends for task queue (in-memory, redis, mongodb)
 * Tools to debug and collect statistics
 
