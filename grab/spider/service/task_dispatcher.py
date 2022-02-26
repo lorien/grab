@@ -1,9 +1,9 @@
 from six.moves.queue import Empty, Queue
 from weblib.error import ResponseNotValid
 
-from grab.spider.base_service import BaseService
 from grab.spider.task import Task
 from grab.spider.error import FatalError, SpiderError
+from .base import BaseService
 
 
 class TaskDispatcherService(BaseService):

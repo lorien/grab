@@ -1,7 +1,7 @@
 import time
 import six
 
-from grab.spider.base_service import BaseService
+from .base import BaseService
 
 
 class TaskGeneratorService(BaseService):

@@ -23,9 +23,9 @@ from grab.spider.task import Task
 from grab.proxylist import ProxyList, BaseProxySource
 from grab.util.misc import camel_case_to_underscore
 from grab.stat import Stat
-from grab.spider.parser_service import ParserService
-from grab.spider.task_generator_service import TaskGeneratorService
-from grab.spider.task_dispatcher_service import TaskDispatcherService
+from .service.parser import ParserService
+from .service.task_generator import TaskGeneratorService
+from .service.task_dispatcher import TaskDispatcherService
 
 DEFAULT_TASK_PRIORITY = 100
 DEFAULT_NETWORK_STREAM_NUMBER = 3
@@ -213,7 +213,7 @@ class Spider(object):
         if network_service == "threaded":
             # pylint: disable=no-name-in-module, import-error
             # pylint: disable=import-outside-toplevel
-            from grab.spider.network_service import NetworkServiceThreaded
+            from .service.network import NetworkServiceThreaded
 
             # pylint: enable=import-outside-toplevel
 

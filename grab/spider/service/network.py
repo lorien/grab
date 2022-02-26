@@ -9,7 +9,7 @@ from grab.error import (
     GrabInvalidResponse,
 )
 from grab.util.misc import camel_case_to_underscore
-from grab.spider.base_service import BaseService
+from .base import BaseService
 
 
 def make_class_abbr(name):

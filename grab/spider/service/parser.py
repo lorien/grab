@@ -4,8 +4,8 @@ import sys
 from six.moves.queue import Queue
 from six.moves import queue
 
-from grab.spider.base_service import BaseService
 from grab.spider.error import NoTaskHandler
+from .base import BaseService
 
 
 class ParserService(BaseService):

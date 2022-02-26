@@ -131,6 +131,9 @@ def main():
         default=False,
         help="Enable verbose logging",
     )
+    parser.add_argument(
+        "--failfast", action="store_true", default=False, help="Stop at first fail"
+    )
     opts = parser.parse_args()
 
     GLOBAL["network_service"] = opts.network_service
@@ -174,8 +177,7 @@ def main():
             for test in some_suite:
                 if not hasattr(test, "backend") or test.backend in GLOBAL["backends"]:
                     suite.addTest(test)
-
-    runner = unittest.TextTestRunner()
+    runner = unittest.TextTestRunner(failfast=opts.failfast)
     result = runner.run(suite)
     th_list = list(threading.enumerate())
     print("Active threads (%d):" % len(th_list))
