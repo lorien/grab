@@ -1,8 +1,7 @@
 recursive-include docs *
 recursive-exclude docs *.pyc __pycache__
-recursive-include script *.py
-recursive-include test *
-recursive-exclude test *.pyc __pycache__
+recursive-include tests *
+recursive-exclude tests *.pyc __pycache__
 include CHANGELOG.md
 include .flake8
 include LICENSE

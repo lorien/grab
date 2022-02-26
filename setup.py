@@ -26,10 +26,8 @@ setup(
     # Package files
     packages=[
         "grab",
-        "grab.script",
         "grab.spider",
         "grab.spider.queue_backend",
-        "grab.spider.network_service",
         "grab.transport",
         "grab.util",
     ],
