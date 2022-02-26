@@ -1,6 +1,4 @@
-# coding: utf-8
 from unittest import TestCase
-import sys
 
 from grab.util.log import default_logging
 from tests.util import temp_file

@@ -4,7 +4,6 @@ import threading
 from mock import patch
 from test_server import Response
 
-from grab.error import GrabTimeoutError
 from grab import Grab
 from grab import base
 

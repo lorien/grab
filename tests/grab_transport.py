@@ -60,7 +60,8 @@
 #        self.assertEqual(grab3.doc.body, response)
 #
 #    # def test_transport_option_as_string_DEPRECATED(self):
-#    #    self.assert_transport_response("grab.transport.DEPRECATED.DEPRECATEDTransport", b"XYZ")
+#    #    self.assert_transport_response(
+#    #        "grab.transport.DEPRECATED.DEPRECATEDTransport", b"XYZ")
 #
 #    # def test_transport_option_as_string_fake(self):
 #    #    with temp_dir() as dir_:
@@ -71,7 +72,8 @@
 #    #        sys.path.remove(dir_)
 #
 #    # def test_transport_option_as_class_DEPRECATED(self):
-#    #    from grab.transport.DEPRECATED import (  # pylint: disable=import-outside-toplevel
+#    #    from grab.transport.DEPRECATED \
+#    #    import (  # pylint: disable=import-outside-toplevel
 #    #        DEPRECATEDTransport,
 #    #    )
 #
@@ -113,10 +115,12 @@
 #        self.assertTrue(grab.transport is None)
 #
 #        grab.setup_transport(None)
-#        self.assertEqual(grab.transport_param, "grab.transport.DEPRECATED.DEPRECATEDTransport")
+#        self.assertEqual(grab.transport_param,
+#            "grab.transport.DEPRECATED.DEPRECATEDTransport")
 #
 #    def test_setup_transport_callable(self):
-#        from grab.transport.DEPRECATED import (  # pylint: disable=import-outside-toplevel
+#        from grab.transport.DEPRECATED import (\
+#            pylint: disable=import-outside-toplevel
 #            DEPRECATEDTransport,
 #        )
 #

@@ -2,12 +2,12 @@ from pprint import pprint  # pylint: disable=unused-import
 
 from test_server import Response
 
-from grab.error import (
-    GrabInternalError,
-    GrabCouldNotResolveHostError,
-    GrabTimeoutError,
-    GrabInvalidUrl,
-)
+# from grab.error import (
+#    GrabInternalError,
+#    GrabCouldNotResolveHostError,
+#    GrabTimeoutError,
+#    GrabInvalidUrl,
+# )
 
 from tests.util import build_grab
 from tests.util import BaseGrabTestCase

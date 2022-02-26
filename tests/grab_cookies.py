@@ -1,7 +1,6 @@
+from pprint import pprint  # pylint: disable=unused-import
 import json
 import pickle
-from pprint import pprint
-from urllib.request import Request
 
 from test_server import Response
 

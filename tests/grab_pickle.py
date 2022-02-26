@@ -1,10 +1,11 @@
-import pickle
+# import pickle
 
-from six.moves.queue import Queue
-from test_server import Response
+# from six.moves.queue import Queue
+# from test_server import Response
 
 from tests.util import BaseGrabTestCase
-from tests.util import build_grab
+
+# from tests.util import build_grab
 
 
 class TestGrab(BaseGrabTestCase):

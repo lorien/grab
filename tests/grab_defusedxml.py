@@ -6,9 +6,8 @@ import os
 
 from lxml.etree import parse  # pytype: disable=import-error
 from six import BytesIO
-from defusedxml import EntitiesForbidden
 
-from tests.util import temp_dir, build_grab
+from tests.util import temp_dir
 from tests.util import BaseGrabTestCase
 
 

@@ -8,15 +8,15 @@ import time
 from contextlib import contextmanager
 import ssl
 from typing import cast
-
-from urllib3.exceptions import LocationParseError
 import urllib.request
 from http.client import HTTPResponse
+
 from six.moves.urllib.parse import urlsplit
 from six.moves.http_cookiejar import CookieJar
 import six
 from weblib.http import normalize_url, normalize_post_data, normalize_http_values
 from weblib.encoding import make_str, make_unicode, decode_pairs
+from urllib3.exceptions import LocationParseError
 from urllib3 import PoolManager, ProxyManager, exceptions, make_headers
 from urllib3.filepost import encode_multipart_formdata
 from urllib3.fields import RequestField
