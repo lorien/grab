@@ -41,7 +41,7 @@ REQUEST_COUNTER = itertools.count(1)
 MUTABLE_CONFIG_KEYS = ("post", "multipart_post", "headers", "cookies")
 TRANSPORT_CACHE = {}
 TRANSPORT_ALIAS = {
-    "urllib3": "grab.transport.urllib3.Urllib3Transport",
+    "urllib3": "grab.transport.Urllib3Transport",
 }
 DEFAULT_TRANSPORT = "urllib3"
 
