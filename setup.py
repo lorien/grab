@@ -27,7 +27,7 @@ setup(
         "grab",
         "grab.spider",
         "grab.spider.queue_backend",
-        "grab.service",
+        "grab.spider.service",
         "grab.util",
     ],
     include_package_data=True,
