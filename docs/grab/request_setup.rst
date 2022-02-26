@@ -84,23 +84,3 @@ There is also `adopt`, which does the opposite of the `clone` method:
     g2.adopt(g1)
 
 The `g2` instance receives the state of the `g1` instance.
-
-
-.. _grab_configuration_pycurl:
-
-Setting Up the Pycurl Object
-----------------------------
-
-Sometimes you need more detailed control of network requests than Grab allows.
-In such cases you can configure pycurl directly. All Grab's network
-features are only a wrapper to the pycurl library. Any available Grab
-option just sets some option of the underlying pycurl object. Here is a 
-simple example of how to change the type of the HTTP authentication:
-
-.. code:: python
-
-    import pycurl
-    from grab import Grab
-    g = Grab()
-    g.setup(userpwd='root:123')
-    g.transport.curl.setopt(pycurl.HTTPAUTH, pycurl.HTTPAUTH_NTLM)

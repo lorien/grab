@@ -26,8 +26,8 @@ e.g.  interacting with DOM tree of the HTML document.
 There are two main parts in the Grab library:
 
     1) The single request/response API that allows you to build network 
-    request, perform it and work with the received content. The API is a 
-    wrapper of the pycurl and lxml libraries.
+    request, perform it and work with the received content. The API is built
+    on top of urllib3 and lxml libraries.
 
     2) The Spider API to build asynchronous web crawlers. You write classes 
     that define handlers for each type of network request. Each handler is able
@@ -63,7 +63,6 @@ Grab User Manual
     grab/cookies
     grab/proxy
     grab/response_search
-    grab/pycurl
     grab/response
     grab/transport
 

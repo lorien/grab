@@ -8,8 +8,6 @@ recommended way of installing Grab is by using pip::
 
     pip install -U Grab
 
-You should also manually install the lxml and pycurl libraries.
-
 Let's get started with some simple examples.
 
 Make a request

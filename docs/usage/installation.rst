@@ -31,7 +31,7 @@ Update installation tools:
 
 .. code:: shell
 
-    pip install -U setuptools pip
+    pip install -U pip
 
 Run the command:
 
@@ -39,17 +39,11 @@ Run the command:
 
     pip install -U grab
 
-This command will install Grab and all dependencies. Be aware that you need
-to have some libraries installed in your system to successfully build lxml and
-pycurl dependencies.
+This command will install Grab and all dependencies.
 
-To build pycurl successfully you need to install:
-
-.. code:: shell
-
-    apt-get install libcurl4-openssl-dev
-   
-To build lxml successfully you need to install:
+Be aware that you need to have some libraries installed in your system
+to successfully build lxml dependency.  To build lxml successfully you
+need to install:
 
 .. code:: shell
 
@@ -65,13 +59,9 @@ enable swap file if it is disabled.
 Installation on Windows
 -----------------------
 
-Step 1. Install lxml. You can get lxml here http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
-
-Step 2. Install pycurl.
-
-.. warning::
-
-    Do not use the recent version of pycurl (7.43.0 at the moment). This version fails randomly on windows platform. Use 7.19.5.3 version. You can get it here https://bintray.com/pycurl/pycurl/pycurl/view#files
+If you have problems with installing lxml with pip try to manually install lxml with
+packages available here http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
+I
 
 Step 3. Update installation tools
 
@@ -144,24 +134,9 @@ Dependencies
 All required dependencies should be installed automatically if you 
 install Grab with pip. Here is list of Grab dependencies::
 
-    lxml
-    pycurl
-    selection
-    weblib
-    six
-    user_agent
-
-
-.. _installation_upgrade:
-
-Upgrade Grab from 0.5.x version to 0.6.x
-----------------------------------------
-
-In Grab 0.6.x some features were moved out into separate packages. If
-you install/upgrade Grab with pip, all dependencies should be installed 
-automatically. Anyway, if you have some ImportError issues then try to 
-install dependencies manually with the command: 
-
-.. code:: shell
-
-    pip install -U lxml pycurl selection weblib six user_agent
+     weblib
+     six
+     user_agent
+     selection
+     lxml
+     defusedxml

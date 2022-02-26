@@ -20,13 +20,9 @@ Here is the heart of the library, the Grab class.
     .. automethod:: go
     .. automethod:: download
     .. automethod:: request
-    .. automethod:: fake_response
-    .. automethod:: load_proxylist
     .. automethod:: change_proxy
     .. automethod:: make_url_absolute
     .. automethod:: clear_cookies
-    .. automethod:: load_cookies
-    .. automethod:: dump_cookies
     .. automethod:: setup_with_proxyline
 
 .. autoclass:: BaseGrab

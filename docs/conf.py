@@ -22,7 +22,7 @@ import sys
 from unittest.mock import MagicMock
 
 SOURCE_DIR = os.path.dirname(os.path.realpath(__file__))
-PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(SOURCE_DIR)))
+PROJECT_DIR = os.path.dirname(os.path.dirname(SOURCE_DIR))
 sys.path.insert(0, PROJECT_DIR)
 
 
@@ -37,7 +37,6 @@ MOCK_MODULES = [
     "lxml",
     "lxml.html",
     "lxml.etree",
-    "pycurl",
     "defusedxml",
     "defusedxml.lxml",
 ]

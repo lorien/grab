@@ -67,23 +67,6 @@ follow_location
 Automatically follow the location in 301/302 response.
 
 
-.. _option_interface:
-
-interface
-^^^^^^^^^
-
-:Type: string
-:Default: None
-
-The network interface through which the request should be submitted.
-
-To specify the interface by its OS name, use "if!***" format, e.g. "if!eth0".
-To specify the interface by its name or ip address, use "host!***" format, e.g.
-"host!127.0.0.1" or "host!localhost".
-
-See also the pycurl manual: http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTINTERFACE
-
-
 .. _option_redirect_limit:
 
 redirect_limit
@@ -162,7 +145,7 @@ of handling that data is selected. The default type for POST requests is "applic
 
 In case of `dict` or sequence of pairs, the following algorithm is applied to each value:
 
-* objects of `grab.upload.UploadFile` class are converted into pycurl structures
+* objects of `grab.upload.UploadFile` class are converted into corresponding urllib3 objects
 * unicode strings are converted into byte strings
 * None values are converted into empty strings
 
@@ -498,17 +481,6 @@ log_dir
 
 Directory to save the content of each response in. Each response will be saved to a unique file.
 See details at :ref:`grab_debugging_response_saving`.
-
-
-.. _option_verbose_logging:
-
-verbose_logging
-^^^^^^^^^^^^^^^
-
-:Type: bool
-:Default: False
-
-This option enables printing to console of all detailed debug info about each pycurl action. Sometimes this can be useful.
 
 
 .. _option_debug_post:

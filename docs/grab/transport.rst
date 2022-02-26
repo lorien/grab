@@ -3,29 +3,15 @@
 Network Transport
 =================
 
-Grab can use two libraries to submit network requests: pycurl and urllib3. You may acess
-transport object with `Grab.transport` attribute. In most cases you do not need direct
-access to transport object.
-
-Pycurl transport
-----------------
-
-The pycurl transport is the default network transport. You can control low-level options
-of pycurl object by accessing `Grab.transport.pycurl` object. For example:
-
-..  code:: python
-
-    from grab import Grab
-    import pycurl
-
-    grab = Grab()
-    grab.transport.pycurl.setopt(pycurl.LOW_SPEED_LIMIT, 100)
-    grab.go('http://example.com/download/porn.mpeg')
+Network transport is a component which utilize one of well known 3rd-party network packages
+to do network requests and retreive network resposne.  At the moment Grab supports only one
+network library: urllib3. You may acess transport object with `Grab.transport` attribute.
+In most cases you do not need direct access to transport object.
 
 Urllib3 transport
 -----------------
 
-If you want to use Grab in gevent environment then consider to use urllib3 transport.
+This transport also could be used in gevent environment.
 The urllib3 uses native python sockets that could be patched by `gevent.monkey.patch_all`.
 
 ..  code:: python
