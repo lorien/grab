@@ -213,7 +213,7 @@ class Spider(object):
         if network_service == "threaded":
             # pylint: disable=no-name-in-module, import-error
             # pylint: disable=import-outside-toplevel
-            from grab.spider.network_service.threaded import NetworkServiceThreaded
+            from grab.spider.network_service import NetworkServiceThreaded
 
             # pylint: enable=import-outside-toplevel
 

@@ -76,7 +76,6 @@ SPIDER_TEST_LIST = (
     "tests.spider_misc",
     "tests.spider_meta",
     "tests.spider_error",
-    #'tests.spider_data',
     "tests.spider_stat",
     "tests.spider_multiprocess",
 )
