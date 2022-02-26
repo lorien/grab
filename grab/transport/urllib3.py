@@ -9,6 +9,7 @@ from contextlib import contextmanager
 import ssl
 from typing import cast
 
+from urllib3.exceptions import LocationParseError
 import urllib.request
 from http.client import HTTPResponse
 from six.moves.urllib.parse import urlsplit
@@ -311,8 +312,8 @@ class Urllib3Transport(BaseTransport):
                     headers=req.headers,
                     preload_content=False,
                 )
-            except UnicodeError as ex:
-                raise error.GrabConnectionError("GrabInvalidUrl", ex)
+            except LocationParseError as ex:
+                raise error.GrabInvalidResponse(str(ex), ex)
         # except exceptions.ReadTimeoutError as ex:
         #    raise error.GrabTimeoutError('ReadTimeoutError', ex)
         # except exceptions.ConnectTimeoutError as ex:
@@ -418,14 +419,13 @@ class Urllib3Transport(BaseTransport):
             # self.response_header_chunks = []
 
             response.code = self._response.status
-            # response.total_time = self.curl.getinfo(pycurl.TOTAL_TIME)
-            # response.connect_time = self.curl.getinfo(pycurl.CONNECT_TIME)
-            # response.name_lookup_time = (self.curl
-            #                             .getinfo(pycurl.NAMELOOKUP_TIME))
-            # response.download_size = self.curl.getinfo(pycurl.SIZE_DOWNLOAD)
-            # response.upload_size = self.curl.getinfo(pycurl.SIZE_UPLOAD)
-            # response.download_speed = self.curl.getinfo(pycurl.SPEED_DOWNLOAD)
-            # response.remote_ip = self.curl.getinfo(pycurl.PRIMARY_IP)
+            # response.total_time =
+            # response.connect_time =
+            # response.name_lookup_time =
+            # response.download_size =
+            # response.upload_size =
+            # response.download_speed =
+            # response.remote_ip =
 
             response.url = self._response.get_redirect_location() or self._request.url
 
@@ -448,9 +448,6 @@ class Urllib3Transport(BaseTransport):
             jar = self.extract_cookiejar()  # self._response, self._request)
             response.cookies = CookieManager(jar)
 
-            # We do not need anymore cookies stored in the
-            # curl instance so drop them
-            # self.curl.setopt(pycurl.COOKIELIST, 'ALL')
             return response
         finally:
             self._response.release_conn()

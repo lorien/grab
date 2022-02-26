@@ -20,8 +20,7 @@ setup(
     long_description=README_CONTENT,
     long_description_content_type="text/markdown",
     download_url="https://pypi.python.org/pypi/grab",
-    keywords="pycurl multicurl curl network parsing grabbing scraping"
-    " lxml xpath data mining",
+    keywords="network parsing grabbing scraping lxml xpath data mining",
     license="MIT License",
     # Package files
     packages=[
@@ -39,7 +38,6 @@ setup(
         "user_agent",
         "selection",
         "lxml",
-        'pycurl==7.44.1;platform_system!="Windows"',
         "defusedxml",
     ],
     extras_require={

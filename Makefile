@@ -32,5 +32,5 @@ coveralls:
 	bash -c "source var/coveralls.env && coveralls"
 
 docs:
-	rm -r docs/_build \
-		&& sphinx-build -b html docs/source docs/_build
+	if [ -e docs/_build ]; then rm -r docs/_build; fi \
+		&& sphinx-build -b html docs docs/_build

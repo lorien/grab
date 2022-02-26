@@ -54,16 +54,12 @@ class GrabNetworkError(OriginalExceptionError, GrabError):
 class GrabTimeoutError(GrabNetworkError):
     """
     Raises when configured time is outed for the request.
-
-    In curl transport it is CURLE_OPERATION_TIMEDOUT (28)
     """
 
 
 class GrabConnectionError(GrabNetworkError):
     """
     Raised when it is not possible to establish network connection.
-
-    In curl transport it is CURLE_COULDNT_CONNECT (7)
     """
 
 
@@ -77,8 +73,6 @@ class GrabCouldNotResolveHostError(GrabNetworkError):
 class GrabAuthError(GrabError):
     """
     Raised when remote server denies authentication credentials.
-
-    In curl transport it is CURLE_COULDNT_CONNECT (67)
     """
 
 
@@ -102,6 +96,12 @@ class GrabInvalidUrl(GrabError):
     """
 
 
+class GrabInvalidResponse(OriginalExceptionError, GrabError):
+    """
+    Raised when network response's data could not be processed
+    """
+
+
 class GrabInternalError(OriginalExceptionError, GrabError):
     pass
 
@@ -115,7 +115,6 @@ class GrabFeatureIsDeprecated(GrabError):
 
 def raise_feature_is_deprecated(feature_name):
     raise GrabFeatureIsDeprecated(
-        '%s is not supported anymore. Update your spiders'
-        ' or use old Grab version'
-        % feature_name
+        "%s is not supported anymore. Update your spiders"
+        " or use old Grab version" % feature_name
     )

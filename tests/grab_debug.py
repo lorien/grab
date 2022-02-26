@@ -9,7 +9,7 @@ from grab import Grab
 from grab import base
 
 from tests.util import BaseGrabTestCase
-from tests.util import build_grab, exclude_grab_transport, temp_dir
+from tests.util import build_grab, temp_dir
 from tests.util import reset_request_counter
 
 
@@ -95,27 +95,26 @@ class TestCookies(BaseGrabTestCase):
                 log_file_content = inp.read()
             self.assertTrue("x-engine" in log_file_content.lower())
 
-    @exclude_grab_transport("urllib3")
-    def test_log_dir_response_network_error(self):
-        with temp_dir() as tmp_dir:
-            reset_request_counter()
+    # def test_log_dir_response_network_error(self):
+    #    with temp_dir() as tmp_dir:
+    #        reset_request_counter()
 
-            grab = build_grab()
-            grab.setup(log_dir=tmp_dir, timeout=1, user_agent="Perl", debug=True)
-            self.server.add_response(
-                Response(data=b"omsk", headers=[("X-Engine", "PHP")], sleep=2)
-            )
+    #        grab = build_grab()
+    #        grab.setup(log_dir=tmp_dir, timeout=1, user_agent="Perl", debug=True)
+    #        self.server.add_response(
+    #            Response(data=b"omsk", headers=[("X-Engine", "PHP")], sleep=2)
+    #        )
 
-            self.assertEqual(os.listdir(tmp_dir), [])
-            try:
-                grab.go(self.server.get_url())
-            except GrabTimeoutError:
-                pass
+    #        self.assertEqual(os.listdir(tmp_dir), [])
+    #        try:
+    #            grab.go(self.server.get_url())
+    #        except GrabTimeoutError:
+    #            pass
 
-            self.assertEqual(sorted(os.listdir(tmp_dir)), ["01.html", "01.log"])
-            with open(os.path.join(tmp_dir, "01.log"), encoding="utf-8") as inp:
-                log_file_content = inp.read()
-            self.assertTrue("user-agent: perl" in log_file_content.lower())
+    #        self.assertEqual(sorted(os.listdir(tmp_dir)), ["01.html", "01.log"])
+    #        with open(os.path.join(tmp_dir, "01.log"), encoding="utf-8") as inp:
+    #            log_file_content = inp.read()
+    #        self.assertTrue("user-agent: perl" in log_file_content.lower())
 
     def test_log_dir_request_content_is_empty(self):
         self.server.add_response(Response())
@@ -135,26 +134,25 @@ class TestCookies(BaseGrabTestCase):
             self.assertFalse("xxxPost" in log_file_content)
 
     # because urllib3 does not collects request headers
-    @exclude_grab_transport("urllib3")
-    def test_log_dir_request_content_headers_and_post(self):
-        self.server.add_response(Response())
-        with temp_dir() as tmp_dir:
-            reset_request_counter()
+    # def test_log_dir_request_content_headers_and_post(self):
+    #    self.server.add_response(Response())
+    #    with temp_dir() as tmp_dir:
+    #        reset_request_counter()
 
-            grab = build_grab()
-            grab.setup(log_dir=tmp_dir, debug=True)
-            grab.setup(headers={"X-Name": "spider"}, post={"xxx": "Post"})
+    #        grab = build_grab()
+    #        grab.setup(log_dir=tmp_dir, debug=True)
+    #        grab.setup(headers={"X-Name": "spider"}, post={"xxx": "Post"})
 
-            self.assertEqual(os.listdir(tmp_dir), [])
-            grab.go(self.server.get_url())
-            self.assertEqual(sorted(os.listdir(tmp_dir)), ["01.html", "01.log"])
-            with open(os.path.join(tmp_dir, "01.log"), encoding="utf-8") as inp:
-                log_file_content = inp.read()
-            # if not 'x-name' in log_file_content.lower():
-            #    print('CONTENT OF 01.log:')
-            #    print(log_file_content)
-            self.assertTrue("x-name" in log_file_content.lower())
-            self.assertTrue("xxx=post" in log_file_content.lower())
+    #        self.assertEqual(os.listdir(tmp_dir), [])
+    #        grab.go(self.server.get_url())
+    #        self.assertEqual(sorted(os.listdir(tmp_dir)), ["01.html", "01.log"])
+    #        with open(os.path.join(tmp_dir, "01.log"), encoding="utf-8") as inp:
+    #            log_file_content = inp.read()
+    #        # if not 'x-name' in log_file_content.lower():
+    #        #    print('CONTENT OF 01.log:')
+    #        #    print(log_file_content)
+    #        self.assertTrue("x-name" in log_file_content.lower())
+    #        self.assertTrue("xxx=post" in log_file_content.lower())
 
     def test_debug_post(self):
         grab = build_grab(debug_post=True)

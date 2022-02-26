@@ -8,12 +8,10 @@ handlers. Each handler handles only one specific type of web pages crawled on
 web-site e.g. home page, user profile page, search results page. Each handler
 could spawn new requests which will be processed in turn by other handlers.
 
-The Spider process network requests asynchronously. There is only one process
-that handles all network, business logic and HTML-processing tasks. Network
-requests are performed by multicurl library. In short, when you create new
-network request it is processed by multicurl and when the response is ready,
-then the corresponding handler from your spider class is called with result
-of network request.
+Spider uses multipe python threads to process network reqeustss in parallel.
+In short, when you create new network request it is processed one of free
+network thread, when the response is ready the corresponding handler from
+your spider class is called with result of network request.
 
 Each handler receives two arguments. First argument is a Grab object, that
 contains all data bout network request and response. The second argument is

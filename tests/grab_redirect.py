@@ -150,8 +150,6 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         grab.go(self.server.get_url())
         self.assertTrue(b"done" in grab.doc.body)
 
-    # TODO: must be written for both transports: curl and urllib3
-    # they might deal with it in different ways
     # def test_redirect_utf_location(self):
     #    def callback():
     #        url = (self.server.get_url() + u"фыва").encode("utf-8")

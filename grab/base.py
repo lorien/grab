@@ -41,10 +41,9 @@ REQUEST_COUNTER = itertools.count(1)
 MUTABLE_CONFIG_KEYS = ("post", "multipart_post", "headers", "cookies")
 TRANSPORT_CACHE = {}
 TRANSPORT_ALIAS = {
-    "pycurl": "grab.transport.curl.CurlTransport",
     "urllib3": "grab.transport.urllib3.Urllib3Transport",
 }
-DEFAULT_TRANSPORT = "pycurl"
+DEFAULT_TRANSPORT = "urllib3"
 
 # pylint: disable=invalid-name
 logger = logging.getLogger("grab.base")
@@ -79,7 +78,7 @@ def default_config() -> Dict[str, Any]:
         log_dir=False,
         debug_post=False,
         debug_post_limit=150,
-        # Only for curl transport
+        # Only for DEPRECATED transport
         debug=False,
         verbose_logging=False,
         # Only for selenium transport

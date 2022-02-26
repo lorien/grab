@@ -2,7 +2,12 @@ import time
 
 from six.moves.queue import Empty
 
-from grab.error import GrabNetworkError, GrabTooManyRedirectsError, GrabInvalidUrl
+from grab.error import (
+    GrabNetworkError,
+    GrabTooManyRedirectsError,
+    GrabInvalidUrl,
+    GrabInvalidResponse,
+)
 from grab.util.misc import camel_case_to_underscore
 from grab.spider.base_service import BaseService
 
@@ -70,6 +75,7 @@ class NetworkServiceThreaded(BaseService):
                                 except (
                                     GrabNetworkError,
                                     GrabInvalidUrl,
+                                    GrabInvalidResponse,
                                     GrabTooManyRedirectsError,
                                 ) as ex:
                                     is_redir_err = isinstance(

@@ -1,6 +1,7 @@
+# TODO: remove this file frm rtd build process
 # sub-set of standard grab dependencies
 # that could be build on readthedocs service
-# The problem is that pycurl, lxml and few other modules could not be built
+# The problem is that lxml and few other modules could not be built
 # thus the grab package is not installed while docs are building
 # Also this file is used in `tox -e doc`
 pip>=9.0.1
@@ -9,3 +10,4 @@ user_agent
 sphinx
 mock
 sphinx_rtd_theme
+urllib3

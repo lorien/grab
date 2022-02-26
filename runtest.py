@@ -18,7 +18,7 @@ GRAB_TEST_LIST = (
     "tests.grab_api",
     "tests.grab_transport",
     "tests.response_class",
-    "tests.grab_debug",  # FIXME: fix tests excluded for urllib3
+    "tests.grab_debug",
     # *** Response processing
     "tests.grab_xml_processing",
     "tests.grab_response_body_processing",
@@ -29,10 +29,10 @@ GRAB_TEST_LIST = (
     # *** Network
     "tests.grab_get_request",
     "tests.grab_post_request",
-    "tests.grab_request",  # FIXME: fix tests excluded for urllib3
-    "tests.grab_request_headers",  # FIXME: fix tests excluded for urllib3
+    "tests.grab_request",
+    "tests.grab_request_headers",
     "tests.grab_user_agent",
-    "tests.grab_cookies",  # FIXME: fix tests excluded for urllib3
+    "tests.grab_cookies",
     "tests.grab_url_processing",
     "tests.grab_timeout",
     # *** Refactor
@@ -40,7 +40,7 @@ GRAB_TEST_LIST = (
     "tests.grab_upload_file",
     "tests.grab_limit_option",
     "tests.grab_charset_issue",
-    "tests.grab_pickle",  # FIXME: fix tests excluded for urllib3
+    "tests.grab_pickle",
     "tests.proxy",
     # *** Extensions
     "tests.ext_text",
@@ -48,16 +48,11 @@ GRAB_TEST_LIST = (
     "tests.ext_lxml",
     "tests.ext_form",
     "tests.ext_doc",
-    # *** Pycurl Test
-    "tests.pycurl_cookie",
     # *** util.module
     "tests.util_log",
     # *** grab.export
     "tests.grab_error",
     "tests.ext_pyquery",
-    # *** process control
-    "tests.grab_sigint",
-    "tests.spider_sigint",
     # *** Other things
     "tests.raw_server",
     "tests.misc",
@@ -101,7 +96,6 @@ def main():
     setup_logging()
     parser = ArgumentParser()
     parser.add_argument("-t", "--test", help="Run only specified tests")
-    parser.add_argument("--grab-transport", default="pycurl")
     parser.add_argument("--network-service", default="threaded")
     parser.add_argument(
         "--test-grab",
@@ -139,7 +133,6 @@ def main():
     )
     opts = parser.parse_args()
 
-    GLOBAL["grab_transport"] = opts.grab_transport
     GLOBAL["network_service"] = opts.network_service
 
     if opts.backend_mongodb:

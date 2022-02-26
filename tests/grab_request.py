@@ -9,7 +9,7 @@ from grab.error import (
     GrabInvalidUrl,
 )
 
-from tests.util import build_grab, exclude_grab_transport
+from tests.util import build_grab
 from tests.util import BaseGrabTestCase
 
 
@@ -51,33 +51,32 @@ class GrabRequestTestCase(BaseGrabTestCase):
         grab = build_grab()
         grab.go(self.server.get_url())
 
-    @exclude_grab_transport("urllib3")
-    def test_redirect_with_invalid_byte(self):
-        url = self.server.get_url()
-        invalid_url = "http://\xa0" + url  # .encode('ascii')
+    # def test_redirect_with_invalid_byte(self):
+    #    url = self.server.get_url()
+    #    invalid_url = "http://\xa0" + url  # .encode('ascii')
 
-        def callback():
-            return {
-                "type": "response",
-                "status": 301,
-                "headers": [("Location", invalid_url)],
-                "data": b"",
-            }
+    #    def callback():
+    #        return {
+    #            "type": "response",
+    #            "status": 301,
+    #            "headers": [("Location", invalid_url)],
+    #            "data": b"",
+    #        }
 
-        self.server.add_response(Response(callback=callback))
-        grab = build_grab()
-        # GrabTimeoutError raised when tests are being runned on computer
-        # without access to the internet (no DNS service available)
-        self.assertRaises(
-            (
-                GrabInternalError,
-                GrabCouldNotResolveHostError,
-                GrabTimeoutError,
-                GrabInvalidUrl,
-            ),
-            grab.go,
-            self.server.get_url(),
-        )
+    #    self.server.add_response(Response(callback=callback))
+    #    grab = build_grab()
+    #    # GrabTimeoutError raised when tests are being runned on computer
+    #    # without access to the internet (no DNS service available)
+    #    self.assertRaises(
+    #        (
+    #            GrabInternalError,
+    #            GrabCouldNotResolveHostError,
+    #            GrabTimeoutError,
+    #            GrabInvalidUrl,
+    #        ),
+    #        grab.go,
+    #        self.server.get_url(),
+    #    )
 
     def test_options_method(self):
         self.server.add_response(Response())
@@ -93,11 +92,3 @@ class GrabRequestTestCase(BaseGrabTestCase):
         grab.go(self.server.get_url())
         self.assertEqual("OPTIONS", self.server.request.method)
         self.assertTrue("Content-Length" not in self.server.request.headers)
-
-    @exclude_grab_transport("urllib3")
-    def test_request_headers(self):
-        self.server.add_response(Response())
-        grab = build_grab(debug=True)
-        grab.setup(headers={"Foo": "Bar"})
-        grab.go(self.server.get_url())
-        self.assertEqual("Bar", grab.request_headers["foo"])

@@ -1,6 +1,6 @@
 from test_server import Response
 
-from tests.util import build_grab, only_grab_transport
+from tests.util import build_grab
 from tests.util import BaseGrabTestCase, temp_file
 
 
@@ -15,16 +15,6 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         self.assertTrue(
             self.server.request.headers.get("user-agent").startswith("Mozilla/5.0 ")
         )
-
-    @only_grab_transport("pycurl")
-    def test_empty_useragent_pycurl(self):
-        self.server.add_response(Response())
-        grab = build_grab()
-
-        # Empty string disable default pycurl user-agent
-        grab.setup(user_agent="")
-        grab.go(self.server.get_url())
-        self.assertFalse("user-agent" in self.server.request.headers)
 
     def test_useragent_simple(self):
         self.server.add_response(Response())

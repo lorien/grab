@@ -129,7 +129,7 @@ class Spider(object):
         parser_requests_per_process=10000,
         parser_pool_size=1,
         network_service="threaded",
-        grab_transport="pycurl",
+        grab_transport="urllib3",
         # Deprecated
         transport=None,
     ):
@@ -155,7 +155,7 @@ class Spider(object):
         self.fatal_error_queue = Queue()
         self.task_queue_parameters = None
         self._started = None
-        assert grab_transport in ("pycurl", "urllib3")
+        assert grab_transport in ["urllib3"]
         self.grab_transport_name = grab_transport
         self.parser_requests_per_process = parser_requests_per_process
         self.stat = Stat()

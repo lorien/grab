@@ -19,7 +19,6 @@ NON_ROUTABLE_IP = "10.0.0.0"
 
 GLOBAL = {
     "backends": [],
-    "grab_transport": None,
     "network_service": None,
 }
 
@@ -52,13 +51,13 @@ def temp_file(root_dir=None):
 
 def build_grab(*args, **kwargs):
     """Builds the Grab instance with default options."""
-    kwargs.setdefault("transport", GLOBAL["grab_transport"])
+    kwargs.setdefault("transport", "urllib3")
     return Grab(*args, **kwargs)
 
 
 def build_spider(cls, **kwargs):
     """Builds the Spider instance with default options."""
-    kwargs.setdefault("grab_transport", GLOBAL["grab_transport"])
+    kwargs.setdefault("grab_transport", "urllib3")
     kwargs.setdefault("network_service", GLOBAL["network_service"])
     return cls(**kwargs)
 
@@ -85,44 +84,6 @@ def start_server():
     return server
 
 
-def exclude_grab_transport(*names):
-    def decorator(func):
-        def caller(*args, **kwargs):
-            if GLOBAL["grab_transport"] in names:
-                func_name = "%s:%s" % (func.__module__, func.__name__)
-                logger.debug(
-                    "Running test %s for grab transport %s is" " restricted",
-                    func_name,
-                    GLOBAL["grab_transport"],
-                )
-                return None
-            else:
-                return func(*args, **kwargs)
-
-        return caller
-
-    return decorator
-
-
-def only_grab_transport(*names):
-    def decorator(func):
-        def caller(*args, **kwargs):
-            if GLOBAL["grab_transport"] in names:
-                return func(*args, **kwargs)
-            else:
-                func_name = "%s:%s" % (func.__module__, func.__name__)
-                logger.debug(
-                    "Running test %s for grab transport %s is" " restricted",
-                    func_name,
-                    GLOBAL["grab_transport"],
-                )
-                return None
-
-        return caller
-
-    return decorator
-
-
 def skip_test_if(condition, why_message):
     def decorator(func):
         def caller(*args, **kwargs):
@@ -132,25 +93,6 @@ def skip_test_if(condition, why_message):
                 return None
             else:
                 return func(*args, **kwargs)
-
-        return caller
-
-    return decorator
-
-
-def run_test_if(condition, why_message):
-    def decorator(func):
-        def caller(*args, **kwargs):
-            if condition():
-                return func(*args, **kwargs)
-            else:
-                func_name = "%s:%s" % (func.__module__, func.__name__)
-                logger.debug(
-                    "Running test %s is restricted because" " it is not %s",
-                    func_name,
-                    why_message,
-                )
-                return None
 
         return caller
 

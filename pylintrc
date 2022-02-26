@@ -1,6 +1,6 @@
 [MASTER]
 jobs=4
-extension-pkg-whitelist=pycurl,lxml
+extension-pkg-whitelist=lxml
 
 [MESSAGES CONTROL]
 disable=R,fixme,missing-docstring,consider-using-f-string

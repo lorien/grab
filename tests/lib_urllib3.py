@@ -1,14 +1,13 @@
 # coding: utf-8
 import six
 
-from tests.util import BaseGrabTestCase, only_grab_transport
+from tests.util import BaseGrabTestCase
 
 
 class GrabApiTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    @only_grab_transport("urllib3")
     def test_urllib3_idna_error(self):
         # pylint: disable=import-outside-toplevel
         from urllib3 import PoolManager
