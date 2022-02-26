@@ -51,11 +51,8 @@ GRAB_TEST_LIST = (
     # *** Pycurl Test
     "tests.pycurl_cookie",
     # *** util.module
-    "tests.util_module",
     "tests.util_log",
     # *** grab.export
-    "tests.util_config",
-    "tests.script_crawl",
     "tests.grab_error",
     "tests.ext_pyquery",
     # *** process control

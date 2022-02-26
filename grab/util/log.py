@@ -4,6 +4,20 @@ from contextlib import contextmanager
 from io import TextIOBase
 
 
+def setup_logger(
+    name: str,
+    filename: str,
+    filemode: str,
+    propagate: bool = True,
+    level: int = logging.DEBUG,
+):
+    logger = logging.getLogger(name)
+    logger.propagate = propagate
+    hdl = logging.FileHandler(filename, filemode)
+    logger.addHandler(hdl)
+    logger.setLevel(level)
+
+
 def default_logging(
     grab_log=None,  # '/tmp/grab.log',
     network_log=None,  # '/tmp/grab.network.log',
@@ -19,19 +33,22 @@ def default_logging(
     """
 
     logging.basicConfig(level=level)
-
-    network_logger = logging.getLogger("grab.network")
-    network_logger.propagate = propagate_network_logger
     if network_log:
-        hdl = logging.FileHandler(network_log, mode)
-        network_logger.addHandler(hdl)
-        network_logger.setLevel(level)
-
-    grab_logger = logging.getLogger("grab")
+        setup_logger(
+            name="grab.network",
+            filename=network_log,
+            filemode=mode,
+            propagate=propagate_network_logger,
+            level=level,
+        )
     if grab_log:
-        hdl = logging.FileHandler(grab_log, mode)
-        grab_logger.addHandler(hdl)
-        grab_logger.setLevel(level)
+        setup_logger(
+            name="grab",
+            filename=grab_log,
+            filemode=mode,
+            propagate=True,
+            level=level,
+        )
 
 
 class PycurlSigintHandler(TextIOBase):

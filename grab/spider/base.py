@@ -26,7 +26,6 @@ from grab.stat import Stat
 from grab.spider.parser_service import ParserService
 from grab.spider.task_generator_service import TaskGeneratorService
 from grab.spider.task_dispatcher_service import TaskDispatcherService
-from grab.spider.http_api_service import HttpApiService
 
 DEFAULT_TASK_PRIORITY = 100
 DEFAULT_NETWORK_STREAM_NUMBER = 3
@@ -129,7 +128,6 @@ class Spider(object):
         args=None,
         parser_requests_per_process=10000,
         parser_pool_size=1,
-        http_api_port=None,
         network_service="threaded",
         grab_transport="pycurl",
         # Deprecated
@@ -156,7 +154,6 @@ class Spider(object):
 
         self.fatal_error_queue = Queue()
         self.task_queue_parameters = None
-        self.http_api_port = http_api_port
         self._started = None
         assert grab_transport in ("pycurl", "urllib3")
         self.grab_transport_name = grab_transport
@@ -222,10 +219,6 @@ class Spider(object):
 
             self.network_service = NetworkServiceThreaded(self, self.thread_number)
         self.task_dispatcher = TaskDispatcherService(self)
-        if self.http_api_port:
-            self.http_api_service = HttpApiService(self)
-        else:
-            self.http_api_service = None
         self.task_generator_service = TaskGeneratorService(self, self.task_generator())
 
     def setup_cache(self, *args, **kwargs):  # pylint: disable=unused-argument
@@ -636,8 +629,6 @@ class Spider(object):
                 self.parser_service,
                 self.network_service,
             ]
-            if self.http_api_service:
-                self.http_api_service.start()
             for srv in services:
                 srv.start()
             while self.work_allowed:
