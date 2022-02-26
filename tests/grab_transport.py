@@ -113,3 +113,10 @@ class TestTransportTestCase(BaseGrabTestCase):
         with self.assertRaises(GrabMisuseError) as ex:
             grab.setup_transport(transport)
         self.assertTrue("Transport is already set up" in str(ex.exception))
+
+    def test_setup_transport_none(self):
+        grab = Grab()
+        self.assertTrue(grab.transport is None)
+
+        grab.setup_transport(None)
+        self.assertEqual(grab.transport_param, "grab.transport.curl.CurlTransport")

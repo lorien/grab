@@ -227,3 +227,12 @@ class TestProxy(BaseGrabTestCase):
         self.assertEqual(grab.config["proxy"], "1.1.1.1:8080")
         self.assertEqual(grab.config["proxy_userpwd"], "user:pass")
         self.assertEqual(grab.config["proxy_type"], "http")
+
+    def test_proxy_auth(self):
+        # For not this test is just for test coverage in logging method
+        grab = build_grab()
+        grab.setup_with_proxyline(
+            "{}:{}:user:pass".format(self.server.address, self.server.port)
+        )
+        self.server.add_response(Response())
+        grab.go(self.server.get_url())

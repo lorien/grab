@@ -255,8 +255,10 @@ class Grab(object):
                     mod = __import__(mod_path, globals(), locals(), ["foo"])
                     cls = getattr(mod, cls_name)
                     TRANSPORT_CACHE[(mod_path, cls_name)] = cls
+                self.transport_param = transport_param
                 self.transport = cls()
         elif isinstance(transport_param, collections.abc.Callable):
+            self.transport_param = transport_param
             self.transport = transport_param()
         else:
             raise error.GrabMisuseError(
@@ -535,7 +537,7 @@ class Grab(object):
         else:
             return None
 
-    def process_request_result(self, prepare_response_func=None):
+    def process_request_result(self):
         """
         Process result of real request performed via transport extension.
         """
@@ -572,10 +574,7 @@ class Grab(object):
         # again!
         self.reset_temporary_options()
 
-        if prepare_response_func:
-            self.doc = prepare_response_func(self.transport, self)
-        else:
-            self.doc = self.transport.prepare_response(self)
+        self.doc = self.transport.prepare_response(self)
 
         self.doc.process_grab(self)
 
