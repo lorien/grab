@@ -8,15 +8,14 @@
 
 Important notice: pycurl backend is dropped. The only network transport now is urllib3.
 
-The project is being in a slow refactoring stage. It might be possible there will no
-be new feaures.
+The project is in a slow refactoring stage. It might be possible there will not be new features.
 
 Things that are going to happen (no estimation time):
 
-* Refactoring the source code while keeping most of external API unchanged
+* Refactoring the source code while keeping most of the external API unchanged
 * Fixing bugs
 * Annotating source code with type hints
-* Improving quality of source code to comply with pylint and other linters
+* Improving the quality of source code to comply with pylint and other linters
 * Moving some features into external packages or moving external dependencies inside Grab
 * Fixing memory leaks
 * Improving test coverage
@@ -46,7 +45,7 @@ Get it here [grab.readthedocs.io](https://grab.readthedocs.io/en/latest/)
 ## About Grab (very old description)
 
 Grab is a python web scraping framework. Grab provides a number of helpful methods
-to perform network requests, scrape web sites and process the scraped content:
+to perform network requests, scrape websites and process the scraped content:
 
 * Automatic cookies (session) support
 * HTTPS/SOCKS proxy support with/without authentication
@@ -58,11 +57,11 @@ to perform network requests, scrape web sites and process the scraped content:
 * Automatic charset detection
 * Powerful API to extract data from DOM tree of HTML documents with XPATH queries
 
-Grab provides interface called Spider to develop multithreaded web-site scrapers:
+Grab provides an interface called Spider to develop multithreaded website scrapers:
 
 * Rules and conventions to organize crawling logic
 * Multiple parallel network requests
-* Automatic processing of network errors (failed tasks go back to task queue)
+* Automatic processing of network errors (failed tasks go back to a task queue)
 * You can create network requests and parse responses with Grab API (see above)
 * Different backends for task queue (in-memory, redis, mongodb)
 * Tools to debug and collect statistics
