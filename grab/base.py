@@ -121,7 +121,7 @@ def default_config() -> Dict[str, Any]:
         encoding="gzip",
         # Network interface
         interface=None,
-        # DNS resulution
+        # DNS resolution
         resolve=None,
         # Redirects
         follow_refresh=False,

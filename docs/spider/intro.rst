@@ -8,7 +8,7 @@ handlers. Each handler handles only one specific type of web pages crawled on
 web-site e.g. home page, user profile page, search results page. Each handler
 could spawn new requests which will be processed in turn by other handlers.
 
-Spider uses multipe python threads to process network reqeustss in parallel.
+Spider uses multiple python threads to process network requests in parallel.
 In short, when you create new network request it is processed one of free
 network thread, when the response is ready the corresponding handler from
 your spider class is called with result of network request.
