@@ -117,7 +117,7 @@ class WebProxySource(BaseProxySource):
                     raise
                 else:
                     logger.debug(
-                        "Failed to retreive proxy list from %s." " Retrying.", self.url
+                        "Failed to retrieve proxy list from %s." " Retrying.", self.url
                     )
 
 

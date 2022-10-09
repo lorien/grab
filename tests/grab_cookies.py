@@ -153,7 +153,7 @@ class TestCookies(BaseGrabTestCase):
             with open(tmp_file, "w", encoding="utf-8") as out:
                 json.dump(cookies, out)
 
-            # One cookie are sent in server reponse
+            # One cookie are sent in server response
             # Another cookies is passed via the `cookiefile` option
             self.server.add_response(
                 Response(headers=[("Set-Cookie", "godzilla=monkey")])
@@ -348,7 +348,7 @@ class TestCookies(BaseGrabTestCase):
         grab.cookies.set("foo", "bar2", "localhost")
         self.assertEqual(1, len(grab.cookies.items()))
 
-        # Empty domain as same as localhost becuase internally
+        # Empty domain as same as localhost because internally
         # localhost replaced with empty string
         grab.cookies.set("foo", "bar3", "")
         self.assertEqual(1, len(grab.cookies.items()))
@@ -371,7 +371,7 @@ class TestCookies(BaseGrabTestCase):
         # request page one more time, sending cookie
         # should not fail
         grab.go(self.server.get_url())
-        # does not work yet, because test_server does not correclty
+        # does not work yet, because test_server does not correctly
         # display request unicode cookies
         # self.assertEqual(
         # u'медвед', self.server.request['cookies']['preved']['value']

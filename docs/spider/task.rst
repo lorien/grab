@@ -35,7 +35,7 @@ see examples of different task creation. All three examples do the same:
     # Using `url` argument
     t = Task('wikipedia', url 'http://wikipedia.org/')
 
-    # Using Grab intance
+    # Using Grab instance
     g = Grab()
     g.setup(url='http://wikipedia.org/')
     t = Task('wikipedia', grab=g)

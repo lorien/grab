@@ -37,7 +37,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         bot.add_task(task)
         self.assertEqual(33, task.priority)
 
-        # Automatic priority does not override explictily setted priority
+        # Automatic priority does not override explicitly set priority
         base.DEFAULT_TASK_PRIORITY = 33
         bot = build_spider(SimpleSpider, priority_mode="const")
         bot.setup_queue()

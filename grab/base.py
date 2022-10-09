@@ -67,7 +67,7 @@ def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
 
 
 def default_config() -> Dict[str, Any]:
-    # TODO: Maybe config should be splitted into two entities:
+    # TODO: Maybe config should be split into two entities:
     # 1) config which is not changed during request
     # 2) changeable settings
     return dict(
@@ -121,7 +121,7 @@ def default_config() -> Dict[str, Any]:
         encoding="gzip",
         # Network interface
         interface=None,
-        # DNS resulution
+        # DNS resolution
         resolve=None,
         # Redirects
         follow_refresh=False,
@@ -630,7 +630,7 @@ class Grab(object):
         """
         Setup `response` object without real network requests.
 
-        Useful for testing and debuging.
+        Useful for testing and debugging.
 
         All ``**kwargs`` will be passed to `Document` constructor.
         """

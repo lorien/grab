@@ -4,8 +4,8 @@ Network Transport
 =================
 
 Network transport is a component which utilize one of well known 3rd-party network packages
-to do network requests and retreive network resposne.  At the moment Grab supports only one
-network library: urllib3. You may acess transport object with `Grab.transport` attribute.
+to do network requests and retrieve network response.  At the moment Grab supports only one
+network library: urllib3. You may access transport object with `Grab.transport` attribute.
 In most cases you do not need direct access to transport object.
 
 Urllib3 transport

@@ -65,7 +65,7 @@ class GrabRequestTestCase(BaseGrabTestCase):
 
     #    self.server.add_response(Response(callback=callback))
     #    grab = build_grab()
-    #    # GrabTimeoutError raised when tests are being runned on computer
+    #    # GrabTimeoutError raised when tests are being ran on computer
     #    # without access to the internet (no DNS service available)
     #    self.assertRaises(
     #        (

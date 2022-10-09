@@ -276,7 +276,7 @@ class Document(object):
                 codecs.lookup(charset)
             except LookupError:
                 logger.debug(
-                    "Unknown charset found: %s." " Using utf-8 istead.", charset
+                    "Unknown charset found: %s." " Using utf-8 instead.", charset
                 )
                 self.charset = "utf-8"
             else:
@@ -330,7 +330,7 @@ class Document(object):
     def save_hash(self, location, basedir, ext=None):
         """
         Save response body into file with special path
-        builded from hash. That allows to lower number of files
+        built from hash. That allows to lower number of files
         per directory.
 
         :param location: URL of file or something else. It is
