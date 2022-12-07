@@ -1,4 +1,3 @@
-# coding: utf-8
 from test_server import Response
 from tests.util import BaseGrabTestCase, build_grab
 

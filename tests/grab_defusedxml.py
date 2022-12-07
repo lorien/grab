@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 See details here: https://github.com/tiran/defusedxml/blob/master/README.md
 """

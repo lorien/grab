@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from grab import DataNotFound, GrabMisuseError
 from tests.util import BaseGrabTestCase, build_grab
 
