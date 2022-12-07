@@ -1,4 +1,4 @@
-# 🇷🇺 Grab Framework Project
+# Grab Framework Project
 
 ![Grab Test Status](https://github.com/lorien/grab/workflows/test/badge.svg)
 [![Grab Test Coverage Status](https://coveralls.io/repos/github/lorien/grab/badge.svg)](https://coveralls.io/github/lorien/grab)
