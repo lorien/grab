@@ -1,0 +1,51 @@
+#feedparser
+#flake8
+#selenium
+#runscript
+#urllib3
+#pyquery
+## to fix appveyor
+#item
+#pylint
+#psutil
+#tox
+#fastrq
+#sphinx
+
+test_server>=0.0.35
+mock
+bumpversion
+pytest
+build
+twine
+
+coverage
+#coveralls
+pytest-cov
+
+# types
+types-lxml
+
+# Code Quality
+bandit[toml]
+flake8
+# flake8-broken-line # DISABLED, DEPENCIES ISSUES
+flake8-bugbear
+# flake8-commas # DISABLED, do not like C816 missing trailing comma in Python 3.6+
+flake8-comprehensions
+flake8-debugger
+flake8-docstrings
+flake8-expression-complexity
+flake8-isort
+flake8-pep585
+flake8-pie
+# flake8-quotes # DISABLED, BREAKS FLAKE8
+flake8-return
+flake8-simplify
+flake8-string-format
+flake8-cognitive-complexity
+mccabe
+mypy
+pep8-naming
+pylint
+

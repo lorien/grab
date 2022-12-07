@@ -1,4 +1,5 @@
 [flake8]
+# --- flake8
 # E121 continuation line under-indented for hanging indent
 # E125 continuation line with same indent as next logical line
 # E203 whitespace before ':'
@@ -7,6 +8,24 @@
 # F401 'pprint.pprint' imported but unused, CHECKED BY PYLINT
 # F841 local variable 'suffix' is assigned to but never used, CHECKED BY PYLINT
 # W503 line break before binary operator
-ignore=E121,E125,E203,E261,E265,F401,F841,W503
+# N818 exception name 'ElementNotFound' should be named with an Error suffix
+# --- flake8-commas
+# C812 missing trailing comma
+# C813 missing trailing comma in Python 3
+# --- flake8-docstrings
+# D100 Missing docstring in public module
+# D101 Missing docstring in public class
+# D102 Missing docstring in public method
+# D103 Missing docstring in public function
+# D104 Missing docstring in public package
+# D105 Missing docstring in magic method
+# D107 Missing docstring in __init__
+# --- flake8-string-format
+# P101 format string does contain unindexed parameters
+# --- flake8-pie
+# PIE798 no-unnecessary-class: Consider using a module for namespacing instead
+# PIE786 Use precise exception handlers
+ignore=F401,C812,C813,D100,D101,D102,D103,D104,D107,D105,P101,PIE798,PIE786,W503,N818
 max-line-length=88
-# exclude = tests/files/invalid_import.py
+inline-quotes = double
+max-complexity=10
