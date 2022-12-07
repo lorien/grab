@@ -24,7 +24,7 @@ coverage
 pytest-cov
 
 # types
-types-lxml
+# FAILS on python 3.7 # types-lxml
 
 # Code Quality
 bandit[toml]
