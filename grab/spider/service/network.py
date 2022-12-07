@@ -1,14 +1,14 @@
 import time
-
-from six.moves.queue import Empty
+from queue import Empty
 
 from grab.error import (
+    GrabInvalidResponse,
+    GrabInvalidUrl,
     GrabNetworkError,
     GrabTooManyRedirectsError,
-    GrabInvalidUrl,
-    GrabInvalidResponse,
 )
 from grab.util.misc import camel_case_to_underscore
+
 from .base import BaseService
 
 

@@ -1,10 +1,7 @@
-from test_server import Response
-
 from grab import DataNotFound
 from grab.util import warning
-
-from tests.util import build_grab
-from tests.util import BaseGrabTestCase
+from test_server import Response
+from tests.util import BaseGrabTestCase, build_grab
 
 HTML = """
 <head>
@@ -70,11 +67,11 @@ class LXMLExtensionTest(BaseGrabTestCase):
         # content of adjacent XML nodes
         self.assertEqual(
             self.lxml_tree.xpath('//div[@id="bee"]/div')[0].text_content().strip(),
-            u"пчела",
+            "пчела",
         )
         self.assertEqual(
             self.lxml_tree.xpath('//div[@id="fly"]')[0].text_content().strip(),
-            u"му\nха",
+            "му\nха",
         )
 
     def test_lxml_xpath(self):
@@ -88,7 +85,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
         self.assertEqual("bee-em", self.grab.doc.select("//em").node().get("id"))
         ####self.grab.xpath_one('//em')
         self.assertEqual(
-            "num-2", self.grab.doc.select(u'//*[text() = "item #2"]').node().get("id")
+            "num-2", self.grab.doc.select('//*[text() = "item #2"]').node().get("id")
         )
         self.assertRaises(
             DataNotFound, lambda: self.grab.doc.select('//em[@id="baz"]').node()
@@ -98,18 +95,18 @@ class LXMLExtensionTest(BaseGrabTestCase):
 
     def test_xpath_text(self):
         self.assertEqual(
-            u"пче ла", self.grab.doc.select('//*[@id="bee"]').text(smart=True)
+            "пче ла", self.grab.doc.select('//*[@id="bee"]').text(smart=True)
         )
         self.assertEqual(
-            u"пчела mozilla = 777; body { color: green; }",
+            "пчела mozilla = 777; body { color: green; }",
             self.grab.doc.select('//*[@id="bee"]').text(smart=False),
         )
         self.assertEqual(
-            u"пче ла му ха item #100 2 item #2",
+            "пче ла му ха item #100 2 item #2",
             self.grab.doc.select("/html/body").text(smart=True),
         )
         self.assertRaises(DataNotFound, lambda: self.grab.doc("//code").text())
-        self.assertEqual(u"bee", self.grab.doc.select('//*[@id="bee"]/@id').text())
+        self.assertEqual("bee", self.grab.doc.select('//*[@id="bee"]/@id').text())
         self.assertRaises(
             DataNotFound, lambda: self.grab.doc.select('//*[@id="bee2"]/@id').text()
         )
@@ -147,10 +144,13 @@ class LXMLExtensionTest(BaseGrabTestCase):
 
         # By default HTML DOM builder is used
         # It handles CDATA incorrectly
-        grab = build_grab()
-        grab.go(self.server.get_url())
-        self.assertEqual(None, grab.doc.select("//weight").node().text)
-        self.assertEqual(None, grab.doc.tree.xpath("//weight")[0].text)
+        # Date: Dec 8, 2022 starts
+        # Comment: It does not loose data anymore
+        # grab = build_grab()
+        # grab.go(self.server.get_url())
+        # self.assertEqual(None, grab.doc.select("//weight").node().text)
+        # self.assertEqual(None, grab.doc.tree.xpath("//weight")[0].text)
+        # Update Dec 8, 2022 ends
 
         # But XML DOM builder produces valid result
         # self.assertEqual(None, grab.xpath_one('//weight').text)

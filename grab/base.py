@@ -5,27 +5,26 @@
 """
 The core of grab package: the Grab class.
 """
-import logging
-import os
-from random import randint
-from copy import copy, deepcopy
-import threading
-import itertools
 import collections.abc
 import email
-from datetime import datetime
+import itertools
+import logging
+import os
+import threading
 import weakref
-from typing import Dict, Any, Optional, cast
+from copy import copy, deepcopy
+from datetime import datetime
 from email.message import EmailMessage
+from random import randint
+from typing import Any, Dict, Optional, cast
+from urllib.parse import urljoin
 
-from six.moves.urllib.parse import urljoin
-import six
 from weblib.html import find_base_url
-from weblib.http import normalize_http_values, make_str
+from weblib.http import make_str, normalize_http_values
 
-from grab.document import Document
 from grab import error
 from grab.cookie import CookieManager
+from grab.document import Document
 from grab.proxylist import ProxyList, parse_proxy_line
 
 __all__ = ("Grab",)
@@ -241,7 +240,7 @@ class Grab(object):
             )
         if transport_param is None:
             transport_param = DEFAULT_TRANSPORT
-        if isinstance(transport_param, six.string_types):
+        if isinstance(transport_param, str):
             if transport_param in TRANSPORT_ALIAS:
                 transport_param = TRANSPORT_ALIAS[transport_param]
             if "." not in transport_param:
@@ -548,7 +547,7 @@ class Grab(object):
             if isinstance(post, dict):
                 post = list(post.items())
             if post:
-                if isinstance(post, six.string_types):
+                if isinstance(post, str):
                     post = (
                         make_str(
                             post[: self.config["debug_post_limit"]], errors="ignore"
@@ -636,7 +635,7 @@ class Grab(object):
         """
 
         self.reset()
-        if isinstance(content, six.text_type):
+        if isinstance(content, str):
             raise error.GrabMisuseError(
                 "Method `setup_document` accepts only "
                 "byte string in `content` argument."

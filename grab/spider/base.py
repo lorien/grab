@@ -2,30 +2,26 @@
 # pylint: disable=too-many-lines
 import logging
 import time
-from random import randint
 from copy import deepcopy
-from traceback import format_exception, format_stack
 from datetime import datetime
+from queue import Empty, Queue
+from random import randint
+from traceback import format_exception, format_stack
 
-from six.moves.queue import Queue, Empty
-import six
 from weblib import metric
 
 from grab.base import Grab
 from grab.error import raise_feature_is_deprecated
-from grab.spider.error import (
-    SpiderError,
-    SpiderMisuseError,
-    NoTaskHandler,
-)
-from grab.util.warning import warn
+from grab.proxylist import BaseProxySource, ProxyList
+from grab.spider.error import NoTaskHandler, SpiderError, SpiderMisuseError
 from grab.spider.task import Task
-from grab.proxylist import ProxyList, BaseProxySource
-from grab.util.misc import camel_case_to_underscore
 from grab.stat import Stat
+from grab.util.misc import camel_case_to_underscore
+from grab.util.warning import warn
+
 from .service.parser import ParserService
-from .service.task_generator import TaskGeneratorService
 from .service.task_dispatcher import TaskDispatcherService
+from .service.task_generator import TaskGeneratorService
 
 DEFAULT_TASK_PRIORITY = 100
 DEFAULT_NETWORK_STREAM_NUMBER = 3
@@ -71,8 +67,7 @@ class SpiderMetaClass(type):
         return super(SpiderMetaClass, cls).__new__(cls, name, bases, namespace)
 
 
-@six.add_metaclass(SpiderMetaClass)
-class Spider(object):
+class Spider(metaclass=SpiderMetaClass):
     """
     Asynchronous scraping framework.
     """
@@ -316,7 +311,7 @@ class Spider(object):
         self.proxylist = ProxyList()
         if isinstance(source, BaseProxySource):
             self.proxylist.set_source(source)
-        elif isinstance(source, six.string_types):
+        elif isinstance(source, str):
             if source_type == "text_file":
                 self.proxylist.load_file(source, proxy_type=proxy_type)
             elif source_type == "url":
@@ -539,7 +534,7 @@ class Spider(object):
         # Looks strange but I really have some problems with
         # serializing exception into string
         try:
-            ex_str = six.text_type(ex)
+            ex_str = str(ex)
         except TypeError:
             try:
                 ex_str = ex.decode("utf-8", "ignore")

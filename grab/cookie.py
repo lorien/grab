@@ -7,9 +7,8 @@ Some code got from
     https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 """
 import json
-
-from six.moves.http_cookiejar import CookieJar, Cookie
-from six.moves.urllib.parse import urlparse, urlunparse
+from http.cookiejar import Cookie, CookieJar
+from urllib.parse import urlparse, urlunparse
 
 from grab.error import GrabMisuseError
 
