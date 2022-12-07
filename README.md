@@ -37,12 +37,6 @@ See details about installing Grab on different platforms here http://docs.grabli
 
 Get it here [grab.readthedocs.io](https://grab.readthedocs.io/en/latest/)
 
-## Telegram chat groups
-
-- Russian: [t.me/grablab\_ru](https://t.me/grablab_ru)
-- English: [t.me/grablab](https://t.me/grablab)
-
-
 ## About Grab (very old description)
 
 Grab is a python web scraping framework. Grab provides a number of helpful methods
@@ -123,3 +117,10 @@ Grab provides interface called Spider to develop multithreaded web-site scrapers
     bot = ExampleSpider(thread_number=2)
     bot.run()
 ```
+
+
+## Community
+
+Telegram English chat: [https://t.me/grablab](https://t.me/grablab)
+
+Telegram Russian chat: [https://t.me/grablab\_ru](https://t.me/grablab_ru)
