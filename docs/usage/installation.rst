@@ -137,4 +137,3 @@ install Grab with pip. Here is list of Grab dependencies::
      user_agent
      selection
      lxml
-     defusedxml

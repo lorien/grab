@@ -32,7 +32,6 @@ dependencies = [
     "user_agent",
     "selection",
     "lxml",
-    "defusedxml",
     "urllib3[socks]",
     "certifi",
 ]

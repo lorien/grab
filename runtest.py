@@ -24,7 +24,6 @@ GRAB_TEST_LIST = (
     "tests.grab_response_body_processing",
     "tests.grab_charset",
     "tests.grab_redirect",
-    "tests.grab_defusedxml",
     "tests.grab_document",
     # *** Network
     "tests.grab_get_request",
@@ -54,6 +53,7 @@ GRAB_TEST_LIST = (
     "tests.grab_error",
     "tests.ext_pyquery",
     # *** Other things
+    "tests.xml_security",
     "tests.raw_server",
     "tests.misc",
     "tests.test_util_http",

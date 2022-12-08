@@ -26,8 +26,7 @@ from datetime import datetime
 from io import BytesIO, StringIO
 from urllib.parse import parse_qs, urljoin, urlsplit
 
-import defusedxml.lxml
-from lxml.etree import ParserError, XMLParser  # pytype: disable=import-error
+from lxml import etree
 from lxml.html import CheckboxValues, HTMLParser, MultipleSelectOptions
 from selection import XpathSelector
 
@@ -583,12 +582,14 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             parser = THREAD_STORAGE.html_parsers.setdefault(
                 charset, HTMLParser(encoding=charset)
             )
-            dom = defusedxml.lxml.parse(io_cls(content), parser=parser)
+            dom = etree.parse(io_cls(content), parser=parser)
             return dom.getroot()
         if not hasattr(THREAD_STORAGE, "xml_parser"):
             THREAD_STORAGE.xml_parsers = {}
-        parser = THREAD_STORAGE.xml_parsers.setdefault(charset, XMLParser())
-        dom = defusedxml.lxml.parse(io_cls(content), parser=parser)
+        parser = THREAD_STORAGE.xml_parsers.setdefault(
+            charset, etree.XMLParser(resolve_entities=False)
+        )
+        dom = etree.parse(io_cls(content), parser=parser)
         return dom.getroot()
 
     def build_html_tree(self):
@@ -613,7 +614,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             except Exception as ex:  # pylint: disable=broad-except
                 # FIXME: write test for this case
                 if (
-                    isinstance(ex, ParserError)  # noqa: SIM114
+                    isinstance(ex, etree.ParserError)  # noqa: SIM114
                     and "Document is empty" in str(ex)
                     and b"<html" not in body
                 ):
