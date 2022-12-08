@@ -1,5 +1,5 @@
 import re
-from re import Match
+from typing import Match
 
 from .encoding import make_bytes
 
