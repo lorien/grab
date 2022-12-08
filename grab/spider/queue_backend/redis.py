@@ -64,5 +64,5 @@ class QueueBackend(QueueInterface):
         self.queue_object.clear()
 
     def close(self):
-        # get conneciton opened by qr and close it
+        # get connection opened by qr and close it
         pass

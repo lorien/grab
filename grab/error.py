@@ -81,7 +81,7 @@ class GrabMisuseError(GrabError):
 
 class GrabTooManyRedirectsError(GrabError):
     """
-    Raised when Grab reached max. allowd number of redirects for
+    Raised when Grab reached max. allowed number of redirects for
     one request.
     """
 
@@ -106,7 +106,7 @@ class GrabInternalError(OriginalExceptionError, GrabError):
 class GrabFeatureIsDeprecated(GrabError):
     """
     Raised when user tries to use feature that is deprecated
-    and has been droppped
+    and has been dropped
     """
 
 

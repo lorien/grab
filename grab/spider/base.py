@@ -291,7 +291,7 @@ class Spider(metaclass=SpiderMetaClass):
         :param proxy_type:
             Should be one of the following: 'socks4', 'socks5' or'http'.
         :param auto_change:
-            If set to `True` then automatical random proxy rotation
+            If set to `True` then automatically random proxy rotation
             will be used.
 
 

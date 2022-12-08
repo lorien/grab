@@ -416,7 +416,7 @@ class Urllib3Transport(BaseTransport):
 
             if self._request.response_path:
                 response.body_path = self._request.response_path
-                # FIXME: Quick dirty hack, actullay, response is fully
+                # FIXME: Quick dirty hack, actually, response is fully
                 # read into memory
                 self._request.response_file.write(read_with_timeout())
                 self._request.response_file.close()
@@ -459,7 +459,7 @@ class Urllib3Transport(BaseTransport):
     def extract_cookiejar(self):
         jar = CookieJar()
         # self._respose could be None
-        # if this method is called from custom preapre response
+        # if this method is called from custom prepare response
         if self._response and self._request:
             jar.extract_cookies(
                 # pylint: disable=protected-access
