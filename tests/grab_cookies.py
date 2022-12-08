@@ -1,14 +1,11 @@
-from pprint import pprint  # pylint: disable=unused-import
 import json
 import pickle
+from pprint import pprint  # pylint: disable=unused-import
 
-from test_server import Response
-
-from grab.error import GrabMisuseError
 from grab.cookie import CookieManager, create_cookie
-
-from tests.util import temp_file, build_grab
-from tests.util import BaseGrabTestCase
+from grab.error import GrabMisuseError
+from test_server import Response
+from tests.util import BaseGrabTestCase, build_grab, temp_file
 
 
 class TestCookies(BaseGrabTestCase):
@@ -112,7 +109,7 @@ class TestCookies(BaseGrabTestCase):
 
             self.server.add_response(Response())
             grab = build_grab()
-            cookies = {"foo": "bar", "spam": u"begemot"}
+            cookies = {"foo": "bar", "spam": "begemot"}
             grab.setup(cookies=cookies)
             grab.go(self.server.get_url())
             grab.cookies.save_to_file(tmp_file)
@@ -126,7 +123,7 @@ class TestCookies(BaseGrabTestCase):
             grab = build_grab()
             cookies = [
                 {"name": "foo", "value": "bar", "domain": self.server.address},
-                {"name": "spam", "value": u"begemot", "domain": self.server.address},
+                {"name": "spam", "value": "begemot", "domain": self.server.address},
             ]
             with open(tmp_file, "w", encoding="utf-8") as out:
                 json.dump(cookies, out)
@@ -153,7 +150,7 @@ class TestCookies(BaseGrabTestCase):
             with open(tmp_file, "w", encoding="utf-8") as out:
                 json.dump(cookies, out)
 
-            # One cookie are sent in server reponse
+            # One cookie are sent in server response
             # Another cookies is passed via the `cookiefile` option
             self.server.add_response(
                 Response(headers=[("Set-Cookie", "godzilla=monkey")])
@@ -348,7 +345,7 @@ class TestCookies(BaseGrabTestCase):
         grab.cookies.set("foo", "bar2", "localhost")
         self.assertEqual(1, len(grab.cookies.items()))
 
-        # Empty domain as same as localhost becuase internally
+        # Empty domain as same as localhost because internally
         # localhost replaced with empty string
         grab.cookies.set("foo", "bar3", "")
         self.assertEqual(1, len(grab.cookies.items()))
@@ -371,7 +368,7 @@ class TestCookies(BaseGrabTestCase):
         # request page one more time, sending cookie
         # should not fail
         grab.go(self.server.get_url())
-        # does not work yet, because test_server does not correclty
+        # does not work yet, because test_server does not correctly
         # display request unicode cookies
         # self.assertEqual(
         # u'медвед', self.server.request['cookies']['preved']['value']

@@ -4,7 +4,7 @@ Network Transport
 =================
 
 Network transport is a component which utilize one of well known 3rd-party network packages
-to do network requests and retreive network response.  At the moment Grab supports only one
+to do network requests and retrieve network response.  At the moment Grab supports only one
 network library: urllib3. You may access transport object with `Grab.transport` attribute.
 In most cases you do not need direct access to transport object.
 
@@ -57,7 +57,7 @@ VERY simple transport that understands only one option: the URL.
     from subprocess import check_output
 
 
-    class WgetTransport(object):
+    class WgetTransport:
         def __init__(self):
             self.request_head = b''
             self.request_body = b''

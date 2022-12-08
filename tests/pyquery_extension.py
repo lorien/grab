@@ -1,8 +1,7 @@
-# coding: utf-8
 from grab import Grab
 from tests.util import BaseGrabTestCase
 
-HTML = u"""
+HTML = """
 <head>
     <title>фыва</title>
     <meta http-equiv="Content-Type" content="text/html; charset=cp1251" />
@@ -42,10 +41,10 @@ class PyqueryExtensionTest(BaseGrabTestCase):
 
         # pytype: enable=import-error
 
-        self.assertEqual(self.grab.doc.pyquery("#num-1").text(), u"item #100 2")
+        self.assertEqual(self.grab.doc.pyquery("#num-1").text(), "item #100 2")
         self.assertEqual(
             self.grab.doc.pyquery("li")
             .filter(lambda x: "#2" in PyQuery(x).text())
             .text(),
-            u"item #2",
+            "item #2",
         )

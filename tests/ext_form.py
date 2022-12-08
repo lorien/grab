@@ -1,11 +1,8 @@
 from urllib.parse import parse_qsl
 
-from test_server import Response
-
 from grab import DataNotFound, GrabMisuseError
-
-from tests.util import build_grab
-from tests.util import BaseGrabTestCase
+from test_server import Response
+from tests.util import BaseGrabTestCase, build_grab
 
 FORMS_HTML = b"""
 <head>
@@ -127,8 +124,8 @@ class TestHtmlForms(BaseGrabTestCase):
         # pylint: enable=no-member,protected-access
 
     def assert_equal_qs(self, qs1, qs2):
-        args1 = set([(x, y) for x, y in parse_qsl(qs1)])
-        args2 = set([(x, y) for x, y in parse_qsl(qs2)])
+        args1 = set(parse_qsl(qs1))
+        args2 = set(parse_qsl(qs2))
         self.assertEqual(args1, args2)
 
     def test_submit(self):
@@ -254,7 +251,7 @@ class TestHtmlForms(BaseGrabTestCase):
         grab = build_grab()
         grab.go(self.server.get_url())
         grab.submit()
-        self.assertTrue(u"Beställa".encode("utf-8") in self.server.request.data)
+        self.assertTrue("Beställa".encode("utf-8") in self.server.request.data)
 
     def test_field_disabled(self):
         html = b"""

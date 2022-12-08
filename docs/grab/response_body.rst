@@ -26,5 +26,5 @@ Response Compression Method
 You can control the compression of the server response body with :ref:`option_encoding`. The default value is "gzip".
 That means that Grab sends "Accept-Encoding: gzip" to the server, and if the server answers with a response body packed
 with gzip then Grab automatically unpacks the gzipped body, and you have unpacked data in the `response.body`.
-If you do not want the server to send you gziped data, use an empty string as the value of :ref:`option_encoding`.
+If you do not want the server to send you gzipped data, use an empty string as the value of :ref:`option_encoding`.
 

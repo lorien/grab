@@ -1,14 +1,12 @@
-# coding: utf-8
 """
 See details here: https://github.com/tiran/defusedxml/blob/master/README.md
 """
 import os
+from io import BytesIO
 
 from lxml.etree import parse  # pytype: disable=import-error
-from six import BytesIO
 
-from tests.util import temp_dir
-from tests.util import BaseGrabTestCase
+from tests.util import BaseGrabTestCase, temp_dir
 
 
 class GrabSimpleTestCase(BaseGrabTestCase):

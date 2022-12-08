@@ -1,11 +1,8 @@
-from weblib.error import ResponseNotValid
-from test_server import Response
-
 from grab import Grab
-from grab.spider import base
-from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
+from grab.error import ResponseNotValid
+from grab.spider import NoTaskHandler, Spider, SpiderMisuseError, Task, base
 from grab.spider.error import SpiderError
-
+from test_server import Response
 from tests.util import BaseGrabTestCase, build_grab, build_spider
 
 
@@ -37,7 +34,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         bot.add_task(task)
         self.assertEqual(33, task.priority)
 
-        # Automatic priority does not override explictily setted priority
+        # Automatic priority does not override explicitly set priority
         base.DEFAULT_TASK_PRIORITY = 33
         bot = build_spider(SimpleSpider, priority_mode="const")
         bot.setup_queue()
@@ -149,7 +146,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
             def task_page(self, unused_grab, unused_task):
                 self.meta["tokens"].append("0_handler")
 
-        class FuncWithState(object):
+        class FuncWithState:
             def __init__(self, tokens):
                 self.tokens = tokens
 
@@ -244,7 +241,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         # If any of compared tasks does not have priority
         # than tasks are equal
         self.assertTrue(task1 == task3)
-        self.assertTrue(task3 == task3)
+        self.assertTrue(task2 == task3)
 
     def test_task_get_fallback_handler(self):
         class TestSpider(Spider):
@@ -294,7 +291,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
         class TestSpider(Spider):
             def create_grab_instance(self, **kwargs):
-                grab = super(TestSpider, self).create_grab_instance(**kwargs)
+                grab = super().create_grab_instance(**kwargs)
                 grab.setup(timeout=77)
                 return grab
 

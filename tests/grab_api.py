@@ -1,14 +1,9 @@
-from copy import deepcopy
 import threading
+from copy import deepcopy
 
-import six
+from grab import Grab, GrabError, GrabMisuseError
 from test_server import Response
-
-from grab import Grab, GrabMisuseError, GrabError
-
-from tests.util import build_grab, temp_file
-from tests.util import BaseGrabTestCase
-from tests.util import reset_request_counter
+from tests.util import BaseGrabTestCase, build_grab, reset_request_counter, temp_file
 
 
 class GrabApiTestCase(BaseGrabTestCase):
@@ -54,7 +49,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertEqual(grab.doc.body, content)
 
     def test_inheritance(self):
-        class SimpleExtension(object):
+        class SimpleExtension:
             data = {"counter": 0}
 
             @classmethod
@@ -90,7 +85,7 @@ class GrabApiTestCase(BaseGrabTestCase):
 
         # Make 10 requests in concurrent threads
         threads = []
-        for _ in six.moves.range(10):
+        for _ in range(10):
             thread = threading.Thread(target=func)
             threads.append(thread)
             thread.start()
@@ -135,7 +130,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertTrue(b"test" in grab.doc.body)
 
     def test_setup_document_invalid_input(self):
-        data = u"""
+        data = """
         <h1>test</h1>
         """
         self.assertRaises(GrabMisuseError, build_grab, data)

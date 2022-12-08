@@ -1,31 +1,25 @@
-# FIXME: split to modules, make smaller
 # pylint: disable=too-many-lines
 import logging
 import time
-from random import randint
 from copy import deepcopy
-from traceback import format_exception, format_stack
 from datetime import datetime
-
-from six.moves.queue import Queue, Empty
-import six
-from weblib import metric
+from queue import Empty, Queue
+from random import randint
+from traceback import format_exception, format_stack
 
 from grab.base import Grab
 from grab.error import raise_feature_is_deprecated
-from grab.spider.error import (
-    SpiderError,
-    SpiderMisuseError,
-    NoTaskHandler,
-)
-from grab.util.warning import warn
+from grab.proxylist import BaseProxySource, ProxyList
+from grab.spider.error import NoTaskHandler, SpiderError, SpiderMisuseError
 from grab.spider.task import Task
-from grab.proxylist import ProxyList, BaseProxySource
-from grab.util.misc import camel_case_to_underscore
 from grab.stat import Stat
+from grab.util.metrics import format_traffic_value
+from grab.util.misc import camel_case_to_underscore
+from grab.util.warning import warn
+
 from .service.parser import ParserService
-from .service.task_generator import TaskGeneratorService
 from .service.task_dispatcher import TaskDispatcherService
+from .service.task_generator import TaskGeneratorService
 
 DEFAULT_TASK_PRIORITY = 100
 DEFAULT_NETWORK_STREAM_NUMBER = 3
@@ -71,8 +65,7 @@ class SpiderMetaClass(type):
         return super(SpiderMetaClass, cls).__new__(cls, name, bases, namespace)
 
 
-@six.add_metaclass(SpiderMetaClass)
-class Spider(object):
+class Spider(metaclass=SpiderMetaClass):
     """
     Asynchronous scraping framework.
     """
@@ -88,8 +81,6 @@ class Spider(object):
     initial_urls = []
 
     class Meta:
-        # pylint: disable=no-init
-        #
         # Meta.abstract means that this class will not be
         # collected to spider registry by `grab crawl` CLI command.
         # The Meta is inherited by descendant classes BUT
@@ -108,8 +99,7 @@ class Spider(object):
     def get_spider_name(cls):
         if cls.spider_name:
             return cls.spider_name
-        else:
-            return camel_case_to_underscore(cls.__name__)
+        return camel_case_to_underscore(cls.__name__)
 
     # **************
     # Public Methods
@@ -184,15 +174,14 @@ class Spider(object):
         self._grab_config = {}
         if priority_mode not in ["random", "const"]:
             raise SpiderMisuseError(
-                "Value of priority_mode option should be " '"random" or "const"'
+                'Value of priority_mode option should be "random" or "const"'
             )
-        else:
-            self.priority_mode = priority_mode
+        self.priority_mode = priority_mode
         if only_cache:
             raise_feature_is_deprecated("Cache feature")
         self.work_allowed = True
         if request_pause is not NULL:
-            warn("Option `request_pause` is deprecated and is not " "supported anymore")
+            warn("Option `request_pause` is deprecated and is not supported anymore")
         self.proxylist_enabled = None
         self.proxylist = None
         self.proxy = None
@@ -266,18 +255,16 @@ class Spider(object):
             msg = "Invalid task URL: %s" % task.url
             if raise_error:
                 raise SpiderError(msg)
-            else:
-                logger.error(
-                    "%s\nTraceback:\n%s",
-                    msg,
-                    "".join(format_stack()),
-                )
-                return False
-        else:
-            # TODO: keep original task priority if it was set explicitly
-            # WTF the previous comment means?
-            queue.put(task, priority=task.priority, schedule_time=task.schedule_time)
-            return True
+            logger.error(
+                "%s\nTraceback:\n%s",
+                msg,
+                "".join(format_stack()),
+            )
+            return False
+        # TODO: keep original task priority if it was set explicitly
+        # WTF the previous comment means?
+        queue.put(task, priority=task.priority, schedule_time=task.schedule_time)
+        return True
 
     def stop(self):
         """
@@ -304,7 +291,7 @@ class Spider(object):
         :param proxy_type:
             Should be one of the following: 'socks4', 'socks5' or'http'.
         :param auto_change:
-            If set to `True` then automatical random proxy rotation
+            If set to `True` then automatically random proxy rotation
             will be used.
 
 
@@ -316,7 +303,7 @@ class Spider(object):
         self.proxylist = ProxyList()
         if isinstance(source, BaseProxySource):
             self.proxylist.set_source(source)
-        elif isinstance(source, six.string_types):
+        elif isinstance(source, str):
             if source_type == "text_file":
                 self.proxylist.load_file(source, proxy_type=proxy_type)
             elif source_type == "url":
@@ -392,7 +379,7 @@ class Spider(object):
         if "download-size" in self.stat.counters:
             out.append(
                 "Network download: %s"
-                % metric.format_traffic_value(self.stat.counters["download-size"])
+                % format_traffic_value(self.stat.counters["download-size"])
             )
         out.append(
             "Queue size: %d" % self.task_queue.size() if self.task_queue else "NA"
@@ -460,7 +447,6 @@ class Spider(object):
         if False:  # pylint: disable=using-constant-test
             # Some magic to make this function empty generator
             yield ":-)"
-        return
 
     # ***************
     # Private Methods
@@ -487,8 +473,7 @@ class Spider(object):
     def generate_task_priority(self):
         if self.priority_mode == "const":
             return DEFAULT_TASK_PRIORITY
-        else:
-            return randint(*RANDOM_TASK_PRIORITY_RANGE)
+        return randint(*RANDOM_TASK_PRIORITY_RANGE)
 
     def process_initial_urls(self):
         if self.initial_urls:
@@ -502,8 +487,7 @@ class Spider(object):
             size = self.task_queue.size()
             if size:
                 return True
-            else:
-                return None
+            return None
 
     def setup_grab_for_task(self, task):
         grab = self.create_grab_instance()
@@ -539,7 +523,7 @@ class Spider(object):
         # Looks strange but I really have some problems with
         # serializing exception into string
         try:
-            ex_str = six.text_type(ex)
+            ex_str = str(ex)
         except TypeError:
             try:
                 ex_str = ex.decode("utf-8", "ignore")
@@ -556,15 +540,14 @@ class Spider(object):
         callback = task.get("callback")
         if callback:
             return callback
+        try:
+            handler = getattr(self, "task_%s" % task.name)
+        except AttributeError as ex:
+            raise NoTaskHandler(
+                "No handler or callback defined for " "task %s" % task.name
+            ) from ex
         else:
-            try:
-                handler = getattr(self, "task_%s" % task.name)
-            except AttributeError as ex:
-                raise NoTaskHandler(
-                    "No handler or callback defined for " "task %s" % task.name
-                ) from ex
-            else:
-                return handler
+            return handler
 
     def log_network_result_stats(self, res, task):
         # Increase stat counters

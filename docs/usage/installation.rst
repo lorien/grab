@@ -49,7 +49,7 @@ need to install:
 
     apt-get install libxml2-dev libxslt-dev
 
-If your system has 512Mb RAM or less you might experience issues during instalation
+If your system has 512Mb RAM or less you might experience issues during installation
 of Grab dependencies. Installation of lxml requires quite a few RAM. In such case
 enable swap file if it is disabled.
 
@@ -134,8 +134,6 @@ Dependencies
 All required dependencies should be installed automatically if you 
 install Grab with pip. Here is list of Grab dependencies::
 
-     weblib
-     six
      user_agent
      selection
      lxml

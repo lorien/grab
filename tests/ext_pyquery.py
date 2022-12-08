@@ -1,7 +1,5 @@
 from test_server import Response
-
-from tests.util import BaseGrabTestCase
-from tests.util import build_grab
+from tests.util import BaseGrabTestCase, build_grab
 
 
 class ExtensionPyqueryTestCase(BaseGrabTestCase):
@@ -19,8 +17,8 @@ class ExtensionPyqueryTestCase(BaseGrabTestCase):
 
     def test_national_utf_symbol(self):
         msg = (
-            u"P.S. Bir daha öz fikrimi xatırladım ki,rhen ve "
-            u"qelben sene bağlı insan başqasına ehtiyac duymaz."
+            "P.S. Bir daha öz fikrimi xatırladım ki,rhen ve "
+            "qelben sene bağlı insan başqasına ehtiyac duymaz."
         )
         self.server.add_response(
             Response(data=b"<html><body><p>%s</p></body>" % msg.encode("utf-8"))

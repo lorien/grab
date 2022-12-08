@@ -1,0 +1,95 @@
+[project]
+
+name = "grab"
+version = "0.6.41"
+description = "Web scraping framework"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {"file" = "LICENSE"}
+keywords = ["web crawling", "web scraping", "web crawler", "web scraper", "lxml", "xpath", "html parsing"]
+authors = [
+    {name = "Gregory Petukhov", email = "lorien@lorien.name"}
+]
+# https://pypi.org/pypi?%3Aaction=list_classifiers
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP",
+    #"Typing :: Typed",
+]
+dependencies = [
+    "user_agent",
+    "selection",
+    "lxml",
+    "defusedxml",
+    "urllib3[socks]",
+    "certifi",
+]
+
+[project.optional-dependencies]
+pyquery = ["pyquery"]
+cssselect = ["cssselect"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+homepage = "http://github.com/lorien/grab"
+
+[tool.setuptools]
+packages=["grab", "grab.spider", "grab.spider.queue_backend", "grab.spider.service", "grab.util"]
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+# skip_gitignore = true # throws errors in stderr when ".git" dir does not exist
+
+[tool.bandit]
+# B101 assert_used
+# B410 Using HtmlElement to parse untrusted XML data
+skips = ["B101", "B410"]
+
+[[tool.mypy.overrides]]
+module = "pyquery"
+ignore_missing_imports = true
+
+[tool.pylint.main]
+jobs=4
+extension-pkg-whitelist="lxml"
+disable="missing-docstring,broad-except,too-few-public-methods,consider-using-f-string,fixme"
+variable-rgx="[a-z_][a-z0-9_]{1,30}$"
+attr-rgx="[a-z_][a-z0-9_]{1,30}$"
+argument-rgx="[a-z_][a-z0-9_]{1,30}$"
+max-line-length=88
+max-args=9
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py3
+isolated_build = True
+
+[testenv]
+commands =
+    pytest --cov selection --cov-report xml {posargs}
+deps =
+    -rrequirements.txt
+"""
