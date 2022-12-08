@@ -1,8 +1,9 @@
-from six.moves.queue import Empty, Queue
-from weblib.error import ResponseNotValid
+from queue import Empty, Queue
 
-from grab.spider.task import Task
+from grab.error import ResponseNotValid
 from grab.spider.error import FatalError, SpiderError
+from grab.spider.task import Task
+
 from .base import BaseService
 
 

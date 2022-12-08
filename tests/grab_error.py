@@ -1,6 +1,7 @@
+from io import StringIO
 from unittest import TestCase
+
 import mock
-from six import StringIO
 
 from grab import GrabNetworkError
 from grab.util.warning import warn

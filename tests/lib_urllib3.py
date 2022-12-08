@@ -1,6 +1,3 @@
-# coding: utf-8
-import six
-
 from tests.util import BaseGrabTestCase
 
 
@@ -11,7 +8,6 @@ class GrabApiTestCase(BaseGrabTestCase):
     def test_urllib3_idna_error(self):
         # pylint: disable=import-outside-toplevel
         from urllib3 import PoolManager
-        from urllib3.exceptions import NewConnectionError
 
         # pylint: enable=import-outside-toplevel
 
@@ -23,5 +19,4 @@ class GrabApiTestCase(BaseGrabTestCase):
             "/servlet/ProductDisplay?langId=-1&storeId="
         )
         pool = PoolManager()
-        exc_cls = UnicodeError if six.PY3 else NewConnectionError
-        self.assertRaises(exc_cls, pool.request, "GET", invalid_url, retries=False)
+        self.assertRaises(UnicodeError, pool.request, "GET", invalid_url, retries=False)

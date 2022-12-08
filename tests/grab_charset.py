@@ -1,9 +1,6 @@
-from test_server import Response
-
 from grab import Grab
-
-from tests.util import build_grab
-from tests.util import BaseGrabTestCase
+from test_server import Response
+from tests.util import BaseGrabTestCase, build_grab
 
 
 class GrabCharsetDetectionTestCase(BaseGrabTestCase):
@@ -19,7 +16,7 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
         grab = build_grab()
         self.server.add_response(Response(data="фуу".encode("utf-8")))
         grab.go(self.server.get_url())
-        self.assertEqual(u"фуу".encode("utf-8"), grab.doc.body)
+        self.assertEqual("фуу".encode("utf-8"), grab.doc.body)
 
         # print(grab.doc.head)
         self.assertEqual(grab.doc.charset, "utf-8")
@@ -27,7 +24,7 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
         grab = build_grab(document_charset="cp1251")
         self.server.add_response(Response(data="фуу".encode("cp1251")))
         grab.go(self.server.get_url())
-        self.assertEqual(u"фуу".encode("cp1251"), grab.doc.body)
+        self.assertEqual("фуу".encode("cp1251"), grab.doc.body)
         self.assertEqual(grab.doc.charset, "cp1251")
 
     def test_document_charset_lowercase(self):

@@ -23,7 +23,6 @@ images.yandex.ru and save found data to the file.
 
 .. code:: python
 
-    # coding: utf-8
     import urllib
     import csv
     import logging

@@ -4,50 +4,50 @@
 """
 The Document class is the result of network request made with Grab instance.
 """
+import email
+import os
+import re
+
 # FIXME: split to modules, make smaller
 # pylint: disable=too-many-lines
 import weakref
-import re
 from copy import copy
-import email
-import os
 
 try:
     import ujson as json
 except ImportError:
     import json
-import tempfile
-import webbrowser
-import codecs
-from datetime import datetime
-import threading
-import logging
-from six.moves.urllib.parse import urlsplit, parse_qs, urljoin
 
-import six
-from six import BytesIO, StringIO
-from lxml.html import HTMLParser
-from lxml.etree import XMLParser, ParserError  # pytype: disable=import-error
-from lxml.html import CheckboxValues, MultipleSelectOptions
-from weblib.http import smart_urlencode
-import weblib.encoding
-from weblib.files import hashed_path
-from weblib.text import normalize_space
-from weblib.html import decode_entities, find_refresh_url
-from weblib.rex import normalize_regexp
+import codecs
+import logging
+import tempfile
+import threading
+import webbrowser
+from datetime import datetime
+from io import BytesIO, StringIO
+from urllib.parse import parse_qs, urljoin, urlsplit
+
 import defusedxml.lxml
+from lxml.etree import ParserError, XMLParser  # pytype: disable=import-error
+from lxml.html import CheckboxValues, HTMLParser, MultipleSelectOptions
 from selection import XpathSelector
 
-from grab.cookie import CookieManager
-from grab.error import GrabMisuseError, DataNotFound
 from grab.const import NULL
+from grab.cookie import CookieManager
+from grab.error import DataNotFound, GrabMisuseError
+from grab.util.files import hashed_path
+from grab.util.html import decode_entities, find_refresh_url
+from grab.util.html import fix_special_entities as fix_special_entities_func
+from grab.util.http import smart_urlencode
+from grab.util.rex import normalize_regexp
+from grab.util.text import normalize_spaces
 from grab.util.warning import warn
 
 NULL_BYTE = chr(0)
-RE_XML_DECLARATION = re.compile(br"^[^<]{,100}<\?xml[^>]+\?>", re.I)
-RE_DECLARATION_ENCODING = re.compile(br'encoding\s*=\s*["\']([^"\']+)["\']')
-RE_META_CHARSET = re.compile(br"<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)", re.I)
-RE_META_CHARSET_HTML5 = re.compile(br'<meta[^>]+charset\s*=\s*[\'"]?([-\w]+)', re.I)
+RE_XML_DECLARATION = re.compile(rb"^[^<]{,100}<\?xml[^>]+\?>", re.I)
+RE_DECLARATION_ENCODING = re.compile(rb'encoding\s*=\s*["\']([^"\']+)["\']')
+RE_META_CHARSET = re.compile(rb"<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)", re.I)
+RE_META_CHARSET_HTML5 = re.compile(rb'<meta[^>]+charset\s*=\s*[\'"]?([-\w]+)', re.I)
 RE_UNICODE_XML_DECLARATION = re.compile(
     RE_XML_DECLARATION.pattern.decode("utf-8"), re.I
 )
@@ -80,7 +80,7 @@ def read_bom(data):
     return None, None
 
 
-class Document(object):
+class Document:
     """
     Document (in most cases it is a network response
         i.e. result of network request)
@@ -201,14 +201,11 @@ class Document(object):
                 _, response = responses[-1].split(b"\n", 1)
                 response = response.decode("utf-8", "ignore")
             else:
-                response = u""
-            if six.PY2:
-                # email_from_string does not work with unicode input
-                response = response.encode("utf-8")
+                response = ""
             self.headers = email.message_from_string(response)
 
         if charset is None:
-            if isinstance(self.body, six.text_type):
+            if isinstance(self.body, str):
                 self.charset = "utf-8"
             else:
                 self.detect_charset()
@@ -275,9 +272,7 @@ class Document(object):
             try:
                 codecs.lookup(charset)
             except LookupError:
-                logger.debug(
-                    "Unknown charset found: %s." " Using utf-8 instead.", charset
-                )
+                logger.debug("Unknown charset found: %s. Using utf-8 instead.", charset)
                 self.charset = "utf-8"
             else:
                 self.charset = charset
@@ -354,7 +349,7 @@ class Document(object):
         returns save_to + path
         """
 
-        if isinstance(location, six.text_type):
+        if isinstance(location, str):
             location = location.encode("utf-8")
         rel_path = hashed_path(location, ext=ext)
         path = os.path.join(basedir, rel_path)
@@ -374,10 +369,7 @@ class Document(object):
         Return response body deserialized into JSON object.
         """
 
-        if six.PY3:
-            return json.loads(self.body.decode(self.charset))
-        else:
-            return json.loads(self.body)
+        return json.loads(self.body.decode(self.charset))
 
     def url_details(self):
         """
@@ -448,23 +440,13 @@ class Document(object):
         If substring is found return True else False.
         """
 
-        if isinstance(anchor, six.text_type):
+        if isinstance(anchor, str):
             if byte:
-                raise GrabMisuseError(
-                    "The anchor should be bytes string in " "byte mode"
-                )
-            else:
-                return anchor in self.unicode_body()
-
-        if not isinstance(anchor, six.text_type):
-            if byte:
-                # if six.PY3:
-                # return anchor in self.body_as_bytes()
-                return anchor in self.body
-            else:
-                raise GrabMisuseError(
-                    "The anchor should be byte string in " "non-byte mode"
-                )
+                raise GrabMisuseError("The anchor should be bytes string in byte mode")
+            return anchor in self.unicode_body()
+        if byte:
+            return anchor in self.body
+        raise GrabMisuseError("The anchor should be byte string in non-byte mode")
 
     def text_assert(self, anchor, byte=False):
         """
@@ -472,7 +454,7 @@ class Document(object):
         """
 
         if not self.text_search(anchor, byte=byte):
-            raise DataNotFound(u"Substring not found: %s" % anchor)
+            raise DataNotFound("Substring not found: %s" % anchor)
 
     def text_assert_any(self, anchors, byte=False):
         """
@@ -485,7 +467,7 @@ class Document(object):
                 found = True
                 break
         if not found:
-            raise DataNotFound(u"Substrings not found: %s" % ", ".join(anchors))
+            raise DataNotFound("Substrings not found: %s" % ", ".join(anchors))
 
     # RegexpExtension methods
 
@@ -504,10 +486,9 @@ class Document(object):
         except DataNotFound as ex:
             if default is NULL:
                 raise DataNotFound("Regexp not found") from ex
-            else:
-                return default
+            return default
         else:
-            return normalize_space(decode_entities(match.group(1)))
+            return normalize_spaces(decode_entities(match.group(1)))
 
     def rex_search(self, regexp, flags=0, byte=False, default=NULL):
         """
@@ -526,23 +507,17 @@ class Document(object):
         regexp = normalize_regexp(regexp, flags)
         match = None
         if byte:
-            if not isinstance(regexp.pattern, six.text_type) or not six.PY3:
-                # if six.PY3:
-                # body = self.body_as_bytes()
-                # else:
-                # body = self.body
+            if not isinstance(regexp.pattern, str):
                 match = regexp.search(self.body)
         else:
-            if isinstance(regexp.pattern, six.text_type) or not six.PY3:
+            if isinstance(regexp.pattern, str):
                 ubody = self.unicode_body()
                 match = regexp.search(ubody)
         if match:
             return match
-        else:
-            if default is NULL:
-                raise DataNotFound("Could not find regexp: %s" % regexp)
-            else:
-                return default
+        if default is NULL:
+            raise DataNotFound("Could not find regexp: %s" % regexp)
+        return default
 
     def rex_assert(self, rex, byte=False):
         """
@@ -588,7 +563,7 @@ class Document(object):
         if bom:
             body = body[len(self.bom) :]
         if fix_special_entities:
-            body = weblib.encoding.fix_special_entities(body)
+            body = fix_special_entities_func(body)
         if ignore_errors:
             errors = "ignore"
         else:
@@ -617,13 +592,12 @@ class Document(object):
     def _read_body(self):
         if self.body_path:
             return self.read_body_from_file()
-        else:
-            return self._bytes_body
+        return self._bytes_body
 
     def _write_body(self, body):
-        if isinstance(body, six.text_type):
+        if isinstance(body, str):
             raise GrabMisuseError("Document.body could be only byte string.")
-        elif self.body_path:
+        if self.body_path:
             with open(self.body_path, "wb") as out:
                 out.write(body)
             self._bytes_body = None
@@ -643,8 +617,7 @@ class Document(object):
 
         if self._grab_config["content_type"] == "xml":
             return self.build_xml_tree()
-        else:
-            return self.build_html_tree()
+        return self.build_html_tree()
 
     @classmethod
     def _build_dom(cls, content, mode):
@@ -656,13 +629,10 @@ class Document(object):
                 StringIO(content), parser=THREAD_STORAGE.html_parser
             )
             return dom.getroot()
-        else:
-            if not hasattr(THREAD_STORAGE, "xml_parser"):
-                THREAD_STORAGE.xml_parser = XMLParser()
-            dom = defusedxml.lxml.parse(
-                BytesIO(content), parser=THREAD_STORAGE.xml_parser
-            )
-            return dom.getroot()
+        if not hasattr(THREAD_STORAGE, "xml_parser"):
+            THREAD_STORAGE.xml_parser = XMLParser()
+        dom = defusedxml.lxml.parse(BytesIO(content), parser=THREAD_STORAGE.xml_parser)
+        return dom.getroot()
 
     def build_html_tree(self):
         if self._lxml_tree is None:
@@ -673,10 +643,7 @@ class Document(object):
             if self._grab_config["strip_null_bytes"]:
                 body = body.replace(NULL_BYTE, "")
             # py3 hack
-            if six.PY3:
-                body = RE_UNICODE_XML_DECLARATION.sub("", body)
-            else:
-                body = RE_XML_DECLARATION.sub("", body)
+            body = RE_UNICODE_XML_DECLARATION.sub("", body)
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser
@@ -987,7 +954,7 @@ class Document(object):
                 extra_post_items = extra_post
 
             # Drop existing post items with such key
-            keys_to_drop = set([x for x, y in extra_post_items])
+            keys_to_drop = {x for x, y in extra_post_items}
             for key in keys_to_drop:
                 post_items = [(x, y) for x, y in post_items if x != key]
 
@@ -1096,6 +1063,5 @@ class Document(object):
             if elem.tag == "form":  # pylint: disable=no-member
                 self._lxml_form = elem
                 return
-            else:
-                elem = elem.getparent()  # pylint: disable=no-member
+            elem = elem.getparent()  # pylint: disable=no-member
         self._lxml_form = None

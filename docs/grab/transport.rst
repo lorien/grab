@@ -57,7 +57,7 @@ VERY simple transport that understands only one option: the URL.
     from subprocess import check_output
 
 
-    class WgetTransport(object):
+    class WgetTransport:
         def __init__(self):
             self.request_head = b''
             self.request_body = b''

@@ -134,8 +134,6 @@ Dependencies
 All required dependencies should be installed automatically if you 
 install Grab with pip. Here is list of Grab dependencies::
 
-     weblib
-     six
      user_agent
      selection
      lxml

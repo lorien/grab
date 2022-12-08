@@ -1,11 +1,7 @@
-import six
-
-from test_server import Response
-
 from grab import Grab
 from grab.spider import Spider, Task
-from grab.spider.error import SpiderError, FatalError
-
+from grab.spider.error import FatalError, SpiderError
+from test_server import Response
 from tests.util import BaseGrabTestCase, build_spider
 
 
@@ -82,7 +78,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         class TestSpider(Spider):
             def task_generator(self):
-                for _ in six.moves.range(13):
+                for _ in range(13):
                     yield Task("page", url=server.get_url())
 
             def task_page(self, unused_grab, unused_task):
@@ -200,7 +196,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.server.add_response(Response(), count=-1)
         bot = build_spider(TestSpider)
         bot.setup_queue()
-        for _ in six.moves.range(5):
+        for _ in range(5):
             bot.add_task(Task("page", url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
         bot.run()

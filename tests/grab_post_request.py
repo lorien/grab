@@ -1,11 +1,8 @@
 from urllib.parse import quote
 
-from test_server import Response
-
 from grab import GrabMisuseError
-
-from tests.util import build_grab
-from tests.util import BaseGrabTestCase
+from test_server import Response
+from tests.util import BaseGrabTestCase, build_grab
 
 
 class TestPostFeature(BaseGrabTestCase):
@@ -92,14 +89,14 @@ class TestPostFeature(BaseGrabTestCase):
 
     def test_unicode_post(self):
         self.server.add_response(Response(), count=3)
-        # By default, unicode post should be converted into utf-8
+        ## By default, unicode post should be converted into utf-8
         grab = build_grab()
         data = "фыва"
         grab.setup(post=data, url=self.server.get_url())
         grab.request()
         self.assertEqual(self.server.request.data, data.encode("utf-8"))
 
-        # Now try cp1251 with charset option
+        ## Now try cp1251 with charset option
         grab = build_grab()
         data = "фыва"
         grab.setup(post=data, url=self.server.get_url(), charset="cp1251", debug=True)

@@ -1,4 +1,3 @@
-# coding: utf-8
 from unittest import TestCase
 
 from tests.util import build_grab
@@ -21,4 +20,4 @@ class DocExtensionTest(TestCase):
         self.assertTrue(self.grab.doc)
 
     def test_select_method(self):
-        self.assertEqual('test', self.grab.doc.select('//h1').text())
+        self.assertEqual("test", self.grab.doc.select("//h1").text())
