@@ -574,57 +574,63 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return self.build_html_tree()
 
     @classmethod
-    def _build_dom(cls, content, mode):
+    def _build_dom(cls, content, mode, charset):
         assert mode in ("html", "xml")
+        io_cls = BytesIO if isinstance(content, bytes) else StringIO
         if mode == "html":
-            if not hasattr(THREAD_STORAGE, "html_parser"):
-                THREAD_STORAGE.html_parser = HTMLParser()
-            dom = defusedxml.lxml.parse(
-                StringIO(content), parser=THREAD_STORAGE.html_parser
+            if not hasattr(THREAD_STORAGE, "html_parsers"):
+                THREAD_STORAGE.html_parsers = {}
+            parser = THREAD_STORAGE.html_parsers.setdefault(
+                charset, HTMLParser(encoding=charset)
             )
+            dom = defusedxml.lxml.parse(io_cls(content), parser=parser)
             return dom.getroot()
         if not hasattr(THREAD_STORAGE, "xml_parser"):
-            THREAD_STORAGE.xml_parser = XMLParser()
-        dom = defusedxml.lxml.parse(BytesIO(content), parser=THREAD_STORAGE.xml_parser)
+            THREAD_STORAGE.xml_parsers = {}
+        parser = THREAD_STORAGE.xml_parsers.setdefault(charset, XMLParser())
+        dom = defusedxml.lxml.parse(io_cls(content), parser=parser)
         return dom.getroot()
 
     def build_html_tree(self):
         if self._lxml_tree is None:
+            body = self.body
             fix_setting = self._grab_config["fix_special_entities"]
-            body = self.unicode_body(fix_special_entities=fix_setting).strip()
+            # body = self.unicode_body(fix_special_entities=fix_setting).strip()
+            if fix_setting:
+                body = fix_special_entities_func(body)
             if self._grab_config["lowercased_tree"]:
                 body = body.lower()
-            if self._grab_config["strip_null_bytes"]:
-                body = body.replace(NULL_BYTE, "")
-            # py3 hack
-            body = RE_UNICODE_XML_DECLARATION.sub("", body)
+            # could not be applied to bytes body
+            # if self._grab_config["strip_null_bytes"]:
+            #    body = body.replace(NULL_BYTE, "")
+            body = RE_XML_DECLARATION.sub(b"", body)
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser
-                body = "<html></html>"
+                body = b"<html></html>"
             try:
-                self._lxml_tree = self._build_dom(body, "html")
+                self._lxml_tree = self._build_dom(body, "html", self.charset)
             except Exception as ex:  # pylint: disable=broad-except
                 # FIXME: write test for this case
                 if (
                     isinstance(ex, ParserError)  # noqa: SIM114
                     and "Document is empty" in str(ex)
-                    and "<html" not in body
+                    and b"<html" not in body
                 ):
                     # Fix for "just a string" body
-                    body = "<html>%s</html>" % body
-                    self._lxml_tree = self._build_dom(body, "html")
+                    body = b"<html>%s</html>" % body
+                    self._lxml_tree = self._build_dom(body, "html", self.charset)
 
                 # FIXME: write test for this case
                 elif (
                     isinstance(ex, TypeError)
                     and "object of type 'NoneType' has no len" in str(ex)
-                    and "<html" not in body
+                    and b"<html" not in body
                 ):
 
                     # Fix for smth like "<frameset></frameset>"
-                    body = "<html>%s</html>" % body
-                    self._lxml_tree = self._build_dom(body, "html")
+                    body = b"<html>%s</html>" % body
+                    self._lxml_tree = self._build_dom(body, "html", self.charset)
                 else:
                     raise
         return self._lxml_tree
@@ -641,7 +647,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def build_xml_tree(self):
         if self._strict_lxml_tree is None:
-            self._strict_lxml_tree = self._build_dom(self.body, "xml")
+            self._strict_lxml_tree = self._build_dom(self.body, "xml", self.charset)
         return self._strict_lxml_tree
 
     # FormExtension methods
