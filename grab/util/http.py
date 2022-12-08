@@ -86,7 +86,7 @@ def normalize_url(url):
     if RE_NOT_SAFE_CHAR.search(url):
         parts = list(urlsplit(url))
         # Scheme
-        pass
+        # do nothing with scheme
         # Network location (user:pass@hostname)
         if RE_NON_ALPHA_DIGIT_NETLOC.search(parts[1]):
             parts[1] = parts[1].encode("idna")
@@ -103,9 +103,8 @@ def normalize_url(url):
 def normalize_post_data(data, encoding="utf-8"):
     if isinstance(data, str):
         return make_bytes(data, encoding=encoding)
-    elif isinstance(data, bytes):
+    if isinstance(data, bytes):
         return data
-    else:
-        # it calls `normalize_http_values()`
-        res = smart_urlencode(data, encoding)
-        return make_bytes(res)
+    # it calls `normalize_http_values()`
+    res = smart_urlencode(data, encoding)
+    return make_bytes(res)

@@ -3,8 +3,8 @@ from hashlib import sha1
 
 def hashed_path_details(url, ext="jpg", base_dir=None):
     _hash = sha1(url).hexdigest()
-    a, b, tail = _hash[:2], _hash[2:4], _hash[4:]
-    directory = "%s/%s" % (a, b)
+    part1, part2, tail = _hash[:2], _hash[2:4], _hash[4:]
+    directory = "%s/%s" % (part1, part2)
     if base_dir is not None:
         directory = "%s/%s" % (base_dir, directory)
     if ext is not None:

@@ -34,7 +34,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             item["server"].stop()
 
     def setUp(self):
-        super(TestSpiderProxyCase, self).setUp()
+        super().setUp()
         for item in self.extra_servers.values():
             item["server"].reset()
 

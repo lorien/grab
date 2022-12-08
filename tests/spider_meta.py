@@ -3,7 +3,6 @@ from tests.util import BaseGrabTestCase
 
 
 class SpiderMetaTestCase(BaseGrabTestCase):
-
     def test_root_spider_class(self):
         self.assertEqual(Spider.Meta.abstract, True)
 
@@ -14,7 +13,6 @@ class SpiderMetaTestCase(BaseGrabTestCase):
         self.assertEqual(Child.Meta.abstract, False)
 
         class AnotherChild(Spider):
-            # pylint: disable=no-init
             class Meta:
                 abstract = True
 
@@ -26,7 +24,6 @@ class SpiderMetaTestCase(BaseGrabTestCase):
         self.assertEqual(ChildOfChild.Meta.abstract, False)
 
         class AnoterhChildOfChild(Child):
-            # pylint: disable=no-init
             class Meta:
                 abstract = True
 
@@ -34,20 +31,18 @@ class SpiderMetaTestCase(BaseGrabTestCase):
 
     def test_meta_inheritance(self):
         class SomeSpider(Spider):
-            # pylint: disable=no-init
             class Meta:
-                some_foo = 'bar'
+                some_foo = "bar"
 
         class Child(SomeSpider):
             pass
 
-        self.assertEqual(Child.Meta.some_foo, 'bar')
+        self.assertEqual(Child.Meta.some_foo, "bar")
 
     def test_explicit_existence_of_abstract(self):
         class SomeSpider(Spider):
-            # pylint: disable=no-init
             class Meta:
-                some_foo = 'bar'
+                some_foo = "bar"
 
         # pylint: disable=no-member
         self.assertEqual(SomeSpider.Meta.abstract, False)

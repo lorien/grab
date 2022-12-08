@@ -8,22 +8,20 @@ GB = MB * 1000
 def in_unit(num: int, unit: str) -> Union[int, float]:
     if unit == "b":
         return num
-    elif unit == "kb":
+    if unit == "kb":
         return round(num / float(KB), 2)
-    elif unit == "mb":
+    if unit == "mb":
         return round(num / float(MB), 2)
-    elif unit == "gb":
+    if unit == "gb":
         return round(num / float(GB), 2)
-    else:
-        return num
+    return num
 
 
 def format_traffic_value(num: int) -> str:
     if num < KB:
         return "%s B" % in_unit(num, "b")
-    elif num < MB:
+    if num < MB:
         return "%s KB" % in_unit(num, "kb")
-    elif num < GB:
+    if num < GB:
         return "%s MB" % in_unit(num, "mb")
-    else:
-        return "%s GB" % in_unit(num, "gb")
+    return "%s GB" % in_unit(num, "gb")

@@ -1,13 +1,13 @@
-from threading import Thread, Event
 import logging
 import sys
+from threading import Event, Thread
 
 # pylint: disable=invalid-name
 logger = logging.getLogger("grab.spider.base_service")
 # pylint: enable=invalid-name
 
 
-class ServiceWorker(object):
+class ServiceWorker:
     def __init__(self, spider, worker_callback):
         self.spider = spider
         self.thread = Thread(
@@ -64,7 +64,7 @@ class ServiceWorker(object):
         return self.thread.is_alive()
 
 
-class BaseService(object):
+class BaseService:
     def __init__(self, spider):
         self.spider = spider
         self.worker_registry = []

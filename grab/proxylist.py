@@ -21,6 +21,7 @@ class Proxy(namedtuple("Proxy", PROXY_FIELDS)):
     def get_userpwd(self):
         if self.username:
             return "%s:%s" % (self.username, self.password or "")
+        return None
 
 
 class InvalidProxyLine(GrabError):
@@ -66,7 +67,7 @@ def parse_raw_list_data(data, proxy_type="http", proxy_userpwd=None):
                 yield Proxy(host, port, username, password, proxy_type)
 
 
-class BaseProxySource(object):
+class BaseProxySource:
     def __init__(self, proxy_type="http", proxy_userpwd=None, **kwargs):
         kwargs["proxy_type"] = proxy_type
         kwargs["proxy_userpwd"] = proxy_userpwd
@@ -91,7 +92,7 @@ class FileProxySource(BaseProxySource):
 
     def __init__(self, path, **kwargs):
         self.path = path
-        super(FileProxySource, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def load_raw_data(self):
         return open(self.path, encoding="utf-8").read()
@@ -102,21 +103,20 @@ class WebProxySource(BaseProxySource):
 
     def __init__(self, url, **kwargs):
         self.url = url
-        super(WebProxySource, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
-    def load_raw_data(self):
+    def load_raw_data(self):  # pylint: disable=inconsistent-return-statements
         limit = 3
-        for count in range(limit):
+        for ntry in range(limit):
             try:
-                data = urlopen(self.url, timeout=3).read()
-                return data.decode("utf-8", "ignore")
+                with urlopen(self.url, timeout=3) as inp:
+                    return inp.read().decode("utf-8", "ignore")
             except URLError:
-                if count >= (limit - 1):
+                if ntry >= (limit - 1):
                     raise
-                else:
-                    logger.debug(
-                        "Failed to retreive proxy list from %s." " Retrying.", self.url
-                    )
+                logger.debug(
+                    "Failed to retreive proxy list from %s. Retrying.", self.url
+                )
 
 
 class ListProxySource(BaseProxySource):
@@ -125,13 +125,13 @@ class ListProxySource(BaseProxySource):
 
     def __init__(self, items, **kwargs):
         self.items = items
-        super(ListProxySource, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def load_raw_data(self):
         return "\n".join(self.items)
 
 
-class ProxyList(object):
+class ProxyList:
     """
     Class to work with proxy list.
     """

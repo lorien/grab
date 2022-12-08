@@ -1,16 +1,14 @@
-import os
-from unittest import TestCase
-import logging
-from contextlib import contextmanager
-from tempfile import mkdtemp, mkstemp
-from shutil import rmtree
-import platform
 import itertools
+import logging
+import os
+import platform
+from contextlib import contextmanager
+from shutil import rmtree
+from tempfile import mkdtemp, mkstemp
+from unittest import TestCase
 
+from grab import Grab, base
 from test_server import TestServer
-
-from grab import Grab
-from grab import base
 
 logger = logging.getLogger("tests.util")  # pylint: disable=invalid-name
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -91,8 +89,7 @@ def skip_test_if(condition, why_message):
                 func_name = "%s:%s" % (func.__module__, func.__name__)
                 logger.debug("Skipping test %s because %s", func_name, why_message)
                 return None
-            else:
-                return func(*args, **kwargs)
+            return func(*args, **kwargs)
 
         return caller
 

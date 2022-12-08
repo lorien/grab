@@ -1,4 +1,5 @@
 import re
+from html.entities import name2codepoint
 from typing import Match
 
 from .encoding import make_bytes
@@ -111,5 +112,4 @@ def find_base_url(html):
     match = RE_BASE_URL.search(html)
     if match:
         return match.group(1)
-    else:
-        return None
+    return None

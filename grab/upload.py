@@ -6,15 +6,14 @@ from hashlib import md5
 from grab.util.encoding import make_bytes
 
 
-class BaseUploadObject(object):
+class BaseUploadObject:
     __slots__ = ()
 
     def find_content_type(self, filename):
         ctype, _ = mimetypes.guess_type(filename)
         if ctype is None:
             return "application/octet-stream"
-        else:
-            return ctype
+        return ctype
 
 
 class UploadContent(BaseUploadObject):

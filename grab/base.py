@@ -157,7 +157,7 @@ def default_config() -> Dict[str, Any]:
     )
 
 
-class Grab(object):
+class Grab:
     __slots__ = (
         "request_head",
         "request_body",
@@ -240,20 +240,19 @@ class Grab(object):
         if transport_param is None:
             transport_param = DEFAULT_TRANSPORT
         if isinstance(transport_param, str):
-            if transport_param in TRANSPORT_ALIAS:
+            if transport_param in TRANSPORT_ALIAS:  # pylint: disable=consider-using-get
                 transport_param = TRANSPORT_ALIAS[transport_param]
             if "." not in transport_param:
                 raise error.GrabMisuseError("Unknown transport: %s" % transport_param)
-            else:
-                mod_path, cls_name = transport_param.rsplit(".", 1)
-                try:
-                    cls = TRANSPORT_CACHE[(mod_path, cls_name)]
-                except KeyError:
-                    mod = __import__(mod_path, globals(), locals(), ["foo"])
-                    cls = getattr(mod, cls_name)
-                    TRANSPORT_CACHE[(mod_path, cls_name)] = cls
-                self.transport_param = transport_param
-                self.transport = cls()
+            mod_path, cls_name = transport_param.rsplit(".", 1)
+            try:
+                cls = TRANSPORT_CACHE[(mod_path, cls_name)]
+            except KeyError:
+                mod = __import__(mod_path, globals(), locals(), ["foo"])
+                cls = getattr(mod, cls_name)
+                TRANSPORT_CACHE[(mod_path, cls_name)] = cls
+            self.transport_param = transport_param
+            self.transport = cls()
         elif isinstance(transport_param, collections.abc.Callable):
             self.transport_param = transport_param
             self.transport = transport_param()
@@ -402,7 +401,7 @@ class Grab(object):
         """
 
         # pylint: disable=no-member
-        thread_name = threading.currentThread().getName().lower()
+        thread_name = threading.current_thread().name.lower()
         # pylint: enable=no-member
         if thread_name == "mainthread":
             thread_name = ""
@@ -471,12 +470,11 @@ class Grab(object):
                             refresh_count += 1
                             if refresh_count > self.config["redirect_limit"]:
                                 raise error.GrabTooManyRedirectsError()
-                            else:
-                                url = doc.headers.get("Location")
-                                self.prepare_request(
-                                    url=self.make_url_absolute(url), referer=None
-                                )
-                                continue
+                            url = doc.headers.get("Location")
+                            self.prepare_request(
+                                url=self.make_url_absolute(url), referer=None
+                            )
+                            continue
 
                 if self.config["follow_refresh"]:
                     refresh_url = self.doc.get_meta_refresh_url()
@@ -484,11 +482,10 @@ class Grab(object):
                         refresh_count += 1
                         if refresh_count > self.config["redirect_limit"]:
                             raise error.GrabTooManyRedirectsError()
-                        else:
-                            self.prepare_request(
-                                url=self.make_url_absolute(refresh_url), referer=None
-                            )
-                            continue
+                        self.prepare_request(
+                            url=self.make_url_absolute(refresh_url), referer=None
+                        )
+                        continue
                 return doc
 
     def submit(self, make_request=True, **kwargs):
@@ -531,8 +528,7 @@ class Grab(object):
             self.setup(url=result["url"])
         if make_request:
             return self.request()
-        else:
-            return None
+        return None
 
     def process_request_result(self):
         """
@@ -695,7 +691,7 @@ class Grab(object):
 
     def save_dumps(self):
         # pylint: disable=no-member
-        thread_name = threading.currentThread().getName().lower()
+        thread_name = threading.current_thread().name.lower()
         # pylint: enable=no-member
         if thread_name == "mainthread":
             thread_name = ""
@@ -733,8 +729,7 @@ class Grab(object):
                 if base_url:
                     return urljoin(base_url, url)
             return urljoin(self.config["url"], url)
-        else:
-            return url
+        return url
 
     def detect_request_method(self):
         """
@@ -800,14 +795,13 @@ class Grab(object):
     def request_headers(self) -> Optional[EmailMessage]:
         if self.request_head is None:
             return None
-        else:
-            first_head = self.request_head.decode("utf-8").split("\r\n\r\n")[0]
-            lines = first_head.split("\r\n")
-            lines = [x for x in lines if ":" in x]
-            return cast(
-                EmailMessage,
-                email.message_from_string("\n".join(lines), _class=EmailMessage),
-            )
+        first_head = self.request_head.decode("utf-8").split("\r\n\r\n")[0]
+        lines = first_head.split("\r\n")
+        lines = [x for x in lines if ":" in x]
+        return cast(
+            EmailMessage,
+            email.message_from_string("\n".join(lines), _class=EmailMessage),
+        )
 
 
 # For backward compatibility

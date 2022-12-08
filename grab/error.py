@@ -28,7 +28,7 @@ class GrabError(Exception):
     """
 
 
-class OriginalExceptionError(object):
+class OriginalExceptionError:
     """
     Exception sub-class which constructor accepts original exception
     as second argument
@@ -39,7 +39,7 @@ class OriginalExceptionError(object):
             self.original_exc = args[1]
         else:
             self.original_exc = None
-        super(OriginalExceptionError, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class GrabNetworkError(OriginalExceptionError, GrabError):
@@ -121,7 +121,8 @@ def raise_feature_is_deprecated(feature_name):
 # @comment:
 # Previously DataNotFound (sublass of IndexError) exception were in weblib package.
 # I am moving away from using weblib package.
-# To minimize failures in external code which uses DataNotFound class I make it alias of IndexError
+# To minimize failures in external code which uses DataNotFound class I make
+# it alias of IndexError
 DataNotFound = IndexError
 
 

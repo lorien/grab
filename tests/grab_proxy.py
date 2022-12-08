@@ -29,7 +29,7 @@ class TestProxy(BaseGrabTestCase):
             item["server"].stop()
 
     def setUp(self):
-        super(TestProxy, self).setUp()
+        super().setUp()
         for item in self.extra_servers.values():
             item["server"].reset()
 

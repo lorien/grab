@@ -30,7 +30,7 @@ COOKIE_ATTRS = (
 
 # Source:
 # https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
-class MockRequest(object):
+class MockRequest:
     """Wraps a `requests.Request` to mimic a `urllib2.Request`.
     The code in `cookielib.CookieJar` expects this interface in order to
     correctly manage cookie policies, i.e., determine whether a cookie can be
@@ -89,7 +89,7 @@ class MockRequest(object):
         add it back if you find one.
         """
         raise NotImplementedError(
-            "Cookie headers should be added" " with add_unredirected_header()"
+            "Cookie headers should be added with add_unredirected_header()"
         )
 
     def add_unredirected_header(self, name, value):
@@ -112,7 +112,7 @@ class MockRequest(object):
 
 
 # https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
-class MockResponse(object):
+class MockResponse:
     """Wraps a `httplib.HTTPMessage` to mimic a `urllib.addinfourl`.
     ...what? Basically, expose the parsed HTTP headers from the server response
     the way `cookielib` expects to see them.
@@ -171,7 +171,7 @@ def create_cookie(name, value, domain, httponly=None, **kwargs):
     return Cookie(**config)
 
 
-class CookieManager(object):
+class CookieManager:
     """
     Each Grab instance has `cookies` attribute that is instance of
     `CookieManager` class.

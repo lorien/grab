@@ -8,7 +8,6 @@ class GrabApiTestCase(BaseGrabTestCase):
     def test_urllib3_idna_error(self):
         # pylint: disable=import-outside-toplevel
         from urllib3 import PoolManager
-        from urllib3.exceptions import NewConnectionError
 
         # pylint: enable=import-outside-toplevel
 

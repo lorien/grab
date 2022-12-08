@@ -146,7 +146,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
             def task_page(self, unused_grab, unused_task):
                 self.meta["tokens"].append("0_handler")
 
-        class FuncWithState(object):
+        class FuncWithState:
             def __init__(self, tokens):
                 self.tokens = tokens
 
@@ -241,7 +241,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         # If any of compared tasks does not have priority
         # than tasks are equal
         self.assertTrue(task1 == task3)
-        self.assertTrue(task3 == task3)
+        self.assertTrue(task2 == task3)
 
     def test_task_get_fallback_handler(self):
         class TestSpider(Spider):
@@ -291,7 +291,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
         class TestSpider(Spider):
             def create_grab_instance(self, **kwargs):
-                grab = super(TestSpider, self).create_grab_instance(**kwargs)
+                grab = super().create_grab_instance(**kwargs)
                 grab.setup(timeout=77)
                 return grab
 

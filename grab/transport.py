@@ -35,7 +35,7 @@ from grab.util.encoding import decode_pairs, make_bytes, make_str
 from grab.util.http import normalize_http_values, normalize_post_data, normalize_url
 
 
-class BaseTransport(object):
+class BaseTransport:
     def __init__(self):
         # these assignments makes pylint happy
         self.body_file = None
@@ -82,7 +82,7 @@ def process_upload_items(items):
     return result
 
 
-class Request(object):
+class Request:
     def __init__(
         self,
         method=None,
@@ -121,7 +121,7 @@ class Urllib3Transport(BaseTransport):
     """
 
     def __init__(self):
-        super(Urllib3Transport, self).__init__()
+        super().__init__()
         # http://urllib3.readthedocs.io/en/latest/user-guide.html#certificate-verification
         self.pool = PoolManager(10, cert_reqs="CERT_REQUIRED", ca_certs=certifi.where())
 
@@ -190,7 +190,7 @@ class Urllib3Transport(BaseTransport):
                 pass
             elif isinstance(post_data, str):
                 raise GrabMisuseError(
-                    "Option multipart_post data" " does not accept unicode."
+                    "Option multipart_post data does not accept unicode."
                 )
             else:
                 post_items = normalize_http_values(
@@ -494,7 +494,7 @@ class Urllib3Transport(BaseTransport):
             # Trying to guess better domain name by removing leading "www."
             if grab.config["cookies"]:
                 if not isinstance(grab.config["cookies"], dict):
-                    raise error.GrabMisuseError("cookies option should" " be a dict")
+                    raise error.GrabMisuseError("cookies option should be a dict")
                 for name, value in grab.config["cookies"].items():
                     grab.cookies.set(name=name, value=value, domain=request_host_no_www)
 

@@ -49,7 +49,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertEqual(grab.doc.body, content)
 
     def test_inheritance(self):
-        class SimpleExtension(object):
+        class SimpleExtension:
             data = {"counter": 0}
 
             @classmethod

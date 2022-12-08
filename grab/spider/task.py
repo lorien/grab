@@ -1,12 +1,13 @@
 from __future__ import absolute_import
+
 from datetime import datetime, timedelta
 
-from grab.spider.error import SpiderMisuseError
 from grab.base import copy_config
 from grab.error import raise_feature_is_deprecated
+from grab.spider.error import SpiderMisuseError
 
 
-class BaseTask(object):
+class BaseTask:
     pass
 
 
@@ -118,13 +119,11 @@ class Task(BaseTask):
             )
 
         if url is not None and grab is not None:
-            raise SpiderMisuseError(
-                "Options url and grab could not be used " "together"
-            )
+            raise SpiderMisuseError("Options url and grab could not be used together")
 
         if url is not None and grab_config is not None:
             raise SpiderMisuseError(
-                "Options url and grab_config could not be " "used together"
+                "Options url and grab_config could not be used together"
             )
 
         if grab is not None and grab_config is not None:
@@ -200,18 +199,16 @@ class Task(BaseTask):
             task.task_try_count = self.task_try_count + 1
 
         if kwargs.get("url") is not None and kwargs.get("grab") is not None:
-            raise SpiderMisuseError(
-                "Options url and grab could not be " "used together"
-            )
+            raise SpiderMisuseError("Options url and grab could not be used together")
 
         if kwargs.get("url") is not None and kwargs.get("grab_config") is not None:
             raise SpiderMisuseError(
-                "Options url and grab_config could not " "be used together"
+                "Options url and grab_config could not be used together"
             )
 
         if kwargs.get("grab") is not None and kwargs.get("grab_config") is not None:
             raise SpiderMisuseError(
-                "Options grab and grab_config could not " "be used together"
+                "Options grab and grab_config could not be used together"
             )
 
         if kwargs.get("grab"):
@@ -242,15 +239,13 @@ class Task(BaseTask):
     def __eq__(self, other):
         if not self.priority or not other.priority:
             return True
-        else:
-            return self.priority == other.priority
+        return self.priority == other.priority
 
     def get_fallback_handler(self, spider):
         if self.fallback_name:
             return getattr(spider, self.fallback_name)
-        elif self.name:
+        if self.name:
             fb_name = "task_%s_fallback" % self.name
             if hasattr(spider, fb_name):
                 return getattr(spider, fb_name)
-        else:
-            return None
+        return None

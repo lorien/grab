@@ -1,14 +1,11 @@
-from pprint import pprint  # pylint: disable=unused-import
 import json
 import pickle
+from pprint import pprint  # pylint: disable=unused-import
 
-from test_server import Response
-
-from grab.error import GrabMisuseError
 from grab.cookie import CookieManager, create_cookie
-
-from tests.util import temp_file, build_grab
-from tests.util import BaseGrabTestCase
+from grab.error import GrabMisuseError
+from test_server import Response
+from tests.util import BaseGrabTestCase, build_grab, temp_file
 
 
 class TestCookies(BaseGrabTestCase):
@@ -112,7 +109,7 @@ class TestCookies(BaseGrabTestCase):
 
             self.server.add_response(Response())
             grab = build_grab()
-            cookies = {"foo": "bar", "spam": u"begemot"}
+            cookies = {"foo": "bar", "spam": "begemot"}
             grab.setup(cookies=cookies)
             grab.go(self.server.get_url())
             grab.cookies.save_to_file(tmp_file)
@@ -126,7 +123,7 @@ class TestCookies(BaseGrabTestCase):
             grab = build_grab()
             cookies = [
                 {"name": "foo", "value": "bar", "domain": self.server.address},
-                {"name": "spam", "value": u"begemot", "domain": self.server.address},
+                {"name": "spam", "value": "begemot", "domain": self.server.address},
             ]
             with open(tmp_file, "w", encoding="utf-8") as out:
                 json.dump(cookies, out)

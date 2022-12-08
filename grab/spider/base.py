@@ -81,8 +81,6 @@ class Spider(metaclass=SpiderMetaClass):
     initial_urls = []
 
     class Meta:
-        # pylint: disable=no-init
-        #
         # Meta.abstract means that this class will not be
         # collected to spider registry by `grab crawl` CLI command.
         # The Meta is inherited by descendant classes BUT
@@ -101,8 +99,7 @@ class Spider(metaclass=SpiderMetaClass):
     def get_spider_name(cls):
         if cls.spider_name:
             return cls.spider_name
-        else:
-            return camel_case_to_underscore(cls.__name__)
+        return camel_case_to_underscore(cls.__name__)
 
     # **************
     # Public Methods
@@ -177,15 +174,14 @@ class Spider(metaclass=SpiderMetaClass):
         self._grab_config = {}
         if priority_mode not in ["random", "const"]:
             raise SpiderMisuseError(
-                "Value of priority_mode option should be " '"random" or "const"'
+                'Value of priority_mode option should be "random" or "const"'
             )
-        else:
-            self.priority_mode = priority_mode
+        self.priority_mode = priority_mode
         if only_cache:
             raise_feature_is_deprecated("Cache feature")
         self.work_allowed = True
         if request_pause is not NULL:
-            warn("Option `request_pause` is deprecated and is not " "supported anymore")
+            warn("Option `request_pause` is deprecated and is not supported anymore")
         self.proxylist_enabled = None
         self.proxylist = None
         self.proxy = None
@@ -259,18 +255,16 @@ class Spider(metaclass=SpiderMetaClass):
             msg = "Invalid task URL: %s" % task.url
             if raise_error:
                 raise SpiderError(msg)
-            else:
-                logger.error(
-                    "%s\nTraceback:\n%s",
-                    msg,
-                    "".join(format_stack()),
-                )
-                return False
-        else:
-            # TODO: keep original task priority if it was set explicitly
-            # WTF the previous comment means?
-            queue.put(task, priority=task.priority, schedule_time=task.schedule_time)
-            return True
+            logger.error(
+                "%s\nTraceback:\n%s",
+                msg,
+                "".join(format_stack()),
+            )
+            return False
+        # TODO: keep original task priority if it was set explicitly
+        # WTF the previous comment means?
+        queue.put(task, priority=task.priority, schedule_time=task.schedule_time)
+        return True
 
     def stop(self):
         """
@@ -453,7 +447,6 @@ class Spider(metaclass=SpiderMetaClass):
         if False:  # pylint: disable=using-constant-test
             # Some magic to make this function empty generator
             yield ":-)"
-        return
 
     # ***************
     # Private Methods
@@ -480,8 +473,7 @@ class Spider(metaclass=SpiderMetaClass):
     def generate_task_priority(self):
         if self.priority_mode == "const":
             return DEFAULT_TASK_PRIORITY
-        else:
-            return randint(*RANDOM_TASK_PRIORITY_RANGE)
+        return randint(*RANDOM_TASK_PRIORITY_RANGE)
 
     def process_initial_urls(self):
         if self.initial_urls:
@@ -495,8 +487,7 @@ class Spider(metaclass=SpiderMetaClass):
             size = self.task_queue.size()
             if size:
                 return True
-            else:
-                return None
+            return None
 
     def setup_grab_for_task(self, task):
         grab = self.create_grab_instance()
@@ -549,15 +540,14 @@ class Spider(metaclass=SpiderMetaClass):
         callback = task.get("callback")
         if callback:
             return callback
+        try:
+            handler = getattr(self, "task_%s" % task.name)
+        except AttributeError as ex:
+            raise NoTaskHandler(
+                "No handler or callback defined for " "task %s" % task.name
+            ) from ex
         else:
-            try:
-                handler = getattr(self, "task_%s" % task.name)
-            except AttributeError as ex:
-                raise NoTaskHandler(
-                    "No handler or callback defined for " "task %s" % task.name
-                ) from ex
-            else:
-                return handler
+            return handler
 
     def log_network_result_stats(self, res, task):
         # Increase stat counters

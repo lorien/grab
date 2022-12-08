@@ -32,12 +32,12 @@ from lxml.etree import ParserError, XMLParser  # pytype: disable=import-error
 from lxml.html import CheckboxValues, HTMLParser, MultipleSelectOptions
 from selection import XpathSelector
 
-import grab.util.html
 from grab.const import NULL
 from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabMisuseError
 from grab.util.files import hashed_path
 from grab.util.html import decode_entities, find_refresh_url
+from grab.util.html import fix_special_entities as fix_special_entities_func
 from grab.util.http import smart_urlencode
 from grab.util.rex import normalize_regexp
 from grab.util.text import normalize_spaces
@@ -80,7 +80,7 @@ def read_bom(data):
     return None, None
 
 
-class Document(object):
+class Document:
     """
     Document (in most cases it is a network response
         i.e. result of network request)
@@ -272,9 +272,7 @@ class Document(object):
             try:
                 codecs.lookup(charset)
             except LookupError:
-                logger.debug(
-                    "Unknown charset found: %s." " Using utf-8 istead.", charset
-                )
+                logger.debug("Unknown charset found: %s. Using utf-8 istead.", charset)
                 self.charset = "utf-8"
             else:
                 self.charset = charset
@@ -444,19 +442,11 @@ class Document(object):
 
         if isinstance(anchor, str):
             if byte:
-                raise GrabMisuseError(
-                    "The anchor should be bytes string in " "byte mode"
-                )
-            else:
-                return anchor in self.unicode_body()
-
-        if not isinstance(anchor, str):
-            if byte:
-                return anchor in self.body
-            else:
-                raise GrabMisuseError(
-                    "The anchor should be byte string in " "non-byte mode"
-                )
+                raise GrabMisuseError("The anchor should be bytes string in byte mode")
+            return anchor in self.unicode_body()
+        if byte:
+            return anchor in self.body
+        raise GrabMisuseError("The anchor should be byte string in non-byte mode")
 
     def text_assert(self, anchor, byte=False):
         """
@@ -496,8 +486,7 @@ class Document(object):
         except DataNotFound as ex:
             if default is NULL:
                 raise DataNotFound("Regexp not found") from ex
-            else:
-                return default
+            return default
         else:
             return normalize_spaces(decode_entities(match.group(1)))
 
@@ -526,11 +515,9 @@ class Document(object):
                 match = regexp.search(ubody)
         if match:
             return match
-        else:
-            if default is NULL:
-                raise DataNotFound("Could not find regexp: %s" % regexp)
-            else:
-                return default
+        if default is NULL:
+            raise DataNotFound("Could not find regexp: %s" % regexp)
+        return default
 
     def rex_assert(self, rex, byte=False):
         """
@@ -576,7 +563,7 @@ class Document(object):
         if bom:
             body = body[len(self.bom) :]
         if fix_special_entities:
-            body = grab.util.html.fix_special_entities(body)
+            body = fix_special_entities_func(body)
         if ignore_errors:
             errors = "ignore"
         else:
@@ -605,13 +592,12 @@ class Document(object):
     def _read_body(self):
         if self.body_path:
             return self.read_body_from_file()
-        else:
-            return self._bytes_body
+        return self._bytes_body
 
     def _write_body(self, body):
         if isinstance(body, str):
             raise GrabMisuseError("Document.body could be only byte string.")
-        elif self.body_path:
+        if self.body_path:
             with open(self.body_path, "wb") as out:
                 out.write(body)
             self._bytes_body = None
@@ -631,8 +617,7 @@ class Document(object):
 
         if self._grab_config["content_type"] == "xml":
             return self.build_xml_tree()
-        else:
-            return self.build_html_tree()
+        return self.build_html_tree()
 
     @classmethod
     def _build_dom(cls, content, mode):
@@ -644,13 +629,10 @@ class Document(object):
                 StringIO(content), parser=THREAD_STORAGE.html_parser
             )
             return dom.getroot()
-        else:
-            if not hasattr(THREAD_STORAGE, "xml_parser"):
-                THREAD_STORAGE.xml_parser = XMLParser()
-            dom = defusedxml.lxml.parse(
-                BytesIO(content), parser=THREAD_STORAGE.xml_parser
-            )
-            return dom.getroot()
+        if not hasattr(THREAD_STORAGE, "xml_parser"):
+            THREAD_STORAGE.xml_parser = XMLParser()
+        dom = defusedxml.lxml.parse(BytesIO(content), parser=THREAD_STORAGE.xml_parser)
+        return dom.getroot()
 
     def build_html_tree(self):
         if self._lxml_tree is None:
@@ -972,7 +954,7 @@ class Document(object):
                 extra_post_items = extra_post
 
             # Drop existing post items with such key
-            keys_to_drop = set([x for x, y in extra_post_items])
+            keys_to_drop = {x for x, y in extra_post_items}
             for key in keys_to_drop:
                 post_items = [(x, y) for x, y in post_items if x != key]
 
@@ -1081,6 +1063,5 @@ class Document(object):
             if elem.tag == "form":  # pylint: disable=no-member
                 self._lxml_form = elem
                 return
-            else:
-                elem = elem.getparent()  # pylint: disable=no-member
+            elem = elem.getparent()  # pylint: disable=no-member
         self._lxml_form = None

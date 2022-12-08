@@ -10,7 +10,7 @@ from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
 from tests.util import BaseGrabTestCase, build_spider
 
 
-class SpiderQueueMixin(object):
+class SpiderQueueMixin:
     server: Any
     setup_queue: Any
     stat: Any
