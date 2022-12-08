@@ -1,6 +1,6 @@
 # Grab Framework Project
 
-![Grab Test Status](https://github.com/lorien/grab/workflows/test/badge.svg)
+[![Grab Test Status](https://github.com/lorien/grab/workflows/test/badge.svg)](https://github.com/lorien/grab/actions/workflows/test.yml)
 [![Grab Test Coverage Status](https://coveralls.io/repos/github/lorien/grab/badge.svg)](https://coveralls.io/github/lorien/grab)
 [![Grab Documentation](https://readthedocs.org/projects/grab/badge/?version=latest)](https://grab.readthedocs.io/en/latest/)
 
@@ -13,7 +13,7 @@ be new feaures.
 
 Things that are going to happen (no estimation time):
 
-* Refactoring the source code while keeping most of external API unchanged
+* Refactoring the source code while keeping most of external API unchanged#
 * Fixing bugs
 * Annotating source code with type hints
 * Improving quality of source code to comply with pylint and other linters
