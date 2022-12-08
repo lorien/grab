@@ -20,7 +20,7 @@ build
 twine
 
 coverage
-#coveralls
+coveralls
 pytest-cov
 
 # types
