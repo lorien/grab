@@ -1,7 +1,6 @@
 import re
 
-from weblib.error import DataNotFound
-
+from grab.error import DataNotFound
 from tests.util import BaseGrabTestCase, build_grab
 
 HTML = """

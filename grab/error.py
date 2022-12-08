@@ -22,7 +22,6 @@ Exception
 """
 
 from __future__ import absolute_import
-from weblib.error import DataNotFound  # noqa pylint: disable=unused-import
 
 
 class GrabError(Exception):
@@ -118,3 +117,11 @@ def raise_feature_is_deprecated(feature_name):
         "%s is not supported anymore. Update your spiders"
         " or use old Grab version" % feature_name
     )
+
+
+# @date: Dec 08, 2022
+# @comment:
+# Previously DataNotFound (sublass of IndexError) exception were in weblib package.
+# I am moving away from using weblib package.
+# To minimize failures in external code which uses DataNotFound class I make it alias of IndexError
+DataNotFound = IndexError
