@@ -85,7 +85,7 @@ def process_upload_items(items):
     return result
 
 
-class Request:
+class Request:  # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         method=None,
@@ -150,6 +150,40 @@ class Urllib3Transport(BaseTransport):
         self._response = None
         self._request = None
 
+    def process_config_post(self, grab, req, extra_headers, method):
+        if grab.config["multipart_post"] is not None:
+            post_data = grab.config["multipart_post"]
+            if isinstance(post_data, bytes):
+                pass
+            elif isinstance(post_data, str):
+                raise GrabMisuseError(
+                    "Option multipart_post data does not accept unicode."
+                )
+            else:
+                post_items = normalize_http_values(
+                    grab.config["multipart_post"],
+                    charset=grab.config["charset"],
+                    ignore_classes=(UploadFile, UploadContent),
+                )
+                post_items = decode_pairs(post_items, grab.config["charset"])
+                post_items = process_upload_items(post_items)
+                post_data, content_type = encode_multipart_formdata(post_items)
+                extra_headers["Content-Type"] = content_type
+            extra_headers["Content-Length"] = len(post_data)
+            req.data = post_data
+        elif grab.config["post"] is not None:
+            post_data = normalize_post_data(grab.config["post"], grab.config["charset"])
+            extra_headers["Content-Length"] = len(post_data)
+            req.data = post_data
+
+        if method in ("POST", "PUT"):
+            if grab.config["post"] is None and grab.config["multipart_post"] is None:
+                raise GrabMisuseError(
+                    "Neither `post` or `multipart_post`"
+                    " options was specified for the %s"
+                    " request" % method
+                )
+
     def process_config(self, grab):
         req = Request(data=None)
 
@@ -183,39 +217,8 @@ class Urllib3Transport(BaseTransport):
                 grab.config["body_storage_filename"],
                 create_dir=grab.config["body_storage_create_dir"],
             )
-
-        if grab.config["multipart_post"] is not None:
-            post_data = grab.config["multipart_post"]
-            if isinstance(post_data, bytes):
-                pass
-            elif isinstance(post_data, str):
-                raise GrabMisuseError(
-                    "Option multipart_post data does not accept unicode."
-                )
-            else:
-                post_items = normalize_http_values(
-                    grab.config["multipart_post"],
-                    charset=grab.config["charset"],
-                    ignore_classes=(UploadFile, UploadContent),
-                )
-                post_items = decode_pairs(post_items, grab.config["charset"])
-                post_items = process_upload_items(post_items)
-                post_data, content_type = encode_multipart_formdata(post_items)
-                extra_headers["Content-Type"] = content_type
-            extra_headers["Content-Length"] = len(post_data)
-            req.data = post_data
-        elif grab.config["post"] is not None:
-            post_data = normalize_post_data(grab.config["post"], grab.config["charset"])
-            extra_headers["Content-Length"] = len(post_data)
-            req.data = post_data
-
-        if method in ("POST", "PUT"):
-            if grab.config["post"] is None and grab.config["multipart_post"] is None:
-                raise GrabMisuseError(
-                    "Neither `post` or `multipart_post`"
-                    " options was specified for the %s"
-                    " request" % method
-                )
+        # POST data
+        self.process_config_post(grab, req, extra_headers, method)
         # Proxy
         if grab.config["proxy"]:
             req.proxy = grab.config["proxy"]
@@ -240,7 +243,7 @@ class Urllib3Transport(BaseTransport):
         extra_headers["User-Agent"] = grab.config["user_agent"]
 
         # Headers
-        headers = extra_headers
+        headers = extra_headers  # FIXME: WTF
         headers.update(grab.config["common_headers"])
 
         if grab.config["headers"]:
@@ -358,6 +361,35 @@ class Urllib3Transport(BaseTransport):
         #                                         ex.args[1])
         # raise error.GrabNetworkError(ex.args[0], ex.args[1])
 
+    def read_with_timeout(self):
+        if self._request.config_nobody:
+            return b""
+        maxsize = self._request.config_body_maxsize
+        chunks = []
+        default_chunk_size = 10000
+        if maxsize:
+            chunk_size = min(default_chunk_size, maxsize + 1)
+        else:
+            chunk_size = default_chunk_size
+        bytes_read = 0
+        while True:
+            chunk = self._response.read(chunk_size)
+            if chunk:
+                bytes_read += len(chunk)
+                chunks.append(chunk)
+                if maxsize and bytes_read > maxsize:
+                    # reached limit on bytes to read
+                    break
+            else:
+                break
+            if self._request.timeout:
+                if time.time() - self._request.op_started > self._request.timeout:
+                    raise GrabTimeoutError
+        data = b"".join(chunks)
+        if maxsize:
+            data = data[:maxsize]
+        return data
+
     def prepare_response(self, grab):
         # Information about urllib3
         # On python2 urllib3 headers contains original binary data
@@ -366,10 +398,7 @@ class Urllib3Transport(BaseTransport):
         if not self._response:
             return None
         try:
-            # if self.body_file:
-            #    self.body_file.close()
             response = Document()
-
             head = ""
             for key, val in self._response.getheaders().items():
                 key = key.encode("latin").decode("utf-8", errors="ignore")
@@ -378,51 +407,15 @@ class Urllib3Transport(BaseTransport):
             head += "\r\n"
             response.head = make_bytes(head, encoding="utf-8")
 
-            # if self.body_path:
-            #    response.body_path = self.body_path
-            # else:
-            #    response.body = b''.join(self.response_body_chunks)
-            def read_with_timeout():
-                if self._request.config_nobody:
-                    return b""
-                maxsize = self._request.config_body_maxsize
-                chunks = []
-                default_chunk_size = 10000
-                if maxsize:
-                    chunk_size = min(default_chunk_size, maxsize + 1)
-                else:
-                    chunk_size = default_chunk_size
-                bytes_read = 0
-                while True:
-                    chunk = self._response.read(chunk_size)
-                    if chunk:
-                        bytes_read += len(chunk)
-                        chunks.append(chunk)
-                        if maxsize and bytes_read > maxsize:
-                            # reached limit on bytes to read
-                            break
-                    else:
-                        break
-                    if self._request.timeout:
-                        if (
-                            time.time() - self._request.op_started
-                            > self._request.timeout
-                        ):
-                            raise GrabTimeoutError
-                data = b"".join(chunks)
-                if maxsize:
-                    data = data[:maxsize]
-                return data
-
             if self._request.response_path:
                 # FIXME: Read/write by chunks.
                 # Now the whole content is read at once.
                 response.body_path = self._request.response_path
                 with open(response.body_path, "wb") as out:
-                    out.write(read_with_timeout())
+                    out.write(self.read_with_timeout())
             else:
                 response.body_path = None
-                response.body = read_with_timeout()
+                response.body = self.read_with_timeout()
 
             # Clear memory
             # self.response_header_chunks = []

@@ -80,7 +80,7 @@ def read_bom(data):
     return None, None
 
 
-class Document:
+class Document:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
     """
     Document (in most cases it is a network response
         i.e. result of network request)
@@ -214,6 +214,34 @@ class Document:
 
         self._unicode_body = None
 
+    def detect_charset_from_body_chunk(self, body_chunk):
+        charset = None
+        ret_bom = None
+        # Try to extract charset from http-equiv meta tag
+        match_charset = RE_META_CHARSET.search(body_chunk)
+        if match_charset:
+            charset = match_charset.group(1)
+        else:
+            match_charset_html5 = RE_META_CHARSET_HTML5.search(body_chunk)
+            if match_charset_html5:
+                charset = match_charset_html5.group(1)
+
+        # TODO: <meta charset="utf-8" />
+        bom_encoding, chunk_bom = read_bom(body_chunk)
+        if bom_encoding:
+            charset = bom_encoding
+            ret_bom = chunk_bom
+
+        # Try to process XML declaration
+        if not charset:
+            if body_chunk.startswith(b"<?xml"):
+                match = RE_XML_DECLARATION.search(body_chunk)
+                if match:
+                    enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
+                    if enc_match:
+                        charset = enc_match.group(1)
+        return charset, ret_bom
+
     def detect_charset(self):
         """
         Detect charset of the response.
@@ -233,29 +261,9 @@ class Document:
         body_chunk = self.get_body_chunk()
 
         if body_chunk:
-            # Try to extract charset from http-equiv meta tag
-            match_charset = RE_META_CHARSET.search(body_chunk)
-            if match_charset:
-                charset = match_charset.group(1)
-            else:
-                match_charset_html5 = RE_META_CHARSET_HTML5.search(body_chunk)
-                if match_charset_html5:
-                    charset = match_charset_html5.group(1)
-
-            # TODO: <meta charset="utf-8" />
-            bom_enc, bom = read_bom(body_chunk)
-            if bom_enc:
-                charset = bom_enc
+            charset, bom = self.detect_charset_from_body_chunk(body_chunk)
+            if bom:
                 self.bom = bom
-
-            # Try to process XML declaration
-            if not charset:
-                if body_chunk.startswith(b"<?xml"):
-                    match = RE_XML_DECLARATION.search(body_chunk)
-                    if match:
-                        enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
-                        if enc_match:
-                            charset = enc_match.group(1)
 
         if not charset:
             if "Content-Type" in self.headers:
@@ -876,6 +884,50 @@ class Document:
     # * Remove set_input_by_number
     # * New method: set_input_by(id=None, number=None, xpath=None)
 
+    def process_extra_post(self, post_items, extra_post):
+        if isinstance(extra_post, dict):
+            extra_post_items = extra_post.items()
+        else:
+            extra_post_items = extra_post
+
+        # Drop existing post items with such key
+        keys_to_drop = {x for x, y in extra_post_items}
+        for key in keys_to_drop:
+            post_items = [(x, y) for x, y in post_items if x != key]
+
+        for key, value in extra_post_items:
+            post_items.append((key, value))
+        return post_items
+
+    def clean_submit_controls(self, post, submit_name):
+        # All this code need only for one reason:
+        # to not send multiple submit keys in form data
+        # in real life only this key is submitted whose button
+        # was pressed
+
+        # Build list of submit buttons which have a name
+        submit_controls = {}
+        for elem in self.form.inputs:
+            if (
+                elem.tag == "input"
+                and elem.type == "submit"
+                and elem.get("name") is not None
+            ):
+                submit_controls[elem.name] = elem
+
+        if submit_controls:
+            # If name of submit control is not given then
+            # use the name of first submit control
+            if submit_name is None or submit_name not in submit_controls:
+                controls = sorted(submit_controls.values(), key=lambda x: x.name)
+                submit_name = controls[0].name
+
+            # Form data should contain only one submit control
+            for name in submit_controls:
+                if name != submit_name:
+                    if name in post:
+                        del post[name]
+
     def get_form_request(
         self, submit_name=None, url=None, extra_post=None, remove_from_post=None
     ):
@@ -900,36 +952,8 @@ class Document:
         """
 
         # pylint: disable=no-member
-
         post = self.form_fields()
-
-        # Build list of submit buttons which have a name
-        submit_controls = {}
-        for elem in self.form.inputs:
-            if (
-                elem.tag == "input"
-                and elem.type == "submit"
-                and elem.get("name") is not None
-            ):
-                submit_controls[elem.name] = elem
-
-        # All this code need only for one reason:
-        # to not send multiple submit keys in form data
-        # in real life only this key is submitted whose button
-        # was pressed
-        if submit_controls:
-            # If name of submit control is not given then
-            # use the name of first submit control
-            if submit_name is None or submit_name not in submit_controls:
-                controls = sorted(submit_controls.values(), key=lambda x: x.name)
-                submit_name = controls[0].name
-
-            # Form data should contain only one submit control
-            for name in submit_controls:
-                if name != submit_name:
-                    if name in post:
-                        del post[name]
-
+        self.clean_submit_controls(post, submit_name)
         if url:
             action_url = urljoin(self.url, url)
         else:
@@ -948,18 +972,7 @@ class Document:
         del post
 
         if extra_post:
-            if isinstance(extra_post, dict):
-                extra_post_items = extra_post.items()
-            else:
-                extra_post_items = extra_post
-
-            # Drop existing post items with such key
-            keys_to_drop = {x for x, y in extra_post_items}
-            for key in keys_to_drop:
-                post_items = [(x, y) for x, y in post_items if x != key]
-
-            for key, value in extra_post_items:
-                post_items.append((key, value))
+            post_items = self.process_extra_post(post_items, extra_post)
 
         if remove_from_post:
             post_items = [(x, y) for x, y in post_items if x not in remove_from_post]
@@ -1000,17 +1013,29 @@ class Document:
         )
         self.grab.submit(*args, **kwargs)
 
-    def form_fields(self):
-        """
-        Return fields of default form.
-
-        Fill some fields with reasonable values.
-        """
-
-        fields = dict(self.form.fields)  # pylint: disable=no-member
-
+    def build_fields_to_remove(self, fields, form_inputs):
         fields_to_remove = set()
+        for elem in form_inputs:  # pylint: disable=no-member
+            # Ignore elements without name
+            if not elem.get("name"):
+                continue
+            # Do not submit disabled fields
+            # http://www.w3.org/TR/html4/interact/forms.html#h-17.12
+            if elem.get("disabled"):
+                if elem.name in fields:
+                    fields_to_remove.add(elem.name)
+            elif getattr(elem, "type", None) == "checkbox":
+                if not elem.checked:
+                    if elem.name is not None:
+                        if elem.name in fields and fields[elem.name] is None:
+                            fields_to_remove.add(elem.name)
+            else:
+                # WHAT THE FUCK DOES THAT MEAN?
+                if elem.name in fields_to_remove:
+                    fields_to_remove.remove(elem.name)
+        return fields_to_remove
 
+    def process_form_fields(self, fields):
         for key, val in list(fields.items()):
             if isinstance(val, CheckboxValues):
                 if not len(val):  # pylint: disable=len-as-condition
@@ -1027,34 +1052,25 @@ class Document:
                 else:
                     fields[key] = list(val)
 
-        for elem in self.form.inputs:  # pylint: disable=no-member
-            # Ignore elements without name
-            if not elem.get("name"):
-                continue
+    def form_fields(self):
+        """
+        Return fields of default form.
 
-            # Do not submit disabled fields
-            # http://www.w3.org/TR/html4/interact/forms.html#h-17.12
-            if elem.get("disabled"):
-                if elem.name in fields:
-                    fields_to_remove.add(elem.name)
-            elif getattr(elem, "type", None) == "checkbox":
-                if not elem.checked:
-                    if elem.name is not None:
-                        if elem.name in fields and fields[elem.name] is None:
-                            fields_to_remove.add(elem.name)
-            else:
-                if elem.name in fields_to_remove:
-                    fields_to_remove.remove(elem.name)
-                if elem.tag == "select":
-                    if elem.name in fields and fields[elem.name] is None:
-                        if elem.value_options:
-                            fields[elem.name] = elem.value_options[0]
+        Fill some fields with reasonable values.
+        """
 
-                elif getattr(elem, "type", None) == "radio":
-                    if fields[elem.name] is None:
-                        fields[elem.name] = elem.get("value")
-        for fname in fields_to_remove:
-            del fields[fname]
+        fields = dict(self.form.fields)  # pylint: disable=no-member
+        self.process_form_fields(fields)
+        for elem in self.form.inputs:
+            if elem.tag == "select":
+                if elem.name in fields and fields[elem.name] is None:
+                    if elem.value_options:
+                        fields[elem.name] = elem.value_options[0]
+            elif getattr(elem, "type", None) == "radio":
+                if fields[elem.name] is None:
+                    fields[elem.name] = elem.get("value")
+        for name in self.build_fields_to_remove(fields, self.form.inputs):
+            del fields[name]
         return fields
 
     def choose_form_by_element(self, xpath):
