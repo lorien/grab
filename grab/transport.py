@@ -37,26 +37,28 @@ from grab.util.http import normalize_http_values, normalize_post_data, normalize
 
 class BaseTransport:
     def __init__(self):
+        pass
         # these assignments makes pylint happy
-        self.body_file = None
-        self.body_path = None
+        # self.body_file = None
+        # self.body_path = None
 
     def reset(self):
-        self.body_file = None
-        self.body_path = None
+        # self.body_file = None
+        # self.body_path = None
+        pass
 
     def setup_body_file(self, storage_dir, storage_filename, create_dir=False):
         if create_dir:
             if not os.path.exists(storage_dir):
                 os.makedirs(storage_dir)
         if storage_filename is None:
-            handle, path = tempfile.mkstemp(dir=storage_dir)
-            self.body_file = os.fdopen(handle, "wb")
+            file, file_path = tempfile.mkstemp(dir=storage_dir)
+            os.close(file)
+            # body_file = os.fdopen(handle, "wb")
         else:
-            path = os.path.join(storage_dir, storage_filename)
-            self.body_file = open(path, "wb")
-        self.body_path = path
-        return self.body_file, self.body_path
+            file_path = os.path.join(storage_dir, storage_filename)
+            # body_file = open(path, "wb")
+        return file_path
 
 
 def process_upload_items(items):
@@ -70,7 +72,8 @@ def process_upload_items(items):
             field.make_multipart(content_type=val.content_type)
             result.append(field)
         elif isinstance(val, UploadFile):
-            data = open(val.path, "rb").read()
+            with open(val.path, "rb") as inp:
+                data = inp.read()
             headers = {"Content-Type": val.content_type}
             field = RequestField(
                 name=key, data=data, filename=val.filename, headers=headers
@@ -108,7 +111,6 @@ class Request:
         self.config_nobody = None
         self.config_body_maxsize = None
 
-        self.response_file = None
         self.response_path = None
 
     def get_full_url(self):
@@ -176,13 +178,11 @@ class Urllib3Transport(BaseTransport):
         else:
             if not grab.config["body_storage_dir"]:
                 raise GrabMisuseError("Option body_storage_dir is not defined")
-            file_, path_ = self.setup_body_file(
+            req.response_path = self.setup_body_file(
                 grab.config["body_storage_dir"],
                 grab.config["body_storage_filename"],
                 create_dir=grab.config["body_storage_create_dir"],
             )
-            req.response_file = file_
-            req.response_path = path_
 
         if grab.config["multipart_post"] is not None:
             post_data = grab.config["multipart_post"]
@@ -415,12 +415,13 @@ class Urllib3Transport(BaseTransport):
                 return data
 
             if self._request.response_path:
+                # FIXME: Read/write by chunks.
+                # Now the whole content is read at once.
                 response.body_path = self._request.response_path
-                # FIXME: Quick dirty hack, actually, response is fully
-                # read into memory
-                self._request.response_file.write(read_with_timeout())
-                self._request.response_file.close()
+                with open(response.body_path, "wb") as out:
+                    out.write(read_with_timeout())
             else:
+                response.body_path = None
                 response.body = read_with_timeout()
 
             # Clear memory
