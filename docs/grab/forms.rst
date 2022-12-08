@@ -20,11 +20,11 @@ the `choose_form` method.
 Let's look at a simple example of how to use these form features::
 
     >>> g = Grab()
-    >>> g.go('http://ya.ru/')
-    >>> g.set_input('text', 'grab lib')
-    >>> g.submit()
+    >>> g.go("http://ya.ru/")
+    >>> g.doc.set_input("text", "grab documenation")
+    >>> g.doc.submit()
     >>> g.doc.select('//a[@class="b-serp-item__title-link"]/@href').text()
-    'http://grablib.org/'
+    'https://grab.readthedocs.io/'
 
 The form that has been chosen automatically is available in the `grab.form` attribute.
 

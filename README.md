@@ -29,12 +29,12 @@ Things that are going to happen (no estimation time):
 $ pip install -U grab
 ```
 
-See details about installing Grab on different platforms here http://docs.grablib.org/en/latest/usage/installation.html
+See details about installing Grab on different platforms here https://grab.readthedocs.io/en/latest/usage/installation.html
 
 
 ## Documentation
 
-Get it here [grab.readthedocs.io](https://grab.readthedocs.io/en/latest/)
+Documenations is here https://grab.readthedocs.io/en/latest/
 
 ## About Grab (very old description)
 
