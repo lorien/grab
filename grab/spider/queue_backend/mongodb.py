@@ -1,10 +1,10 @@
-import queue
-import pickle
 import logging
+import pickle
+import queue
 from datetime import datetime
 
-from bson import Binary
 import pymongo
+from bson import Binary
 
 from grab.spider.queue_backend.base import QueueInterface
 
@@ -29,7 +29,7 @@ class QueueBackend(QueueInterface):
 
         self.collection.create_index([("priority", 1)])
 
-        super(QueueBackend, self).__init__(spider_name, **kwargs)
+        super().__init__(spider_name, **kwargs)
 
     def size(self):
         return self.collection.count_documents({})
@@ -52,8 +52,7 @@ class QueueBackend(QueueInterface):
         )
         if item is None:
             raise queue.Empty()
-        else:
-            return pickle.loads(item["task"])
+        return pickle.loads(item["task"])
 
     def clear(self):
         self.collection.delete_many({})

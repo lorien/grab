@@ -35,7 +35,7 @@ see examples of different task creation. All three examples do the same:
     # Using `url` argument
     t = Task('wikipedia', url 'http://wikipedia.org/')
 
-    # Using Grab intance
+    # Using Grab instance
     g = Grab()
     g.setup(url='http://wikipedia.org/')
     t = Task('wikipedia', grab=g)
@@ -53,7 +53,7 @@ Also you can specify these arguments:
 :disable_cache: don't use spider's cache for this request, network response will not stored into cache as well.
 :refresh_cache: do not use spider's cache, in case of success response it will refresh cache.
 :valid_status: procces the following response codes in task handler. By default only 2xx and 404 statuses will be processed in task handlers.
-:use_proxylist: use spider's global proxy list, by default this oprion is True
+:use_proxylist: use spider's global proxy list, by default this option is True
 
 
 Task Object as Data Storage

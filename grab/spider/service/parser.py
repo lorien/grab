@@ -1,10 +1,9 @@
-import time
 import sys
-
-from six.moves.queue import Queue
-from six.moves import queue
+import time
+from queue import Empty, Queue
 
 from grab.spider.error import NoTaskHandler
+
 from .base import BaseService
 
 
@@ -43,7 +42,7 @@ class ParserService(BaseService):
             worker.process_pause_signal()
             try:
                 result, task = self.input_queue.get(True, 0.1)
-            except queue.Empty:
+            except Empty:
                 pass
             else:
                 worker.is_busy_event.set()

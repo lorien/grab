@@ -15,7 +15,7 @@ spread by these threads. You can use urllib3 Grab transport with
 threaded transport.
 
 At the moment Grab supports only one network library to send network requests: urllib3.
-You may acess transport object with `Grab.transport` attribute. In most cases you do not need direct
+You may access transport object with `Grab.transport` attribute. In most cases you do not need direct
 access to transport object.
 
 .. code:: python

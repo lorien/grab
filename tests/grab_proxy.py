@@ -1,11 +1,8 @@
 from typing import Dict
 
-import six
-from test_server import TestServer, Response
-
 from grab.proxylist import BaseProxySource
-from tests.util import build_grab, temp_file
-from tests.util import BaseGrabTestCase
+from test_server import Response, TestServer
+from tests.util import BaseGrabTestCase, build_grab, temp_file
 
 ADDRESS = "127.0.0.1"
 
@@ -32,7 +29,7 @@ class TestProxy(BaseGrabTestCase):
             item["server"].stop()
 
     def setUp(self):
-        super(TestProxy, self).setUp()
+        super().setUp()
         for item in self.extra_servers.values():
             item["server"].reset()
 
@@ -71,7 +68,7 @@ class TestProxy(BaseGrabTestCase):
             grab.proxylist.load_file(tmp_file)
             self.assertEqual(grab.config["proxy_auto_change"], True)
             servers = set()
-            for _ in six.moves.range(10):
+            for _ in range(10):
                 grab.go("http://yandex.ru")
                 servers.add(grab.config["proxy"])
 
@@ -86,7 +83,7 @@ class TestProxy(BaseGrabTestCase):
             self.assertEqual(grab.config["proxy_auto_change"], False)
             # TODO: probably call proxy change manually
             servers = set()
-            for _ in six.moves.range(10):
+            for _ in range(10):
                 grab.go("http://yandex.ru")
                 servers.add(grab.config["proxy"])
             self.assertEqual(len(servers), 1)
@@ -109,7 +106,7 @@ class TestProxy(BaseGrabTestCase):
 
             grab = build_grab()
             with open(tmp_file, "w", encoding="utf-8") as out:
-                for num in six.moves.range(10):
+                for num in range(10):
                     out.write("server-%d:777\n" % num)
             grab.proxylist.load_file(tmp_file)
             grab.setup(proxy_auto_change=False)

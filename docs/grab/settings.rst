@@ -218,7 +218,7 @@ cookiefile
 ^^^^^^^^^^
 
 :Type: string
-:Defaul: None
+:Default: None
 
 Before each request, Grab will read cookies from this file and join them with stored cookies. After each response, Grab will save all cookies to that file.
 The data stored in the file is a dict serialized as JSON.

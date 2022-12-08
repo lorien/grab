@@ -1,16 +1,16 @@
 """
 Spider task queue backend powered by redis
 """
-import queue
-import random
 import logging
 import pickle
+import queue
+import random
 
-from redis import StrictRedis
 from fastrq.priorityqueue import PriorityQueue  # pytype: disable=import-error
+from redis import StrictRedis
 
-from grab.spider.queue_backend.base import QueueInterface
 from grab.spider.error import SpiderMisuseError
+from grab.spider.queue_backend.base import QueueInterface
 
 
 class CustomPriorityQueue(PriorityQueue):
@@ -32,7 +32,7 @@ class CustomPriorityQueue(PriorityQueue):
 
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, queue_name=None, **kwargs):
-        super(QueueBackend, self).__init__(spider_name, **kwargs)
+        super().__init__(spider_name, **kwargs)
         self.spider_name = spider_name
         if queue_name is None:
             queue_name = "task_queue_%s" % spider_name
@@ -42,7 +42,7 @@ class QueueBackend(QueueInterface):
 
     def put(self, task, priority, schedule_time=None):
         if schedule_time is not None:
-            raise SpiderMisuseError("Redis task queue does not support " "delayed task")
+            raise SpiderMisuseError("Redis task queue does not support delayed task")
         # Add attribute with random value
         # This is required because qr library
         # does not allow to store multiple values with same hash
@@ -55,8 +55,7 @@ class QueueBackend(QueueInterface):
         task = self.queue_object.pop()
         if task is None:
             raise queue.Empty()
-        else:
-            return pickle.loads(task[0])  # pylint: disable=unsubscriptable-object
+        return pickle.loads(task[0])  # pylint: disable=unsubscriptable-object
 
     def size(self):
         return len(self.queue_object)
@@ -65,5 +64,5 @@ class QueueBackend(QueueInterface):
         self.queue_object.clear()
 
     def close(self):
-        # get conneciton opened by qr and close it
+        # get connection opened by qr and close it
         pass

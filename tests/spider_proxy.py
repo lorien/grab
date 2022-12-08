@@ -1,17 +1,10 @@
 from typing import Dict
 
-import six
-from test_server import TestServer, Response
-
-from tests.util import (
-    BaseGrabTestCase,
-    build_spider,
-    ADDRESS,
-    temp_file,
-)
 from grab import Grab
-from grab.spider import Spider, Task
 from grab.proxylist import BaseProxySource, Proxy
+from grab.spider import Spider, Task
+from test_server import Response, TestServer
+from tests.util import ADDRESS, BaseGrabTestCase, build_spider, temp_file
 
 
 class SimpleSpider(Spider):
@@ -41,7 +34,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             item["server"].stop()
 
     def setUp(self):
-        super(TestSpiderProxyCase, self).setUp()
+        super().setUp()
         for item in self.extra_servers.values():
             item["server"].reset()
 
@@ -78,7 +71,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             bot = build_spider(SimpleSpider, thread_number=1)
             bot.load_proxylist(proxy_file, "text_file")
             bot.setup_queue()
-            for _ in six.moves.range(10):
+            for _ in range(10):
                 bot.add_task(Task("baz", "http://yandex.ru"))
             bot.run()
 
@@ -104,7 +97,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             bot = build_spider(SimpleSpider, thread_number=1)
             bot.load_proxylist(proxy_file, "text_file", auto_change=False)
             bot.setup_queue()
-            for _ in six.moves.range(1):
+            for _ in range(1):
                 bot.add_task(Task("baz", "http://yandex.ru"))
             bot.run()
 
@@ -134,7 +127,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
                 proxy_file, "text_file", auto_change=False, auto_init=False
             )
             bot.setup_queue()
-            for _ in six.moves.range(10):
+            for _ in range(10):
                 bot.add_task(Task("baz", self.server.get_url()))
             bot.run()
 

@@ -2,40 +2,40 @@
 # Author: Grigoriy Petukhov (http://getdata.pro)
 # License: MIT
 from __future__ import absolute_import
-import logging
-import random
-import time
-from contextlib import contextmanager
-import ssl
-from typing import cast
-import urllib.request
-from http.client import HTTPResponse
-import tempfile
-import os
 
-from six.moves.urllib.parse import urlsplit
-from six.moves.http_cookiejar import CookieJar
-import six
-from weblib.http import normalize_url, normalize_post_data, normalize_http_values
-from weblib.encoding import make_str, make_unicode, decode_pairs
-from urllib3.exceptions import LocationParseError
+import logging
+import os
+import random
+import ssl
+import tempfile
+import time
+import urllib.request
+from contextlib import contextmanager
+from http.client import HTTPResponse
+from http.cookiejar import CookieJar
+from typing import cast
+from urllib.parse import urlsplit
+
+import certifi
 from urllib3 import PoolManager, ProxyManager, exceptions, make_headers
-from urllib3.filepost import encode_multipart_formdata
+from urllib3.contrib.socks import SOCKSProxyManager
+from urllib3.exceptions import LocationParseError
 from urllib3.fields import RequestField
+from urllib3.filepost import encode_multipart_formdata
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
-from urllib3.contrib.socks import SOCKSProxyManager
 from user_agent import generate_user_agent
-import certifi
 
 from grab import error
-from grab.error import GrabMisuseError, GrabTimeoutError
 from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.document import Document
-from grab.upload import UploadFile, UploadContent
+from grab.error import GrabMisuseError, GrabTimeoutError
+from grab.upload import UploadContent, UploadFile
+from grab.util.encoding import decode_pairs, make_bytes, make_str
+from grab.util.http import normalize_http_values, normalize_post_data, normalize_url
 
 
-class BaseTransport(object):
+class BaseTransport:
     def __init__(self):
         # these assignments makes pylint happy
         self.body_file = None
@@ -82,7 +82,7 @@ def process_upload_items(items):
     return result
 
 
-class Request(object):
+class Request:
     def __init__(
         self,
         method=None,
@@ -121,7 +121,7 @@ class Urllib3Transport(BaseTransport):
     """
 
     def __init__(self):
-        super(Urllib3Transport, self).__init__()
+        super().__init__()
         # http://urllib3.readthedocs.io/en/latest/user-guide.html#certificate-verification
         self.pool = PoolManager(10, cert_reqs="CERT_REQUIRED", ca_certs=certifi.where())
 
@@ -155,13 +155,12 @@ class Urllib3Transport(BaseTransport):
             request_url = normalize_url(grab.config["url"])
         except Exception as ex:
             raise error.GrabInvalidUrl(
-                u"%s: %s"
-                % (six.text_type(ex), make_unicode(grab.config["url"], errors="ignore"))
+                "%s: %s" % (str(ex), make_str(grab.config["url"], errors="ignore"))
             )
         req.url = request_url
 
         method = grab.detect_request_method()
-        req.method = make_str(method)
+        req.method = make_bytes(method)
 
         req.config_body_maxsize = grab.config["body_maxsize"]
         req.config_nobody = grab.config["nobody"]
@@ -187,11 +186,11 @@ class Urllib3Transport(BaseTransport):
 
         if grab.config["multipart_post"] is not None:
             post_data = grab.config["multipart_post"]
-            if isinstance(post_data, six.binary_type):
+            if isinstance(post_data, bytes):
                 pass
-            elif isinstance(post_data, six.text_type):
+            elif isinstance(post_data, str):
                 raise GrabMisuseError(
-                    "Option multipart_post data" " does not accept unicode."
+                    "Option multipart_post data does not accept unicode."
                 )
             else:
                 post_items = normalize_http_values(
@@ -207,10 +206,6 @@ class Urllib3Transport(BaseTransport):
             req.data = post_data
         elif grab.config["post"] is not None:
             post_data = normalize_post_data(grab.config["post"], grab.config["charset"])
-            # py3 hack
-            # if six.PY3:
-            #    post_data = smart_unicode(post_data,
-            #                              grab.config['charset'])
             extra_headers["Content-Length"] = len(post_data)
             req.data = post_data
 
@@ -316,14 +311,10 @@ class Urllib3Transport(BaseTransport):
             # It is the timeout on read of next data chunk from the server
             # Total response timeout is handled by Grab
             timeout = Timeout(connect=req.connect_timeout, read=req.timeout)
-            # req_headers = dict((make_unicode(x), make_unicode(y))
+            # req_headers = dict((make_str(x), make_str(y))
             #                   for (x, y) in req.headers.items())
-            if six.PY3:
-                req_url = make_unicode(req.url)
-                req_method = make_unicode(req.method)
-            else:
-                req_url = make_str(req.url)
-                req_method = req.method
+            req_url = make_str(req.url)
+            req_method = make_str(req.method)
             req.op_started = time.time()
             try:
                 res = pool.urlopen(
@@ -366,8 +357,6 @@ class Urllib3Transport(BaseTransport):
         # raise error.GrabCouldNotResolveHostError(ex.args[0],
         #                                         ex.args[1])
         # raise error.GrabNetworkError(ex.args[0], ex.args[1])
-        # six.reraise(error.GrabInternalError, error.GrabInternalError(ex),
-        #            sys.exc_info()[2])
 
     def prepare_response(self, grab):
         # Information about urllib3
@@ -383,15 +372,11 @@ class Urllib3Transport(BaseTransport):
 
             head = ""
             for key, val in self._response.getheaders().items():
-                if six.PY2:
-                    key = key.decode("utf-8", errors="ignore")
-                    val = val.decode("utf-8", errors="ignore")
-                if six.PY3:
-                    key = key.encode("latin").decode("utf-8", errors="ignore")
-                    val = val.encode("latin").decode("utf-8", errors="ignore")
+                key = key.encode("latin").decode("utf-8", errors="ignore")
+                val = val.encode("latin").decode("utf-8", errors="ignore")
                 head += "%s: %s\r\n" % (key, val)
             head += "\r\n"
-            response.head = make_str(head, encoding="utf-8")
+            response.head = make_bytes(head, encoding="utf-8")
 
             # if self.body_path:
             #    response.body_path = self.body_path
@@ -431,7 +416,7 @@ class Urllib3Transport(BaseTransport):
 
             if self._request.response_path:
                 response.body_path = self._request.response_path
-                # FIXME: Quick dirty hack, actullay, response is fully
+                # FIXME: Quick dirty hack, actually, response is fully
                 # read into memory
                 self._request.response_file.write(read_with_timeout())
                 self._request.response_file.close()
@@ -457,12 +442,8 @@ class Urllib3Transport(BaseTransport):
 
             hdr = email.message.Message()
             for key, val in self._response.getheaders().items():
-                if six.PY2:
-                    key = key.decode("utf-8", errors="ignore")
-                    val = val.decode("utf-8", errors="ignore")
-                if six.PY3:
-                    key = key.encode("latin").decode("utf-8", errors="ignore")
-                    val = val.encode("latin").decode("utf-8", errors="ignore")
+                key = key.encode("latin").decode("utf-8", errors="ignore")
+                val = val.encode("latin").decode("utf-8", errors="ignore")
                 # if key == 'Location':
                 #    import pdb; pdb.set_trace()
                 hdr[key] = val
@@ -478,7 +459,7 @@ class Urllib3Transport(BaseTransport):
     def extract_cookiejar(self):
         jar = CookieJar()
         # self._respose could be None
-        # if this method is called from custom preapre response
+        # if this method is called from custom prepare response
         if self._response and self._request:
             jar.extract_cookies(
                 # pylint: disable=protected-access
@@ -513,7 +494,7 @@ class Urllib3Transport(BaseTransport):
             # Trying to guess better domain name by removing leading "www."
             if grab.config["cookies"]:
                 if not isinstance(grab.config["cookies"], dict):
-                    raise error.GrabMisuseError("cookies option should" " be a dict")
+                    raise error.GrabMisuseError("cookies option should be a dict")
                 for name, value in grab.config["cookies"].items():
                     grab.cookies.set(name=name, value=value, domain=request_host_no_www)
 

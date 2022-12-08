@@ -1,10 +1,9 @@
 from __future__ import absolute_import
+
 import os.path
 
 from test_server import Response
-
-from tests.util import TEST_DIR, build_grab, temp_dir
-from tests.util import BaseGrabTestCase
+from tests.util import TEST_DIR, BaseGrabTestCase, build_grab, temp_dir
 
 HTML = """
 Hello world
@@ -59,7 +58,7 @@ class TestResponse(BaseGrabTestCase):
         grab = build_grab()
         grab.setup(document_charset="utf-8")
         grab.go(self.server.get_url())
-        self.assertTrue(u"крокодил" in grab.doc.unicode_body())
+        self.assertTrue("крокодил" in grab.doc.unicode_body())
 
     def test_xml_declaration(self):
         """
@@ -77,5 +76,5 @@ class TestResponse(BaseGrabTestCase):
         grab = build_grab()
         grab.go(self.server.get_url())
         ubody = grab.doc.unicode_body()
-        self.assertTrue(u"тест" in ubody)
+        self.assertTrue("тест" in ubody)
         self.assertTrue("<?xml" in ubody)

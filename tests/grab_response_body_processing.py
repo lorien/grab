@@ -1,11 +1,8 @@
 import os
 
-from test_server import Response
-
-from tests.util import temp_dir, build_grab, TEST_DIR
-from tests.util import BaseGrabTestCase
-
 from grab import GrabMisuseError
+from test_server import Response
+from tests.util import TEST_DIR, BaseGrabTestCase, build_grab, temp_dir
 
 
 class GrabSimpleTestCase(BaseGrabTestCase):
@@ -67,7 +64,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         grab.doc.body = b"def"
 
         with self.assertRaises(GrabMisuseError):
-            grab.doc.body = u"Спутник"
+            grab.doc.body = "Спутник"
 
     def test_empty_response(self):
         self.server.add_response(Response(data=b""))

@@ -15,14 +15,11 @@ Exception
     |-> GrabInvalidUrl
     |-> GrabInternalError
     |-> GrabFeatureIsDeprecated
-
-Exception
-| -> weblib.error.WeblibError
-     |-> DataNotFound <- IndexError
+    |-> ResponseNotValid
+|-> DataNotFound == IndexError
 """
 
 from __future__ import absolute_import
-from weblib.error import DataNotFound  # noqa pylint: disable=unused-import
 
 
 class GrabError(Exception):
@@ -31,7 +28,7 @@ class GrabError(Exception):
     """
 
 
-class OriginalExceptionError(object):
+class OriginalExceptionError:
     """
     Exception sub-class which constructor accepts original exception
     as second argument
@@ -42,7 +39,7 @@ class OriginalExceptionError(object):
             self.original_exc = args[1]
         else:
             self.original_exc = None
-        super(OriginalExceptionError, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class GrabNetworkError(OriginalExceptionError, GrabError):
@@ -84,7 +81,7 @@ class GrabMisuseError(GrabError):
 
 class GrabTooManyRedirectsError(GrabError):
     """
-    Raised when Grab reached max. allowd number of redirects for
+    Raised when Grab reached max. allowed number of redirects for
     one request.
     """
 
@@ -109,7 +106,7 @@ class GrabInternalError(OriginalExceptionError, GrabError):
 class GrabFeatureIsDeprecated(GrabError):
     """
     Raised when user tries to use feature that is deprecated
-    and has been droppped
+    and has been dropped
     """
 
 
@@ -118,3 +115,16 @@ def raise_feature_is_deprecated(feature_name):
         "%s is not supported anymore. Update your spiders"
         " or use old Grab version" % feature_name
     )
+
+
+# @date: Dec 08, 2022
+# @comment:
+# Previously DataNotFound (sublass of IndexError) exception were in weblib package.
+# I am moving away from using weblib package.
+# To minimize failures in external code which uses DataNotFound class I make
+# it alias of IndexError
+DataNotFound = IndexError
+
+
+class ResponseNotValid(GrabError):
+    pass

@@ -1,19 +1,16 @@
-from unittest import TestCase
 import time
 from typing import Any
+from unittest import TestCase
 
-import six
-from test_server import Response
-
-from grab.spider.queue_backend.base import QueueInterface
 from grab.spider import Spider, Task
 from grab.spider.error import SpiderMisuseError
-
-from tests.util import BaseGrabTestCase, build_spider
+from grab.spider.queue_backend.base import QueueInterface
+from test_server import Response
 from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
+from tests.util import BaseGrabTestCase, build_spider
 
 
-class SpiderQueueMixin(object):
+class SpiderQueueMixin:
     server: Any
     setup_queue: Any
     stat: Any
@@ -51,7 +48,7 @@ class SpiderQueueMixin(object):
         bot = build_spider(CustomSpider)
         self.setup_queue(bot)
         bot.task_queue.clear()
-        for _ in six.moves.range(5):
+        for _ in range(5):
             bot.add_task(Task("page", url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
         bot.run()
@@ -66,7 +63,7 @@ class SpiderQueueMixin(object):
         self.setup_queue(bot)
         bot.task_queue.clear()
 
-        for _ in six.moves.range(5):
+        for _ in range(5):
             bot.add_task(Task("page", url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
         bot.task_queue.clear()
@@ -105,7 +102,7 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
         self.setup_queue(bot)
         bot.task_queue.clear()
 
-        for delay in six.moves.range(5):
+        for delay in range(5):
             bot.add_task(Task("page", url=self.server.get_url(), delay=delay + 1))
 
         self.assertEqual(5, len(bot.task_queue.schedule_list))

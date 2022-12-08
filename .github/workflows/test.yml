@@ -20,15 +20,17 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install -U -r requirements_dev.txt
-        pip install -U -e .
+        pip install -U -r requirements.txt
+        pip install -U -e .[cssselect,pyquery]
 
     - name: Run tests
       run: |
         coverage run runtest.py --test-all
 
-    - name: Upload coverage results
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        coveralls --service=github
+    # @data: dec08, 2022
+    # @comment: fails with error Could not submit coverage: 503 Server Error: Service Unavailable for url: https://coveralls.io/api/v1/jobs
+    #- name: Upload coverage results
+    #  env:
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #  run: |
+    #    coveralls --service=github

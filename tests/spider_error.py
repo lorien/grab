@@ -51,7 +51,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.run()
 
-    # TODO: fix this test, it failes now because
+    # TODO: fix this test, it fails now because
     # spider do some logging which counts as output
     # def test_no_warning(self):
     #    """Simple spider should not generate

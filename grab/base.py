@@ -1,32 +1,30 @@
-# -*- coding: utf-8 -*-
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
 """
 The core of grab package: the Grab class.
 """
-import logging
-import os
-from random import randint
-from copy import copy, deepcopy
-import threading
-import itertools
 import collections.abc
 import email
-from datetime import datetime
+import itertools
+import logging
+import os
+import threading
 import weakref
-from typing import Dict, Any, Optional, cast
+from copy import copy, deepcopy
+from datetime import datetime
 from email.message import EmailMessage
+from random import randint
+from typing import Any, Dict, Optional, cast
+from urllib.parse import urljoin
 
-from six.moves.urllib.parse import urljoin
-import six
-from weblib.html import find_base_url
-from weblib.http import normalize_http_values, make_str
-
-from grab.document import Document
 from grab import error
 from grab.cookie import CookieManager
+from grab.document import Document
 from grab.proxylist import ProxyList, parse_proxy_line
+from grab.util.encoding import make_bytes
+from grab.util.html import find_base_url
+from grab.util.http import normalize_http_values
 
 __all__ = ("Grab",)
 # This counter will used in enumerating network queries.
@@ -67,7 +65,7 @@ def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
 
 
 def default_config() -> Dict[str, Any]:
-    # TODO: Maybe config should be splitted into two entities:
+    # TODO: Maybe config should be split into two entities:
     # 1) config which is not changed during request
     # 2) changeable settings
     return dict(
@@ -121,7 +119,7 @@ def default_config() -> Dict[str, Any]:
         encoding="gzip",
         # Network interface
         interface=None,
-        # DNS resulution
+        # DNS resolution
         resolve=None,
         # Redirects
         follow_refresh=False,
@@ -159,7 +157,7 @@ def default_config() -> Dict[str, Any]:
     )
 
 
-class Grab(object):
+class Grab:
     __slots__ = (
         "request_head",
         "request_body",
@@ -241,21 +239,20 @@ class Grab(object):
             )
         if transport_param is None:
             transport_param = DEFAULT_TRANSPORT
-        if isinstance(transport_param, six.string_types):
-            if transport_param in TRANSPORT_ALIAS:
+        if isinstance(transport_param, str):
+            if transport_param in TRANSPORT_ALIAS:  # pylint: disable=consider-using-get
                 transport_param = TRANSPORT_ALIAS[transport_param]
             if "." not in transport_param:
                 raise error.GrabMisuseError("Unknown transport: %s" % transport_param)
-            else:
-                mod_path, cls_name = transport_param.rsplit(".", 1)
-                try:
-                    cls = TRANSPORT_CACHE[(mod_path, cls_name)]
-                except KeyError:
-                    mod = __import__(mod_path, globals(), locals(), ["foo"])
-                    cls = getattr(mod, cls_name)
-                    TRANSPORT_CACHE[(mod_path, cls_name)] = cls
-                self.transport_param = transport_param
-                self.transport = cls()
+            mod_path, cls_name = transport_param.rsplit(".", 1)
+            try:
+                cls = TRANSPORT_CACHE[(mod_path, cls_name)]
+            except KeyError:
+                mod = __import__(mod_path, globals(), locals(), ["foo"])
+                cls = getattr(mod, cls_name)
+                TRANSPORT_CACHE[(mod_path, cls_name)] = cls
+            self.transport_param = transport_param
+            self.transport = cls()
         elif isinstance(transport_param, collections.abc.Callable):
             self.transport_param = transport_param
             self.transport = transport_param()
@@ -404,7 +401,7 @@ class Grab(object):
         """
 
         # pylint: disable=no-member
-        thread_name = threading.currentThread().getName().lower()
+        thread_name = threading.current_thread().name.lower()
         # pylint: enable=no-member
         if thread_name == "mainthread":
             thread_name = ""
@@ -473,12 +470,11 @@ class Grab(object):
                             refresh_count += 1
                             if refresh_count > self.config["redirect_limit"]:
                                 raise error.GrabTooManyRedirectsError()
-                            else:
-                                url = doc.headers.get("Location")
-                                self.prepare_request(
-                                    url=self.make_url_absolute(url), referer=None
-                                )
-                                continue
+                            url = doc.headers.get("Location")
+                            self.prepare_request(
+                                url=self.make_url_absolute(url), referer=None
+                            )
+                            continue
 
                 if self.config["follow_refresh"]:
                     refresh_url = self.doc.get_meta_refresh_url()
@@ -486,11 +482,10 @@ class Grab(object):
                         refresh_count += 1
                         if refresh_count > self.config["redirect_limit"]:
                             raise error.GrabTooManyRedirectsError()
-                        else:
-                            self.prepare_request(
-                                url=self.make_url_absolute(refresh_url), referer=None
-                            )
-                            continue
+                        self.prepare_request(
+                            url=self.make_url_absolute(refresh_url), referer=None
+                        )
+                        continue
                 return doc
 
     def submit(self, make_request=True, **kwargs):
@@ -533,8 +528,7 @@ class Grab(object):
             self.setup(url=result["url"])
         if make_request:
             return self.request()
-        else:
-            return None
+        return None
 
     def process_request_result(self):
         """
@@ -548,9 +542,9 @@ class Grab(object):
             if isinstance(post, dict):
                 post = list(post.items())
             if post:
-                if isinstance(post, six.string_types):
+                if isinstance(post, str):
                     post = (
-                        make_str(
+                        make_bytes(
                             post[: self.config["debug_post_limit"]], errors="ignore"
                         )
                         + b"..."
@@ -630,13 +624,13 @@ class Grab(object):
         """
         Setup `response` object without real network requests.
 
-        Useful for testing and debuging.
+        Useful for testing and debugging.
 
         All ``**kwargs`` will be passed to `Document` constructor.
         """
 
         self.reset()
-        if isinstance(content, six.text_type):
+        if isinstance(content, str):
             raise error.GrabMisuseError(
                 "Method `setup_document` accepts only "
                 "byte string in `content` argument."
@@ -697,7 +691,7 @@ class Grab(object):
 
     def save_dumps(self):
         # pylint: disable=no-member
-        thread_name = threading.currentThread().getName().lower()
+        thread_name = threading.current_thread().name.lower()
         # pylint: enable=no-member
         if thread_name == "mainthread":
             thread_name = ""
@@ -735,8 +729,7 @@ class Grab(object):
                 if base_url:
                     return urljoin(base_url, url)
             return urljoin(self.config["url"], url)
-        else:
-            return url
+        return url
 
     def detect_request_method(self):
         """
@@ -802,14 +795,13 @@ class Grab(object):
     def request_headers(self) -> Optional[EmailMessage]:
         if self.request_head is None:
             return None
-        else:
-            first_head = self.request_head.decode("utf-8").split("\r\n\r\n")[0]
-            lines = first_head.split("\r\n")
-            lines = [x for x in lines if ":" in x]
-            return cast(
-                EmailMessage,
-                email.message_from_string("\n".join(lines), _class=EmailMessage),
-            )
+        first_head = self.request_head.decode("utf-8").split("\r\n\r\n")[0]
+        lines = first_head.split("\r\n")
+        lines = [x for x in lines if ":" in x]
+        return cast(
+            EmailMessage,
+            email.message_from_string("\n".join(lines), _class=EmailMessage),
+        )
 
 
 # For backward compatibility

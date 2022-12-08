@@ -1,6 +1,6 @@
-# 🇷🇺 Grab Framework Project
+# Grab Framework Project
 
-![Grab Test Status](https://github.com/lorien/grab/workflows/test/badge.svg)
+[![Grab Test Status](https://github.com/lorien/grab/workflows/test/badge.svg)](https://github.com/lorien/grab/actions/workflows/test.yml)
 [![Grab Test Coverage Status](https://coveralls.io/repos/github/lorien/grab/badge.svg)](https://coveralls.io/github/lorien/grab)
 [![Grab Documentation](https://readthedocs.org/projects/grab/badge/?version=latest)](https://grab.readthedocs.io/en/latest/)
 
@@ -35,12 +35,6 @@ See details about installing Grab on different platforms here http://docs.grabli
 ## Documentation
 
 Get it here [grab.readthedocs.io](https://grab.readthedocs.io/en/latest/)
-
-## Telegram chat groups
-
-- Russian: [t.me/grablab\_ru](https://t.me/grablab_ru)
-- English: [t.me/grablab](https://t.me/grablab)
-
 
 ## About Grab (very old description)
 
@@ -122,3 +116,10 @@ Grab provides an interface called Spider to develop multithreaded website scrape
     bot = ExampleSpider(thread_number=2)
     bot.run()
 ```
+
+
+## Community
+
+Telegram English chat: [https://t.me/grablab](https://t.me/grablab)
+
+Telegram Russian chat: [https://t.me/grablab\_ru](https://t.me/grablab_ru)
