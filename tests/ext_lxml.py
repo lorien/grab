@@ -75,15 +75,14 @@ class LXMLExtensionTest(BaseGrabTestCase):
         )
 
     def test_lxml_xpath(self):
-        names = set(x.tag for x in self.lxml_tree.xpath('//div[@id="bee"]//*'))
-        self.assertEqual(set(["em", "div", "strong", "style", "script"]), names)
+        names = {x.tag for x in self.lxml_tree.xpath('//div[@id="bee"]//*')}
+        self.assertEqual({"em", "div", "strong", "style", "script"}, names)
         xpath_query = '//div[@id="bee"]//*[name() != "script" and name() != "style"]'
-        names = set(x.tag for x in self.lxml_tree.xpath(xpath_query))
-        self.assertEqual(set(["em", "div", "strong"]), names)
+        names = {x.tag for x in self.lxml_tree.xpath(xpath_query)}
+        self.assertEqual({"em", "div", "strong"}, names)
 
     def test_xpath(self):
         self.assertEqual("bee-em", self.grab.doc.select("//em").node().get("id"))
-        ####self.grab.xpath_one('//em')
         self.assertEqual(
             "num-2", self.grab.doc.select('//*[text() = "item #2"]').node().get("id")
         )
@@ -166,9 +165,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
         # self.assertEqual('30', grab.tree.xpath('//weight')[0].text)
 
     def test_xml_declaration(self):
-        """
-        HTML with XML declaration should be processed without errors.
-        """
+        # HTML with XML declaration should be processed without errors.
         self.server.add_response(
             Response(
                 data=(

@@ -14,7 +14,7 @@ class SpiderQueueMixin:
     server: Any
     setup_queue: Any
     stat: Any
-    assertEqual: Any
+    # assertEqual: Any
 
     class SimpleSpider(Spider):
         def task_page(self, unused_grab, task):
@@ -75,10 +75,8 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
         bot.setup_queue(backend="memory")
 
     def test_schedule(self):
-        """
-        In this test I create a number of delayed task
-        and then check the order in which they was executed
-        """
+        # In this test I create a number of delayed task
+        # and then check the order in which they was executed
         server = self.server
         server.add_response(Response(), count=4)
 
@@ -117,10 +115,8 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
         bot.setup_queue(backend="mongodb", **MONGODB_CONNECTION)
 
     def test_schedule(self):
-        """
-        In this test I create a number of delayed task
-        and then check the order in which they was executed
-        """
+        # In this test I create a number of delayed task
+        # and then check the order in which they was executed
         server = self.server
         server.add_response(Response(), count=4)
 
@@ -172,7 +168,7 @@ class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
 
 class QueueInterfaceTestCase(TestCase):
     def test_abstract_methods(self):
-        """Just to improve test coverage"""
+        """Just to improve test coverage."""
         # pylint: disable=abstract-method
         class BrokenQueue(QueueInterface):
             pass

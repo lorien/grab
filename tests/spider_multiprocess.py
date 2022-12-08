@@ -1,7 +1,5 @@
-from test_server import Response
-
 from grab.spider import Spider, Task
-
+from test_server import Response
 from tests.util import BaseGrabTestCase, build_spider
 
 
@@ -30,8 +28,8 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_spider_nonmp_changes(self):
-        """This test tests that in non-multiprocess-mode changes made
-        inside handler applied to main spider instance."""
+        # This test tests that in non-multiprocess-mode changes made
+        # inside handler applied to main spider instance.
         self.server.add_response(Response(), count=-1)
         bot = build_spider(self.SimpleSpider)
         bot.setup_queue()

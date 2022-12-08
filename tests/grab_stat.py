@@ -1,6 +1,5 @@
-from tests.util import BaseGrabTestCase
-
 from grab.stat import Stat
+from tests.util import BaseGrabTestCase
 
 
 class GrabStatTestCase(BaseGrabTestCase):

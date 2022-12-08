@@ -1,8 +1,4 @@
-"""
-This module contains Stat class. It is used inside
-Grab::Spider to collect statistics about events happening
-during the scraping session.
-"""
+"""Provides Stat class to collect statistics about events is being happening."""
 import logging
 import time
 from collections import defaultdict
@@ -121,7 +117,7 @@ class Timer:
 
     @contextmanager
     def log_time(self, key):
-        """Threadsafe"""
+        # Threadsafe
         start = time.time()
         try:
             yield

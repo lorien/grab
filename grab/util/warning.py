@@ -1,16 +1,13 @@
-import warnings
 import logging
-import traceback
 import sys
+import traceback
+import warnings
 
 DISABLE_WARNINGS = False
 
 
 class GrabDeprecationWarning(UserWarning):
-    """
-    Warning category used in Grab to generate
-    warning messages.
-    """
+    """Warning category used in Grab to generate warning messages."""
 
 
 def warn(msg, stacklevel=2):

@@ -36,7 +36,7 @@ check:
 	echo "pylint" \
 	&& pylint -j0 $(FILES_CHECK_ALL) \
 	&& echo "flake8" \
-	&& flake8 -j auto --max-cognitive-complexity=11 $(FILES_CHECK_ALL)
+	&& flake8 -j auto --max-cognitive-complexity=17 $(FILES_CHECK_ALL) \
 	#echo "mypy" \
 	#&& mypy --strict $(FILES_CHECK_MYPY) \
 	#&& echo "bandit" \

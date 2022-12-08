@@ -2,14 +2,10 @@ import os
 import threading
 
 from mock import patch
+
+from grab import Grab, base
 from test_server import Response
-
-from grab import Grab
-from grab import base
-
-from tests.util import BaseGrabTestCase
-from tests.util import build_grab, temp_dir
-from tests.util import reset_request_counter
+from tests.util import BaseGrabTestCase, build_grab, reset_request_counter, temp_dir
 
 
 class TestCookies(BaseGrabTestCase):

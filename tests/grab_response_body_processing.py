@@ -95,12 +95,11 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         self.assertEqual(grab.doc("//html").text(), "test")
 
     def test_github_html_processing(self):
-        """This test is for osx and py3.5
-        See: https://github.com/lorien/grab/issues/199
+        # This test is for osx and py3.5
+        # See: https://github.com/lorien/grab/issues/199
 
-        It should works with recent lxml builds on any platform.
-        In the past it failed on previous lxml releases on macos platform
-        """
+        # It should works with recent lxml builds on any platform.
+        # In the past it failed on previous lxml releases on macos platform
         path = os.path.join(TEST_DIR, "files/github_showcases.html")
         with open(path, "rb") as inp:
             data = inp.read()

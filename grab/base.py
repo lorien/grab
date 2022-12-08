@@ -1,9 +1,7 @@
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-"""
-The core of grab package: the Grab class.
-"""
+"""The core of grab package: the Grab class."""
 import collections.abc
 import email
 import itertools
@@ -53,10 +51,7 @@ logger_network = logging.getLogger("grab.network")
 
 
 def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
-    """
-    Copy grab config with correct handling of mutable config values.
-    """
-
+    """Copy grab config with correct handling of mutable config values."""
     cloned_config = copy(config)
     # Apply ``copy`` function to mutable config values
     for key in mutable_config_keys:
@@ -68,100 +63,100 @@ def default_config() -> Dict[str, Any]:
     # TODO: Maybe config should be split into two entities:
     # 1) config which is not changed during request
     # 2) changeable settings
-    return dict(
+    return {
         # Common
-        url=None,
+        "url": None,
         # Debugging
-        log_file=None,
-        log_dir=False,
-        debug_post=False,
-        debug_post_limit=150,
+        "log_file": None,
+        "log_dir": False,
+        "debug_post": False,
+        "debug_post_limit": 150,
         # Only for DEPRECATED transport
-        debug=False,
-        verbose_logging=False,
+        "debug": False,
+        "verbose_logging": False,
         # Only for selenium transport
-        webdriver="firefox",
-        selenium_wait=1,  # in seconds
+        "webdriver": "firefox",
+        "selenium_wait": 1,  # in seconds
         # Proxy
-        proxy=None,
-        proxy_type=None,
-        proxy_userpwd=None,
-        proxy_auto_change=True,
+        "proxy": None,
+        "proxy_type": None,
+        "proxy_userpwd": None,
+        "proxy_auto_change": True,
         # Method, Post
-        method=None,
-        post=None,
-        multipart_post=None,
+        "method": None,
+        "post": None,
+        "multipart_post": None,
         # Headers, User-Agent, Referer
-        headers={},
-        common_headers={},
-        user_agent=None,
-        user_agent_file=None,
-        referer=None,
-        reuse_referer=True,
+        "headers": {},
+        "common_headers": {},
+        "user_agent": None,
+        "user_agent_file": None,
+        "referer": None,
+        "reuse_referer": True,
         # Cookies
-        cookies={},
-        reuse_cookies=True,
-        cookiefile=None,
+        "cookies": {},
+        "reuse_cookies": True,
+        "cookiefile": None,
         # Timeouts
-        timeout=15,
-        connect_timeout=3,
+        "timeout": 15,
+        "connect_timeout": 3,
         # Connection
-        connection_reuse=True,
+        "connection_reuse": True,
         # Response processing
-        nobody=False,
-        body_maxsize=None,
-        body_inmemory=True,
-        body_storage_dir=None,
-        body_storage_filename=None,
-        body_storage_create_dir=False,
-        reject_file_size=None,
+        "nobody": False,
+        "body_maxsize": None,
+        "body_inmemory": True,
+        "body_storage_dir": None,
+        "body_storage_filename": None,
+        "body_storage_create_dir": False,
+        "reject_file_size": None,
         # Content compression
-        encoding="gzip",
+        "encoding": "gzip",
         # Network interface
-        interface=None,
+        "interface": None,
         # DNS resolution
-        resolve=None,
+        "resolve": None,
         # Redirects
-        follow_refresh=False,
-        follow_location=True,
-        redirect_limit=10,
+        "follow_refresh": False,
+        "follow_location": True,
+        "redirect_limit": 10,
         # Authentication
-        userpwd=None,
+        "userpwd": None,
         # Character set to which any unicode data should be encoded
         # before get placed in request
         # This setting is overwritten after each request with
         # charset of retrieved document
-        charset="utf-8",
+        "charset": "utf-8",
         # Charset to use for converting content of response
         # into unicode, by default it is detected automatically
-        document_charset=None,
+        "document_charset": None,
         # Content type control how DOM are built
         # For html type HTML DOM builder is used
         # For xml type XML DOM builder is used
-        content_type="html",
+        "content_type": "html",
         # Fix &#X; entities, where X between 128 and 160
         # Such entities are parsed by modern browsers as
         # windows-1251 entities independently of the real charset of
         # the document, If this option is True then such entities
         # will be replaced with correct unicode entities e.g.:
         # &#151; ->  &#8212;
-        fix_special_entities=True,
+        "fix_special_entities": True,
         # Convert document body to lower case before building LXML tree
         # It does not affect `self.doc.body`
-        lowercased_tree=False,
+        "lowercased_tree": False,
         # Strip null bytes from document body before building lXML tree
         # It does not affect `self.doc.body`
-        strip_null_bytes=True,
+        "strip_null_bytes": True,
         # Internal object to store
-        state={},
-    )
+        "state": {},
+    }
 
 
 class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
     __slots__ = (
         "request_head",
         "request_body",
-        #'request_log',
+        # 'request_log',
         "proxylist",
         "config",
         "transport",
@@ -182,7 +177,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     clonable_attributes = (
         "request_head",
         "request_body",
-        #'request_log',
+        # 'request_log',
         "proxylist",
     )
 
@@ -194,10 +189,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     #
 
     def __init__(self, document_body=None, transport=None, **kwargs):
-        """
-        Create Grab instance
-        """
-
+        """Create Grab instance."""
         self.meta = {}
         self._doc = None
         self.config: Dict[str, Any] = default_config()
@@ -240,7 +232,9 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         if transport_param is None:
             transport_param = DEFAULT_TRANSPORT
         if isinstance(transport_param, str):
-            if transport_param in TRANSPORT_ALIAS:  # pylint: disable=consider-using-get
+            if (  # noqa: SIM908 pylint: disable=consider-using-get
+                transport_param in TRANSPORT_ALIAS
+            ):
                 transport_param = TRANSPORT_ALIAS[transport_param]
             if "." not in transport_param:
                 raise error.GrabMisuseError("Unknown transport: %s" % transport_param)
@@ -264,12 +258,13 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     def reset(self):
         """
-        Reset all attributes which could be modified during previous request
+        Reset Grab instnce.
+
+        Resets all attributes which could be modified during previous request
         or which is not initialized yet if this is the new Grab instance.
 
         This methods is automatically called before each network request.
         """
-
         self.request_head = None
         # self.request_log = None
         self.request_body = None
@@ -280,7 +275,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             self.transport.reset()
 
     def clone(self, **kwargs):
-        """
+        r"""
         Create clone of Grab instance.
 
         Cloned instance will have the same state: cookies, referrer, response
@@ -288,7 +283,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         :param \\**kwargs: overrides settings of cloned grab instance
         """
-
         grab = Grab(transport=self.transport_param)
         grab.config = self.dump_config()
 
@@ -311,7 +305,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         Use case: create backup of current state to the cloned instance and
         then restore the state from it.
         """
-
         self.load_config(grab.config)
 
         self.doc = grab.doc.copy(new_grab=self)
@@ -321,10 +314,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.cookies = deepcopy(grab.cookies)
 
     def dump_config(self):
-        """
-        Make clone of current config.
-        """
-
+        """Make clone of current config."""
         conf = copy_config(self.config, self.mutable_config_keys)
         conf["state"] = {
             "cookiejar_cookies": list(self.cookies.cookiejar),
@@ -332,10 +322,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         return conf
 
     def load_config(self, config):
-        """
-        Configure grab instance with external config object.
-        """
-
+        """Configure grab instance with external config object."""
         self.config = copy_config(config, self.mutable_config_keys)
         if "cookiejar_cookies" in config["state"]:
             self.cookies = CookieManager.from_cookie_list(
@@ -343,35 +330,27 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             )
 
     def setup(self, **kwargs):
-        """
-        Setting up Grab instance configuration.
-        """
-
+        """Set up Grab instance configuration."""
         for key in kwargs:
             if key not in self.config.keys():
                 raise error.GrabMisuseError("Unknown option: %s" % key)
 
-        if "url" in kwargs:
-            if self.config.get("url"):
-                kwargs["url"] = self.make_url_absolute(kwargs["url"])
+        if "url" in kwargs and self.config.get("url"):
+            kwargs["url"] = self.make_url_absolute(kwargs["url"])
         self.config.update(kwargs)
 
     def go(self, url, **kwargs):  # pylint: disable=invalid-name
         """
-        Go to ``url``
+        Go to ``url``.
 
         Args:
             :url: could be absolute or relative. If relative then t will be
                 appended to the absolute URL of previous request.
         """
-
         return self.request(url=url, **kwargs)
 
     def download(self, url, location, **kwargs):
-        """
-        Fetch document located at ``url`` and save to to ``location``.
-        """
-
+        """Fetch document located at ``url`` and save to to ``location``."""
         doc = self.go(url, **kwargs)
         with open(location, "wb") as out:
             out.write(doc.body)
@@ -380,10 +359,10 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     def prepare_request(self, **kwargs):
         """
         Configure all things to make real network request.
+
         This method is called before doing real request via
         transport extension.
         """
-
         if self.transport is None:
             self.setup_transport(self.transport_param)
         self.reset()
@@ -396,10 +375,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.transport.process_config(self)
 
     def log_request(self, extra=""):
-        """
-        Send request details to logging system.
-        """
-
+        """Send request details to logging system."""
         # pylint: disable=no-member
         thread_name = threading.current_thread().name.lower()
         # pylint: enable=no-member
@@ -436,7 +412,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             proxy_info,
         )
 
-    def request(self, **kwargs):
+    def request(self, **kwargs):  # noqa: CCR001
         """
         Perform network request.
 
@@ -445,7 +421,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         Returns: ``Document`` objects.
         """
-
         self.prepare_request(**kwargs)
         refresh_count = 0
 
@@ -464,17 +439,17 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 with self.transport.wrap_transport_error():
                     doc = self.process_request_result()
 
-                if self.config["follow_location"]:
-                    if doc.code in (301, 302, 303, 307, 308):
-                        if doc.headers.get("Location"):
-                            refresh_count += 1
-                            if refresh_count > self.config["redirect_limit"]:
-                                raise error.GrabTooManyRedirectsError()
-                            url = doc.headers.get("Location")
-                            self.prepare_request(
-                                url=self.make_url_absolute(url), referer=None
-                            )
-                            continue
+                if (
+                    self.config["follow_location"]
+                    and doc.code in (301, 302, 303, 307, 308)
+                    and doc.headers.get("Location")
+                ):
+                    refresh_count += 1
+                    if refresh_count > self.config["redirect_limit"]:
+                        raise error.GrabTooManyRedirectsError()
+                    url = doc.headers.get("Location")
+                    self.prepare_request(url=self.make_url_absolute(url), referer=None)
+                    continue
 
                 if self.config["follow_refresh"]:
                     refresh_url = self.doc.get_meta_refresh_url()
@@ -554,10 +529,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             )
 
     def process_request_result(self):
-        """
-        Process result of real request performed via transport extension.
-        """
-
+        """Process result of real request performed via transport extension."""
         now = datetime.utcnow()
         # TODO: move into separate method
         if self.config["debug_post"]:
@@ -610,7 +582,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         This method is called then fatal network exception is raised.
         The saved dump could be used for debugging the reason of the failure.
         """
-
         self.doc = self.transport.prepare_response(self)
         self.copy_request_data()
         self.save_dumps()
@@ -623,13 +594,12 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     def setup_document(self, content, **kwargs):
         """
-        Setup `response` object without real network requests.
+        Set up `response` object without real network requests.
 
         Useful for testing and debugging.
 
         All ``**kwargs`` will be passed to `Document` constructor.
         """
-
         self.reset()
         if isinstance(content, str):
             raise error.GrabMisuseError(
@@ -655,10 +625,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.doc = doc
 
     def change_proxy(self, random=True):
-        """
-        Set random proxy from proxylist.
-        """
-
+        """Set random proxy from proxylist."""
         if self.proxylist.size():
             if random:
                 proxy = self.proxylist.get_random_proxy()
@@ -678,10 +645,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     @classmethod
     def common_headers(cls):
-        """
-        Build headers which sends typical browser.
-        """
-
+        """Build headers which sends typical browser."""
         return {
             "Accept": "text/xml,application/xml,application/xhtml+xml"
             ",text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d" % randint(2, 5),
@@ -719,10 +683,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.doc.save(file_name)
 
     def make_url_absolute(self, url, resolve_base=False):
-        """
-        Make url absolute using previous request url as base url.
-        """
-
+        """Make url absolute using previous request url as base url."""
         if self.config["url"]:
             if resolve_base:
                 ubody = self.doc.unicode_body()
@@ -734,15 +695,13 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     def detect_request_method(self):
         """
-        Analyze request config and find which
-        request method will be used.
+        Analyze request config and find which request method will be used.
 
         Returns request method in upper case
 
         This method needs simetime when `process_config` method
         was not called yet.
         """
-
         method = cast(Optional[str], self.config["method"])
         if method:
             method = method.upper()
@@ -751,13 +710,10 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 method = "POST"
             else:
                 method = "GET"
-        return method
+        return method  # noqa: R504
 
     def clear_cookies(self):
-        """
-        Clear all remembered cookies.
-        """
-
+        """Clear all remembered cookies."""
         self.config["cookies"] = {}
         self.cookies.clear()
 
@@ -772,16 +728,13 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             self.setup(proxy_userpwd=userpwd)
 
     def __getstate__(self):
-        """
-        Reset cached lxml objects which could not be pickled.
-        """
+        """Reset cached lxml objects which could not be pickled."""
         state = {}
         for cls in type(self).mro():
             cls_slots = getattr(cls, "__slots__", ())
             for slot in cls_slots:
-                if slot != "__weakref__":
-                    if hasattr(self, slot):
-                        state[slot] = getattr(self, slot)
+                if slot != "__weakref__" and hasattr(self, slot):
+                    state[slot] = getattr(self, slot)
 
         if state["_doc"]:
             state["_doc"].grab = weakref.proxy(self)

@@ -4,10 +4,10 @@
 
 # from test_server import Response
 
-from tests.util import BaseGrabTestCase
 from grab import Grab
 from grab.error import GrabMisuseError
 from grab.transport import Urllib3Transport
+from tests.util import BaseGrabTestCase
 
 #
 # FAKE_TRANSPORT_CODE = """

@@ -17,7 +17,7 @@ class TestResponse(BaseGrabTestCase):
         self.server.reset()
 
     def test_save(self):
-        "Test `Response.save` method."
+        """Test `Response.save` method."""
         with temp_dir() as tmp_dir:
             with open(IMG_FILE, "rb") as inp:
                 img_data = inp.read()
@@ -31,7 +31,7 @@ class TestResponse(BaseGrabTestCase):
                 self.assertEqual(inp.read(), img_data)
 
     def test_save_hash(self):
-        "Test `Response.save_hash` method."
+        """Test `Response.save_hash` method."""
         with temp_dir() as tmp_dir:
             with open(IMG_FILE, "rb") as inp:
                 img_data = inp.read()
@@ -61,10 +61,8 @@ class TestResponse(BaseGrabTestCase):
         self.assertTrue("крокодил" in grab.doc.unicode_body())
 
     def test_xml_declaration(self):
-        """
-        unicode_body() should return HTML with xml declaration (if it
-        exists in original HTML)
-        """
+        # unicode_body() should return HTML with xml declaration (if it
+        # exists in original HTML)
         self.server.add_response(
             Response(
                 data=(

@@ -1,7 +1,5 @@
 from test_server import Response
-
-from tests.util import build_grab
-from tests.util import BaseGrabTestCase, temp_file
+from tests.util import BaseGrabTestCase, build_grab, temp_file
 
 
 class GrabSimpleTestCase(BaseGrabTestCase):

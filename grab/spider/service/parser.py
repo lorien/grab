@@ -60,15 +60,13 @@ class ParserService(BaseService):
                     else:
                         self.execute_task_handler(handler, result, task)
                         self.spider.stat.inc("parser:handler-processed")
-                    if self.spider.parser_requests_per_process:
-                        if (
-                            process_request_count
-                            >= self.spider.parser_requests_per_process
-                        ):
-                            self.spider.stat.inc(
-                                "parser:handler-req-limit",
-                            )
-                            return
+                    if self.spider.parser_requests_per_process and (
+                        process_request_count >= self.spider.parser_requests_per_process
+                    ):
+                        self.spider.stat.inc(
+                            "parser:handler-req-limit",
+                        )
+                        return
                 finally:
                     worker.is_busy_event.clear()
 

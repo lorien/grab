@@ -43,7 +43,6 @@ class TaskDispatcherService(BaseService):
         Exception can come only from parser_service and it always has
         meta {"from": "parser", "exc_info": <...>}
         """
-
         if meta is None:
             meta = {}
         if isinstance(result, Task):

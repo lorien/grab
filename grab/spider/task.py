@@ -12,11 +12,9 @@ class BaseTask:
 
 
 class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
-    """
-    Task for spider.
-    """
+    """Task for spider."""
 
-    def __init__(  # pylint: disable=too-many-arguments, too-many-locals
+    def __init__(  # noqa: C901 pylint: disable=too-many-arguments, too-many-locals
         self,
         name=None,
         url=None,
@@ -159,10 +157,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             setattr(self, key, value)
 
     def get(self, key, default=None):
-        """
-        Return value of attribute or None if such attribute
-        does not exist.
-        """
+        """Return value of attribute or None if such attribute does not exist."""
         return getattr(self, key, default)
 
     def process_delay_option(self, delay):
@@ -175,14 +170,12 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         self.grab_config = copy_config(grab_config)
         self.url = grab_config["url"]
 
-    def clone(self, **kwargs):
-        """
-        Clone Task instance.
+    def clone(self, **kwargs):  # noqa: C901
+        """Clone Task instance.
 
         Reset network_try_count, increase task_try_count.
         Reset priority attribute if it was not set explicitly.
         """
-
         # First, create exact copy of the current Task object
         attr_copy = self.__dict__.copy()
         if attr_copy.get("grab_config") is not None:

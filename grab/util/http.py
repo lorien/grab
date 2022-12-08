@@ -15,25 +15,42 @@ RE_NON_ALPHA_DIGIT_NETLOC = re.compile(r"[^-.:@a-zA-Z0-9]")
 
 def smart_urlencode(items, charset="utf-8"):
     """
-    Convert sequence of items into bytestring which could be submitted
-    in POST or GET request.
+    Normalize items to be a part of HTTP request's payload.
 
     It differs from ``urllib.urlencode`` in that it can process unicode
     and some special values.
 
     ``items`` could dict or tuple or list.
     """
-
     if isinstance(items, dict):
         items = items.items()
     res = normalize_http_values(items, charset=charset)
     return urlencode(res)
 
 
+def process_http_item(item, charset, ignore_classes):
+    key, value = item
+    if isinstance(value, (list, tuple)):
+        ret = []
+        for subval in value:
+            ret.extend(process_http_item((key, subval), charset, ignore_classes))
+        return ret
+    if isinstance(key, str):
+        key = make_bytes(key, encoding=charset)
+    if ignore_classes and isinstance(value, ignore_classes):
+        pass
+    elif isinstance(value, str):
+        value = make_bytes(value, encoding=charset)
+    elif value is None:
+        value = b""
+    else:
+        value = make_bytes(value)
+    return [(key, value)]
+
+
 def normalize_http_values(items, charset="utf-8", ignore_classes=None):
     """
-    Accept sequence of (key, value) paris or dict and convert each
-    value into bytestring.
+    Convert values in dict/list-of-tuples to bytes.
 
     Unicode is converted into bytestring using charset of previous response
     (or utf-8, if no requests were performed)
@@ -44,7 +61,6 @@ def normalize_http_values(items, charset="utf-8", ignore_classes=None):
     any classes from the `ignore_classes` then the value is not
     processed and returned as-is.
     """
-
     if isinstance(items, dict):
         items = items.items()
 
@@ -52,31 +68,9 @@ def normalize_http_values(items, charset="utf-8", ignore_classes=None):
     if isinstance(ignore_classes, list):
         ignore_classes = tuple(ignore_classes)
 
-    def process(item):
-        key, value = item
-        # Process key
-        if isinstance(key, str):
-            key = make_bytes(key, encoding=charset)
-        # Process value
-        if ignore_classes and isinstance(value, ignore_classes):
-            pass
-        elif isinstance(value, str):
-            value = make_bytes(value, encoding=charset)
-        elif value is None:
-            value = b""
-        elif isinstance(value, (list, tuple)):
-            for subval in value:
-                for res in process((key, subval)):
-                    yield res
-            return
-        else:
-            value = make_bytes(value)
-        yield key, value
-
     ret = []
     for item in items:
-        for yield_item in process(item):
-            ret.append(yield_item)
+        ret.extend(process_http_item(item, charset, ignore_classes))
     return ret
 
 

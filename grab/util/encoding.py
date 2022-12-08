@@ -1,8 +1,5 @@
 def make_str(value, encoding="utf-8", errors="strict"):
-    """
-    Normalize unicode/byte string to unicode string.
-    """
-
+    """Normalize unicode/byte string to unicode string."""
     if isinstance(value, str):
         return value
     if isinstance(value, bytes):
@@ -11,10 +8,7 @@ def make_str(value, encoding="utf-8", errors="strict"):
 
 
 def make_bytes(value, encoding="utf-8", errors="strict"):
-    """
-    Normalize unicode/byte string to byte string.
-    """
-
+    """Normalize unicode/byte string to byte string."""
     if isinstance(value, str):
         return value.encode(encoding, errors=errors)
     if isinstance(value, bytes):

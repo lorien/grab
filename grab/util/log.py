@@ -23,12 +23,10 @@ def default_logging(
     propagate_network_logger=False,
 ):
     """
-    Customize logging output to display all log messages
-    except grab network logs.
+    Customize logging output to display all log messages except grab network logs.
 
     Redirect grab network logs into file.
     """
-
     logging.basicConfig(level=level)
     if network_log:
         setup_logger(

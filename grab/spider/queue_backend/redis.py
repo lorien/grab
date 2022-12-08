@@ -1,6 +1,4 @@
-"""
-Spider task queue backend powered by redis
-"""
+"""Spider task queue backend powered by redis."""
 import logging
 import pickle
 import queue

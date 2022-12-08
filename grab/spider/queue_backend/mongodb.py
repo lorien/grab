@@ -15,9 +15,7 @@ logger = logging.getLogger("grab.spider.queue_backend.mongodb")
 
 class QueueBackend(QueueInterface):
     def __init__(self, spider_name, database=None, queue_name=None, **kwargs):
-        """
-        All "unexpected" kwargs goes to `pymongo.MongoClient()` method
-        """
+        # All "unexpected" kwargs goes to `pymongo.MongoClient()` method.
         if queue_name is None:
             queue_name = "task_queue_%s" % spider_name
 

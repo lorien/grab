@@ -1,6 +1,4 @@
-"""
-QueueInterface defines interface of queue backend.
-"""
+"""QueueInterface defines interface of queue backend."""
 
 
 class QueueInterface:
@@ -12,7 +10,7 @@ class QueueInterface:
 
     def get(self):
         """
-        Return `Task` object or raise `Queue.Empty` exception
+        Return `Task` object or raise `Queue.Empty` exception.
 
         @returns: `grab.spider.task.Task` object
         @raises: `Queue.Empty` exception

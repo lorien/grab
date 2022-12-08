@@ -79,10 +79,7 @@ class TestHtmlForms(BaseGrabTestCase):
         self.grab.setup_document(FORMS_HTML)
 
     def test_choose_form(self):
-        """
-        Test ``choose_form`` method
-        """
-
+        """Test ``choose_form`` method."""
         # raise errors
         self.assertRaises(DataNotFound, self.grab.doc.choose_form, 10)
         self.assertRaises(DataNotFound, self.grab.doc.choose_form, id="bad_id")
@@ -215,10 +212,7 @@ class TestHtmlForms(BaseGrabTestCase):
         self.assertRaises(DataNotFound, lambda: grab.doc.form)
 
     def test_disabled_radio(self):
-        """
-        Bug #57
-        """
-
+        """Test issue #57."""
         grab = build_grab()
         self.server.add_response(Response(data=DISABLED_RADIO_HTML))
         self.server.add_response(Response())
@@ -234,7 +228,7 @@ class TestHtmlForms(BaseGrabTestCase):
         grab.doc.set_input_by_xpath('//input[re:test(@id, "^ba")]', "bar-value")
         grab.submit(make_request=False)
         self.assertEqual(
-            set([("foo", None), ("bar", "bar-value")]),
+            {("foo", None), ("bar", "bar-value")},
             set(grab.config["post"]),
         )
 
@@ -263,7 +257,7 @@ class TestHtmlForms(BaseGrabTestCase):
             </form>
         """
         grab = build_grab(html)
-        self.assertEqual(set(["foo"]), set(grab.doc.form_fields().keys()))
+        self.assertEqual({"foo"}, set(grab.doc.form_fields().keys()))
 
     def test_checkbox_checked_but_disabled(self):
         html = b"""

@@ -84,10 +84,7 @@ def decode_entities(html: str) -> str:
 
 
 def find_refresh_url(html):
-    """
-    Find value of redirect url from http-equiv refresh meta tag.
-    """
-
+    """Find value of redirect url from http-equiv refresh meta tag."""
     # We should decode quote values to correctly find
     # the url value
     # html = html.replace('&#39;', '\'')
@@ -103,10 +100,7 @@ def find_refresh_url(html):
 
 
 def find_base_url(html):
-    """
-    Find url of <base> tag.
-    """
-
+    """Find url of <base> tag."""
     html = decode_entities(html)
 
     match = RE_BASE_URL.search(html)

@@ -1,10 +1,8 @@
 import os
 
-from test_server import Response
-
 from grab import UploadContent, UploadFile
-
-from tests.util import build_grab, temp_file, BaseGrabTestCase
+from test_server import Response
+from tests.util import BaseGrabTestCase, build_grab, temp_file
 
 
 class TestUploadContent(BaseGrabTestCase):
@@ -18,8 +16,7 @@ class TestUploadContent(BaseGrabTestCase):
             '<input type="file" name="image">'
             "</form>" % url
         ).encode("ascii")
-        grab = build_grab(html, charset="utf-8")
-        return grab
+        return build_grab(html, charset="utf-8")
 
     # *******************
     # UploadContent Tests

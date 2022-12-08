@@ -79,8 +79,7 @@ class BaseService:
             if isinstance(obj, ServiceWorker):
                 yield obj
             elif isinstance(obj, list):
-                for item in obj:
-                    yield item
+                yield from obj
 
     def start(self):
         for worker in self.iterate_workers(self.worker_registry):

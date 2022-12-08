@@ -35,7 +35,7 @@ logger = logging.getLogger("grab.spider.base")
 
 class SpiderMetaClass(type):
     """
-    This meta class does following things::
+    Magic meta class to make things complex.
 
     * It creates Meta attribute, if it is not defined in
         Spider descendant class, by copying parent's Meta attribute
@@ -65,12 +65,9 @@ class SpiderMetaClass(type):
         return super(SpiderMetaClass, cls).__new__(cls, name, bases, namespace)
 
 
-class Spider(
-    metaclass=SpiderMetaClass
-):  # pylint: disable=too-many-instance-attributes, too-many-public-methods
-    """
-    Asynchronous scraping framework.
-    """
+# pylint: disable=too-many-instance-attributes, too-many-public-methods
+class Spider(metaclass=SpiderMetaClass):
+    """Asynchronous scraping framework."""
 
     spider_name = None
 
@@ -107,7 +104,8 @@ class Spider(
     # Public Methods
     # **************
 
-    def __init__(  # pylint: disable=too-many-instance-attributes, too-many-locals, too-many-arguments
+    # pylint: disable=too-many-locals, too-many-arguments
+    def __init__(
         self,
         thread_number=None,
         network_try_limit=None,
@@ -126,6 +124,8 @@ class Spider(
         transport=None,
     ):
         """
+        Create Spider instance, duh.
+
         Arguments:
         * thread-number - Number of concurrent network streams
         * network_try_limit - How many times try to send request
@@ -143,7 +143,6 @@ class Spider(
             network request which is performed again due to network error
         * args - command line arguments parsed with `setup_arg_parser` method
         """
-
         self.fatal_error_queue = Queue()
         self.task_queue_parameters = None
         self._started = None
@@ -212,12 +211,14 @@ class Spider(
         self.task_dispatcher = TaskDispatcherService(self)
         self.task_generator_service = TaskGeneratorService(self, self.task_generator())
 
+    # pylint: enable=too-many-locals, too-many-arguments
+
     def setup_cache(self, *args, **kwargs):  # pylint: disable=unused-argument
         raise_feature_is_deprecated("Cache feature")
 
     def setup_queue(self, backend="memory", **kwargs):
         """
-        Setup queue.
+        Set up queue.
 
         :param backend: Backend name
             Should be one of the following: 'memory', 'redis' or 'mongo'.
@@ -233,10 +234,7 @@ class Spider(
         self.task_queue = mod.QueueBackend(spider_name=self.get_spider_name(), **kwargs)
 
     def add_task(self, task, queue=None, raise_error=False):
-        """
-        Add task to the task queue.
-        """
-
+        """Add task to the task queue."""
         if queue is None:
             queue = self.task_queue
         if queue is None:
@@ -269,10 +267,7 @@ class Spider(
         return True
 
     def stop(self):
-        """
-        This method set internal flag which signal spider
-        to stop processing new task and shuts down.
-        """
+        """Instruct spider to stop processing new tasks and start shutting down."""
         self.work_allowed = False
 
     def load_proxylist(
@@ -328,7 +323,7 @@ class Spider(
         self.proxy_auto_change = auto_change
 
     def process_next_page(self, grab, task, xpath, resolve_base=False, **kwargs):
-        """
+        r"""
         Generate task for next page.
 
         :param grab: Grab instance
@@ -360,8 +355,10 @@ class Spider(
                 "Option timing of method render_stats is deprecated."
                 " There is no more timing feature."
             )
-        out = ["------------ Stats: ------------"]
-        out.append("Counters:")
+        out = [
+            "------------ Stats: ------------",
+            "Counters:",
+        ]
 
         # Process counters
         items = sorted(self.stat.counters.items(), key=lambda x: x[0], reverse=True)
@@ -405,21 +402,19 @@ class Spider(
 
     def prepare(self):
         """
-        You can do additional spider customization here
-        before it has started working. Simply redefine
-        this method in your Spider class.
+        Do additional spider customization here.
+
+        This method runs before spider has started working.
         """
 
     def shutdown(self):
-        """
-        You can override this method to do some final actions
-        after parsing has been done.
-        """
+        """Override this method to do some final actions after parsing has been done."""
 
     def update_grab_instance(self, grab):
         """
-        Use this method to automatically update config of any
-        `Grab` instance created by the spider.
+        Update config of any `Grab` instance created by the spider.
+
+        WTF it means?
         """
 
     def create_grab_instance(self, **kwargs):
@@ -434,7 +429,7 @@ class Spider(
             grab = Grab(**self._grab_config)
         else:
             grab = Grab(**kwargs)
-        return grab
+        return grab  # noqa: R504
 
     def task_generator(self):
         """
@@ -445,7 +440,6 @@ class Spider(
         This allows you to not overload all free memory if total number of
         tasks is big.
         """
-
         if False:  # pylint: disable=using-constant-test
             # Some magic to make this function empty generator
             yield ":-)"
@@ -463,7 +457,6 @@ class Spider(
         * if error: (False, reason)
 
         """
-
         if task.task_try_count > self.task_try_limit:
             return False, "task-try-count"
 
@@ -506,10 +499,11 @@ class Spider(
 
     def is_valid_network_response_code(self, code, task):
         """
-        Answer the question: if the response could be handled via
-        usual task handler or the task failed and should be processed as error.
-        """
+        Test if response is valid.
 
+        Valid response is handled with associated task handler.
+        Failed respoosne is processed with error handler.
+        """
         return code < 400 or code == 404 or code in task.valid_status
 
     def process_parser_error(self, func_name, task, exc_info):
@@ -566,18 +560,16 @@ class Spider(
             self.stat.inc("spider:upload-size", doc.upload_size)
 
     def process_grab_proxy(self, task, grab):
-        """Assign new proxy from proxylist to the task"""
-
-        if task.use_proxylist:
-            if self.proxylist_enabled:
-                if self.proxy_auto_change:
-                    self.change_active_proxy(task, grab)
-                if self.proxy:
-                    grab.setup(
-                        proxy=self.proxy.get_address(),
-                        proxy_userpwd=self.proxy.get_userpwd(),
-                        proxy_type=self.proxy.proxy_type,
-                    )
+        """Assign new proxy from proxylist to the task."""
+        if task.use_proxylist and self.proxylist_enabled:
+            if self.proxy_auto_change:
+                self.change_active_proxy(task, grab)
+            if self.proxy:
+                grab.setup(
+                    proxy=self.proxy.get_address(),
+                    proxy_userpwd=self.proxy.get_userpwd(),
+                    proxy_type=self.proxy.proxy_type,
+                )
 
     # pylint: disable=unused-argument
     def change_active_proxy(self, task, grab):
@@ -600,7 +592,7 @@ class Spider(
     #        logger.debug("Task %s has invalid URL: %s", task.name, task.url)
     #        self.stat.collect("invalid-url", task.url)
 
-    def run(self):
+    def run(self):  # noqa: C901
         self._started = time.time()
         services = []
         try:
@@ -707,3 +699,6 @@ class Spider(
     @cache_writer_service.setter
     def cache_writer_service(self, _):
         raise_feature_is_deprecated("Cache feature")
+
+
+# pylint: enable=too-many-instance-attributes, too-many-public-methods

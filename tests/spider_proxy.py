@@ -1,5 +1,3 @@
-from typing import Dict
-
 from grab import Grab
 from grab.proxylist import BaseProxySource, Proxy
 from grab.spider import Spider, Task
@@ -13,7 +11,7 @@ class SimpleSpider(Spider):
 
 
 class TestSpiderProxyCase(BaseGrabTestCase):
-    extra_servers: Dict[int, Dict]
+    extra_servers: dict[int, dict]
 
     @classmethod
     def setUpClass(cls):
@@ -162,4 +160,4 @@ class TestSpiderProxyCase(BaseGrabTestCase):
         bot.run()
 
         self.assertEqual(self.server.request.headers.get("host"), "yandex.ru")
-        self.assertEqual(set(bot.stat.collections["ports"]), set([self.server.port]))
+        self.assertEqual(set(bot.stat.collections["ports"]), {self.server.port})

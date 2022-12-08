@@ -1,5 +1,7 @@
 """
-RTFM:
+This module provides things to operate with cookies.
+
+Manuals:
 
 * http://docs.python.org/2/library/cookielib.html#cookie-objects
 
@@ -32,6 +34,7 @@ COOKIE_ATTRS = (
 # https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 class MockRequest:
     """Wraps a `requests.Request` to mimic a `urllib2.Request`.
+
     The code in `cookielib.CookieJar` expects this interface in order to
     correctly manage cookie policies, i.e., determine whether a cookie can be
     set, given the domains of the request and the cookie.
@@ -85,8 +88,9 @@ class MockRequest:
 
     def add_header(self, key, val):
         """
-        cookielib has no legitimate use for this method;
-        add it back if you find one.
+        Cookielib has no legitimate use for this method.
+
+        Add it back if you find one.
         """
         raise NotImplementedError(
             "Cookie headers should be added with add_unredirected_header()"
@@ -114,12 +118,14 @@ class MockRequest:
 # https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 class MockResponse:
     """Wraps a `httplib.HTTPMessage` to mimic a `urllib.addinfourl`.
+
     ...what? Basically, expose the parsed HTTP headers from the server response
     the way `cookielib` expects to see them.
     """
 
     def __init__(self, headers):
         """Make a MockResponse for `cookielib` to read.
+
         :param headers: a httplib.HTTPMessage or analogous carrying the headers
         """
         self._headers = headers
@@ -132,25 +138,24 @@ class MockResponse:
 
 
 def create_cookie(name, value, domain, httponly=None, **kwargs):
-    """Creates `cookielib.Cookie` instance"""
-
+    """Create `cookielib.Cookie` instance."""
     if domain == "localhost":
         domain = ""
-    config = dict(
-        name=name,
-        value=value,
-        version=0,
-        port=None,
-        domain=domain,
-        path="/",
-        secure=False,
-        expires=None,
-        discard=True,
-        comment=None,
-        comment_url=None,
-        rfc2109=False,
-        rest={"HttpOnly": httponly},
-    )
+    config = {
+        "name": name,
+        "value": value,
+        "version": 0,
+        "port": None,
+        "domain": domain,
+        "path": "/",
+        "secure": False,
+        "expires": None,
+        "discard": True,
+        "comment": None,
+        "comment_url": None,
+        "rfc2109": False,
+        "rest": {"HttpOnly": httponly},
+    }
 
     for key in kwargs:
         if key not in config:
@@ -173,6 +178,8 @@ def create_cookie(name, value, domain, httponly=None, **kwargs):
 
 class CookieManager:
     """
+    Class to operate cookies of Grab instance.
+
     Each Grab instance has `cookies` attribute that is instance of
     `CookieManager` class.
 
@@ -199,7 +206,6 @@ class CookieManager:
         :param value: value of cookie
         :param kwargs: extra attributes of cookie
         """
-
         if domain == "localhost":
             domain = ""
 
@@ -232,9 +238,8 @@ class CookieManager:
         for cls in type(self).mro():
             cls_slots = getattr(cls, "__slots__", ())
             for slot in cls_slots:
-                if slot != "__weakref__":
-                    if hasattr(self, slot):
-                        state[slot] = getattr(self, slot)
+                if slot != "__weakref__" and hasattr(self, slot):
+                    state[slot] = getattr(self, slot)
 
         state["_cookiejar_cookies"] = list(self.cookiejar)
         del state["cookiejar"]
@@ -268,7 +273,6 @@ class CookieManager:
 
         Content of file should be a JSON-serialized list of dicts.
         """
-
         with open(path, encoding="utf-8") as inf:
             data = inf.read()
             if data:
@@ -276,15 +280,15 @@ class CookieManager:
             else:
                 items = {}
         for item in items:
-            extra = dict(
-                (x, y) for x, y in item.items() if x not in ["name", "value", "domain"]
-            )
+            extra = {
+                x: y for x, y in item.items() if x not in ["name", "value", "domain"]
+            }
             self.set(item["name"], item["value"], item["domain"], **extra)
 
     def get_dict(self):
         res = []
         for cookie in self.cookiejar:
-            res.append(dict((x, getattr(cookie, x)) for x in COOKIE_ATTRS))
+            res.append({x: getattr(cookie, x) for x in COOKIE_ATTRS})
         return res
 
     def save_to_file(self, path):
@@ -293,15 +297,12 @@ class CookieManager:
 
         Cookies are dumped as JSON-serialized dict of keys and values.
         """
-
         with open(path, "w", encoding="utf-8") as out:
             out.write(json.dumps(self.get_dict()))
 
     def get_cookie_header(self, req):
-        """
-        :param req: object with httplib.Request interface
-            Actually, it have to have `url` and `headers` attributes
-        """
+        # :param req: object with httplib.Request interface
+        #    Actually, it have to have `url` and `headers` attributes
         mocked_req = MockRequest(req)
         self.cookiejar.add_cookie_header(mocked_req)
         return mocked_req.get_new_headers().get("Cookie")

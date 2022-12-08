@@ -35,7 +35,7 @@ def temp_file(root_dir=None):
     os.close(fdesc)
     try:
         os.unlink(file_)
-    except (IOError, OSError):
+    except OSError:
         if "Windows" in platform.system():
             logger.error(
                 "Ignoring IOError raised when trying to delete"
@@ -48,13 +48,13 @@ def temp_file(root_dir=None):
 
 
 def build_grab(*args, **kwargs):
-    """Builds the Grab instance with default options."""
+    """Build the Grab instance with default options."""
     kwargs.setdefault("transport", "urllib3")
     return Grab(*args, **kwargs)
 
 
 def build_spider(cls, **kwargs):
-    """Builds the Spider instance with default options."""
+    """Build the Spider instance with default options."""
     kwargs.setdefault("grab_transport", "urllib3")
     kwargs.setdefault("network_service", GLOBAL["network_service"])
     return cls(**kwargs)

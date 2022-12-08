@@ -26,8 +26,8 @@ class TestCookies(BaseGrabTestCase):
         grab.setup(cookies={"foo": "1", "bar": "2"})
         grab.go(self.server.get_url())
         self.assertEqual(
-            set((x.key, x.value) for x in self.server.request.cookies.values()),
-            set([("foo", "1"), ("bar", "2")]),
+            {(x.key, x.value) for x in self.server.request.cookies.values()},
+            {("foo", "1"), ("bar", "2")},
         )
 
     def test_session(self):
@@ -41,14 +41,14 @@ class TestCookies(BaseGrabTestCase):
         self.server.add_response(Response())
         grab.go(self.server.get_url())
         self.assertEqual(
-            set([("foo", "bar")]),
-            set((x.key, x.value) for x in self.server.request.cookies.values()),
+            {("foo", "bar")},
+            {(x.key, x.value) for x in self.server.request.cookies.values()},
         )
         self.server.add_response(Response())
         grab.go(self.server.get_url())
         self.assertEqual(
-            set([("foo", "bar")]),
-            set((x.key, x.value) for x in self.server.request.cookies.values()),
+            {("foo", "bar")},
+            {(x.key, x.value) for x in self.server.request.cookies.values()},
         )
 
         # Test reuse_cookies=False
@@ -104,7 +104,7 @@ class TestCookies(BaseGrabTestCase):
             with open(tmp_file, encoding="utf-8") as inp:
                 self.assertEqual(
                     set(cookies.items()),
-                    set((x["name"], x["value"]) for x in json.load(inp)),
+                    {(x["name"], x["value"]) for x in json.load(inp)},
                 )
 
             self.server.add_response(Response())
@@ -116,7 +116,7 @@ class TestCookies(BaseGrabTestCase):
             with open(tmp_file, encoding="utf-8") as inp:
                 self.assertEqual(
                     set(cookies.items()),
-                    set((x["name"], x["value"]) for x in json.load(inp)),
+                    {(x["name"], x["value"]) for x in json.load(inp)},
                 )
 
             # Test load cookies
@@ -129,7 +129,7 @@ class TestCookies(BaseGrabTestCase):
                 json.dump(cookies, out)
             grab.cookies.load_from_file(tmp_file)
             self.assertEqual(
-                set(grab.cookies.items()), set((x["name"], x["value"]) for x in cookies)
+                set(grab.cookies.items()), {(x["name"], x["value"]) for x in cookies}
             )
 
     def test_cookiefile_empty(self):
@@ -169,7 +169,7 @@ class TestCookies(BaseGrabTestCase):
             with open(tmp_file, encoding="utf-8") as inp:
                 self.assertEqual(
                     set(merged_cookies),
-                    set((x["name"], x["value"]) for x in json.load(inp)),
+                    {(x["name"], x["value"]) for x in json.load(inp)},
                 )
 
             # Just ensure it works

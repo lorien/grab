@@ -1,7 +1,5 @@
 from test_server import Response
-
-from tests.util import build_grab
-from tests.util import BaseGrabTestCase
+from tests.util import BaseGrabTestCase, build_grab
 
 
 class TestContentLimit(BaseGrabTestCase):

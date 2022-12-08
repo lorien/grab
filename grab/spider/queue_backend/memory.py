@@ -1,3 +1,4 @@
+from contextlib import suppress
 from datetime import datetime
 from queue import Empty, PriorityQueue
 
@@ -20,7 +21,7 @@ class QueueBackend(QueueInterface):
         now = datetime.utcnow()
 
         removed_indexes = []
-        index = 0
+        index = 0  # noqa: SIM113
         for schedule_time, task in self.schedule_list:
             if schedule_time <= now:
                 self.put(task, 1)
@@ -38,11 +39,9 @@ class QueueBackend(QueueInterface):
         return self.queue_object.qsize() + len(self.schedule_list)
 
     def clear(self):
-        try:
+        with suppress(Empty):
             while True:
                 self.queue_object.get(False)
-        except Empty:
-            pass
         self.schedule_list = []
 
     def close(self):

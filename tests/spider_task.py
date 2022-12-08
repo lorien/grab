@@ -284,7 +284,7 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.add_task(Task("page", grab=Grab(url=self.server.get_url(), timeout=1)))
         bot.run()
-        self.assertEqual(set([77]), set(bot.stat.collections["points"]))
+        self.assertEqual({77}, set(bot.stat.collections["points"]))
 
     def test_create_grab_instance(self):
         self.server.add_response(Response(), count=-1)
@@ -309,7 +309,7 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.add_task(Task("page", grab=Grab(url=self.server.get_url(), timeout=75)))
         bot.run()
-        self.assertEqual(set([77, 76, 75]), set(bot.stat.collections["points"]))
+        self.assertEqual({77, 76, 75}, set(bot.stat.collections["points"]))
 
     def test_add_task_invalid_url_no_error(self):
         class TestSpider(Spider):

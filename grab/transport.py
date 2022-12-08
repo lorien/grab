@@ -48,9 +48,8 @@ class BaseTransport:
         pass
 
     def setup_body_file(self, storage_dir, storage_filename, create_dir=False):
-        if create_dir:
-            if not os.path.exists(storage_dir):
-                os.makedirs(storage_dir)
+        if create_dir and not os.path.exists(storage_dir):
+            os.makedirs(storage_dir)
         if storage_filename is None:
             file, file_path = tempfile.mkstemp(dir=storage_dir)
             os.close(file)
@@ -58,7 +57,7 @@ class BaseTransport:
         else:
             file_path = os.path.join(storage_dir, storage_filename)
             # body_file = open(path, "wb")
-        return file_path
+        return file_path  # noqa: R504
 
 
 def process_upload_items(items):
@@ -118,9 +117,7 @@ class Request:  # pylint: disable=too-many-instance-attributes
 
 
 class Urllib3Transport(BaseTransport):
-    """
-    Grab network transport based on urllib3 library.
-    """
+    """Grab network transport based on urllib3 library."""
 
     def __init__(self):
         super().__init__()
@@ -155,7 +152,7 @@ class Urllib3Transport(BaseTransport):
             post_data = grab.config["multipart_post"]
             if isinstance(post_data, bytes):
                 pass
-            elif isinstance(post_data, str):
+            elif isinstance(post_data, str):  # noqa: R506
                 raise GrabMisuseError(
                     "Option multipart_post data does not accept unicode."
                 )
@@ -176,15 +173,16 @@ class Urllib3Transport(BaseTransport):
             extra_headers["Content-Length"] = len(post_data)
             req.data = post_data
 
-        if method in ("POST", "PUT"):
-            if grab.config["post"] is None and grab.config["multipart_post"] is None:
-                raise GrabMisuseError(
-                    "Neither `post` or `multipart_post`"
-                    " options was specified for the %s"
-                    " request" % method
-                )
+        if method in ("POST", "PUT") and (
+            grab.config["post"] is None and grab.config["multipart_post"] is None
+        ):
+            raise GrabMisuseError(
+                "Neither `post` or `multipart_post`"
+                " options was specified for the %s"
+                " request" % method
+            )
 
-    def process_config(self, grab):
+    def process_config(self, grab):  # noqa: C901
         req = Request(data=None)
 
         try:
@@ -382,12 +380,13 @@ class Urllib3Transport(BaseTransport):
                     break
             else:
                 break
-            if self._request.timeout:
-                if time.time() - self._request.op_started > self._request.timeout:
-                    raise GrabTimeoutError
+            if self._request.timeout and (
+                time.time() - self._request.op_started > self._request.timeout
+            ):
+                raise GrabTimeoutError
         data = b"".join(chunks)
         if maxsize:
-            data = data[:maxsize]
+            return data[:maxsize]
         return data
 
     def prepare_response(self, grab):

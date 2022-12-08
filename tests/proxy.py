@@ -1,9 +1,6 @@
-from test_server import Response
-
 from grab.proxylist import ProxyList
-
-from tests.util import build_grab, temp_file
-from tests.util import BaseGrabTestCase
+from test_server import Response
+from tests.util import BaseGrabTestCase, build_grab, temp_file
 
 DEFAULT_PLIST_DATA = b"1.1.1.1:8080\n1.1.1.2:8080\n"
 

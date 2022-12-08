@@ -1,9 +1,7 @@
 # Copyright: 2013, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: MIT
-"""
-The Document class is the result of network request made with Grab instance.
-"""
+"""The Document class is the result of network request made with Grab instance."""
 import email
 import os
 import re
@@ -23,6 +21,7 @@ import logging
 import tempfile
 import threading
 import webbrowser
+from contextlib import suppress
 from datetime import datetime
 from io import BytesIO, StringIO
 from urllib.parse import parse_qs, urljoin, urlsplit
@@ -61,13 +60,15 @@ _BOM_TABLE = [
     (codecs.BOM_UTF16_LE, "utf-16-le"),
     (codecs.BOM_UTF8, "utf-8"),
 ]
-_FIRST_CHARS = set(char[0] for (char, name) in _BOM_TABLE)
+_FIRST_CHARS = {char[0] for (char, name) in _BOM_TABLE}
 THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")  # pylint: disable=invalid-name
 
 
 def read_bom(data):
-    """Read the byte order mark in the text, if present, and
+    """Detect BOM and encoding it is representing.
+
+    Read the byte order mark in the text, if present, and
     return the encoding represented by the BOM and the BOM.
 
     If no BOM can be detected, (None, None) is returned.
@@ -81,10 +82,7 @@ def read_bom(data):
 
 
 class Document:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
-    """
-    Document (in most cases it is a network response
-        i.e. result of network request)
-    """
+    """Network response."""
 
     __slots__ = (
         "status",
@@ -187,7 +185,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         This method is called after Grab instance performs network request.
         """
-
         if headers:
             self.headers = headers
         else:
@@ -233,13 +230,12 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             ret_bom = chunk_bom
 
         # Try to process XML declaration
-        if not charset:
-            if body_chunk.startswith(b"<?xml"):
-                match = RE_XML_DECLARATION.search(body_chunk)
-                if match:
-                    enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
-                    if enc_match:
-                        charset = enc_match.group(1)
+        if not charset and body_chunk.startswith(b"<?xml"):
+            match = RE_XML_DECLARATION.search(body_chunk)
+            if match:
+                enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
+                if enc_match:
+                    charset = enc_match.group(1)
         return charset, ret_bom
 
     def detect_charset(self):
@@ -255,7 +251,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         Use utf-8 as fallback charset.
         """
-
         charset = None
 
         body_chunk = self.get_body_chunk()
@@ -265,11 +260,10 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             if bom:
                 self.bom = bom
 
-        if not charset:
-            if "Content-Type" in self.headers:
-                pos = self.headers["Content-Type"].find("charset=")
-                if pos > -1:
-                    charset = self.headers["Content-Type"][(pos + 8) :]
+        if not charset and "Content-Type" in self.headers:
+            pos = self.headers["Content-Type"].find("charset=")
+            if pos > -1:
+                charset = self.headers["Content-Type"][(pos + 8) :]  # noqa: E203
 
         if charset:
             charset = charset.lower()
@@ -286,10 +280,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                 self.charset = charset
 
     def copy(self, new_grab=None):
-        """
-        Clone the Response object.
-        """
-
+        """Clone the Response object."""
         obj = self.__class__()
         obj.process_grab(new_grab if new_grab else self.grab)
 
@@ -316,24 +307,20 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return obj
 
     def save(self, path):
-        """
-        Save response body to file.
-        """
-
+        """Save response body to file."""
         path_dir = os.path.split(path)[0]
         if not os.path.exists(path_dir):
-            try:
+            with suppress(OSError):
                 os.makedirs(path_dir)
-            except OSError:
-                pass
 
         with open(path, "wb") as out:
             out.write(self._bytes_body if self._bytes_body is not None else b"")
 
     def save_hash(self, location, basedir, ext=None):
         """
-        Save response body into file with special path
-        built from hash. That allows to lower number of files
+        Save response body into file with special path built from hash.
+
+        That allows to lower number of files
         per directory.
 
         :param location: URL of file or something else. It is
@@ -356,48 +343,33 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         TODO: replace `basedir` with two options: root and save_to. And
         returns save_to + path
         """
-
         if isinstance(location, str):
             location = location.encode("utf-8")
         rel_path = hashed_path(location, ext=ext)
         path = os.path.join(basedir, rel_path)
         if not os.path.exists(path):
             path_dir, _ = os.path.split(path)
-            try:
+            with suppress(OSError):
                 os.makedirs(path_dir)
-            except OSError:
-                pass
             with open(path, "wb") as out:
                 out.write(self._bytes_body)
         return rel_path
 
     @property
     def json(self):
-        """
-        Return response body deserialized into JSON object.
-        """
-
+        """Return response body deserialized into JSON object."""
         return json.loads(self.body.decode(self.charset))
 
     def url_details(self):
-        """
-        Return result of urlsplit function applied to response url.
-        """
-
+        """Return result of urlsplit function applied to response url."""
         return urlsplit(self.url)
 
     def query_param(self, key):
-        """
-        Return value of parameter in query string.
-        """
-
+        """Return value of parameter in query string."""
         return parse_qs(self.url_details().query)[key][0]
 
     def browse(self):
-        """
-        Save response in temporary file and open it in GUI browser.
-        """
-
+        """Save response in temporary file and open it in GUI browser."""
         _, path = tempfile.mkstemp()
         self.save(path)
         webbrowser.open("file://" + path)
@@ -411,16 +383,13 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return self.total_time
 
     def __getstate__(self):
-        """
-        Reset cached lxml objects which could not be pickled.
-        """
+        """Reset cached lxml objects which could not be pickled."""
         state = {}
         for cls in type(self).mro():
             cls_slots = getattr(cls, "__slots__", ())
             for slot in cls_slots:
-                if slot != "__weakref__":
-                    if hasattr(self, slot):
-                        state[slot] = getattr(self, slot)
+                if slot != "__weakref__" and hasattr(self, slot):
+                    state[slot] = getattr(self, slot)
         state["_lxml_tree"] = None
         state["_strict_lxml_tree"] = None
         state["_lxml_form"] = None
@@ -447,7 +416,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         If substring is found return True else False.
         """
-
         if isinstance(anchor, str):
             if byte:
                 raise GrabMisuseError("The anchor should be bytes string in byte mode")
@@ -457,18 +425,12 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         raise GrabMisuseError("The anchor should be byte string in non-byte mode")
 
     def text_assert(self, anchor, byte=False):
-        """
-        If `anchor` is not found then raise `DataNotFound` exception.
-        """
-
+        """If `anchor` is not found then raise `DataNotFound` exception."""
         if not self.text_search(anchor, byte=byte):
             raise DataNotFound("Substring not found: %s" % anchor)
 
     def text_assert_any(self, anchors, byte=False):
-        """
-        If no `anchors` were found then raise `DataNotFound` exception.
-        """
-
+        """If no `anchors` were found then raise `DataNotFound` exception."""
         found = False
         for anchor in anchors:
             if self.text_search(anchor, byte=byte):
@@ -481,13 +443,11 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def rex_text(self, regexp, flags=0, byte=False, default=NULL):
         """
-        Search regular expression in response body and return content of first
-        matching group.
+        Return content of first matching group of regexp found in response body.
 
         :param byte: if False then search is performed in
             `response.unicode_body()` else the rex is searched in `response.body`.
         """
-
         # pylint: disable=no-member
         try:
             match = self.rex_search(regexp, flags=flags, byte=byte)
@@ -509,9 +469,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             regular expression with re.U flag.
 
         Return found match object or None
-
         """
-
         regexp = normalize_regexp(regexp, flags)
         match = None
         if byte:
@@ -528,20 +486,14 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return default
 
     def rex_assert(self, rex, byte=False):
-        """
-        If `rex` expression is not found then raise `DataNotFound` exception.
-        """
-
+        """Raise `DataNotFound` exception if `rex` expression is not found."""
         self.rex_search(rex, byte=byte)
 
     # PyqueryExtension methods
 
     @property
     def pyquery(self):
-        """
-        Returns pyquery handler.
-        """
-
+        """Return pyquery handler."""
         if not self._pyquery:
             # pytype: disable=import-error
             from pyquery import PyQuery  # pylint: disable=import-outside-toplevel
@@ -560,7 +512,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                 body_chunk = inp.read(4096)
         elif self._bytes_body:
             body_chunk = self._bytes_body[:4096]
-        return body_chunk
+        return body_chunk  # noqa: R504
 
     def convert_body_to_unicode(
         self, body, bom, charset, ignore_errors, fix_special_entities
@@ -569,7 +521,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         # if isinstance(body, unicode):
         # body = body.encode('utf-8')
         if bom:
-            body = body[len(self.bom) :]
+            body = body[len(self.bom) :]  # noqa: E203
         if fix_special_entities:
             body = fix_special_entities_func(body)
         if ignore_errors:
@@ -583,10 +535,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             return inp.read()
 
     def unicode_body(self, ignore_errors=True, fix_special_entities=True):
-        """
-        Return response body as unicode string.
-        """
-
+        """Return response body as unicode string."""
         if not self._unicode_body:
             self._unicode_body = self.convert_body_to_unicode(
                 body=self.body,
@@ -619,10 +568,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     @property
     def tree(self):
-        """
-        Return DOM tree of the document built with HTML DOM builder.
-        """
-
+        """Return DOM tree of the document built with HTML DOM builder."""
         if self._grab_config["content_type"] == "xml":
             return self.build_xml_tree()
         return self.build_html_tree()
@@ -661,7 +607,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             except Exception as ex:  # pylint: disable=broad-except
                 # FIXME: write test for this case
                 if (
-                    isinstance(ex, ParserError)
+                    isinstance(ex, ParserError)  # noqa: SIM114
                     and "Document is empty" in str(ex)
                     and "<html" not in body
                 ):
@@ -685,9 +631,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     @property
     def xml_tree(self):
-        """
-        Return DOM-tree of the document built with XML DOM builder.
-        """
+        """Return DOM-tree of the document built with XML DOM builder."""
         warn(
             "Attribute `grab.xml_tree` is deprecated. "
             "Use `Grab.doc.tree` attribute "
@@ -702,7 +646,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     # FormExtension methods
 
-    def choose_form(self, number=None, xpath=None, name=None, **kwargs):
+    def choose_form(self, number=None, xpath=None, name=None, **kwargs):  # noqa: C901
         """
         Set the default form.
 
@@ -731,7 +675,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             # Select by xpath
             g.choose_form(xpath='//form[contains(@action, "/submit")]')
         """
-
         id_ = kwargs.pop("id", None)
         if id_ is not None:
             try:
@@ -762,7 +705,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     @property
     def form(self):
         """
-        This attribute points to default form.
+        Return default document's form.
 
         If form was not selected manually then select the form
         which has the biggest number of input elements.
@@ -779,7 +722,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             g.choose_form(1)
             print g.form
         """
-
         if self._lxml_form is None:
             forms = [
                 (idx, len(list(x.fields))) for idx, x in enumerate(self.tree.forms)
@@ -807,16 +749,14 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             # Check the checkbox
             g.set_input('accept', True)
         """
-
         if self._lxml_form is None:
             self.choose_form_by_element('.//*[@name="%s"]' % name)
         elem = self.form.inputs[name]  # pylint: disable=no-member
 
         processed = False
-        if getattr(elem, "type", None) == "checkbox":
-            if isinstance(value, bool):
-                elem.checked = value
-                processed = True
+        if getattr(elem, "type", None) == "checkbox" and isinstance(value, bool):
+            elem.checked = value
+            processed = True
 
         if not processed:
             # We need to remember original values of file fields
@@ -835,7 +775,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         :param _id: id of element
         :param value: value which should be set to element
         """
-
         xpath = './/*[@id="%s"]' % _id
         if self._lxml_form is None:
             self.choose_form_by_element(xpath)
@@ -846,24 +785,22 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def set_input_by_number(self, number, value):
         """
-        Set the value of form element by its number in the form
+        Set the value of form element by its number in the form.
 
         :param number: number of element
         :param value: value which should be set to element
         """
-
         sel = XpathSelector(self.form)
         elem = sel.select('.//input[@type="text"]')[number].node()
         return self.set_input(elem.get("name"), value)
 
     def set_input_by_xpath(self, xpath, value):
         """
-        Set the value of form element by xpath
+        Set the value of form element by xpath.
 
         :param xpath: xpath path
         :param value: value which should be set to element
         """
-
         elem = self.select(xpath).node()
 
         if self._lxml_form is None:
@@ -924,9 +861,8 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
             # Form data should contain only one submit control
             for name in submit_controls:
-                if name != submit_name:
-                    if name in post:
-                        del post[name]
+                if name != submit_name and name in post:
+                    del post[name]
 
     def get_form_request(
         self, submit_name=None, url=None, extra_post=None, remove_from_post=None
@@ -950,7 +886,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         Multipart forms are correctly recognized by grab library.
         """
-
         # pylint: disable=no-member
         post = self.form_fields()
         self.clean_submit_controls(post, submit_name)
@@ -963,10 +898,9 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         # `extra_post` allows multiple value of one key
 
         # Process saved values of file fields
-        if self.form.method == "POST":
-            if "multipart" in self.form.get("enctype", ""):
-                for key, obj in self._file_fields.items():
-                    post[key] = obj
+        if self.form.method == "POST" and "multipart" in self.form.get("enctype", ""):
+            for key, obj in self._file_fields.items():
+                post[key] = obj
 
         post_items = list(post.items())
         del post
@@ -1021,14 +955,16 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                 continue
             # Do not submit disabled fields
             # http://www.w3.org/TR/html4/interact/forms.html#h-17.12
-            if elem.get("disabled"):
-                if elem.name in fields:
-                    fields_to_remove.add(elem.name)
+            if elem.get("disabled") and elem.name in fields:
+                fields_to_remove.add(elem.name)
             elif getattr(elem, "type", None) == "checkbox":
-                if not elem.checked:
-                    if elem.name is not None:
-                        if elem.name in fields and fields[elem.name] is None:
-                            fields_to_remove.add(elem.name)
+                if (
+                    not elem.checked
+                    and elem.name is not None
+                    and elem.name in fields
+                    and fields[elem.name] is None
+                ):
+                    fields_to_remove.add(elem.name)
             else:
                 # WHAT THE FUCK DOES THAT MEAN?
                 if elem.name in fields_to_remove:
@@ -1038,14 +974,14 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def process_form_fields(self, fields):
         for key, val in list(fields.items()):
             if isinstance(val, CheckboxValues):
-                if not len(val):  # pylint: disable=len-as-condition
+                if not len(val):  # noqa: PIE787 pylint: disable=len-as-condition
                     del fields[key]
                 elif len(val) == 1:
                     fields[key] = val.pop()
                 else:
                     fields[key] = list(val)
             if isinstance(val, MultipleSelectOptions):
-                if not len(val):  # pylint: disable=len-as-condition
+                if not len(val):  # noqa: PIE787 pylint: disable=len-as-condition
                     del fields[key]
                 elif len(val) == 1:
                     fields[key] = val.pop()
@@ -1058,17 +994,18 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         Fill some fields with reasonable values.
         """
-
         fields = dict(self.form.fields)  # pylint: disable=no-member
         self.process_form_fields(fields)
         for elem in self.form.inputs:
-            if elem.tag == "select":
-                if elem.name in fields and fields[elem.name] is None:
-                    if elem.value_options:
-                        fields[elem.name] = elem.value_options[0]
-            elif getattr(elem, "type", None) == "radio":
-                if fields[elem.name] is None:
-                    fields[elem.name] = elem.get("value")
+            if (
+                elem.tag == "select"
+                and elem.name in fields
+                and fields[elem.name] is None
+                and elem.value_options
+            ):
+                fields[elem.name] = elem.value_options[0]
+            elif (getattr(elem, "type", None) == "radio") and fields[elem.name] is None:
+                fields[elem.name] = elem.get("value")
         for name in self.build_fields_to_remove(fields, self.form.inputs):
             del fields[name]
         return fields

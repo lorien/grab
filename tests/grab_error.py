@@ -29,8 +29,5 @@ class GrabErrorTestCase(TestCase):
     def test_attribute_exception(self):
         grab = build_grab()
         self.assertTrue(grab.exception is None)
-        try:
+        with self.assertRaises(GrabNetworkError):
             grab.go("http://%s" % NON_ROUTABLE_IP)
-        except GrabNetworkError:
-            pass
-        self.assertTrue(isinstance(grab.exception, GrabNetworkError))

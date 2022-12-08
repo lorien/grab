@@ -18,13 +18,11 @@ class GrabXMLProcessingTestCase(BaseGrabTestCase):
         self.assertTrue(grab.doc.select("//foo").text() == "foo")
 
     def test_declaration_bug(self):
-        """
-        1. Build Grab instance with XML with xml declaration
-        2. Call search method
-        3. Call xpath
-        4. Get ValueError: Unicode strings with encoding
-            declaration are not supported.
-        """
+        # 1. Build Grab instance with XML with xml declaration
+        # 2. Call search method
+        # 3. Call xpath
+        # 4. Get ValueError: Unicode strings with encoding
+        #     declaration are not supported.
         xml = (
             b'<?xml version="1.0" encoding="UTF-8"?>' b"<tree><leaf>text</leaf></tree>"
         )
