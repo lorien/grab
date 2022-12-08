@@ -1,3 +1,5 @@
+from typing import Dict
+
 from grab import Grab
 from grab.proxylist import BaseProxySource, Proxy
 from grab.spider import Spider, Task
@@ -11,7 +13,7 @@ class SimpleSpider(Spider):
 
 
 class TestSpiderProxyCase(BaseGrabTestCase):
-    extra_servers: dict[int, dict]
+    extra_servers: Dict[int, Dict]
 
     @classmethod
     def setUpClass(cls):

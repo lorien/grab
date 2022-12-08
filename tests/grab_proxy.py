@@ -1,3 +1,5 @@
+from typing import Dict
+
 from grab.proxylist import BaseProxySource
 from test_server import Response, TestServer
 from tests.util import BaseGrabTestCase, build_grab, temp_file
@@ -6,7 +8,7 @@ ADDRESS = "127.0.0.1"
 
 
 class TestProxy(BaseGrabTestCase):
-    extra_servers: dict[int, dict]
+    extra_servers: Dict[int, Dict]
 
     @classmethod
     def setUpClass(cls):
