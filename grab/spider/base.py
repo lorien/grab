@@ -65,7 +65,9 @@ class SpiderMetaClass(type):
         return super(SpiderMetaClass, cls).__new__(cls, name, bases, namespace)
 
 
-class Spider(metaclass=SpiderMetaClass):
+class Spider(
+    metaclass=SpiderMetaClass
+):  # pylint: disable=too-many-instance-attributes, too-many-public-methods
     """
     Asynchronous scraping framework.
     """
@@ -105,7 +107,7 @@ class Spider(metaclass=SpiderMetaClass):
     # Public Methods
     # **************
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-instance-attributes, too-many-locals, too-many-arguments
         self,
         thread_number=None,
         network_try_limit=None,
@@ -634,28 +636,31 @@ class Spider(metaclass=SpiderMetaClass):
             self.interrupted = True
             raise
         finally:
-            # TODO:
-            # print('Start stopping services')
-            for srv in services:
-                # Resume service if it has been paused
-                # to allow service to process stop signal
-                srv.resume()
-                srv.stop()
-            # print('Called .stop() for all services')
-            start = time.time()
-            while any(x.is_alive() for x in services):
-                time.sleep(0.1)
-                if time.time() - start > 10:
-                    break
-            for srv in services:
-                if srv.is_alive():
-                    print("The %s has not stopped :(" % srv)
-            self.stat.print_progress_line()
-            self.shutdown()
-            if self.task_queue:
-                self.task_queue.clear()
-                self.task_queue.close()
-            logger.debug("Work done")
+            self.shutdown_services(services)
+
+    def shutdown_services(self, services):
+        # TODO:
+        # print('Start stopping services')
+        for srv in services:
+            # Resume service if it has been paused
+            # to allow service to process stop signal
+            srv.resume()
+            srv.stop()
+        # print('Called .stop() for all services')
+        start = time.time()
+        while any(x.is_alive() for x in services):
+            time.sleep(0.1)
+            if time.time() - start > 10:
+                break
+        for srv in services:
+            if srv.is_alive():
+                print("The %s has not stopped :(" % srv)
+        self.stat.print_progress_line()
+        self.shutdown()
+        if self.task_queue:
+            self.task_queue.clear()
+            self.task_queue.close()
+        logger.debug("Work done")
 
     def is_idle(self):
         return (

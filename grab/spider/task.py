@@ -11,12 +11,12 @@ class BaseTask:
     pass
 
 
-class Task(BaseTask):
+class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
     """
     Task for spider.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments, too-many-locals
         self,
         name=None,
         url=None,

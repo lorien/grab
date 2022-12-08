@@ -68,28 +68,31 @@ class TaskDispatcherService(BaseService):
             if isinstance(result, FatalError):
                 self.spider.fatal_error_queue.put(meta["exc_info"])
         elif isinstance(result, dict) and "grab" in result:
-            # TODO: Move to network service
-            # starts
-            self.spider.log_network_result_stats(result, task)
-            # ends
-            is_valid = False
-            if task.get("raw"):
-                is_valid = True
-            elif result["ok"]:
-                res_code = result["grab"].doc.code
-                is_valid = self.spider.is_valid_network_response_code(res_code, task)
-            if is_valid:
-                self.spider.parser_service.input_queue.put((result, task))
-            else:
-                self.spider.log_failed_network_result(result)
-                # Try to do network request one more time
-                # TODO:
-                # Implement valid_try_limit
-                # Use it if request failed not because of network error
-                # But because of content integrity check
-                if self.spider.network_try_limit > 0:
-                    task.setup_grab_config(result["grab_config_backup"])
-                    self.spider.add_task(task)
-            self.spider.stat.inc("spider:request")
+            self.process_network_result(result, task)
         else:
             raise SpiderError("Unknown result received from a service: %s" % result)
+
+    def process_network_result(self, result, task):
+        # TODO: Move to network service
+        # starts
+        self.spider.log_network_result_stats(result, task)
+        # ends
+        is_valid = False
+        if task.get("raw"):
+            is_valid = True
+        elif result["ok"]:
+            res_code = result["grab"].doc.code
+            is_valid = self.spider.is_valid_network_response_code(res_code, task)
+        if is_valid:
+            self.spider.parser_service.input_queue.put((result, task))
+        else:
+            self.spider.log_failed_network_result(result)
+            # Try to do network request one more time
+            # TODO:
+            # Implement valid_try_limit
+            # Use it if request failed not because of network error
+            # But because of content integrity check
+            if self.spider.network_try_limit > 0:
+                task.setup_grab_config(result["grab_config_backup"])
+                self.spider.add_task(task)
+        self.spider.stat.inc("spider:request")

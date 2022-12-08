@@ -11,7 +11,7 @@ class SimpleSpider(Spider):
         pass
 
 
-class TestSpiderTestCase(BaseGrabTestCase):
+class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-methods
     def setUp(self):
         self.server.reset()
 

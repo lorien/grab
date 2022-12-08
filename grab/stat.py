@@ -14,7 +14,7 @@ DEFAULT_SPEED_KEY = "spider:request-processed"
 DEFAULT_LOGGING_PERIOD = 1
 
 
-class Stat:
+class Stat:  # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         logger_name="grab.stat",

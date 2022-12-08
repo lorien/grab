@@ -157,7 +157,7 @@ def default_config() -> Dict[str, Any]:
     )
 
 
-class Grab:
+class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
     __slots__ = (
         "request_head",
         "request_body",
@@ -530,6 +530,29 @@ class Grab:
             return self.request()
         return None
 
+    def debug_post(self):
+        post = self.config["post"] or self.config["multipart_post"]
+        if isinstance(post, dict):
+            post = list(post.items())
+        if post:
+            if isinstance(post, str):
+                post = (
+                    make_bytes(post[: self.config["debug_post_limit"]], errors="ignore")
+                    + b"..."
+                )
+            else:
+                items = normalize_http_values(post, charset=self.config["charset"])
+                new_items = []
+                for key, value in items:
+                    if len(value) > self.config["debug_post_limit"]:
+                        value = value[: self.config["debug_post_limit"]] + b"..."
+                    new_items.append((key, value))
+                post = "\n".join("%-25s: %s" % x for x in new_items)
+        if post:
+            logger_network.debug(
+                "[%02d] POST request:\n%s\n", self.request_counter, post
+            )
+
     def process_request_result(self):
         """
         Process result of real request performed via transport extension.
@@ -538,29 +561,7 @@ class Grab:
         now = datetime.utcnow()
         # TODO: move into separate method
         if self.config["debug_post"]:
-            post = self.config["post"] or self.config["multipart_post"]
-            if isinstance(post, dict):
-                post = list(post.items())
-            if post:
-                if isinstance(post, str):
-                    post = (
-                        make_bytes(
-                            post[: self.config["debug_post_limit"]], errors="ignore"
-                        )
-                        + b"..."
-                    )
-                else:
-                    items = normalize_http_values(post, charset=self.config["charset"])
-                    new_items = []
-                    for key, value in items:
-                        if len(value) > self.config["debug_post_limit"]:
-                            value = value[: self.config["debug_post_limit"]] + b"..."
-                        new_items.append((key, value))
-                    post = "\n".join("%-25s: %s" % x for x in new_items)
-            if post:
-                logger_network.debug(
-                    "[%02d] POST request:\n%s\n", self.request_counter, post
-                )
+            self.debug_post()
 
         # It's important to delete old POST data after request is performed.
         # If POST data is not cleared then next request will try to use them
