@@ -210,7 +210,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         if kwargs:
             self.setup(**kwargs)
         if document_body is not None:
-            self.setup_document(document_body)
+            self.setup_document(document_body, charset=kwargs.get("document_charset"))
 
     def _get_doc(self):
         if self._doc is None:
@@ -612,7 +612,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         doc.body = content
         doc.status = ""
         doc.head = b"HTTP/1.1 200 OK\r\n\r\n"
-        doc.parse(charset=kwargs.get("document_charset"))
+        doc.parse(charset=kwargs.get("charset"))
         doc.code = 200
         doc.total_time = 0
         doc.connect_time = 0
@@ -620,6 +620,8 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         doc.url = ""
 
         for key, value in kwargs.items():
+            if key and value is None:
+                value = "utf-8"
             setattr(doc, key, value)
 
         self.doc = doc

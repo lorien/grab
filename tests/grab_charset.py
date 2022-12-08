@@ -72,6 +72,9 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
 
     def test_charset_html5(self):
         grab = Grab()
+        grab.setup_document(b"<meta charset='cp1251'>")
+        self.assertEqual("cp1251", grab.doc.charset)
+
         grab.setup_document(b"<meta charset='windows-1251'>")
         self.assertEqual("windows-1251", grab.doc.charset)
 

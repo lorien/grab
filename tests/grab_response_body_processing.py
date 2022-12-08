@@ -110,3 +110,10 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         for elem in grab.doc('//a[contains(@class, "exploregrid-item")]'):
             items.append(grab.make_url_absolute(elem.attr("href")))
         self.assertTrue("tools-for-open-source" in items[2])
+
+    def test_explicit_custom_charset(self):
+        g = build_grab(
+            "<html><head></head><body><h1>привет</h1></body></html".encode("cp1251"),
+            document_charset="cp1251",
+        )
+        self.assertEqual("привет", g.doc.select("//h1").text())
