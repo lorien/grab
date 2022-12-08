@@ -1,11 +1,10 @@
 from __future__ import absolute_import
 
-from weblib.logs import default_logging  # noqa
-
-from grab.error import (GrabError, DataNotFound, GrabNetworkError,  # noqa
-                        GrabMisuseError, GrabTimeoutError)
-from grab.upload import UploadContent, UploadFile  # noqa
 from grab.base import Grab  # noqa
+from grab.error import GrabNetworkError  # noqa
+from grab.error import DataNotFound, GrabError, GrabMisuseError, GrabTimeoutError
+from grab.upload import UploadContent, UploadFile  # noqa
+from grab.util.log import default_logging  # noqa
 
-__version__ = '0.6.41'
-VERSION_NUMERIC = tuple(map(int, __version__.split('.')))
+__version__ = "0.6.41"
+VERSION_NUMERIC = tuple(map(int, __version__.split(".")))

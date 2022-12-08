@@ -1,11 +1,8 @@
-from weblib.error import ResponseNotValid
-from test_server import Response
-
 from grab import Grab
-from grab.spider import base
-from grab.spider import Spider, Task, SpiderMisuseError, NoTaskHandler
+from grab.error import ResponseNotValid
+from grab.spider import NoTaskHandler, Spider, SpiderMisuseError, Task, base
 from grab.spider.error import SpiderError
-
+from test_server import Response
 from tests.util import BaseGrabTestCase, build_grab, build_spider
 
 

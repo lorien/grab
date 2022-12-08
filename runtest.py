@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import unittest
-import sys
-from argparse import ArgumentParser
 import logging
+import sys
 import threading
+import unittest
+from argparse import ArgumentParser
 
 from tests.util import GLOBAL
 
@@ -56,7 +56,7 @@ GRAB_TEST_LIST = (
     # *** Other things
     "tests.raw_server",
     "tests.misc",
-    "tests.lib_weblib",
+    "tests.test_util_http",
 )
 
 # ************

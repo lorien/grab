@@ -24,21 +24,6 @@ in Grab's messages::
     >>> logger.addHandler(logging.StreamHandler())
     >>> logger.setLevel(logging.DEBUG)
 
-You can also use a `default_logging` function that configures logging as
-follows:
-
-* all messages of any level except from Grab modules are printed to console
-* all "grab*" messages with level INFO or higher are printed to console
-* all "grab*" messages of any level are saved to /tmp/grab.log
-* all "grab.network*" messages (usually these are URLs being requested) of any
-  level are saved to /tmp/grab.network.log
-
-Usage of `default_logging` function is simple::
-
-    >>> from weblib.logs import default_logging
-    >>> default_logging()
-
-
 .. _grab_debugging_logging_network:
 
 Logging messages about network request

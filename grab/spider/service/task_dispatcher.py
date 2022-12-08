@@ -1,7 +1,6 @@
 from queue import Empty, Queue
 
-from weblib.error import ResponseNotValid
-
+from grab.error import ResponseNotValid
 from grab.spider.error import FatalError, SpiderError
 from grab.spider.task import Task
 

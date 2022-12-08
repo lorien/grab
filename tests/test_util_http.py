@@ -1,5 +1,4 @@
-from weblib.http import normalize_url
-
+from grab.util.http import normalize_url
 from tests.util import BaseGrabTestCase
 
 

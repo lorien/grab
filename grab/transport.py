@@ -25,14 +25,14 @@ from urllib3.filepost import encode_multipart_formdata
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
 from user_agent import generate_user_agent
-from weblib.encoding import decode_pairs, make_str, make_unicode
-from weblib.http import normalize_http_values, normalize_post_data, normalize_url
 
 from grab import error
 from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.document import Document
 from grab.error import GrabMisuseError, GrabTimeoutError
 from grab.upload import UploadContent, UploadFile
+from grab.util.encoding import decode_pairs, make_bytes, make_str
+from grab.util.http import normalize_http_values, normalize_post_data, normalize_url
 
 
 class BaseTransport(object):
@@ -155,12 +155,12 @@ class Urllib3Transport(BaseTransport):
             request_url = normalize_url(grab.config["url"])
         except Exception as ex:
             raise error.GrabInvalidUrl(
-                "%s: %s" % (str(ex), make_unicode(grab.config["url"], errors="ignore"))
+                "%s: %s" % (str(ex), make_str(grab.config["url"], errors="ignore"))
             )
         req.url = request_url
 
         method = grab.detect_request_method()
-        req.method = make_str(method)
+        req.method = make_bytes(method)
 
         req.config_body_maxsize = grab.config["body_maxsize"]
         req.config_nobody = grab.config["nobody"]
@@ -311,10 +311,10 @@ class Urllib3Transport(BaseTransport):
             # It is the timeout on read of next data chunk from the server
             # Total response timeout is handled by Grab
             timeout = Timeout(connect=req.connect_timeout, read=req.timeout)
-            # req_headers = dict((make_unicode(x), make_unicode(y))
+            # req_headers = dict((make_str(x), make_str(y))
             #                   for (x, y) in req.headers.items())
-            req_url = make_unicode(req.url)
-            req_method = make_unicode(req.method)
+            req_url = make_str(req.url)
+            req_method = make_str(req.method)
             req.op_started = time.time()
             try:
                 res = pool.urlopen(
@@ -376,7 +376,7 @@ class Urllib3Transport(BaseTransport):
                 val = val.encode("latin").decode("utf-8", errors="ignore")
                 head += "%s: %s\r\n" % (key, val)
             head += "\r\n"
-            response.head = make_str(head, encoding="utf-8")
+            response.head = make_bytes(head, encoding="utf-8")
 
             # if self.body_path:
             #    response.body_path = self.body_path

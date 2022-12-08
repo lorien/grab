@@ -15,10 +15,8 @@ Exception
     |-> GrabInvalidUrl
     |-> GrabInternalError
     |-> GrabFeatureIsDeprecated
-
-Exception
-| -> weblib.error.WeblibError
-     |-> DataNotFound <- IndexError
+    |-> ResponseNotValid
+|-> DataNotFound == IndexError
 """
 
 from __future__ import absolute_import
@@ -125,3 +123,7 @@ def raise_feature_is_deprecated(feature_name):
 # I am moving away from using weblib package.
 # To minimize failures in external code which uses DataNotFound class I make it alias of IndexError
 DataNotFound = IndexError
+
+
+class ResponseNotValid(GrabError):
+    pass

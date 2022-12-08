@@ -28,19 +28,19 @@ from io import BytesIO, StringIO
 from urllib.parse import parse_qs, urljoin, urlsplit
 
 import defusedxml.lxml
-import weblib.encoding
 from lxml.etree import ParserError, XMLParser  # pytype: disable=import-error
 from lxml.html import CheckboxValues, HTMLParser, MultipleSelectOptions
 from selection import XpathSelector
-from weblib.files import hashed_path
-from weblib.html import decode_entities, find_refresh_url
-from weblib.http import smart_urlencode
-from weblib.rex import normalize_regexp
-from weblib.text import normalize_space
 
+import grab.util.html
 from grab.const import NULL
 from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabMisuseError
+from grab.util.files import hashed_path
+from grab.util.html import decode_entities, find_refresh_url
+from grab.util.http import smart_urlencode
+from grab.util.rex import normalize_regexp
+from grab.util.text import normalize_spaces
 from grab.util.warning import warn
 
 NULL_BYTE = chr(0)
@@ -499,7 +499,7 @@ class Document(object):
             else:
                 return default
         else:
-            return normalize_space(decode_entities(match.group(1)))
+            return normalize_spaces(decode_entities(match.group(1)))
 
     def rex_search(self, regexp, flags=0, byte=False, default=NULL):
         """
@@ -576,7 +576,7 @@ class Document(object):
         if bom:
             body = body[len(self.bom) :]
         if fix_special_entities:
-            body = weblib.encoding.fix_special_entities(body)
+            body = grab.util.html.fix_special_entities(body)
         if ignore_errors:
             errors = "ignore"
         else:

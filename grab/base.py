@@ -18,13 +18,13 @@ from random import randint
 from typing import Any, Dict, Optional, cast
 from urllib.parse import urljoin
 
-from weblib.html import find_base_url
-from weblib.http import make_str, normalize_http_values
-
 from grab import error
 from grab.cookie import CookieManager
 from grab.document import Document
 from grab.proxylist import ProxyList, parse_proxy_line
+from grab.util.encoding import make_bytes
+from grab.util.html import find_base_url
+from grab.util.http import normalize_http_values
 
 __all__ = ("Grab",)
 # This counter will used in enumerating network queries.
@@ -548,7 +548,7 @@ class Grab(object):
             if post:
                 if isinstance(post, str):
                     post = (
-                        make_str(
+                        make_bytes(
                             post[: self.config["debug_post_limit"]], errors="ignore"
                         )
                         + b"..."

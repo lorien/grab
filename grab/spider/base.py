@@ -1,4 +1,3 @@
-# FIXME: split to modules, make smaller
 # pylint: disable=too-many-lines
 import logging
 import time
@@ -8,14 +7,13 @@ from queue import Empty, Queue
 from random import randint
 from traceback import format_exception, format_stack
 
-from weblib import metric
-
 from grab.base import Grab
 from grab.error import raise_feature_is_deprecated
 from grab.proxylist import BaseProxySource, ProxyList
 from grab.spider.error import NoTaskHandler, SpiderError, SpiderMisuseError
 from grab.spider.task import Task
 from grab.stat import Stat
+from grab.util.metrics import format_traffic_value
 from grab.util.misc import camel_case_to_underscore
 from grab.util.warning import warn
 
@@ -387,7 +385,7 @@ class Spider(metaclass=SpiderMetaClass):
         if "download-size" in self.stat.counters:
             out.append(
                 "Network download: %s"
-                % metric.format_traffic_value(self.stat.counters["download-size"])
+                % format_traffic_value(self.stat.counters["download-size"])
             )
         out.append(
             "Queue size: %d" % self.task_queue.size() if self.task_queue else "NA"
