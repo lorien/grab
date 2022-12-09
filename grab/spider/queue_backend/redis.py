@@ -13,7 +13,7 @@ from fastrq.priorityqueue import PriorityQueue  # pytype: disable=import-error
 from redis import Redis
 
 from grab.spider.error import SpiderMisuseError
-from grab.spider.queue_backend.base import QueueInterface
+from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.task import Task
 
 
@@ -34,7 +34,7 @@ class CustomPriorityQueue(PriorityQueue):  # type: ignore
             self._redis.delete(self._key)
 
 
-class QueueBackend(QueueInterface):
+class RedisTaskQueue(BaseTaskQueue):
     def __init__(
         self, spider_name: str, queue_name: Optional[str] = None, **kwargs: Any
     ) -> None:

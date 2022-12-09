@@ -10,18 +10,20 @@ from grab.error import (
 )
 from grab.util.misc import camel_case_to_underscore
 
-from .base import BaseService
+from ..interface import BaseSpider
+from ..task import Task
+from .base import BaseService, ServiceWorker
 
 NetworkResult = Dict[str, Any]
 
 
-def make_class_abbr(name):
+def make_class_abbr(name: str) -> str:
     val = camel_case_to_underscore(name)
     return val.replace("_", "-")
 
 
 class NetworkServiceThreaded(BaseService):
-    def __init__(self, spider, thread_number):
+    def __init__(self, spider: BaseSpider, thread_number: int) -> None:
         super().__init__(spider)
         self.thread_number = thread_number
         self.worker_pool = []
@@ -29,7 +31,7 @@ class NetworkServiceThreaded(BaseService):
             self.worker_pool.append(self.create_worker(self.worker_callback))
         self.register_workers(self.worker_pool)
 
-    def get_active_threads_number(self):
+    def get_active_threads_number(self) -> int:
         return sum(
             1
             for x in self.iterate_workers(self.worker_registry)
@@ -37,7 +39,7 @@ class NetworkServiceThreaded(BaseService):
         )
 
     # TODO: supervisor worker to restore failed worker threads
-    def worker_callback(self, worker):
+    def worker_callback(self, worker: ServiceWorker) -> None:
         while not worker.stop_event.is_set():
             worker.process_pause_signal()
             try:
@@ -54,7 +56,7 @@ class NetworkServiceThreaded(BaseService):
                     finally:
                         worker.is_busy_event.clear()
 
-    def process_task(self, task):
+    def process_task(self, task: Task) -> None:
         task.network_try_count += 1  # pylint: disable=no-member
         is_valid, reason = self.spider.check_task_limits(task)
         if is_valid:

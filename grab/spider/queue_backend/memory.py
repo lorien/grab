@@ -5,11 +5,11 @@ from datetime import datetime
 from queue import Empty, PriorityQueue
 from typing import Any, Optional
 
-from grab.spider.queue_backend.base import QueueInterface
+from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.task import Task
 
 
-class QueueBackend(QueueInterface):
+class MemoryTaskQueue(BaseTaskQueue):
     def __init__(self, spider_name: str, **kwargs: Any) -> None:
         super().__init__(spider_name, **kwargs)
         self.queue_object: PriorityQueue[tuple[int, Task]] = PriorityQueue()

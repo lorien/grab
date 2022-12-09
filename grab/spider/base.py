@@ -18,6 +18,7 @@ from grab.util.metrics import format_traffic_value
 from grab.util.misc import camel_case_to_underscore
 from grab.util.warning import warn
 
+from .interface import BaseSpider
 from .service.network import NetworkResult
 from .service.parser import ParserService
 from .service.task_dispatcher import TaskDispatcherService
@@ -35,40 +36,8 @@ logger = logging.getLogger("grab.spider.base")
 # pylint: disable=invalid-name
 
 
-class SpiderMetaClass(type):
-    """
-    Magic meta class to make things complex.
-
-    * It creates Meta attribute, if it is not defined in
-        Spider descendant class, by copying parent's Meta attribute
-    * It reset Meta.abstract to False if Meta is copied from parent class
-    * If defined Meta does not contains `abstract`
-        attribute then define it and set to False
-    """
-
-    def __new__(cls, name, bases, namespace):
-        if "Meta" not in namespace:
-            for base in bases:
-                if hasattr(base, "Meta"):
-                    # copy contents of base Meta
-                    meta = type("Meta", (object,), dict(base.Meta.__dict__))
-                    # reset abstract attribute
-                    meta.abstract = False
-                    namespace["Meta"] = meta
-                    break
-
-        # Process special case (SpiderMetaClassMixin)
-        if "Meta" not in namespace:
-            namespace["Meta"] = type("Meta", (object,), {})
-
-        if not hasattr(namespace["Meta"], "abstract"):
-            namespace["Meta"].abstract = False
-
-        return super(SpiderMetaClass, cls).__new__(cls, name, bases, namespace)
-
-
 # pylint: disable=too-many-instance-attributes, too-many-public-methods
-class Spider(metaclass=SpiderMetaClass):
+class Spider(BaseSpider):
     """Asynchronous scraping framework."""
 
     spider_name = None
@@ -80,13 +49,6 @@ class Spider(metaclass=SpiderMetaClass):
     # then consider to use `task_generator` method instead of
     # `initial_urls` attribute
     initial_urls = []
-
-    class Meta:
-        # Meta.abstract means that this class will not be
-        # collected to spider registry by `grab crawl` CLI command.
-        # The Meta is inherited by descendant classes BUT
-        # Meta.abstract is reset to False in each descendant
-        abstract = True
 
     # *************
     # Class Methods
@@ -218,6 +180,22 @@ class Spider(metaclass=SpiderMetaClass):
     def setup_cache(self, *args, **kwargs):  # pylint: disable=unused-argument
         raise_feature_is_deprecated("Cache feature")
 
+    def load_queue_class(self, backend: str):
+        # pylint: disable=import-outside-toplevel
+        if backend == "mongodb":
+            from grab.spider.queue_backend.mongodb import MongodbTaskQueue
+
+            return MongodbTaskQueue
+        if backend == "redis":
+            from grab.spider.queue_backend.redis import RedisTaskQueue
+
+            return RedisTaskQueue
+        if backend == "memory":
+            from grab.spider.queue_backend.memory import MemoryTaskQueue
+
+            return MemoryTaskQueue
+        raise SpiderMisuseError(f"Invalid task queue backend name: {backend}")
+
     def setup_queue(self, backend="memory", **kwargs):
         """
         Set up queue.
@@ -230,10 +208,11 @@ class Spider(metaclass=SpiderMetaClass):
             warn('Backend name "mongo" is deprecated. Use "mongodb" instead.')
             backend = "mongodb"
         logger.debug("Using %s backend for task queue", backend)
-        mod = __import__(
-            "grab.spider.queue_backend.%s" % backend, globals(), locals(), ["foo"]
-        )
-        self.task_queue = mod.QueueBackend(spider_name=self.get_spider_name(), **kwargs)
+        queue_cls = self.load_queue_class(backend)
+        # mod = __import__(
+        #    "grab.spider.queue_backend.%s" % backend, globals(), locals(), ["foo"]
+        # )
+        self.task_queue = queue_cls(spider_name=self.get_spider_name(), **kwargs)
 
     def add_task(self, task, queue=None, raise_error=False):
         """Add task to the task queue."""

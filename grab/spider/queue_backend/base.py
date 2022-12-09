@@ -1,11 +1,10 @@
-"""QueueInterface defines interface of queue backend."""
 from datetime import datetime
 from typing import Any, Optional
 
 from grab.spider.task import Task
 
 
-class QueueInterface:
+class BaseTaskQueue:
     def __init__(self, spider_name: str, **kwargs: Any) -> None:
         pass
 

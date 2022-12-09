@@ -9,14 +9,14 @@ from bson import Binary
 from pymongo import MongoClient
 from pymongo.collection import Collection
 
-from grab.spider.queue_backend.base import QueueInterface
+from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.task import Task
 from grab.types import JsonDocument
 
 LOG = logging.getLogger("grab.spider.queue_backend.mongodb")
 
 
-class QueueBackend(QueueInterface):
+class MongodbTaskQueue(BaseTaskQueue):
     def __init__(
         self,
         spider_name: str,

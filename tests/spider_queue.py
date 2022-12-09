@@ -6,7 +6,7 @@ from test_server import Response
 
 from grab.spider import Spider, Task
 from grab.spider.error import SpiderMisuseError
-from grab.spider.queue_backend.base import QueueInterface
+from grab.spider.queue_backend.base import BaseTaskQueue
 from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
 from tests.util import BaseGrabTestCase, build_spider
 
@@ -167,14 +167,14 @@ class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
         )
 
 
-class QueueInterfaceTestCase(TestCase):
+class TaskQueueTestCase(TestCase):
     def test_abstract_methods(self):
         """Just to improve test coverage."""
         # pylint: disable=abstract-method
-        class BrokenQueue(QueueInterface):
+        class BrokenTaskQueue(BaseTaskQueue):
             pass
 
-        task_queue = BrokenQueue("spider_name")
+        task_queue = BrokenTaskQueue("spider_name")
         self.assertRaises(NotImplementedError, task_queue.put, None, None)
         self.assertRaises(NotImplementedError, task_queue.get)
         self.assertRaises(NotImplementedError, task_queue.size)

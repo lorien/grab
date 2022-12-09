@@ -69,7 +69,6 @@ SPIDER_TEST_LIST = (
     "tests.spider_proxy",
     "tests.spider_queue",
     "tests.spider_misc",
-    "tests.spider_meta",
     "tests.spider_error",
     "tests.spider_stat",
     "tests.spider_multiprocess",
