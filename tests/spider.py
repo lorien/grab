@@ -1,7 +1,8 @@
+from test_server import Response
+
 from grab import Grab
 from grab.spider import Spider, Task
 from grab.spider.error import FatalError, SpiderError
-from test_server import Response
 from tests.util import BaseGrabTestCase, build_spider
 
 

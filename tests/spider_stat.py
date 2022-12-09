@@ -1,5 +1,6 @@
-from grab.spider import Spider, Task
 from test_server import Response
+
+from grab.spider import Spider, Task
 from tests.util import BaseGrabTestCase, build_spider
 
 

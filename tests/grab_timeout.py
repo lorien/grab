@@ -1,7 +1,8 @@
 import time
 
-from grab.error import GrabTimeoutError
 from test_server import Response
+
+from grab.error import GrabTimeoutError
 from tests.util import BaseGrabTestCase, build_grab
 
 

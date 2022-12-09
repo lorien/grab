@@ -1,5 +1,6 @@
-from grab import Grab
 from test_server import Response
+
+from grab import Grab
 from tests.util import BaseGrabTestCase, build_grab
 
 

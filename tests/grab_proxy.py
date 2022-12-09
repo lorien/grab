@@ -1,7 +1,8 @@
 from typing import Dict
 
-from grab.proxylist import BaseProxySource
 from test_server import Response, TestServer
+
+from grab.proxylist import BaseProxySource
 from tests.util import BaseGrabTestCase, build_grab, temp_file
 
 ADDRESS = "127.0.0.1"

@@ -1,6 +1,7 @@
+from test_server import Response
+
 from grab import Grab, GrabTimeoutError
 from grab.spider import Spider, Task
-from test_server import Response
 from tests.util import BaseGrabTestCase, build_spider
 
 # That URLs breaks Grab's URL normalization process

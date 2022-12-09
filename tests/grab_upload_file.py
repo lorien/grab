@@ -1,7 +1,8 @@
 import os
 
-from grab import UploadContent, UploadFile
 from test_server import Response
+
+from grab import UploadContent, UploadFile
 from tests.util import BaseGrabTestCase, build_grab, temp_file
 
 

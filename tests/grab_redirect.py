@@ -1,5 +1,6 @@
-from grab.error import GrabTooManyRedirectsError
 from test_server import Response
+
+from grab.error import GrabTooManyRedirectsError
 from tests.util import BaseGrabTestCase, build_grab
 
 

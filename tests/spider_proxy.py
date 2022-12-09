@@ -1,9 +1,10 @@
 from typing import Dict
 
+from test_server import Response, TestServer
+
 from grab import Grab
 from grab.proxylist import BaseProxySource, Proxy
 from grab.spider import Spider, Task
-from test_server import Response, TestServer
 from tests.util import ADDRESS, BaseGrabTestCase, build_spider, temp_file
 
 

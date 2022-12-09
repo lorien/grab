@@ -2,9 +2,9 @@ import os
 import threading
 
 from mock import patch
+from test_server import Response
 
 from grab import Grab, base
-from test_server import Response
 from tests.util import BaseGrabTestCase, build_grab, reset_request_counter, temp_dir
 
 

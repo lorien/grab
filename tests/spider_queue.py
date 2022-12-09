@@ -2,10 +2,11 @@ import time
 from typing import Any
 from unittest import TestCase
 
+from test_server import Response
+
 from grab.spider import Spider, Task
 from grab.spider.error import SpiderMisuseError
 from grab.spider.queue_backend.base import QueueInterface
-from test_server import Response
 from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
 from tests.util import BaseGrabTestCase, build_spider
 

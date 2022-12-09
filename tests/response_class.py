@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import os.path
 
 from test_server import Response
+
 from tests.util import TEST_DIR, BaseGrabTestCase, build_grab, temp_dir
 
 HTML = """

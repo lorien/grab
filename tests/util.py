@@ -7,8 +7,9 @@ from shutil import rmtree
 from tempfile import mkdtemp, mkstemp
 from unittest import TestCase
 
-from grab import Grab, base
 from test_server import TestServer
+
+from grab import Grab, base
 
 logger = logging.getLogger("tests.util")  # pylint: disable=invalid-name
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))

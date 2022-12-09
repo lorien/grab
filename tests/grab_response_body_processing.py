@@ -1,7 +1,8 @@
 import os
 
-from grab import GrabMisuseError
 from test_server import Response
+
+from grab import GrabMisuseError
 from tests.util import TEST_DIR, BaseGrabTestCase, build_grab, temp_dir
 
 

@@ -1,7 +1,8 @@
 from urllib.parse import quote
 
-from grab.error import GrabError
 from test_server import Response
+
+from grab.error import GrabError
 from tests.util import BaseGrabTestCase, build_grab
 
 

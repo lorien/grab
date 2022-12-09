@@ -1,7 +1,8 @@
 from urllib.parse import parse_qsl
 
-from grab import DataNotFound, GrabMisuseError
 from test_server import Response
+
+from grab import DataNotFound, GrabMisuseError
 from tests.util import BaseGrabTestCase, build_grab
 
 FORMS_HTML = b"""

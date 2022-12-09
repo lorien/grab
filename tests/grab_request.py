@@ -1,6 +1,7 @@
 from pprint import pprint  # pylint: disable=unused-import
 
 from test_server import Response
+
 from tests.util import BaseGrabTestCase, build_grab
 
 # from grab.error import (

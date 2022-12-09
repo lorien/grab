@@ -1,6 +1,7 @@
 from urllib.request import urlopen
 
 from test_server import Response
+
 from tests.util import BaseGrabTestCase
 
 

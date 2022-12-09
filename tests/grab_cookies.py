@@ -2,9 +2,10 @@ import json
 import pickle
 from pprint import pprint  # pylint: disable=unused-import
 
+from test_server import Response
+
 from grab.cookie import CookieManager, create_cookie
 from grab.error import GrabMisuseError
-from test_server import Response
 from tests.util import BaseGrabTestCase, build_grab, temp_file
 
 

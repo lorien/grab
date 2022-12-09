@@ -1,6 +1,7 @@
+from test_server import Response
+
 from grab import DataNotFound
 from grab.util import warning
-from test_server import Response
 from tests.util import BaseGrabTestCase, build_grab
 
 HTML = """

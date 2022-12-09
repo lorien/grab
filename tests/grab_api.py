@@ -1,8 +1,9 @@
 import threading
 from copy import deepcopy
 
-from grab import Grab, GrabError, GrabMisuseError
 from test_server import Response
+
+from grab import Grab, GrabError, GrabMisuseError
 from tests.util import BaseGrabTestCase, build_grab, reset_request_counter, temp_file
 
 
