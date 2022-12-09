@@ -1,5 +1,6 @@
 import time
 from queue import Empty
+from typing import Any, Dict
 
 from grab.error import (
     GrabInvalidResponse,
@@ -10,6 +11,8 @@ from grab.error import (
 from grab.util.misc import camel_case_to_underscore
 
 from .base import BaseService
+
+NetworkResult = Dict[str, Any]
 
 
 def make_class_abbr(name):

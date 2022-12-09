@@ -1,6 +1,7 @@
 import logging
 import sys
 from threading import Event, Thread
+from typing import Any, Callable, Iterable, Union
 
 # pylint: disable=invalid-name
 logger = logging.getLogger("grab.spider.base_service")
@@ -25,7 +26,9 @@ class ServiceWorker:
         self.activity_paused = Event()
         self.is_busy_event = Event()
 
-    def worker_callback_wrapper(self, callback):
+    def worker_callback_wrapper(
+        self, callback: Callable[..., Any]
+    ) -> Callable[..., None]:
         def wrapper(*args, **kwargs):
             try:
                 callback(*args, **kwargs)
@@ -35,18 +38,18 @@ class ServiceWorker:
 
         return wrapper
 
-    def start(self):
+    def start(self) -> None:
         self.thread.start()
 
-    def stop(self):
+    def stop(self) -> None:
         self.stop_event.set()
 
-    def process_pause_signal(self):
+    def process_pause_signal(self) -> None:
         if self.pause_event.is_set():
             self.activity_paused.set()
             self.resume_event.wait()
 
-    def pause(self):
+    def pause(self) -> None:
         self.resume_event.clear()
         self.pause_event.set()
         while True:
@@ -55,12 +58,12 @@ class ServiceWorker:
             if not self.is_alive():
                 break
 
-    def resume(self):
+    def resume(self) -> None:
         self.pause_event.clear()
         self.activity_paused.clear()
         self.resume_event.set()
 
-    def is_alive(self):
+    def is_alive(self) -> bool:
         return self.thread.is_alive()
 
 
@@ -69,11 +72,13 @@ class BaseService:
         self.spider = spider
         self.worker_registry = []
 
-    def create_worker(self, worker_action):
+    def create_worker(self, worker_action: Callable[..., None]) -> ServiceWorker:
         # pylint: disable=no-member
         return ServiceWorker(self.spider, worker_action)
 
-    def iterate_workers(self, objects):
+    def iterate_workers(
+        self, objects: Union[list[ServiceWorker], ServiceWorker]
+    ) -> Iterable[ServiceWorker]:
         for obj in objects:
             assert isinstance(obj, (ServiceWorker, list))
             if isinstance(obj, ServiceWorker):
@@ -81,32 +86,32 @@ class BaseService:
             elif isinstance(obj, list):
                 yield from obj
 
-    def start(self):
+    def start(self) -> None:
         for worker in self.iterate_workers(self.worker_registry):
             worker.start()
 
-    def stop(self):
+    def stop(self) -> None:
         for worker in self.iterate_workers(self.worker_registry):
             worker.stop()
 
-    def pause(self):
+    def pause(self) -> None:
         for worker in self.iterate_workers(self.worker_registry):
             worker.pause()
         # logging.debug('Service %s paused' % self.__class__.__name__)
 
-    def resume(self):
+    def resume(self) -> None:
         for worker in self.iterate_workers(self.worker_registry):
             worker.resume()
         # logging.debug('Service %s resumed' % self.__class__.__name__)
 
-    def register_workers(self, *args):
+    def register_workers(self, *args: Any) -> None:
         # pylint: disable=attribute-defined-outside-init
         self.worker_registry = args
 
-    def is_busy(self):
+    def is_busy(self) -> bool:
         return any(
             x.is_busy_event.is_set() for x in self.iterate_workers(self.worker_registry)
         )
 
-    def is_alive(self):
+    def is_alive(self) -> bool:
         return any(x.is_alive() for x in self.iterate_workers(self.worker_registry))

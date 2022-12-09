@@ -34,7 +34,7 @@ test:
 #	&& twine upload dist/*
 
 mypy:
-	mypy --strict $(FILES_CHECK_MYPY)
+	mypy --python-version=3.8 --strict $(FILES_CHECK_MYPY)
 
 pylint:
 	pylint -j0 $(FILES_CHECK_ALL)
@@ -50,6 +50,8 @@ check:
 	&& make pylint \
 	&& echo "flake8" \
 	&& make flake8 \
+	&& echo "OK" \
+	&& tox -e py38-check
 
 build:
 	rm -rf *.egg-info

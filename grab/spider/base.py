@@ -6,6 +6,7 @@ from datetime import datetime
 from queue import Empty, Queue
 from random import randint
 from traceback import format_exception, format_stack
+from typing import Any
 
 from grab.base import Grab
 from grab.error import raise_feature_is_deprecated
@@ -17,6 +18,7 @@ from grab.util.metrics import format_traffic_value
 from grab.util.misc import camel_case_to_underscore
 from grab.util.warning import warn
 
+from .service.network import NetworkResult
 from .service.parser import ParserService
 from .service.task_dispatcher import TaskDispatcherService
 from .service.task_generator import TaskGeneratorService
@@ -665,14 +667,14 @@ class Spider(metaclass=SpiderMetaClass):
             and not self.network_service.is_busy()
         )
 
-    def log_failed_network_result(self, res):
+    def log_failed_network_result(self, res: NetworkResult) -> None:
         if res["ok"]:
             msg = "http-%s" % res["grab"].doc.code
         else:
             msg = res["error_abbr"]
         self.stat.inc("error:%s" % msg)
 
-    def log_rejected_task(self, task, reason):
+    def log_rejected_task(self, task: Task, reason: str) -> None:
         if reason == "task-try-count":
             self.stat.collect("task-count-rejected", task.url)
         elif reason == "network-try-count":
@@ -685,19 +687,19 @@ class Spider(metaclass=SpiderMetaClass):
     # #################
 
     @property
-    def cache_reader_service(self):
+    def cache_reader_service(self) -> None:
         raise_feature_is_deprecated("Cache feature")
 
     @cache_reader_service.setter
-    def cache_reader_service(self, _):
+    def cache_reader_service(self, _: Any) -> None:
         raise_feature_is_deprecated("Cache feature")
 
     @property
-    def cache_writer_service(self):
+    def cache_writer_service(self) -> None:
         raise_feature_is_deprecated("Cache feature")
 
     @cache_writer_service.setter
-    def cache_writer_service(self, _):
+    def cache_writer_service(self, _: Any) -> None:
         raise_feature_is_deprecated("Cache feature")
 
 

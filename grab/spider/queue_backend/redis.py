@@ -1,4 +1,6 @@
 """Spider task queue backend powered by redis."""
+from __future__ import annotations
+
 import logging
 import pickle
 import queue
@@ -8,7 +10,7 @@ from datetime import datetime
 from typing import Any, Optional, cast
 
 from fastrq.priorityqueue import PriorityQueue  # pytype: disable=import-error
-from redis import StrictRedis
+from redis import Redis
 
 from grab.spider.error import SpiderMisuseError
 from grab.spider.queue_backend.base import QueueInterface
@@ -22,11 +24,9 @@ class CustomPriorityQueue(PriorityQueue):  # type: ignore
         self._conn_kwargs = kwargs
 
     # https://github.com/limen/fastrq/blob/master/fastrq/base.py
-    def connect(self) -> StrictRedis:
+    def connect(self) -> Redis[Any]:
         if self._redis is None:
-            self._redis: StrictRedis = StrictRedis(
-                decode_responses=False, **self._conn_kwargs
-            )
+            self._redis: Redis[Any] = Redis(decode_responses=False, **self._conn_kwargs)
         return self._redis
 
     def clear(self) -> None:
