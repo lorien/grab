@@ -117,3 +117,9 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             document_charset="cp1251",
         )
         self.assertEqual("привет", grab.doc.select("//h1").text())
+
+    def test_json(self):
+        self.server.add_response(Response(data=b'{"foo": "bar"}'))
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        self.assertEqual({"foo": "bar"}, grab.doc.json)

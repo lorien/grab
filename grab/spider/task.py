@@ -1,5 +1,4 @@
-from __future__ import absolute_import
-
+from copy import deepcopy
 from datetime import datetime, timedelta
 
 from grab.base import copy_config
@@ -34,6 +33,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         disable_cache=False,
         refresh_cache=False,
         cache_timeout=None,
+        store=None,
         # kwargs
         **kwargs
     ):
@@ -100,16 +100,40 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         self.grab_config = None
         if disable_cache or refresh_cache or cache_timeout:
             raise_feature_is_deprecated("Cache feature")
-
         if name == "generator":
             # The name "generator" is restricted because
             # `task_generator` handler could not be created because
             # this name is already used for special method which
             # generates new tasks
             raise SpiderMisuseError('Task name could not be "generator"')
-
         self.name = name
+        self.check_init_options_integrity(url, grab, grab_config)
+        if grab:
+            self.setup_grab_config(grab.dump_config())
+        elif grab_config:
+            self.setup_grab_config(grab_config)
+        else:
+            self.grab_config = None
+            self.url = url
+        if valid_status is None:
+            self.valid_status = []
+        else:
+            self.valid_status = valid_status
+        self.process_delay_option(delay)
+        self.fallback_name = fallback_name
+        self.priority_set_explicitly = priority_set_explicitly
+        self.priority = priority
+        self.network_try_count = network_try_count
+        self.task_try_count = task_try_count
+        self.use_proxylist = use_proxylist
+        self.raw = raw
+        self.callback = callback
+        self.coroutines_stack = []
+        self.store = store if store else {}
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
+    def check_init_options_integrity(self, url, grab, grab_config):
         if url is None and grab is None and grab_config is None:
             raise SpiderMisuseError(
                 "Either url, grab or grab_config argument "
@@ -128,33 +152,6 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             raise SpiderMisuseError(
                 "Options grab and grab_config could not be used together"
             )
-
-        if grab:
-            self.setup_grab_config(grab.dump_config())
-        elif grab_config:
-            self.setup_grab_config(grab_config)
-        else:
-            self.grab_config = None
-            self.url = url
-
-        if valid_status is None:
-            self.valid_status = []
-        else:
-            self.valid_status = valid_status
-
-        self.process_delay_option(delay)
-
-        self.fallback_name = fallback_name
-        self.priority_set_explicitly = priority_set_explicitly
-        self.priority = priority
-        self.network_try_count = network_try_count
-        self.task_try_count = task_try_count
-        self.use_proxylist = use_proxylist
-        self.raw = raw
-        self.callback = callback
-        self.coroutines_stack = []
-        for key, value in kwargs.items():
-            setattr(self, key, value)
 
     def get(self, key, default=None):
         """Return value of attribute or None if such attribute does not exist."""
@@ -177,7 +174,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         Reset priority attribute if it was not set explicitly.
         """
         # First, create exact copy of the current Task object
-        attr_copy = self.__dict__.copy()
+        attr_copy = deepcopy(self.__dict__)
         if attr_copy.get("grab_config") is not None:
             del attr_copy["url"]
         if not attr_copy["priority_set_explicitly"]:

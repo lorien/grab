@@ -1,4 +1,4 @@
-.PHONY: bootstrap venv deps dirs clean test release check build
+.PHONY: bootstrap venv deps dirs clean test release check build mypy
 
 FILES_CHECK_MYPY = grab
 FILES_CHECK_ALL = $(FILES_CHECK_MYPY) tests
@@ -36,9 +36,14 @@ check:
 	echo "pylint" \
 	&& pylint -j0 $(FILES_CHECK_ALL) \
 	&& echo "flake8" \
-	&& flake8 -j auto --max-cognitive-complexity=17 $(FILES_CHECK_ALL) \
+	&& flake8 -j auto --max-cognitive-complexity=17 $(FILES_CHECK_ALL)
 	#echo "mypy" \
 	#&& mypy --strict $(FILES_CHECK_MYPY) \
+	#&& echo "bandit" \
+	#&& bandit -qc pyproject.toml -r $(FILES_CHECK_ALL)
+
+mypy:
+	mypy --strict $(FILES_CHECK_MYPY)
 	#&& echo "bandit" \
 	#&& bandit -qc pyproject.toml -r $(FILES_CHECK_ALL)
 

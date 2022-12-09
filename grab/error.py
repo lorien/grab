@@ -81,7 +81,7 @@ class GrabFeatureIsDeprecated(GrabError):
     """Raised when user tries to use feature that is deprecated and has been dropped."""
 
 
-def raise_feature_is_deprecated(feature_name):
+def raise_feature_is_deprecated(feature_name: str) -> None:
     raise GrabFeatureIsDeprecated(
         "%s is not supported anymore. Update your spiders"
         " or use old Grab version" % feature_name

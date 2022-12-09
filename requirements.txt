@@ -25,6 +25,9 @@ pytest-cov
 
 # types
 # FAILS on python 3.7 # types-lxml
+lxml-stubs
+types-urllib3
+types-redis
 
 # Code Quality
 bandit[toml]

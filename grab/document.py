@@ -2,26 +2,21 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: MIT
 """The Document class is the result of network request made with Grab instance."""
+import codecs
 import email
+import json
+import logging
 import os
 import re
+import tempfile
+import threading
 
 # FIXME: split to modules, make smaller
 # pylint: disable=too-many-lines
 import weakref
-from copy import copy
-
-try:
-    import ujson as json
-except ImportError:
-    import json
-
-import codecs
-import logging
-import tempfile
-import threading
 import webbrowser
 from contextlib import suppress
+from copy import copy
 from datetime import datetime
 from io import BytesIO, StringIO
 from urllib.parse import parse_qs, urljoin, urlsplit

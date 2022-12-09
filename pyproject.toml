@@ -4,7 +4,7 @@ name = "grab"
 version = "0.6.41"
 description = "Web scraping framework"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = {"file" = "LICENSE"}
 keywords = ["web crawling", "web scraping", "web crawler", "web scraper", "lxml", "xpath", "html parsing"]
 authors = [
@@ -65,6 +65,10 @@ skips = ["B101", "B410"]
 
 [[tool.mypy.overrides]]
 module = "pyquery"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["user_agent", "fastrq.priorityqueue"]
 ignore_missing_imports = true
 
 [tool.pylint.main]
