@@ -1,7 +1,7 @@
 from contextlib import suppress
 from datetime import datetime
 from queue import Empty, PriorityQueue
-from typing import Any, Optional
+from typing import Any, List, Optional, Tuple
 
 from grab.spider.queue_backend.base import QueueInterface
 from grab.spider.task import Task
@@ -11,7 +11,7 @@ class QueueBackend(QueueInterface):
     def __init__(self, spider_name: str, **kwargs: Any) -> None:
         super().__init__(spider_name, **kwargs)
         self.queue_object: PriorityQueue[tuple[int, Task]] = PriorityQueue()
-        self.schedule_list: list[tuple[datetime, Task]] = []
+        self.schedule_list: List[Tuple[datetime, Task]] = []
 
     def put(
         self, task: Task, priority: int, schedule_time: Optional[datetime] = None
