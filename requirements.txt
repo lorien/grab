@@ -8,10 +8,10 @@
 #item
 #pylint
 #psutil
-#tox
 #fastrq
 #sphinx
 
+tox
 test_server>=0.0.35
 mock
 bumpversion
