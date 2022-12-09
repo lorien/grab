@@ -1,4 +1,4 @@
-from typing import Dict
+from __future__ import annotations
 
 from test_server import Response, TestServer
 
@@ -14,7 +14,7 @@ class SimpleSpider(Spider):
 
 
 class TestSpiderProxyCase(BaseGrabTestCase):
-    extra_servers: Dict[int, Dict]
+    extra_servers: dict[int, dict]
 
     @classmethod
     def setUpClass(cls):

@@ -1,7 +1,9 @@
+"""The core of grab package: the Grab class."""
+from __future__ import annotations
+
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-"""The core of grab package: the Grab class."""
 import collections.abc
 import email
 import itertools
@@ -13,7 +15,7 @@ from copy import copy, deepcopy
 from datetime import datetime
 from email.message import EmailMessage
 from random import randint
-from typing import Any, Dict, Optional, cast
+from typing import Any, Optional, cast
 from urllib.parse import urljoin
 
 from grab import error
@@ -59,7 +61,7 @@ def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
     return cloned_config
 
 
-def default_config() -> Dict[str, Any]:
+def default_config() -> dict[str, Any]:
     # TODO: Maybe config should be split into two entities:
     # 1) config which is not changed during request
     # 2) changeable settings
@@ -192,7 +194,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         """Create Grab instance."""
         self.meta = {}
         self._doc = None
-        self.config: Dict[str, Any] = default_config()
+        self.config: dict[str, Any] = default_config()
         self.config["common_headers"] = self.common_headers()
         self.cookies = CookieManager()
         self.proxylist = ProxyList()

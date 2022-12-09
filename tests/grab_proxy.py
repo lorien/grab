@@ -1,4 +1,4 @@
-from typing import Dict
+from __future__ import annotations
 
 from test_server import Response, TestServer
 
@@ -9,7 +9,7 @@ ADDRESS = "127.0.0.1"
 
 
 class TestProxy(BaseGrabTestCase):
-    extra_servers: Dict[int, Dict]
+    extra_servers: dict[int, dict]
 
     @classmethod
     def setUpClass(cls):

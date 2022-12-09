@@ -83,16 +83,3 @@ max-args=9
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-envlist = py3
-isolated_build = True
-
-[testenv]
-commands =
-    pytest --cov selection --cov-report xml {posargs}
-deps =
-    -rrequirements.txt
-"""
