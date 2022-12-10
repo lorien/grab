@@ -27,6 +27,7 @@ from urllib3.util.timeout import Timeout
 from user_agent import generate_user_agent
 
 from grab import error
+from grab.base import Grab
 from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.document import Document
 from grab.error import GrabMisuseError, GrabTimeoutError
@@ -458,11 +459,14 @@ class Urllib3Transport(BaseTransport):
                 # pylint: disable=protected-access
                 cast(HTTPResponse, MockResponse(self._response._original_response.msg)),
                 # pylint: enable=protected-access
-                cast(urllib.request.Request, MockRequest(self._request)),
+                cast(
+                    urllib.request.Request,
+                    MockRequest(self._request.url, self._request.headers),
+                ),
             )
         return jar
 
-    def process_cookie_options(self, grab, req):
+    def process_cookie_options(self, grab: Grab, req: Request):
         # `cookiefile` option should be processed before `cookies` option
         # because `load_cookies` updates `cookies` option
         if grab.config["cookiefile"]:
@@ -491,6 +495,6 @@ class Urllib3Transport(BaseTransport):
                 for name, value in grab.config["cookies"].items():
                     grab.cookies.set(name=name, value=value, domain=request_host_no_www)
 
-        cookie_hdr = grab.cookies.get_cookie_header(req)
+        cookie_hdr = grab.cookies.get_cookie_header(req.url, req.headers)
         if cookie_hdr:
             req.headers["Cookie"] = cookie_hdr

@@ -137,7 +137,10 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             setattr(self, key, value)
 
     def assert_init_options_integrity(
-        self, url: str, grab: Grab, grab_config: dict[str, Any]
+        self,
+        url: Optional[str],
+        grab: Optional[Grab],
+        grab_config: Optional[dict[str, Any]],
     ) -> None:
         if url is None and grab is None and grab_config is None:
             raise SpiderMisuseError(
@@ -229,13 +232,13 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         return "<Task: %s>" % self.url
 
     def __lt__(self, other: Task) -> bool:
-        # if self.priority is None or other.priority is None:
-        #    return False
+        if self.priority is None or other.priority is None:
+            return False
         return self.priority < other.priority
 
     def __eq__(self, other: object) -> bool:
-        # if not isinstance(other, Task):
-        #    return NotImplemented
+        if not isinstance(other, Task):
+            return NotImplemented
         if not self.priority or not other.priority:
             # WTF???
             return True

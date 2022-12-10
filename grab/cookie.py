@@ -8,6 +8,8 @@ Manuals:
 Some code got from
     https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 """
+from __future__ import annotations
+
 import json
 from http.cookiejar import Cookie, CookieJar
 from urllib.parse import urlparse, urlunparse
@@ -30,6 +32,8 @@ COOKIE_ATTRS = (
 )
 
 
+# Reference:
+# https://docs.python.org/3/library/http.cookiejar.html#http.cookiejar.CookieJar.add_cookie_header
 # Source:
 # https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
 class MockRequest:
@@ -43,16 +47,17 @@ class MockRequest:
     appropriately. You probably want `get_cookie_header`, defined below.
     """
 
-    def __init__(self, request):
-        self._req = request
+    def __init__(self, url: str, headers: dict[str, str]):
+        self._url = url
+        self._headers = headers
         self._new_headers = {}
-        self.type = urlparse(self._req.url).scheme
+        self.type = urlparse(self._url).scheme
 
     def get_type(self):
         return self.type
 
     def get_host(self):
-        return urlparse(self._req.url).netloc
+        return urlparse(self._url).netloc
 
     def get_origin_req_host(self):
         return self.get_host()
@@ -60,11 +65,11 @@ class MockRequest:
     def get_full_url(self):
         # Only return the response's URL if the user hadn't set the Host
         # header
-        if not self._req.headers.get("Host"):
-            return self._req.url
+        if not self._headers.get("Host"):
+            return self._url
         # If they did set it, retrieve it and reconstruct the expected domain
-        host = self._req.headers["Host"]
-        parsed = urlparse(self._req.url)
+        host = self._headers["Host"]
+        parsed = urlparse(self._url)
         # Reconstruct the URL as we expect it
         return urlunparse(
             [
@@ -81,10 +86,10 @@ class MockRequest:
         return True
 
     def has_header(self, name):
-        return name in self._req.headers or name in self._new_headers
+        return name in self._headers or name in self._new_headers
 
     def get_header(self, name, default=None):
-        return self._req.headers.get(name, self._new_headers.get(name, default))
+        return self._headers.get(name, self._new_headers.get(name, default))
 
     def add_header(self, key, val):
         """
@@ -300,9 +305,9 @@ class CookieManager:
         with open(path, "w", encoding="utf-8") as out:
             out.write(json.dumps(self.get_dict()))
 
-    def get_cookie_header(self, req):
+    def get_cookie_header(self, url: str, headers: dict[str, str]) -> str:
         # :param req: object with httplib.Request interface
         #    Actually, it have to have `url` and `headers` attributes
-        mocked_req = MockRequest(req)
+        mocked_req = MockRequest(url, headers)
         self.cookiejar.add_cookie_header(mocked_req)
         return mocked_req.get_new_headers().get("Cookie")
