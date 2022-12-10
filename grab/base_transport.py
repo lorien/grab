@@ -4,10 +4,11 @@ import os
 import tempfile
 from abc import abstractmethod
 from contextlib import contextmanager
-from typing import Any, Generator, Mapping, MutableMapping, Optional, cast
+from typing import Any, Generator, Mapping, Optional, cast
 
-from .cookie import CookieManager
-from .document import Document
+from grab.cookie import CookieManager
+from grab.document import Document
+from grab.types import GrabConfig
 
 
 class BaseTransport:
@@ -15,7 +16,7 @@ class BaseTransport:
         pass
 
     @abstractmethod
-    def prepare_response(self, grab_config: dict[str, Any]) -> Document:
+    def prepare_response(self, grab_config: GrabConfig) -> Document:
         raise NotImplementedError
 
     @abstractmethod
@@ -29,14 +30,14 @@ class BaseTransport:
 
     @abstractmethod
     def process_config(
-        self, grab_config: MutableMapping[str, Any], grab_cookies: CookieManager
+        self, grab_config: GrabConfig, grab_cookies: CookieManager
     ) -> None:
         raise NotImplementedError
 
     @abstractmethod
     def process_cookie_options(
         self,
-        grab_config: Mapping[str, Any],
+        grab_config: GrabConfig,
         cookie_manager: CookieManager,
         request_url: str,
         request_headers: dict[str, Any],

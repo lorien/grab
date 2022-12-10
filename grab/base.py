@@ -13,7 +13,7 @@ import weakref
 from copy import copy, deepcopy
 from datetime import datetime
 from random import randint
-from typing import Any, Callable, Dict, Mapping, Optional, Union, cast
+from typing import Any, Dict, Mapping, MutableMapping, Optional, Sequence, cast
 from urllib.parse import urljoin
 
 from grab import error
@@ -21,6 +21,7 @@ from grab.base_transport import BaseTransport
 from grab.cookie import CookieManager
 from grab.document import Document
 from grab.proxylist import ProxyList, parse_proxy_line
+from grab.types import GrabConfig, TransportParam
 from grab.util.encoding import make_bytes
 from grab.util.html import find_base_url
 from grab.util.http import normalize_http_values
@@ -35,14 +36,12 @@ __all__ = ("Grab",)
 # creates multiple Grab instances - in case of shared counter
 # grab instances do not overwrite dump logs
 REQUEST_COUNTER = itertools.count(1)
-MUTABLE_CONFIG_KEYS = ("post", "multipart_post", "headers", "cookies")
-TRANSPORT_CACHE = {}
+MUTABLE_CONFIG_KEYS = ["post", "multipart_post", "headers", "cookies"]
+TRANSPORT_CACHE: MutableMapping[tuple[str, str], type[BaseTransport]] = {}
 TRANSPORT_ALIAS = {
     "urllib3": "grab.transport.Urllib3Transport",
 }
 DEFAULT_TRANSPORT = "urllib3"
-GrabConfig = Dict[str, Any]
-TransportParam = Optional[Union[str, Callable[..., Any]]]
 
 # pylint: disable=invalid-name
 logger = logging.getLogger("grab.base")
@@ -54,8 +53,8 @@ logger_network = logging.getLogger("grab.network")
 
 
 def copy_config(
-    config: dict[str, Any], mutable_config_keys: Optional[list[str]] = None
-) -> dict[str, Any]:
+    config: GrabConfig, mutable_config_keys: Optional[Sequence[str]] = None
+) -> GrabConfig:
     """Copy grab config with correct handling of mutable config values."""
     cloned_config = copy(config)
     # Apply ``copy`` function to mutable config values
@@ -64,7 +63,7 @@ def copy_config(
     return cloned_config
 
 
-def default_config() -> dict[str, Any]:
+def default_config() -> GrabConfig:
     # TODO: Maybe config should be split into two entities:
     # 1) config which is not changed during request
     # 2) changeable settings
@@ -192,8 +191,8 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         **kwargs: Any,
     ) -> None:
         """Create Grab instance."""
-        self.meta = {}
-        self._doc = None
+        self.meta: dict[str, Any] = {}
+        self._doc: Optional[Document] = None
         self.config: GrabConfig = default_config()
         self.config["common_headers"] = self.common_headers()
         self.cookies = CookieManager()
@@ -203,8 +202,8 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         # makes pylint happy
         self.request_counter = 0
         self.request_method: Optional[str] = None
-        self.transport_param = transport
-        self.transport = None
+        self.transport_param: TransportParam = transport
+        self.transport: Optional[BaseTransport] = None
 
         self.reset()
         if kwargs:
@@ -244,14 +243,14 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 raise error.GrabMisuseError("Unknown transport: %s" % transport_param)
             mod_path, cls_name = transport_param.rsplit(".", 1)
             try:
-                cls = TRANSPORT_CACHE[(mod_path, cls_name)]
+                cls: type[BaseTransport] = TRANSPORT_CACHE[(mod_path, cls_name)]
             except KeyError:
                 mod = __import__(mod_path, globals(), locals(), ["foo"])
                 cls = getattr(mod, cls_name)
                 TRANSPORT_CACHE[(mod_path, cls_name)] = cls
             self.transport_param = transport_param
             self.transport = cls()
-        elif isinstance(transport_param, Callable):
+        elif callable(transport_param):
             self.transport_param = transport_param
             self.transport = transport_param()
         else:
@@ -316,7 +315,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     def dump_config(self) -> dict[str, Any]:
         """Make clone of current config."""
-        conf = copy_config(self.config, self.mutable_config_keys)
+        conf = cast(Dict[str, Any], copy_config(self.config, self.mutable_config_keys))
         conf["state"] = {
             "cookiejar_cookies": list(self.cookies.cookiejar),
         }

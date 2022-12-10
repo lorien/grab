@@ -27,6 +27,7 @@ from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.service.base import BaseService
 from grab.spider.task import Task
 from grab.stat import Stat
+from grab.types import GrabConfig
 from grab.util.metrics import format_traffic_value
 from grab.util.misc import camel_case_to_underscore
 from grab.util.warning import warn
@@ -518,7 +519,7 @@ class Spider:
             grab.setup(url=task.url)
 
         # Generate new common headers
-        grab.config["common_headers"] = grab.common_headers()
+        cast(GrabConfig, grab.config)["common_headers"] = grab.common_headers()
         self.update_grab_instance(grab)
         grab.setup_transport(self.grab_transport_name)
         return grab

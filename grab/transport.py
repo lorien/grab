@@ -39,6 +39,7 @@ from grab import error
 from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.document import Document
 from grab.error import GrabMisuseError, GrabTimeoutError
+from grab.types import GrabConfig
 from grab.upload import UploadContent, UploadFile
 from grab.util.encoding import decode_pairs, make_str
 from grab.util.http import normalize_http_values, normalize_post_data, normalize_url
@@ -387,7 +388,7 @@ class Urllib3Transport(BaseTransport):
         headers = cast(HTTPResponse, self._response).headers
         return headers.items()
 
-    def prepare_response(self, grab_config: dict[str, Any]) -> Document:
+    def prepare_response(self, grab_config: GrabConfig) -> Document:
         """
         Prepare response, duh.
 

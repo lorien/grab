@@ -30,6 +30,7 @@ from selection import XpathSelector
 from grab.const import NULL
 from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabMisuseError
+from grab.types import GrabConfig
 from grab.util.files import hashed_path
 from grab.util.html import decode_entities, find_refresh_url
 from grab.util.html import fix_special_entities as fix_special_entities_func
@@ -78,7 +79,7 @@ def read_bom(data):
 
 
 class GrabConfigProtocol(Protocol):
-    config: dict[str, Any]
+    config: GrabConfig
 
 
 class Document:  # pylint: disable=too-many-instance-attributes, too-many-public-methods

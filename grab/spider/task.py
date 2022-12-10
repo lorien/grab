@@ -4,9 +4,10 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 from typing import Any, Callable, Optional
 
-from grab.base import Grab, GrabConfig, copy_config
+from grab.base import Grab, copy_config
 from grab.error import raise_feature_is_deprecated
 from grab.spider.error import SpiderMisuseError
+from grab.types import GrabConfig
 
 
 class BaseTask:
@@ -101,7 +102,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             default value if attribute does not exist.
         """
         self.schedule_time: Optional[datetime] = None
-        self.grab_config: Optional[dict[str, Any]] = None
+        self.grab_config: Optional[GrabConfig] = None
         if disable_cache or refresh_cache or cache_timeout:
             raise_feature_is_deprecated("Cache feature")
         if name == "generator":
@@ -140,7 +141,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         self,
         url: Optional[str],
         grab: Optional[Grab],
-        grab_config: Optional[dict[str, Any]],
+        grab_config: Optional[GrabConfig],
     ) -> None:
         if url is None and grab is None and grab_config is None:
             raise SpiderMisuseError(
@@ -171,7 +172,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         else:
             self.schedule_time = None
 
-    def setup_grab_config(self, grab_config: dict[str, Any]) -> None:
+    def setup_grab_config(self, grab_config: GrabConfig) -> None:
         self.grab_config = copy_config(grab_config)
         self.url = grab_config["url"]
 
