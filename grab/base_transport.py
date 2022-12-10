@@ -1,14 +1,47 @@
+from __future__ import annotations
+
 import os
 import tempfile
 from abc import abstractmethod
-from typing import Any, Optional
+from contextlib import contextmanager
+from typing import Any, Generator, Mapping, MutableMapping, Optional, cast
 
+from .cookie import CookieManager
 from .document import Document
 
 
 class BaseTransport:
     def reset(self) -> None:
         pass
+
+    @abstractmethod
+    def prepare_response(self, grab_config: dict[str, Any]) -> Document:
+        raise NotImplementedError
+
+    @abstractmethod
+    @contextmanager
+    def wrap_transport_error(self) -> Generator[None, None, None]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def request(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def process_config(
+        self, grab_config: MutableMapping[str, Any], grab_cookies: CookieManager
+    ) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def process_cookie_options(
+        self,
+        grab_config: Mapping[str, Any],
+        cookie_manager: CookieManager,
+        request_url: str,
+        request_headers: dict[str, Any],
+    ) -> Optional[str]:
+        raise NotImplementedError
 
     def setup_body_file(
         self,
@@ -25,6 +58,18 @@ class BaseTransport:
             file_path = os.path.join(storage_dir, storage_filename)
         return file_path  # noqa: R504
 
-    @abstractmethod
-    def prepare_response(self, grab_config: dict[str, Any]) -> Document:
-        raise NotImplementedError
+    def detect_request_method(self, grab_config: Mapping[str, Any]) -> str:
+        """
+        Analyze request config and find which request method will be used.
+
+        Returns request method in upper case
+        """
+        method = cast(Optional[str], grab_config["method"])
+        if method:
+            method = method.upper()
+        else:
+            if grab_config["post"] or grab_config["multipart_post"]:
+                method = "POST"
+            else:
+                method = "GET"
+        return method  # noqa: R504

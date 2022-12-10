@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import codecs
-import email
+import email.message
 import json
 import logging
 import os
@@ -123,7 +123,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self.status: Optional[str] = None
         self.code: Optional[int] = None
         self.head: Optional[bytes] = None
-        self.headers = None
+        self.headers: Optional[email.message.Message] = None
         self.url: Optional[str] = None
         self.cookies = CookieManager()
         self.charset = "utf-8"
@@ -173,7 +173,9 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return XpathSelector(self.tree).select(*args, **kwargs)
 
     def parse(
-        self, charset: Optional[str] = None, headers: Optional[email.Message] = None
+        self,
+        charset: Optional[str] = None,
+        headers: Optional[email.message.Message] = None,
     ):
         """
         Parse headers.

@@ -1,9 +1,10 @@
 """The core of grab package: the Grab class."""
-from __future__ import annotations
-
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
+from __future__ import annotations
+
+import email
 import itertools
 import logging
 import os
@@ -197,11 +198,11 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.config["common_headers"] = self.common_headers()
         self.cookies = CookieManager()
         self.proxylist = ProxyList()
-        self.exception = None
+        self.exception: Optional[Exception] = None
 
         # makes pylint happy
         self.request_counter = 0
-        self.request_method = None
+        self.request_method: Optional[str] = None
         self.transport_param = transport
         self.transport = None
 
@@ -371,8 +372,10 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             self.setup(**kwargs)
         if self.proxylist.size() and self.config["proxy_auto_change"]:
             self.change_proxy()
-        self.request_method = self.detect_request_method()
-        self.transport.process_config(self)
+        self.request_method = cast(BaseTransport, self.transport).detect_request_method(
+            self.config
+        )
+        cast(BaseTransport, self.transport).process_config(self.config, self.cookies)
 
     def log_request(self, extra: str = "") -> None:
         """Send request details to logging system."""
@@ -408,7 +411,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             proxy_info,
         )
 
-    def request(self, **kwargs: dict[str, Any]) -> Document:  # noqa: CCR001
+    def request(self, **kwargs: Any) -> Document:  # noqa: CCR001
         """
         Perform network request.
 
@@ -424,7 +427,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             self.log_request()
 
             try:
-                self.transport.request()
+                cast(BaseTransport, self.transport).request()
             except error.GrabError as ex:
                 self.exception = ex
                 self.reset_temporary_options()
@@ -432,18 +435,18 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                     self.save_failed_dump()
                 raise
             else:
-                with self.transport.wrap_transport_error():
+                with cast(BaseTransport, self.transport).wrap_transport_error():
                     doc = self.process_request_result()
 
                 if (
                     self.config["follow_location"]
                     and doc.code in (301, 302, 303, 307, 308)
-                    and doc.headers.get("Location")
+                    and cast(email.message.Message, doc.headers).get("Location")
                 ):
                     refresh_count += 1
                     if refresh_count > self.config["redirect_limit"]:
                         raise error.GrabTooManyRedirectsError()
-                    url = doc.headers.get("Location")
+                    url = cast(email.message.Message, doc.headers).get("Location")
                     self.prepare_request(url=self.make_url_absolute(url), referer=None)
                     continue
 
@@ -681,25 +684,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                     return urljoin(base_url, url)
             return urljoin(cast(str, self.config["url"]), url)
         return url
-
-    def detect_request_method(self) -> str:
-        """
-        Analyze request config and find which request method will be used.
-
-        Returns request method in upper case
-
-        This method needs simetime when `process_config` method
-        was not called yet.
-        """
-        method = cast(Optional[str], self.config["method"])
-        if method:
-            method = method.upper()
-        else:
-            if self.config["post"] or self.config["multipart_post"]:
-                method = "POST"
-            else:
-                method = "GET"
-        return method  # noqa: R504
 
     def clear_cookies(self) -> None:
         """Clear all remembered cookies."""

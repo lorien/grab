@@ -60,7 +60,7 @@ VERY simple transport that understands only one option: the URL.
     class WgetTransport:
         def reset(self): pass
 
-        def process_config(self, grab):
+        def process_config(self, grab.config):
             self._request_url = grab.config['url']
 
         def request(self):

@@ -12,7 +12,16 @@ from contextlib import contextmanager
 from http.client import HTTPResponse
 from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
-from typing import Any, Generator, Optional, Sequence, Union, cast
+from typing import (
+    Any,
+    Generator,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Sequence,
+    Union,
+    cast,
+)
 from urllib.parse import urlsplit
 
 import certifi
@@ -27,7 +36,6 @@ from urllib3.util.timeout import Timeout
 from user_agent import generate_user_agent
 
 from grab import error
-from grab.base import Grab
 from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.document import Document
 from grab.error import GrabMisuseError, GrabTimeoutError
@@ -119,10 +127,10 @@ class Urllib3Transport(BaseTransport):
         self._request = None
 
     def process_config_post(
-        self, grab: Grab, method: str
+        self, grab_config: Mapping[str, Any], method: str
     ) -> tuple[dict[str, Any], Optional[bytes]]:
         if method in ("POST", "PUT") and (
-            grab.config["post"] is None and grab.config["multipart_post"] is None
+            grab_config["post"] is None and grab_config["multipart_post"] is None
         ):
             raise GrabMisuseError(
                 "Neither `post` or `multipart_post`"
@@ -131,8 +139,8 @@ class Urllib3Transport(BaseTransport):
             )
         extra_headers = {}
         post_data: Optional[bytes] = None
-        if grab.config["multipart_post"] is not None:
-            post_data = grab.config["multipart_post"]
+        if grab_config["multipart_post"] is not None:
+            post_data = grab_config["multipart_post"]
             if isinstance(post_data, bytes):
                 pass
             elif isinstance(post_data, str):  # noqa: R506
@@ -142,12 +150,12 @@ class Urllib3Transport(BaseTransport):
             else:
                 # WTF: why I encode things into bytes and then decode them back?
                 post_items: Sequence[tuple[bytes, Any]] = normalize_http_values(
-                    grab.config["multipart_post"],
-                    charset=grab.config["charset"],
+                    grab_config["multipart_post"],
+                    charset=grab_config["charset"],
                     ignore_classes=(UploadFile, UploadContent),
                 )
                 post_items2: Sequence[tuple[str, Any]] = decode_pairs(
-                    post_items, grab.config["charset"]
+                    post_items, grab_config["charset"]
                 )
                 post_items3 = process_upload_items(post_items2)
                 post_data, content_type = encode_multipart_formdata(
@@ -155,73 +163,75 @@ class Urllib3Transport(BaseTransport):
                 )  # type: ignore
                 extra_headers["Content-Type"] = content_type
             extra_headers["Content-Length"] = len(post_data)
-        elif grab.config["post"] is not None:
-            post_data = normalize_post_data(grab.config["post"], grab.config["charset"])
+        elif grab_config["post"] is not None:
+            post_data = normalize_post_data(grab_config["post"], grab_config["charset"])
             extra_headers["Content-Length"] = len(post_data)
         return extra_headers, post_data
 
-    def process_config(  # noqa: C901
-        self, grab: Grab
+    def process_config(  # noqa: C901 pylint: disable=too-many-locals
+        self, grab_config: MutableMapping[str, Any], grab_cookies: CookieManager
     ) -> None:  # noqa: C901 pylint: disable=too-many-branches
         # Init
         extra_headers: dict[str, str] = {}
         # URL
         try:
-            request_url = normalize_url(grab.config["url"])
+            request_url = normalize_url(grab_config["url"])
         except Exception as ex:
             raise error.GrabInvalidUrl(
-                "%s: %s" % (str(ex), make_str(grab.config["url"], errors="ignore"))
+                "%s: %s" % (str(ex), make_str(grab_config["url"], errors="ignore"))
             )
         # Method
-        method = grab.detect_request_method()
+        method = self.detect_request_method(grab_config)
         # Body storage/memory storing
-        if grab.config["body_inmemory"]:
+        if grab_config["body_inmemory"]:
             response_path = None
         else:
-            if not grab.config["body_storage_dir"]:
+            if not grab_config["body_storage_dir"]:
                 raise GrabMisuseError("Option body_storage_dir is not defined")
             response_path = self.setup_body_file(
-                grab.config["body_storage_dir"],
-                grab.config["body_storage_filename"],
-                create_dir=grab.config["body_storage_create_dir"],
+                grab_config["body_storage_dir"],
+                grab_config["body_storage_filename"],
+                create_dir=grab_config["body_storage_create_dir"],
             )
         # POST data
-        post_headers, req_data = self.process_config_post(grab, method)
+        post_headers, req_data = self.process_config_post(grab_config, method)
         extra_headers.update(post_headers)
         # Proxy
         req_proxy = None
-        if grab.config["proxy"]:
-            req_proxy = grab.config["proxy"]
+        if grab_config["proxy"]:
+            req_proxy = grab_config["proxy"]
         req_proxy_userpwd = None
-        if grab.config["proxy_userpwd"]:
-            req_proxy_userpwd = grab.config["proxy_userpwd"]
+        if grab_config["proxy_userpwd"]:
+            req_proxy_userpwd = grab_config["proxy_userpwd"]
         req_proxy_type = None
-        if grab.config["proxy_type"]:
-            req_proxy_type = grab.config["proxy_type"]
+        if grab_config["proxy_type"]:
+            req_proxy_type = grab_config["proxy_type"]
         # User-Agent
-        if grab.config["user_agent"] is None:
-            if grab.config["user_agent_file"] is not None:
-                with open(grab.config["user_agent_file"], encoding="utf-8") as inf:
+        if grab_config["user_agent"] is None:
+            if grab_config["user_agent_file"] is not None:
+                with open(grab_config["user_agent_file"], encoding="utf-8") as inf:
                     lines = inf.read().splitlines()
-                grab.config["user_agent"] = random.choice(lines)
+                grab_config["user_agent"] = random.choice(lines)
             else:
-                grab.config["user_agent"] = generate_user_agent()
-        extra_headers["User-Agent"] = cast(str, grab.config["user_agent"])
+                grab_config["user_agent"] = generate_user_agent()
+        extra_headers["User-Agent"] = cast(str, grab_config["user_agent"])
         # Headers
-        extra_headers.update(grab.config["common_headers"])
-        if grab.config["headers"]:
-            extra_headers.update(grab.config["headers"])
-        cookie_hdr = self.process_cookie_options(grab, request_url, extra_headers)
+        extra_headers.update(grab_config["common_headers"])
+        if grab_config["headers"]:
+            extra_headers.update(grab_config["headers"])
+        cookie_hdr = self.process_cookie_options(
+            grab_config, grab_cookies, request_url, extra_headers
+        )
         if cookie_hdr:
             extra_headers["Cookie"] = cookie_hdr
 
         self._request = Request(
             url=request_url,
             method=method,
-            config_body_maxsize=grab.config["body_maxsize"],
-            config_nobody=grab.config["nobody"],
-            timeout=grab.config["timeout"],
-            connect_timeout=grab.config["connect_timeout"],
+            config_body_maxsize=grab_config["body_maxsize"],
+            config_nobody=grab_config["nobody"],
+            timeout=grab_config["timeout"],
+            connect_timeout=grab_config["connect_timeout"],
             response_path=response_path,
             proxy=req_proxy,
             proxy_type=req_proxy_type,
@@ -469,14 +479,18 @@ class Urllib3Transport(BaseTransport):
         return jar
 
     def process_cookie_options(
-        self, grab: Grab, request_url: str, request_headers: dict[str, Any]
+        self,
+        grab_config: Mapping[str, Any],
+        cookie_manager: CookieManager,
+        request_url: str,
+        request_headers: dict[str, Any],
     ) -> Optional[str]:
         # `cookiefile` option should be processed before `cookies` option
         # because `load_cookies` updates `cookies` option
-        if grab.config["cookiefile"]:
+        if grab_config["cookiefile"]:
             # Do not raise exception if cookie file does not exist
             try:
-                grab.cookies.load_from_file(grab.config["cookiefile"])
+                cookie_manager.load_from_file(grab_config["cookiefile"])
             except IOError as ex:
                 logging.error(ex)
 
@@ -493,11 +507,13 @@ class Urllib3Transport(BaseTransport):
             # I pass these no-domain cookies to *each* requested domain
             # by setting these cookies with corresponding domain attribute
             # Trying to guess better domain name by removing leading "www."
-            if grab.config["cookies"]:
-                if not isinstance(grab.config["cookies"], dict):
+            if grab_config["cookies"]:
+                if not isinstance(grab_config["cookies"], dict):
                     raise error.GrabMisuseError("cookies option should be a dict")
-                for name, value in grab.config["cookies"].items():
-                    grab.cookies.set(name=name, value=value, domain=request_host_no_www)
+                for name, value in grab_config["cookies"].items():
+                    cookie_manager.set(
+                        name=name, value=value, domain=request_host_no_www
+                    )
 
-        cookie_hdr = grab.cookies.get_cookie_header(request_url, request_headers)
+        cookie_hdr = cookie_manager.get_cookie_header(request_url, request_headers)
         return cookie_hdr if cookie_hdr else None
