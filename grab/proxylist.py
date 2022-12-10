@@ -3,9 +3,8 @@ from __future__ import annotations
 import itertools
 import logging
 import re
-from collections import namedtuple
 from random import randint
-from typing import Any, Optional
+from typing import Any, NamedTuple, Optional
 from urllib.error import URLError
 from urllib.request import urlopen
 
@@ -17,7 +16,13 @@ PROXY_FIELDS = ("host", "port", "username", "password", "proxy_type")
 logger = logging.getLogger("grab.proxylist")  # pylint: disable=invalid-name
 
 
-class Proxy(namedtuple("Proxy", PROXY_FIELDS)):
+class Proxy(NamedTuple):
+    host: str
+    port: int
+    username: Optional[str]
+    password: Optional[str]
+    proxy_type: str
+
     def get_address(self) -> str:
         return "%s:%s" % (self.host, self.port)
 

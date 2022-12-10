@@ -14,7 +14,7 @@ from copy import copy, deepcopy
 from datetime import datetime
 from email.message import EmailMessage
 from random import randint
-from typing import Any, Callable, Dict, Optional, Union, cast
+from typing import Any, Callable, Dict, Mapping, Optional, Union, cast
 from urllib.parse import urljoin
 
 from grab import error
@@ -209,7 +209,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.exception = None
 
         # makes pylint happy
-        self.request_counter = None
+        self.request_counter = 0
         self.request_head = None
         self.request_body = None
         self.request_method = None
@@ -222,12 +222,12 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         if document_body is not None:
             self.setup_document(document_body, charset=kwargs.get("document_charset"))
 
-    def _get_doc(self):
+    def _get_doc(self) -> Document:
         if self._doc is None:
             self._doc = Document(self)
         return self._doc
 
-    def _set_doc(self, obj):
+    def _set_doc(self, obj: Document) -> None:
         self._doc = obj
 
     doc = property(_get_doc, _set_doc)
@@ -283,7 +283,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         # self.request_log = None
         self.request_body = None
         self.request_method = None
-        self.request_counter = None
+        self.request_counter = 0
         self.exception = None
         if self.transport:
             self.transport.reset()
@@ -312,7 +312,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         return grab
 
-    def adopt(self, grab):
+    def adopt(self, grab: Grab) -> None:
         """
         Copy the state of another `Grab` instance.
 
@@ -353,7 +353,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             kwargs["url"] = self.make_url_absolute(kwargs["url"])
         self.config.update(kwargs)
 
-    def go(self, url, **kwargs):  # pylint: disable=invalid-name
+    def go(self, url: str, **kwargs: Any) -> Document:  # pylint: disable=invalid-name
         """
         Go to ``url``.
 
@@ -363,14 +363,14 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         """
         return self.request(url=url, **kwargs)
 
-    def download(self, url, location, **kwargs):
+    def download(self, url: str, location: str, **kwargs: Any) -> int:
         """Fetch document located at ``url`` and save to to ``location``."""
         doc = self.go(url, **kwargs)
         with open(location, "wb") as out:
             out.write(doc.body)
         return len(doc.body)
 
-    def prepare_request(self, **kwargs):
+    def prepare_request(self, **kwargs: Any) -> None:
         """
         Configure all things to make real network request.
 
@@ -388,7 +388,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.request_method = self.detect_request_method()
         self.transport.process_config(self)
 
-    def log_request(self, extra=""):
+    def log_request(self, extra: str = "") -> None:
         """Send request details to logging system."""
         # pylint: disable=no-member
         thread_name = threading.current_thread().name.lower()
@@ -414,11 +414,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             extra = "[%s] " % extra
         logger_network.debug(
             "[%s%s] %s%s %s%s",
-            (
-                "%02d" % self.request_counter
-                if self.request_counter is not None
-                else "NA"
-            ),
+            ("%02d" % self.request_counter),
             thread_name,
             extra,
             self.request_method or "GET",
@@ -477,7 +473,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                         continue
                 return doc
 
-    def submit(self, make_request=True, **kwargs):
+    def submit(self, make_request: bool = True, **kwargs: Any) -> Optional[Document]:
         """
         Submit current form.
 
@@ -519,7 +515,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             return self.request()
         return None
 
-    def debug_post(self):
+    def debug_post(self) -> None:
         post = self.config["post"] or self.config["multipart_post"]
         if isinstance(post, dict):
             post = list(post.items())
@@ -542,7 +538,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 "[%02d] POST request:\n%s\n", self.request_counter, post
             )
 
-    def process_request_result(self):
+    def process_request_result(self) -> Document:
         """Process result of real request performed via transport extension."""
         now = datetime.utcnow()
         # TODO: move into separate method
@@ -583,13 +579,13 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         return self.doc
 
-    def reset_temporary_options(self):
+    def reset_temporary_options(self) -> None:
         self.config["post"] = None
         self.config["multipart_post"] = None
         self.config["method"] = None
         self.config["body_storage_filename"] = None
 
-    def save_failed_dump(self):
+    def save_failed_dump(self) -> None:
         """
         Save dump of failed request for debugging.
 
@@ -600,13 +596,13 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.copy_request_data()
         self.save_dumps()
 
-    def copy_request_data(self):
+    def copy_request_data(self) -> None:
         # TODO: Maybe request object?
         self.request_head = self.transport.request_head
         self.request_body = self.transport.request_body
         # self.request_log = self.transport.request_log
 
-    def setup_document(self, content, **kwargs):
+    def setup_document(self, content: bytes, **kwargs: Any) -> None:
         """
         Set up `response` object without real network requests.
 
@@ -640,7 +636,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         self.doc = doc
 
-    def change_proxy(self, random=True):
+    def change_proxy(self, random: bool = True) -> None:
         """Set random proxy from proxylist."""
         if self.proxylist.size():
             if random:
@@ -670,7 +666,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             "Keep-Alive": "300",
         }
 
-    def save_dumps(self):
+    def save_dumps(self) -> None:
         # pylint: disable=no-member
         thread_name = threading.current_thread().name.lower()
         # pylint: enable=no-member
@@ -683,10 +679,10 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         )
         with open(file_name, "wb") as out:
             out.write(b"Request headers:\n")
-            out.write(self.request_head)
+            out.write(cast(bytes, self.request_head))
             out.write(b"\n")
             out.write(b"Request body:\n")
-            out.write(self.request_body)
+            out.write(cast(bytes, self.request_body))
             out.write(b"\n\n")
             out.write(b"Response headers:\n")
             out.write(self.doc.head if (self.doc and self.doc.head) else b"")
@@ -705,8 +701,8 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 ubody = self.doc.unicode_body()
                 base_url = find_base_url(ubody)
                 if base_url:
-                    return urljoin(base_url, url)
-            return urljoin(self.config["url"], url)
+                    return urljoin(cast(str, base_url), url)
+            return urljoin(cast(str, self.config["url"]), url)
         return url
 
     def detect_request_method(self) -> str:
@@ -728,12 +724,12 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 method = "GET"
         return method  # noqa: R504
 
-    def clear_cookies(self):
+    def clear_cookies(self) -> None:
         """Clear all remembered cookies."""
         self.config["cookies"] = {}
         self.cookies.clear()
 
-    def setup_with_proxyline(self, line, proxy_type="http"):
+    def setup_with_proxyline(self, line: str, proxy_type: str = "http") -> None:
         # TODO: remove from base class
         # maybe to proxylist?
         host, port, user, pwd = parse_proxy_line(line)
@@ -743,7 +739,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             userpwd = "%s:%s" % (user, pwd)
             self.setup(proxy_userpwd=userpwd)
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         """Reset cached lxml objects which could not be pickled."""
         state = {}
         for cls in type(self).mro():
@@ -757,7 +753,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         return state
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: Mapping[str, Any]) -> None:
         for slot, value in state.items():
             setattr(self, slot, value)
 

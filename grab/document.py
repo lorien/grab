@@ -120,7 +120,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self._grab_config = {}
         if grab:
             self.process_grab_config(grab.config)
-        self.status = None
+        self.status: Optional[str] = None
         self.code: Optional[int] = None
         self.head: Optional[bytes] = None
         self.headers = None

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Union
+from typing import Any, Sequence, Union
 
 
 def make_str(value: Any, encoding: str = "utf-8", errors: str = "strict") -> str:
@@ -28,8 +28,8 @@ def decode_bytes(value: Any, encoding: str) -> Any:
 
 
 def decode_pairs(
-    pairs: list[tuple[Union[str, bytes], Any]], encoding: str = "utf-8"
-) -> list[tuple[str, str]]:
+    pairs: Sequence[tuple[Union[str, bytes], Any]], encoding: str = "utf-8"
+) -> Sequence[tuple[str, str]]:
     ret = []
     for pair in pairs:
         ret.append((decode_bytes(pair[0], encoding), decode_bytes(pair[1], encoding)))

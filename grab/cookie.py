@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 from http.client import HTTPMessage
 from http.cookiejar import Cookie, CookieJar
-from typing import Any, Optional, Union
+from typing import Any, Mapping, Optional, Sequence, Union
 from urllib.parse import urlparse, urlunparse
 
 from urllib3._collections import HTTPHeaderDict
@@ -57,16 +57,16 @@ class MockRequest:
         self._new_headers = {}
         self.type = urlparse(self._url).scheme
 
-    def get_type(self):
+    def get_type(self) -> str:
         return self.type
 
-    def get_host(self):
+    def get_host(self) -> str:
         return urlparse(self._url).netloc
 
-    def get_origin_req_host(self):
+    def get_origin_req_host(self) -> str:
         return self.get_host()
 
-    def get_full_url(self):
+    def get_full_url(self) -> str:
         # Only return the response's URL if the user hadn't set the Host
         # header
         if not self._headers.get("Host"):
@@ -86,16 +86,16 @@ class MockRequest:
             ]
         )
 
-    def is_unverifiable(self):
+    def is_unverifiable(self) -> bool:
         return True
 
-    def has_header(self, name):
+    def has_header(self, name: str) -> bool:
         return name in self._headers or name in self._new_headers
 
-    def get_header(self, name, default=None):
+    def get_header(self, name: str, default: Any = None) -> str:
         return self._headers.get(name, self._new_headers.get(name, default))
 
-    def add_header(self, key, val):
+    def add_header(self, key: str, val: str) -> None:
         """
         Cookielib has no legitimate use for this method.
 
@@ -105,22 +105,22 @@ class MockRequest:
             "Cookie headers should be added with add_unredirected_header()"
         )
 
-    def add_unredirected_header(self, name, value):
+    def add_unredirected_header(self, name: str, value: str) -> None:
         self._new_headers[name] = value
 
-    def get_new_headers(self):
+    def get_new_headers(self) -> dict[str, str]:
         return self._new_headers
 
     @property
-    def unverifiable(self):
+    def unverifiable(self) -> bool:
         return self.is_unverifiable()
 
     @property
-    def origin_req_host(self):
+    def origin_req_host(self) -> str:
         return self.get_origin_req_host()
 
     @property
-    def host(self):
+    def host(self) -> str:
         return self.get_host()
 
 
@@ -147,7 +147,9 @@ class MockResponse:
     #    # self._headers.getheaders(name)
 
 
-def create_cookie(name, value, domain, httponly=None, **kwargs):
+def create_cookie(
+    name: str, value: str, domain: str, httponly: Optional[bool] = None, **kwargs: Any
+) -> None:
     """Create `cookielib.Cookie` instance."""
     if domain == "localhost":
         domain = ""
@@ -221,7 +223,7 @@ class CookieManager:
 
         self.cookiejar.set_cookie(create_cookie(name, value, domain, **kwargs))
 
-    def update(self, cookies):
+    def update(self, cookies: Union[CookieJar, CookieManager]) -> None:
         if isinstance(cookies, CookieJar):
             for cookie in cookies:
                 self.cookiejar.set_cookie(cookie)
@@ -234,16 +236,16 @@ class CookieManager:
             )
 
     @classmethod
-    def from_cookie_list(cls, clist):
+    def from_cookie_list(cls, clist: Sequence[Cookie]) -> CookieManager:
         jar = CookieJar()
         for cookie in clist:
             jar.set_cookie(cookie)
         return cls(jar)
 
-    def clear(self):
+    def clear(self) -> None:
         self.cookiejar = CookieJar()
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         state = {}
         for cls in type(self).mro():
             cls_slots = getattr(cls, "__slots__", ())
@@ -256,7 +258,7 @@ class CookieManager:
 
         return state
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: Mapping[dict, Any]) -> None:
         state["cookiejar"] = CookieJar()
         for cookie in state["_cookiejar_cookies"]:
             state["cookiejar"].set_cookie(cookie)
@@ -265,13 +267,13 @@ class CookieManager:
         for slot, value in state.items():
             setattr(self, slot, value)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> str:
         for cookie in self.cookiejar:
             if cookie.name == key:
                 return cookie.value
         raise KeyError
 
-    def items(self):
+    def items(self) -> list[tuple[str, str]]:
         res = []
         for cookie in self.cookiejar:
             res.append((cookie.name, cookie.value))
@@ -295,13 +297,13 @@ class CookieManager:
             }
             self.set(item["name"], item["value"], item["domain"], **extra)
 
-    def get_dict(self):
+    def get_dict(self) -> list[dict[str, Any]]:
         res = []
         for cookie in self.cookiejar:
             res.append({x: getattr(cookie, x) for x in COOKIE_ATTRS})
         return res
 
-    def save_to_file(self, path):
+    def save_to_file(self, path: str) -> None:
         """
         Dump all cookies to file.
 

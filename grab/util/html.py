@@ -1,6 +1,6 @@
 import re
 from html.entities import name2codepoint
-from typing import Match
+from typing import Match, Optional
 
 from .encoding import make_bytes
 
@@ -99,7 +99,7 @@ def find_refresh_url(html):
     return None
 
 
-def find_base_url(html):
+def find_base_url(html: str) -> Optional[str]:
     """Find url of <base> tag."""
     html = decode_entities(html)
 

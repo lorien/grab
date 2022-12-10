@@ -13,7 +13,8 @@ import urllib.request
 from contextlib import contextmanager
 from http.client import HTTPResponse
 from http.cookiejar import CookieJar
-from typing import Any, Generator, Optional, Union, cast
+from pprint import pprint  # pylint: disable=unused-import
+from typing import Any, Generator, Optional, Sequence, Union, cast
 from urllib.parse import urlsplit
 
 import certifi
@@ -44,7 +45,7 @@ class BaseTransport:
         # self.body_file = None
         # self.body_path = None
 
-    def reset(self):
+    def reset(self) -> None:
         # self.body_file = None
         # self.body_path = None
         pass
@@ -67,7 +68,9 @@ class BaseTransport:
         return file_path  # noqa: R504
 
 
-def process_upload_items(items: list[tuple[str, Any]]) -> list[tuple[str, Any]]:
+def process_upload_items(
+    items: Sequence[tuple[str, Any]]
+) -> list[Union[RequestField, tuple[str, Any]]]:
     result = []
     for key, val in items:
         if isinstance(val, UploadContent):
@@ -97,7 +100,7 @@ class Request:  # pylint: disable=too-many-instance-attributes
         *,
         url: str,
         method: str,
-        headers=None,
+        headers: dict[str, Any],
         config_nobody: bool,
         config_body_maxsize: int,
         timeout: int,
@@ -108,7 +111,7 @@ class Request:  # pylint: disable=too-many-instance-attributes
         proxy_type: Optional[str] = None,
         proxy: Optional[str] = None,
         proxy_userpwd: Optional[str] = None,
-    ):
+    ) -> None:
         self.url = url
         self.method = method
         self.data = data
@@ -124,7 +127,7 @@ class Request:  # pylint: disable=too-many-instance-attributes
         self.config_body_maxsize = config_body_maxsize
         self.response_path: Optional[str] = response_path
 
-    def get_full_url(self):
+    def get_full_url(self) -> str:
         return self.url
 
 
@@ -182,12 +185,12 @@ class Urllib3Transport(BaseTransport):
                 )
             else:
                 # WTF: why I encode things into bytes and then decode them back?
-                post_items: list[tuple[bytes, Any]] = normalize_http_values(
+                post_items: Sequence[tuple[bytes, Any]] = normalize_http_values(
                     grab.config["multipart_post"],
                     charset=grab.config["charset"],
                     ignore_classes=(UploadFile, UploadContent),
                 )
-                post_items2: list[tuple[str, Any]] = decode_pairs(
+                post_items2: Sequence[tuple[str, Any]] = decode_pairs(
                     post_items, grab.config["charset"]
                 )
                 post_items3 = process_upload_items(post_items2)
