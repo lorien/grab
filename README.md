@@ -36,6 +36,7 @@ See details about installing Grab on different platforms here https://grab.readt
 ## Documentation
 
 Documenations is here https://grab.readthedocs.io/en/latest/
+Documentation for Grab version 0.6.41 (released in 2018 year) is here https://grab.readthedocs.io/en/v0.6.41-doc/
 
 ## About Grab (very old description)
 
