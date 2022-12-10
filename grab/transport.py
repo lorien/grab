@@ -1,7 +1,7 @@
 # Copyright: 2015, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://getdata.pro)
 # License: MIT
-from __future__ import absolute_import
+from __future__ import annotations
 
 import logging
 import os
@@ -13,7 +13,7 @@ import urllib.request
 from contextlib import contextmanager
 from http.client import HTTPResponse
 from http.cookiejar import CookieJar
-from typing import cast
+from typing import Any, Generator, Optional, Union, cast
 from urllib.parse import urlsplit
 
 import certifi
@@ -22,6 +22,7 @@ from urllib3.contrib.socks import SOCKSProxyManager
 from urllib3.exceptions import LocationParseError
 from urllib3.fields import RequestField
 from urllib3.filepost import encode_multipart_formdata
+from urllib3.response import HTTPResponse as Urllib3HTTPResponse
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
 from user_agent import generate_user_agent
@@ -32,12 +33,12 @@ from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.document import Document
 from grab.error import GrabMisuseError, GrabTimeoutError
 from grab.upload import UploadContent, UploadFile
-from grab.util.encoding import decode_pairs, make_bytes, make_str
+from grab.util.encoding import decode_pairs, make_str
 from grab.util.http import normalize_http_values, normalize_post_data, normalize_url
 
 
 class BaseTransport:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
         # these assignments makes pylint happy
         # self.body_file = None
@@ -48,7 +49,12 @@ class BaseTransport:
         # self.body_path = None
         pass
 
-    def setup_body_file(self, storage_dir, storage_filename, create_dir=False):
+    def setup_body_file(
+        self,
+        storage_dir: str,
+        storage_filename: Optional[str],
+        create_dir: bool = False,
+    ) -> str:
         if create_dir and not os.path.exists(storage_dir):
             os.makedirs(storage_dir)
         if storage_filename is None:
@@ -61,7 +67,7 @@ class BaseTransport:
         return file_path  # noqa: R504
 
 
-def process_upload_items(items):
+def process_upload_items(items: list[tuple[str, Any]]) -> list[tuple[str, Any]]:
     result = []
     for key, val in items:
         if isinstance(val, UploadContent):
@@ -86,16 +92,22 @@ def process_upload_items(items):
 
 
 class Request:  # pylint: disable=too-many-instance-attributes
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
-        method=None,
-        url=None,
-        data=None,
-        proxy=None,
-        proxy_userpwd=None,
-        proxy_type=None,
+        *,
+        url: str,
+        method: str,
         headers=None,
-        body_maxsize=None,
+        config_nobody: bool,
+        config_body_maxsize: int,
+        timeout: int,
+        connect_timeout: int,
+        data: Optional[bytes] = None,
+        body_maxsize: Optional[int] = None,
+        response_path: Optional[str] = None,
+        proxy_type: Optional[str] = None,
+        proxy: Optional[str] = None,
+        proxy_userpwd: Optional[str] = None,
     ):
         self.url = url
         self.method = method
@@ -105,13 +117,12 @@ class Request:  # pylint: disable=too-many-instance-attributes
         self.proxy_type = proxy_type
         self.headers = headers
         self.body_maxsize = body_maxsize
-        self.op_started = None
-        self.timeout = None
-        self.connect_timeout = None
-        self.config_nobody = None
-        self.config_body_maxsize = None
-
-        self.response_path = None
+        self.op_started: Optional[float] = None
+        self.timeout = timeout
+        self.connect_timeout = connect_timeout
+        self.config_nobody = config_nobody
+        self.config_body_maxsize = config_body_maxsize
+        self.response_path: Optional[str] = response_path
 
     def get_full_url(self):
         return self.url
@@ -120,7 +131,7 @@ class Request:  # pylint: disable=too-many-instance-attributes
 class Urllib3Transport(BaseTransport):
     """Grab network transport based on urllib3 library."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         # http://urllib3.readthedocs.io/en/latest/user-guide.html#certificate-verification
         self.pool = PoolManager(10, cert_reqs="CERT_REQUIRED", ca_certs=certifi.where())
@@ -132,10 +143,10 @@ class Urllib3Transport(BaseTransport):
         self.request_body = b""
         self.request_log = b""
 
-        self._response = None
-        self._request = None
+        self._response: Optional[Urllib3HTTPResponse] = None
+        self._request: Optional[Request] = None
 
-    def reset(self):
+    def reset(self) -> None:
         # self.response_header_chunks = []
         # self.response_body_chunks = []
         # self.response_body_bytes_read = 0
@@ -148,7 +159,19 @@ class Urllib3Transport(BaseTransport):
         self._response = None
         self._request = None
 
-    def process_config_post(self, grab, req, extra_headers, method):
+    def process_config_post(
+        self, grab: Grab, method: str
+    ) -> tuple[dict[str, Any], Optional[bytes]]:
+        if method in ("POST", "PUT") and (
+            grab.config["post"] is None and grab.config["multipart_post"] is None
+        ):
+            raise GrabMisuseError(
+                "Neither `post` or `multipart_post`"
+                " options was specified for the %s"
+                " request" % method
+            )
+        extra_headers = {}
+        post_data: Optional[bytes] = None
         if grab.config["multipart_post"] is not None:
             post_data = grab.config["multipart_post"]
             if isinstance(post_data, bytes):
@@ -158,78 +181,64 @@ class Urllib3Transport(BaseTransport):
                     "Option multipart_post data does not accept unicode."
                 )
             else:
-                post_items = normalize_http_values(
+                # WTF: why I encode things into bytes and then decode them back?
+                post_items: list[tuple[bytes, Any]] = normalize_http_values(
                     grab.config["multipart_post"],
                     charset=grab.config["charset"],
                     ignore_classes=(UploadFile, UploadContent),
                 )
-                post_items = decode_pairs(post_items, grab.config["charset"])
-                post_items = process_upload_items(post_items)
-                post_data, content_type = encode_multipart_formdata(post_items)
+                post_items2: list[tuple[str, Any]] = decode_pairs(
+                    post_items, grab.config["charset"]
+                )
+                post_items3 = process_upload_items(post_items2)
+                post_data, content_type = encode_multipart_formdata(
+                    post_items3
+                )  # type: ignore
                 extra_headers["Content-Type"] = content_type
             extra_headers["Content-Length"] = len(post_data)
-            req.data = post_data
         elif grab.config["post"] is not None:
             post_data = normalize_post_data(grab.config["post"], grab.config["charset"])
             extra_headers["Content-Length"] = len(post_data)
-            req.data = post_data
+        return extra_headers, post_data
 
-        if method in ("POST", "PUT") and (
-            grab.config["post"] is None and grab.config["multipart_post"] is None
-        ):
-            raise GrabMisuseError(
-                "Neither `post` or `multipart_post`"
-                " options was specified for the %s"
-                " request" % method
-            )
-
-    def process_config(self, grab):  # noqa: C901
-        req = Request(data=None)
-
+    def process_config(  # noqa: C901
+        self, grab: Grab
+    ) -> None:  # noqa: C901 pylint: disable=too-many-branches
+        # Init
+        extra_headers: dict[str, str] = {}
+        # URL
         try:
             request_url = normalize_url(grab.config["url"])
         except Exception as ex:
             raise error.GrabInvalidUrl(
                 "%s: %s" % (str(ex), make_str(grab.config["url"], errors="ignore"))
             )
-        req.url = request_url
-
+        # Method
         method = grab.detect_request_method()
-        req.method = make_bytes(method)
-
-        req.config_body_maxsize = grab.config["body_maxsize"]
-        req.config_nobody = grab.config["nobody"]
-
-        req.timeout = grab.config["timeout"]
-        req.connect_timeout = grab.config["connect_timeout"]
-
-        extra_headers = {}
-
-        # Body processing
+        # Body storage/memory storing
         if grab.config["body_inmemory"]:
-            pass
+            response_path = None
         else:
             if not grab.config["body_storage_dir"]:
                 raise GrabMisuseError("Option body_storage_dir is not defined")
-            req.response_path = self.setup_body_file(
+            response_path = self.setup_body_file(
                 grab.config["body_storage_dir"],
                 grab.config["body_storage_filename"],
                 create_dir=grab.config["body_storage_create_dir"],
             )
         # POST data
-        self.process_config_post(grab, req, extra_headers, method)
+        post_headers, req_data = self.process_config_post(grab, method)
+        extra_headers.update(post_headers)
         # Proxy
+        req_proxy = None
         if grab.config["proxy"]:
-            req.proxy = grab.config["proxy"]
-
+            req_proxy = grab.config["proxy"]
+        req_proxy_userpwd = None
         if grab.config["proxy_userpwd"]:
-            req.proxy_userpwd = grab.config["proxy_userpwd"]
-
+            req_proxy_userpwd = grab.config["proxy_userpwd"]
+        req_proxy_type = None
         if grab.config["proxy_type"]:
-            req.proxy_type = grab.config["proxy_type"]
-        else:
-            req.proxy_type = "http"
-
+            req_proxy_type = grab.config["proxy_type"]
         # User-Agent
         if grab.config["user_agent"] is None:
             if grab.config["user_agent_file"] is not None:
@@ -238,24 +247,32 @@ class Urllib3Transport(BaseTransport):
                 grab.config["user_agent"] = random.choice(lines)
             else:
                 grab.config["user_agent"] = generate_user_agent()
-
-        extra_headers["User-Agent"] = grab.config["user_agent"]
-
+        extra_headers["User-Agent"] = cast(str, grab.config["user_agent"])
         # Headers
-        headers = extra_headers  # FIXME: WTF
-        headers.update(grab.config["common_headers"])
-
+        extra_headers.update(grab.config["common_headers"])
         if grab.config["headers"]:
-            headers.update(grab.config["headers"])
-        req.headers = headers
+            extra_headers.update(grab.config["headers"])
+        cookie_hdr = self.process_cookie_options(grab, request_url, extra_headers)
+        if cookie_hdr:
+            extra_headers["Cookie"] = cookie_hdr
 
-        # Cookies
-        self.process_cookie_options(grab, req)
-
-        self._request = req
+        self._request = Request(
+            url=request_url,
+            method=method,
+            config_body_maxsize=grab.config["body_maxsize"],
+            config_nobody=grab.config["nobody"],
+            timeout=grab.config["timeout"],
+            connect_timeout=grab.config["connect_timeout"],
+            response_path=response_path,
+            proxy=req_proxy,
+            proxy_type=req_proxy_type,
+            proxy_userpwd=req_proxy_userpwd,
+            headers=extra_headers,
+            data=req_data,
+        )
 
     @contextmanager
-    def wrap_transport_error(self):
+    def wrap_transport_error(self) -> Generator[None, None, None]:
         try:
             yield
         except exceptions.ReadTimeoutError as ex:
@@ -274,12 +291,15 @@ class Urllib3Transport(BaseTransport):
         except ssl.SSLError as ex:
             raise error.GrabConnectionError("SSLError", ex)
 
-    def request(self):
-        req = self._request
+    def request(self) -> None:
+        req = cast(Request, self._request)
 
+        pool: Union[PoolManager, SOCKSProxyManager]
         if req.proxy:
             if req.proxy_userpwd:
-                headers = make_headers(proxy_basic_auth=req.proxy_userpwd)
+                headers = make_headers(
+                    proxy_basic_auth=req.proxy_userpwd
+                )  # type: ignore
             else:
                 headers = None
             proxy_url = "%s://%s" % (req.proxy_type, req.proxy)
@@ -315,11 +335,11 @@ class Urllib3Transport(BaseTransport):
             timeout = Timeout(connect=req.connect_timeout, read=req.timeout)
             # req_headers = dict((make_str(x), make_str(y))
             #                   for (x, y) in req.headers.items())
-            req_url = make_str(req.url)
-            req_method = make_str(req.method)
+            req_url = req.url
+            req_method = req.method
             req.op_started = time.time()
             try:
-                res = pool.urlopen(
+                res = pool.urlopen(  # type: ignore
                     req_method,
                     req_url,
                     body=req.data,
@@ -360,10 +380,10 @@ class Urllib3Transport(BaseTransport):
         #                                         ex.args[1])
         # raise error.GrabNetworkError(ex.args[0], ex.args[1])
 
-    def read_with_timeout(self):
-        if self._request.config_nobody:
+    def read_with_timeout(self) -> bytes:
+        if cast(Request, self._request).config_nobody:
             return b""
-        maxsize = self._request.config_body_maxsize
+        maxsize = cast(Request, self._request).config_body_maxsize
         chunks = []
         default_chunk_size = 10000
         if maxsize:
@@ -372,7 +392,7 @@ class Urllib3Transport(BaseTransport):
             chunk_size = default_chunk_size
         bytes_read = 0
         while True:
-            chunk = self._response.read(chunk_size)
+            chunk = cast(HTTPResponse, self._response).read(chunk_size)
             if chunk:
                 bytes_read += len(chunk)
                 chunks.append(chunk)
@@ -381,8 +401,9 @@ class Urllib3Transport(BaseTransport):
                     break
             else:
                 break
-            if self._request.timeout and (
-                time.time() - self._request.op_started > self._request.timeout
+            if cast(Request, self._request).timeout and (
+                time.time() - cast(float, cast(Request, self._request).op_started)
+                > cast(float, cast(Request, self._request).timeout)
             ):
                 raise GrabTimeoutError
         data = b"".join(chunks)
@@ -390,27 +411,47 @@ class Urllib3Transport(BaseTransport):
             return data[:maxsize]
         return data
 
-    def prepare_response(self, grab):
-        # Information about urllib3
-        # On python2 urllib3 headers contains original binary data
-        # On python3 urllib3 headers are converted to unicode
-        # using latin encoding
+    def get_response_header_items(self) -> list[tuple[str, Any]]:
+        """
+        Return current response headers as items.
+
+        This funciton is required to isolated smalles part of untyped code
+        and hide it from mypy
+
+        WTF: why "type: ignore" is not required here by mypy
+        """
+        headers = cast(HTTPResponse, self._response).headers
+        return headers.items()
+
+    def prepare_response(self, grab_config: dict[str, Any]) -> Optional[Document]:
+        """
+        Prepare response, duh.
+
+        This methed is called after network request is completed
+        hence the "self._request" is not None.
+        Update: maybe not.
+
+        Good to know: on python3 urllib3 headers are converted to str type
+        using latin encoding.
+        """
         if not self._response:
             return None
         try:
             response = Document()
             head = ""
-            for key, val in self._response.getheaders().items():
+            for key, val in self.get_response_header_items():
                 key = key.encode("latin").decode("utf-8", errors="ignore")
                 val = val.encode("latin").decode("utf-8", errors="ignore")
                 head += "%s: %s\r\n" % (key, val)
             head += "\r\n"
-            response.head = make_bytes(head, encoding="utf-8")
+            response.head = head.encode("utf-8", errors="strict")
 
-            if self._request.response_path:
+            if cast(Request, self._request).response_path:
                 # FIXME: Read/write by chunks.
                 # Now the whole content is read at once.
-                response.body_path = self._request.response_path
+                response.body_path = cast(
+                    str, cast(Request, self._request).response_path
+                )
                 with open(response.body_path, "wb") as out:
                     out.write(self.read_with_timeout())
             else:
@@ -429,19 +470,22 @@ class Urllib3Transport(BaseTransport):
             # response.download_speed =
             # response.remote_ip =
 
-            response.url = self._response.get_redirect_location() or self._request.url
+            response.url = (
+                self._response.get_redirect_location()
+                or cast(Request, self._request).url
+            )
 
             # WTF: it is imported here?
             import email.message  # pylint: disable=import-outside-toplevel
 
             hdr = email.message.Message()
-            for key, val in self._response.getheaders().items():
+            for key, val in self.get_response_header_items():
                 key = key.encode("latin").decode("utf-8", errors="ignore")
                 val = val.encode("latin").decode("utf-8", errors="ignore")
                 # if key == 'Location':
                 #    import pdb; pdb.set_trace()
                 hdr[key] = val
-            response.parse(charset=grab.config["document_charset"], headers=hdr)
+            response.parse(charset=grab_config["document_charset"], headers=hdr)
 
             jar = self.extract_cookiejar()  # self._response, self._request)
             response.cookies = CookieManager(jar)
@@ -450,14 +494,18 @@ class Urllib3Transport(BaseTransport):
         finally:
             self._response.release_conn()
 
-    def extract_cookiejar(self):
+    def extract_cookiejar(self) -> CookieJar:
         jar = CookieJar()
         # self._respose could be None
         # if this method is called from custom prepare response
         if self._response and self._request:
             jar.extract_cookies(
                 # pylint: disable=protected-access
-                cast(HTTPResponse, MockResponse(self._response._original_response.msg)),
+                cast(
+                    HTTPResponse,
+                    # MockResponse(self._response._original_response.headers),
+                    MockResponse(self._response.headers),
+                ),
                 # pylint: enable=protected-access
                 cast(
                     urllib.request.Request,
@@ -466,7 +514,9 @@ class Urllib3Transport(BaseTransport):
             )
         return jar
 
-    def process_cookie_options(self, grab: Grab, req: Request):
+    def process_cookie_options(
+        self, grab: Grab, request_url: str, request_headers: dict[str, Any]
+    ) -> Optional[str]:
         # `cookiefile` option should be processed before `cookies` option
         # because `load_cookies` updates `cookies` option
         if grab.config["cookiefile"]:
@@ -476,7 +526,7 @@ class Urllib3Transport(BaseTransport):
             except IOError as ex:
                 logging.error(ex)
 
-        request_host = urlsplit(req.url).hostname
+        request_host = urlsplit(request_url).hostname
         if request_host:
             if request_host.startswith("www."):
                 request_host_no_www = request_host[4:]
@@ -495,6 +545,5 @@ class Urllib3Transport(BaseTransport):
                 for name, value in grab.config["cookies"].items():
                     grab.cookies.set(name=name, value=value, domain=request_host_no_www)
 
-        cookie_hdr = grab.cookies.get_cookie_header(req.url, req.headers)
-        if cookie_hdr:
-            req.headers["Cookie"] = cookie_hdr
+        cookie_hdr = grab.cookies.get_cookie_header(request_url, request_headers)
+        return cookie_hdr if cookie_hdr else None

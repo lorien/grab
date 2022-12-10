@@ -18,8 +18,9 @@ Exception
     |-> ResponseNotValid
 |-> DataNotFound == IndexError
 """
-
 from __future__ import absolute_import
+
+from typing import Any
 
 
 class GrabError(Exception):
@@ -29,7 +30,7 @@ class GrabError(Exception):
 class OriginalExceptionGrabError(GrabError):
     """Sub-class which constructor accepts original exception as second argument."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         if len(args) > 1:
             self.original_exc = args[1]
         else:

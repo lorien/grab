@@ -1,9 +1,10 @@
-import logging
-import sys
-import traceback
+# import logging
+# import sys
+# import traceback
 import warnings
 
-DISABLE_WARNINGS = False
+# See tests.ext_lxml
+# DISABLE_WARNINGS = False
 
 
 class GrabDeprecationWarning(UserWarning):
@@ -12,7 +13,7 @@ class GrabDeprecationWarning(UserWarning):
 
 def warn(msg: str, stacklevel: int = 2) -> None:
     warnings.warn(msg, category=GrabDeprecationWarning, stacklevel=stacklevel)
-    frame = sys._getframe()  # pylint: disable=protected-access
-    logging.debug(
-        "Deprecation Warning\n%s", "".join(traceback.format_stack(f=frame.f_back))
-    )
+    # frame = sys._getframe()  # pylint: disable=protected-access
+    # logging.debug(
+    #    "Deprecation Warning\n%s", "".join(traceback.format_stack(f=frame.f_back))
+    # )

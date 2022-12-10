@@ -1,4 +1,9 @@
-def make_str(value, encoding="utf-8", errors="strict"):
+from __future__ import annotations
+
+from typing import Any, Union
+
+
+def make_str(value: Any, encoding: str = "utf-8", errors: str = "strict") -> str:
     """Normalize unicode/byte string to unicode string."""
     if isinstance(value, str):
         return value
@@ -16,10 +21,16 @@ def make_bytes(value, encoding="utf-8", errors="strict"):
     return str(value).encode(encoding, errors=errors)
 
 
-def decode_pairs(pairs, encoding="utf-8"):
-    def decode(value):
-        if isinstance(value, bytes):
-            return make_str(value, encoding)
-        return value
+def decode_bytes(value: Any, encoding: str) -> Any:
+    if isinstance(value, bytes):
+        return value.decode(encoding)
+    return value
 
-    return [(decode(pair[0]), decode(pair[1])) for pair in pairs]
+
+def decode_pairs(
+    pairs: list[tuple[Union[str, bytes], Any]], encoding: str = "utf-8"
+) -> list[tuple[str, str]]:
+    ret = []
+    for pair in pairs:
+        ret.append((decode_bytes(pair[0], encoding), decode_bytes(pair[1], encoding)))
+    return ret

@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import re
+from typing import Any, Optional, Union
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 
 from .encoding import make_bytes, make_str
@@ -13,14 +16,16 @@ RE_NOT_SAFE_CHAR = re.compile(
 RE_NON_ALPHA_DIGIT_NETLOC = re.compile(r"[^-.:@a-zA-Z0-9]")
 
 
-def smart_urlencode(items, charset="utf-8"):
+def smart_urlencode(
+    items: Union[dict[str, Any], list[tuple[str, Any]]], charset: str = "utf-8"
+) -> str:
     """
     Normalize items to be a part of HTTP request's payload.
 
+    WOW, so much smart.
+
     It differs from ``urllib.urlencode`` in that it can process unicode
     and some special values.
-
-    ``items`` could dict or tuple or list.
     """
     if isinstance(items, dict):
         items = items.items()
@@ -28,7 +33,9 @@ def smart_urlencode(items, charset="utf-8"):
     return urlencode(res)
 
 
-def process_http_item(item, charset, ignore_classes):
+def process_http_item(
+    item: tuple[str, Any], charset: str, ignore_classes: tuple[type, ...]
+) -> list[tuple[bytes, Any]]:
     key, value = item
     if isinstance(value, (list, tuple)):
         ret = []
@@ -48,7 +55,11 @@ def process_http_item(item, charset, ignore_classes):
     return [(key, value)]
 
 
-def normalize_http_values(items, charset="utf-8", ignore_classes=None):
+def normalize_http_values(
+    items: Union[dict[str, Any], list[str, Any]],
+    charset: str = "utf-8",
+    ignore_classes: Optional[Union[list[type], tuple[type, ...]]] = None,
+) -> list[tuple[bytes, Any]]:
     """
     Convert values in dict/list-of-tuples to bytes.
 
@@ -63,18 +74,16 @@ def normalize_http_values(items, charset="utf-8", ignore_classes=None):
     """
     if isinstance(items, dict):
         items = items.items()
-
     # Fix list into tuple because isinstance works only with tupled sequences
     if isinstance(ignore_classes, list):
         ignore_classes = tuple(ignore_classes)
-
     ret = []
     for item in items:
         ret.extend(process_http_item(item, charset, ignore_classes))
     return ret
 
 
-def normalize_url(url):
+def normalize_url(url: Union[bytes, str]) -> str:
     # https://tools.ietf.org/html/rfc3986
     url = make_str(url)
     if RE_NOT_SAFE_CHAR.search(url):
@@ -94,9 +103,9 @@ def normalize_url(url):
     return url
 
 
-def normalize_post_data(data, encoding="utf-8"):
+def normalize_post_data(data: Union[str, bytes], encoding: str = "utf-8") -> bytes:
     if isinstance(data, str):
-        return make_bytes(data, encoding=encoding)
+        return data.encode(encoding)
     if isinstance(data, bytes):
         return data
     # it calls `normalize_http_values()`

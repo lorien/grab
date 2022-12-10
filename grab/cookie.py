@@ -11,8 +11,12 @@ Some code got from
 from __future__ import annotations
 
 import json
+from http.client import HTTPMessage
 from http.cookiejar import Cookie, CookieJar
+from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
+
+from urllib3._collections import HTTPHeaderDict
 
 from grab.error import GrabMisuseError
 
@@ -128,18 +132,19 @@ class MockResponse:
     the way `cookielib` expects to see them.
     """
 
-    def __init__(self, headers):
+    def __init__(self, headers: Union[HTTPMessage, HTTPHeaderDict]) -> None:
         """Make a MockResponse for `cookielib` to read.
 
         :param headers: a httplib.HTTPMessage or analogous carrying the headers
         """
         self._headers = headers
 
-    def info(self):
+    def info(self) -> HTTPMessage:
         return self._headers
 
-    def getheaders(self, name):
-        self._headers.getheaders(name)
+    # def getheaders(self, name: str) -> list[str, str]:
+    #    raise Exception("WTF????????????????????????")
+    #    # self._headers.getheaders(name)
 
 
 def create_cookie(name, value, domain, httponly=None, **kwargs):
@@ -194,7 +199,7 @@ class CookieManager:
 
     __slots__ = ("cookiejar",)
 
-    def __init__(self, cookiejar=None):
+    def __init__(self, cookiejar: Optional[CookieJar] = None) -> None:
         if cookiejar is not None:
             self.cookiejar = cookiejar
         else:
@@ -204,7 +209,7 @@ class CookieManager:
     # def disable_cookiejar_lock(self, cj):
     # cj._cookies_lock = dummy_threading.RLock()
 
-    def set(self, name, value, domain, **kwargs):
+    def set(self, name: str, value: str, domain: str, **kwargs: Any) -> None:
         """Add new cookie or replace existing cookie with same parameters.
 
         :param name: name of cookie
@@ -272,7 +277,7 @@ class CookieManager:
             res.append((cookie.name, cookie.value))
         return res
 
-    def load_from_file(self, path):
+    def load_from_file(self, path: str) -> None:
         """
         Load cookies from the file.
 

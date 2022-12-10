@@ -554,9 +554,9 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         # again!
         self.reset_temporary_options()
 
-        self.doc = self.transport.prepare_response(self)
+        self.doc = self.transport.prepare_response(self.config)
 
-        self.doc.process_grab(self)
+        self.doc.process_grab_config(self.config)
 
         if self.config["reuse_cookies"]:
             self.cookies.update(self.doc.cookies)
@@ -596,7 +596,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         This method is called then fatal network exception is raised.
         The saved dump could be used for debugging the reason of the failure.
         """
-        self.doc = self.transport.prepare_response(self)
+        self.doc = self.transport.prepare_response(self.config)
         self.copy_request_data()
         self.save_dumps()
 
@@ -709,7 +709,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             return urljoin(self.config["url"], url)
         return url
 
-    def detect_request_method(self):
+    def detect_request_method(self) -> str:
         """
         Analyze request config and find which request method will be used.
 

@@ -1,7 +1,8 @@
 from test_server import Response
 
 from grab import DataNotFound
-from grab.util import warning
+
+# from grab.util import warning
 from tests.util import BaseGrabTestCase, build_grab
 
 HTML = """
@@ -44,12 +45,12 @@ XML = b"""
 class LXMLExtensionTest(BaseGrabTestCase):
     @classmethod
     def setUpClass(cls):
-        warning.DISABLE_WARNINGS = True
+        # warning.DISABLE_WARNINGS = True
         super(LXMLExtensionTest, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        warning.DISABLE_WARNINGS = False
+        # warning.DISABLE_WARNINGS = False
         super(LXMLExtensionTest, cls).tearDownClass()
 
     def setUp(self):

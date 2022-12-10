@@ -46,11 +46,7 @@ bandit:
 	bandit -qc pyproject.toml -r $(FILES_CHECK_ALL)
 
 check:
-	echo "pylint" \
-	&& make pylint \
-	&& echo "flake8" \
-	&& make flake8 \
-	&& echo "OK" \
+	tox -e py3-check \
 	&& tox -e py38-check
 
 build:

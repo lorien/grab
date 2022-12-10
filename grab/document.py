@@ -2,6 +2,8 @@
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: MIT
 """The Document class is the result of network request made with Grab instance."""
+from __future__ import annotations
+
 import codecs
 import email
 import json
@@ -13,12 +15,12 @@ import threading
 
 # FIXME: split to modules, make smaller
 # pylint: disable=too-many-lines
-import weakref
 import webbrowser
 from contextlib import suppress
 from copy import copy
 from datetime import datetime
 from io import BytesIO, StringIO
+from typing import Any, Optional, Protocol
 from urllib.parse import parse_qs, urljoin, urlsplit
 
 from lxml import etree
@@ -75,6 +77,10 @@ def read_bom(data):
     return None, None
 
 
+class GrabConfigProtocol(Protocol):
+    config: dict[str, Any]
+
+
 class Document:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
     """Network response."""
 
@@ -110,16 +116,15 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         "_grab_config",
     )
 
-    def __init__(self, grab=None):
+    def __init__(self, grab: Optional[GrabConfigProtocol] = None) -> None:
         self._grab_config = {}
-        self.grab = None
         if grab:
-            self.process_grab(grab)
+            self.process_grab_config(grab.config)
         self.status = None
-        self.code = None
-        self.head = None
+        self.code: Optional[int] = None
+        self.head: Optional[bytes] = None
         self.headers = None
-        self.url = None
+        self.url: Optional[str] = None
         self.cookies = CookieManager()
         self.charset = "utf-8"
         self.bom = None
@@ -135,7 +140,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self.from_cache = False
 
         # Body
-        self.body_path = None
+        self.body_path: Optional[str] = None
         self._bytes_body = None
         self._unicode_body = None
 
@@ -150,13 +155,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self._lxml_form = None
         self._file_fields = {}
 
-    def process_grab(self, grab):
-        # TODO: `self.grab` connection should be removed completely
-        if isinstance(grab, weakref.ProxyType):
-            self.grab = grab
-        else:
-            self.grab = weakref.proxy(grab)
-
+    def process_grab_config(self, grab_config):
         # Save some grab.config items required to
         # process content of the document
         for key in (
@@ -165,7 +164,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             "lowercased_tree",
             "strip_null_bytes",
         ):
-            self._grab_config[key] = self.grab.config[key]
+            self._grab_config[key] = grab_config[key]
 
     def __call__(self, query):
         return self.select(query)
@@ -173,7 +172,9 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def select(self, *args, **kwargs):
         return XpathSelector(self.tree).select(*args, **kwargs)
 
-    def parse(self, charset=None, headers=None):
+    def parse(
+        self, charset: Optional[str] = None, headers: Optional[email.Message] = None
+    ):
         """
         Parse headers.
 
@@ -276,7 +277,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def copy(self, new_grab=None):
         """Clone the Response object."""
         obj = self.__class__()
-        obj.process_grab(new_grab if new_grab else self.grab)
+        obj.process_grab_config(new_grab.config if new_grab else self._grab_config)
 
         copy_keys = (
             "status",
@@ -398,7 +399,11 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     # TextExtension methods
 
-    def text_search(self, anchor, byte=False):
+    def warn_byte_argument(self, byte: Optional[bool]):
+        if byte is not None:
+            warn('Option "byte" is deprecated. Its value is ignored.', stacklevel=3)
+
+    def text_search(self, anchor, byte: Optional[bool] = None) -> bool:
         """
         Search the substring in response body.
 
@@ -410,13 +415,10 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         If substring is found return True else False.
         """
+        self.warn_byte_argument(byte)
         if isinstance(anchor, str):
-            if byte:
-                raise GrabMisuseError("The anchor should be bytes string in byte mode")
             return anchor in self.unicode_body()
-        if byte:
-            return anchor in self.body
-        raise GrabMisuseError("The anchor should be byte string in non-byte mode")
+        return anchor in self.body
 
     def text_assert(self, anchor, byte=False):
         """If `anchor` is not found then raise `DataNotFound` exception."""
@@ -922,32 +924,15 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         if self.form.method == "POST":
             if "multipart" in self.form.get("enctype", ""):
                 result["multipart_post"] = post_items
-                # self.grab.setup(multipart_post=post_items)
             else:
                 result["post"] = post_items
-                # self.grab.setup(post=post_items)
             result["url"] = action_url
-            # self.grab.setup(url=action_url)
 
         else:
             url = action_url.split("?")[0] + "?" + smart_urlencode(post_items)
             result["url"] = url
-            # self.grab.setup(url=url)
 
         return result
-
-        # if make_request:
-        #    return self.grab.request()
-        # else:
-        #    return None
-
-    def submit(self, *args, **kwargs):
-        warn(
-            "Method `Document.submit` is deprecated. "
-            "Use `Grab.submit` method instead.",
-            stacklevel=3,
-        )
-        self.grab.submit(*args, **kwargs)
 
     def build_fields_to_remove(self, fields, form_inputs):
         fields_to_remove = set()
