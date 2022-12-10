@@ -58,10 +58,6 @@ VERY simple transport that understands only one option: the URL.
 
 
     class WgetTransport:
-        def __init__(self):
-            self.request_head = b''
-            self.request_body = b''
-
         def reset(self): pass
 
         def process_config(self, grab):

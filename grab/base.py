@@ -4,7 +4,6 @@ from __future__ import annotations
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-import email
 import itertools
 import logging
 import os
@@ -12,7 +11,6 @@ import threading
 import weakref
 from copy import copy, deepcopy
 from datetime import datetime
-from email.message import EmailMessage
 from random import randint
 from typing import Any, Callable, Dict, Mapping, Optional, Union, cast
 from urllib.parse import urljoin
@@ -159,9 +157,6 @@ def default_config() -> dict[str, Any]:
 
 class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
     __slots__ = (
-        "request_head",
-        "request_body",
-        # 'request_log',
         "proxylist",
         "config",
         "transport",
@@ -179,12 +174,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
-    clonable_attributes = (
-        "request_head",
-        "request_body",
-        # 'request_log',
-        "proxylist",
-    )
+    clonable_attributes = ("proxylist",)
 
     # Complex config items which points to mutable objects
     mutable_config_keys = copy(MUTABLE_CONFIG_KEYS)
@@ -210,8 +200,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         # makes pylint happy
         self.request_counter = 0
-        self.request_head = None
-        self.request_body = None
         self.request_method = None
         self.transport_param = transport
         self.transport = None
@@ -279,9 +267,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         This methods is automatically called before each network request.
         """
-        self.request_head = None
-        # self.request_log = None
-        self.request_body = None
         self.request_method = None
         self.request_counter = 0
         self.exception = None
@@ -571,9 +556,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         if self.config["reuse_referer"]:
             self.config["referer"] = self.doc.url
 
-        self.copy_request_data()
-
-        # Should be called after `copy_request_data`
         if self.config["log_dir"]:
             self.save_dumps()
 
@@ -593,14 +575,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         The saved dump could be used for debugging the reason of the failure.
         """
         self.doc = self.transport.prepare_response(self.config)
-        self.copy_request_data()
         self.save_dumps()
-
-    def copy_request_data(self) -> None:
-        # TODO: Maybe request object?
-        self.request_head = self.transport.request_head
-        self.request_body = self.transport.request_body
-        # self.request_log = self.transport.request_log
 
     def setup_document(self, content: bytes, **kwargs: Any) -> None:
         """
@@ -679,10 +654,10 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         )
         with open(file_name, "wb") as out:
             out.write(b"Request headers:\n")
-            out.write(cast(bytes, self.request_head))
+            out.write(b"THIS FEATURE IS NOT SUPPORTED ANYMORE")
             out.write(b"\n")
             out.write(b"Request body:\n")
-            out.write(cast(bytes, self.request_body))
+            out.write(b"THIS FEATURE IS NOT SUPPORTED ANYMORE")
             out.write(b"\n\n")
             out.write(b"Response headers:\n")
             out.write(self.doc.head if (self.doc and self.doc.head) else b"")
@@ -756,18 +731,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     def __setstate__(self, state: Mapping[str, Any]) -> None:
         for slot, value in state.items():
             setattr(self, slot, value)
-
-    @property
-    def request_headers(self) -> Optional[EmailMessage]:
-        if self.request_head is None:
-            return None
-        first_head = self.request_head.decode("utf-8").split("\r\n\r\n")[0]
-        lines = first_head.split("\r\n")
-        lines = [x for x in lines if ":" in x]
-        return cast(
-            EmailMessage,
-            email.message_from_string("\n".join(lines), _class=EmailMessage),
-        )
 
 
 # For backward compatibility

@@ -39,15 +39,7 @@ from grab.util.http import normalize_http_values, normalize_post_data, normalize
 
 
 class BaseTransport:
-    def __init__(self) -> None:
-        pass
-        # these assignments makes pylint happy
-        # self.body_file = None
-        # self.body_path = None
-
     def reset(self) -> None:
-        # self.body_file = None
-        # self.body_path = None
         pass
 
     def setup_body_file(
@@ -61,10 +53,8 @@ class BaseTransport:
         if storage_filename is None:
             file, file_path = tempfile.mkstemp(dir=storage_dir)
             os.close(file)
-            # body_file = os.fdopen(handle, "wb")
         else:
             file_path = os.path.join(storage_dir, storage_filename)
-            # body_file = open(path, "wb")
         return file_path  # noqa: R504
 
 
@@ -138,27 +128,13 @@ class Urllib3Transport(BaseTransport):
         super().__init__()
         # http://urllib3.readthedocs.io/en/latest/user-guide.html#certificate-verification
         self.pool = PoolManager(10, cert_reqs="CERT_REQUIRED", ca_certs=certifi.where())
-
+        # WTF: logging is configured here?
         logger = logging.getLogger("urllib3.connectionpool")
         logger.setLevel(logging.WARNING)
-
-        self.request_head = b""
-        self.request_body = b""
-        self.request_log = b""
-
-        self._response: Optional[Urllib3HTTPResponse] = None
         self._request: Optional[Request] = None
+        self._response: Optional[Urllib3HTTPResponse] = None
 
     def reset(self) -> None:
-        # self.response_header_chunks = []
-        # self.response_body_chunks = []
-        # self.response_body_bytes_read = 0
-        # self.verbose_logging = False
-        # Maybe move to super-class???
-        self.request_head = b""
-        self.request_body = b""
-        self.request_log = b""
-
         self._response = None
         self._request = None
 
@@ -366,11 +342,6 @@ class Urllib3Transport(BaseTransport):
         #    raise error.GrabConnectionError('ProtocolError', ex)
         # except exceptions.SSLError as ex:
         #    raise error.GrabConnectionError('SSLError', ex)
-
-        # WTF?
-        self.request_head = b""
-        self.request_body = b""
-        self.request_log = b""
 
         self._response = res
         # raise error.GrabNetworkError(ex.args[0], ex.args[1])
