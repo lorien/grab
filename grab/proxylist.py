@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import itertools
 import logging
 import re
 from collections import namedtuple
 from random import randint
+from typing import Any, Optional
 from urllib.error import URLError
 from urllib.request import urlopen
 
@@ -15,10 +18,10 @@ logger = logging.getLogger("grab.proxylist")  # pylint: disable=invalid-name
 
 
 class Proxy(namedtuple("Proxy", PROXY_FIELDS)):
-    def get_address(self):
+    def get_address(self) -> str:
         return "%s:%s" % (self.host, self.port)
 
-    def get_userpwd(self):
+    def get_userpwd(self) -> Optional[str]:
         if self.username:
             return "%s:%s" % (self.username, self.password or "")
         return None
@@ -28,7 +31,7 @@ class InvalidProxyLine(GrabError):
     pass
 
 
-def parse_proxy_line(line):
+def parse_proxy_line(line: str) -> tuple[str, str, Optional[str], Optional[str]]:
     """
     Parse proxy details from the raw text line.
 
@@ -49,7 +52,9 @@ def parse_proxy_line(line):
     raise InvalidProxyLine("Invalid proxy line: %s" % line)
 
 
-def parse_raw_list_data(data, proxy_type="http", proxy_userpwd=None):
+def parse_raw_list_data(
+    data: str, proxy_type: str = "http", proxy_userpwd: Optional[str] = None
+) -> Proxy:
     """Iterate over proxy servers found in the raw data."""
     if not isinstance(data, str):
         data = data.decode("utf-8")
@@ -67,15 +72,20 @@ def parse_raw_list_data(data, proxy_type="http", proxy_userpwd=None):
 
 
 class BaseProxySource:
-    def __init__(self, proxy_type="http", proxy_userpwd=None, **kwargs):
+    def __init__(
+        self,
+        proxy_type: str = "http",
+        proxy_userpwd: Optional[str] = None,
+        **kwargs: Any,
+    ) -> Any:
         kwargs["proxy_type"] = proxy_type
         kwargs["proxy_userpwd"] = proxy_userpwd
         self.config = kwargs
 
-    def load_raw_data(self):
+    def load_raw_data(self) -> str:
         raise NotImplementedError
 
-    def load(self):
+    def load(self) -> list[Proxy]:
         data = self.load_raw_data()
         return list(
             parse_raw_list_data(
@@ -89,11 +99,11 @@ class BaseProxySource:
 class FileProxySource(BaseProxySource):
     """Load list from the file."""
 
-    def __init__(self, path, **kwargs):
+    def __init__(self, path: str, **kwargs: Any) -> None:
         self.path = path
         super().__init__(**kwargs)
 
-    def load_raw_data(self):
+    def load_raw_data(self) -> str:
         with open(self.path, encoding="utf-8") as inp:
             return inp.read()
 
@@ -101,11 +111,11 @@ class FileProxySource(BaseProxySource):
 class WebProxySource(BaseProxySource):
     """Load list from web resource."""
 
-    def __init__(self, url, **kwargs):
+    def __init__(self, url: str, **kwargs: Any) -> None:
         self.url = url
         super().__init__(**kwargs)
 
-    def load_raw_data(self):  # pylint: disable=inconsistent-return-statements
+    def load_raw_data(self) -> None:  # pylint: disable=inconsistent-return-statements
         limit = 3
         for ntry in range(limit):
             try:
@@ -122,62 +132,62 @@ class WebProxySource(BaseProxySource):
 class ListProxySource(BaseProxySource):
     """Load list from python list of strings."""
 
-    def __init__(self, items, **kwargs):
+    def __init__(self, items: list[str], **kwargs: Any) -> None:
         self.items = items
         super().__init__(**kwargs)
 
-    def load_raw_data(self):
+    def load_raw_data(self) -> str:
         return "\n".join(self.items)
 
 
 class ProxyList:
     """Class to work with proxy list."""
 
-    def __init__(self, source=None):
+    def __init__(self, source: Optional[BaseProxySource] = None) -> None:
         self._source = source
         self._list = []
         self._list_iter = None
 
-    def set_source(self, source):
+    def set_source(self, source: BaseProxySource) -> None:
         """Set the proxy source and use it to load proxy list."""
         self._source = source
         self.load()
 
-    def load_file(self, path, **kwargs):
+    def load_file(self, path: str, **kwargs: Any) -> None:
         """Load proxy list from file."""
         self.set_source(FileProxySource(path, **kwargs))
 
-    def load_url(self, url, **kwargs):
+    def load_url(self, url: str, **kwargs: Any) -> None:
         """Load proxy list from web document."""
         self.set_source(WebProxySource(url, **kwargs))
 
-    def load_list(self, items, **kwargs):
+    def load_list(self, items: list[str], **kwargs: Any) -> None:
         """Load proxy list from python list."""
         self.set_source(ListProxySource(items, **kwargs))
 
-    def load(self):
+    def load(self) -> None:
         """Load proxy list from configured proxy source."""
         self._list = self._source.load()
         self._list_iter = itertools.cycle(self._list)
 
-    def get_random_proxy(self):
+    def get_random_proxy(self) -> Proxy:
         """Return random proxy."""
         idx = randint(0, len(self._list) - 1)
         return self._list[idx]
 
-    def get_next_proxy(self):
+    def get_next_proxy(self) -> Proxy:
         """Return next proxy."""
         return next(self._list_iter)
 
-    def size(self):
+    def size(self) -> int:
         """Return number of proxies in the list."""
         return len(self._list)
 
-    def __iter__(self):
+    def __iter__(self) -> Proxy:
         return iter(self._list)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._list)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: int) -> Proxy:
         return self._list[key]

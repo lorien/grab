@@ -1,12 +1,13 @@
 import time
 from queue import Empty
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 from grab.error import (
     GrabInvalidResponse,
     GrabInvalidUrl,
     GrabNetworkError,
     GrabTooManyRedirectsError,
+    OriginalExceptionGrabError,
 )
 from grab.util.misc import camel_case_to_underscore
 
@@ -96,14 +97,15 @@ class NetworkServiceThreaded(BaseService):
                     )
                     # UnicodeError: see #323
                     if (
-                        is_redir_err
+                        not isinstance(ex, OriginalExceptionGrabError)
                         or isinstance(ex, GrabInvalidUrl)
                         or orig_exc_name == "error"
                         or orig_exc_name == "UnicodeError"
                     ):
                         ex_cls = ex
                     else:
-                        ex_cls = ex.original_exc
+                        # ex_cls.original_exc
+                        ex_cls = cast(OriginalExceptionGrabError, ex).original_exc
                     result.update(
                         {
                             "ok": False,
@@ -122,7 +124,7 @@ class NetworkServiceThreaded(BaseService):
         else:
             self.spider.log_rejected_task(task, reason)
             # pylint: disable=no-member
-            handler = task.get_fallback_handler(self.spider)
+            handler = self.spider.get_fallback_handler(task)
             # pylint: enable=no-member
             if handler:
                 handler(task)

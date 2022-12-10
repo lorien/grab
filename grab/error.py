@@ -26,7 +26,7 @@ class GrabError(Exception):
     """All custom Grab exception should be children of that class."""
 
 
-class OriginalExceptionError:
+class OriginalExceptionGrabError(GrabError):
     """Sub-class which constructor accepts original exception as second argument."""
 
     def __init__(self, *args, **kwargs):
@@ -37,7 +37,7 @@ class OriginalExceptionError:
         super().__init__(*args, **kwargs)
 
 
-class GrabNetworkError(OriginalExceptionError, GrabError):
+class GrabNetworkError(OriginalExceptionGrabError):
     """Raises in case of network error."""
 
 
@@ -69,11 +69,11 @@ class GrabInvalidUrl(GrabError):
     """Raised when error occurred while normalizing URL e.g. IDN processing."""
 
 
-class GrabInvalidResponse(OriginalExceptionError, GrabError):
+class GrabInvalidResponse(OriginalExceptionGrabError):
     """Raised when network response's data could not be processed."""
 
 
-class GrabInternalError(OriginalExceptionError, GrabError):
+class GrabInternalError(OriginalExceptionGrabError):
     pass
 
 

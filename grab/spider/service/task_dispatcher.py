@@ -1,23 +1,28 @@
+from __future__ import annotations
+
 from queue import Empty, Queue
+from typing import Any, Optional, Union
 
 from grab.error import ResponseNotValid
 from grab.spider.error import FatalError, SpiderError
-from grab.spider.task import Task
 
-from .base import BaseService
+from ..interface import BaseSpider
+from ..task import Task
+from .base import BaseService, ServiceWorker
+from .network import NetworkResult
 
 
 class TaskDispatcherService(BaseService):
-    def __init__(self, spider):
+    def __init__(self, spider: BaseSpider):
         super().__init__(spider)
-        self.input_queue = Queue()
+        self.input_queue: Queue[Any] = Queue()
         self.worker = self.create_worker(self.worker_callback)
         self.register_workers(self.worker)
 
-    def start(self):
+    def start(self) -> None:
         self.worker.start()
 
-    def worker_callback(self, worker):
+    def worker_callback(self, worker: ServiceWorker) -> None:
         while not worker.stop_event.is_set():
             worker.process_pause_signal()
             try:
@@ -27,7 +32,12 @@ class TaskDispatcherService(BaseService):
             else:
                 self.process_service_result(result, task, meta)
 
-    def process_service_result(self, result, task, meta=None):
+    def process_service_result(
+        self,
+        result: Union[Task, None, Exception, dict[str, Any]],
+        task: Task,
+        meta: Optional[dict[str, Any]] = None,
+    ) -> None:
         """
         Process result submitted from any service to task dispatcher service.
 
@@ -71,7 +81,7 @@ class TaskDispatcherService(BaseService):
         else:
             raise SpiderError("Unknown result received from a service: %s" % result)
 
-    def process_network_result(self, result, task):
+    def process_network_result(self, result: NetworkResult, task: Task) -> None:
         # TODO: Move to network service
         # starts
         self.spider.log_network_result_stats(result, task)

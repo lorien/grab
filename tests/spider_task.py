@@ -260,9 +260,9 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
             TestSpider,
         )
 
-        self.assertEqual(task1.get_fallback_handler(bot), bot.do_smth)
-        self.assertEqual(task2.get_fallback_handler(bot), bot.task_bar_fallback)
-        self.assertEqual(task3.get_fallback_handler(bot), None)
+        self.assertEqual(bot.get_fallback_handler(task1), bot.do_smth)
+        self.assertEqual(bot.get_fallback_handler(task2), bot.task_bar_fallback)
+        self.assertEqual(bot.get_fallback_handler(task3), None)
 
     def test_update_grab_instance(self):
         self.server.add_response(Response(), count=2)

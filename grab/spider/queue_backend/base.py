@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from datetime import datetime
 from typing import Any, Optional
 
@@ -25,9 +26,13 @@ class BaseTaskQueue:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def size(self) -> int:
         raise NotImplementedError
 
     def clear(self) -> None:
         """Remove all tasks from the queue."""
+        raise NotImplementedError
+
+    def close(self) -> None:
         raise NotImplementedError

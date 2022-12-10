@@ -31,6 +31,9 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         self.logger_name = logger_name
         self.logger = logging.getLogger(logger_name)
         self.setup_logging_file(log_file)
+        self.counters: dict[str, int] = defaultdict(int)
+        self.collections: dict[str, list[Any]] = defaultdict(list)
+        self.counters_prev: dict[str, int] = defaultdict(int)
         self.reset()
 
     def setup_speed_keys(self, speed_key: str, extra_keys: list[str]) -> None:
@@ -40,9 +43,9 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         self.speed_keys = keys
 
     def reset(self) -> None:
-        self.counters = defaultdict(int)
-        self.collections = defaultdict(list)
-        self.counters_prev = defaultdict(int)
+        self.counters.clear()
+        self.collections.clear()
+        self.counters_prev.clear()
 
     def setup_logging_file(self, log_file: str) -> None:
         self.log_file = log_file

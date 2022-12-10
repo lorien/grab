@@ -4,7 +4,6 @@ from __future__ import annotations
 # Copyright: 2011, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: BSD
-import collections.abc
 import email
 import itertools
 import logging
@@ -15,7 +14,7 @@ from copy import copy, deepcopy
 from datetime import datetime
 from email.message import EmailMessage
 from random import randint
-from typing import Any, Optional, cast
+from typing import Any, Callable, Dict, Optional, Union, cast
 from urllib.parse import urljoin
 
 from grab import error
@@ -42,6 +41,8 @@ TRANSPORT_ALIAS = {
     "urllib3": "grab.transport.Urllib3Transport",
 }
 DEFAULT_TRANSPORT = "urllib3"
+GrabConfig = Dict[str, Any]
+TransportParam = Optional[Union[str, Callable[..., Any]]]
 
 # pylint: disable=invalid-name
 logger = logging.getLogger("grab.base")
@@ -52,11 +53,13 @@ logger_network = logging.getLogger("grab.network")
 # pylint: enable=invalid-name
 
 
-def copy_config(config, mutable_config_keys=MUTABLE_CONFIG_KEYS):
+def copy_config(
+    config: dict[str, Any], mutable_config_keys: Optional[list[str]] = None
+) -> dict[str, Any]:
     """Copy grab config with correct handling of mutable config values."""
     cloned_config = copy(config)
     # Apply ``copy`` function to mutable config values
-    for key in mutable_config_keys:
+    for key in mutable_config_keys or MUTABLE_CONFIG_KEYS:
         cloned_config[key] = copy(config[key])
     return cloned_config
 
@@ -190,11 +193,16 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     # Public methods
     #
 
-    def __init__(self, document_body=None, transport=None, **kwargs):
+    def __init__(
+        self,
+        document_body: Optional[bytes] = None,
+        transport: TransportParam = None,
+        **kwargs: Any,
+    ) -> None:
         """Create Grab instance."""
         self.meta = {}
         self._doc = None
-        self.config: dict[str, Any] = default_config()
+        self.config: GrabConfig = default_config()
         self.config["common_headers"] = self.common_headers()
         self.cookies = CookieManager()
         self.proxylist = ProxyList()
@@ -224,7 +232,11 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     doc = property(_get_doc, _set_doc)
 
-    def setup_transport(self, transport_param, reset=False):
+    def setup_transport(
+        self,
+        transport_param: TransportParam,
+        reset: bool = False,
+    ) -> None:
         if self.transport is not None and not reset:
             raise error.GrabMisuseError(
                 "Transport is already set up. Use"
@@ -249,7 +261,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 TRANSPORT_CACHE[(mod_path, cls_name)] = cls
             self.transport_param = transport_param
             self.transport = cls()
-        elif isinstance(transport_param, collections.abc.Callable):
+        elif isinstance(transport_param, Callable):
             self.transport_param = transport_param
             self.transport = transport_param()
         else:
@@ -276,7 +288,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         if self.transport:
             self.transport.reset()
 
-    def clone(self, **kwargs):
+    def clone(self, **kwargs: Any) -> Grab:
         r"""
         Create clone of Grab instance.
 
@@ -323,7 +335,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         }
         return conf
 
-    def load_config(self, config):
+    def load_config(self, config: GrabConfig) -> None:
         """Configure grab instance with external config object."""
         self.config = copy_config(config, self.mutable_config_keys)
         if "cookiejar_cookies" in config["state"]:
@@ -331,7 +343,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 config["state"]["cookiejar_cookies"]
             )
 
-    def setup(self, **kwargs):
+    def setup(self, **kwargs: Any) -> None:
         """Set up Grab instance configuration."""
         for key in kwargs:
             if key not in self.config.keys():
@@ -648,7 +660,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     #
 
     @classmethod
-    def common_headers(cls):
+    def common_headers(cls) -> dict[str, str]:
         """Build headers which sends typical browser."""
         return {
             "Accept": "text/xml,application/xml,application/xhtml+xml"
@@ -686,7 +698,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         )
         self.doc.save(file_name)
 
-    def make_url_absolute(self, url, resolve_base=False):
+    def make_url_absolute(self, url: str, resolve_base: bool = False) -> str:
         """Make url absolute using previous request url as base url."""
         if self.config["url"]:
             if resolve_base:

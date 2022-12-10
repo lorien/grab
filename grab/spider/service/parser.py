@@ -1,16 +1,23 @@
+from __future__ import annotations
+
 import sys
 import time
 from queue import Empty, Queue
+from typing import Any, Callable
 
+from grab.base import Grab
 from grab.spider.error import NoTaskHandler
 
-from .base import BaseService
+from ..interface import BaseSpider
+from ..task import Task
+from .base import BaseService, ServiceWorker
+from .network import NetworkResult
 
 
 class ParserService(BaseService):
-    def __init__(self, spider, pool_size):
+    def __init__(self, spider: BaseSpider, pool_size: int) -> None:
         super().__init__(spider)
-        self.input_queue = Queue()
+        self.input_queue: Queue[Any] = Queue()
         self.pool_size = pool_size
         self.workers_pool = []
         for _ in range(self.pool_size):
@@ -18,7 +25,7 @@ class ParserService(BaseService):
         self.supervisor = self.create_worker(self.supervisor_callback)
         self.register_workers(self.workers_pool, self.supervisor)
 
-    def check_pool_health(self):
+    def check_pool_health(self) -> None:
         to_remove = []
         for worker in self.workers_pool:
             if not worker.is_alive():
@@ -30,13 +37,13 @@ class ParserService(BaseService):
         for worker in to_remove:
             self.workers_pool.remove(worker)
 
-    def supervisor_callback(self, worker):
+    def supervisor_callback(self, worker: ServiceWorker) -> None:
         while not worker.stop_event.is_set():
             worker.process_pause_signal()
             self.check_pool_health()
             time.sleep(1)
 
-    def worker_callback(self, worker):
+    def worker_callback(self, worker: ServiceWorker) -> None:
         process_request_count = 0
         while not worker.stop_event.is_set():
             worker.process_pause_signal()
@@ -70,7 +77,9 @@ class ParserService(BaseService):
                 finally:
                     worker.is_busy_event.clear()
 
-    def execute_task_handler(self, handler, result, task):
+    def execute_task_handler(
+        self, handler: Callable[[Grab, Task], None], result: NetworkResult, task: Task
+    ) -> None:
         # pylint: disable=broad-except
         try:
             handler_result = handler(result["grab"], task)

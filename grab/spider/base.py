@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # pylint: disable=too-many-lines
 import logging
 import time
@@ -6,12 +8,15 @@ from datetime import datetime
 from queue import Empty, Queue
 from random import randint
 from traceback import format_exception, format_stack
-from typing import Any
+from types import TracebackType
+from typing import Any, Callable, Iterator, Optional, Union, cast
 
 from grab.base import Grab
 from grab.error import raise_feature_is_deprecated
-from grab.proxylist import BaseProxySource, ProxyList
+from grab.proxylist import BaseProxySource, Proxy, ProxyList
 from grab.spider.error import NoTaskHandler, SpiderError, SpiderMisuseError
+from grab.spider.queue_backend.base import BaseTaskQueue
+from grab.spider.service.base import BaseService
 from grab.spider.task import Task
 from grab.stat import Stat
 from grab.util.metrics import format_traffic_value
@@ -29,7 +34,6 @@ DEFAULT_NETWORK_STREAM_NUMBER = 3
 DEFAULT_TASK_TRY_LIMIT = 5
 DEFAULT_NETWORK_TRY_LIMIT = 5
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
-NULL = object()
 
 # pylint: disable=invalid-name
 logger = logging.getLogger("grab.spider.base")
@@ -48,18 +52,18 @@ class Spider(BaseSpider):
     # If the logic of generating initial tasks is complex
     # then consider to use `task_generator` method instead of
     # `initial_urls` attribute
-    initial_urls = []
+    initial_urls: list[str] = []
 
     # *************
     # Class Methods
     # *************
 
     @classmethod
-    def update_spider_config(cls, config):
+    def update_spider_config(cls, config: dict[str, Any]) -> None:
         pass
 
     @classmethod
-    def get_spider_name(cls):
+    def get_spider_name(cls) -> str:
         if cls.spider_name:
             return cls.spider_name
         return camel_case_to_underscore(cls.__name__)
@@ -71,22 +75,22 @@ class Spider(BaseSpider):
     # pylint: disable=too-many-locals, too-many-arguments
     def __init__(
         self,
-        thread_number=None,
-        network_try_limit=None,
-        task_try_limit=None,
-        request_pause=NULL,
-        priority_mode="random",
-        meta=None,
-        only_cache=False,
-        config=None,
-        args=None,
-        parser_requests_per_process=10000,
-        parser_pool_size=1,
-        network_service="threaded",
-        grab_transport="urllib3",
+        thread_number: Optional[int] = None,
+        network_try_limit: Optional[int] = None,
+        task_try_limit: Optional[int] = None,
+        priority_mode: str = "random",
+        meta: Optional[dict[str, Any]] = None,
+        config: Optional[dict[str, Any]] = None,
+        args: Optional[dict[str, Any]] = None,
+        parser_requests_per_process: int = 10000,
+        parser_pool_size: int = 1,
+        network_service: str = "threaded",
+        grab_transport: str = "urllib3",
         # Deprecated
-        transport=None,
-    ):
+        request_pause: Any = None,
+        only_cache: bool = False,
+        transport: Any = None,
+    ) -> None:
         """
         Create Spider instance, duh.
 
@@ -107,14 +111,16 @@ class Spider(BaseSpider):
             network request which is performed again due to network error
         * args - command line arguments parsed with `setup_arg_parser` method
         """
-        self.fatal_error_queue = Queue()
+        self.fatal_error_queue: Queue[
+            tuple[type[Exception], Exception, TracebackType]
+        ] = Queue()
         self.task_queue_parameters = None
-        self._started = None
+        self._started: Optional[float] = None
         assert grab_transport in ["urllib3"]
         self.grab_transport_name = grab_transport
         self.parser_requests_per_process = parser_requests_per_process
         self.stat = Stat()
-        self.task_queue = None
+        self.task_queue: Optional[BaseTaskQueue] = None
         if args is None:
             self.args = {}
         else:
@@ -136,7 +142,7 @@ class Spider(BaseSpider):
         self.network_try_limit = network_try_limit or int(
             self.config.get("network_try_limit", DEFAULT_NETWORK_TRY_LIMIT)
         )
-        self._grab_config = {}
+        self._grab_config: dict[str, Any] = {}
         if priority_mode not in ["random", "const"]:
             raise SpiderMisuseError(
                 'Value of priority_mode option should be "random" or "const"'
@@ -145,11 +151,11 @@ class Spider(BaseSpider):
         if only_cache:
             raise_feature_is_deprecated("Cache feature")
         self.work_allowed = True
-        if request_pause is not NULL:
+        if request_pause is not None:
             warn("Option `request_pause` is deprecated and is not supported anymore")
-        self.proxylist_enabled = None
-        self.proxylist = None
-        self.proxy = None
+        self.proxylist_enabled: Optional[bool] = None
+        self.proxylist: Optional[ProxyList] = None
+        self.proxy: Optional[Proxy] = None
         self.proxy_auto_change = False
         self.interrupted = False
         self.parser_pool_size = parser_pool_size
@@ -177,10 +183,12 @@ class Spider(BaseSpider):
 
     # pylint: enable=too-many-locals, too-many-arguments
 
-    def setup_cache(self, *args, **kwargs):  # pylint: disable=unused-argument
+    def setup_cache(
+        self, *_args: Any, **_kwargs: Any
+    ) -> None:  # pylint: disable=unused-argument
         raise_feature_is_deprecated("Cache feature")
 
-    def load_queue_class(self, backend: str):
+    def load_queue_class(self, backend: str) -> type[BaseTaskQueue]:
         # pylint: disable=import-outside-toplevel
         if backend == "mongodb":
             from grab.spider.queue_backend.mongodb import MongodbTaskQueue
@@ -196,7 +204,7 @@ class Spider(BaseSpider):
             return MemoryTaskQueue
         raise SpiderMisuseError(f"Invalid task queue backend name: {backend}")
 
-    def setup_queue(self, backend="memory", **kwargs):
+    def setup_queue(self, backend: str = "memory", **kwargs: Any) -> None:
         """
         Set up queue.
 
@@ -214,7 +222,12 @@ class Spider(BaseSpider):
         # )
         self.task_queue = queue_cls(spider_name=self.get_spider_name(), **kwargs)
 
-    def add_task(self, task, queue=None, raise_error=False):
+    def add_task(
+        self,
+        task: Task,
+        queue: Optional[BaseTaskQueue] = None,
+        raise_error: bool = False,
+    ) -> bool:
         """Add task to the task queue."""
         if queue is None:
             queue = self.task_queue
@@ -229,7 +242,7 @@ class Spider(BaseSpider):
         else:
             task.priority_set_explicitly = True
 
-        if not task.url.startswith(
+        if not task.url or not task.url.startswith(
             ("http://", "https://", "ftp://", "file://", "feed://")
         ):
             self.stat.collect("task-with-invalid-url", task.url)
@@ -247,18 +260,18 @@ class Spider(BaseSpider):
         queue.put(task, priority=task.priority, schedule_time=task.schedule_time)
         return True
 
-    def stop(self):
+    def stop(self) -> None:
         """Instruct spider to stop processing new tasks and start shutting down."""
         self.work_allowed = False
 
     def load_proxylist(
         self,
-        source,
-        source_type=None,
-        proxy_type="http",
-        auto_init=True,
-        auto_change=True,
-    ):
+        source: Union[str, BaseProxySource],
+        source_type: Optional[str] = None,
+        proxy_type: str = "http",
+        auto_init: bool = True,
+        auto_change: bool = True,
+    ) -> None:
         """
         Load proxy list.
 
@@ -303,7 +316,14 @@ class Spider(BaseSpider):
             self.proxy = self.proxylist.get_random_proxy()
         self.proxy_auto_change = auto_change
 
-    def process_next_page(self, grab, task, xpath, resolve_base=False, **kwargs):
+    def process_next_page(
+        self,
+        grab: Grab,
+        task: Task,
+        xpath: str,
+        resolve_base: bool = False,
+        **kwargs: Any,
+    ) -> bool:
         r"""
         Generate task for next page.
 
@@ -330,7 +350,7 @@ class Spider(BaseSpider):
             self.add_task(task2)
             return True
 
-    def render_stats(self, timing=None):
+    def render_stats(self, timing: None = None) -> str:
         if timing is not None:
             warn(
                 "Option timing of method render_stats is deprecated."
@@ -381,24 +401,24 @@ class Spider(BaseSpider):
     # Methods for spider customization
     # ********************************
 
-    def prepare(self):
+    def prepare(self) -> None:
         """
         Do additional spider customization here.
 
         This method runs before spider has started working.
         """
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """Override this method to do some final actions after parsing has been done."""
 
-    def update_grab_instance(self, grab):
+    def update_grab_instance(self, grab: Grab) -> None:
         """
         Update config of any `Grab` instance created by the spider.
 
         WTF it means?
         """
 
-    def create_grab_instance(self, **kwargs):
+    def create_grab_instance(self, **kwargs: Any) -> Grab:
         # Back-ward compatibility for deprecated `grab_config` attribute
         # Here I use `_grab_config` to not trigger warning messages
         kwargs["transport"] = self.grab_transport_name
@@ -412,7 +432,7 @@ class Spider(BaseSpider):
             grab = Grab(**kwargs)
         return grab  # noqa: R504
 
-    def task_generator(self):
+    def task_generator(self) -> Iterator[Task]:
         """
         You can override this method to load new tasks smoothly.
 
@@ -429,7 +449,7 @@ class Spider(BaseSpider):
     # Private Methods
     # ***************
 
-    def check_task_limits(self, task):
+    def check_task_limits(self, task: Task) -> tuple[bool, Optional[str]]:
         """
         Check that task's network & try counters do not exceed limits.
 
@@ -446,26 +466,26 @@ class Spider(BaseSpider):
 
         return True, None
 
-    def generate_task_priority(self):
+    def generate_task_priority(self) -> int:
         if self.priority_mode == "const":
             return DEFAULT_TASK_PRIORITY
         return randint(*RANDOM_TASK_PRIORITY_RANGE)
 
-    def process_initial_urls(self):
+    def process_initial_urls(self) -> None:
         if self.initial_urls:
             for url in self.initial_urls:
                 self.add_task(Task("initial", url=url))
 
-    def get_task_from_queue(self):
+    def get_task_from_queue(self) -> Optional[Union[bool, Task]]:
         try:
-            return self.task_queue.get()
+            return cast(BaseTaskQueue, self.task_queue).get()
         except Empty:
-            size = self.task_queue.size()
+            size = cast(BaseTaskQueue, self.task_queue).size()
             if size:
                 return True
             return None
 
-    def setup_grab_for_task(self, task):
+    def setup_grab_for_task(self, task: Task) -> Grab:
         grab = self.create_grab_instance()
         if task.grab_config:
             grab.load_config(task.grab_config)
@@ -478,7 +498,7 @@ class Spider(BaseSpider):
         grab.setup_transport(self.grab_transport_name)
         return grab
 
-    def is_valid_network_response_code(self, code, task):
+    def is_valid_network_response_code(self, code: int, task: Task) -> bool:
         """
         Test if response is valid.
 
@@ -487,7 +507,12 @@ class Spider(BaseSpider):
         """
         return code < 400 or code == 404 or code in task.valid_status
 
-    def process_parser_error(self, func_name, task, exc_info):
+    def process_parser_error(
+        self,
+        func_name: str,
+        task: Task,
+        exc_info: tuple[type[Exception], Exception, TracebackType],
+    ) -> None:
         _, ex, _ = exc_info
         self.stat.inc("spider:error-%s" % ex.__class__.__name__.lower())
 
@@ -497,26 +522,16 @@ class Spider(BaseSpider):
             "".join(format_exception(*exc_info)),
         )
 
-        # Looks strange but I really have some problems with
-        # serializing exception into string
-        try:
-            ex_str = str(ex)
-        except TypeError:
-            try:
-                ex_str = ex.decode("utf-8", "ignore")
-            except TypeError:
-                ex_str = str(ex)
-
         task_url = task.url if task else None
         self.stat.collect(
             "fatal",
-            "%s|%s|%s|%s" % (func_name, ex.__class__.__name__, ex_str, task_url),
+            "%s|%s|%s|%s" % (func_name, ex.__class__.__name__, str(ex), task_url),
         )
 
-    def find_task_handler(self, task):
+    def find_task_handler(self, task: Task) -> Callable[..., Any]:
         callback = task.get("callback")
         if callback:
-            return callback
+            return cast(Callable[..., Any], callback)
         try:
             handler = getattr(self, "task_%s" % task.name)
         except AttributeError as ex:
@@ -524,9 +539,9 @@ class Spider(BaseSpider):
                 "No handler or callback defined for " "task %s" % task.name
             ) from ex
         else:
-            return handler
+            return cast(Callable[..., Any], handler)
 
-    def log_network_result_stats(self, res, task):
+    def log_network_result_stats(self, res: NetworkResult, task: Task) -> None:
         # Increase stat counters
         self.stat.inc("spider:request-processed")
         self.stat.inc("spider:task")
@@ -540,7 +555,7 @@ class Spider(BaseSpider):
             self.stat.inc("spider:download-size", doc.download_size)
             self.stat.inc("spider:upload-size", doc.upload_size)
 
-    def process_grab_proxy(self, task, grab):
+    def process_grab_proxy(self, task: Task, grab: Grab) -> None:
         """Assign new proxy from proxylist to the task."""
         if task.use_proxylist and self.proxylist_enabled:
             if self.proxy_auto_change:
@@ -553,8 +568,8 @@ class Spider(BaseSpider):
                 )
 
     # pylint: disable=unused-argument
-    def change_active_proxy(self, task, grab):
-        self.proxy = self.proxylist.get_random_proxy()
+    def change_active_proxy(self, task: Task, grab: Grab) -> None:
+        self.proxy = cast(ProxyList, self.proxylist).get_random_proxy()
 
     # pylint: enable=unused-argument
 
@@ -573,7 +588,7 @@ class Spider(BaseSpider):
     #        logger.debug("Task %s has invalid URL: %s", task.name, task.url)
     #        self.stat.collect("invalid-url", task.url)
 
-    def run(self):  # noqa: C901
+    def run(self) -> None:  # noqa: C901
         self._started = time.time()
         services = []
         try:
@@ -611,7 +626,7 @@ class Spider(BaseSpider):
         finally:
             self.shutdown_services(services)
 
-    def shutdown_services(self, services):
+    def shutdown_services(self, services: list[BaseService]) -> None:
         # TODO:
         # print('Start stopping services')
         for srv in services:
@@ -635,10 +650,10 @@ class Spider(BaseSpider):
             self.task_queue.close()
         logger.debug("Work done")
 
-    def is_idle(self):
+    def is_idle(self) -> bool:
         return (
             not self.task_generator_service.is_alive()
-            and not self.task_queue.size()
+            and not cast(BaseTaskQueue, self.task_queue).size()
             and not self.task_dispatcher.input_queue.qsize()
             and not self.parser_service.input_queue.qsize()
             and not self.parser_service.is_busy()
@@ -660,6 +675,15 @@ class Spider(BaseSpider):
             self.stat.collect("network-count-rejected", task.url)
         else:
             raise SpiderError("Unknown response from " "check_task_limits: %s" % reason)
+
+    def get_fallback_handler(self, task: Task) -> Optional[Callable[..., Any]]:
+        if task.fallback_name:
+            return cast(Callable[..., Any], getattr(self, task.fallback_name))
+        if task.name:
+            fb_name = "task_%s_fallback" % task.name
+            if hasattr(self, fb_name):
+                return cast(Callable[..., Any], getattr(self, fb_name))
+        return None
 
     # ################
     # Deprecated Things

@@ -10,7 +10,7 @@ class GrabDeprecationWarning(UserWarning):
     """Warning category used in Grab to generate warning messages."""
 
 
-def warn(msg, stacklevel=2):
+def warn(msg: str, stacklevel: int = 2) -> None:
     warnings.warn(msg, category=GrabDeprecationWarning, stacklevel=stacklevel)
     frame = sys._getframe()  # pylint: disable=protected-access
     logging.debug(

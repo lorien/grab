@@ -1,10 +1,15 @@
-import time
+from __future__ import annotations
 
+import time
+from typing import Iterator
+
+from ..interface import BaseSpider
+from ..task import Task
 from .base import BaseService
 
 
 class TaskGeneratorService(BaseService):
-    def __init__(self, spider, real_generator):
+    def __init__(self, spider: BaseSpider, real_generator: Iterator[Task]) -> None:
         super().__init__(spider)
         self.real_generator = real_generator
         self.task_queue_threshold = max(200, self.spider.thread_number * 2)

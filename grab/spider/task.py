@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from copy import deepcopy
 from datetime import datetime, timedelta
+from typing import Any, Callable, Optional
 
-from grab.base import copy_config
+from grab.base import Grab, GrabConfig, copy_config
 from grab.error import raise_feature_is_deprecated
 from grab.spider.error import SpiderMisuseError
 
@@ -15,28 +18,28 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
 
     def __init__(  # noqa: C901 pylint: disable=too-many-arguments, too-many-locals
         self,
-        name=None,
-        url=None,
-        grab=None,
-        grab_config=None,
-        priority=None,
-        priority_set_explicitly=True,
-        network_try_count=0,
-        task_try_count=1,
-        valid_status=None,
-        use_proxylist=True,
-        delay=None,
-        raw=False,
-        callback=None,
-        fallback_name=None,
+        name: Optional[str] = None,
+        url: Optional[str] = None,
+        grab: Optional[Grab] = None,
+        grab_config: Optional[GrabConfig] = None,
+        priority: Optional[int] = None,
+        priority_set_explicitly: bool = True,
+        network_try_count: int = 0,
+        task_try_count: int = 1,
+        valid_status: Optional[list[int]] = None,
+        use_proxylist: bool = True,
+        delay: Optional[int] = None,
+        raw: bool = False,
+        callback: Optional[Callable[..., None]] = None,
+        fallback_name: Optional[str] = None,
         # deprecated
-        disable_cache=False,
-        refresh_cache=False,
-        cache_timeout=None,
-        store=None,
+        disable_cache: bool = False,
+        refresh_cache: bool = False,
+        cache_timeout: Optional[int] = None,
+        store: Optional[dict[str, Any]] = None,
         # kwargs
-        **kwargs
-    ):
+        **kwargs: Any,
+    ) -> None:
         """
         Create `Task` object.
 
@@ -97,7 +100,8 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             later as attributes or with `get` method which allows to use
             default value if attribute does not exist.
         """
-        self.grab_config = None
+        self.schedule_time: Optional[datetime] = None
+        self.grab_config: Optional[dict[str, Any]] = None
         if disable_cache or refresh_cache or cache_timeout:
             raise_feature_is_deprecated("Cache feature")
         if name == "generator":
@@ -107,7 +111,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             # generates new tasks
             raise SpiderMisuseError('Task name could not be "generator"')
         self.name = name
-        self.check_init_options_integrity(url, grab, grab_config)
+        self.assert_init_options_integrity(url, grab, grab_config)
         if grab:
             self.setup_grab_config(grab.dump_config())
         elif grab_config:
@@ -128,12 +132,13 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         self.use_proxylist = use_proxylist
         self.raw = raw
         self.callback = callback
-        self.coroutines_stack = []
         self.store = store if store else {}
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def check_init_options_integrity(self, url, grab, grab_config):
+    def assert_init_options_integrity(
+        self, url: str, grab: Grab, grab_config: dict[str, Any]
+    ) -> None:
         if url is None and grab is None and grab_config is None:
             raise SpiderMisuseError(
                 "Either url, grab or grab_config argument "
@@ -153,21 +158,21 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
                 "Options grab and grab_config could not be used together"
             )
 
-    def get(self, key, default=None):
+    def get(self, key: str, default: Any = None) -> Any:
         """Return value of attribute or None if such attribute does not exist."""
         return getattr(self, key, default)
 
-    def process_delay_option(self, delay):
+    def process_delay_option(self, delay: Optional[float]) -> None:
         if delay:
             self.schedule_time = datetime.utcnow() + timedelta(seconds=delay)
         else:
             self.schedule_time = None
 
-    def setup_grab_config(self, grab_config):
+    def setup_grab_config(self, grab_config: dict[str, Any]) -> None:
         self.grab_config = copy_config(grab_config)
         self.url = grab_config["url"]
 
-    def clone(self, **kwargs):  # noqa: C901
+    def clone(self, **kwargs: Any) -> Task:  # noqa: C901
         """Clone Task instance.
 
         Reset network_try_count, increase task_try_count.
@@ -220,22 +225,18 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
 
         return task
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Task: %s>" % self.url
 
-    def __lt__(self, other):
+    def __lt__(self, other: Task) -> bool:
+        # if self.priority is None or other.priority is None:
+        #    return False
         return self.priority < other.priority
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        # if not isinstance(other, Task):
+        #    return NotImplemented
         if not self.priority or not other.priority:
+            # WTF???
             return True
         return self.priority == other.priority
-
-    def get_fallback_handler(self, spider):
-        if self.fallback_name:
-            return getattr(spider, self.fallback_name)
-        if self.name:
-            fb_name = "task_%s_fallback" % self.name
-            if hasattr(spider, fb_name):
-                return getattr(spider, fb_name)
-        return None

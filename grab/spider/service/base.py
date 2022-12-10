@@ -5,13 +5,15 @@ import sys
 from threading import Event, Thread
 from typing import Any, Callable, Iterable, Union
 
+from ..interface import BaseSpider
+
 # pylint: disable=invalid-name
 logger = logging.getLogger("grab.spider.base_service")
 # pylint: enable=invalid-name
 
 
 class ServiceWorker:
-    def __init__(self, spider, worker_callback):
+    def __init__(self, spider: BaseSpider, worker_callback: Callable[..., Any]) -> None:
         self.spider = spider
         self.thread = Thread(
             target=self.worker_callback_wrapper(worker_callback), args=[self]
@@ -70,7 +72,7 @@ class ServiceWorker:
 
 
 class BaseService:
-    def __init__(self, spider):
+    def __init__(self, spider: BaseSpider) -> None:
         self.spider = spider
         self.worker_registry = []
 
