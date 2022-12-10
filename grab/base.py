@@ -270,7 +270,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 "or class or callable. Got %s" % type(transport_param)
             )
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Reset Grab instnce.
 
@@ -327,7 +327,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             setattr(self, key, getattr(grab, key))
         self.cookies = deepcopy(grab.cookies)
 
-    def dump_config(self):
+    def dump_config(self) -> dict[str, Any]:
         """Make clone of current config."""
         conf = copy_config(self.config, self.mutable_config_keys)
         conf["state"] = {
@@ -426,7 +426,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             proxy_info,
         )
 
-    def request(self, **kwargs):  # noqa: CCR001
+    def request(self, **kwargs: dict[str, Any]) -> Document:  # noqa: CCR001
         """
         Perform network request.
 

@@ -2,19 +2,24 @@ from __future__ import annotations
 
 import logging
 import sys
+from queue import Queue
 from threading import Event, Thread
 from typing import Any, Callable, Iterable, Union
 
-from ..interface import BaseSpider
+from ..interface import FatalErrorQueueItem
 
 # pylint: disable=invalid-name
-logger = logging.getLogger("grab.spider.base_service")
+logger = logging.getLogger(__name__)
 # pylint: enable=invalid-name
 
 
 class ServiceWorker:
-    def __init__(self, spider: BaseSpider, worker_callback: Callable[..., Any]) -> None:
-        self.spider = spider
+    def __init__(
+        self,
+        fatal_error_queue: Queue[FatalErrorQueueItem],
+        worker_callback: Callable[..., Any],
+    ) -> None:
+        self.fatal_error_queue = fatal_error_queue
         self.thread = Thread(
             target=self.worker_callback_wrapper(worker_callback), args=[self]
         )
@@ -38,7 +43,7 @@ class ServiceWorker:
                 callback(*args, **kwargs)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.error("Spider Service Fatal Error", exc_info=ex)
-                self.spider.fatal_error_queue.put(sys.exc_info())
+                self.fatal_error_queue.put(sys.exc_info())
 
         return wrapper
 
@@ -72,13 +77,13 @@ class ServiceWorker:
 
 
 class BaseService:
-    def __init__(self, spider: BaseSpider) -> None:
-        self.spider = spider
+    def __init__(self, fatal_error_queue: Queue[FatalErrorQueueItem]) -> None:
+        self.fatal_error_queue = fatal_error_queue
         self.worker_registry = []
 
     def create_worker(self, worker_action: Callable[..., None]) -> ServiceWorker:
         # pylint: disable=no-member
-        return ServiceWorker(self.spider, worker_action)
+        return ServiceWorker(self.fatal_error_queue, worker_action)
 
     def iterate_workers(
         self, objects: Union[list[ServiceWorker], ServiceWorker]

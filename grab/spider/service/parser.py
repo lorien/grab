@@ -7,16 +7,30 @@ from typing import Any, Callable
 
 from grab.base import Grab
 from grab.spider.error import NoTaskHandler
+from grab.stat import Stat
 
-from ..interface import BaseSpider
+from ..interface import FatalErrorQueueItem
 from ..task import Task
 from .base import BaseService, ServiceWorker
 from .network import NetworkResult
+from .task_dispatcher import TaskDispatcherService
 
 
-class ParserService(BaseService):
-    def __init__(self, spider: BaseSpider, pool_size: int) -> None:
-        super().__init__(spider)
+class ParserService(BaseService):  # pylint: disable=too-many-instance-attributes
+    def __init__(
+        self,
+        fatal_error_queue: Queue[FatalErrorQueueItem],
+        pool_size: int,
+        task_dispatcher: TaskDispatcherService,
+        stat: Stat,
+        parser_requests_per_process: int,
+        find_task_handler: Callable[[Task], Callable[..., None]],
+    ) -> None:
+        super().__init__(fatal_error_queue)
+        self.task_dispatcher = task_dispatcher
+        self.stat = stat
+        self.parser_requests_per_process = parser_requests_per_process
+        self.find_task_handler = find_task_handler
         self.input_queue: Queue[Any] = Queue()
         self.pool_size = pool_size
         self.workers_pool = []
@@ -29,7 +43,7 @@ class ParserService(BaseService):
         to_remove = []
         for worker in self.workers_pool:
             if not worker.is_alive():
-                self.spider.stat.inc("parser:worker-restarted")
+                self.stat.inc("parser:worker-restarted")
                 new_worker = self.create_worker(self.worker_callback)
                 self.workers_pool.append(new_worker)
                 new_worker.start()
@@ -56,21 +70,21 @@ class ParserService(BaseService):
                 try:
                     process_request_count += 1
                     try:
-                        handler = self.spider.find_task_handler(task)
+                        handler = self.find_task_handler(task)
                     except NoTaskHandler as ex:
                         # WTF, disabling it for the moment
                         # ex.tb = format_exc()
-                        self.spider.task_dispatcher.input_queue.put(
+                        self.task_dispatcher.input_queue.put(
                             (ex, task, {"exc_info": sys.exc_info()})
                         )
-                        self.spider.stat.inc("parser:handler-not-found")
+                        self.stat.inc("parser:handler-not-found")
                     else:
                         self.execute_task_handler(handler, result, task)
-                        self.spider.stat.inc("parser:handler-processed")
-                    if self.spider.parser_requests_per_process and (
-                        process_request_count >= self.spider.parser_requests_per_process
+                        self.stat.inc("parser:handler-processed")
+                    if self.parser_requests_per_process and (
+                        process_request_count >= self.parser_requests_per_process
                     ):
-                        self.spider.stat.inc(
+                        self.stat.inc(
                             "parser:handler-req-limit",
                         )
                         return
@@ -87,11 +101,11 @@ class ParserService(BaseService):
                 pass
             else:
                 for item in handler_result:
-                    self.spider.task_dispatcher.input_queue.put(
+                    self.task_dispatcher.input_queue.put(
                         (item, task, None),
                     )
         except Exception as ex:
-            self.spider.task_dispatcher.input_queue.put(
+            self.task_dispatcher.input_queue.put(
                 (
                     ex,
                     task,

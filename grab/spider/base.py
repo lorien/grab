@@ -9,12 +9,20 @@ from queue import Empty, Queue
 from random import randint
 from traceback import format_exception, format_stack
 from types import TracebackType
-from typing import Any, Callable, Iterator, Optional, Union, cast
+from typing import Any, Callable, Iterator, Literal, Optional, Union, cast
 
 from grab.base import Grab
-from grab.error import raise_feature_is_deprecated
+from grab.error import (
+    GrabInvalidResponse,
+    GrabInvalidUrl,
+    GrabNetworkError,
+    GrabTooManyRedirectsError,
+    OriginalExceptionGrabError,
+    ResponseNotValid,
+    raise_feature_is_deprecated,
+)
 from grab.proxylist import BaseProxySource, Proxy, ProxyList
-from grab.spider.error import NoTaskHandler, SpiderError, SpiderMisuseError
+from grab.spider.error import FatalError, NoTaskHandler, SpiderError, SpiderMisuseError
 from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.service.base import BaseService
 from grab.spider.task import Task
@@ -23,7 +31,7 @@ from grab.util.metrics import format_traffic_value
 from grab.util.misc import camel_case_to_underscore
 from grab.util.warning import warn
 
-from .interface import BaseSpider
+from .interface import FatalErrorQueueItem
 from .service.network import NetworkResult
 from .service.parser import ParserService
 from .service.task_dispatcher import TaskDispatcherService
@@ -41,7 +49,7 @@ logger = logging.getLogger("grab.spider.base")
 
 
 # pylint: disable=too-many-instance-attributes, too-many-public-methods
-class Spider(BaseSpider):
+class Spider:
     """Asynchronous scraping framework."""
 
     spider_name = None
@@ -111,9 +119,7 @@ class Spider(BaseSpider):
             network request which is performed again due to network error
         * args - command line arguments parsed with `setup_arg_parser` method
         """
-        self.fatal_error_queue: Queue[
-            tuple[type[Exception], Exception, TracebackType]
-        ] = Queue()
+        self.fatal_error_queue: Queue[FatalErrorQueueItem] = Queue()
         self.task_queue_parameters = None
         self._started: Optional[float] = None
         assert grab_transport in ["urllib3"]
@@ -159,10 +165,6 @@ class Spider(BaseSpider):
         self.proxy_auto_change = False
         self.interrupted = False
         self.parser_pool_size = parser_pool_size
-        self.parser_service = ParserService(
-            spider=self,
-            pool_size=self.parser_pool_size,
-        )
         if transport is not None:
             warn(
                 'The "transport" argument of Spider constructor is'
@@ -177,9 +179,32 @@ class Spider(BaseSpider):
 
             # pylint: enable=import-outside-toplevel
 
-            self.network_service = NetworkServiceThreaded(self, self.thread_number)
-        self.task_dispatcher = TaskDispatcherService(self)
-        self.task_generator_service = TaskGeneratorService(self, self.task_generator())
+            self.network_service = NetworkServiceThreaded(
+                self.fatal_error_queue,
+                self.thread_number,
+                process_task=self.srv_process_task,
+                get_task_from_queue=self.get_task_from_queue,
+            )
+        self.task_dispatcher = TaskDispatcherService(
+            self.fatal_error_queue,
+            process_service_result=self.srv_process_service_result,
+        )
+        self.parser_service = ParserService(
+            fatal_error_queue=self.fatal_error_queue,
+            pool_size=self.parser_pool_size,
+            task_dispatcher=self.task_dispatcher,
+            stat=self.stat,
+            parser_requests_per_process=self.parser_requests_per_process,
+            find_task_handler=self.find_task_handler,
+        )
+        self.task_generator_service = TaskGeneratorService(
+            self.fatal_error_queue,
+            self.task_generator(),
+            thread_number=self.thread_number,
+            get_task_queue=self.get_task_queue,
+            parser_service=self.parser_service,
+            task_dispatcher=self.task_dispatcher,
+        )
 
     # pylint: enable=too-many-locals, too-many-arguments
 
@@ -449,7 +474,7 @@ class Spider(BaseSpider):
     # Private Methods
     # ***************
 
-    def check_task_limits(self, task: Task) -> tuple[bool, Optional[str]]:
+    def check_task_limits(self, task: Task) -> tuple[bool, str]:
         """
         Check that task's network & try counters do not exceed limits.
 
@@ -464,7 +489,7 @@ class Spider(BaseSpider):
         if task.network_try_count > self.network_try_limit:
             return False, "network-try-count"
 
-        return True, None
+        return True, "ok"
 
     def generate_task_priority(self) -> int:
         if self.priority_mode == "const":
@@ -476,7 +501,7 @@ class Spider(BaseSpider):
             for url in self.initial_urls:
                 self.add_task(Task("initial", url=url))
 
-    def get_task_from_queue(self) -> Optional[Union[bool, Task]]:
+    def get_task_from_queue(self) -> Optional[Union[Literal[True], Task]]:
         try:
             return cast(BaseTaskQueue, self.task_queue).get()
         except Empty:
@@ -588,6 +613,12 @@ class Spider(BaseSpider):
     #        logger.debug("Task %s has invalid URL: %s", task.name, task.url)
     #        self.stat.collect("invalid-url", task.url)
 
+    def get_task_queue(self) -> BaseTaskQueue:
+        # this method is expected to be called
+        # after "spider.run()" is called
+        # i.e. the "self.task_queue" is set
+        return cast(BaseTaskQueue, self.task_queue)
+
     def run(self) -> None:  # noqa: C901
         self._started = time.time()
         services = []
@@ -674,7 +705,7 @@ class Spider(BaseSpider):
         elif reason == "network-try-count":
             self.stat.collect("network-count-rejected", task.url)
         else:
-            raise SpiderError("Unknown response from " "check_task_limits: %s" % reason)
+            raise SpiderError("Unknown response from check_task_limits: %s" % reason)
 
     def get_fallback_handler(self, task: Task) -> Optional[Callable[..., Any]]:
         if task.fallback_name:
@@ -704,6 +735,159 @@ class Spider(BaseSpider):
     @cache_writer_service.setter
     def cache_writer_service(self, _: Any) -> None:
         raise_feature_is_deprecated("Cache feature")
+
+    # #################
+    # REFACTORING STUFF
+    # #################
+    def srv_process_service_result(
+        self,
+        result: Union[Task, None, Exception, dict[str, Any]],
+        task: Task,
+        meta: Optional[dict[str, Any]] = None,
+    ) -> None:
+        """
+        Process result submitted from any service to task dispatcher service.
+
+        Result could be:
+        * Task
+        * None
+        * Task instance
+        * ResponseNotValid-based exception
+        * Arbitrary exception
+        * Network response:
+            {ok, ecode, emsg, error_abbr, exc, grab, grab_config_backup}
+
+        Exception can come only from parser_service and it always has
+        meta {"from": "parser", "exc_info": <...>}
+        """
+        if meta is None:
+            meta = {}
+        if isinstance(result, Task):
+            self.add_task(result)
+        elif result is None:
+            pass
+        elif isinstance(result, ResponseNotValid):
+            self.add_task(task.clone())
+            error_code = result.__class__.__name__.replace("_", "-")
+            self.stat.inc("integrity:%s" % error_code)
+        elif isinstance(result, Exception):
+            if task:
+                handler = self.find_task_handler(task)
+                handler_name = getattr(handler, "__name__", "NONE")
+            else:
+                handler_name = "NA"
+            self.process_parser_error(
+                handler_name,
+                task,
+                meta["exc_info"],
+            )
+            if isinstance(result, FatalError):
+                self.fatal_error_queue.put(meta["exc_info"])
+        elif isinstance(result, dict) and "grab" in result:
+            self.srv_process_network_result(result, task)
+        else:
+            raise SpiderError("Unknown result received from a service: %s" % result)
+
+    def srv_process_network_result(self, result: NetworkResult, task: Task) -> None:
+        # TODO: Move to network service
+        # starts
+        self.log_network_result_stats(result, task)
+        # ends
+        is_valid = False
+        if task.get("raw"):
+            is_valid = True
+        elif result["ok"]:
+            res_code = result["grab"].doc.code
+            is_valid = self.is_valid_network_response_code(res_code, task)
+        if is_valid:
+            self.parser_service.input_queue.put((result, task))
+        else:
+            self.log_failed_network_result(result)
+            # Try to do network request one more time
+            # TODO:
+            # Implement valid_try_limit
+            # Use it if request failed not because of network error
+            # But because of content integrity check
+            if self.network_try_limit > 0:
+                task.setup_grab_config(result["grab_config_backup"])
+                self.add_task(task)
+        self.stat.inc("spider:request")
+
+    def srv_process_task(self, task: Task) -> None:
+        task.network_try_count += 1  # pylint: disable=no-member
+        is_valid, reason = self.check_task_limits(task)
+        if is_valid:
+            grab = self.setup_grab_for_task(task)
+            # TODO: almost duplicate of
+            # Spider.submit_task_to_transport
+            grab_config_backup = grab.dump_config()
+            self.process_grab_proxy(task, grab)
+            self.stat.inc("spider:request-network")
+            self.stat.inc("spider:task-%s-network" % task.name)
+
+            # self.freelist.pop()
+            try:
+                result: dict[str, Any] = {
+                    "ok": True,
+                    "ecode": None,
+                    "emsg": None,
+                    "error_abbr": None,
+                    "grab": grab,
+                    "grab_config_backup": (grab_config_backup),
+                    "task": task,
+                    "exc": None,
+                }
+                try:
+                    grab.request()
+                except (
+                    GrabNetworkError,
+                    GrabInvalidUrl,
+                    GrabInvalidResponse,
+                    GrabTooManyRedirectsError,
+                ) as ex:
+                    is_redir_err = isinstance(ex, GrabTooManyRedirectsError)
+                    orig_exc_name = (
+                        ex.original_exc.__class__.__name__
+                        if hasattr(ex, "original_exc")
+                        else None
+                    )
+                    # UnicodeError: see #323
+                    if (
+                        not isinstance(ex, OriginalExceptionGrabError)
+                        or isinstance(ex, GrabInvalidUrl)
+                        or orig_exc_name == "error"
+                        or orig_exc_name == "UnicodeError"
+                    ):
+                        ex_cls = ex
+                    else:
+                        # ex_cls.original_exc
+                        ex_cls = cast(OriginalExceptionGrabError, ex).original_exc
+                    result.update(
+                        {
+                            "ok": False,
+                            "exc": ex,
+                            "error_abbr": (
+                                "too-many-redirects"
+                                if is_redir_err
+                                else self.make_class_abbr(ex_cls.__class__.__name__)
+                            ),
+                        }
+                    )
+                self.task_dispatcher.input_queue.put((result, task, None))
+            finally:
+                pass
+                # self.freelist.append(1)
+        else:
+            self.log_rejected_task(task, reason)
+            # pylint: disable=no-member
+            handler = self.get_fallback_handler(task)
+            # pylint: enable=no-member
+            if handler:
+                handler(task)
+
+    def make_class_abbr(self, name: str) -> str:
+        val = camel_case_to_underscore(name)
+        return val.replace("_", "-")
 
 
 # pylint: enable=too-many-instance-attributes, too-many-public-methods
