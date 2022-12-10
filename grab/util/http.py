@@ -42,8 +42,10 @@ def process_http_item(
         for subval in value:
             ret.extend(process_http_item((key, subval), charset, ignore_classes))
         return ret
+    # key
     if isinstance(key, str):
         key = make_bytes(key, encoding=charset)
+    # value
     if ignore_classes and isinstance(value, ignore_classes):
         pass
     elif isinstance(value, str):

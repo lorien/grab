@@ -16,6 +16,7 @@ from typing import Any, Callable, Dict, Mapping, Optional, Union, cast
 from urllib.parse import urljoin
 
 from grab import error
+from grab.base_transport import BaseTransport
 from grab.cookie import CookieManager
 from grab.document import Document
 from grab.proxylist import ProxyList, parse_proxy_line
@@ -504,9 +505,10 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         post = self.config["post"] or self.config["multipart_post"]
         if isinstance(post, dict):
             post = list(post.items())
+        post_bytes: Optional[bytes] = None
         if post:
             if isinstance(post, str):
-                post = (
+                post_bytes = (
                     make_bytes(post[: self.config["debug_post_limit"]], errors="ignore")
                     + b"..."
                 )
@@ -517,10 +519,10 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                     if len(value) > self.config["debug_post_limit"]:
                         value = value[: self.config["debug_post_limit"]] + b"..."
                     new_items.append((key, value))
-                post = "\n".join("%-25s: %s" % x for x in new_items)
+                post_bytes = b"\n".join(b"%-25s: %s" % x for x in new_items)
         if post:
             logger_network.debug(
-                "[%02d] POST request:\n%s\n", self.request_counter, post
+                "[%02d] POST request:\n%r\n", self.request_counter, post_bytes
             )
 
     def process_request_result(self) -> Document:
@@ -535,7 +537,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         # again!
         self.reset_temporary_options()
 
-        self.doc = self.transport.prepare_response(self.config)
+        self.doc = cast(BaseTransport, self.transport).prepare_response(self.config)
 
         self.doc.process_grab_config(self.config)
 
@@ -574,7 +576,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         This method is called then fatal network exception is raised.
         The saved dump could be used for debugging the reason of the failure.
         """
-        self.doc = self.transport.prepare_response(self.config)
+        self.doc = cast(BaseTransport, self.transport).prepare_response(self.config)
         self.save_dumps()
 
     def setup_document(self, content: bytes, **kwargs: Any) -> None:
@@ -676,7 +678,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 ubody = self.doc.unicode_body()
                 base_url = find_base_url(ubody)
                 if base_url:
-                    return urljoin(cast(str, base_url), url)
+                    return urljoin(base_url, url)
             return urljoin(cast(str, self.config["url"]), url)
         return url
 

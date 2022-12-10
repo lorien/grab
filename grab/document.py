@@ -20,7 +20,7 @@ from contextlib import suppress
 from copy import copy
 from datetime import datetime
 from io import BytesIO, StringIO
-from typing import Any, Optional, Protocol
+from typing import Any, Mapping, Optional, Protocol
 from urllib.parse import parse_qs, urljoin, urlsplit
 
 from lxml import etree
@@ -155,7 +155,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self._lxml_form = None
         self._file_fields = {}
 
-    def process_grab_config(self, grab_config):
+    def process_grab_config(self, grab_config: Mapping[str, Any]) -> Any:
         # Save some grab.config items required to
         # process content of the document
         for key in (

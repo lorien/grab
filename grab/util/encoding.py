@@ -12,7 +12,7 @@ def make_str(value: Any, encoding: str = "utf-8", errors: str = "strict") -> str
     return str(value)
 
 
-def make_bytes(value, encoding="utf-8", errors="strict"):
+def make_bytes(value: Any, encoding: str = "utf-8", errors: str = "strict") -> bytes:
     """Normalize unicode/byte string to byte string."""
     if isinstance(value, str):
         return value.encode(encoding, errors=errors)

@@ -4,10 +4,8 @@
 from __future__ import annotations
 
 import logging
-import os
 import random
 import ssl
-import tempfile
 import time
 import urllib.request
 from contextlib import contextmanager
@@ -37,31 +35,13 @@ from grab.upload import UploadContent, UploadFile
 from grab.util.encoding import decode_pairs, make_str
 from grab.util.http import normalize_http_values, normalize_post_data, normalize_url
 
-
-class BaseTransport:
-    def reset(self) -> None:
-        pass
-
-    def setup_body_file(
-        self,
-        storage_dir: str,
-        storage_filename: Optional[str],
-        create_dir: bool = False,
-    ) -> str:
-        if create_dir and not os.path.exists(storage_dir):
-            os.makedirs(storage_dir)
-        if storage_filename is None:
-            file, file_path = tempfile.mkstemp(dir=storage_dir)
-            os.close(file)
-        else:
-            file_path = os.path.join(storage_dir, storage_filename)
-        return file_path  # noqa: R504
+from .base_transport import BaseTransport
 
 
 def process_upload_items(
     items: Sequence[tuple[str, Any]]
-) -> list[Union[RequestField, tuple[str, Any]]]:
-    result = []
+) -> Sequence[Union[RequestField, tuple[str, Any]]]:
+    result: list[Union[RequestField, tuple[str, Any]]] = []
     for key, val in items:
         if isinstance(val, UploadContent):
             headers = {"Content-Type": val.content_type}
@@ -397,19 +377,21 @@ class Urllib3Transport(BaseTransport):
         headers = cast(HTTPResponse, self._response).headers
         return headers.items()
 
-    def prepare_response(self, grab_config: dict[str, Any]) -> Optional[Document]:
+    def prepare_response(self, grab_config: dict[str, Any]) -> Document:
         """
         Prepare response, duh.
 
         This methed is called after network request is completed
         hence the "self._request" is not None.
-        Update: maybe not.
 
         Good to know: on python3 urllib3 headers are converted to str type
         using latin encoding.
         """
         if not self._response:
-            return None
+            raise GrabMisuseError(
+                "Method prepare response must be callled only"
+                " after network response is received"
+            )
         try:
             response = Document()
             head = ""
@@ -460,10 +442,8 @@ class Urllib3Transport(BaseTransport):
                 #    import pdb; pdb.set_trace()
                 hdr[key] = val
             response.parse(charset=grab_config["document_charset"], headers=hdr)
-
             jar = self.extract_cookiejar()  # self._response, self._request)
             response.cookies = CookieManager(jar)
-
             return response
         finally:
             self._response.release_conn()
