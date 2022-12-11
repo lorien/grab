@@ -128,7 +128,7 @@ class TestPostFeature(BaseGrabTestCase):
             post={"foo": data}, url=self.server.get_url(), charset="cp1251", debug=True
         )
         grab.request()
-        test = ("foo=%s" % quote(data.encode("cp1251"))).encode("latin-1")
+        test = ("foo=%s" % quote(data.encode("cp1251"))).encode("ascii")
         self.assertEqual(self.server.request.data, test)
 
     def test_put(self):

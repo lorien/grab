@@ -20,11 +20,13 @@ from contextlib import suppress
 from copy import copy
 from datetime import datetime
 from io import BytesIO, StringIO
-from typing import Any, Mapping, Optional, Protocol
+from typing import Any, Mapping, MutableMapping, Optional, Protocol, Sequence, Union
 from urllib.parse import parse_qs, urlencode, urljoin, urlsplit
 
 from lxml import etree
-from lxml.html import CheckboxValues, HTMLParser, MultipleSelectOptions
+
+# from lxml.etree import ElementBase
+from lxml.html import CheckboxValues, HtmlElement, HTMLParser, MultipleSelectOptions
 from selection import XpathSelector
 
 from grab.const import NULL
@@ -169,7 +171,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def __call__(self, query):
         return self.select(query)
 
-    def select(self, *args, **kwargs):
+    def select(self, *args: Any, **kwargs: Any):  # -> SelectorList[BaseElement]:
         return XpathSelector(self.tree).select(*args, **kwargs)
 
     def parse(
@@ -825,7 +827,11 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     # * Remove set_input_by_number
     # * New method: set_input_by(id=None, number=None, xpath=None)
 
-    def process_extra_post(self, post_items, extra_post):
+    def process_extra_post(
+        self,
+        post_items: Union[dict[str, Any], Sequence[tuple[str, Any]]],
+        extra_post: dict[str, Any],
+    ) -> Sequence[tuple[str, Any]]:
         if isinstance(extra_post, dict):
             extra_post_items = extra_post.items()
         else:
@@ -893,6 +899,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         # pylint: disable=no-member
         post = self.form_fields()
         self.clean_submit_controls(post, submit_name)
+        action_url: str
         if url:
             action_url = urljoin(self.url, url)
         else:
@@ -906,7 +913,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             for key, obj in self._file_fields.items():
                 post[key] = obj
 
-        post_items = list(post.items())
+        post_items: Sequence[tuple[str, Any]] = list(post.items())
         del post
 
         if extra_post:
@@ -915,7 +922,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         if remove_from_post:
             post_items = [(x, y) for x, y in post_items if x not in remove_from_post]
 
-        result = {
+        result: dict[str, Any] = {
             "multipart_post": None,
             "post": None,
             "url": None,
@@ -934,8 +941,10 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         return result
 
-    def build_fields_to_remove(self, fields, form_inputs):
-        fields_to_remove = set()
+    def build_fields_to_remove(
+        self, fields: Mapping[str, Any], form_inputs: Sequence[HtmlElement]
+    ) -> set[str]:
+        fields_to_remove: set[str] = set()
         for elem in form_inputs:  # pylint: disable=no-member
             # Ignore elements without name
             if not elem.get("name"):
@@ -958,7 +967,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                     fields_to_remove.remove(elem.name)
         return fields_to_remove
 
-    def process_form_fields(self, fields):
+    def process_form_fields(self, fields: MutableMapping[str, Any]) -> None:
         for key, val in list(fields.items()):
             if isinstance(val, CheckboxValues):
                 if not len(val):  # noqa: PIE787 pylint: disable=len-as-condition
@@ -975,7 +984,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                 else:
                     fields[key] = list(val)
 
-    def form_fields(self):
+    def form_fields(self) -> MutableMapping[str, HtmlElement]:
         """
         Return fields of default form.
 
@@ -997,7 +1006,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             del fields[name]
         return fields
 
-    def choose_form_by_element(self, xpath):
+    def choose_form_by_element(self, xpath: str) -> None:
         elem = self.select(xpath).node()
         while elem is not None:
             if elem.tag == "form":  # pylint: disable=no-member
