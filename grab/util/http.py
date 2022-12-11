@@ -16,21 +16,41 @@ RE_NOT_SAFE_CHAR = re.compile(
 RE_NON_ALPHA_DIGIT_NETLOC = re.compile(r"[^-.:@a-zA-Z0-9]")
 
 
-def smart_urlencode(
-    items: Union[dict[str, Any], list[tuple[str, Any]]], charset: str = "utf-8"
-) -> str:
-    """
-    Normalize items to be a part of HTTP request's payload.
+def normalize_url(url: Union[bytes, str]) -> str:
+    # https://tools.ietf.org/html/rfc3986
+    url = make_str(url)
+    if RE_NOT_SAFE_CHAR.search(url):
+        parts = list(urlsplit(url))
+        # Scheme
+        # do nothing with scheme
+        # Network location (user:pass@hostname)
+        if RE_NON_ALPHA_DIGIT_NETLOC.search(parts[1]):
+            parts[1] = parts[1].encode("idna")
+        # Path
+        parts[2] = quote(make_str(parts[2]), safe=RESERVED_CHARS)
+        # Query
+        parts[3] = quote(make_str(parts[3]), safe=RESERVED_CHARS)
+        # Fragment
+        parts[4] = quote(make_str(parts[4]), safe=RESERVED_CHARS)
+        return urlunsplit(map(make_str, parts))
+    return url
 
-    WOW, so much smart.
 
-    It differs from ``urllib.urlencode`` in that it can process unicode
-    and some special values.
-    """
-    if isinstance(items, dict):
-        items = list(items.items())
-    res = normalize_http_values(items, charset=charset)
-    return urlencode(res)
+# def smart_urlencode(
+#    items: Union[dict[str, Any], list[tuple[str, Any]]], charset: str = "utf-8"
+# ) -> str:
+#    """
+#    Normalize items to be a part of HTTP request's payload.
+#
+#    WOW, so much smart.
+#
+#    It differs from ``urllib.urlencode`` in that it can process unicode
+#    and some special values.
+#    """
+#    if isinstance(items, dict):
+#        items = list(items.items())
+#    res = normalize_http_values(items, charset=charset)
+#    return urlencode(res)
 
 
 def process_http_item(
@@ -86,31 +106,10 @@ def normalize_http_values(
     return ret
 
 
-def normalize_url(url: Union[bytes, str]) -> str:
-    # https://tools.ietf.org/html/rfc3986
-    url = make_str(url)
-    if RE_NOT_SAFE_CHAR.search(url):
-        parts = list(urlsplit(url))
-        # Scheme
-        # do nothing with scheme
-        # Network location (user:pass@hostname)
-        if RE_NON_ALPHA_DIGIT_NETLOC.search(parts[1]):
-            parts[1] = parts[1].encode("idna")
-        # Path
-        parts[2] = quote(make_str(parts[2]), safe=RESERVED_CHARS)
-        # Query
-        parts[3] = quote(make_str(parts[3]), safe=RESERVED_CHARS)
-        # Fragment
-        parts[4] = quote(make_str(parts[4]), safe=RESERVED_CHARS)
-        return urlunsplit(map(make_str, parts))
-    return url
-
-
 def normalize_post_data(data: Union[str, bytes], encoding: str = "utf-8") -> bytes:
     if isinstance(data, str):
         return data.encode(encoding)
     if isinstance(data, bytes):
         return data
     # it calls `normalize_http_values()`
-    res = smart_urlencode(data, encoding)
-    return make_bytes(res)
+    return make_bytes(urlencode(normalize_http_values(data, encoding)))

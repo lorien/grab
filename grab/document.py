@@ -21,7 +21,7 @@ from copy import copy
 from datetime import datetime
 from io import BytesIO, StringIO
 from typing import Any, Mapping, Optional, Protocol
-from urllib.parse import parse_qs, urljoin, urlsplit
+from urllib.parse import parse_qs, urlencode, urljoin, urlsplit
 
 from lxml import etree
 from lxml.html import CheckboxValues, HTMLParser, MultipleSelectOptions
@@ -34,7 +34,6 @@ from grab.types import GrabConfig
 from grab.util.files import hashed_path
 from grab.util.html import decode_entities, find_refresh_url
 from grab.util.html import fix_special_entities as fix_special_entities_func
-from grab.util.http import smart_urlencode
 from grab.util.rex import normalize_regexp
 from grab.util.text import normalize_spaces
 from grab.util.warning import warn
@@ -930,7 +929,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             result["url"] = action_url
 
         else:
-            url = action_url.split("?")[0] + "?" + smart_urlencode(post_items)
+            url = action_url.split("?")[0] + "?" + urlencode(post_items)
             result["url"] = url
 
         return result

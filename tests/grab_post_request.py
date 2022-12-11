@@ -10,6 +10,23 @@ class TestPostFeature(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
+    # def test_foo(self):
+    #    self.server.add_response(Response(), count=9)
+
+    #    #    grab.setup(post=[("foo", "bar"), ("gaz", "baz")])
+    #    #    grab.request()
+    #    #    self.assertEqual(self.server.request.data, b"foo=bar&gaz=baz")
+    #    # Now try dict with unicode value & charset option
+    #    grab = build_grab()
+    #    data = "фыва"
+    #    grab.setup(
+    #        post={"foo": data}, url=self.server.get_url(), charset="cp1251", debug=True
+    #    )
+    #    grab.request()
+    #    test = "foo=%s" % quote(data.encode("cp1251"))
+    #    test = test.encode("utf-8")  # py3 hack
+    #    self.assertEqual(self.server.request.data, test)
+
     def test_post(self):
         self.server.add_response(Response(), count=9)
         grab = build_grab(url=self.server.get_url(), debug_post=True)
@@ -111,8 +128,7 @@ class TestPostFeature(BaseGrabTestCase):
             post={"foo": data}, url=self.server.get_url(), charset="cp1251", debug=True
         )
         grab.request()
-        test = "foo=%s" % quote(data.encode("cp1251"))
-        test = test.encode("utf-8")  # py3 hack
+        test = ("foo=%s" % quote(data.encode("cp1251"))).encode("latin-1")
         self.assertEqual(self.server.request.data, test)
 
     def test_put(self):
