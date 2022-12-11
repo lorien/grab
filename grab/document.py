@@ -793,6 +793,17 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                 raise DataNotFound("Response does not contains any form")
         return self._lxml_form
 
+    def get_cached_form(self) -> Optional[FormElement]:
+        """
+        Get form which has been already selected.
+
+        Returns None if form has not been selected yet.
+
+        It is for testing mainly. To not trigger pylint warnings about
+        accessing protected element.
+        """
+        return self._lxml_form
+
     def set_input(self, name: str, value: Any) -> None:
         """
         Set the value of form element by its `name` attribute.

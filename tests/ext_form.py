@@ -71,7 +71,7 @@ DISABLED_RADIO_HTML = b"""
 """
 
 
-class TestHtmlForms(BaseGrabTestCase):
+class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-methods
     def setUp(self):
         self.server.reset()
 
@@ -79,7 +79,7 @@ class TestHtmlForms(BaseGrabTestCase):
         self.grab = build_grab()
         self.grab.setup_document(FORMS_HTML)
 
-    def test_choose_form(self):
+    def test_choose_form1(self):
         """Test ``choose_form`` method."""
         # raise errors
         self.assertRaises(DataNotFound, self.grab.doc.choose_form, 10)
@@ -89,37 +89,32 @@ class TestHtmlForms(BaseGrabTestCase):
 
         # check results
         self.grab.doc.choose_form(0)
-        # pylint: disable=no-member,protected-access
-        self.assertEqual("form", self.grab.doc._lxml_form.tag)
-        self.assertEqual("search_form", self.grab.doc._lxml_form.get("id"))
-        # pylint: enable=no-member,protected-access
+        self.assertEqual("form", self.grab.doc.get_cached_form().tag)
+        self.assertEqual("search_form", self.grab.doc.get_cached_form().get("id"))
 
-        # reset current form
-        self.grab.doc._lxml_form = None  # pylint: disable=protected-access
+    def test_choose_form2(self):
+        self.grab = build_grab()
+        self.grab.setup_document(FORMS_HTML)
 
         self.grab.doc.choose_form(id="common_form")
-        # pylint: disable=no-member,protected-access
-        self.assertEqual("form", self.grab.doc._lxml_form.tag)
-        self.assertEqual("common_form", self.grab.doc._lxml_form.get("id"))
-        # pylint: enable=no-member,protected-access
+        self.assertEqual("form", self.grab.doc.get_cached_form().tag)
+        self.assertEqual("common_form", self.grab.doc.get_cached_form().get("id"))
 
-        # reset current form
-        self.grab.doc._lxml_form = None  # pylint: disable=protected-access
+    def test_choose_form3(self):
+        self.grab = build_grab()
+        self.grab.setup_document(FORMS_HTML)
 
         self.grab.doc.choose_form(name="dummy")
-        # pylint: disable=no-member,protected-access
-        self.assertEqual("form", self.grab.doc._lxml_form.tag)
-        self.assertEqual("dummy", self.grab.doc._lxml_form.get("name"))
-        # pylint: enable=no-member,protected-access
+        self.assertEqual("form", self.grab.doc.get_cached_form().tag)
+        self.assertEqual("dummy", self.grab.doc.get_cached_form().get("name"))
 
-        # reset current form
-        self.grab.doc._lxml_form = None  # pylint: disable=protected-access
+    def test_choose_form4(self):
+        self.grab = build_grab()
+        self.grab.setup_document(FORMS_HTML)
 
         self.grab.doc.choose_form(xpath='//form[contains(@action, "/dummy")]')
-        # pylint: disable=no-member,protected-access
-        self.assertEqual("form", self.grab.doc._lxml_form.tag)
-        self.assertEqual("dummy", self.grab.doc._lxml_form.get("name"))
-        # pylint: enable=no-member,protected-access
+        self.assertEqual("form", self.grab.doc.get_cached_form().tag)
+        self.assertEqual("dummy", self.grab.doc.get_cached_form().get("name"))
 
     def assert_equal_qs(self, qs1, qs2):
         args1 = set(parse_qsl(qs1))
@@ -173,38 +168,34 @@ class TestHtmlForms(BaseGrabTestCase):
         grab.submit(remove_from_post=["submit1"])
         self.assert_equal_qs(self.server.request.data, b"secret=123")
 
-    def test_set_methods(self):
+    def test_set_methods1(self):
         grab = build_grab()
         self.server.add_response(Response(data=FORMS_HTML))
         grab.go(self.server.get_url())
 
-        # pylint: disable=protected-access
-        self.assertEqual(grab.doc._lxml_form, None)
-        # pylint: enable=protected-access
+        self.assertEqual(grab.doc.get_cached_form(), None)
 
         grab.doc.set_input("gender", "1")
-        # pylint: disable=no-member,protected-access
-        self.assertEqual("common_form", grab.doc._lxml_form.get("id"))
-        # pylint: enable=no-member,protected-access
+        self.assertEqual("common_form", grab.doc.get_cached_form().get("id"))
 
-        # pylint: disable=no-member,protected-access
         self.assertRaises(KeyError, lambda: grab.doc.set_input("query", "asdf"))
-        # pylint: enable=no-member,protected-access
 
-        grab.doc._lxml_form = None  # pylint: disable=protected-access
+    def test_set_methods2(self):
+        grab = build_grab()
+        self.server.add_response(Response(data=FORMS_HTML))
+        grab.go(self.server.get_url())
         grab.doc.set_input_by_id("search_box", "asdf")
-        # pylint: disable=no-member,protected-access
-        self.assertEqual("search_form", grab.doc._lxml_form.get("id"))
-        # pylint: enable=no-member,protected-access
+        self.assertEqual("search_form", grab.doc.get_cached_form().get("id"))
 
         grab.doc.choose_form(xpath='//form[@id="common_form"]')
         grab.doc.set_input_by_number(0, "asdf")
 
-        # pylint: disable=no-member,protected-access
-        grab.doc._lxml_form = None
+    def test_set_methods3(self):
+        grab = build_grab()
+        self.server.add_response(Response(data=FORMS_HTML))
+        grab.go(self.server.get_url())
         grab.doc.set_input_by_xpath('//*[@name="gender"]', "2")
-        self.assertEqual("common_form", grab.doc._lxml_form.get("id"))
-        # pylint: enable=no-member,protected-access
+        self.assertEqual("common_form", grab.doc.get_cached_form().get("id"))
 
     def test_html_without_forms(self):
         grab = build_grab()
