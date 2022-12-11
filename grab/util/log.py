@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import logging
+from typing import Optional
 
 
 def setup_logger(
@@ -7,7 +10,7 @@ def setup_logger(
     filemode: str,
     propagate: bool = True,
     level: int = logging.DEBUG,
-):
+) -> None:
     logger = logging.getLogger(name)
     logger.propagate = propagate
     hdl = logging.FileHandler(filename, filemode)
@@ -16,12 +19,12 @@ def setup_logger(
 
 
 def default_logging(
-    grab_log=None,  # '/tmp/grab.log',
-    network_log=None,  # '/tmp/grab.network.log',
-    level=logging.DEBUG,
-    mode="a",
-    propagate_network_logger=False,
-):
+    grab_log: Optional[str] = None,  # '/tmp/grab.log',
+    network_log: Optional[str] = None,  # '/tmp/grab.network.log',
+    level: int = logging.DEBUG,
+    mode: str = "a",
+    propagate_network_logger: bool = False,
+) -> None:
     """
     Customize logging output to display all log messages except grab network logs.
 

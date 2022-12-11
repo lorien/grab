@@ -314,7 +314,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         with open(path, "wb") as out:
             out.write(self._bytes_body if self._bytes_body is not None else b"")
 
-    def save_hash(self, location, basedir, ext=None):
+    def save_hash(self, location: str, basedir: str, ext: Optional[str] = None) -> str:
         """
         Save response body into file with special path built from hash.
 
@@ -341,8 +341,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         TODO: replace `basedir` with two options: root and save_to. And
         returns save_to + path
         """
-        if isinstance(location, str):
-            location = location.encode("utf-8")
         rel_path = hashed_path(location, ext=ext)
         path = os.path.join(basedir, rel_path)
         if not os.path.exists(path):

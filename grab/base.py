@@ -505,11 +505,11 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     def debug_post(self) -> None:
         post = self.config["post"] or self.config["multipart_post"]
-        if isinstance(post, dict):
-            post = list(post.items())
+        # if isinstance(post, dict):
+        #    post = list(post.items())
         post_bytes: Optional[bytes] = None
         if post:
-            if isinstance(post, str):
+            if isinstance(post, (bytes, str)):
                 post_bytes = (
                     make_bytes(post[: self.config["debug_post_limit"]], errors="ignore")
                     + b"..."

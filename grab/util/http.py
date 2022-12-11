@@ -28,15 +28,16 @@ def smart_urlencode(
     and some special values.
     """
     if isinstance(items, dict):
-        items = items.items()
+        items = list(items.items())
     res = normalize_http_values(items, charset=charset)
     return urlencode(res)
 
 
 def process_http_item(
-    item: tuple[str, Any], charset: str, ignore_classes: tuple[type, ...]
+    item: tuple[Union[str, bytes], Any], charset: str, ignore_classes: tuple[type, ...]
 ) -> list[tuple[bytes, Any]]:
-    key, value = item
+    key: Union[str, bytes] = item[0]
+    value: Any = item[1]
     if isinstance(value, (list, tuple)):
         ret = []
         for subval in value:
@@ -58,7 +59,7 @@ def process_http_item(
 
 
 def normalize_http_values(
-    items: Union[dict[str, Any], list[str, Any]],
+    items: Union[dict[str, Any], list[tuple[str, Any]]],
     charset: str = "utf-8",
     ignore_classes: Optional[Union[list[type], tuple[type, ...]]] = None,
 ) -> list[tuple[bytes, Any]]:
