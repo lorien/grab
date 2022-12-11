@@ -4,14 +4,14 @@ import itertools
 import logging
 import re
 from random import randint
-from typing import Any, NamedTuple, Optional
+from typing import IO, Any, Iterator, NamedTuple, Optional, cast
 from urllib.error import URLError
 from urllib.request import urlopen
 
 from grab.error import GrabError
 
-RE_SIMPLE_PROXY = re.compile(r"^([^:]+):([^:]+)$")
-RE_AUTH_PROXY = re.compile(r"^([^:]+):([^:]+):([^:]+):([^:]+)$")
+RE_SIMPLE_PROXY = re.compile(r"^([^:]+):(\d+)$")
+RE_AUTH_PROXY = re.compile(r"^([^:]+):(\d+):([^:]+):([^:]+)$")
 PROXY_FIELDS = ("host", "port", "username", "password", "proxy_type")
 logger = logging.getLogger("grab.proxylist")  # pylint: disable=invalid-name
 
@@ -36,7 +36,7 @@ class InvalidProxyLine(GrabError):
     pass
 
 
-def parse_proxy_line(line: str) -> tuple[str, str, Optional[str], Optional[str]]:
+def parse_proxy_line(line: str) -> tuple[str, int, Optional[str], Optional[str]]:
     """
     Parse proxy details from the raw text line.
 
@@ -47,19 +47,19 @@ def parse_proxy_line(line: str) -> tuple[str, str, Optional[str], Optional[str]]
     line = line.strip()
     match = RE_SIMPLE_PROXY.search(line)
     if match:
-        return match.group(1), match.group(2), None, None
+        return match.group(1), int(match.group(2)), None, None
 
     match = RE_AUTH_PROXY.search(line)
     if match:
         host, port, user, pwd = match.groups()
-        return host, port, user, pwd
+        return host, int(port), user, pwd
 
     raise InvalidProxyLine("Invalid proxy line: %s" % line)
 
 
 def parse_raw_list_data(
     data: str, proxy_type: str = "http", proxy_userpwd: Optional[str] = None
-) -> Proxy:
+) -> Iterator[Proxy]:
     """Iterate over proxy servers found in the raw data."""
     if not isinstance(data, str):
         data = data.decode("utf-8")
@@ -82,7 +82,7 @@ class BaseProxySource:
         proxy_type: str = "http",
         proxy_userpwd: Optional[str] = None,
         **kwargs: Any,
-    ) -> Any:
+    ) -> None:
         kwargs["proxy_type"] = proxy_type
         kwargs["proxy_userpwd"] = proxy_userpwd
         self.config = kwargs
@@ -91,10 +91,9 @@ class BaseProxySource:
         raise NotImplementedError
 
     def load(self) -> list[Proxy]:
-        data = self.load_raw_data()
         return list(
             parse_raw_list_data(
-                data,
+                self.load_raw_data(),
                 proxy_type=self.config["proxy_type"],
                 proxy_userpwd=self.config["proxy_userpwd"],
             )
@@ -120,18 +119,19 @@ class WebProxySource(BaseProxySource):
         self.url = url
         super().__init__(**kwargs)
 
-    def load_raw_data(self) -> None:  # pylint: disable=inconsistent-return-statements
+    def load_raw_data(self) -> str:
         limit = 3
         for ntry in range(limit):
             try:
                 with urlopen(self.url, timeout=3) as inp:
-                    return inp.read().decode("utf-8", "ignore")
+                    return cast(IO[bytes], inp).read().decode("utf-8", "ignore")
             except URLError:
                 if ntry >= (limit - 1):
                     raise
                 logger.debug(
                     "Failed to retrieve proxy list from %s. Retrying.", self.url
                 )
+        raise Exception("Could not happen")
 
 
 class ListProxySource(BaseProxySource):
@@ -150,8 +150,8 @@ class ProxyList:
 
     def __init__(self, source: Optional[BaseProxySource] = None) -> None:
         self._source = source
-        self._list = []
-        self._list_iter = None
+        self._list: list[Proxy] = []
+        self._list_iter: Optional[Iterator[Proxy]] = None
 
     def set_source(self, source: BaseProxySource) -> None:
         """Set the proxy source and use it to load proxy list."""
@@ -172,6 +172,7 @@ class ProxyList:
 
     def load(self) -> None:
         """Load proxy list from configured proxy source."""
+        assert self._source is not None
         self._list = self._source.load()
         self._list_iter = itertools.cycle(self._list)
 
@@ -182,13 +183,13 @@ class ProxyList:
 
     def get_next_proxy(self) -> Proxy:
         """Return next proxy."""
-        return next(self._list_iter)
+        return next(cast(Iterator[Proxy], self._list_iter))
 
     def size(self) -> int:
         """Return number of proxies in the list."""
         return len(self._list)
 
-    def __iter__(self) -> Proxy:
+    def __iter__(self) -> Iterator[Proxy]:
         return iter(self._list)
 
     def __len__(self) -> int:

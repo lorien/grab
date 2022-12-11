@@ -4,7 +4,8 @@ import logging
 import sys
 from queue import Queue
 from threading import Event, Thread
-from typing import Any, Callable, Iterable, Union
+from types import TracebackType
+from typing import Any, Callable, Iterable, Tuple, Type, cast
 
 from ..interface import FatalErrorQueueItem
 
@@ -24,26 +25,33 @@ class ServiceWorker:
             target=self.worker_callback_wrapper(worker_callback), args=[self]
         )
         self.thread.daemon = True
-        th_name = "worker:%s:%s" % (
-            worker_callback.__self__.__class__.__name__,
-            worker_callback.__name__,
-        )
-        self.thread.name = th_name
+        self.thread.name = self.build_thread_name(worker_callback)
         self.pause_event = Event()
         self.stop_event = Event()
         self.resume_event = Event()
         self.activity_paused = Event()
         self.is_busy_event = Event()
 
+    def build_thread_name(self, worker_callback: Callable[..., Any]) -> str:
+        if hasattr(worker_callback, "__self__"):
+            cls_name = worker_callback.__self__.__class__.__name__
+        else:
+            cls_name = "NA"
+        return "worker:%s:%s" % (cls_name, worker_callback.__name__)
+
     def worker_callback_wrapper(
         self, callback: Callable[..., Any]
     ) -> Callable[..., None]:
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> None:
             try:
                 callback(*args, **kwargs)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.error("Spider Service Fatal Error", exc_info=ex)
-                self.fatal_error_queue.put(sys.exc_info())
+                self.fatal_error_queue.put(
+                    cast(
+                        Tuple[Type[Exception], Exception, TracebackType], sys.exc_info()
+                    )
+                )
 
         return wrapper
 
@@ -79,15 +87,13 @@ class ServiceWorker:
 class BaseService:
     def __init__(self, fatal_error_queue: Queue[FatalErrorQueueItem]) -> None:
         self.fatal_error_queue = fatal_error_queue
-        self.worker_registry = []
+        self.worker_registry: list[ServiceWorker] = []
 
     def create_worker(self, worker_action: Callable[..., None]) -> ServiceWorker:
         # pylint: disable=no-member
         return ServiceWorker(self.fatal_error_queue, worker_action)
 
-    def iterate_workers(
-        self, objects: Union[list[ServiceWorker], ServiceWorker]
-    ) -> Iterable[ServiceWorker]:
+    def iterate_workers(self, objects: list[ServiceWorker]) -> Iterable[ServiceWorker]:
         for obj in objects:
             assert isinstance(obj, (ServiceWorker, list))
             if isinstance(obj, ServiceWorker):
@@ -115,7 +121,7 @@ class BaseService:
 
     def register_workers(self, *args: Any) -> None:
         # pylint: disable=attribute-defined-outside-init
-        self.worker_registry = args
+        self.worker_registry = list(args)
 
     def is_busy(self) -> bool:
         return any(

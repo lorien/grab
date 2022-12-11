@@ -211,15 +211,15 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         if document_body is not None:
             self.setup_document(document_body, charset=kwargs.get("document_charset"))
 
-    def _get_doc(self) -> Document:
+    @property
+    def doc(self) -> Document:
         if self._doc is None:
             self._doc = Document(self)
         return self._doc
 
-    def _set_doc(self, obj: Document) -> None:
+    @doc.setter
+    def doc(self, obj: Document) -> None:
         self._doc = obj
-
-    doc = property(_get_doc, _set_doc)
 
     def setup_transport(
         self,
@@ -302,12 +302,13 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         """
         Copy the state of another `Grab` instance.
 
+        WTF: this use case is needed for?
         Use case: create backup of current state to the cloned instance and
         then restore the state from it.
         """
         self.load_config(grab.config)
 
-        self.doc = grab.doc.copy(new_grab=self)
+        self.doc = grab.doc.copy(new_grab_config=self.config)
 
         for key in self.clonable_attributes:
             setattr(self, key, getattr(grab, key))
@@ -352,6 +353,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     def download(self, url: str, location: str, **kwargs: Any) -> int:
         """Fetch document located at ``url`` and save to to ``location``."""
         doc = self.go(url, **kwargs)
+        assert doc.body is not None
         with open(location, "wb") as out:
             out.write(doc.body)
         return len(doc.body)
@@ -551,6 +553,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.config["charset"] = self.doc.charset
 
         if self.config["log_file"]:
+            assert self.doc.body is not None
             with open(self.config["log_file"], "wb") as out:
                 out.write(self.doc.body)
 
@@ -678,6 +681,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         if self.config["url"]:
             if resolve_base:
                 ubody = self.doc.unicode_body()
+                assert ubody is not None
                 base_url = find_base_url(ubody)
                 if base_url:
                     return urljoin(base_url, url)

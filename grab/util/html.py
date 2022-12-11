@@ -23,12 +23,12 @@ RE_REFRESH_URL = re.compile(
 RE_BASE_URL = re.compile(r'<base[^>]+href\s*=["\']*([^\'"> ]+)', re.I)
 
 
-def special_entity_handler(match):
+def special_entity_handler(match: Match[bytes]) -> bytes:
     num = int(match.group(1))
     if 128 <= num <= 160:
         try:
-            num = chr(num).encode("utf-8")
-            return make_bytes("&#%d;" % ord(num.decode("cp1252")[1]))
+            num_chr = chr(num).encode("utf-8")
+            return make_bytes("&#%d;" % ord(num_chr.decode("cp1252")[1]))
         except UnicodeDecodeError:
             return match.group(0)
     else:
@@ -83,7 +83,7 @@ def decode_entities(html: str) -> str:
     return RE_NAMED_ENTITY.sub(process_named_entity, html)
 
 
-def find_refresh_url(html):
+def find_refresh_url(html: str) -> Optional[str]:
     """Find value of redirect url from http-equiv refresh meta tag."""
     # We should decode quote values to correctly find
     # the url value

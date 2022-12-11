@@ -30,13 +30,16 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         self.count_prev = 0
         self.logger_name = logger_name
         self.logger = logging.getLogger(logger_name)
+        self.log_file: Optional[str] = None
         self.setup_logging_file(log_file)
         self.counters: dict[str, int] = defaultdict(int)
         self.collections: dict[str, list[Any]] = defaultdict(list)
         self.counters_prev: dict[str, int] = defaultdict(int)
         self.reset()
 
-    def setup_speed_keys(self, speed_key: str, extra_keys: list[str]) -> None:
+    def setup_speed_keys(
+        self, speed_key: str, extra_keys: Optional[list[str]] = None
+    ) -> None:
         keys = [speed_key]
         if extra_keys:
             keys.extend(extra_keys)
@@ -47,7 +50,7 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         self.collections.clear()
         self.counters_prev.clear()
 
-    def setup_logging_file(self, log_file: str) -> None:
+    def setup_logging_file(self, log_file: Optional[str]) -> None:
         self.log_file = log_file
         if log_file:
             self.logger.addHandler(logging.FileHandler(log_file, "w"))
@@ -69,7 +72,7 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         for key in self.speed_keys:
             time_elapsed = now - self.time
             if time_elapsed == 0:
-                qps = 0
+                qps: float = 0
             else:
                 count_current = self.counters[key]
                 diff = count_current - self.counters_prev[key]
@@ -106,8 +109,8 @@ class Stat:  # pylint: disable=too-many-instance-attributes
 
 class Timer:
     def __init__(self) -> None:
-        self.time_points = {}
-        self.timers = defaultdict(int)
+        self.time_points: dict[str, float] = {}
+        self.timers: dict[str, float] = defaultdict(int)
 
     def start(self, key: str) -> None:
         self.time_points[key] = time.time()

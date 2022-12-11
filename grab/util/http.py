@@ -25,14 +25,14 @@ def normalize_url(url: Union[bytes, str]) -> str:
         # do nothing with scheme
         # Network location (user:pass@hostname)
         if RE_NON_ALPHA_DIGIT_NETLOC.search(parts[1]):
-            parts[1] = parts[1].encode("idna")
+            parts[1] = parts[1].encode("idna").decode("ascii")
         # Path
         parts[2] = quote(make_str(parts[2]), safe=RESERVED_CHARS)
         # Query
         parts[3] = quote(make_str(parts[3]), safe=RESERVED_CHARS)
         # Fragment
         parts[4] = quote(make_str(parts[4]), safe=RESERVED_CHARS)
-        return urlunsplit(map(make_str, parts))
+        return urlunsplit(list(map(make_str, parts)))
     return url
 
 
@@ -54,7 +54,9 @@ def normalize_url(url: Union[bytes, str]) -> str:
 
 
 def process_http_item(
-    item: tuple[Union[str, bytes], Any], charset: str, ignore_classes: tuple[type, ...]
+    item: tuple[Union[str, bytes], Any],
+    charset: str,
+    ignore_classes: Optional[tuple[type, ...]] = None,
 ) -> list[tuple[bytes, Any]]:
     key: Union[str, bytes] = item[0]
     value: Any = item[1]
@@ -96,7 +98,7 @@ def normalize_http_values(
     processed and returned as-is.
     """
     if isinstance(items, dict):
-        items = items.items()
+        items = list(items.items())
     # Fix list into tuple because isinstance works only with tupled sequences
     if isinstance(ignore_classes, list):
         ignore_classes = tuple(ignore_classes)

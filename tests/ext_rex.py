@@ -64,10 +64,10 @@ class ExtensionRexTestCase(BaseGrabTestCase):
         self.assertRaises(DataNotFound, lambda: self.grab.doc.rex_search(rex))
 
         # # Search for unicode rex in byte-string body should fail
+        # updated: whatever it has mean 10 years ago,
+        # it works in new grab which ignores byte argument
         rex = re.compile("фыва", re.U)
-        self.assertRaises(
-            DataNotFound, lambda: self.grab.doc.rex_search(rex, byte=True)
-        )
+        self.assertEqual("фыва", self.grab.doc.rex_search(rex, byte=True).group(0))
 
         # # Search for unexesting fragment
         rex = re.compile("(фыва2)", re.U)

@@ -223,6 +223,7 @@ class Urllib3Transport(BaseTransport):
         cookie_hdr = self.process_cookie_options(
             grab_config, grab_cookies, request_url, extra_headers
         )
+        print("!!!", cookie_hdr)
         if cookie_hdr:
             extra_headers["Cookie"] = cookie_hdr
 
@@ -516,5 +517,6 @@ class Urllib3Transport(BaseTransport):
                         name=name, value=value, domain=request_host_no_www
                     )
 
+        print("ZZZ", cookie_manager.get_dict())
         cookie_hdr = cookie_manager.get_cookie_header(request_url, request_headers)
         return cookie_hdr if cookie_hdr else None

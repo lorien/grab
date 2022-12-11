@@ -13,6 +13,41 @@ class TestCookies(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
+    def test_cookiefile(self):
+        with temp_file() as tmp_file:
+            grab = build_grab()
+
+            cookies = [{"name": "spam", "value": "ham", "domain": self.server.address}]
+            with open(tmp_file, "w", encoding="utf-8") as out:
+                json.dump(cookies, out)
+
+            # One cookie are sent in server response
+            # Another cookies is passed via the `cookiefile` option
+            self.server.add_response(
+                Response(headers=[("Set-Cookie", "godzilla=monkey")])
+            )
+            grab.setup(cookiefile=tmp_file, debug=True)
+            grab.go(self.server.get_url())
+            self.assertEqual(self.server.request.cookies["spam"].value, "ham")
+            # print("XXX", grab.cookies.get_dict())
+
+            # This is correct reslt of combining two cookies
+            merged_cookies = [("godzilla", "monkey"), ("spam", "ham")]
+
+            # grab.cookies should contains merged cookies
+            self.assertEqual(set(merged_cookies), set(grab.cookies.items()))
+
+            # `cookiefile` file should contains merged cookies
+            with open(tmp_file, encoding="utf-8") as inp:
+                self.assertEqual(
+                    set(merged_cookies),
+                    {(x["name"], x["value"]) for x in json.load(inp)},
+                )
+
+            # Just ensure it works
+            self.server.add_response(Response())
+            grab.go(self.server.get_url())
+
     def test_parsing_response_cookies(self):
         grab = build_grab()
         self.server.add_response(
@@ -143,77 +178,6 @@ class TestCookies(BaseGrabTestCase):
             grab.setup(cookiefile=tmp_file)
             grab.go(self.server.get_url())
 
-    def test_cookiefile(self):
-        with temp_file() as tmp_file:
-            grab = build_grab()
-
-            cookies = [{"name": "spam", "value": "ham", "domain": self.server.address}]
-            with open(tmp_file, "w", encoding="utf-8") as out:
-                json.dump(cookies, out)
-
-            # One cookie are sent in server response
-            # Another cookies is passed via the `cookiefile` option
-            self.server.add_response(
-                Response(headers=[("Set-Cookie", "godzilla=monkey")])
-            )
-            grab.setup(cookiefile=tmp_file, debug=True)
-            grab.go(self.server.get_url())
-            self.assertEqual(self.server.request.cookies["spam"].value, "ham")
-
-            # This is correct reslt of combining two cookies
-            merged_cookies = [("godzilla", "monkey"), ("spam", "ham")]
-
-            # grab.cookies should contains merged cookies
-            self.assertEqual(set(merged_cookies), set(grab.cookies.items()))
-
-            # `cookiefile` file should contains merged cookies
-            with open(tmp_file, encoding="utf-8") as inp:
-                self.assertEqual(
-                    set(merged_cookies),
-                    {(x["name"], x["value"]) for x in json.load(inp)},
-                )
-
-            # Just ensure it works
-            self.server.add_response(Response())
-            grab.go(self.server.get_url())
-
-    # def test_manual_dns(self):
-    #    grab = build_grab()
-    #    USE CUSTOM DNS: ["foo:%d:127.0.0.1" % self.server.port]
-    #    self.server.add_response(Response(data=b"zzz"))
-    #    grab.go("http://foo:%d/" % self.server.port)
-    #    self.assertEqual(b"zzz", grab.doc.body)
-
-    # def test_different_domains(self):
-    #    grab = build_grab()
-    #    names = [
-    #        "foo:%d:127.0.0.1" % self.server.port,
-    #        "bar:%d:127.0.0.1" % self.server.port,
-    #    ]
-    #    grab.setup_transport()
-    #    USE CUSTOM DNS
-
-    #    self.server.add_response(Response(headers=[("Set-Cookie", "foo=foo")]))
-    #    grab.go("http://foo:%d" % self.server.port)
-    #    self.assertEqual(dict(grab.doc.cookies.items()), {"foo": "foo"})
-
-    #    self.server.add_response(Response(headers=[("Set-Cookie", "bar=bar")]))
-    #    grab.go("http://bar:%d" % self.server.port)
-    #    self.assertEqual(dict(grab.doc.cookies.items()), {"bar": "bar"})
-
-    #    # That does not hold anymore, I guess I have fixed it
-    #    # # response.cookies contains cookies from both domains
-    #    # # because it just accumulates cookies over time
-    #    # # self.assertEqual(
-    #    # #     dict(grab.doc.cookies.items()), {"foo": "foo", "bar": "bar"}
-    #    # # )
-
-    # def test_cookie_domain(self):
-    #    grab = build_grab()
-    #    USE CUSTOM NAMES:    "example.com:%d:127.0.0.1" % self.server.port,
-    #    grab.cookies.set("foo", "bar", domain="example.com")
-    #    grab.go("http://example.com:%d/" % self.server.port)
-
     def test_update_invalid_cookie(self):
         grab = build_grab()
         self.assertRaises(GrabMisuseError, grab.cookies.update, None)
@@ -242,35 +206,6 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual("bar", mgr["foo"])
         self.assertRaises(KeyError, lambda: mgr["zzz"])
 
-    # def test_dot_domain(self):
-    #    grab = build_grab(debug=True)
-    #    USE CUSTOM NAMES
-    #        "foo.bar:%d:127.0.0.1" % self.server.port,
-    #        "www.foo.bar:%d:127.0.0.1" % self.server.port,
-    #    ]
-    #    self.server.add_response(
-    #        Response(
-    #            headers=[
-    #                (
-    #                    "Set-Cookie",
-    #                    (
-    #                        "foo=foo; Domain=.foo.bar;"
-    #                        " Expires=Wed, 13 Jan 3000 22:23:01 GMT;"
-    #                    ),
-    #                )
-    #            ]
-    #        ),
-    #        count=2,
-    #    )
-
-    #    grab.go("http://www.foo.bar:%d" % self.server.port)
-    #    self.assertEqual(dict(grab.doc.cookies.items()), {"foo": "foo"})
-    #    pprint(grab.doc.cookies.get_dict())
-
-    #    grab.go("http://www.foo.bar:%d" % self.server.port)
-    #    pprint(self.server.request)
-    #    self.assertEqual("foo", self.server.request.cookies.get("foo").value)
-
     def test_path(self):
         self.server.add_response(
             Response(
@@ -295,29 +230,6 @@ class TestCookies(BaseGrabTestCase):
         # work with "/admin" path
         grab.go(self.server.get_url("/admin/zz"))
         self.assertEqual(2, len(self.server.request.cookies))
-
-    # def test_common_case_www_domain(self):
-    #    grab = build_grab()
-    #    USE CUSTOM NAMES
-    #        "www.foo.bar:%d:127.0.0.1" % self.server.port,
-    #    ]
-    #    # Cookies are set for root domain (not for www subdomain)
-    #    self.server.add_response(
-    #        Response(
-    #            headers=[
-    #                ("Set-Cookie", "foo=1; Domain=foo.bar;"),
-    #                ("Set-Cookie", "bar=2; Domain=.foo.bar;"),
-    #            ]
-    #        )
-    #    )
-    #    self.server.add_response(Response())
-
-    #    # get cookies
-    #    grab.go("http://www.foo.bar:%d" % self.server.port)
-    #    # submit cookies
-    #    grab.go("http://www.foo.bar:%d" % self.server.port)
-    #    self.assertEqual("1", (self.server.request.cookies.get("foo").value))
-    #    self.assertEqual("2", (self.server.request.cookies.get("bar").value))
 
     def test_cookie_merging_replace_with_cookies_option(self):
         with temp_file() as tmp_file:
@@ -379,3 +291,92 @@ class TestCookies(BaseGrabTestCase):
     #    mgr = CookieManager()
     #    req = Request("https://example.com", headers={"Cookie": "foo=bar"})
     #    self.assertEqual("foo=bar", mgr.get_cookie_header(req))
+
+    # def test_manual_dns(self):
+    #    grab = build_grab()
+    #    USE CUSTOM DNS: ["foo:%d:127.0.0.1" % self.server.port]
+    #    self.server.add_response(Response(data=b"zzz"))
+    #    grab.go("http://foo:%d/" % self.server.port)
+    #    self.assertEqual(b"zzz", grab.doc.body)
+
+    # def test_different_domains(self):
+    #    grab = build_grab()
+    #    names = [
+    #        "foo:%d:127.0.0.1" % self.server.port,
+    #        "bar:%d:127.0.0.1" % self.server.port,
+    #    ]
+    #    grab.setup_transport()
+    #    USE CUSTOM DNS
+
+    #    self.server.add_response(Response(headers=[("Set-Cookie", "foo=foo")]))
+    #    grab.go("http://foo:%d" % self.server.port)
+    #    self.assertEqual(dict(grab.doc.cookies.items()), {"foo": "foo"})
+
+    #    self.server.add_response(Response(headers=[("Set-Cookie", "bar=bar")]))
+    #    grab.go("http://bar:%d" % self.server.port)
+    #    self.assertEqual(dict(grab.doc.cookies.items()), {"bar": "bar"})
+
+    #    # That does not hold anymore, I guess I have fixed it
+    #    # # response.cookies contains cookies from both domains
+    #    # # because it just accumulates cookies over time
+    #    # # self.assertEqual(
+    #    # #     dict(grab.doc.cookies.items()), {"foo": "foo", "bar": "bar"}
+    #    # # )
+
+    # def test_cookie_domain(self):
+    #    grab = build_grab()
+    #    USE CUSTOM NAMES:    "example.com:%d:127.0.0.1" % self.server.port,
+    #    grab.cookies.set("foo", "bar", domain="example.com")
+    #    grab.go("http://example.com:%d/" % self.server.port)
+
+    # def test_common_case_www_domain(self):
+    #    grab = build_grab()
+    #    USE CUSTOM NAMES
+    #        "www.foo.bar:%d:127.0.0.1" % self.server.port,
+    #    ]
+    #    # Cookies are set for root domain (not for www subdomain)
+    #    self.server.add_response(
+    #        Response(
+    #            headers=[
+    #                ("Set-Cookie", "foo=1; Domain=foo.bar;"),
+    #                ("Set-Cookie", "bar=2; Domain=.foo.bar;"),
+    #            ]
+    #        )
+    #    )
+    #    self.server.add_response(Response())
+
+    #    # get cookies
+    #    grab.go("http://www.foo.bar:%d" % self.server.port)
+    #    # submit cookies
+    #    grab.go("http://www.foo.bar:%d" % self.server.port)
+    #    self.assertEqual("1", (self.server.request.cookies.get("foo").value))
+    #    self.assertEqual("2", (self.server.request.cookies.get("bar").value))
+
+    # def test_dot_domain(self):
+    #    grab = build_grab(debug=True)
+    #    USE CUSTOM NAMES
+    #        "foo.bar:%d:127.0.0.1" % self.server.port,
+    #        "www.foo.bar:%d:127.0.0.1" % self.server.port,
+    #    ]
+    #    self.server.add_response(
+    #        Response(
+    #            headers=[
+    #                (
+    #                    "Set-Cookie",
+    #                    (
+    #                        "foo=foo; Domain=.foo.bar;"
+    #                        " Expires=Wed, 13 Jan 3000 22:23:01 GMT;"
+    #                    ),
+    #                )
+    #            ]
+    #        ),
+    #        count=2,
+    #    )
+
+    #    grab.go("http://www.foo.bar:%d" % self.server.port)
+    #    self.assertEqual(dict(grab.doc.cookies.items()), {"foo": "foo"})
+    #    pprint(grab.doc.cookies.get_dict())
+
+    #    grab.go("http://www.foo.bar:%d" % self.server.port)
+    #    pprint(self.server.request)
+    #    self.assertEqual("foo", self.server.request.cookies.get("foo").value)

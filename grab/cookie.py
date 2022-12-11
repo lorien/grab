@@ -11,10 +11,12 @@ Some code got from
 from __future__ import annotations
 
 import json
+from copy import copy
 from http.client import HTTPMessage
 from http.cookiejar import Cookie, CookieJar
-from typing import Any, Mapping, Optional, Sequence, Union
+from typing import Any, Mapping, Optional, Sequence, Union, cast
 from urllib.parse import urlparse, urlunparse
+from urllib.request import Request
 
 from urllib3._collections import HTTPHeaderDict
 
@@ -54,7 +56,7 @@ class MockRequest:
     def __init__(self, url: str, headers: dict[str, str]):
         self._url = url
         self._headers = headers
-        self._new_headers = {}
+        self._new_headers: dict[str, Any] = {}
         self.type = urlparse(self._url).scheme
 
     def get_type(self) -> str:
@@ -139,7 +141,7 @@ class MockResponse:
         """
         self._headers = headers
 
-    def info(self) -> HTTPMessage:
+    def info(self) -> Union[HTTPMessage, HTTPHeaderDict]:
         return self._headers
 
     # def getheaders(self, name: str) -> list[str, str]:
@@ -147,45 +149,68 @@ class MockResponse:
     #    # self._headers.getheaders(name)
 
 
-def create_cookie(
-    name: str, value: str, domain: str, httponly: Optional[bool] = None, **kwargs: Any
-) -> None:
-    """Create `cookielib.Cookie` instance."""
+def create_cookie(  # pylint: disable=too-many-arguments, too-many-locals
+    # required
+    name: str,
+    value: str,
+    domain: str,
+    # non required
+    comment: Optional[str] = None,
+    comment_url: Optional[str] = None,
+    discard: bool = True,
+    domain_initial_dot: Optional[bool] = None,
+    domain_specified: Optional[bool] = None,
+    expires: Optional[int] = None,
+    path: str = "/",
+    path_specified: Optional[bool] = None,
+    port: Optional[int] = None,
+    port_specified: Optional[bool] = None,
+    rest: Optional[dict[str, Any]] = None,
+    rfc2109: bool = False,
+    secure: bool = False,
+    version: int = 0,
+    httponly: Optional[bool] = None,
+) -> Cookie:
+    """Create cookielib.Cookie instance."""
+    # See also type hints for Cookie at
+    # https://github.com/python/typeshed/blob/main/stdlib/http/cookiejar.pyi
     if domain == "localhost":
         domain = ""
-    config = {
-        "name": name,
-        "value": value,
-        "version": 0,
-        "port": None,
-        "domain": domain,
-        "path": "/",
-        "secure": False,
-        "expires": None,
-        "discard": True,
-        "comment": None,
-        "comment_url": None,
-        "rfc2109": False,
-        "rest": {"HttpOnly": httponly},
-    }
-
-    for key in kwargs:
-        if key not in config:
-            raise GrabMisuseError(
-                "Function `create_cookie` does not accept " "`%s` argument" % key
-            )
-
-    config.update(**kwargs)
-    config["rest"]["HttpOnly"] = httponly
-
-    config["port_specified"] = bool(config["port"])
-    config["domain_specified"] = bool(config["domain"])
-    # pytype: disable=attribute-error
-    config["domain_initial_dot"] = (config["domain"] or "").startswith(".")
-    # pytype: enable=attribute-error
-    config["path_specified"] = bool(config["path"])
-
-    return Cookie(**config)
+    if rest is None:
+        new_rest = {}
+    else:
+        new_rest = copy(rest)
+        if "HttpOnly" not in new_rest:
+            new_rest["HttpOnly"] = httponly
+    if port_specified is None:
+        port_specified = port is not None
+    if domain_specified is None:
+        domain_specified = domain is not None
+    if domain_initial_dot is None:
+        domain_initial_dot = domain.startswith(".")
+    if path_specified is None:
+        path_specified = path is not None
+    return Cookie(
+        # from required scope
+        name=name,
+        value=value,
+        domain=domain,
+        # from non required scope
+        comment=comment,
+        comment_url=comment_url,
+        discard=discard,
+        domain_initial_dot=domain_initial_dot,
+        domain_specified=domain_specified,
+        expires=expires,
+        path=path,
+        path_specified=path_specified,
+        port=str(port) if port else None,  # typeshed bundled with mypy wants str type
+        port_specified=port_specified,
+        rest=new_rest,
+        rfc2109=rfc2109,
+        secure=secure,
+        version=version,
+    )
 
 
 class CookieManager:
@@ -258,22 +283,21 @@ class CookieManager:
 
         return state
 
-    def __setstate__(self, state: Mapping[dict, Any]) -> None:
-        state["cookiejar"] = CookieJar()
+    def __setstate__(self, state: Mapping[str, Any]) -> None:
+        self.cookiejar = CookieJar()
         for cookie in state["_cookiejar_cookies"]:
-            state["cookiejar"].set_cookie(cookie)
-        del state["_cookiejar_cookies"]
+            self.cookiejar.set_cookie(cookie)
+        for key, value in state.items():
+            if key != "_cookiejar_cookies":
+                setattr(self, key, value)
 
-        for slot, value in state.items():
-            setattr(self, slot, value)
-
-    def __getitem__(self, key: str) -> str:
+    def __getitem__(self, key: str) -> Optional[str]:
         for cookie in self.cookiejar:
             if cookie.name == key:
                 return cookie.value
         raise KeyError
 
-    def items(self) -> list[tuple[str, str]]:
+    def items(self) -> list[tuple[str, Optional[str]]]:
         res = []
         for cookie in self.cookiejar:
             res.append((cookie.name, cookie.value))
@@ -312,9 +336,10 @@ class CookieManager:
         with open(path, "w", encoding="utf-8") as out:
             out.write(json.dumps(self.get_dict()))
 
-    def get_cookie_header(self, url: str, headers: dict[str, str]) -> str:
+    def get_cookie_header(self, url: str, headers: dict[str, str]) -> Optional[str]:
         # :param req: object with httplib.Request interface
         #    Actually, it have to have `url` and `headers` attributes
+        print("AAA", url, headers)
         mocked_req = MockRequest(url, headers)
-        self.cookiejar.add_cookie_header(mocked_req)
+        self.cookiejar.add_cookie_header(cast(Request, mocked_req))
         return mocked_req.get_new_headers().get("Cookie")

@@ -5,7 +5,7 @@ from typing import Optional
 
 
 def hashed_path_details(
-    url: str, ext: str = "jpg", base_dir: Optional[str] = None
+    url: str, ext: Optional[str] = None, base_dir: Optional[str] = None
 ) -> dict[str, str]:
     _hash = sha1(url.encode()).hexdigest()
     part1, part2, tail = _hash[:2], _hash[2:4], _hash[4:]
@@ -24,5 +24,7 @@ def hashed_path_details(
     }
 
 
-def hashed_path(url: str, ext: str = "jpg", base_dir: Optional[str] = None) -> str:
+def hashed_path(
+    url: str, ext: Optional[str] = None, base_dir: Optional[str] = None
+) -> str:
     return hashed_path_details(url, ext=ext, base_dir=base_dir)["full_path"]
