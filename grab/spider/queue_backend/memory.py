@@ -27,12 +27,11 @@ class MemoryTaskQueue(BaseTaskQueue):
         now = datetime.utcnow()
 
         removed_indexes = []
-        index = 0  # noqa: SIM113
-        for schedule_time, task in self.schedule_list:
+        for idx, item in enumerate(self.schedule_list):
+            schedule_time, task = item
             if schedule_time <= now:
                 self.put(task, 1)
-                removed_indexes.append(index)
-            index += 1
+                removed_indexes.append(idx)
 
         self.schedule_list = [
             x for idx, x in enumerate(self.schedule_list) if idx not in removed_indexes

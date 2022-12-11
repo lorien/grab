@@ -29,7 +29,6 @@ GRAB_TEST_LIST = (
     "tests.grab_get_request",
     "tests.grab_post_request",
     "tests.grab_request",
-    "tests.grab_request_headers",
     "tests.grab_user_agent",
     "tests.grab_cookies",
     "tests.grab_url_processing",

@@ -17,7 +17,7 @@ from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.task import Task
 
 
-class CustomPriorityQueue(PriorityQueue):  # type: ignore
+class CustomPriorityQueue(PriorityQueue):  # type: ignore # FIXME
     def __init__(self, key: str, **kwargs: Any) -> None:
         # sets `key` to `self._key`
         super().__init__(key)

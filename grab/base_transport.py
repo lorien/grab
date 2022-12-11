@@ -55,9 +55,8 @@ class BaseTransport:
         if storage_filename is None:
             file, file_path = tempfile.mkstemp(dir=storage_dir)
             os.close(file)
-        else:
-            file_path = os.path.join(storage_dir, storage_filename)
-        return file_path  # noqa: R504
+            return file_path
+        return os.path.join(storage_dir, storage_filename)
 
     def detect_request_method(self, grab_config: Mapping[str, Any]) -> str:
         """
@@ -67,10 +66,7 @@ class BaseTransport:
         """
         method = cast(Optional[str], grab_config["method"])
         if method:
-            method = method.upper()
-        else:
-            if grab_config["post"] or grab_config["multipart_post"]:
-                method = "POST"
-            else:
-                method = "GET"
-        return method  # noqa: R504
+            return method.upper()
+        if grab_config["post"] or grab_config["multipart_post"]:
+            return "POST"
+        return "GET"

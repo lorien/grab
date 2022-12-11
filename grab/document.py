@@ -284,7 +284,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         if not charset and self.headers and "Content-Type" in self.headers:
             pos = self.headers["Content-Type"].find("charset=")
             if pos > -1:
-                charset = self.headers["Content-Type"][(pos + 8) :]  # noqa: E203
+                charset = self.headers["Content-Type"][(pos + 8) :]
 
         if charset:
             charset = charset.lower()
@@ -563,7 +563,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         # if isinstance(body, unicode):
         # body = body.encode('utf-8')
         if bom is not None:
-            body = body[len(bom) :]  # noqa: E203
+            body = body[len(bom) :]
         if fix_special_entities:
             body = fix_special_entities_func(body)
         if ignore_errors:
@@ -663,23 +663,18 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                 self._lxml_tree = self._build_dom(body, "html", self.charset)
             except Exception as ex:  # pylint: disable=broad-except
                 # FIXME: write test for this case
-                if (
-                    isinstance(ex, etree.ParserError)  # noqa: SIM114
-                    and "Document is empty" in str(ex)
-                    and b"<html" not in body
-                ):
+                if b"<html" not in body and (
                     # Fix for "just a string" body
-                    body = b"<html>%s</html>" % body
-                    self._lxml_tree = self._build_dom(body, "html", self.charset)
-
-                # FIXME: write test for this case
-                elif (
-                    isinstance(ex, TypeError)
-                    and "object of type 'NoneType' has no len" in str(ex)
-                    and b"<html" not in body
-                ):
-
+                    (
+                        isinstance(ex, etree.ParserError)
+                        and "Document is empty" in str(ex)
+                    )
                     # Fix for smth like "<frameset></frameset>"
+                    or (
+                        isinstance(ex, TypeError)
+                        and "object of type 'NoneType' has no len" in str(ex)
+                    )
+                ):
                     body = b"<html>%s</html>" % body
                     self._lxml_tree = self._build_dom(body, "html", self.charset)
                 else:
@@ -1037,14 +1032,14 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def process_form_fields(self, fields: MutableMapping[str, Any]) -> None:
         for key, val in list(fields.items()):
             if isinstance(val, CheckboxValues):
-                if not len(val):  # noqa: PIE787 pylint: disable=len-as-condition
+                if not val:
                     del fields[key]
                 elif len(val) == 1:
                     fields[key] = val.pop()
                 else:
                     fields[key] = list(val)
             if isinstance(val, MultipleSelectOptions):
-                if not len(val):  # noqa: PIE787 pylint: disable=len-as-condition
+                if not val:
                     del fields[key]
                 elif len(val) == 1:
                     fields[key] = val.pop()
@@ -1076,8 +1071,8 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def choose_form_by_element(self, xpath: str) -> None:
         elem = self.select(xpath).node()
         while elem is not None:
-            if elem.tag == "form":  # pylint: disable=no-member
+            if elem.tag == "form":
                 self._lxml_form = elem
                 return
-            elem = elem.getparent()  # pylint: disable=no-member
+            elem = elem.getparent()
         self._lxml_form = None

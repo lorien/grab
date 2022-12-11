@@ -27,7 +27,8 @@
 # PIE798 no-unnecessary-class: Consider using a module for namespacing instead
 # PIE786 Use precise exception handlers
 # PEA001  typing.Match is deprecated, use re.Match instead. # is not possible in py<3.9
-ignore=F401,C812,C813,D100,D101,D102,D103,D104,D106,D107,D105,P101,PIE798,PIE786,W503,N818,PEA001
+# E203 Colons should not have any space before them. # does not work with Black formatting of "foo[(1 + 1) : ]"
+ignore=F401,C812,C813,D100,D101,D102,D103,D104,D106,D107,D105,P101,PIE798,PIE786,W503,N818,PEA001,E203
 max-line-length=88
 inline-quotes = double
 max-complexity=10

@@ -142,12 +142,12 @@ class Urllib3Transport(BaseTransport):
         post_data: Optional[bytes] = None
         if grab_config["multipart_post"] is not None:
             post_data = grab_config["multipart_post"]
-            if isinstance(post_data, bytes):
-                pass
-            elif isinstance(post_data, str):  # noqa: R506
+            if isinstance(post_data, str):
                 raise GrabMisuseError(
                     "Option multipart_post data does not accept unicode."
                 )
+            if isinstance(post_data, bytes):
+                pass
             else:
                 # WTF: why I encode things into bytes and then decode them back?
                 post_items: Sequence[tuple[bytes, Any]] = normalize_http_values(
@@ -161,7 +161,7 @@ class Urllib3Transport(BaseTransport):
                 post_items3 = process_upload_items(post_items2)
                 post_data, content_type = encode_multipart_formdata(
                     post_items3
-                )  # type: ignore
+                )  # type: ignore # FIXME
                 extra_headers["Content-Type"] = content_type
             extra_headers["Content-Length"] = len(post_data)
         elif grab_config["post"] is not None:
@@ -270,7 +270,7 @@ class Urllib3Transport(BaseTransport):
             if req.proxy_userpwd:
                 headers = make_headers(
                     proxy_basic_auth=req.proxy_userpwd
-                )  # type: ignore
+                )  # type: ignore # FIXME
             else:
                 headers = None
             proxy_url = "%s://%s" % (req.proxy_type, req.proxy)
@@ -310,7 +310,7 @@ class Urllib3Transport(BaseTransport):
             req_method = req.method
             req.op_started = time.time()
             try:
-                res = pool.urlopen(  # type: ignore
+                res = pool.urlopen(  # type: ignore # FIXME
                     req_method,
                     req_url,
                     body=req.data,
@@ -383,8 +383,6 @@ class Urllib3Transport(BaseTransport):
 
         This funciton is required to isolated smalles part of untyped code
         and hide it from mypy
-
-        WTF: why "type: ignore" is not required here by mypy
         """
         headers = cast(HTTPResponse, self._response).headers
         return headers.items()

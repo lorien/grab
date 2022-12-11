@@ -13,7 +13,7 @@ from grab.error import GrabError
 RE_SIMPLE_PROXY = re.compile(r"^([^:]+):(\d+)$")
 RE_AUTH_PROXY = re.compile(r"^([^:]+):(\d+):([^:]+):([^:]+)$")
 PROXY_FIELDS = ("host", "port", "username", "password", "proxy_type")
-logger = logging.getLogger("grab.proxylist")  # pylint: disable=invalid-name
+logger = logging.getLogger("grab.proxylist")
 
 
 class Proxy(NamedTuple):

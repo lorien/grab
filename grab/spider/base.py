@@ -445,31 +445,28 @@ class Spider:
         """
 
     def create_grab_instance(self, **kwargs: Any) -> Grab:
+        # WTF: I have no idea what is happening here
         # Back-ward compatibility for deprecated `grab_config` attribute
         # Here I use `_grab_config` to not trigger warning messages
         kwargs["transport"] = self.grab_transport_name
         if self._grab_config and kwargs:
             merged_config = deepcopy(self._grab_config)
             merged_config.update(kwargs)
-            grab = Grab(**merged_config)
-        elif self._grab_config and not kwargs:
-            grab = Grab(**self._grab_config)
-        else:
-            grab = Grab(**kwargs)
-        return grab  # noqa: R504
+            return Grab(**merged_config)
+        if self._grab_config and not kwargs:
+            return Grab(**self._grab_config)
+        return Grab(**kwargs)
 
     def task_generator(self) -> Iterator[Task]:
         """
-        You can override this method to load new tasks smoothly.
+        You can override this method to load new tasks.
 
         It will be used each time as number of tasks
         in task queue is less then number of threads multiplied on 2
         This allows you to not overload all free memory if total number of
         tasks is big.
         """
-        if False:  # pylint: disable=using-constant-test
-            # Some magic to make this function empty generator
-            yield ":-)"
+        yield from ()
 
     # ***************
     # Private Methods
@@ -593,26 +590,9 @@ class Spider:
                     proxy_type=self.proxy.proxy_type,
                 )
 
-    # pylint: disable=unused-argument
     def change_active_proxy(self, task: Task, grab: Grab) -> None:
+        # pylint: disable=unused-argument
         self.proxy = cast(ProxyList, self.proxylist).get_random_proxy()
-
-    # pylint: enable=unused-argument
-
-    # def submit_task_to_transport(self, task, grab):
-    #    grab_config_backup = grab.dump_config()
-    #    self.process_grab_proxy(task, grab)
-    #    self.stat.inc("spider:request-network")
-    #    self.stat.inc("spider:task-%s-network" % task.name)
-    #    try:
-    #        # pylint: disable=no-member
-    #        self.network_service.start_task_processing(task, grab, grab_config_backup)
-    #        # pylint: enable=no-member
-    #    except GrabInvalidUrl:
-    #        # TODO: log error
-    #        # TODO: show traceback
-    #        logger.debug("Task %s has invalid URL: %s", task.name, task.url)
-    #        self.stat.collect("invalid-url", task.url)
 
     def get_task_queue(self) -> BaseTaskQueue:
         # this method is expected to be called
@@ -815,12 +795,10 @@ class Spider:
         self.stat.inc("spider:request")
 
     def srv_process_task(self, task: Task) -> None:
-        task.network_try_count += 1  # pylint: disable=no-member
+        task.network_try_count += 1
         is_valid, reason = self.check_task_limits(task)
         if is_valid:
             grab = self.setup_grab_for_task(task)
-            # TODO: almost duplicate of
-            # Spider.submit_task_to_transport
             grab_config_backup = grab.dump_config()
             self.process_grab_proxy(task, grab)
             self.stat.inc("spider:request-network")
@@ -880,9 +858,7 @@ class Spider:
                 # self.freelist.append(1)
         else:
             self.log_rejected_task(task, reason)
-            # pylint: disable=no-member
             handler = self.get_fallback_handler(task)
-            # pylint: enable=no-member
             if handler:
                 handler(task)
 

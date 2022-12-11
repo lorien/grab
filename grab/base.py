@@ -10,6 +10,7 @@ import logging
 import os
 import threading
 import weakref
+from contextlib import suppress
 from copy import copy, deepcopy
 from datetime import datetime
 from random import randint
@@ -235,9 +236,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         if transport_param is None:
             transport_param = DEFAULT_TRANSPORT
         if isinstance(transport_param, str):
-            if (  # noqa: SIM908 pylint: disable=consider-using-get
-                transport_param in TRANSPORT_ALIAS
-            ):
+            with suppress(KeyError):
                 transport_param = TRANSPORT_ALIAS[transport_param]
             if "." not in transport_param:
                 raise error.GrabMisuseError("Unknown transport: %s" % transport_param)

@@ -45,17 +45,13 @@ class ExtensionRexTestCase(BaseGrabTestCase):
     def test_rex(self):
         # Search unicode rex in unicode body - default case
         rex = re.compile("(фыва)", re.U)
-        # pylint: disable=no-member
         self.assertEqual("фыва", self.grab.doc.rex_search(rex).group(1))
-        # pylint: enable=no-member
 
         # Search non-unicode rex in byte-string body
         rex = re.compile("(фыва)".encode("cp1251"))
-        # pylint: disable=no-member
         self.assertEqual(
             "фыва".encode("cp1251"), self.grab.doc.rex_search(rex, byte=True).group(1)
         )
-        # pylint: enable=no-member
 
         # # Search for non-unicode rex in unicode body should fail
         pattern = "(фыва)"
