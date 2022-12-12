@@ -9,16 +9,7 @@ Common problems
 ---------------
 
 
-1) If you got the error `requirement specifiers; Expected version spec ...` while
-installing grab via the pip then you have outdated setuptools or pip packages.
-
-Fix the error with following command:
-
-.. code:: shell
-
-    pip install -U setuptools pip
-
-2) If you got out of memory error while installing lxml on linux machine with 512Mb RAM
+1) If you got out of memory error while installing lxml on linux machine with 512Mb RAM
 or less then check that you swap file is enabled.
 
 
@@ -82,8 +73,6 @@ Now you can install Grab via pip with this command::
 
     python -m pip install grab
 
-
-
 .. _installation_freebsd:
 
 Installation on FreeBSD
@@ -100,12 +89,6 @@ Run the command:
 .. code:: shell
 
     pip install -U grab
-
-You can also install Grab from FreeBSD ports (thanks to Ruslan Makhmatkhanov):
-
-* To install the port: cd /usr/ports/devel/py-grab/ && make install clean
-* To add the package: pkg_add -r py27-grab
-
 
 .. _installation_macos:
 
@@ -124,16 +107,11 @@ Run the command:
 
     pip install -U grab
 
-
-
 .. _installation_deps:
 
 Dependencies
 ------------
 
 All required dependencies should be installed automatically if you 
-install Grab with pip. Here is list of Grab dependencies::
-
-     user_agent
-     selection
-     lxml
+install Grab with pip. Actual list of grab dependencies is stored in
+https://github.com/lorien/grab/blob/master/pyproject.toml in "dependencies" key.

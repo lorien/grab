@@ -6,23 +6,33 @@
 [![Grab Test Coverage Status](https://coveralls.io/repos/github/lorien/grab/badge.svg)](https://coveralls.io/github/lorien/grab)
 [![Grab Documentation](https://readthedocs.org/projects/grab/badge/?version=latest)](https://grab.readthedocs.io/en/latest/)
 
-## Project Status
+## Status of Project
 
-Important notice: pycurl backend is dropped. The only network transport now is urllib3.
+I myself have not used Grab for many years. I am not sure it is being used by anybody at present time.
+Nonetheless I work on the project from time to time, just for fun. In 2022 I have annotated
+whole Grab code base with type hints, it complies mypy in strict mode. Also the whole code base complies to
+pylint and flake8 linters. There are few exceptions: very large methods and classes with too many local
+atributes and variables. I will refactor them eventually. Also I have set up running mypy, pylint, flake8
+and pytest in github actions.
 
-The project is in a slow refactoring stage. It might be possible there will not be new features.
+Initially Grab worked with pycurl as network backend. Then I have added urllib3 backend. At present time
+pycurl backend is not supported anymore.
 
-Things that are going to happen (no estimation time):
+I do not care if the project is not used anymore by anybody. I feel good by making Grab source code less shitty.
+And, for sure, Grab source code is very shitty. And design is shitty too. I have created it many years ago.
 
-* Refactoring the source code while keeping most of the external API unchanged
-* Fixing bugs
-* Annotating source code with type hints
-* Improving the quality of source code to comply with pylint and other linters
-* Moving some features into external packages or moving external dependencies inside Grab
-* Fixing memory leaks
-* Improving test coverage
-* Adding more platforms and python versions to test matrix
-* Releasing new versions on pypi
+Grab requires python of version 3.8 or higher.
+
+## Thinks to be done next
+
+* Refactor source code to remove all pylint disable comments like:
+    * too-many-instance-attributes
+    * too-many-arguments
+    * too-many-locals
+    * too-nany-lines
+    * too-many-public-methods
+* Make 100% test coverage, it is about 90% now
+* Release new version to pypi
 
 
 ## Installation
@@ -36,9 +46,9 @@ See details about installing Grab on different platforms here https://grab.readt
 
 ## Documentation
 
-Documenations is here https://grab.readthedocs.io/en/latest/
+Documenations is located here https://grab.readthedocs.io/en/latest/
 
-Documentation for Grab version 0.6.41 (released in 2018 year) is here https://grab.readthedocs.io/en/v0.6.41-doc/
+Documentation for old Grab version 0.6.41 (released in 2018 year) is here https://grab.readthedocs.io/en/v0.6.41-doc/
 
 ## About Grab (very old description)
 
@@ -64,8 +74,14 @@ Grab provides an interface called Spider to develop multithreaded website scrape
 * Different backends for task queue (in-memory, redis, mongodb)
 * Tools to debug and collect statistics
 
+## Deprecated Usage Examples
 
-## Grab Example
+Following examples were written many years ago. In those times many of websites could
+be scraped with bare network and html libraries, without using browser engines. I guess
+following examples do not work anymore.
+
+
+## Grab Usage Example
 
 ```python
     import logging
@@ -95,8 +111,7 @@ Grab provides an interface called Spider to develop multithreaded website scrape
                           g.make_url_absolute(elem.attr('href'))))
 ```
 
-
-## Grab::Spider Example
+## Grab::Spider Usage Example
 
 ```python
     import logging
