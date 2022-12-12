@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import codecs
+import email
 import email.message
 import json
 import logging
@@ -42,7 +43,6 @@ from grab.types import NULL, GrabConfig
 from grab.util.files import hashed_path
 from grab.util.html import decode_entities, find_refresh_url
 from grab.util.html import fix_special_entities as fix_special_entities_func
-from grab.util.rex import normalize_regexp
 from grab.util.text import normalize_spaces
 from grab.util.warning import warn
 
@@ -493,16 +493,15 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         Return found match object or None
         """
         self.warn_byte_argument(byte)
-        regexp = normalize_regexp(regexp, flags)
         match: None | Match[bytes] | Match[str] = None
         assert self.body is not None
-
+        if isinstance(regexp, (bytes, str)):
+            regexp = re.compile(regexp, flags=flags)
         match = (
             regexp.search(self.body)
             if isinstance(regexp.pattern, bytes)
             else regexp.search(cast(str, self.unicode_body()))
         )
-
         if match:
             return match
         if default is NULL:
@@ -610,23 +609,26 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return self.build_html_tree()
 
     @classmethod
+    def wrap_io(cls, inp: bytes | str) -> StringIO | BytesIO:
+        return BytesIO(inp) if isinstance(inp, bytes) else StringIO(inp)
+
+    @classmethod
     def _build_dom(cls, content: bytes | str, mode: str, charset: str) -> _Element:
         assert mode in {"html", "xml"}
-        io_cls = BytesIO if isinstance(content, bytes) else StringIO
         if mode == "html":
             if not hasattr(THREAD_STORAGE, "html_parsers"):
                 THREAD_STORAGE.html_parsers = {}
             parser = THREAD_STORAGE.html_parsers.setdefault(
                 charset, HTMLParser(encoding=charset)
             )
-            dom = etree.parse(io_cls(content), parser=parser)
+            dom = etree.parse(cls.wrap_io(content), parser=parser)
             return dom.getroot()
         if not hasattr(THREAD_STORAGE, "xml_parser"):
             THREAD_STORAGE.xml_parsers = {}
         parser = THREAD_STORAGE.xml_parsers.setdefault(
             charset, etree.XMLParser(resolve_entities=False)
         )
-        dom = etree.parse(io_cls(content), parser=parser)
+        dom = etree.parse(cls.wrap_io(content), parser=parser)
         return dom.getroot()
 
     def build_html_tree(self) -> _Element:

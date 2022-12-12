@@ -4,7 +4,7 @@
 # License: BSD
 from __future__ import annotations
 
-import email
+import email.message
 import itertools
 import logging
 import os
