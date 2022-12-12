@@ -33,6 +33,7 @@ Grab requires python of version 3.8 or higher.
     * too-many-public-methods
 * Make 100% test coverage, it is about 90% now
 * Release new version to pypi
+* Fix uploading coverage stats to coveralls service
 
 
 ## Installation
