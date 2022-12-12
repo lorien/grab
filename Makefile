@@ -34,8 +34,7 @@ clean:
 	find -name '__pycache__' -delete
 
 test:
-	coverage run runtest.py --test-all --backend-redis --backend-mongodb \
-		&& coverage report -i -m --include "grab/*"
+	tox -e py3-test
 
 #release:
 #	git push \
