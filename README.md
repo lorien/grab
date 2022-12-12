@@ -10,7 +10,7 @@
 
 I myself have not used Grab for many years. I am not sure it is being used by anybody at present time.
 Nonetheless I work on the project from time to time, just for fun. In 2022 I have annotated
-whole Grab code base with type hints, it complies mypy in strict mode. Also the whole code base complies to
+whole Grab code base with type hints, it complies to mypy in strict mode. Also the whole code base complies to
 pylint and flake8 linters. There are few exceptions: very large methods and classes with too many local
 atributes and variables. I will refactor them eventually. Also I have set up running mypy, pylint, flake8
 and pytest in github actions.
