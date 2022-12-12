@@ -11,7 +11,7 @@ from test_server import TestServer
 
 from grab import Grab, base
 
-logger = logging.getLogger("tests.util")  # pylint: disable=invalid-name
+logger = logging.getLogger("tests.util")
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 ADDRESS = "127.0.0.1"
 NON_ROUTABLE_IP = "10.0.0.0"
@@ -48,10 +48,15 @@ def temp_file(root_dir=None):
             raise
 
 
+def build_grab_custom_subclass(grab_cls, *args, **kwargs):
+    """Build the specific Grab-subclass instance with default options."""
+    kwargs.setdefault("transport", "urllib3")
+    return grab_cls(*args, **kwargs)
+
+
 def build_grab(*args, **kwargs):
     """Build the Grab instance with default options."""
-    kwargs.setdefault("transport", "urllib3")
-    return Grab(*args, **kwargs)
+    return build_grab_custom_subclass(Grab, *args, **kwargs)
 
 
 def build_spider(cls, **kwargs):

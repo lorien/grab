@@ -44,9 +44,7 @@ TRANSPORT_ALIAS = {
 }
 DEFAULT_TRANSPORT = "urllib3"
 
-# pylint: disable=invalid-name
 logger = logging.getLogger("grab.base")
-# Logger to handle network activity
 # It is done as separate logger to allow you easily
 # control network logging separately from other grab logs
 logger_network = logging.getLogger("grab.network")
@@ -379,9 +377,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     def log_request(self, extra: str = "") -> None:
         """Send request details to logging system."""
-        # pylint: disable=no-member
         thread_name = threading.current_thread().name.lower()
-        # pylint: enable=no-member
         if thread_name == "mainthread":
             thread_name = ""
         else:
@@ -648,9 +644,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         }
 
     def save_dumps(self) -> None:
-        # pylint: disable=no-member
         thread_name = threading.current_thread().name.lower()
-        # pylint: enable=no-member
         if thread_name == "mainthread":
             thread_name = ""
         else:

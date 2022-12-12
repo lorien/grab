@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-# pylint: disable=too-many-lines
 import logging
 import time
 from copy import deepcopy
@@ -43,10 +42,7 @@ DEFAULT_NETWORK_STREAM_NUMBER = 3
 DEFAULT_TASK_TRY_LIMIT = 5
 DEFAULT_NETWORK_TRY_LIMIT = 5
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
-
-# pylint: disable=invalid-name
 logger = logging.getLogger("grab.spider.base")
-# pylint: disable=invalid-name
 
 
 # pylint: disable=too-many-instance-attributes, too-many-public-methods
@@ -174,7 +170,6 @@ class Spider:
             network_service = transport
         assert network_service in ("threaded",)
         if network_service == "threaded":
-            # pylint: disable=no-name-in-module, import-error
             # pylint: disable=import-outside-toplevel
             from .service.network import NetworkServiceThreaded
 
@@ -209,9 +204,7 @@ class Spider:
 
     # pylint: enable=too-many-locals, too-many-arguments
 
-    def setup_cache(
-        self, *_args: Any, **_kwargs: Any
-    ) -> None:  # pylint: disable=unused-argument
+    def setup_cache(self, *_args: Any, **_kwargs: Any) -> None:
         raise_feature_is_deprecated("Cache feature")
 
     def load_queue_class(self, backend: str) -> type[BaseTaskQueue]:

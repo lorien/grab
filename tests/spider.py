@@ -102,8 +102,11 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_handler_result_none(self):
         class TestSpider(Spider):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.points = []
+
             def prepare(self):
-                # pylint: disable=attribute-defined-outside-init
                 self.points = []
 
             def task_page(self, unused_grab, unused_task):
@@ -117,8 +120,11 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_fallback_handler_by_default_name(self):
         class TestSpider(Spider):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.points = []
+
             def prepare(self):
-                # pylint: disable=attribute-defined-outside-init
                 self.points = []
 
             def task_page(self, grab, task):
@@ -137,8 +143,11 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_fallback_handler_by_fallback_name(self):
         class TestSpider(Spider):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.points = []
+
             def prepare(self):
-                # pylint: disable=attribute-defined-outside-init
                 self.points = []
 
             def task_page(self, grab, task):
@@ -174,8 +183,11 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_handler_result_invalid(self):
         class TestSpider(Spider):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.points = []
+
             def prepare(self):
-                # pylint: disable=attribute-defined-outside-init
                 self.points = []
 
             def task_page(self, unused_grab, unused_task):

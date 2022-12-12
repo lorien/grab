@@ -5,6 +5,10 @@ from test_server import Response
 from grab import GrabMisuseError
 from tests.util import TEST_DIR, BaseGrabTestCase, build_grab, temp_dir
 
+# class CustomGrab(Grab):
+#    def get_cached_bytes_body(self):
+#        return self._bytes_body
+
 
 class GrabSimpleTestCase(BaseGrabTestCase):
     def setUp(self):
@@ -71,9 +75,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         self.server.add_response(Response(data=b""))
         grab = build_grab()
         grab.go(self.server.get_url())
-        # pylint: disable=pointless-statement
-        grab.doc.tree  # should not raise exception
-        # pylint: enable=pointless-statement
+        self.assertTrue(grab.doc.tree is not None)  # should not raise exception
 
     # def test_emoji_processing(self):
     #    #html = u'''

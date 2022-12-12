@@ -9,9 +9,7 @@ from typing import Any, Callable, Iterable, Tuple, Type, cast
 
 from ..interface import FatalErrorQueueItem
 
-# pylint: disable=invalid-name
 logger = logging.getLogger(__name__)
-# pylint: enable=invalid-name
 
 
 class ServiceWorker:
@@ -90,7 +88,6 @@ class BaseService:
         self.worker_registry: list[ServiceWorker] = []
 
     def create_worker(self, worker_action: Callable[..., None]) -> ServiceWorker:
-        # pylint: disable=no-member
         return ServiceWorker(self.fatal_error_queue, worker_action)
 
     def iterate_workers(self, objects: list[ServiceWorker]) -> Iterable[ServiceWorker]:
@@ -120,7 +117,6 @@ class BaseService:
         # logging.debug('Service %s resumed' % self.__class__.__name__)
 
     def register_workers(self, *args: Any) -> None:
-        # pylint: disable=attribute-defined-outside-init
         self.worker_registry = list(args)
 
     def is_busy(self) -> bool:

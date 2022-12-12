@@ -1,6 +1,7 @@
 # Copyright: 2013, Grigoriy Petukhov
 # Author: Grigoriy Petukhov (http://lorien.name)
 # License: MIT
+# pylint: disable=too-many-lines
 """The Document class is the result of network request made with Grab instance."""
 from __future__ import annotations
 
@@ -12,9 +13,6 @@ import os
 import re
 import tempfile
 import threading
-
-# FIXME: split to modules, make smaller
-# pylint: disable=too-many-lines
 import webbrowser
 from contextlib import suppress
 from copy import copy
@@ -78,7 +76,7 @@ _BOM_TABLE = [
 ]
 _FIRST_CHARS = {char[0] for (char, name) in _BOM_TABLE}
 THREAD_STORAGE = threading.local()
-logger = logging.getLogger("grab.document")  # pylint: disable=invalid-name
+logger = logging.getLogger("grab.document")
 
 
 def read_bom(data: bytes) -> Union[tuple[None, None], tuple[str, bytes]]:
@@ -479,7 +477,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         default: Any = NULL,
     ) -> Any:
         """Return content of first matching group of regexp found in response body."""
-        # pylint: disable=no-member
         self.warn_byte_argument(byte)
         try:
             match = self.rex_search(regexp, flags=flags, byte=byte)
@@ -822,7 +819,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         """
         if self._lxml_form is None:
             self.choose_form_by_element('.//*[@name="%s"]' % name)
-        elem = self.form.inputs[name]  # pylint: disable=no-member
+        elem = self.form.inputs[name]
 
         processed = False
         if getattr(elem, "type", None) == "checkbox" and isinstance(value, bool):
@@ -851,7 +848,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             self.choose_form_by_element(xpath)
         sel = XpathSelector(self.form)
         elem = sel.select(xpath).node()
-        # pylint: disable=no-member
         return self.set_input(elem.get("name"), value)
 
     def set_input_by_number(self, number: int, value: Any) -> None:
@@ -879,12 +875,11 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             # which contains found element
             parent = elem
             while True:
-                parent = parent.getparent()  # pylint: disable=no-member
+                parent = parent.getparent()
                 if parent.tag == "form":
                     self._lxml_form = parent
                     break
 
-        # pylint: disable=no-member
         return self.set_input(elem.get("name"), value)
 
     # FIXME:
@@ -969,7 +964,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         Multipart forms are correctly recognized by grab library.
         """
-        # pylint: disable=no-member
         post = self.form_fields()
         self.clean_submit_controls(post, submit_name)
         assert self.url is not None
@@ -1018,7 +1012,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self, fields: Mapping[str, Any], form_inputs: Sequence[HtmlElement]
     ) -> set[str]:
         fields_to_remove: set[str] = set()
-        for elem in form_inputs:  # pylint: disable=no-member
+        for elem in form_inputs:
             # Ignore elements without name
             if not elem.get("name"):
                 continue
@@ -1063,7 +1057,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         Fill some fields with reasonable values.
         """
-        fields = dict(self.form.fields)  # pylint: disable=no-member
+        fields = dict(self.form.fields)
         self.process_form_fields(fields)
         for elem in self.form.inputs:
             if (

@@ -9,6 +9,7 @@ from grab.error import GrabMisuseError
 from grab.transport import Urllib3Transport
 from tests.util import BaseGrabTestCase
 
+# WTF: why all these things are commented? Should I enable them?
 #
 # FAKE_TRANSPORT_CODE = """
 # from grab.transport.DEPRECATED import DEPRECATEDTransport

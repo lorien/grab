@@ -3,6 +3,7 @@
 # License: MIT
 from __future__ import annotations
 
+import email.message
 import logging
 import random
 import ssl
@@ -441,9 +442,6 @@ class Urllib3Transport(BaseTransport):
                 or cast(Request, self._request).url
             )
 
-            # WTF: it is imported here?
-            import email.message  # pylint: disable=import-outside-toplevel
-
             hdr = email.message.Message()
             for key, val in self.get_response_header_items():
                 key = key.encode("latin").decode("utf-8", errors="ignore")
@@ -464,13 +462,11 @@ class Urllib3Transport(BaseTransport):
         # if this method is called from custom prepare response
         if self._response and self._request:
             jar.extract_cookies(
-                # pylint: disable=protected-access
                 cast(
                     HTTPResponse,
                     # MockResponse(self._response._original_response.headers),
                     MockResponse(self._response.headers),
                 ),
-                # pylint: enable=protected-access
                 cast(
                     urllib.request.Request,
                     MockRequest(self._request.url, self._request.headers),

@@ -175,12 +175,14 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
 
     def test_task_url_and_grab_options(self):
         class TestSpider(Spider):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.done = False
+
             def setup(self):
-                # pylint: disable=attribute-defined-outside-init
                 self.done = False
 
             def task_page(self, unused_grab, unused_task):
-                # pylint: disable=attribute-defined-outside-init
                 self.done = True
 
         bot = build_spider(
@@ -228,9 +230,7 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         grab.setup(url="http://foo.com/")
         task = Task("foo", grab=grab, foo=1)
         task2 = task.clone(foo=2)
-        # pytype: disable=attribute-error
         self.assertEqual(2, task2.foo)  # pylint: disable=no-member
-        # pytype: enable=attribute-error
 
     def test_task_comparison(self):
         task1 = Task("foo", url="http://foo.com/", priority=1)
@@ -418,9 +418,7 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
                 self.stat.inc("foo")
 
             def task_generator(self):
-                # pylint: disable=using-constant-test
-                if False:
-                    yield None
+                yield from ()
 
         bot = build_spider(TestSpider)
         bot.setup_queue()
