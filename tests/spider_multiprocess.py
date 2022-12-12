@@ -6,12 +6,13 @@ from tests.util import BaseGrabTestCase, build_spider
 
 class BasicSpiderTestCase(BaseGrabTestCase):
     class SimpleSpider(Spider):
-        def prepare(self):
-            # pylint: disable=attribute-defined-outside-init
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
             self.foo_count = 1
 
-        def prepare_parser(self):
-            # pylint: disable=attribute-defined-outside-init
+        # FIXME: is it required yet, after createing __init__
+        # check all other similar cases
+        def prepare(self):
             self.foo_count = 1
 
         def task_page(self, unused_grab, task):

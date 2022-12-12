@@ -32,10 +32,12 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         server = self.server
 
         class TestSpider(Spider):
-            def task_generator(self):
-                # pylint: disable=attribute-defined-outside-init
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
                 self.done_counter = 0
-                # pylint: enable=attribute-defined-outside-init
+
+            def task_generator(self):
+                self.done_counter = 0
                 yield Task("page", url=server.get_url())
 
             def task_page(self, grab, task):
@@ -50,6 +52,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.run()
 
+    # FIXME: have not been fixed yet, duh
     # TODO: fix this test, it fails now because
     # spider do some logging which counts as output
     # def test_no_warning(self):

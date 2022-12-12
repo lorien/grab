@@ -29,7 +29,6 @@ class TestCookies(BaseGrabTestCase):
             grab.setup(cookiefile=tmp_file, debug=True)
             grab.go(self.server.get_url())
             self.assertEqual(self.server.request.cookies["spam"].value, "ham")
-            # print("XXX", grab.cookies.get_dict())
 
             # This is correct reslt of combining two cookies
             merged_cookies = [("godzilla", "monkey"), ("spam", "ham")]
@@ -375,8 +374,6 @@ class TestCookies(BaseGrabTestCase):
 
     #    grab.go("http://www.foo.bar:%d" % self.server.port)
     #    self.assertEqual(dict(grab.doc.cookies.items()), {"foo": "foo"})
-    #    pprint(grab.doc.cookies.get_dict())
 
     #    grab.go("http://www.foo.bar:%d" % self.server.port)
-    #    pprint(self.server.request)
     #    self.assertEqual("foo", self.server.request.cookies.get("foo").value)

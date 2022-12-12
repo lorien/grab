@@ -633,13 +633,11 @@ class Spider:
 
     def shutdown_services(self, services: list[BaseService]) -> None:
         # TODO:
-        # print('Start stopping services')
         for srv in services:
             # Resume service if it has been paused
             # to allow service to process stop signal
             srv.resume()
             srv.stop()
-        # print('Called .stop() for all services')
         start = time.time()
         while any(x.is_alive() for x in services):
             time.sleep(0.1)
@@ -647,7 +645,7 @@ class Spider:
                 break
         for srv in services:
             if srv.is_alive():
-                print("The %s has not stopped :(" % srv)
+                logger.error("The %s has not stopped :(", srv)
         self.stat.print_progress_line()
         self.shutdown()
         if self.task_queue:

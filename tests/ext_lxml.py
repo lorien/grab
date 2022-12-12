@@ -1,3 +1,4 @@
+from lxml.html import fromstring
 from test_server import Response
 
 from grab import DataNotFound
@@ -59,8 +60,6 @@ class LXMLExtensionTest(BaseGrabTestCase):
         # Create fake grab instance with fake response
         self.grab = build_grab()
         self.grab.setup_document(HTML.encode("cp1251"), charset="cp1251")
-
-        from lxml.html import fromstring  # pylint: disable=import-outside-toplevel
 
         self.lxml_tree = fromstring(self.grab.doc.body)
 

@@ -4,7 +4,7 @@ import os
 import tempfile
 from abc import abstractmethod
 from contextlib import contextmanager
-from typing import Any, Generator, Mapping, Optional, cast
+from typing import Any, Generator, Mapping, Optional, Type, cast
 
 from grab.cookie import CookieManager
 from grab.document import Document
@@ -16,7 +16,9 @@ class BaseTransport:
         pass
 
     @abstractmethod
-    def prepare_response(self, grab_config: GrabConfig) -> Document:
+    def prepare_response(
+        self, grab_config: GrabConfig, *, document_class: Type[Document] = Document
+    ) -> Document:
         raise NotImplementedError
 
     @abstractmethod

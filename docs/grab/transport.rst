@@ -68,8 +68,8 @@ VERY simple transport that understands only one option: the URL.
                                 self._request_url])
             self._response_body = out
 
-        def prepare_response(self, grab_config):
-            doc = Document()
+        def prepare_response(self, grab_config, *, document_class = Document):
+            doc = document_class()
             doc.body = self._response_body
             return doc
 

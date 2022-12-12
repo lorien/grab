@@ -1,3 +1,5 @@
+from urllib3 import PoolManager
+
 from tests.util import BaseGrabTestCase
 
 
@@ -6,10 +8,6 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_urllib3_idna_error(self):
-        # pylint: disable=import-outside-toplevel
-        from urllib3 import PoolManager
-
-        # pylint: enable=import-outside-toplevel
 
         invalid_url = (
             "http://13354&altProductId=6423589&productId=6423589"

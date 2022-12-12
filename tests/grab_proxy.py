@@ -119,9 +119,7 @@ class TestProxy(BaseGrabTestCase):
             grab.proxylist.load_file(tmp_file)
             grab.setup(proxy_auto_change=False)
             grab.change_proxy()
-            # pylint: disable=unsupported-membership-test
             self.assertTrue("server-" in grab.config["proxy"])
-            # pylint: enable=unsupported-membership-test
 
     def test_list_proxysource(self):
         for item in self.extra_servers.values():

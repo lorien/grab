@@ -14,7 +14,7 @@ from contextlib import suppress
 from copy import copy, deepcopy
 from datetime import datetime
 from random import randint
-from typing import Any, Dict, Mapping, MutableMapping, Optional, Sequence, cast
+from typing import Any, Dict, Mapping, MutableMapping, Optional, Sequence, Type, cast
 from urllib.parse import urljoin
 
 from grab import error
@@ -171,6 +171,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         # multiple base classes with __slots__
         "_doc",
     )
+    document_class: Type[Document] = Document
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
@@ -536,7 +537,9 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         # again!
         self.reset_temporary_options()
 
-        self.doc = cast(BaseTransport, self.transport).prepare_response(self.config)
+        self.doc = cast(BaseTransport, self.transport).prepare_response(
+            self.config, document_class=self.document_class
+        )
 
         self.doc.process_grab_config(self.config)
 
@@ -576,7 +579,9 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         This method is called then fatal network exception is raised.
         The saved dump could be used for debugging the reason of the failure.
         """
-        self.doc = cast(BaseTransport, self.transport).prepare_response(self.config)
+        self.doc = cast(BaseTransport, self.transport).prepare_response(
+            self.config, document_class=self.document_class
+        )
         self.save_dumps()
 
     def setup_document(self, content: bytes, **kwargs: Any) -> None:
@@ -595,7 +600,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             )
 
         # Configure Document instance
-        doc = Document(grab=self)
+        doc = self.document_class(grab=self)
         doc.body = content
         doc.status = ""
         doc.head = b"HTTP/1.1 200 OK\r\n\r\n"

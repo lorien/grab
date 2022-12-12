@@ -339,7 +339,6 @@ class CookieManager:
     def get_cookie_header(self, url: str, headers: dict[str, str]) -> Optional[str]:
         # :param req: object with httplib.Request interface
         #    Actually, it have to have `url` and `headers` attributes
-        print("AAA", url, headers)
         mocked_req = MockRequest(url, headers)
         self.cookiejar.add_cookie_header(cast(Request, mocked_req))
         return mocked_req.get_new_headers().get("Cookie")

@@ -20,6 +20,7 @@ from typing import (
     MutableMapping,
     Optional,
     Sequence,
+    Type,
     Union,
     cast,
 )
@@ -224,7 +225,6 @@ class Urllib3Transport(BaseTransport):
         cookie_hdr = self.process_cookie_options(
             grab_config, grab_cookies, request_url, extra_headers
         )
-        print("!!!", cookie_hdr)
         if cookie_hdr:
             extra_headers["Cookie"] = cookie_hdr
 
@@ -388,7 +388,9 @@ class Urllib3Transport(BaseTransport):
         headers = cast(HTTPResponse, self._response).headers
         return headers.items()
 
-    def prepare_response(self, grab_config: GrabConfig) -> Document:
+    def prepare_response(
+        self, grab_config: GrabConfig, *, document_class: Type[Document] = Document
+    ) -> Document:
         """
         Prepare response, duh.
 
@@ -404,7 +406,7 @@ class Urllib3Transport(BaseTransport):
                 " after network response is received"
             )
         try:
-            response = Document()
+            response = document_class()
             head = ""
             for key, val in self.get_response_header_items():
                 key = key.encode("latin").decode("utf-8", errors="ignore")
@@ -511,6 +513,5 @@ class Urllib3Transport(BaseTransport):
                         name=name, value=value, domain=request_host_no_www
                     )
 
-        print("ZZZ", cookie_manager.get_dict())
         cookie_hdr = cookie_manager.get_cookie_header(request_url, request_headers)
         return cookie_hdr if cookie_hdr else None

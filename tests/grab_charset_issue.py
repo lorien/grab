@@ -28,7 +28,6 @@ class LXMLExtensionTest(BaseGrabTestCase):
         # Explicitly use unicode_body func
         grab = build_grab()
         grab.go(self.server.get_url())
-        # print(':::', grab.doc.unicode_body())
         self.assertTrue("&#8212;" in grab.doc.unicode_body())
 
     def test_invalid_charset(self):
@@ -38,4 +37,3 @@ class LXMLExtensionTest(BaseGrabTestCase):
         self.server.add_response(Response(data=html))
         grab = build_grab()
         grab.go(self.server.get_url())
-        # print(grab.doc.charset)
