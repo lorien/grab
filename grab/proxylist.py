@@ -3,8 +3,10 @@ from __future__ import annotations
 import itertools
 import logging
 import re
+import typing
+from collections.abc import Iterator
 from random import randint
-from typing import IO, Any, Iterator, NamedTuple, Optional, cast
+from typing import IO, Any, NamedTuple, cast
 from urllib.error import URLError
 from urllib.request import urlopen
 
@@ -19,14 +21,14 @@ logger = logging.getLogger("grab.proxylist")
 class Proxy(NamedTuple):
     host: str
     port: int
-    username: Optional[str]
-    password: Optional[str]
+    username: None | str
+    password: None | str
     proxy_type: str
 
     def get_address(self) -> str:
         return "%s:%s" % (self.host, self.port)
 
-    def get_userpwd(self) -> Optional[str]:
+    def get_userpwd(self) -> None | str:
         if self.username:
             return "%s:%s" % (self.username, self.password or "")
         return None
@@ -36,7 +38,7 @@ class InvalidProxyLine(GrabError):
     pass
 
 
-def parse_proxy_line(line: str) -> tuple[str, int, Optional[str], Optional[str]]:
+def parse_proxy_line(line: str) -> tuple[str, int, None | str, None | str]:
     """Parse proxy details from the raw text line.
 
     The text line could be in one of the following formats:
@@ -57,7 +59,7 @@ def parse_proxy_line(line: str) -> tuple[str, int, Optional[str], Optional[str]]
 
 
 def parse_raw_list_data(
-    data: str, proxy_type: str = "http", proxy_userpwd: Optional[str] = None
+    data: str, proxy_type: str = "http", proxy_userpwd: None | str = None
 ) -> Iterator[Proxy]:
     """Iterate over proxy servers found in the raw data."""
     if not isinstance(data, str):
@@ -79,7 +81,7 @@ class BaseProxySource:
     def __init__(
         self,
         proxy_type: str = "http",
-        proxy_userpwd: Optional[str] = None,
+        proxy_userpwd: None | str = None,
         **kwargs: Any,
     ) -> None:
         kwargs["proxy_type"] = proxy_type
@@ -147,10 +149,10 @@ class ListProxySource(BaseProxySource):
 class ProxyList:
     """Class to work with proxy list."""
 
-    def __init__(self, source: Optional[BaseProxySource] = None) -> None:
+    def __init__(self, source: None | BaseProxySource = None) -> None:
         self._source = source
         self._list: list[Proxy] = []
-        self._list_iter: Optional[Iterator[Proxy]] = None
+        self._list_iter: None | Iterator[Proxy] = None
 
     def set_source(self, source: BaseProxySource) -> None:
         """Set the proxy source and use it to load proxy list."""
@@ -182,7 +184,8 @@ class ProxyList:
 
     def get_next_proxy(self) -> Proxy:
         """Return next proxy."""
-        return next(cast(Iterator[Proxy], self._list_iter))
+        # pylint: disable=deprecated-typing-alias
+        return next(cast(typing.Iterator[Proxy], self._list_iter))
 
     def size(self) -> int:
         """Return number of proxies in the list."""

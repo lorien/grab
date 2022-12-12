@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import logging
 import time
+import typing
+from collections.abc import Callable, Iterator
 from copy import deepcopy
 from datetime import datetime
 from queue import Empty, Queue
 from random import randint
 from traceback import format_exception, format_stack
 from types import TracebackType
-from typing import Any, Callable, Iterator, Literal, Optional, Union, cast
+from typing import Any, Literal, cast
 
 from grab.base import Grab
 from grab.error import (
@@ -80,13 +82,13 @@ class Spider:
     # pylint: disable=too-many-locals, too-many-arguments
     def __init__(
         self,
-        thread_number: Optional[int] = None,
-        network_try_limit: Optional[int] = None,
-        task_try_limit: Optional[int] = None,
+        thread_number: None | int = None,
+        network_try_limit: None | int = None,
+        task_try_limit: None | int = None,
         priority_mode: str = "random",
-        meta: Optional[dict[str, Any]] = None,
-        config: Optional[dict[str, Any]] = None,
-        args: Optional[dict[str, Any]] = None,
+        meta: None | dict[str, Any] = None,
+        config: None | dict[str, Any] = None,
+        args: None | dict[str, Any] = None,
         parser_requests_per_process: int = 10000,
         parser_pool_size: int = 1,
         network_service: str = "threaded",
@@ -117,12 +119,12 @@ class Spider:
         """
         self.fatal_error_queue: Queue[FatalErrorQueueItem] = Queue()
         self.task_queue_parameters = None
-        self._started: Optional[float] = None
+        self._started: None | float = None
         assert grab_transport in {"urllib3"}
         self.grab_transport_name = grab_transport
         self.parser_requests_per_process = parser_requests_per_process
         self.stat = Stat()
-        self.task_queue: Optional[BaseTaskQueue] = None
+        self.task_queue: None | BaseTaskQueue = None
         if args is None:
             self.args = {}
         else:
@@ -155,9 +157,9 @@ class Spider:
         self.work_allowed = True
         if request_pause is not None:
             warn("Option `request_pause` is deprecated and is not supported anymore")
-        self.proxylist_enabled: Optional[bool] = None
-        self.proxylist: Optional[ProxyList] = None
-        self.proxy: Optional[Proxy] = None
+        self.proxylist_enabled: None | bool = None
+        self.proxylist: None | ProxyList = None
+        self.proxy: None | Proxy = None
         self.proxy_auto_change = False
         self.interrupted = False
         self.parser_pool_size = parser_pool_size
@@ -242,7 +244,7 @@ class Spider:
     def add_task(
         self,
         task: Task,
-        queue: Optional[BaseTaskQueue] = None,
+        queue: None | BaseTaskQueue = None,
         raise_error: bool = False,
     ) -> bool:
         """Add task to the task queue."""
@@ -283,8 +285,8 @@ class Spider:
 
     def load_proxylist(
         self,
-        source: Union[str, BaseProxySource],
-        source_type: Optional[str] = None,
+        source: str | BaseProxySource,
+        source_type: None | str = None,
         proxy_type: str = "http",
         auto_init: bool = True,
         auto_change: bool = True,
@@ -481,7 +483,7 @@ class Spider:
             for url in self.initial_urls:
                 self.add_task(Task("initial", url=url))
 
-    def get_task_from_queue(self) -> Optional[Union[Literal[True], Task]]:
+    def get_task_from_queue(self) -> None | Literal[True] | Task:
         try:
             return cast(BaseTaskQueue, self.task_queue).get()
         except Empty:
@@ -535,15 +537,19 @@ class Spider:
     def find_task_handler(self, task: Task) -> Callable[..., Any]:
         callback = task.get("callback")
         if callback:
-            return cast(Callable[..., Any], callback)
+            # pylint: disable=deprecated-typing-alias
+            return cast(typing.Callable[..., Any], callback)
+            # pylint: enable=deprecated-typing-alias
         try:
-            handler = getattr(self, "task_%s" % task.name)
+            # pylint: disable=deprecated-typing-alias
+            return cast(typing.Callable[..., Any], getattr(self, "task_%s" % task.name))
+            # pylint: enable=deprecated-typing-alias
         except AttributeError as ex:
             raise NoTaskHandler(
                 "No handler or callback defined for " "task %s" % task.name
             ) from ex
-        else:
-            return cast(Callable[..., Any], handler)
+        # else:
+        #    return handler
 
     def log_network_result_stats(self, res: NetworkResult, task: Task) -> None:
         # Increase stat counters
@@ -664,13 +670,17 @@ class Spider:
         else:
             raise SpiderError("Unknown response from check_task_limits: %s" % reason)
 
-    def get_fallback_handler(self, task: Task) -> Optional[Callable[..., Any]]:
+    def get_fallback_handler(self, task: Task) -> None | Callable[..., Any]:
         if task.fallback_name:
-            return cast(Callable[..., Any], getattr(self, task.fallback_name))
+            # pylint: disable=deprecated-typing-alias
+            return cast(typing.Callable[..., Any], getattr(self, task.fallback_name))
+            # pylint: enable=deprecated-typing-alias
         if task.name:
             fb_name = "task_%s_fallback" % task.name
             if hasattr(self, fb_name):
-                return cast(Callable[..., Any], getattr(self, fb_name))
+                # pylint: disable=deprecated-typing-alias
+                return cast(typing.Callable[..., Any], getattr(self, fb_name))
+                # pylint: enable=deprecated-typing-alias
         return None
 
     # ################
@@ -698,9 +708,9 @@ class Spider:
     # #################
     def srv_process_service_result(
         self,
-        result: Union[Task, None, Exception, dict[str, Any]],
+        result: Task | None | Exception | dict[str, Any],
         task: Task,
-        meta: Optional[dict[str, Any]] = None,
+        meta: None | dict[str, Any] = None,
     ) -> None:
         """Process result submitted from any service to task dispatcher service.
 

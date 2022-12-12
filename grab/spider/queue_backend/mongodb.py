@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import logging
 import pickle
 import queue
 from datetime import datetime
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import pymongo
 from bson import Binary
@@ -21,8 +23,8 @@ class MongodbTaskQueue(BaseTaskQueue):
         self,
         spider_name: str,
         database: str,
-        queue_name: Optional[str] = None,
-        **kwargs: Any
+        queue_name: None | str = None,
+        **kwargs: Any,
     ) -> None:
         # All "unexpected" kwargs goes to "pymongo.MongoClient()" method
         if queue_name is None:
@@ -47,7 +49,7 @@ class MongodbTaskQueue(BaseTaskQueue):
         self,
         task: Task,
         priority: int,
-        schedule_time: Optional[datetime] = None,
+        schedule_time: None | datetime = None,
     ) -> None:
         if schedule_time is None:
             schedule_time = datetime.utcnow()

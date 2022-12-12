@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import sys
 import time
+from collections.abc import Callable
 from queue import Empty, Queue
-from typing import Any, Callable
+from typing import Any
 
 from grab.base import Grab
 from grab.spider.error import NoTaskHandler

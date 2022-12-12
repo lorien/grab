@@ -3,8 +3,9 @@ from __future__ import annotations
 import os
 import tempfile
 from abc import abstractmethod
+from collections.abc import Generator, Mapping
 from contextlib import contextmanager
-from typing import Any, Generator, Mapping, Optional, Type, cast
+from typing import Any, Optional, cast
 
 from grab.cookie import CookieManager
 from grab.document import Document
@@ -17,7 +18,7 @@ class BaseTransport:
 
     @abstractmethod
     def prepare_response(
-        self, grab_config: GrabConfig, *, document_class: Type[Document] = Document
+        self, grab_config: GrabConfig, *, document_class: type[Document] = Document
     ) -> Document:
         raise NotImplementedError
 
@@ -43,13 +44,13 @@ class BaseTransport:
         cookie_manager: CookieManager,
         request_url: str,
         request_headers: dict[str, Any],
-    ) -> Optional[str]:
+    ) -> None | str:
         raise NotImplementedError
 
     def setup_body_file(
         self,
         storage_dir: str,
-        storage_filename: Optional[str],
+        storage_filename: None | str,
         create_dir: bool = False,
     ) -> str:
         if create_dir and not os.path.exists(storage_dir):
@@ -65,7 +66,9 @@ class BaseTransport:
 
         Returns request method in upper case
         """
+        # pylint: disable=consider-alternative-union-syntax
         method = cast(Optional[str], grab_config["method"])
+        # pylint: enable=consider-alternative-union-syntax
         if method:
             return method.upper()
         if grab_config["post"] or grab_config["multipart_post"]:

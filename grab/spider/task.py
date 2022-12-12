@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from copy import deepcopy
 from datetime import datetime, timedelta
-from typing import Any, Callable, Optional
+from typing import Any
 
 from grab.base import Grab, copy_config
 from grab.error import raise_feature_is_deprecated
@@ -19,25 +20,25 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
 
     def __init__(  # noqa: C901 pylint: disable=too-many-arguments, too-many-locals
         self,
-        name: Optional[str] = None,
-        url: Optional[str] = None,
-        grab: Optional[Grab] = None,
-        grab_config: Optional[GrabConfig] = None,
-        priority: Optional[int] = None,
+        name: None | str = None,
+        url: None | str = None,
+        grab: None | Grab = None,
+        grab_config: None | GrabConfig = None,
+        priority: None | int = None,
         priority_set_explicitly: bool = True,
         network_try_count: int = 0,
         task_try_count: int = 1,
-        valid_status: Optional[list[int]] = None,
+        valid_status: None | list[int] = None,
         use_proxylist: bool = True,
-        delay: Optional[int] = None,
+        delay: None | int = None,
         raw: bool = False,
-        callback: Optional[Callable[..., None]] = None,
-        fallback_name: Optional[str] = None,
+        callback: None | Callable[..., None] = None,
+        fallback_name: None | str = None,
         # deprecated
         disable_cache: bool = False,
         refresh_cache: bool = False,
-        cache_timeout: Optional[int] = None,
-        store: Optional[dict[str, Any]] = None,
+        cache_timeout: None | int = None,
+        store: None | dict[str, Any] = None,
         # kwargs
         **kwargs: Any,
     ) -> None:
@@ -100,8 +101,8 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             later as attributes or with `get` method which allows to use
             default value if attribute does not exist.
         """
-        self.schedule_time: Optional[datetime] = None
-        self.grab_config: Optional[GrabConfig] = None
+        self.schedule_time: None | datetime = None
+        self.grab_config: None | GrabConfig = None
         if disable_cache or refresh_cache or cache_timeout:
             raise_feature_is_deprecated("Cache feature")
         if name == "generator":
@@ -138,9 +139,9 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
 
     def assert_init_options_integrity(
         self,
-        url: Optional[str],
-        grab: Optional[Grab],
-        grab_config: Optional[GrabConfig],
+        url: None | str,
+        grab: None | Grab,
+        grab_config: None | GrabConfig,
     ) -> None:
         if url is None and grab is None and grab_config is None:
             raise SpiderMisuseError(
@@ -165,7 +166,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         """Return value of attribute or None if such attribute does not exist."""
         return getattr(self, key, default)
 
-    def process_delay_option(self, delay: Optional[float]) -> None:
+    def process_delay_option(self, delay: None | float) -> None:
         if delay:
             self.schedule_time = datetime.utcnow() + timedelta(seconds=delay)
         else:

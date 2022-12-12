@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import re
 from html.entities import name2codepoint
-from typing import Match, Optional
+from re import Match
 
 from .encoding import make_bytes
 
@@ -82,7 +84,7 @@ def decode_entities(html: str) -> str:
     return RE_NAMED_ENTITY.sub(process_named_entity, html)
 
 
-def find_refresh_url(html: str) -> Optional[str]:
+def find_refresh_url(html: str) -> None | str:
     """Find value of redirect url from http-equiv refresh meta tag."""
     # We should decode quote values to correctly find
     # the url value
@@ -98,7 +100,7 @@ def find_refresh_url(html: str) -> Optional[str]:
     return None
 
 
-def find_base_url(html: str) -> Optional[str]:
+def find_base_url(html: str) -> None | str:
     """Find url of <base> tag."""
     html = decode_entities(html)
 

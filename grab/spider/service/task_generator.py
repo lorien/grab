@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable, Iterator
 from queue import Queue
-from typing import Callable, Iterator
 
 from ..interface import FatalErrorQueueItem
 from ..queue_backend.base import BaseTaskQueue

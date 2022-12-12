@@ -10,10 +10,11 @@ Some code got from
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping, Sequence
 from copy import copy
 from http.client import HTTPMessage
 from http.cookiejar import Cookie, CookieJar
-from typing import Any, Mapping, Optional, Sequence, Union, cast
+from typing import Any, cast
 from urllib.parse import urlparse, urlunparse
 from urllib.request import Request
 
@@ -132,14 +133,14 @@ class MockResponse:
     the way `cookielib` expects to see them.
     """
 
-    def __init__(self, headers: Union[HTTPMessage, HTTPHeaderDict]) -> None:
+    def __init__(self, headers: HTTPMessage | HTTPHeaderDict) -> None:
         """Make a MockResponse for `cookielib` to read.
 
         :param headers: a httplib.HTTPMessage or analogous carrying the headers
         """
         self._headers = headers
 
-    def info(self) -> Union[HTTPMessage, HTTPHeaderDict]:
+    def info(self) -> HTTPMessage | HTTPHeaderDict:
         return self._headers
 
     # def getheaders(self, name: str) -> list[str, str]:
@@ -153,21 +154,21 @@ def create_cookie(  # pylint: disable=too-many-arguments, too-many-locals
     value: str,
     domain: str,
     # non required
-    comment: Optional[str] = None,
-    comment_url: Optional[str] = None,
+    comment: None | str = None,
+    comment_url: None | str = None,
     discard: bool = True,
-    domain_initial_dot: Optional[bool] = None,
-    domain_specified: Optional[bool] = None,
-    expires: Optional[int] = None,
+    domain_initial_dot: None | bool = None,
+    domain_specified: None | bool = None,
+    expires: None | int = None,
     path: str = "/",
-    path_specified: Optional[bool] = None,
-    port: Optional[int] = None,
-    port_specified: Optional[bool] = None,
-    rest: Optional[dict[str, Any]] = None,
+    path_specified: None | bool = None,
+    port: None | int = None,
+    port_specified: None | bool = None,
+    rest: None | dict[str, Any] = None,
     rfc2109: bool = False,
     secure: bool = False,
     version: int = 0,
-    httponly: Optional[bool] = None,
+    httponly: None | bool = None,
 ) -> Cookie:
     """Create cookielib.Cookie instance."""
     # See also type hints for Cookie at
@@ -223,7 +224,7 @@ class CookieManager:
 
     __slots__ = ("cookiejar",)
 
-    def __init__(self, cookiejar: Optional[CookieJar] = None) -> None:
+    def __init__(self, cookiejar: None | CookieJar = None) -> None:
         if cookiejar is not None:
             self.cookiejar = cookiejar
         else:
@@ -245,7 +246,7 @@ class CookieManager:
 
         self.cookiejar.set_cookie(create_cookie(name, value, domain, **kwargs))
 
-    def update(self, cookies: Union[CookieJar, CookieManager]) -> None:
+    def update(self, cookies: CookieJar | CookieManager) -> None:
         if isinstance(cookies, CookieJar):
             for cookie in cookies:
                 self.cookiejar.set_cookie(cookie)
@@ -288,13 +289,13 @@ class CookieManager:
             if key != "_cookiejar_cookies":
                 setattr(self, key, value)
 
-    def __getitem__(self, key: str) -> Optional[str]:
+    def __getitem__(self, key: str) -> None | str:
         for cookie in self.cookiejar:
             if cookie.name == key:
                 return cookie.value
         raise KeyError
 
-    def items(self) -> list[tuple[str, Optional[str]]]:
+    def items(self) -> list[tuple[str, None | str]]:
         res = []
         for cookie in self.cookiejar:
             res.append((cookie.name, cookie.value))
@@ -328,7 +329,7 @@ class CookieManager:
         with open(path, "w", encoding="utf-8") as out:
             out.write(json.dumps(self.get_dict()))
 
-    def get_cookie_header(self, url: str, headers: dict[str, str]) -> Optional[str]:
+    def get_cookie_header(self, url: str, headers: dict[str, str]) -> None | str:
         # :param req: object with httplib.Request interface
         #    Actually, it have to have `url` and `headers` attributes
         mocked_req = MockRequest(url, headers)

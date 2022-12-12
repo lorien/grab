@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from abc import abstractmethod
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from grab.spider.task import Task
 
@@ -13,7 +15,7 @@ class BaseTaskQueue:
         self,
         task: Task,
         priority: int,
-        schedule_time: Optional[datetime] = None,
+        schedule_time: None | datetime = None,
     ) -> None:
         raise NotImplementedError
 

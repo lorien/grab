@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from queue import Empty, Queue
-from typing import Any, Callable, Optional
+from typing import Any
 
 from ..interface import FatalErrorQueueItem
 from ..task import Task
@@ -12,7 +13,7 @@ class TaskDispatcherService(BaseService):
     def __init__(
         self,
         fatal_error_queue: Queue[FatalErrorQueueItem],
-        process_service_result: Callable[[Any, Task, Optional[dict[str, Any]]], Any],
+        process_service_result: Callable[[Any, Task, None | dict[str, Any]], Any],
     ):
         super().__init__(fatal_error_queue)
         self.process_service_result = process_service_result

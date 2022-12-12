@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import logging
 import sys
+from collections.abc import Callable, Iterable
 from queue import Queue
 from threading import Event, Thread
 from types import TracebackType
-from typing import Any, Callable, Iterable, Tuple, Type, cast
+from typing import Any, Tuple, Type, cast
 
 from ..interface import FatalErrorQueueItem
 
@@ -46,6 +47,7 @@ class ServiceWorker:
                 callback(*args, **kwargs)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.error("Spider Service Fatal Error", exc_info=ex)
+                # pylint: disable=deprecated-typing-alias
                 self.fatal_error_queue.put(
                     cast(
                         Tuple[Type[Exception], Exception, TracebackType], sys.exc_info()

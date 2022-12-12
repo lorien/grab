@@ -9,21 +9,12 @@ import random
 import ssl
 import time
 import urllib.request
+from collections.abc import Generator, Mapping, MutableMapping, Sequence
 from contextlib import contextmanager
 from http.client import HTTPResponse
 from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
-from typing import (
-    Any,
-    Generator,
-    Mapping,
-    MutableMapping,
-    Optional,
-    Sequence,
-    Type,
-    Union,
-    cast,
-)
+from typing import Any, cast
 from urllib.parse import urlsplit
 
 import certifi
@@ -51,8 +42,8 @@ from .base_transport import BaseTransport
 
 def process_upload_items(
     items: Sequence[tuple[str, Any]]
-) -> Sequence[Union[RequestField, tuple[str, Any]]]:
-    result: list[Union[RequestField, tuple[str, Any]]] = []
+) -> Sequence[RequestField | tuple[str, Any]]:
+    result: list[RequestField | tuple[str, Any]] = []
     for key, val in items:
         if isinstance(val, UploadContent):
             headers = {"Content-Type": val.content_type}
@@ -86,12 +77,12 @@ class Request:  # pylint: disable=too-many-instance-attributes
         config_body_maxsize: int,
         timeout: int,
         connect_timeout: int,
-        data: Optional[bytes] = None,
-        body_maxsize: Optional[int] = None,
-        response_path: Optional[str] = None,
-        proxy_type: Optional[str] = None,
-        proxy: Optional[str] = None,
-        proxy_userpwd: Optional[str] = None,
+        data: None | bytes = None,
+        body_maxsize: None | int = None,
+        response_path: None | str = None,
+        proxy_type: None | str = None,
+        proxy: None | str = None,
+        proxy_userpwd: None | str = None,
     ) -> None:
         self.url = url
         self.method = method
@@ -101,12 +92,12 @@ class Request:  # pylint: disable=too-many-instance-attributes
         self.proxy_type = proxy_type
         self.headers = headers
         self.body_maxsize = body_maxsize
-        self.op_started: Optional[float] = None
+        self.op_started: None | float = None
         self.timeout = timeout
         self.connect_timeout = connect_timeout
         self.config_nobody = config_nobody
         self.config_body_maxsize = config_body_maxsize
-        self.response_path: Optional[str] = response_path
+        self.response_path: None | str = response_path
 
     def get_full_url(self) -> str:
         return self.url
@@ -122,8 +113,8 @@ class Urllib3Transport(BaseTransport):
         # WTF: logging is configured here?
         logger = logging.getLogger("urllib3.connectionpool")
         logger.setLevel(logging.WARNING)
-        self._request: Optional[Request] = None
-        self._response: Optional[Urllib3HTTPResponse] = None
+        self._request: None | Request = None
+        self._response: None | Urllib3HTTPResponse = None
 
     def reset(self) -> None:
         self._response = None
@@ -131,7 +122,7 @@ class Urllib3Transport(BaseTransport):
 
     def process_config_post(
         self, grab_config: Mapping[str, Any], method: str
-    ) -> tuple[dict[str, Any], Optional[bytes]]:
+    ) -> tuple[dict[str, Any], None | bytes]:
         if method in {"POST", "PUT"} and (
             grab_config["post"] is None and grab_config["multipart_post"] is None
         ):
@@ -141,7 +132,7 @@ class Urllib3Transport(BaseTransport):
                 " request" % method
             )
         extra_headers = {}
-        post_data: Optional[bytes] = None
+        post_data: None | bytes = None
         if grab_config["multipart_post"] is not None:
             post_data = grab_config["multipart_post"]
             if isinstance(post_data, str):
@@ -265,7 +256,7 @@ class Urllib3Transport(BaseTransport):
 
     def select_pool_for_request(
         self, req: Request
-    ) -> Union[PoolManager, ProxyManager, SOCKSProxyManager]:
+    ) -> PoolManager | ProxyManager | SOCKSProxyManager:
         if req.proxy:
             if req.proxy_userpwd:
                 headers = make_headers(
@@ -289,9 +280,9 @@ class Urllib3Transport(BaseTransport):
     def request(self) -> None:
         req = cast(Request, self._request)
 
-        pool: Union[
-            PoolManager, SOCKSProxyManager, ProxyManager
-        ] = self.select_pool_for_request(req)
+        pool: PoolManager | SOCKSProxyManager | ProxyManager = (
+            self.select_pool_for_request(req)
+        )
         with self.wrap_transport_error():
             # Retries can be disabled by passing False:
             # http://urllib3.readthedocs.io/en/latest/reference/urllib3.util.html#module-urllib3.util.retry
@@ -391,7 +382,7 @@ class Urllib3Transport(BaseTransport):
         return headers.items()
 
     def prepare_response(
-        self, grab_config: GrabConfig, *, document_class: Type[Document] = Document
+        self, grab_config: GrabConfig, *, document_class: type[Document] = Document
     ) -> Document:
         """Prepare response, duh.
 
@@ -484,7 +475,7 @@ class Urllib3Transport(BaseTransport):
         cookie_manager: CookieManager,
         request_url: str,
         request_headers: dict[str, Any],
-    ) -> Optional[str]:
+    ) -> None | str:
         # `cookiefile` option should be processed before `cookies` option
         # because `load_cookies` updates `cookies` option
         if grab_config["cookiefile"]:

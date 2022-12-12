@@ -13,26 +13,16 @@ import os
 import re
 import tempfile
 import threading
+import typing
 import webbrowser
+from collections.abc import Mapping, MutableMapping, Sequence
 from contextlib import suppress
 from copy import copy
 from datetime import datetime
 from io import BytesIO, StringIO
 from pprint import pprint  # pylint: disable=unused-import
-from typing import (
-    IO,
-    Any,
-    Mapping,
-    Match,
-    MutableMapping,
-    Optional,
-    Pattern,
-    Protocol,
-    Sequence,
-    Tuple,
-    Union,
-    cast,
-)
+from re import Match, Pattern
+from typing import IO, Any, Protocol, cast
 from urllib.parse import SplitResult, parse_qs, urlencode, urljoin, urlsplit
 
 from lxml import etree
@@ -79,7 +69,7 @@ THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")
 
 
-def read_bom(data: bytes) -> Union[tuple[None, None], tuple[str, bytes]]:
+def read_bom(data: bytes) -> tuple[None, None] | tuple[str, bytes]:
     """Detect BOM and encoding it is representing.
 
     Read the byte order mark in the text, if present, and
@@ -97,6 +87,18 @@ def read_bom(data: bytes) -> Union[tuple[None, None], tuple[str, bytes]]:
 
 class GrabConfigProtocol(Protocol):
     config: GrabConfig
+
+
+def normalize_pairs(
+    inp: Sequence[tuple[str, Any]] | Mapping[str, Any]
+) -> Sequence[tuple[str, Any]]:
+    return (
+        # pylint: disable=deprecated-typing-alias
+        cast(typing.Sequence[typing.Tuple[str, Any]], inp.items())
+        if isinstance(inp, typing.Mapping)
+        else inp
+        # pylint: enable=deprecated-typing-alias
+    )
 
 
 class Document:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
@@ -134,18 +136,18 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         "_grab_config",
     )
 
-    def __init__(self, grab: Optional[GrabConfigProtocol] = None) -> None:
+    def __init__(self, grab: None | GrabConfigProtocol = None) -> None:
         self._grab_config: GrabConfig = {}
         if grab:
             self.process_grab_config(grab.config)
-        self.status: Optional[str] = None
-        self.code: Optional[int] = None
-        self.head: Optional[bytes] = None
-        self.headers: Optional[email.message.Message] = None
-        self.url: Optional[str] = None
+        self.status: None | str = None
+        self.code: None | int = None
+        self.head: None | bytes = None
+        self.headers: None | email.message.Message = None
+        self.url: None | str = None
         self.cookies = CookieManager()
         self.charset = "utf-8"
-        self.bom: Optional[bytes] = None
+        self.bom: None | bytes = None
         self.timestamp = datetime.utcnow()
         self.name_lookup_time = 0
         self.connect_time = 0
@@ -158,13 +160,13 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self.from_cache = False
 
         # Body
-        self.body_path: Optional[str] = None
-        self._bytes_body: Optional[bytes] = None
-        self._unicode_body: Optional[str] = None
+        self.body_path: None | str = None
+        self._bytes_body: None | bytes = None
+        self._unicode_body: None | str = None
 
         # DOM Tree
-        self._lxml_tree: Optional[_Element] = None
-        self._strict_lxml_tree: Optional[_Element] = None
+        self._lxml_tree: None | _Element = None
+        self._strict_lxml_tree: None | _Element = None
 
         # Pyquery
         self._pyquery = None
@@ -193,8 +195,8 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def parse(
         self,
-        charset: Optional[str] = None,
-        headers: Optional[email.message.Message] = None,
+        charset: None | str = None,
+        headers: None | email.message.Message = None,
     ) -> None:
         """Parse headers.
 
@@ -229,9 +231,9 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def detect_charset_from_body_chunk(
         self, body_chunk: bytes
-    ) -> tuple[Optional[str], Optional[bytes]]:
-        charset: Optional[str] = None
-        ret_bom: Optional[bytes] = None
+    ) -> tuple[None | str, None | bytes]:
+        charset: None | str = None
+        ret_bom: None | bytes = None
         # Try to extract charset from http-equiv meta tag
         match_charset = RE_META_CHARSET.search(body_chunk)
         if match_charset:
@@ -296,7 +298,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             else:
                 self.charset = charset
 
-    def copy(self, new_grab_config: Optional[GrabConfig] = None) -> Document:
+    def copy(self, new_grab_config: None | GrabConfig = None) -> Document:
         """Clone the Response object."""
         if new_grab_config.__class__.__name__ == "Grab":
             raise GrabFeatureIsDeprecated(
@@ -336,7 +338,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         with open(path, "wb") as out:
             out.write(self._bytes_body if self._bytes_body is not None else b"")
 
-    def save_hash(self, location: str, basedir: str, ext: Optional[str] = None) -> str:
+    def save_hash(self, location: str, basedir: str, ext: None | str = None) -> str:
         """Save response body into file with special path built from hash.
 
         That allows to lower number of files
@@ -417,18 +419,16 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         for slot, value in state.items():
             setattr(self, slot, value)
 
-    def get_meta_refresh_url(self) -> Optional[str]:
+    def get_meta_refresh_url(self) -> None | str:
         return find_refresh_url(cast(str, self.unicode_body()))
 
     # TextExtension methods
 
-    def warn_byte_argument(self, byte: Optional[bool]) -> None:
+    def warn_byte_argument(self, byte: None | bool) -> None:
         if byte is not None:
             warn('Option "byte" is deprecated. Its value is ignored.', stacklevel=3)
 
-    def text_search(
-        self, anchor: Union[str, bytes], byte: Optional[bool] = None
-    ) -> bool:
+    def text_search(self, anchor: str | bytes, byte: None | bool = None) -> bool:
         """Search the substring in response body.
 
         :param anchor: string to search
@@ -445,16 +445,14 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             return anchor in cast(str, self.unicode_body())
         return anchor in self.body
 
-    def text_assert(
-        self, anchor: Union[str, bytes], byte: Optional[bool] = None
-    ) -> None:
+    def text_assert(self, anchor: str | bytes, byte: None | bool = None) -> None:
         """If `anchor` is not found then raise `DataNotFound` exception."""
         self.warn_byte_argument(byte)
         if not self.text_search(anchor):
             raise DataNotFound("Substring not found: {}".format(str(anchor)))
 
     def text_assert_any(
-        self, anchors: list[Union[str, bytes]], byte: Optional[bool] = None
+        self, anchors: list[str | bytes], byte: None | bool = None
     ) -> None:
         """If no `anchors` were found then raise `DataNotFound` exception."""
         self.warn_byte_argument(byte)
@@ -467,9 +465,9 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def rex_text(
         self,
-        regexp: Union[str, bytes, Pattern[str], Pattern[bytes]],
+        regexp: str | bytes | Pattern[str] | Pattern[bytes],
         flags: int = 0,
-        byte: Optional[bool] = None,
+        byte: None | bool = None,
         default: Any = NULL,
     ) -> Any:
         """Return content of first matching group of regexp found in response body."""
@@ -485,9 +483,9 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def rex_search(
         self,
-        regexp: Union[str, bytes, Pattern[str], Pattern[bytes]],
+        regexp: str | bytes | Pattern[str] | Pattern[bytes],
         flags: int = 0,
-        byte: Optional[bool] = None,
+        byte: None | bool = None,
         default: Any = NULL,
     ) -> Any:
         """Search the regular expression in response body.
@@ -496,7 +494,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         """
         self.warn_byte_argument(byte)
         regexp = normalize_regexp(regexp, flags)
-        match: Optional[Union[Match[bytes], Match[str]]] = None
+        match: None | Match[bytes] | Match[str] = None
         assert self.body is not None
 
         match = (
@@ -513,8 +511,8 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def rex_assert(
         self,
-        rex: Union[str, bytes, Pattern[str], Pattern[bytes]],
-        byte: Optional[bool] = None,
+        rex: str | bytes | Pattern[str] | Pattern[bytes],
+        byte: None | bool = None,
     ) -> None:
         """Raise `DataNotFound` exception if `rex` expression is not found."""
         self.warn_byte_argument(byte)
@@ -538,7 +536,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     # BodyExtension methods
 
-    def get_body_chunk(self) -> Optional[bytes]:
+    def get_body_chunk(self) -> None | bytes:
         if self.body_path:
             with open(self.body_path, "rb") as inp:
                 return inp.read(4096)
@@ -549,7 +547,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def convert_body_to_unicode(
         self,
         body: bytes,
-        bom: Optional[bytes],
+        bom: None | bytes,
         charset: str,
         ignore_errors: bool,
         fix_special_entities: bool,
@@ -570,7 +568,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def unicode_body(
         self, ignore_errors: bool = True, fix_special_entities: bool = True
-    ) -> Optional[str]:
+    ) -> None | str:
         """Return response body as unicode string."""
         if self.body is None:
             return None
@@ -585,7 +583,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return self._unicode_body
 
     @property
-    def body(self) -> Optional[bytes]:
+    def body(self) -> None | bytes:
         if self.body_path:
             return self.read_body_from_file()
         return cast(bytes, self._bytes_body)
@@ -612,9 +610,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return self.build_html_tree()
 
     @classmethod
-    def _build_dom(
-        cls, content: Union[bytes, str], mode: str, charset: str
-    ) -> _Element:
+    def _build_dom(cls, content: bytes | str, mode: str, charset: str) -> _Element:
         assert mode in {"html", "xml"}
         io_cls = BytesIO if isinstance(content, bytes) else StringIO
         if mode == "html":
@@ -693,9 +689,9 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def choose_form(  # noqa: C901
         self,
-        number: Optional[int] = None,
-        xpath: Optional[str] = None,
-        name: Optional[str] = None,
+        number: None | int = None,
+        xpath: None | str = None,
+        name: None | str = None,
         **kwargs: Any,
     ) -> None:  # noqa: C901
         """Set the default form.
@@ -783,7 +779,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                 raise DataNotFound("Response does not contains any form")
         return self._lxml_form
 
-    def get_cached_form(self) -> Optional[FormElement]:
+    def get_cached_form(self) -> None | FormElement:
         """Get form which has been already selected.
 
         Returns None if form has not been selected yet.
@@ -878,14 +874,8 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def process_extra_post(
         self,
         post_items: list[tuple[str, Any]],
-        extra_post: Union[Mapping[str, Any], Sequence[tuple[str, Any]]],
+        extra_post_items: Sequence[tuple[str, Any]],
     ) -> list[tuple[str, Any]]:
-
-        extra_post_items = (
-            cast(Sequence[Tuple[str, Any]], extra_post.items())
-            if isinstance(extra_post, Mapping)
-            else extra_post
-        )
 
         # Drop existing post items with such key
         keys_to_drop = {x for x, y in extra_post_items}
@@ -897,7 +887,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return post_items
 
     def clean_submit_controls(
-        self, post: MutableMapping[str, Any], submit_name: Optional[str]
+        self, post: MutableMapping[str, Any], submit_name: None | str
     ) -> None:
         # All this code need only for one reason:
         # to not send multiple submit keys in form data
@@ -930,10 +920,10 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def get_form_request(
         self,
-        submit_name: Optional[str] = None,
-        url: Optional[str] = None,
-        extra_post: Union[None, Mapping[str, Any], Sequence[tuple[str, Any]]] = None,
-        remove_from_post: Optional[Sequence[str]] = None,
+        submit_name: None | str = None,
+        url: None | str = None,
+        extra_post: None | Mapping[str, Any] | Sequence[tuple[str, Any]] = None,
+        remove_from_post: None | Sequence[str] = None,
     ) -> MutableMapping[str, Any]:
         """Submit default form.
 
@@ -972,8 +962,16 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         post_items: list[tuple[str, Any]] = list(post.items())
         del post
 
+        # extra_post_items = (
+        #    cast(typing.Sequence[Tuple[str, Any]], extra_post.items())
+        #    if isinstance(extra_post, Mapping)
+        #    else extra_post
+        # )
+
         if extra_post:
-            post_items = self.process_extra_post(post_items, extra_post)
+            post_items = self.process_extra_post(
+                post_items, normalize_pairs(extra_post)
+            )
 
         if remove_from_post:
             post_items = [(x, y) for x, y in post_items if x not in remove_from_post]

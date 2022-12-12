@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from queue import Empty, Queue
-from typing import Any, Callable, Dict, Literal, Union
+from typing import Any, Dict, Literal
 
 from ..interface import FatalErrorQueueItem
 from ..task import Task
 from .base import BaseService, ServiceWorker
 
-NetworkResult = Dict[str, Any]
+NetworkResult = Dict[str, Any]  # pylint: disable=deprecated-typing-alias
 
 
 class NetworkServiceThreaded(BaseService):
@@ -17,7 +18,7 @@ class NetworkServiceThreaded(BaseService):
         fatal_error_queue: Queue[FatalErrorQueueItem],
         thread_number: int,
         process_task: Callable[[Task], None],
-        get_task_from_queue: Callable[[], Union[None, Literal[True], Task]],
+        get_task_from_queue: Callable[[], None | Literal[True] | Task],
     ) -> None:
         super().__init__(fatal_error_queue)
         self.thread_number = thread_number

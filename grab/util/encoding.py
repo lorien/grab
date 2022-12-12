@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Sequence, Union
+from collections.abc import Sequence
+from typing import Any
 
 
 def make_str(value: Any, encoding: str = "utf-8", errors: str = "strict") -> str:
@@ -28,7 +29,7 @@ def decode_bytes(value: Any, encoding: str) -> Any:
 
 
 def decode_pairs(
-    pairs: Sequence[tuple[Union[str, bytes], Any]], encoding: str = "utf-8"
+    pairs: Sequence[tuple[str | bytes, Any]], encoding: str = "utf-8"
 ) -> Sequence[tuple[str, str]]:
     ret = []
     for pair in pairs:

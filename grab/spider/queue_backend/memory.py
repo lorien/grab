@@ -3,7 +3,7 @@ from __future__ import annotations
 from contextlib import suppress
 from datetime import datetime
 from queue import Empty, PriorityQueue
-from typing import Any, Optional
+from typing import Any
 
 from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.task import Task
@@ -16,7 +16,7 @@ class MemoryTaskQueue(BaseTaskQueue):
         self.schedule_list: list[tuple[datetime, Task]] = []
 
     def put(
-        self, task: Task, priority: int, schedule_time: Optional[datetime] = None
+        self, task: Task, priority: int, schedule_time: None | datetime = None
     ) -> None:
         if schedule_time is None:
             self.queue_object.put((priority, task))

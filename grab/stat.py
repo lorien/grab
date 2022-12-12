@@ -4,8 +4,9 @@ from __future__ import annotations
 import logging
 import time
 from collections import defaultdict
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Generator, Optional, Union
+from typing import Any
 
 from grab.util.warning import warn
 
@@ -17,10 +18,10 @@ class Stat:  # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         logger_name: str = "grab.stat",
-        log_file: Optional[str] = None,
+        log_file: None | str = None,
         logging_period: int = DEFAULT_LOGGING_PERIOD,
         speed_key: str = DEFAULT_SPEED_KEY,
-        extra_speed_keys: Optional[list[str]] = None,
+        extra_speed_keys: None | list[str] = None,
     ) -> None:
         self.speed_key = speed_key
         self.setup_speed_keys(speed_key, extra_speed_keys)
@@ -30,7 +31,7 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         self.count_prev = 0
         self.logger_name = logger_name
         self.logger = logging.getLogger(logger_name)
-        self.log_file: Optional[str] = None
+        self.log_file: None | str = None
         self.setup_logging_file(log_file)
         self.counters: dict[str, int] = defaultdict(int)
         self.collections: dict[str, list[Any]] = defaultdict(list)
@@ -38,7 +39,7 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         self.reset()
 
     def setup_speed_keys(
-        self, speed_key: str, extra_keys: Optional[list[str]] = None
+        self, speed_key: str, extra_keys: None | list[str] = None
     ) -> None:
         keys = [speed_key]
         if extra_keys:
@@ -50,7 +51,7 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         self.collections.clear()
         self.counters_prev.clear()
 
-    def setup_logging_file(self, log_file: Optional[str]) -> None:
+    def setup_logging_file(self, log_file: None | str) -> None:
         self.log_file = log_file
         if log_file:
             self.logger.addHandler(logging.FileHandler(log_file, "w"))
@@ -67,7 +68,7 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         tokens = [x[1] for x in sorted(result, key=lambda x: x[0])]
         return ", ".join(tokens)
 
-    def get_speed_line(self, now: Union[float, int]) -> str:
+    def get_speed_line(self, now: float | int) -> str:
         items = []
         for key in self.speed_keys:
             time_elapsed = now - self.time
@@ -118,7 +119,7 @@ class Timer:
         del self.time_points[key]
         return elapsed
 
-    def inc_timer(self, key: str, value: Union[int, float]) -> None:
+    def inc_timer(self, key: str, value: int | float) -> None:
         self.timers[key] += value
 
     @contextmanager

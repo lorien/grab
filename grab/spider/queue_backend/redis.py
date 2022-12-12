@@ -7,7 +7,7 @@ import queue
 import random
 import time
 from datetime import datetime
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 from fastrq.priorityqueue import PriorityQueue  # pytype: disable=import-error
 from redis import Redis
@@ -36,7 +36,7 @@ class CustomPriorityQueue(PriorityQueue):  # type: ignore # FIXME
 
 class RedisTaskQueue(BaseTaskQueue):
     def __init__(
-        self, spider_name: str, queue_name: Optional[str] = None, **kwargs: Any
+        self, spider_name: str, queue_name: None | str = None, **kwargs: Any
     ) -> None:
         super().__init__(spider_name, **kwargs)
         self.spider_name = spider_name
@@ -50,7 +50,7 @@ class RedisTaskQueue(BaseTaskQueue):
         self,
         task: Task,
         priority: int,
-        schedule_time: Optional[datetime] = None,
+        schedule_time: None | datetime = None,
     ) -> None:
         if schedule_time is not None:
             raise SpiderMisuseError("Redis task queue does not support delayed task")

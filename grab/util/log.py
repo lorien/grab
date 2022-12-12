@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 
 def setup_logger(
@@ -19,8 +18,8 @@ def setup_logger(
 
 
 def default_logging(
-    grab_log: Optional[str] = None,  # '/tmp/grab.log',
-    network_log: Optional[str] = None,  # '/tmp/grab.network.log',
+    grab_log: None | str = None,  # '/tmp/grab.log',
+    network_log: None | str = None,  # '/tmp/grab.network.log',
     level: int = logging.DEBUG,
     mode: str = "a",
     propagate_network_logger: bool = False,

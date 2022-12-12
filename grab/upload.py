@@ -4,7 +4,6 @@ import mimetypes
 import os
 import time
 from hashlib import md5
-from typing import Optional
 
 from grab.util.encoding import make_bytes
 
@@ -25,8 +24,8 @@ class UploadContent(BaseUploadObject):
     def __init__(
         self,
         content: bytes,
-        filename: Optional[str] = None,
-        content_type: Optional[str] = None,
+        filename: None | str = None,
+        content_type: None | str = None,
     ) -> None:
         self.content = content
         if filename is None:
@@ -48,8 +47,8 @@ class UploadFile(BaseUploadObject):
     def __init__(
         self,
         path: str,
-        filename: Optional[str] = None,
-        content_type: Optional[str] = None,
+        filename: None | str = None,
+        content_type: None | str = None,
     ) -> None:
         self.path = path
         if filename is None:

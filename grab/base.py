@@ -9,12 +9,14 @@ import itertools
 import logging
 import os
 import threading
+import typing
 import weakref
+from collections.abc import Mapping, MutableMapping, Sequence
 from contextlib import suppress
 from copy import copy, deepcopy
 from datetime import datetime
 from random import randint
-from typing import Any, Dict, Mapping, MutableMapping, Optional, Sequence, Type, cast
+from typing import Any, cast
 from urllib.parse import urljoin
 
 from grab import error
@@ -52,7 +54,7 @@ logger_network = logging.getLogger("grab.network")
 
 
 def copy_config(
-    config: GrabConfig, mutable_config_keys: Optional[Sequence[str]] = None
+    config: GrabConfig, mutable_config_keys: None | Sequence[str] = None
 ) -> GrabConfig:
     """Copy grab config with correct handling of mutable config values."""
     cloned_config = copy(config)
@@ -171,7 +173,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         # multiple base classes with __slots__
         "_doc",
     )
-    document_class: Type[Document] = Document
+    document_class: type[Document] = Document
 
     # Attributes which should be processed when clone
     # of Grab instance is creating
@@ -186,24 +188,24 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     def __init__(
         self,
-        document_body: Optional[bytes] = None,
+        document_body: None | bytes = None,
         transport: TransportParam = None,
         **kwargs: Any,
     ) -> None:
         """Create Grab instance."""
         self.meta: dict[str, Any] = {}
-        self._doc: Optional[Document] = None
+        self._doc: None | Document = None
         self.config: GrabConfig = default_config()
         self.config["common_headers"] = self.common_headers()
         self.cookies = CookieManager()
         self.proxylist = ProxyList()
-        self.exception: Optional[Exception] = None
+        self.exception: None | Exception = None
 
         # makes pylint happy
         self.request_counter = 0
-        self.request_method: Optional[str] = None
+        self.request_method: None | str = None
         self.transport_param: TransportParam = transport
-        self.transport: Optional[BaseTransport] = None
+        self.transport: None | BaseTransport = None
 
         self.reset()
         if kwargs:
@@ -311,7 +313,12 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     def dump_config(self) -> dict[str, Any]:
         """Make clone of current config."""
-        conf = cast(Dict[str, Any], copy_config(self.config, self.mutable_config_keys))
+        conf = cast(
+            # pylint: disable=deprecated-typing-alias
+            typing.Dict[str, Any],
+            copy_config(self.config, self.mutable_config_keys)
+            # pylint: enable=deprecated-typing-alias
+        )
         conf["state"] = {
             "cookiejar_cookies": list(self.cookies.cookiejar),
         }
@@ -450,7 +457,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                         continue
                 return doc
 
-    def submit(self, make_request: bool = True, **kwargs: Any) -> Optional[Document]:
+    def submit(self, make_request: bool = True, **kwargs: Any) -> None | Document:
         """Submit current form.
 
         :param make_request: if `False` then grab instance will be
@@ -495,7 +502,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         post = self.config["post"] or self.config["multipart_post"]
         # if isinstance(post, dict):
         #    post = list(post.items())
-        post_bytes: Optional[bytes] = None
+        post_bytes: None | bytes = None
         if post:
             if isinstance(post, (bytes, str)):
                 post_bytes = (

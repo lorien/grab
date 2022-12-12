@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Optional, Union
+from typing import Any
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 
 from .encoding import make_bytes, make_str
@@ -16,7 +16,7 @@ RE_NOT_SAFE_CHAR = re.compile(
 RE_NON_ALPHA_DIGIT_NETLOC = re.compile(r"[^-.:@a-zA-Z0-9]")
 
 
-def normalize_url(url: Union[bytes, str]) -> str:
+def normalize_url(url: bytes | str) -> str:
     # https://tools.ietf.org/html/rfc3986
     url = make_str(url)
     if RE_NOT_SAFE_CHAR.search(url):
@@ -37,7 +37,7 @@ def normalize_url(url: Union[bytes, str]) -> str:
 
 
 # def smart_urlencode(
-#    items: Union[dict[str, Any], list[tuple[str, Any]]], charset: str = "utf-8"
+#    items: dict[str, Any]| list[tuple[str, Any]], charset: str = "utf-8"
 # ) -> str:
 #    """
 #    Normalize items to be a part of HTTP request's payload.
@@ -54,11 +54,11 @@ def normalize_url(url: Union[bytes, str]) -> str:
 
 
 def process_http_item(
-    item: tuple[Union[str, bytes], Any],
+    item: tuple[str | bytes, Any],
     charset: str,
-    ignore_classes: Optional[tuple[type, ...]] = None,
+    ignore_classes: None | tuple[type, ...] = None,
 ) -> list[tuple[bytes, Any]]:
-    key: Union[str, bytes] = item[0]
+    key: str | bytes = item[0]
     value: Any = item[1]
     if isinstance(value, (list, tuple)):
         ret = []
@@ -81,9 +81,9 @@ def process_http_item(
 
 
 def normalize_http_values(
-    items: Union[dict[str, Any], list[tuple[str, Any]]],
+    items: dict[str, Any] | list[tuple[str, Any]],
     charset: str = "utf-8",
-    ignore_classes: Optional[Union[list[type], tuple[type, ...]]] = None,
+    ignore_classes: None | list[type] | tuple[type, ...] = None,
 ) -> list[tuple[bytes, Any]]:
     """Convert values in dict/list-of-tuples to bytes.
 
@@ -107,7 +107,7 @@ def normalize_http_values(
     return ret
 
 
-def normalize_post_data(data: Union[str, bytes], encoding: str = "utf-8") -> bytes:
+def normalize_post_data(data: str | bytes, encoding: str = "utf-8") -> bytes:
     if isinstance(data, str):
         return data.encode(encoding)
     if isinstance(data, bytes):
