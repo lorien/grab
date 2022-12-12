@@ -23,7 +23,7 @@ And, for sure, Grab source code is very shitty. And design is shitty too. I have
 
 Grab requires python of version 3.8 or higher.
 
-## Thinks to be done next
+## Things to be done next
 
 * Refactor source code to remove all pylint disable comments like:
     * too-many-instance-attributes
