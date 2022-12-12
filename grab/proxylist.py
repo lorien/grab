@@ -37,8 +37,7 @@ class InvalidProxyLine(GrabError):
 
 
 def parse_proxy_line(line: str) -> tuple[str, int, Optional[str], Optional[str]]:
-    """
-    Parse proxy details from the raw text line.
+    """Parse proxy details from the raw text line.
 
     The text line could be in one of the following formats:
     * host:port

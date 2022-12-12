@@ -196,8 +196,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         charset: Optional[str] = None,
         headers: Optional[email.message.Message] = None,
     ) -> None:
-        """
-        Parse headers.
+        """Parse headers.
 
         This method is called after Grab instance performs network request.
         """
@@ -258,8 +257,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return charset, ret_bom
 
     def detect_charset(self) -> None:
-        """
-        Detect charset of the response. Set charset inplace to "self.charset".
+        """Detect charset of the response. Set charset inplace to "self.charset".
 
         Try following methods:
         * meta[name="Http-Equiv"]
@@ -339,8 +337,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             out.write(self._bytes_body if self._bytes_body is not None else b"")
 
     def save_hash(self, location: str, basedir: str, ext: Optional[str] = None) -> str:
-        """
-        Save response body into file with special path built from hash.
+        """Save response body into file with special path built from hash.
 
         That allows to lower number of files
         per directory.
@@ -432,8 +429,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def text_search(
         self, anchor: Union[str, bytes], byte: Optional[bool] = None
     ) -> bool:
-        """
-        Search the substring in response body.
+        """Search the substring in response body.
 
         :param anchor: string to search
         :param byte: if False then `anchor` should be the
@@ -494,8 +490,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         byte: Optional[bool] = None,
         default: Any = NULL,
     ) -> Any:
-        """
-        Search the regular expression in response body.
+        """Search the regular expression in response body.
 
         Return found match object or None
         """
@@ -503,10 +498,13 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         regexp = normalize_regexp(regexp, flags)
         match: Optional[Union[Match[bytes], Match[str]]] = None
         assert self.body is not None
-        if isinstance(regexp.pattern, bytes):
-            match = regexp.search(self.body)
-        else:
-            match = regexp.search(cast(str, self.unicode_body()))
+
+        match = (
+            regexp.search(self.body)
+            if isinstance(regexp.pattern, bytes)
+            else regexp.search(cast(str, self.unicode_body()))
+        )
+
         if match:
             return match
         if default is NULL:
@@ -563,10 +561,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             body = body[len(bom) :]
         if fix_special_entities:
             body = fix_special_entities_func(body)
-        if ignore_errors:
-            errors = "ignore"
-        else:
-            errors = "strict"
+        errors = "ignore" if ignore_errors else "strict"
         return body.decode(charset, errors).strip()
 
     def read_body_from_file(self) -> bytes:
@@ -620,7 +615,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def _build_dom(
         cls, content: Union[bytes, str], mode: str, charset: str
     ) -> _Element:
-        assert mode in ("html", "xml")
+        assert mode in {"html", "xml"}
         io_cls = BytesIO if isinstance(content, bytes) else StringIO
         if mode == "html":
             if not hasattr(THREAD_STORAGE, "html_parsers"):
@@ -703,8 +698,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         name: Optional[str] = None,
         **kwargs: Any,
     ) -> None:  # noqa: C901
-        """
-        Set the default form.
+        """Set the default form.
 
         :param number: number of form (starting from zero)
         :param id: value of "id" attribute
@@ -760,8 +754,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     @property
     def form(self) -> FormElement:
-        """
-        Return default document's form.
+        """Return default document's form.
 
         If form was not selected manually then select the form
         which has the biggest number of input elements.
@@ -791,8 +784,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return self._lxml_form
 
     def get_cached_form(self) -> Optional[FormElement]:
-        """
-        Get form which has been already selected.
+        """Get form which has been already selected.
 
         Returns None if form has not been selected yet.
 
@@ -802,8 +794,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return self._lxml_form
 
     def set_input(self, name: str, value: Any) -> None:
-        """
-        Set the value of form element by its `name` attribute.
+        """Set the value of form element by its `name` attribute.
 
         :param name: name of element
         :param value: value which should be set to element
@@ -837,8 +828,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                 elem.value = value
 
     def set_input_by_id(self, _id: str, value: Any) -> None:
-        """
-        Set the value of form element by its `id` attribute.
+        """Set the value of form element by its `id` attribute.
 
         :param _id: id of element
         :param value: value which should be set to element
@@ -851,8 +841,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return self.set_input(elem.get("name"), value)
 
     def set_input_by_number(self, number: int, value: Any) -> None:
-        """
-        Set the value of form element by its number in the form.
+        """Set the value of form element by its number in the form.
 
         :param number: number of element
         :param value: value which should be set to element
@@ -862,8 +851,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return self.set_input(elem.get("name"), value)
 
     def set_input_by_xpath(self, xpath: str, value: Any) -> None:
-        """
-        Set the value of form element by xpath.
+        """Set the value of form element by xpath.
 
         :param xpath: xpath path
         :param value: value which should be set to element
@@ -892,10 +880,12 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         post_items: list[tuple[str, Any]],
         extra_post: Union[Mapping[str, Any], Sequence[tuple[str, Any]]],
     ) -> list[tuple[str, Any]]:
-        if isinstance(extra_post, Mapping):
-            extra_post_items = cast(Sequence[Tuple[str, Any]], extra_post.items())
-        else:
-            extra_post_items = extra_post
+
+        extra_post_items = (
+            cast(Sequence[Tuple[str, Any]], extra_post.items())
+            if isinstance(extra_post, Mapping)
+            else extra_post
+        )
 
         # Drop existing post items with such key
         keys_to_drop = {x for x, y in extra_post_items}
@@ -945,8 +935,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         extra_post: Union[None, Mapping[str, Any], Sequence[tuple[str, Any]]] = None,
         remove_from_post: Optional[Sequence[str]] = None,
     ) -> MutableMapping[str, Any]:
-        """
-        Submit default form.
+        """Submit default form.
 
         :param submit_name: name of button which should be "clicked" to
             submit form
@@ -967,10 +956,10 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         post = self.form_fields()
         self.clean_submit_controls(post, submit_name)
         assert self.url is not None
-        if url:
-            action_url = urljoin(self.url, url)
-        else:
-            action_url = urljoin(self.url, self.form.action)
+
+        action_url = (
+            urljoin(self.url, url) if url else urljoin(self.url, self.form.action)
+        )
 
         # Values from `extra_post` should override values in form
         # `extra_post` allows multiple value of one key
@@ -1028,10 +1017,9 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                     and fields[elem.name] is None
                 ):
                     fields_to_remove.add(elem.name)
-            else:
+            elif elem.name in fields_to_remove:
                 # WHAT THE FUCK DOES THAT MEAN?
-                if elem.name in fields_to_remove:
-                    fields_to_remove.remove(elem.name)
+                fields_to_remove.remove(elem.name)
         return fields_to_remove
 
     def process_form_fields(self, fields: MutableMapping[str, Any]) -> None:
@@ -1052,8 +1040,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                     fields[key] = list(val)
 
     def form_fields(self) -> MutableMapping[str, HtmlElement]:
-        """
-        Return fields of default form.
+        """Return fields of default form.
 
         Fill some fields with reasonable values.
         """

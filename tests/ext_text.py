@@ -45,12 +45,11 @@ class TextExtensionTest(BaseGrabTestCase):
         self.assertTrue(self.grab.doc.text_search("фыва"))
         self.assertFalse(self.grab.doc.text_search("фыва2"))
 
-    def test_search_usage_errors(self):
-        # with self.assertRaises(GrabMisuseError):
-        #    self.grab.doc.text_search("фыва", byte=True)
-        anchor = "фыва"
-        anchor = anchor.encode("utf-8")
-        # self.assertRaises(GrabMisuseError, self.grab.doc.text_search, anchor)
+    # def test_search_usage_errors(self):
+    #    with self.assertRaises(GrabMisuseError):
+    #        self.grab.doc.text_search("фыва", byte=True)
+    #    anchor = "фыва".encode("utf-8")
+    #    self.assertRaises(GrabMisuseError, self.grab.doc.text_search, anchor)
 
     def test_assert_substring(self):
         self.grab.doc.text_assert("фыва")

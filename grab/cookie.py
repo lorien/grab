@@ -1,5 +1,4 @@
-"""
-This module provides things to operate with cookies.
+"""This module provides things to operate with cookies.
 
 Manuals:
 
@@ -98,8 +97,7 @@ class MockRequest:
         return self._headers.get(name, self._new_headers.get(name, default))
 
     def add_header(self, key: str, val: str) -> None:
-        """
-        Cookielib has no legitimate use for this method.
+        """Cookielib has no legitimate use for this method.
 
         Add it back if you find one.
         """
@@ -214,8 +212,7 @@ def create_cookie(  # pylint: disable=too-many-arguments, too-many-locals
 
 
 class CookieManager:
-    """
-    Class to operate cookies of Grab instance.
+    """Class to operate cookies of Grab instance.
 
     Each Grab instance has `cookies` attribute that is instance of
     `CookieManager` class.
@@ -304,17 +301,13 @@ class CookieManager:
         return res
 
     def load_from_file(self, path: str) -> None:
-        """
-        Load cookies from the file.
+        """Load cookies from the file.
 
         Content of file should be a JSON-serialized list of dicts.
         """
         with open(path, encoding="utf-8") as inf:
             data = inf.read()
-            if data:
-                items = json.loads(data)
-            else:
-                items = {}
+            items = json.loads(data) if data else {}
         for item in items:
             extra = {
                 x: y for x, y in item.items() if x not in ["name", "value", "domain"]
@@ -328,8 +321,7 @@ class CookieManager:
         return res
 
     def save_to_file(self, path: str) -> None:
-        """
-        Dump all cookies to file.
+        """Dump all cookies to file.
 
         Cookies are dumped as JSON-serialized dict of keys and values.
         """

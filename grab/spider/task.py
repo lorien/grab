@@ -41,8 +41,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         # kwargs
         **kwargs: Any,
     ) -> None:
-        """
-        Create `Task` object.
+        """Create `Task` object.
 
         If more than one of url, grab and grab_config options are non-empty
         then they processed in following order:

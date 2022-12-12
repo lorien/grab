@@ -66,8 +66,7 @@ def process_hex_entity(match: Match[str]) -> str:
 
 
 def decode_entities(html: str) -> str:
-    """
-    Convert all HTML entities into their unicode representations.
+    """Convert all HTML entities into their unicode representations.
 
     This functions processes following entities:
      * &XXX;

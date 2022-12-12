@@ -25,8 +25,7 @@ def default_logging(
     mode: str = "a",
     propagate_network_logger: bool = False,
 ) -> None:
-    """
-    Customize logging output to display all log messages except grab network logs.
+    """Customize logging output to display all log messages except grab network logs.
 
     Redirect grab network logs into file.
     """

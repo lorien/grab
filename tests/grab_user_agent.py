@@ -63,7 +63,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             grab.setup(user_agent=None, user_agent_file=ua_file)
             grab.go(self.server.get_url())
             self.assertTrue(
-                self.server.request.headers.get("user-agent") in ("GOD1", "GOD2")
+                self.server.request.headers.get("user-agent") in {"GOD1", "GOD2"}
             )
             agent = grab.config["user_agent"]
 

@@ -85,8 +85,7 @@ def normalize_http_values(
     charset: str = "utf-8",
     ignore_classes: Optional[Union[list[type], tuple[type, ...]]] = None,
 ) -> list[tuple[bytes, Any]]:
-    """
-    Convert values in dict/list-of-tuples to bytes.
+    """Convert values in dict/list-of-tuples to bytes.
 
     Unicode is converted into bytestring using charset of previous response
     (or utf-8, if no requests were performed)

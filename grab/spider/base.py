@@ -96,8 +96,7 @@ class Spider:
         only_cache: bool = False,
         transport: Any = None,
     ) -> None:
-        """
-        Create Spider instance, duh.
+        """Create Spider instance, duh.
 
         Arguments:
         * thread-number - Number of concurrent network streams
@@ -119,7 +118,7 @@ class Spider:
         self.fatal_error_queue: Queue[FatalErrorQueueItem] = Queue()
         self.task_queue_parameters = None
         self._started: Optional[float] = None
-        assert grab_transport in ["urllib3"]
+        assert grab_transport in {"urllib3"}
         self.grab_transport_name = grab_transport
         self.parser_requests_per_process = parser_requests_per_process
         self.stat = Stat()
@@ -168,7 +167,7 @@ class Spider:
                 ' deprecated. Use "network_service" argument.'
             )
             network_service = transport
-        assert network_service in ("threaded",)
+        assert network_service in {"threaded"}
         if network_service == "threaded":
             # pylint: disable=import-outside-toplevel
             from .service.network import NetworkServiceThreaded
@@ -224,8 +223,7 @@ class Spider:
         raise SpiderMisuseError(f"Invalid task queue backend name: {backend}")
 
     def setup_queue(self, backend: str = "memory", **kwargs: Any) -> None:
-        """
-        Set up queue.
+        """Set up queue.
 
         :param backend: Backend name
             Should be one of the following: 'memory', 'redis' or 'mongo'.
@@ -291,8 +289,7 @@ class Spider:
         auto_init: bool = True,
         auto_change: bool = True,
     ) -> None:
-        """
-        Load proxy list.
+        """Load proxy list.
 
         :param source: Proxy source.
             Accepts string (file path, url) or ``BaseProxySource`` instance.
@@ -343,8 +340,7 @@ class Spider:
         resolve_base: bool = False,
         **kwargs: Any,
     ) -> bool:
-        r"""
-        Generate task for next page.
+        r"""Generate task for next page.
 
         :param grab: Grab instance
         :param task: Task object which should be assigned to next page url
@@ -404,10 +400,7 @@ class Spider:
             "Queue size: %d" % self.task_queue.size() if self.task_queue else "NA"
         )
         out.append("Network streams: %d" % self.thread_number)
-        if self._started:
-            elapsed = time.time() - self._started
-        else:
-            elapsed = 0
+        elapsed = (time.time() - self._started) if self._started else 0
         hours, seconds = divmod(elapsed, 3600)
         minutes, seconds = divmod(seconds, 60)
         out.append("Time elapsed: %d:%d:%d (H:M:S)" % (hours, minutes, seconds))
@@ -421,8 +414,7 @@ class Spider:
     # ********************************
 
     def prepare(self) -> None:
-        """
-        Do additional spider customization here.
+        """Do additional spider customization here.
 
         This method runs before spider has started working.
         """
@@ -431,8 +423,7 @@ class Spider:
         """Override this method to do some final actions after parsing has been done."""
 
     def update_grab_instance(self, grab: Grab) -> None:
-        """
-        Update config of any `Grab` instance created by the spider.
+        """Update config of any `Grab` instance created by the spider.
 
         WTF it means?
         """
@@ -451,8 +442,7 @@ class Spider:
         return Grab(**kwargs)
 
     def task_generator(self) -> Iterator[Task]:
-        """
-        You can override this method to load new tasks.
+        """You can override this method to load new tasks.
 
         It will be used each time as number of tasks
         in task queue is less then number of threads multiplied on 2
@@ -466,8 +456,7 @@ class Spider:
     # ***************
 
     def check_task_limits(self, task: Task) -> tuple[bool, str]:
-        """
-        Check that task's network & try counters do not exceed limits.
+        """Check that task's network & try counters do not exceed limits.
 
         Returns:
         * if success: (True, None)
@@ -515,8 +504,7 @@ class Spider:
         return grab
 
     def is_valid_network_response_code(self, code: int, task: Task) -> bool:
-        """
-        Test if response is valid.
+        """Test if response is valid.
 
         Valid response is handled with associated task handler.
         Failed respoosne is processed with error handler.
@@ -665,10 +653,7 @@ class Spider:
         )
 
     def log_failed_network_result(self, res: NetworkResult) -> None:
-        if res["ok"]:
-            msg = "http-%s" % res["grab"].doc.code
-        else:
-            msg = res["error_abbr"]
+        msg = ("http-%s" % res["grab"].doc.code) if res["ok"] else res["error_abbr"]
         self.stat.inc("error:%s" % msg)
 
     def log_rejected_task(self, task: Task, reason: str) -> None:
@@ -717,8 +702,7 @@ class Spider:
         task: Task,
         meta: Optional[dict[str, Any]] = None,
     ) -> None:
-        """
-        Process result submitted from any service to task dispatcher service.
+        """Process result submitted from any service to task dispatcher service.
 
         Result could be:
         * Task
@@ -822,16 +806,16 @@ class Spider:
                         else None
                     )
                     # UnicodeError: see #323
-                    if (
-                        not isinstance(ex, OriginalExceptionGrabError)
-                        or isinstance(ex, GrabInvalidUrl)
-                        or orig_exc_name == "error"
-                        or orig_exc_name == "UnicodeError"
-                    ):
-                        ex_cls = ex
-                    else:
-                        # ex_cls.original_exc
-                        ex_cls = cast(OriginalExceptionGrabError, ex).original_exc
+                    ex_cls = (
+                        ex
+                        if (
+                            not isinstance(ex, OriginalExceptionGrabError)
+                            or isinstance(ex, GrabInvalidUrl)
+                            or orig_exc_name == "error"
+                            or orig_exc_name == "UnicodeError"
+                        )
+                        else cast(OriginalExceptionGrabError, ex).original_exc
+                    )
                     result.update(
                         {
                             "ok": False,

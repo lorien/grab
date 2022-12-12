@@ -54,8 +54,7 @@ class ExtensionRexTestCase(BaseGrabTestCase):
         )
 
         # # Search for non-unicode rex in unicode body should fail
-        pattern = "(фыва)"
-        pattern = pattern.encode("utf-8")
+        pattern = "(фыва)".encode("utf-8")
         rex = re.compile(pattern)
         self.assertRaises(DataNotFound, lambda: self.grab.doc.rex_search(rex))
 

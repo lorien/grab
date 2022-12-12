@@ -27,8 +27,7 @@ class FatalError(SpiderError):
 
 
 class SpiderInternalError(SpiderError):
-    """
-    Raises when error throwned by internal spider logic.
+    """Raises when error throwned by internal spider logic.
 
     Like spider class discovering, CLI error.
     """

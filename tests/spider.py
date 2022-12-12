@@ -58,11 +58,11 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.run()
         self.assertEqual(bot.stat.counters["spider:task-baz"], 1)
 
-        bot = build_spider(SimpleSpider, task_try_limit=2)
-        bot.setup_queue()
-        bot.add_task(Task("baz", self.server.get_url(), task_try_count=3))
-        bot.run()
-        self.assertEqual(bot.stat.counters["spider:request-network"], 0)
+        bot2 = build_spider(SimpleSpider, task_try_limit=2)
+        bot2.setup_queue()
+        bot2.add_task(Task("baz", self.server.get_url(), task_try_count=3))
+        bot2.run()
+        self.assertEqual(bot2.stat.counters["spider:request-network"], 0)
 
     def test_task_retry(self):
         self.server.add_response(Response(status=403))

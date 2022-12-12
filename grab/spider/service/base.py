@@ -31,10 +31,11 @@ class ServiceWorker:
         self.is_busy_event = Event()
 
     def build_thread_name(self, worker_callback: Callable[..., Any]) -> str:
-        if hasattr(worker_callback, "__self__"):
-            cls_name = worker_callback.__self__.__class__.__name__
-        else:
-            cls_name = "NA"
+        cls_name = (
+            worker_callback.__self__.__class__.__name__
+            if hasattr(worker_callback, "__self__")
+            else "NA"
+        )
         return "worker:%s:%s" % (cls_name, worker_callback.__name__)
 
     def worker_callback_wrapper(

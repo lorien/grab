@@ -37,7 +37,7 @@ mypy:
 	mypy --python-version=3.8 --strict $(FILES_CHECK_MYPY)
 
 pylint:
-	pylint -j0 $(FILES_CHECK_ALL)
+	pylint -j0  $(FILES_CHECK_ALL)
 
 flake8:
 	flake8 -j auto --max-cognitive-complexity=17 $(FILES_CHECK_ALL)

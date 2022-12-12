@@ -1,5 +1,4 @@
-"""
-Custom exception which Grab instance could generate.
+"""Custom exception which Grab instance could generate.
 
 Taxonomy:
 

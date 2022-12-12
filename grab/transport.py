@@ -132,7 +132,7 @@ class Urllib3Transport(BaseTransport):
     def process_config_post(
         self, grab_config: Mapping[str, Any], method: str
     ) -> tuple[dict[str, Any], Optional[bytes]]:
-        if method in ("POST", "PUT") and (
+        if method in {"POST", "PUT"} and (
             grab_config["post"] is None and grab_config["multipart_post"] is None
         ):
             raise GrabMisuseError(
@@ -263,10 +263,9 @@ class Urllib3Transport(BaseTransport):
         except ssl.SSLError as ex:
             raise error.GrabConnectionError("SSLError", ex)
 
-    def request(self) -> None:
-        req = cast(Request, self._request)
-
-        pool: Union[PoolManager, SOCKSProxyManager]
+    def select_pool_for_request(
+        self, req: Request
+    ) -> Union[PoolManager, ProxyManager, SOCKSProxyManager]:
         if req.proxy:
             if req.proxy_userpwd:
                 headers = make_headers(
@@ -276,18 +275,23 @@ class Urllib3Transport(BaseTransport):
                 headers = None
             proxy_url = "%s://%s" % (req.proxy_type, req.proxy)
             if req.proxy_type == "socks5":
-                pool = SOCKSProxyManager(
+                return SOCKSProxyManager(
                     proxy_url, cert_reqs="CERT_REQUIRED", ca_certs=certifi.where()
                 )  # , proxy_headers=headers)
-            else:
-                pool = ProxyManager(
-                    proxy_url,
-                    proxy_headers=headers,
-                    cert_reqs="CERT_REQUIRED",
-                    ca_certs=certifi.where(),
-                )
-        else:
-            pool = self.pool
+            return ProxyManager(
+                proxy_url,
+                proxy_headers=headers,
+                cert_reqs="CERT_REQUIRED",
+                ca_certs=certifi.where(),
+            )
+        return self.pool
+
+    def request(self) -> None:
+        req = cast(Request, self._request)
+
+        pool: Union[
+            PoolManager, SOCKSProxyManager, ProxyManager
+        ] = self.select_pool_for_request(req)
         with self.wrap_transport_error():
             # Retries can be disabled by passing False:
             # http://urllib3.readthedocs.io/en/latest/reference/urllib3.util.html#module-urllib3.util.retry
@@ -353,10 +357,9 @@ class Urllib3Transport(BaseTransport):
         maxsize = cast(Request, self._request).config_body_maxsize
         chunks = []
         default_chunk_size = 10000
-        if maxsize:
-            chunk_size = min(default_chunk_size, maxsize + 1)
-        else:
-            chunk_size = default_chunk_size
+        chunk_size = (
+            min(default_chunk_size, maxsize + 1) if maxsize else default_chunk_size
+        )
         bytes_read = 0
         while True:
             chunk = cast(HTTPResponse, self._response).read(chunk_size)
@@ -379,8 +382,7 @@ class Urllib3Transport(BaseTransport):
         return data
 
     def get_response_header_items(self) -> list[tuple[str, Any]]:
-        """
-        Return current response headers as items.
+        """Return current response headers as items.
 
         This funciton is required to isolated smalles part of untyped code
         and hide it from mypy
@@ -391,8 +393,7 @@ class Urllib3Transport(BaseTransport):
     def prepare_response(
         self, grab_config: GrabConfig, *, document_class: Type[Document] = Document
     ) -> Document:
-        """
-        Prepare response, duh.
+        """Prepare response, duh.
 
         This methed is called after network request is completed
         hence the "self._request" is not None.
@@ -409,9 +410,9 @@ class Urllib3Transport(BaseTransport):
             response = document_class()
             head = ""
             for key, val in self.get_response_header_items():
-                key = key.encode("latin").decode("utf-8", errors="ignore")
-                val = val.encode("latin").decode("utf-8", errors="ignore")
-                head += "%s: %s\r\n" % (key, val)
+                new_key = key.encode("latin").decode("utf-8", errors="ignore")
+                new_val = val.encode("latin").decode("utf-8", errors="ignore")
+                head += "%s: %s\r\n" % (new_key, new_val)
             head += "\r\n"
             response.head = head.encode("utf-8", errors="strict")
 
@@ -446,11 +447,12 @@ class Urllib3Transport(BaseTransport):
 
             hdr = email.message.Message()
             for key, val in self.get_response_header_items():
-                key = key.encode("latin").decode("utf-8", errors="ignore")
-                val = val.encode("latin").decode("utf-8", errors="ignore")
+                # WTF: is happening here?
+                new_key = key.encode("latin").decode("utf-8", errors="ignore")
+                new_val = val.encode("latin").decode("utf-8", errors="ignore")
                 # if key == 'Location':
                 #    import pdb; pdb.set_trace()
-                hdr[key] = val
+                hdr[new_key] = new_val
             response.parse(charset=grab_config["document_charset"], headers=hdr)
             jar = self.extract_cookiejar()  # self._response, self._request)
             response.cookies = CookieManager(jar)

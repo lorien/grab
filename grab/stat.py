@@ -71,17 +71,14 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         items = []
         for key in self.speed_keys:
             time_elapsed = now - self.time
-            if time_elapsed == 0:
+            if not time_elapsed:
                 qps: float = 0
             else:
                 count_current = self.counters[key]
                 diff = count_current - self.counters_prev[key]
                 qps = diff / time_elapsed
                 self.counters_prev[key] = count_current
-            if key == self.speed_key:
-                label = "RPS"
-            else:
-                label = key
+            label = "RPS" if (key == self.speed_key) else key
             items.append("%s: %.2f" % (label, qps))
         return ", ".join(items)
 

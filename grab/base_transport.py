@@ -61,8 +61,7 @@ class BaseTransport:
         return os.path.join(storage_dir, storage_filename)
 
     def detect_request_method(self, grab_config: Mapping[str, Any]) -> str:
-        """
-        Analyze request config and find which request method will be used.
+        """Analyze request config and find which request method will be used.
 
         Returns request method in upper case
         """

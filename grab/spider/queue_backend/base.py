@@ -18,8 +18,7 @@ class BaseTaskQueue:
         raise NotImplementedError
 
     def get(self) -> Task:
-        """
-        Return `Task` object or raise `Queue.Empty` exception.
+        """Return `Task` object or raise `Queue.Empty` exception.
 
         @returns: `grab.spider.task.Task` object
         @raises: `Queue.Empty` exception

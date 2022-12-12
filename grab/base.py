@@ -258,8 +258,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             )
 
     def reset(self) -> None:
-        """
-        Reset Grab instnce.
+        """Reset Grab instnce.
 
         Resets all attributes which could be modified during previous request
         or which is not initialized yet if this is the new Grab instance.
@@ -273,8 +272,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             self.transport.reset()
 
     def clone(self, **kwargs: Any) -> Grab:
-        r"""
-        Create clone of Grab instance.
+        r"""Create clone of Grab instance.
 
         Cloned instance will have the same state: cookies, referrer, response
         document data
@@ -297,8 +295,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         return grab
 
     def adopt(self, grab: Grab) -> None:
-        """
-        Copy the state of another `Grab` instance.
+        """Copy the state of another `Grab` instance.
 
         WTF: this use case is needed for?
         Use case: create backup of current state to the cloned instance and
@@ -339,8 +336,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.config.update(kwargs)
 
     def go(self, url: str, **kwargs: Any) -> Document:  # pylint: disable=invalid-name
-        """
-        Go to ``url``.
+        """Go to ``url``.
 
         Args:
             :url: could be absolute or relative. If relative then t will be
@@ -357,8 +353,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         return len(doc.body)
 
     def prepare_request(self, **kwargs: Any) -> None:
-        """
-        Configure all things to make real network request.
+        """Configure all things to make real network request.
 
         This method is called before doing real request via
         transport extension.
@@ -379,10 +374,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     def log_request(self, extra: str = "") -> None:
         """Send request details to logging system."""
         thread_name = threading.current_thread().name.lower()
-        if thread_name == "mainthread":
-            thread_name = ""
-        else:
-            thread_name = "-%s" % thread_name
+        thread_name = "" if (thread_name == "mainthread") else "-%s" % thread_name
 
         if self.config["proxy"]:
             if self.config["proxy_userpwd"]:
@@ -409,8 +401,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         )
 
     def request(self, **kwargs: Any) -> Document:  # noqa: CCR001
-        """
-        Perform network request.
+        """Perform network request.
 
         You can specify grab settings in ``**kwargs``.
         Any keyword argument will be passed to ``self.config``.
@@ -437,7 +428,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
                 if (
                     self.config["follow_location"]
-                    and doc.code in (301, 302, 303, 307, 308)
+                    and doc.code in {301, 302, 303, 307, 308}
                     and cast(email.message.Message, doc.headers).get("Location")
                 ):
                     refresh_count += 1
@@ -460,8 +451,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 return doc
 
     def submit(self, make_request: bool = True, **kwargs: Any) -> Optional[Document]:
-        """
-        Submit current form.
+        """Submit current form.
 
         :param make_request: if `False` then grab instance will be
             configured with form post data but request will not be
@@ -516,9 +506,14 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 items = normalize_http_values(post, charset=self.config["charset"])
                 new_items = []
                 for key, value in items:
-                    if len(value) > self.config["debug_post_limit"]:
-                        value = value[: self.config["debug_post_limit"]] + b"..."
-                    new_items.append((key, value))
+                    new_items.append(
+                        (
+                            key,
+                            value[: self.config["debug_post_limit"]] + b"..."
+                            if len(value) > self.config["debug_post_limit"]
+                            else value,
+                        )
+                    )
                 post_bytes = b"\n".join(b"%-25s: %s" % x for x in new_items)
         if post:
             logger_network.debug(
@@ -573,8 +568,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.config["body_storage_filename"] = None
 
     def save_failed_dump(self) -> None:
-        """
-        Save dump of failed request for debugging.
+        """Save dump of failed request for debugging.
 
         This method is called then fatal network exception is raised.
         The saved dump could be used for debugging the reason of the failure.
@@ -585,8 +579,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.save_dumps()
 
     def setup_document(self, content: bytes, **kwargs: Any) -> None:
-        """
-        Set up `response` object without real network requests.
+        """Set up `response` object without real network requests.
 
         Useful for testing and debugging.
 
@@ -611,10 +604,11 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         doc.name_lookup_time = 0
         doc.url = ""
 
+        # WTF: WHat the hell it means?
         for key, value in kwargs.items():
-            if key and value is None:
-                value = "utf-8"
-            setattr(doc, key, value)
+            # if key and value is None:
+            #    value = "utf-8"
+            setattr(doc, key, "utf-8" if (key and value is None) else value)
 
         self.doc = doc
 
@@ -650,10 +644,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     def save_dumps(self) -> None:
         thread_name = threading.current_thread().name.lower()
-        if thread_name == "mainthread":
-            thread_name = ""
-        else:
-            thread_name = "-%s" % thread_name
+        thread_name = "" if (thread_name == "mainthread") else "-%s" % thread_name
         file_name = os.path.join(
             self.config["log_dir"], "%02d%s.log" % (self.request_counter, thread_name)
         )

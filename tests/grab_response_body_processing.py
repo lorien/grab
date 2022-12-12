@@ -29,10 +29,10 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
     def test_body_inmemory_false(self):
         with temp_dir() as tmp_dir:
-            grab = build_grab()
-            grab.setup(body_inmemory=False)
+            grab_bad = build_grab()
+            grab_bad.setup(body_inmemory=False)
             with self.assertRaises(GrabMisuseError):
-                grab.go(self.server.get_url())
+                grab_bad.go(self.server.get_url())
 
             self.server.add_response(Response(data=b"foo"))
             grab = build_grab_custom_subclass(CustomGrab)
@@ -76,7 +76,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         grab.doc.body = b"def"
 
         with self.assertRaises(GrabMisuseError):
-            grab.doc.body = "Спутник"
+            grab.doc.body = "Спутник"  # pylint: disable=redefined-variable-type
 
     def test_empty_response(self):
         self.server.add_response(Response(data=b""))

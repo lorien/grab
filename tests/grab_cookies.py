@@ -94,7 +94,7 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual(grab.doc.cookies["foo"], "bar")
         self.server.add_response(Response())
         grab.go(self.server.get_url())
-        self.assertTrue(len(self.server.request.cookies) == 0)
+        self.assertFalse(self.server.request.cookies)
 
         # Test something
         grab = build_grab()
@@ -105,7 +105,7 @@ class TestCookies(BaseGrabTestCase):
         grab.clear_cookies()
         self.server.add_response(Response())
         grab.go(self.server.get_url())
-        self.assertTrue(len(self.server.request.cookies) == 0)
+        self.assertFalse(self.server.request.cookies)
 
     def test_redirect_session(self):
         grab = build_grab()
@@ -156,15 +156,16 @@ class TestCookies(BaseGrabTestCase):
 
             # Test load cookies
             grab = build_grab()
-            cookies = [
+            cookies_list = [
                 {"name": "foo", "value": "bar", "domain": self.server.address},
                 {"name": "spam", "value": "begemot", "domain": self.server.address},
             ]
             with open(tmp_file, "w", encoding="utf-8") as out:
-                json.dump(cookies, out)
+                json.dump(cookies_list, out)
             grab.cookies.load_from_file(tmp_file)
             self.assertEqual(
-                set(grab.cookies.items()), {(x["name"], x["value"]) for x in cookies}
+                set(grab.cookies.items()),
+                {(x["name"], x["value"]) for x in cookies_list},
             )
 
     def test_cookiefile_empty(self):

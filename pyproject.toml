@@ -80,6 +80,21 @@ attr-rgx="[a-z_][a-z0-9_]{1,30}$"
 argument-rgx="[a-z_][a-z0-9_]{1,30}$"
 max-line-length=88
 max-args=9
+load-plugins=[
+    "pylint.extensions.check_elif",
+    "pylint.extensions.comparetozero",
+    "pylint.extensions.comparison_placement",
+    "pylint.extensions.consider_ternary_expression",
+    "pylint.extensions.docstyle",
+    "pylint.extensions.emptystring",
+    "pylint.extensions.for_any_all",
+    "pylint.extensions.overlapping_exceptions",
+    "pylint.extensions.private_import",
+    "pylint.extensions.redefined_loop_name",
+    "pylint.extensions.redefined_variable_type",
+    "pylint.extensions.set_membership",
+    #"pylint.extensions.typing",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
