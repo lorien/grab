@@ -89,7 +89,6 @@ load-plugins=[
     "pylint.extensions.emptystring",
     "pylint.extensions.for_any_all",
     "pylint.extensions.overlapping_exceptions",
-    "pylint.extensions.private_import",
     "pylint.extensions.redefined_loop_name",
     "pylint.extensions.redefined_variable_type",
     "pylint.extensions.set_membership",
