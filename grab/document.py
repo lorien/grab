@@ -689,7 +689,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     # FormExtension methods
 
-    def choose_form(  # noqa: C901
+    def choose_form(
         self,
         number: None | int = None,
         xpath: None | str = None,
