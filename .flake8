@@ -9,6 +9,7 @@
 # F841 local variable 'suffix' is assigned to but never used, CHECKED BY PYLINT
 # W503 line break before binary operator
 # N818 exception name 'ElementNotFound' should be named with an Error suffix
+# F403: used; unable to detect undefined names # disabled because pylint "wildcard-import" does the same
 # --- flake8-commas
 # C812 missing trailing comma
 # C813 missing trailing comma in Python 3
@@ -28,7 +29,7 @@
 # PIE786 Use precise exception handlers
 # PEA001  typing.Match is deprecated, use re.Match instead. # is not possible in py<3.9
 # E203 Colons should not have any space before them. # does not work with Black formatting of "foo[(1 + 1) : ]"
-ignore=F401,C812,C813,D100,D101,D102,D103,D104,D106,D107,D105,P101,PIE798,PIE786,W503,N818,PEA001,E203
+ignore=F401,C812,C813,D100,D101,D102,D103,D104,D106,D107,D105,P101,PIE798,PIE786,W503,N818,PEA001,E203,F403
 max-line-length=88
 inline-quotes = double
 max-complexity=10

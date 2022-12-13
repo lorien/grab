@@ -162,9 +162,24 @@ class Urllib3Transport(BaseTransport):
             extra_headers["Content-Length"] = len(post_data)
         return extra_headers, post_data
 
-    def process_config(  # noqa: C901 pylint: disable=too-many-locals
+    def process_proxy_config(
+        self, grab_config: GrabConfig
+    ) -> tuple[None | str, None | str, None | str]:
+        # Proxy
+        req_proxy = None
+        if grab_config["proxy"]:
+            req_proxy = grab_config["proxy"]
+        req_proxy_userpwd = None
+        if grab_config["proxy_userpwd"]:
+            req_proxy_userpwd = grab_config["proxy_userpwd"]
+        req_proxy_type = None
+        if grab_config["proxy_type"]:
+            req_proxy_type = grab_config["proxy_type"]
+        return req_proxy, req_proxy_userpwd, req_proxy_type
+
+    def process_config(
         self, grab_config: MutableMapping[str, Any], grab_cookies: CookieManager
-    ) -> None:  # noqa: C901 pylint: disable=too-many-branches
+    ) -> None:
         # Init
         extra_headers: dict[str, str] = {}
         # URL
@@ -191,21 +206,14 @@ class Urllib3Transport(BaseTransport):
         post_headers, req_data = self.process_config_post(grab_config, method)
         extra_headers.update(post_headers)
         # Proxy
-        req_proxy = None
-        if grab_config["proxy"]:
-            req_proxy = grab_config["proxy"]
-        req_proxy_userpwd = None
-        if grab_config["proxy_userpwd"]:
-            req_proxy_userpwd = grab_config["proxy_userpwd"]
-        req_proxy_type = None
-        if grab_config["proxy_type"]:
-            req_proxy_type = grab_config["proxy_type"]
+        req_proxy, req_proxy_userpwd, req_proxy_type = self.process_proxy_config(
+            grab_config
+        )
         # User-Agent
         if grab_config["user_agent"] is None:
             if grab_config["user_agent_file"] is not None:
-                with open(grab_config["user_agent_file"], encoding="utf-8") as inf:
-                    lines = inf.read().splitlines()
-                grab_config["user_agent"] = random.choice(lines)
+                with open(grab_config["user_agent_file"], encoding="utf-8") as inp:
+                    grab_config["user_agent"] = random.choice(inp.read().splitlines())
             else:
                 grab_config["user_agent"] = generate_user_agent()
         extra_headers["User-Agent"] = cast(str, grab_config["user_agent"])
@@ -218,7 +226,6 @@ class Urllib3Transport(BaseTransport):
         )
         if cookie_hdr:
             extra_headers["Cookie"] = cookie_hdr
-
         self._request = Request(
             url=request_url,
             method=method,

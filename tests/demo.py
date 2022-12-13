@@ -14,7 +14,8 @@ def test_callable(inp: Callable[..., str | bytes | None]) -> Callable[..., str |
         inp
         # pylint: enable=deprecated-typing-alias, consider-alternative-union-syntax
     )
-    return dup  # noqa
+    assert dup is not None
+    return dup
 
 
 # def test_union(inp: str | None) -> str | None:
@@ -37,7 +38,8 @@ def test_re_pattern(
         inp
         # pylint: enable=deprecated-typing-alias, consider-alternative-union-syntax
     )
-    return dup  # noqa
+    assert dup is not None
+    return dup
 
 
 def test_isinstance_generic(inp: Mapping[str, int]) -> bool:
