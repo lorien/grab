@@ -4,7 +4,6 @@
 # License: BSD
 from __future__ import annotations
 
-import email.message
 import itertools
 import logging
 import os
@@ -407,7 +406,21 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             proxy_info,
         )
 
-    def request(self, **kwargs: Any) -> Document:  # noqa: CCR001
+    def find_redirect_url(self, doc: Document) -> tuple[None | str, None | str]:
+        assert doc.headers is not None
+        if (
+            self.config["follow_location"]
+            and doc.code in {301, 302, 303, 307, 308}
+            and doc.headers["Location"]
+        ):
+            return doc.headers["Location"], "location"
+        if self.config["follow_refresh"]:
+            url = self.doc.get_meta_refresh_url()
+            if url is not None:
+                return url, "refresh"
+        return None, None
+
+    def request(self, **kwargs: Any) -> Document:
         """Perform network request.
 
         You can specify grab settings in ``**kwargs``.
@@ -432,29 +445,15 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             else:
                 with cast(BaseTransport, self.transport).wrap_transport_error():
                     doc = self.process_request_result()
-
-                if (
-                    self.config["follow_location"]
-                    and doc.code in {301, 302, 303, 307, 308}
-                    and cast(email.message.Message, doc.headers).get("Location")
-                ):
+                redir_url, _ = self.find_redirect_url(doc)
+                if redir_url is not None:
                     refresh_count += 1
                     if refresh_count > self.config["redirect_limit"]:
                         raise error.GrabTooManyRedirectsError()
-                    url = cast(email.message.Message, doc.headers).get("Location")
-                    self.prepare_request(url=self.make_url_absolute(url), referer=None)
+                    self.prepare_request(
+                        url=self.make_url_absolute(redir_url), referer=None
+                    )
                     continue
-
-                if self.config["follow_refresh"]:
-                    refresh_url = self.doc.get_meta_refresh_url()
-                    if refresh_url is not None:
-                        refresh_count += 1
-                        if refresh_count > self.config["redirect_limit"]:
-                            raise error.GrabTooManyRedirectsError()
-                        self.prepare_request(
-                            url=self.make_url_absolute(refresh_url), referer=None
-                        )
-                        continue
                 return doc
 
     def submit(self, make_request: bool = True, **kwargs: Any) -> None | Document:
