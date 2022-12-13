@@ -161,7 +161,6 @@ class Spider:
         self.proxylist: None | ProxyList = None
         self.proxy: None | Proxy = None
         self.proxy_auto_change = False
-        self.interrupted = False
         self.parser_pool_size = parser_pool_size
         if transport is not None:
             warn(
@@ -587,7 +586,38 @@ class Spider:
         # i.e. the "self.task_queue" is set
         return cast(BaseTaskQueue, self.task_queue)
 
-    def run(self) -> None:  # noqa: C901
+    def is_idle_estimated(self) -> bool:
+        return (
+            not self.task_generator_service.is_alive()
+            and not cast(BaseTaskQueue, self.task_queue).size()
+            and not self.task_dispatcher.input_queue.qsize()
+            and not self.parser_service.input_queue.qsize()
+            and not self.parser_service.is_busy()
+            and not self.network_service.get_active_threads_number()
+            and not self.network_service.is_busy()
+        )
+
+    def is_idle_confirmed(self, services: list[BaseService]) -> bool:
+        """Test if spider is fully idle.
+
+        WARNING: As side effect it stops all services to get state of queues
+        anaffected by sercies.
+
+        Spider is full idle when all conditions are met:
+        * all services are paused i.e. the do not change queues
+        * all queues are empty
+        * task generator is completed
+        """
+        if self.is_idle_estimated():
+            for srv in services:
+                srv.pause()
+            if self.is_idle_estimated():
+                return True
+            for srv in services:
+                srv.resume()
+        return False
+
+    def run(self) -> None:
         self._started = time.time()
         services = []
         try:
@@ -609,19 +639,11 @@ class Spider:
                 except Empty:
                     pass
                 else:
-                    # The trackeback of fatal error MUST BE
-                    # rendered by the sender
+                    # WTF: why? (see below)
+                    # The trackeback of fatal error MUST BE rendered by the sender
                     raise exc_info[1]
-                if self.is_idle():
-                    for srv in services:
-                        srv.pause()
-                    if self.is_idle():
-                        break
-                    for srv in services:
-                        srv.resume()
-        except KeyboardInterrupt:
-            self.interrupted = True
-            raise
+                if self.is_idle_confirmed(services):
+                    break
         finally:
             self.shutdown_services(services)
 
@@ -646,17 +668,6 @@ class Spider:
             self.task_queue.clear()
             self.task_queue.close()
         logger.debug("Work done")
-
-    def is_idle(self) -> bool:
-        return (
-            not self.task_generator_service.is_alive()
-            and not cast(BaseTaskQueue, self.task_queue).size()
-            and not self.task_dispatcher.input_queue.qsize()
-            and not self.parser_service.input_queue.qsize()
-            and not self.parser_service.is_busy()
-            and not self.network_service.get_active_threads_number()
-            and not self.network_service.is_busy()
-        )
 
     def log_failed_network_result(self, res: NetworkResult) -> None:
         msg = ("http-%s" % res["grab"].doc.code) if res["ok"] else res["error_abbr"]
