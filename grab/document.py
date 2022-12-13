@@ -695,7 +695,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         xpath: None | str = None,
         name: None | str = None,
         **kwargs: Any,
-    ) -> None:  # noqa: C901
+    ) -> None:
         """Set the default form.
 
         :param number: number of form (starting from zero)
@@ -723,32 +723,25 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             # Select by xpath
             g.choose_form(xpath='//form[contains(@action, "/submit")]')
         """
-        id_ = kwargs.pop("id", None)
-        if id_ is not None:
-            try:
-                self._lxml_form = self.select('//form[@id="%s"]' % id_).node()
-            except IndexError as ex:
-                raise DataNotFound("There is no form with id: %s" % id_) from ex
+        idx = 0
+        if kwargs.get("id") is not None:
+            query = '//form[@id="{}"]'.format(kwargs["id"])
         elif name is not None:
-            try:
-                self._lxml_form = self.select('//form[@name="%s"]' % name).node()
-            except IndexError as ex:
-                raise DataNotFound("There is no form with name: %s" % name) from ex
+            query = '//form[@name="{}"]'.format(name)
         elif number is not None:
-            try:
-                self._lxml_form = cast(HtmlElement, self.tree).forms[number]
-            except IndexError as ex:
-                raise DataNotFound("There is no form with number: %s" % number) from ex
+            query = "//form"
+            idx = number
         elif xpath is not None:
-            try:
-                self._lxml_form = self.select(xpath).node()
-            except IndexError as ex:
-                raise DataNotFound("Could not find form with xpath: %s" % xpath) from ex
+            query = xpath
         else:
             raise GrabMisuseError(
                 "choose_form methods requires one of "
                 "[number, id, name, xpath] arguments"
             )
+        try:
+            self._lxml_form = cast(HtmlElement, self.select(query)[idx].node())
+        except IndexError as ex:
+            raise DataNotFound("Could not find form with xpath: %s" % xpath) from ex
 
     @property
     def form(self) -> FormElement:
