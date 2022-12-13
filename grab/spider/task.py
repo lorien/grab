@@ -176,7 +176,21 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         self.grab_config = copy_config(grab_config)
         self.url = grab_config["url"]
 
-    def clone(self, **kwargs: Any) -> Task:  # noqa: C901
+    def test_clone_options_integrity(
+        self, url: None | str, grab: None | Grab, grab_config: None | GrabConfig
+    ) -> None:
+        if url is not None and grab is not None:
+            raise SpiderMisuseError("Options url and grab could not be used together")
+        if url is not None and grab_config is not None:
+            raise SpiderMisuseError(
+                "Options url and grab_config could not be used together"
+            )
+        if grab is not None and grab_config is not None:
+            raise SpiderMisuseError(
+                "Options grab and grab_config could not be used together"
+            )
+
+    def clone(self, **kwargs: Any) -> Task:
         """Clone Task instance.
 
         Reset network_try_count, increase task_try_count.
@@ -189,27 +203,15 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         if not attr_copy["priority_set_explicitly"]:
             attr_copy["priority"] = None
         task = Task(**attr_copy)
-
         # Reset some task properties if they have not
         # been set explicitly in kwargs
         if "network_try_count" not in kwargs:
             task.network_try_count = 0
         if "task_try_count" not in kwargs:
             task.task_try_count = self.task_try_count + 1
-
-        if kwargs.get("url") is not None and kwargs.get("grab") is not None:
-            raise SpiderMisuseError("Options url and grab could not be used together")
-
-        if kwargs.get("url") is not None and kwargs.get("grab_config") is not None:
-            raise SpiderMisuseError(
-                "Options url and grab_config could not be used together"
-            )
-
-        if kwargs.get("grab") is not None and kwargs.get("grab_config") is not None:
-            raise SpiderMisuseError(
-                "Options grab and grab_config could not be used together"
-            )
-
+        self.test_clone_options_integrity(
+            kwargs.get("url"), kwargs.get("grab"), kwargs.get("grab_config")
+        )
         if kwargs.get("grab"):
             task.setup_grab_config(kwargs["grab"].dump_config())
             del kwargs["grab"]
@@ -221,12 +223,9 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             if task.grab_config:
                 task.grab_config["url"] = kwargs["url"]
             del kwargs["url"]
-
         for key, value in kwargs.items():
             setattr(task, key, value)
-
         task.process_delay_option(None)
-
         return task
 
     def __repr__(self) -> str:
