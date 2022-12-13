@@ -95,7 +95,6 @@ class ParserService(BaseService):  # pylint: disable=too-many-instance-attribute
     def execute_task_handler(
         self, handler: Callable[[Grab, Task], None], result: NetworkResult, task: Task
     ) -> None:
-        # pylint: disable=broad-except
         try:
             handler_result = handler(result["grab"], task)
             if handler_result is None:

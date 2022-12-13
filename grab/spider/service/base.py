@@ -45,7 +45,7 @@ class ServiceWorker:
         def wrapper(*args: Any, **kwargs: Any) -> None:
             try:
                 callback(*args, **kwargs)
-            except Exception as ex:  # pylint: disable=broad-except
+            except Exception as ex:
                 logger.error("Spider Service Fatal Error", exc_info=ex)
                 # pylint: disable=deprecated-typing-alias
                 self.fatal_error_queue.put(

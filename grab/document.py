@@ -651,7 +651,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                 body = b"<html></html>"
             try:
                 self._lxml_tree = self._build_dom(body, "html", self.charset)
-            except Exception as ex:  # pylint: disable=broad-except
+            except Exception as ex:
                 # FIXME: write test for this case
                 if b"<html" not in body and (
                     # Fix for "just a string" body
