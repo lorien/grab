@@ -18,7 +18,7 @@ class BaseTask:
 class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
     """Task for spider."""
 
-    def __init__(  # noqa: C901 pylint: disable=too-many-arguments, too-many-locals
+    def __init__(  # pylint: disable=too-many-arguments, too-many-locals
         self,
         name: None | str = None,
         url: None | str = None,
@@ -112,14 +112,8 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             # generates new tasks
             raise SpiderMisuseError('Task name could not be "generator"')
         self.name = name
-        self.assert_init_options_integrity(url, grab, grab_config)
-        if grab:
-            self.setup_grab_config(grab.dump_config())
-        elif grab_config:
-            self.setup_grab_config(grab_config)
-        else:
-            self.grab_config = None
-            self.url = url
+        self.url: None | str = None
+        self.process_init_url_grab_options(url, grab, grab_config)
         if valid_status is None:
             self.valid_status = []
         else:
@@ -137,7 +131,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def assert_init_options_integrity(
+    def process_init_url_grab_options(
         self,
         url: None | str,
         grab: None | Grab,
@@ -161,6 +155,13 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             raise SpiderMisuseError(
                 "Options grab and grab_config could not be used together"
             )
+        if grab:
+            self.setup_grab_config(grab.dump_config())
+        elif grab_config:
+            self.setup_grab_config(grab_config)
+        else:
+            self.grab_config = None
+            self.url = url
 
     def get(self, key: str, default: Any = None) -> Any:
         """Return value of attribute or None if such attribute does not exist."""
