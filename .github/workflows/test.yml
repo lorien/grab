@@ -1,6 +1,6 @@
 name: Tests
 
-on: [push]
+on: ["push", "pull_request"]
 
 jobs:
   test:
@@ -27,7 +27,7 @@ jobs:
     - name: Run tests
       run: |
         coverage run runtest.py --test-all
-        coverage lcov .coverage.lcov
+        coverage lcov -o .coverage.lcov
 
     - name: Coveralls Parallel
       uses: coverallsapp/github-action@master
