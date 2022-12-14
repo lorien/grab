@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from abc import abstractmethod
 from collections.abc import Callable
 from queue import Empty, Queue
 from typing import Any, Dict, Literal
@@ -12,7 +13,13 @@ from .base import BaseService, ServiceWorker
 NetworkResult = Dict[str, Any]  # pylint: disable=deprecated-typing-alias
 
 
-class NetworkServiceThreaded(BaseService):
+class BaseNetworkService(BaseService):
+    @abstractmethod
+    def get_active_threads_number(self) -> int:
+        raise NotImplementedError
+
+
+class NetworkServiceThreaded(BaseNetworkService):
     def __init__(
         self,
         fatal_error_queue: Queue[FatalErrorQueueItem],

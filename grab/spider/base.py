@@ -28,6 +28,7 @@ from grab.spider.error import FatalError, NoTaskHandler, SpiderError, SpiderMisu
 from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.queue_backend.memory import MemoryTaskQueue
 from grab.spider.service.base import BaseService
+from grab.spider.service.network import BaseNetworkService, NetworkServiceThreaded
 from grab.spider.task import Task
 from grab.stat import Stat
 from grab.types import GrabConfig
@@ -94,12 +95,11 @@ class Spider:
         args: None | dict[str, Any] = None,
         parser_requests_per_process: int = 10000,
         parser_pool_size: int = 1,
-        network_service: str = "threaded",
+        network_service: None | BaseNetworkService = None,
         grab_transport: str = "urllib3",
         # Deprecated
         request_pause: Any = None,
         only_cache: bool = False,
-        transport: Any = None,
     ) -> None:
         """Create Spider instance, duh.
 
@@ -164,25 +164,19 @@ class Spider:
         self.proxy: None | Proxy = None
         self.proxy_auto_change = False
         self.parser_pool_size = parser_pool_size
-        if transport is not None:
-            warn(
-                'The "transport" argument of Spider constructor is'
-                ' deprecated. Use "network_service" argument.'
-            )
-            network_service = transport
-        assert network_service in {"threaded"}
-        if network_service == "threaded":
-            # pylint: disable=import-outside-toplevel
-            from .service.network import NetworkServiceThreaded
-
-            # pylint: enable=import-outside-toplevel
-
-            self.network_service = NetworkServiceThreaded(
+        assert network_service is None or isinstance(
+            network_service, BaseNetworkService
+        )
+        self.network_service = (
+            network_service
+            if network_service is not None
+            else NetworkServiceThreaded(
                 self.fatal_error_queue,
                 self.thread_number,
                 process_task=self.srv_process_task,
                 get_task_from_queue=self.get_task_from_queue,
             )
+        )
         self.task_dispatcher = TaskDispatcherService(
             self.fatal_error_queue,
             process_service_result=self.srv_process_service_result,

@@ -109,7 +109,7 @@ def main():
     setup_logging()
     parser = ArgumentParser()
     parser.add_argument("-t", "--test", help="Run only specified tests")
-    parser.add_argument("--network-service", default="threaded")
+    parser.add_argument("--network-service", default=None)
     parser.add_argument(
         "--test-grab",
         action="store_true",
