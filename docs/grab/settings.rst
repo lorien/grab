@@ -459,30 +459,6 @@ will be replaced with appropriate unicode entities, e.g.: &#151; ->  &#8212;
 Debugging
 ---------
 
-.. _option_log_file:
-
-log_file
-^^^^^^^^
-
-:Type: string
-:Default: None
-
-Path to the file where the body of the recent network response will be saved.
-See details at :ref:`grab_debugging_response_saving`.
-
-
-.. _option_log_dir:
-
-log_dir
-^^^^^^^
-
-:Type: string
-:Default: None
-
-Directory to save the content of each response in. Each response will be saved to a unique file.
-See details at :ref:`grab_debugging_response_saving`.
-
-
 .. _option_debug_post:
 
 debug_post

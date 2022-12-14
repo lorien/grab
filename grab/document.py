@@ -394,14 +394,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self.save(path)
         webbrowser.open("file://" + path)
 
-    @property
-    def time(self) -> int:
-        warn(
-            "Attribute `Document.time` is deprecated. "
-            "Use `Document.total_time` instead."
-        )
-        return self.total_time
-
     def __getstate__(self) -> Mapping[str, Any]:
         """Reset cached lxml objects which could not be pickled."""
         state = {}
@@ -424,11 +416,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     # TextExtension methods
 
-    def warn_byte_argument(self, byte: None | bool) -> None:
-        if byte is not None:
-            warn('Option "byte" is deprecated. Its value is ignored.', stacklevel=3)
-
-    def text_search(self, anchor: str | bytes, byte: None | bool = None) -> bool:
+    def text_search(self, anchor: str | bytes) -> bool:
         """Search the substring in response body.
 
         :param anchor: string to search
@@ -439,23 +427,18 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         If substring is found return True else False.
         """
-        self.warn_byte_argument(byte)
         assert self.body is not None
         if isinstance(anchor, str):
             return anchor in cast(str, self.unicode_body())
         return anchor in self.body
 
-    def text_assert(self, anchor: str | bytes, byte: None | bool = None) -> None:
+    def text_assert(self, anchor: str | bytes) -> None:
         """If `anchor` is not found then raise `DataNotFound` exception."""
-        self.warn_byte_argument(byte)
         if not self.text_search(anchor):
             raise DataNotFound("Substring not found: {}".format(str(anchor)))
 
-    def text_assert_any(
-        self, anchors: list[str | bytes], byte: None | bool = None
-    ) -> None:
+    def text_assert_any(self, anchors: list[str | bytes]) -> None:
         """If no `anchors` were found then raise `DataNotFound` exception."""
-        self.warn_byte_argument(byte)
         if not any(self.text_search(x) for x in anchors):
             raise DataNotFound(
                 "Substrings not found: %s" % ", ".join(map(str, anchors))
@@ -467,13 +450,11 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self,
         regexp: str | bytes | Pattern[str] | Pattern[bytes],
         flags: int = 0,
-        byte: None | bool = None,
         default: Any = NULL,
     ) -> Any:
         """Return content of first matching group of regexp found in response body."""
-        self.warn_byte_argument(byte)
         try:
-            match = self.rex_search(regexp, flags=flags, byte=byte)
+            match = self.rex_search(regexp, flags=flags)
         except DataNotFound as ex:
             if default is NULL:
                 raise DataNotFound("Regexp not found") from ex
@@ -485,14 +466,12 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self,
         regexp: str | bytes | Pattern[str] | Pattern[bytes],
         flags: int = 0,
-        byte: None | bool = None,
         default: Any = NULL,
     ) -> Any:
         """Search the regular expression in response body.
 
         Return found match object or None
         """
-        self.warn_byte_argument(byte)
         match: None | Match[bytes] | Match[str] = None
         assert self.body is not None
         if isinstance(regexp, (bytes, str)):
@@ -511,10 +490,8 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def rex_assert(
         self,
         rex: str | bytes | Pattern[str] | Pattern[bytes],
-        byte: None | bool = None,
     ) -> None:
         """Raise `DataNotFound` exception if `rex` expression is not found."""
-        self.warn_byte_argument(byte)
         # if given regexp not found, rex_search() will raise DataNotFound
         # because default argument is not set
         self.rex_search(rex)

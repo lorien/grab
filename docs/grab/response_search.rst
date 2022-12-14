@@ -22,13 +22,8 @@ If you prefer to raise an exception if string was not found, then use the `doc.t
         raise DataNotFound(u'Substring not found: %s' % anchor)
     grab.error.DataNotFound: Substring not found: tez
 
-By default, all text search methods operate with unicode; i.e., you should pass
-unicode arguments to these methods and these methods will search inside document's
-body converted to unicode. There is an option to work with raw bytes, just pass
-`byte=True` to any method::
-
-    >>> g = Grab('<h1>test</h1>')
-    >>> g.doc.text_search(b'tez', byte=True)
+All text search methods understands both str and bytes queries. If you search for str the document
+body converted to str is used. If you search for bytes the original bytes document body is used.
 
 
 Regexp Search
@@ -54,7 +49,7 @@ Method `doc.rex_assert` raises `DataNotFound` exception if no match is found::
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
       File "/home/lorien/web/grab/grab/document.py", line 189, in rex_assert
-        self.rex_search(rex, byte=byte)
+        self.rex_search(rex)
       File "/home/lorien/web/grab/grab/document.py", line 180, in rex_search
         raise DataNotFound('Could not find regexp: %s' % regexp)
     grab.error.DataNotFound: Could not find regexp: <_sre.SRE_Pattern object at 0x7fa40e97d1f8>

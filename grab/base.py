@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import itertools
 import logging
-import os
 import threading
 import typing
 import weakref
@@ -68,8 +67,6 @@ def default_config() -> GrabConfig:
         # Common
         "url": None,
         # Debugging
-        "log_file": None,
-        "log_dir": False,
         "debug_post": False,
         "debug_post_limit": 150,
         # Only for DEPRECATED transport
@@ -436,8 +433,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             except error.GrabError as ex:
                 self.exception = ex
                 self.reset_temporary_options()
-                if self.config["log_dir"]:
-                    self.save_failed_dump()
                 raise
             else:
                 with cast(BaseTransport, self.transport).wrap_transport_error():
@@ -548,19 +543,11 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         self.config["charset"] = self.doc.charset
 
-        if self.config["log_file"]:
-            assert self.doc.body is not None
-            with open(self.config["log_file"], "wb") as out:
-                out.write(self.doc.body)
-
         if self.config["cookiefile"]:
             self.cookies.save_to_file(self.config["cookiefile"])
 
         if self.config["reuse_referer"]:
             self.config["referer"] = self.doc.url
-
-        if self.config["log_dir"]:
-            self.save_dumps()
 
         return self.doc
 
@@ -569,17 +556,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.config["multipart_post"] = None
         self.config["method"] = None
         self.config["body_storage_filename"] = None
-
-    def save_failed_dump(self) -> None:
-        """Save dump of failed request for debugging.
-
-        This method is called then fatal network exception is raised.
-        The saved dump could be used for debugging the reason of the failure.
-        """
-        self.doc = cast(BaseTransport, self.transport).prepare_response(
-            self.config, document_class=self.document_class
-        )
-        self.save_dumps()
 
     def setup_document(self, content: bytes, **kwargs: Any) -> None:
         """Set up `response` object without real network requests.
@@ -644,29 +620,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             "Accept-Charset": "utf-8,windows-1251;q=0.7,*;q=0.%d" % randint(5, 7),
             "Keep-Alive": "300",
         }
-
-    def save_dumps(self) -> None:
-        thread_name = threading.current_thread().name.lower()
-        thread_name = "" if (thread_name == "mainthread") else "-%s" % thread_name
-        file_name = os.path.join(
-            self.config["log_dir"], "%02d%s.log" % (self.request_counter, thread_name)
-        )
-        with open(file_name, "wb") as out:
-            out.write(b"Request headers:\n")
-            out.write(b"THIS FEATURE IS NOT SUPPORTED ANYMORE")
-            out.write(b"\n")
-            out.write(b"Request body:\n")
-            out.write(b"THIS FEATURE IS NOT SUPPORTED ANYMORE")
-            out.write(b"\n\n")
-            out.write(b"Response headers:\n")
-            out.write(self.doc.head if (self.doc and self.doc.head) else b"")
-
-        file_extension = "html"
-        file_name = os.path.join(
-            self.config["log_dir"],
-            "%02d%s.%s" % (self.request_counter, thread_name, file_extension),
-        )
-        self.doc.save(file_name)
 
     def make_url_absolute(self, url: str, resolve_base: bool = False) -> str:
         """Make url absolute using previous request url as base url."""

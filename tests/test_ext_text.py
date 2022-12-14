@@ -41,27 +41,25 @@ class TextExtensionTest(BaseGrabTestCase):
         self.grab.setup_document(HTML, charset="cp1251")
 
     def test_search(self):
-        self.assertTrue(self.grab.doc.text_search("фыва".encode("cp1251"), byte=True))
+        self.assertTrue(self.grab.doc.text_search("фыва".encode("cp1251")))
         self.assertTrue(self.grab.doc.text_search("фыва"))
         self.assertFalse(self.grab.doc.text_search("фыва2"))
 
     # def test_search_usage_errors(self):
     #    with self.assertRaises(GrabMisuseError):
-    #        self.grab.doc.text_search("фыва", byte=True)
+    #        self.grab.doc.text_search("фыва")
     #    anchor = "фыва".encode("utf-8")
     #    self.assertRaises(GrabMisuseError, self.grab.doc.text_search, anchor)
 
     def test_assert_substring(self):
         self.grab.doc.text_assert("фыва")
-        self.grab.doc.text_assert("фыва".encode("cp1251"), byte=True)
+        self.grab.doc.text_assert("фыва".encode("cp1251"))
         self.assertRaises(DataNotFound, self.grab.doc.text_assert, "фыва2")
 
     def test_assert_substrings(self):
         self.grab.doc.text_assert_any(("фыва",))
         self.grab.doc.text_assert_any(("фывы нет", "фыва"))
-        self.grab.doc.text_assert_any(
-            ("фыва".encode("cp1251"), "где ты фыва?"), byte=True
-        )
+        self.grab.doc.text_assert_any(("фыва".encode("cp1251"), "где ты фыва?"))
         self.assertRaises(
             DataNotFound, self.grab.doc.text_assert_any, ("фыва, вернись", "фыва-а-а-а")
         )

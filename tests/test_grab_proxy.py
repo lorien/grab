@@ -5,6 +5,7 @@ from test_server import Response, TestServer
 from grab.proxylist import BaseProxySource
 from tests.util import BaseGrabTestCase, build_grab, temp_file
 
+TestServer.__test__ = False  # make pytest do not explore it for test cases
 ADDRESS = "127.0.0.1"
 
 

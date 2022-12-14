@@ -1,4 +1,4 @@
-.PHONY: bootstrap venv deps dirs clean test release mypy pylint flake8 bandit check build
+.PHONY: bootstrap venv deps dirs clean test release mypy pylint flake8 bandit check build quick
 
 SHELL := /bin/bash
 FILES_CHECK_MYPY = grab
@@ -66,3 +66,6 @@ build:
 demo:
 	tox -e py3-demo \
 	&& tox -e py38-demo
+
+quick:
+	pytest -n30 -x

@@ -50,7 +50,7 @@ class ExtensionRexTestCase(BaseGrabTestCase):
         # Search non-unicode rex in byte-string body
         rex = re.compile("(фыва)".encode("cp1251"))
         self.assertEqual(
-            "фыва".encode("cp1251"), self.grab.doc.rex_search(rex, byte=True).group(1)
+            "фыва".encode("cp1251"), self.grab.doc.rex_search(rex).group(1)
         )
 
         # # Search for non-unicode rex in unicode body should fail
@@ -62,7 +62,7 @@ class ExtensionRexTestCase(BaseGrabTestCase):
         # updated: whatever it has mean 10 years ago,
         # it works in new grab which ignores byte argument
         rex = re.compile("фыва", re.U)
-        self.assertEqual("фыва", self.grab.doc.rex_search(rex, byte=True).group(0))
+        self.assertEqual("фыва", self.grab.doc.rex_search(rex).group(0))
 
         # # Search for unexesting fragment
         rex = re.compile("(фыва2)", re.U)
@@ -70,7 +70,7 @@ class ExtensionRexTestCase(BaseGrabTestCase):
 
     def test_assert_rex(self):
         self.grab.doc.rex_assert(re.compile("фыва"))
-        self.grab.doc.rex_assert(re.compile("фыва".encode("cp1251")), byte=True)
+        self.grab.doc.rex_assert(re.compile("фыва".encode("cp1251")))
 
     def test_assert_rex_text(self):
         self.assertEqual("ха", self.grab.doc.rex_text('<em id="fly-em">([^<]+)'))

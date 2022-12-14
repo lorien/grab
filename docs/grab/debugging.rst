@@ -51,26 +51,3 @@ The output will be like this::
     POST request:
     foo                      : bar
     name                     : Ivan
-
-
-.. _grab_debugging_response_saving:
-
-Saving the content of requests and responses
---------------------------------------------
-
-You can ask Grab to save the content of each network response to the file
-located at the path passed as the `log_file` option::
-
-    >>> g.setup(log_file='log.html')
-
-Of course, each new response will overwrite the content of the previous
-response.
-
-If you want to log all traffic, then consider using the `log_dir` option, which
-tells Grab to save the contents of all responses to files inside the specified
-directory. Note that each such file will contain a request ID in its filename.
-For each response, there will be two files: XXX.log and XXX.html. The file
-XXX.html contains the raw response. Even if you requested an image or
-large movie, you'll get its raw content in that file. The file XXX.log contains
-headers of network response.  If you configure Grab with `debug=True`,
-the file XXX.log will also contain request headers.
