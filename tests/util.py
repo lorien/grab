@@ -1,8 +1,11 @@
+import functools
 import itertools
+import json
 import logging
 import os
 import platform
 from contextlib import contextmanager
+from copy import deepcopy
 from shutil import rmtree
 from tempfile import mkdtemp, mkstemp
 from unittest import TestCase
@@ -10,8 +13,6 @@ from unittest import TestCase
 from test_server import TestServer
 
 from grab import Grab, base
-
-from .config import load_config
 
 logger = logging.getLogger("tests.util")
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -22,7 +23,30 @@ GLOBAL = {
     "backends": set(),
     "network_service": None,
 }
-CONFIG = load_config()
+DEFAULT_CONFIG = {
+    "mongodb_task_queue": {
+        "connection_args": {},
+    },
+    "redis_task_queue": {
+        "connection_args": {},
+    },
+}
+
+
+@functools.cache  # pylint: disable=no-member
+def load_test_config():
+    config = deepcopy(DEFAULT_CONFIG)
+    try:
+        with open("test_config", encoding="utf-8") as inp:
+            local_config = json.load(inp)
+    except FileNotFoundError:
+        pass
+    else:
+        for key, val in local_config.items():
+            if key in DEFAULT_CONFIG:
+                raise Exception("Invalid config key: {}".format(key))
+            config[key] = val
+    return config
 
 
 @contextmanager

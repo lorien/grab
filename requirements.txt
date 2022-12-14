@@ -16,6 +16,7 @@ test_server>=0.0.35
 mock
 bumpversion
 pytest
+pytest-xdist
 build
 twine
 

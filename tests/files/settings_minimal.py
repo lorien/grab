@@ -1,1 +1,0 @@
-GRAB_SPIDER_CONFIG = {}

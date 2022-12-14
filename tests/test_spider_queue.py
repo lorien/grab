@@ -9,7 +9,7 @@ from grab.spider import Spider, Task
 from grab.spider.error import SpiderMisuseError
 from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.queue_backend.memory import MemoryTaskQueue
-from tests.util import CONFIG, BaseGrabTestCase, build_spider
+from tests.util import BaseGrabTestCase, build_spider, load_test_config
 
 
 class SpiderQueueMixin:
@@ -123,7 +123,7 @@ class SpiderMongodbQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
         from grab.spider.queue_backend.mongodb import MongodbTaskQueue
 
         return MongodbTaskQueue(
-            connection_args=CONFIG["mongodb_task_queue"]["connection_args"]
+            connection_args=load_test_config()["mongodb_task_queue"]["connection_args"]
         )
 
     def test_schedule(self):
@@ -164,7 +164,7 @@ class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
 
         return RedisTaskQueue(
             queue_name=("grab_test_%d" % time.time()),
-            connection_args=CONFIG["mongodb_task_queue"]["connection_args"],
+            connection_args=load_test_config()["mongodb_task_queue"]["connection_args"],
         )
 
     def test_delay_error(self):

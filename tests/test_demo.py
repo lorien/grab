@@ -7,7 +7,9 @@ from re import Pattern
 from typing import Union, cast
 
 
-def test_callable(inp: Callable[..., str | bytes | None]) -> Callable[..., str | bytes]:
+def process_callable(
+    inp: Callable[..., str | bytes | None]
+) -> Callable[..., str | bytes]:
     dup: Callable[..., str | bytes] = cast(
         # pylint: disable=deprecated-typing-alias, consider-alternative-union-syntax
         typing.Callable[..., typing.Union[str, bytes]],
@@ -18,18 +20,19 @@ def test_callable(inp: Callable[..., str | bytes | None]) -> Callable[..., str |
     return dup
 
 
-# def test_union(inp: str | None) -> str | None:
+# def process_union(inp: str | None) -> str | None:
 #    dup: str | None = inp
 #    return dup
 
-# def test_mutable_mapping(inp: MutableMapping[str, int]) -> MutableMapping[str, float]:
+# def process_mutable_mapping(inp: MutableMapping[str, int]
+# ) -> MutableMapping[str, float]:
 #    dup: MutableMapping[str, int] = inp
 #    return cast(
 #        typing.MutableMapping[str, float],  # pylint: disable=deprecated-typing-alias
 #        dup,
 #    )
 #
-def test_re_pattern(
+def process_re_pattern(
     inp: Pattern[str] | Pattern[bytes] | None,
 ) -> Pattern[str] | Pattern[bytes]:
     dup: Pattern[str] | Pattern[bytes] = cast(
@@ -42,18 +45,18 @@ def test_re_pattern(
     return dup
 
 
-def test_isinstance_generic(inp: Mapping[str, int]) -> bool:
-    return isinstance(inp, typing.Mapping[str, int])
+def process_isinstance_generic(inp: Mapping[str, int]) -> bool:
+    return isinstance(inp, typing.Mapping)
 
 
-def main() -> None:
-    test_callable(lambda: "foo")
-    test_re_pattern(re.compile("foo"))
-    test_isinstance_generic({"foo": 1})
-    # test_union("foo")
-    # test_union(None)
-    # test_mutable_mapping({"foo": 1})
+def test_main() -> None:
+    process_callable(lambda: "foo")
+    process_re_pattern(re.compile("foo"))
+    process_isinstance_generic({"foo": 1})
+    # process_union("foo")
+    # process_union(None)
+    # process_mutable_mapping({"foo": 1})
 
 
 if __name__ == "__main__":
-    main()
+    test_main()

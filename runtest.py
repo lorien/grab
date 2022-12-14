@@ -19,46 +19,45 @@ VALID_BACKENDS = {"mongodb", "redis", "pyquery"}
 # * Test redirect and response.url after redirect
 GRAB_TEST_LIST = (
     # *** Internal API
-    "tests.grab_api",
-    "tests.grab_transport",
-    "tests.response_class",
-    "tests.grab_debug",
+    "tests.test_grab_api",
+    "tests.test_grab_transport",
+    "tests.test_grab_response",
+    "tests.test_grab_debug",
     # *** Response processing
-    "tests.grab_xml_processing",
-    "tests.grab_response_body_processing",
-    "tests.grab_charset",
-    "tests.grab_redirect",
-    "tests.grab_document",
+    "tests.test_grab_xml_processing",
+    "tests.test_grab_response_body_processing",
+    "tests.test_grab_charset",
+    "tests.test_grab_redirect",
+    "tests.test_grab_document",
     # *** Network
-    "tests.grab_get_request",
-    "tests.grab_post_request",
-    "tests.grab_request",
-    "tests.grab_user_agent",
-    "tests.grab_cookies",
-    "tests.grab_url_processing",
-    "tests.grab_timeout",
+    "tests.test_grab_get_request",
+    "tests.test_grab_post_request",
+    "tests.test_grab_request",
+    "tests.test_grab_user_agent",
+    "tests.test_grab_cookies",
+    "tests.test_grab_url_processing",
+    "tests.test_grab_timeout",
     # *** Refactor
-    "tests.grab_proxy",
-    "tests.grab_upload_file",
-    "tests.grab_limit_option",
-    "tests.grab_charset_issue",
-    "tests.grab_pickle",
-    "tests.proxy",
+    "tests.test_grab_proxy",
+    "tests.test_grab_upload_file",
+    "tests.test_grab_limit_option",
+    "tests.test_grab_charset_issue",
+    "tests.test_grab_pickle",
+    "tests.test_proxylist",
     # *** Extensions
-    "tests.ext_text",
-    "tests.ext_rex",
-    "tests.ext_lxml",
-    "tests.ext_form",
-    "tests.ext_doc",
+    "tests.test_ext_text",
+    "tests.test_ext_rex",
+    "tests.test_ext_lxml",
+    "tests.test_ext_form",
+    "tests.test_ext_doc",
     # *** util.module
-    "tests.util_log",
+    "tests.test_util_log",
     # *** grab.export
-    "tests.grab_error",
-    "tests.ext_pyquery",
+    "tests.test_grab_error",
+    "tests.test_ext_pyquery",
     # *** Other things
-    "tests.xml_security",
-    "tests.raw_server",
-    "tests.misc",
+    "tests.test_xml_security",
+    "tests.test_server",
     "tests.test_util_http",
 )
 
@@ -67,14 +66,14 @@ GRAB_TEST_LIST = (
 # ************
 
 SPIDER_TEST_LIST = (
-    "tests.spider_task",
-    "tests.spider",
-    "tests.spider_proxy",
-    "tests.spider_queue",
-    "tests.spider_misc",
-    "tests.spider_error",
-    "tests.spider_stat",
-    "tests.spider_multiprocess",
+    "tests.test_spider_task",
+    "tests.test_spider",
+    "tests.test_spider_proxy",
+    "tests.test_spider_queue",
+    "tests.test_spider_misc",
+    "tests.test_spider_error",
+    "tests.test_spider_stat",
+    "tests.test_spider_multiprocess",
 )
 
 

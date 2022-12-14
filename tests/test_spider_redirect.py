@@ -50,11 +50,13 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         bot = build_spider(TestSpider)
         bot.run()
+        print("!!!!!!!!!!!", bot.stat.counters)
         # Different errors depending on combination
         # of network service and transport used
         self.assertEqual(1, len(bot.stat.collections["network-count-rejected"]))
         self.assertTrue(
             bot.stat.counters["error:new-connection-error"] == 5
+            or bot.stat.counters["error:location-parse-error"]
             or bot.stat.counters["error:grab-could-not-resolve-host-error"] == 5
             or bot.stat.counters["error:couldnt-resolve-host"] == 5
         )

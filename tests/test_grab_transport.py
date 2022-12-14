@@ -85,7 +85,7 @@ class TestTransportTestCase(BaseGrabTestCase):
         grab = Grab()
         # AttributeError comes from setup_transport method
         with self.assertRaises(AttributeError):
-            grab.setup_transport("tests.grab_transport.zzz")
+            grab.setup_transport("tests.test_grab_transport.zzz")
 
     def test_invalid_transport_not_collable_or_string(self):
         grab = Grab()
