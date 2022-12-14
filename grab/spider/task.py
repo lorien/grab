@@ -34,11 +34,11 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         raw: bool = False,
         callback: None | Callable[..., None] = None,
         fallback_name: None | str = None,
+        store: None | dict[str, Any] = None,
         # deprecated
         disable_cache: bool = False,
         refresh_cache: bool = False,
         cache_timeout: None | int = None,
-        store: None | dict[str, Any] = None,
         # kwargs
         **kwargs: Any,
     ) -> None:

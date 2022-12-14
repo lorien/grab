@@ -92,14 +92,10 @@ class Spider:
         priority_mode: str = "random",
         meta: None | dict[str, Any] = None,
         config: None | dict[str, Any] = None,
-        args: None | dict[str, Any] = None,
         parser_requests_per_process: int = 10000,
         parser_pool_size: int = 1,
         network_service: None | BaseNetworkService = None,
         grab_transport: str = "urllib3",
-        # Deprecated
-        request_pause: Any = None,
-        only_cache: bool = False,
     ) -> None:
         """Create Spider instance, duh.
 
@@ -118,7 +114,6 @@ class Spider:
         * meta - arbitrary user data
         * retry_rebuild_user_agent - generate new random user-agent for each
             network request which is performed again due to network error
-        * args - command line arguments parsed with `setup_arg_parser` method
         """
         self.fatal_error_queue: Queue[FatalErrorQueueItem] = Queue()
         self._started: None | float = None
@@ -127,10 +122,6 @@ class Spider:
         self.parser_requests_per_process = parser_requests_per_process
         self.stat = Stat()
         self.task_queue: BaseTaskQueue = task_queue if task_queue else MemoryTaskQueue()
-        if args is None:
-            self.args = {}
-        else:
-            self.args = args
         if config is not None:
             self.config = config
         else:
@@ -154,11 +145,7 @@ class Spider:
                 'Value of priority_mode option should be "random" or "const"'
             )
         self.priority_mode = priority_mode
-        if only_cache:
-            raise_feature_is_deprecated("Cache feature")
         self.work_allowed = True
-        if request_pause is not None:
-            warn("Option `request_pause` is deprecated and is not supported anymore")
         self.proxylist_enabled: None | bool = None
         self.proxylist: None | ProxyList = None
         self.proxy: None | Proxy = None
