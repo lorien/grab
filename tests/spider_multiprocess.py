@@ -34,7 +34,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         # inside handler applied to main spider instance.
         self.server.add_response(Response(), count=-1)
         bot = build_spider(self.SimpleSpider)
-        bot.setup_queue()
         bot.meta["url"] = self.server.get_url()
         bot.add_task(Task("page", self.server.get_url()))
         bot.run()

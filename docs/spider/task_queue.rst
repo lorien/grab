@@ -39,26 +39,25 @@ In-memory backend:
 
 .. code:: python
 
-    bot = SomeSpider()
-    bot.setup_queue() # очередь в памяти
+    bot = SomeSpider() # task queue is stored in memory
     # OR (that is the same)
-    bot.setup_queue(backend='memory')
+    from grab.spider.queue_backend.memory import MemoryTaskQueue
+
+    bot = SomeSpider(task_queue=MemoryTaskQueue())
 
 
 MongoDB backend:
 
 .. code:: python
 
-    bot = SomeSpider()
-    bot.setup_queue(backend='mongo', database='database-name')
+    from grab.spider.queue_backend.mongodb import MongodbTaskQueue
 
-All arguments except `backend` go to MongoDB connection constructor. You
-can setup database name, host name, port, authorization arguments and other
-things.
+    bot = SomeSpider(task_queue=MongodbTaskQueue())
 
 Redis backend:
 
 .. code:: python
 
-    bot = SomeSpider()
-    bot.setup_queue(backend='redis', db=1, port=7777)
+    from grab.spider.queue_backend.redis import RedisTaskQueue
+
+    bot = SomeSpider(task_queue=RedisTaskQueue())

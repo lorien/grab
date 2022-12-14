@@ -11,7 +11,7 @@ To run all tests run the command:
 
 .. code:: shell
 
-	./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
+	./runtest.py --test-all --backend=mongodb,redis,pyquery
 
 
 .. _usage_testing_control:
@@ -25,10 +25,10 @@ available options for `runtest.py`::
     --test-grab - Grab API tests
     --test-spider - Grab::Spider API tests
     --test-all - shortcut to run both Grab and Grab::Spider tests
-    --backend-redis - enable tests of things that work with redis
-    --backend-mysql - enable tests of things that work with mysql
-    --backend-postgresql - enable tests of things that work with postgresql
-    --backend-mongo - enable tests of things that work with mongo
+    --backend=redis - enable tests of things that work with redis
+    --backend=mysql - enable tests of things that work with mysql
+    --backend=mongodb - enable tests of things that work with mongo
+    --backend=pyquery - enable tests of things that work with pyquery
 
 If you want to run specific test cases then use the `-t` option. For example:
 
@@ -87,7 +87,7 @@ Test Coverage
 To see test coverage run the commands::
 
     coverage erase
-    coverage run --source=grab ./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
+    coverage run --source=grab ./runtest.py --test-all --backend=mongodb,redis,pyquery
     coverage report -m
 
 Also you can use shortcut::

@@ -20,7 +20,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         # Automatic random priority
         base.RANDOM_TASK_PRIORITY_RANGE = (10, 20)
         bot = build_spider(SimpleSpider, priority_mode="random")
-        bot.setup_queue()
         task = Task("baz", url="http://xxx.com")
         self.assertEqual(task.priority, None)
         bot.add_task(task)
@@ -29,7 +28,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         # Automatic constant priority
         base.DEFAULT_TASK_PRIORITY = 33
         bot = build_spider(SimpleSpider, priority_mode="const")
-        bot.setup_queue()
         task = Task("baz", url="http://xxx.com")
         self.assertEqual(task.priority, None)
         bot.add_task(task)
@@ -38,7 +36,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         # Automatic priority does not override explicitly set priority
         base.DEFAULT_TASK_PRIORITY = 33
         bot = build_spider(SimpleSpider, priority_mode="const")
-        bot.setup_queue()
         task = Task("baz", url="http://xxx.com", priority=1)
         self.assertEqual(1, task.priority)
         bot.add_task(task)
@@ -50,7 +47,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot = build_spider(
             SimpleSpider,
         )
-        bot.setup_queue()
         task = Task("baz", url="http://xxx.com")
         self.assertEqual("http://xxx.com", task.url)
         bot.add_task(task)
@@ -67,7 +63,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot = build_spider(
             SimpleSpider,
         )
-        bot.setup_queue()
 
         task = Task("baz", url="http://xxx.com")
         bot.add_task(task.clone())
@@ -95,7 +90,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot = build_spider(
             SimpleSpider,
         )
-        bot.setup_queue()
 
         grab = Grab()
         grab.setup(url=self.server.get_url())
@@ -115,7 +109,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot = build_spider(
             TestSpider,
         )
-        bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
         self.assertRaises(NoTaskHandler, bot.run)
 
@@ -127,14 +120,12 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         self.server.add_response(Response(status=502), count=4)
 
         bot = build_spider(TestSpider, network_try_limit=1)
-        bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
         self.assertEqual(0, len(bot.stat.collections["codes"]))
 
         bot = build_spider(TestSpider, network_try_limit=1)
-        bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url(), raw=True))
         bot.add_task(Task("page", url=self.server.get_url(), raw=True))
         bot.run()
@@ -161,7 +152,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
             TestSpider,
         )
         bot.meta["tokens"] = tokens
-        bot.setup_queue()
         # classic handler
         bot.add_task(Task("page", url=self.server.get_url()))
         # callback option overried classic handler
@@ -174,21 +164,20 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         self.assertEqual(["0_handler", "1_func", "1_func", "1_func"], sorted(tokens))
 
     def test_task_url_and_grab_options(self):
-        class TestSpider(Spider):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                self.done = False
+        # class TestSpider(Spider):
+        #    def __init__(self, *args, **kwargs):
+        #        super().__init__(*args, **kwargs)
+        #        self.done = False
 
-            def setup(self):
-                self.done = False
+        #    def setup(self):
+        #        self.done = False
 
-            def task_page(self, unused_grab, unused_task):
-                self.done = True
+        #    def task_page(self, unused_grab, unused_task):
+        #        self.done = True
 
-        bot = build_spider(
-            TestSpider,
-        )
-        bot.setup_queue()
+        # bot = build_spider(
+        #    TestSpider,
+        # )
         grab = Grab()
         grab.setup(url=self.server.get_url())
         self.assertRaises(
@@ -281,7 +270,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
                 self.stat.collect("points", grab.config["timeout"])
 
         bot = build_spider(TestSpider, meta={"server": self.server})
-        bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.add_task(Task("page", grab=Grab(url=self.server.get_url(), timeout=1)))
         bot.run()
@@ -306,7 +294,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
                 self.stat.collect("points", grab.config["timeout"])
 
         bot = build_spider(TestSpider, meta={"server": self.server})
-        bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.add_task(Task("page", grab=Grab(url=self.server.get_url(), timeout=75)))
         bot.run()
@@ -319,7 +306,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot = build_spider(
             TestSpider,
         )
-        bot.setup_queue()
         bot.add_task(Task("page", url="zz://zz"))
         self.assertEqual(0, bot.task_queue.size())
         bot.add_task(Task("page", url="zz://zz"), raise_error=False)
@@ -334,7 +320,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot = build_spider(
             TestSpider,
         )
-        bot.setup_queue()
         self.assertRaises(
             SpiderError, bot.add_task, Task("page", url="zz://zz"), raise_error=True
         )
@@ -353,7 +338,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
             TestSpider,
             parser_requests_per_process=2,
         )
-        bot.setup_queue()
         for _ in range(5):
             bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
@@ -368,7 +352,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
                     yield task.clone(fin=True)
 
         bot = build_spider(TestSpider)
-        bot.setup_queue()
 
         grab = Grab()
         grab.setup(url=self.server.get_url(), post={"x": "y"})
@@ -386,7 +369,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
                 raise ResponseNotValid
 
         bot = build_spider(SomeSimpleSpider)
-        bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
         self.assertEqual(bot.task_try_limit, bot.stat.counters["xxx"])
@@ -403,7 +385,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
                 pass
 
         bot = build_spider(TestSpider)
-        bot.setup_queue()
         task = Task("page", url=self.server.get_url())
         bot.add_task(task)
         bot.run()
@@ -421,7 +402,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
                 yield from ()
 
         bot = build_spider(TestSpider)
-        bot.setup_queue()
         task = Task("page", url=self.server.get_url())
         bot.add_task(task)
         bot.run()

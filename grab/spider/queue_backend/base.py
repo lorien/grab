@@ -3,12 +3,13 @@ from __future__ import annotations
 from abc import abstractmethod
 from datetime import datetime
 from typing import Any
+from uuid import uuid4
 
 from grab.spider.task import Task
 
 
 class BaseTaskQueue:
-    def __init__(self, spider_name: str, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         pass
 
     def put(
@@ -37,3 +38,6 @@ class BaseTaskQueue:
 
     def close(self) -> None:
         raise NotImplementedError
+
+    def random_queue_name(self) -> str:
+        return "task_queue_{}".format(str(uuid4()).replace("-", "_"))

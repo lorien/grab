@@ -29,7 +29,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(), count=2)
         bot = build_spider(TestSpider)
-        bot.setup_queue()
         bot.add_task(Task("page_valid", url=self.server.get_url()))
         bot.add_task(Task("page_fail", url=self.server.get_url()))
         bot.run()
@@ -48,7 +47,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 pass
 
         bot = build_spider(TestSpider)
-        bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
         bot.render_stats()

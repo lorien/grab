@@ -18,7 +18,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     def test_spider(self):
         self.server.add_response(Response(data=b"Hello spider!"))
         bot = build_spider(SimpleSpider)
-        bot.setup_queue()
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
         self.assertEqual(b"Hello spider!", bot.stat.collections["SAVED_ITEM"][0])
@@ -31,14 +30,12 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.server.add_response(Response(data=b"Hello spider!", sleep=1.1))
 
         bot = build_spider(CustomSimpleSpider, network_try_limit=1)
-        bot.setup_queue()
         # bot.setup_grab(connect_timeout=1, timeout=1)
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
         self.assertEqual(bot.stat.counters["spider:request-network"], 1)
 
         bot = build_spider(CustomSimpleSpider, network_try_limit=2)
-        bot.setup_queue()
         # bot.setup_grab(connect_timeout=1, timeout=1)
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
@@ -53,13 +50,11 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         bot = build_spider(CustomSimpleSpider, network_try_limit=1)
         # bot.setup_grab(connect_timeout=1, timeout=1)
-        bot.setup_queue()
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
         self.assertEqual(bot.stat.counters["spider:task-baz"], 1)
 
         bot2 = build_spider(SimpleSpider, task_try_limit=2)
-        bot2.setup_queue()
         bot2.add_task(Task("baz", self.server.get_url(), task_try_count=3))
         bot2.run()
         self.assertEqual(bot2.stat.counters["spider:request-network"], 0)
@@ -68,7 +63,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.server.add_response(Response(status=403))
         self.server.add_response(Response(data=b"xxx"))
         bot = build_spider(SimpleSpider)
-        bot.setup_queue()
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
         self.assertEqual(b"xxx", bot.stat.collections["SAVED_ITEM"][0])
@@ -114,7 +108,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(), count=-1)
         bot = build_spider(TestSpider)
-        bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
 
@@ -136,7 +129,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.server.add_response(Response(status=403))
 
         bot = build_spider(TestSpider, network_try_limit=1)
-        bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
         self.assertEqual(bot.points, [1])
@@ -159,7 +151,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.server.add_response(Response(status=403))
 
         bot = build_spider(TestSpider, network_try_limit=1)
-        bot.setup_queue()
         bot.add_task(
             Task("page", url=self.server.get_url(), fallback_name="fallback_zz")
         )
@@ -175,7 +166,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 return False, "zz"
 
         bot = build_spider(TestSpider)
-        bot.setup_queue()
         bot.add_task(
             Task("page", url=self.server.get_url(), fallback_name="fallback_zz")
         )
@@ -195,7 +185,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(), count=-1)
         bot = build_spider(TestSpider)
-        bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
         # bot.run()
         # self.assertEqual(1, bot.stat.counters['spider:error-spidererror'])
@@ -208,7 +197,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(), count=-1)
         bot = build_spider(TestSpider)
-        bot.setup_queue()
         for _ in range(5):
             bot.add_task(Task("page", url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
@@ -222,6 +210,5 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(), count=-1)
         bot = build_spider(TestSpider)
-        bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
         self.assertRaises(FatalError, bot.run)

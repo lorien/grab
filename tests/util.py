@@ -11,15 +11,18 @@ from test_server import TestServer
 
 from grab import Grab, base
 
+from .config import load_config
+
 logger = logging.getLogger("tests.util")
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 ADDRESS = "127.0.0.1"
 NON_ROUTABLE_IP = "10.0.0.0"
 
 GLOBAL = {
-    "backends": [],
+    "backends": set(),
     "network_service": None,
 }
+CONFIG = load_config()
 
 
 @contextmanager

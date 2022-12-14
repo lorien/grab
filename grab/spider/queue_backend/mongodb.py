@@ -21,26 +21,25 @@ LOG = logging.getLogger("grab.spider.queue_backend.mongodb")
 class MongodbTaskQueue(BaseTaskQueue):
     def __init__(
         self,
-        spider_name: str,
-        database: str,
-        queue_name: None | str = None,
-        **kwargs: Any,
+        connection_args: None | dict[str, Any] = None,
+        collection_name: None | str = None,
+        database_name: str = "grab_spider",
     ) -> None:
-        # All "unexpected" kwargs goes to "pymongo.MongoClient()" method
-        if queue_name is None:
-            queue_name = "task_queue_%s" % spider_name
-
-        self.database = database
-        self.queue_name = queue_name
-        self.connection: MongoClient[JsonDocument] = MongoClient(**kwargs)
-        self.collection: Collection[JsonDocument] = self.connection[self.database][
-            self.queue_name
+        super().__init__()
+        self.database_name: str = database_name
+        self.collection_name: str = collection_name or self.random_queue_name()
+        self.connection: MongoClient[JsonDocument] = MongoClient(
+            **(connection_args or {})
+        )
+        self.collection: Collection[JsonDocument] = self.connection[self.database_name][
+            self.collection_name
         ]
-        LOG.debug("Using collection: %s", self.collection)
-
+        LOG.debug(
+            "Using collection %s in database %s",
+            self.collection_name,
+            self.database_name,
+        )
         self.collection.create_index([("priority", 1)])
-
-        super().__init__(spider_name, **kwargs)
 
     def size(self) -> int:
         return self.collection.count_documents({})

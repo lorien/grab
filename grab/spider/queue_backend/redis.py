@@ -36,14 +36,17 @@ class CustomPriorityQueue(PriorityQueue):  # type: ignore # FIXME
 
 class RedisTaskQueue(BaseTaskQueue):
     def __init__(
-        self, spider_name: str, queue_name: None | str = None, **kwargs: Any
+        self,
+        queue_name: None | str = None,
+        connection_args: None | dict[str, Any] = None,
     ) -> None:
-        super().__init__(spider_name, **kwargs)
-        self.spider_name = spider_name
-        if queue_name is None:
-            queue_name = "task_queue_%s" % spider_name
-        self.queue_name = queue_name
-        self.queue_object = CustomPriorityQueue(queue_name, **kwargs)
+        super().__init__()
+        self.queue_name: str = (
+            queue_name if queue_name is not None else self.random_queue_name()
+        )
+        self.queue_object = CustomPriorityQueue(
+            self.queue_name, **(connection_args or {})
+        )
         logging.debug("Redis queue key: %s", self.queue_name)
 
     def put(
@@ -64,7 +67,7 @@ class RedisTaskQueue(BaseTaskQueue):
         self.queue_object.push({pickle.dumps(task): priority})
 
     def get(self) -> Task:
-        task = self.queue_object.pop()
+        task: None | tuple[Any, int] = self.queue_object.pop()
         if task is None:
             raise queue.Empty()
         return cast(

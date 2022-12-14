@@ -49,7 +49,6 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             # Simple test, one task
             bot = build_spider(SimpleSpider, thread_number=1)
             bot.load_proxylist(proxy_file, "text_file")
-            bot.setup_queue()
             bot.add_task(Task("baz", grab=Grab(url="http://yandex.ru", debug=True)))
             bot.run()
             serv = [
@@ -71,7 +70,6 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             # By default auto_change is True
             bot = build_spider(SimpleSpider, thread_number=1)
             bot.load_proxylist(proxy_file, "text_file")
-            bot.setup_queue()
             for _ in range(10):
                 bot.add_task(Task("baz", "http://yandex.ru"))
             bot.run()
@@ -97,7 +95,6 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             # By default auto_init is True
             bot = build_spider(SimpleSpider, thread_number=1)
             bot.load_proxylist(proxy_file, "text_file", auto_change=False)
-            bot.setup_queue()
             for _ in range(1):
                 bot.add_task(Task("baz", "http://yandex.ru"))
             bot.run()
@@ -127,7 +124,6 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             bot.load_proxylist(
                 proxy_file, "text_file", auto_change=False, auto_init=False
             )
-            bot.setup_queue()
             for _ in range(10):
                 bot.add_task(Task("baz", self.server.get_url()))
             bot.run()
@@ -157,7 +153,6 @@ class TestSpiderProxyCase(BaseGrabTestCase):
                 return None
 
         bot = build_spider(TestSpider)
-        bot.setup_queue()
         bot.load_proxylist(CustomProxySource())
         bot.add_task(Task("page", url="http://yandex.ru/"))
         bot.run()

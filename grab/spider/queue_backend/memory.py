@@ -3,15 +3,14 @@ from __future__ import annotations
 from contextlib import suppress
 from datetime import datetime
 from queue import Empty, PriorityQueue
-from typing import Any
 
 from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.task import Task
 
 
 class MemoryTaskQueue(BaseTaskQueue):
-    def __init__(self, spider_name: str, **kwargs: Any) -> None:
-        super().__init__(spider_name, **kwargs)
+    def __init__(self) -> None:
+        super().__init__()
         self.queue_object: PriorityQueue[tuple[int, Task]] = PriorityQueue()
         self.schedule_list: list[tuple[datetime, Task]] = []
 

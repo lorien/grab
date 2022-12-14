@@ -15,7 +15,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 pass
 
         bot = build_spider(TestSpider)
-        bot.setup_queue()
         bot.add_task(Task("page", url=self.server.get_url()))
 
         self.server.add_response(

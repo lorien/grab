@@ -14,6 +14,7 @@ from typing import Any, Literal, cast
 
 from grab.base import Grab
 from grab.error import (
+    GrabFeatureIsDeprecated,
     GrabInvalidResponse,
     GrabInvalidUrl,
     GrabNetworkError,
@@ -25,6 +26,7 @@ from grab.error import (
 from grab.proxylist import BaseProxySource, Proxy, ProxyList
 from grab.spider.error import FatalError, NoTaskHandler, SpiderError, SpiderMisuseError
 from grab.spider.queue_backend.base import BaseTaskQueue
+from grab.spider.queue_backend.memory import MemoryTaskQueue
 from grab.spider.service.base import BaseService
 from grab.spider.task import Task
 from grab.stat import Stat
@@ -82,6 +84,7 @@ class Spider:
     # pylint: disable=too-many-locals, too-many-arguments
     def __init__(
         self,
+        task_queue: None | BaseTaskQueue = None,
         thread_number: None | int = None,
         network_try_limit: None | int = None,
         task_try_limit: None | int = None,
@@ -118,13 +121,12 @@ class Spider:
         * args - command line arguments parsed with `setup_arg_parser` method
         """
         self.fatal_error_queue: Queue[FatalErrorQueueItem] = Queue()
-        self.task_queue_parameters = None
         self._started: None | float = None
         assert grab_transport in {"urllib3"}
         self.grab_transport_name = grab_transport
         self.parser_requests_per_process = parser_requests_per_process
         self.stat = Stat()
-        self.task_queue: None | BaseTaskQueue = None
+        self.task_queue: BaseTaskQueue = task_queue if task_queue else MemoryTaskQueue()
         if args is None:
             self.args = {}
         else:
@@ -207,38 +209,43 @@ class Spider:
     def setup_cache(self, *_args: Any, **_kwargs: Any) -> None:
         raise_feature_is_deprecated("Cache feature")
 
-    def load_queue_class(self, backend: str) -> type[BaseTaskQueue]:
-        # pylint: disable=import-outside-toplevel
-        if backend == "mongodb":
-            from grab.spider.queue_backend.mongodb import MongodbTaskQueue
+    # def load_queue_class(self, backend: str) -> type[BaseTaskQueue]:
+    #    # pylint: disable=import-outside-toplevel
+    #    if backend == "mongodb":
+    #        from grab.spider.queue_backend.mongodb import MongodbTaskQueue
 
-            return MongodbTaskQueue
-        if backend == "redis":
-            from grab.spider.queue_backend.redis import RedisTaskQueue
+    #        return MongodbTaskQueue
+    #    if backend == "redis":
+    #        from grab.spider.queue_backend.redis import RedisTaskQueue
 
-            return RedisTaskQueue
-        if backend == "memory":
-            from grab.spider.queue_backend.memory import MemoryTaskQueue
+    #        return RedisTaskQueue
+    #    if backend == "memory":
+    #        from grab.spider.queue_backend.memory import MemoryTaskQueue
 
-            return MemoryTaskQueue
-        raise SpiderMisuseError(f"Invalid task queue backend name: {backend}")
+    #        return MemoryTaskQueue
+    #    raise SpiderMisuseError(f"Invalid task queue backend name: {backend}")
 
     def setup_queue(self, backend: str = "memory", **kwargs: Any) -> None:
-        """Set up queue.
+        """Set up queue."""
+        raise GrabFeatureIsDeprecated(
+            """Method Spider.setup_queue is deprecated. Now MemoryTaskQueue is used
+            by default. If you need custom task queue pass instance of queue class
+            in task_queue parameter in constructor of Spider class."""
+        )
 
-        :param backend: Backend name
-            Should be one of the following: 'memory', 'redis' or 'mongo'.
-        :param kwargs: Additional credentials for backend.
-        """
-        if backend == "mongo":
-            warn('Backend name "mongo" is deprecated. Use "mongodb" instead.')
-            backend = "mongodb"
-        logger.debug("Using %s backend for task queue", backend)
-        queue_cls = self.load_queue_class(backend)
-        # mod = __import__(
-        #    "grab.spider.queue_backend.%s" % backend, globals(), locals(), ["foo"]
-        # )
-        self.task_queue = queue_cls(spider_name=self.get_spider_name(), **kwargs)
+    #    :param backend: Backend name
+    #        Should be one of the following: 'memory', 'redis' or 'mongo'.
+    #    :param kwargs: Additional credentials for backend.
+    #    """
+    #    if backend == "mongo":
+    #        warn('Backend name "mongo" is deprecated. Use "mongodb" instead.')
+    #        backend = "mongodb"
+    #    logger.debug("Using %s backend for task queue", backend)
+    #    queue_cls = self.load_queue_class(backend)
+    #    # mod = __import__(
+    #    #    "grab.spider.queue_backend.%s" % backend, globals(), locals(), ["foo"]
+    #    # )
+    #    self.task_queue = queue_cls(spider_name=self.get_spider_name(), **kwargs)
 
     def add_task(
         self,
@@ -249,11 +256,6 @@ class Spider:
         """Add task to the task queue."""
         if queue is None:
             queue = self.task_queue
-        if queue is None:
-            raise SpiderMisuseError(
-                "You should configure task queue before "
-                "adding tasks. Use `setup_queue` method."
-            )
         if task.priority is None or not task.priority_set_explicitly:
             task.priority = self.generate_task_priority()
             task.priority_set_explicitly = False
@@ -484,9 +486,9 @@ class Spider:
 
     def get_task_from_queue(self) -> None | Literal[True] | Task:
         try:
-            return cast(BaseTaskQueue, self.task_queue).get()
+            return self.task_queue.get()
         except Empty:
-            size = cast(BaseTaskQueue, self.task_queue).size()
+            size = self.task_queue.size()
             if size:
                 return True
             return None
@@ -584,12 +586,12 @@ class Spider:
         # this method is expected to be called
         # after "spider.run()" is called
         # i.e. the "self.task_queue" is set
-        return cast(BaseTaskQueue, self.task_queue)
+        return self.task_queue
 
     def is_idle_estimated(self) -> bool:
         return (
             not self.task_generator_service.is_alive()
-            and not cast(BaseTaskQueue, self.task_queue).size()
+            and not self.task_queue.size()
             and not self.task_dispatcher.input_queue.qsize()
             and not self.parser_service.input_queue.qsize()
             and not self.parser_service.is_busy()
@@ -622,8 +624,6 @@ class Spider:
         services = []
         try:
             self.prepare()
-            if self.task_queue is None:
-                self.setup_queue()
             self.process_initial_urls()
             services = [
                 self.task_dispatcher,
@@ -664,9 +664,8 @@ class Spider:
                 logger.error("The %s has not stopped :(", srv)
         self.stat.print_progress_line()
         self.shutdown()
-        if self.task_queue:
-            self.task_queue.clear()
-            self.task_queue.close()
+        self.task_queue.clear()
+        self.task_queue.close()
         logger.debug("Work done")
 
     def log_failed_network_result(self, res: NetworkResult) -> None:

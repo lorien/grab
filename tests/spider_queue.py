@@ -1,31 +1,35 @@
 import time
-from typing import Any
+from abc import abstractmethod
 from unittest import TestCase
 
 from test_server import Response
 
+from grab.error import GrabFeatureIsDeprecated
 from grab.spider import Spider, Task
 from grab.spider.error import SpiderMisuseError
 from grab.spider.queue_backend.base import BaseTaskQueue
-from test_settings import MONGODB_CONNECTION, REDIS_CONNECTION
-from tests.util import BaseGrabTestCase, build_spider
+from grab.spider.queue_backend.memory import MemoryTaskQueue
+from tests.util import CONFIG, BaseGrabTestCase, build_spider
 
 
 class SpiderQueueMixin:
-    server: Any
-    setup_queue: Any
-    stat: Any
-    # assertEqual: Any
-
     class SimpleSpider(Spider):
         def task_page(self, unused_grab, task):
             self.stat.collect("url_history", task.url)
             self.stat.collect("priority_history", task.priority)
 
+    @abstractmethod
+    def build_task_queue(self) -> BaseTaskQueue:
+        raise NotImplementedError
+
     def test_basic_priority(self):
         self.server.add_response(Response(), count=5)
-        bot = build_spider(self.SimpleSpider, parser_pool_size=1, thread_number=1)
-        self.setup_queue(bot)
+        bot = build_spider(
+            self.SimpleSpider,
+            parser_pool_size=1,
+            thread_number=1,
+            task_queue=self.build_task_queue(),
+        )
         bot.task_queue.clear()
         requested_urls = {}
         for priority in (4, 2, 1, 5):
@@ -46,8 +50,10 @@ class SpiderQueueMixin:
                 self.final_taskq_size = self.task_queue.size()
 
         self.server.add_response(Response(), count=5)
-        bot = build_spider(CustomSpider)
-        self.setup_queue(bot)
+        bot = build_spider(
+            CustomSpider,
+            task_queue=self.build_task_queue(),
+        )
         bot.task_queue.clear()
         for _ in range(5):
             bot.add_task(Task("page", url=self.server.get_url()))
@@ -60,8 +66,10 @@ class SpiderQueueMixin:
         bot.render_stats()
 
     def test_clear(self):
-        bot = build_spider(self.SimpleSpider)
-        self.setup_queue(bot)
+        bot = build_spider(
+            self.SimpleSpider,
+            task_queue=self.build_task_queue(),
+        )
         bot.task_queue.clear()
 
         for _ in range(5):
@@ -72,8 +80,8 @@ class SpiderQueueMixin:
 
 
 class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
-    def setup_queue(self, bot):
-        bot.setup_queue(backend="memory")
+    def build_task_queue(self):
+        return MemoryTaskQueue()
 
     def test_schedule(self):
         # In this test I create a number of delayed task
@@ -92,13 +100,11 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
                 self.stat.collect("numbers", task.num)
 
         bot = build_spider(TestSpider, thread_number=1)
-        self.setup_queue(bot)
         bot.run()
         self.assertEqual(bot.stat.collections["numbers"], [1, 3, 4, 2])
 
     def test_schedule_list_clear(self):
         bot = build_spider(self.SimpleSpider)
-        self.setup_queue(bot)
         bot.task_queue.clear()
 
         for delay in range(5):
@@ -109,11 +115,16 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
         self.assertEqual(0, len(bot.task_queue.schedule_list))
 
 
-class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
+class SpiderMongodbQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
     backend = "mongodb"
 
-    def setup_queue(self, bot):
-        bot.setup_queue(backend="mongodb", **MONGODB_CONNECTION)
+    def build_task_queue(self):
+        # pylint: disable=import-outside-toplevel
+        from grab.spider.queue_backend.mongodb import MongodbTaskQueue
+
+        return MongodbTaskQueue(
+            connection_args=CONFIG["mongodb_task_queue"]["connection_args"]
+        )
 
     def test_schedule(self):
         # In this test I create a number of delayed task
@@ -131,34 +142,33 @@ class BasicSpiderTestCase(SpiderQueueMixin, BaseGrabTestCase):
             def task_page(self, unused_grab, task):
                 self.stat.collect("numbers", task.num)
 
-        bot = build_spider(TestSpider)
-        self.setup_queue(bot)
+        bot = build_spider(TestSpider, task_queue=self.build_task_queue())
         bot.run()
         self.assertEqual(bot.stat.collections["numbers"], [1, 3, 4, 2])
         # TODO: understand why that test fails
 
     def test_clear_collection(self):
-        bot = build_spider(self.SimpleSpider)
-        self.setup_queue(bot)
+        bot = build_spider(self.SimpleSpider, task_queue=self.build_task_queue())
         bot.task_queue.clear()
 
 
 class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
     backend = "redis"
 
-    def setup_queue(self, bot):
+    def build_task_queue(self):
         # create uniq redis key
         # if use same key then there might be uncleaned
         # data from previous tests
-        bot.setup_queue(
-            backend="redis",
+        # pylint: disable=import-outside-toplevel
+        from grab.spider.queue_backend.redis import RedisTaskQueue
+
+        return RedisTaskQueue(
             queue_name=("grab_test_%d" % time.time()),
-            **REDIS_CONNECTION
+            connection_args=CONFIG["mongodb_task_queue"]["connection_args"],
         )
 
     def test_delay_error(self):
-        bot = build_spider(self.SimpleSpider)
-        self.setup_queue(bot)
+        bot = build_spider(self.SimpleSpider, task_queue=self.build_task_queue())
         bot.task_queue.clear()
         self.assertRaises(
             SpiderMisuseError,
@@ -168,14 +178,22 @@ class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
 
 
 class TaskQueueTestCase(TestCase):
+    class SimpleSpider(Spider):
+        pass
+
     def test_abstract_methods(self):
         """Just to improve test coverage."""
         # pylint: disable=abstract-method
         class BrokenTaskQueue(BaseTaskQueue):
             pass
 
-        task_queue = BrokenTaskQueue("spider_name")
+        task_queue = BrokenTaskQueue()
         self.assertRaises(NotImplementedError, task_queue.put, None, None)
         self.assertRaises(NotImplementedError, task_queue.get)
         self.assertRaises(NotImplementedError, task_queue.size)
         self.assertRaises(NotImplementedError, task_queue.clear)
+
+    def test_deprecated_setup_queue(self):
+        bot = build_spider(self.SimpleSpider)
+        with self.assertRaises(GrabFeatureIsDeprecated):
+            bot.setup_queue("redis")

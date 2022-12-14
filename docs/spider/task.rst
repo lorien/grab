@@ -140,7 +140,6 @@ You can use `add_task` method anywhere, even before the spider have started work
 .. code:: python
 
     bot = ExampleSpider()
-    bot.setup_queue()
     bot.add_task('google', url='http://google.com')
     bot.run()
 

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+
 import logging
 import sys
 import threading
@@ -6,6 +8,8 @@ import unittest
 from argparse import ArgumentParser
 
 from tests.util import GLOBAL
+
+VALID_BACKENDS = {"mongodb", "redis", "pyquery"}
 
 # **********
 # Grab Tests
@@ -90,6 +94,17 @@ def setup_logging():
         logger.setLevel(level)
 
 
+def parse_backend_argument(inp: None | str) -> list[str]:
+    ret = set()
+    if inp is None:
+        return ret
+    for item in inp.split(","):
+        if item not in VALID_BACKENDS:
+            raise Exception("Invalid backend value: {}".format(item))
+        ret.add(item)
+    return ret
+
+
 def main():
     setup_logging()
     parser = ArgumentParser()
@@ -98,50 +113,31 @@ def main():
     parser.add_argument(
         "--test-grab",
         action="store_true",
-        default=False,
         help="Run tests for Grab::Spider",
     )
-    parser.add_argument(
-        "--test-spider", action="store_true", default=False, help="Run tests for Grab"
-    )
+    parser.add_argument("--test-spider", action="store_true", help="Run tests for Grab")
     parser.add_argument(
         "--test-all",
         action="store_true",
-        default=False,
         help="Run tests for both Grab and Grab::Spider",
     )
     parser.add_argument(
-        "--backend-mongodb",
-        action="store_true",
-        default=False,
-        help="Run extra tests that depends on mongodb",
-    )
-    parser.add_argument(
-        "--backend-redis",
-        action="store_true",
-        default=False,
-        help="Run extra tests that depends on redis",
+        "--backend",
+        help=(
+            "Run extra tests that depends on given backends. Multiple backends"
+            " are delimited by comma."
+        ),
     )
     parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
-        default=False,
         help="Enable verbose logging",
     )
-    parser.add_argument(
-        "--failfast", action="store_true", default=False, help="Stop at first fail"
-    )
+    parser.add_argument("--failfast", action="store_true", help="Stop at first fail")
     opts = parser.parse_args()
-
     GLOBAL["network_service"] = opts.network_service
-
-    if opts.backend_mongodb:
-        GLOBAL["backends"].append("mongodb")
-
-    if opts.backend_redis:
-        GLOBAL["backends"].append("redis")
-
+    GLOBAL["backends"].update(parse_backend_argument(opts.backend))
     test_list = []
 
     if opts.test_all:

@@ -16,7 +16,6 @@ dist/
 /.coverage
 /docs/build/
 /docs/_build/
-/test_settings_local.py
 /.python-version
 /.hg/
 /src/

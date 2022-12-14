@@ -4,6 +4,8 @@ from tests.util import BaseGrabTestCase, build_grab
 
 
 class ExtensionPyqueryTestCase(BaseGrabTestCase):
+    backend = "pyquery"
+
     def setUp(self):
         self.server.reset()
 
