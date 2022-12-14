@@ -209,43 +209,13 @@ class Spider:
     def setup_cache(self, *_args: Any, **_kwargs: Any) -> None:
         raise_feature_is_deprecated("Cache feature")
 
-    # def load_queue_class(self, backend: str) -> type[BaseTaskQueue]:
-    #    # pylint: disable=import-outside-toplevel
-    #    if backend == "mongodb":
-    #        from grab.spider.queue_backend.mongodb import MongodbTaskQueue
-
-    #        return MongodbTaskQueue
-    #    if backend == "redis":
-    #        from grab.spider.queue_backend.redis import RedisTaskQueue
-
-    #        return RedisTaskQueue
-    #    if backend == "memory":
-    #        from grab.spider.queue_backend.memory import MemoryTaskQueue
-
-    #        return MemoryTaskQueue
-    #    raise SpiderMisuseError(f"Invalid task queue backend name: {backend}")
-
-    def setup_queue(self, backend: str = "memory", **kwargs: Any) -> None:
+    def setup_queue(self, *_args: Any, **_kwargs: Any) -> None:
         """Set up queue."""
         raise GrabFeatureIsDeprecated(
             """Method Spider.setup_queue is deprecated. Now MemoryTaskQueue is used
             by default. If you need custom task queue pass instance of queue class
             in task_queue parameter in constructor of Spider class."""
         )
-
-    #    :param backend: Backend name
-    #        Should be one of the following: 'memory', 'redis' or 'mongo'.
-    #    :param kwargs: Additional credentials for backend.
-    #    """
-    #    if backend == "mongo":
-    #        warn('Backend name "mongo" is deprecated. Use "mongodb" instead.')
-    #        backend = "mongodb"
-    #    logger.debug("Using %s backend for task queue", backend)
-    #    queue_cls = self.load_queue_class(backend)
-    #    # mod = __import__(
-    #    #    "grab.spider.queue_backend.%s" % backend, globals(), locals(), ["foo"]
-    #    # )
-    #    self.task_queue = queue_cls(spider_name=self.get_spider_name(), **kwargs)
 
     def add_task(
         self,
