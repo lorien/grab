@@ -33,7 +33,7 @@ DEFAULT_CONFIG = {
 }
 
 
-@functools.cache  # pylint: disable=no-member
+@functools.lru_cache
 def load_test_config():
     config = deepcopy(DEFAULT_CONFIG)
     try:
