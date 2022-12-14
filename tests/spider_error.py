@@ -52,9 +52,12 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.run()
 
-    # FIXME: have not been fixed yet, duh
-    # TODO: fix this test, it fails now because
+    # FIXME: Fix this test, it fails now because
     # spider do some logging which counts as output
+    # New information:
+    # extra output is caused by test_server library
+    # The python http server logs requests details to console like:
+    # - 127.0.0.1 - - [14/Dec/2022 20:16:53] "GET / HTTP/1.1" 555 -
     # def test_no_warning(self):
     #    """Simple spider should not generate
     #    any warnings (warning module sends messages to stderr)
@@ -76,7 +79,9 @@ class SpiderErrorTestCase(BaseGrabTestCase):
 
     #        bot = build_spider(SimpleSpider)
     #        bot.run()
-    #    self.assertTrue(out.getvalue() == "")
+    #    val = out.getvalue()
+    #    print("!!!!!!!!!!!!!!!!! [{}]".format(val))
+    #    self.assertTrue(val == "")
 
     def test_grab_attribute_exception(self):
         server = self.server

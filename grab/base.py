@@ -46,10 +46,7 @@ TRANSPORT_ALIAS = {
 DEFAULT_TRANSPORT = "urllib3"
 
 logger = logging.getLogger("grab.base")
-# It is done as separate logger to allow you easily
-# control network logging separately from other grab logs
 logger_network = logging.getLogger("grab.network")
-# pylint: enable=invalid-name
 
 
 def copy_config(

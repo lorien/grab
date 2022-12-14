@@ -181,19 +181,7 @@ class TaskQueueTestCase(TestCase):
     class SimpleSpider(Spider):
         pass
 
-    def test_abstract_methods(self):
-        """Just to improve test coverage."""
-        # pylint: disable=abstract-method
-        class BrokenTaskQueue(BaseTaskQueue):
-            pass
-
-        task_queue = BrokenTaskQueue()
-        self.assertRaises(NotImplementedError, task_queue.put, None, None)
-        self.assertRaises(NotImplementedError, task_queue.get)
-        self.assertRaises(NotImplementedError, task_queue.size)
-        self.assertRaises(NotImplementedError, task_queue.clear)
-
     def test_deprecated_setup_queue(self):
         bot = build_spider(self.SimpleSpider)
         with self.assertRaises(GrabFeatureIsDeprecated):
-            bot.setup_queue("redis")
+            bot.setup_queue("foobar")

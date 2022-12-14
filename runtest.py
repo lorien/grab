@@ -92,6 +92,8 @@ def setup_logging():
     ):
         logger = logging.getLogger(name)
         logger.setLevel(level)
+    for hdl in logging.getLogger().handlers:
+        hdl.setFormatter(logging.Formatter("[%(levelname)s] %(name)s -- %(message)s"))
 
 
 def parse_backend_argument(inp: None | str) -> list[str]:

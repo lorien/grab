@@ -20,7 +20,7 @@ from tests.util import BaseGrabTestCase
 #
 #
 # def get_fake_transport_class():
-#    from grab.transport.DEPRECATED import (  # pylint: disable=import-outside-toplevel
+#    from grab.transport.DEPRECATED import (
 #        DEPRECATEDTransport,
 #    )
 #
@@ -35,7 +35,7 @@ from tests.util import BaseGrabTestCase
 #
 #
 # def get_DEPRECATED_transport_instance():
-#    from grab.transport.DEPRECATED import (  # pylint: disable=import-outside-toplevel
+#    from grab.transport.DEPRECATED import (
 #        DEPRECATEDTransport,
 #    )
 #
@@ -45,6 +45,7 @@ from tests.util import BaseGrabTestCase
 
 
 class TestTransportTestCase(BaseGrabTestCase):
+    # WTF: why so many commented code?
     # def test_transport_option_as_string_DEPRECATED(self):
     #    self.assert_transport_response(
     #        "grab.transport.DEPRECATED.DEPRECATEDTransport", b"XYZ")
@@ -59,7 +60,7 @@ class TestTransportTestCase(BaseGrabTestCase):
 
     # def test_transport_option_as_class_DEPRECATED(self):
     #    from grab.transport.DEPRECATED \
-    #    import (  # pylint: disable=import-outside-toplevel
+    #    import (
     #        DEPRECATEDTransport,
     #    )
 
