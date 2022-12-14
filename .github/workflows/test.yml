@@ -3,7 +3,7 @@ name: Tests
 on: [push]
 
 jobs:
-  build:
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -27,11 +27,23 @@ jobs:
     - name: Run tests
       run: |
         coverage run runtest.py --test-all
+        coverage lcov .coverage.lcov
 
-    # @data: dec08, 2022
-    # @comment: fails with error Could not submit coverage: 503 Server Error: Service Unavailable for url: https://coveralls.io/api/v1/jobs
-    #- name: Upload coverage results
-    #  env:
-    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #  run: |
-    #    coveralls --service=github
+    - name: Coveralls Parallel
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        path-to-lcov: ./.coverage.lcov
+        flag-name: run-${{ matrix.os }}-${{ python }}
+        parallel: true 
+
+  finish:
+      needs: test
+      runs-on: ubuntu-latest
+      steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.github_token }}
+          path-to-lcov: ./.coverage.lcov
+          parallel-finished: true
