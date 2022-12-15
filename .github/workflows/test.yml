@@ -31,13 +31,18 @@ jobs:
       #  mongodb-version: 5.0
 
     - name: Start Redis
+      if: runner.os == "Linux"
       uses: supercharge/redis-github-action@1.4.0
       with:
         redis-version: 5
 
     - name: Run tests
       run: |
-        coverage run runtest.py --test-all --backend=redis,mongodb,pyquery
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          coverage run runtest.py --test-all --backend=redis,mongodb,pyquery
+        else
+          coverage run runtest.py --test-all --backend=mongodb,pyquery
+        fi
         coverage lcov -o .coverage.lcov
 
     - name: Coveralls Parallel
