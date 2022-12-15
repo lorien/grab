@@ -27,8 +27,8 @@ jobs:
     - name: Start MongoDB
       uses: ankane/setup-mongodb@v1
       #uses: supercharge/mongodb-github-action@1.8.0 # does not work on macos
-      with:
-        mongodb-version: 5.0
+      #with:
+      #  mongodb-version: 5.0
 
     - name: Start Redis
       uses: supercharge/redis-github-action@1.4.0
