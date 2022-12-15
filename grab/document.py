@@ -40,6 +40,7 @@ from selection import SelectorList, XpathSelector
 from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabFeatureIsDeprecated, GrabMisuseError
 from grab.types import NULL, GrabConfig
+from grab.util.encoding import read_bom
 from grab.util.files import hashed_path
 from grab.util.html import decode_entities, find_refresh_url
 from grab.util.html import fix_special_entities as fix_special_entities_func
@@ -55,34 +56,8 @@ RE_UNICODE_XML_DECLARATION = re.compile(
     RE_XML_DECLARATION.pattern.decode("utf-8"), re.I
 )
 
-# Bom processing logic was copied from
-# https://github.com/scrapy/w3lib/blob/master/w3lib/encoding.py
-_BOM_TABLE = [
-    (codecs.BOM_UTF32_BE, "utf-32-be"),
-    (codecs.BOM_UTF32_LE, "utf-32-le"),
-    (codecs.BOM_UTF16_BE, "utf-16-be"),
-    (codecs.BOM_UTF16_LE, "utf-16-le"),
-    (codecs.BOM_UTF8, "utf-8"),
-]
-_FIRST_CHARS = {char[0] for (char, name) in _BOM_TABLE}
 THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")
-
-
-def read_bom(data: bytes) -> tuple[None, None] | tuple[str, bytes]:
-    """Detect BOM and encoding it is representing.
-
-    Read the byte order mark in the text, if present, and
-    return the encoding represented by the BOM and the BOM.
-
-    If no BOM can be detected, (None, None) is returned.
-    """
-    # common case is no BOM, so this is fast
-    if data and data[0] in _FIRST_CHARS:
-        for bom, encoding in _BOM_TABLE:
-            if data.startswith(bom):
-                return encoding, bom
-    return None, None
 
 
 class GrabConfigProtocol(Protocol):
