@@ -24,9 +24,19 @@ jobs:
         pip install -U -r requirements_backend.txt
         pip install -U -e .[cssselect,pyquery]
 
+    - name: Start MongoDB
+      uses: supercharge/mongodb-github-action@1.8.0
+      with:
+        mongodb-version: 4.4
+
+    - name: Start Redis
+      uses: supercharge/redis-github-action@1.4.0
+      with:
+        redis-version: 5
+
     - name: Run tests
       run: |
-        coverage run runtest.py --test-all
+        coverage run runtest.py --test-all --backend=redis,mongodb,pyquery
         coverage lcov -o .coverage.lcov
 
     - name: Coveralls Parallel
