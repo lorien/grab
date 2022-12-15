@@ -40,7 +40,7 @@ from selection import SelectorList, XpathSelector
 from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabFeatureIsDeprecated, GrabMisuseError
 from grab.types import NULL, GrabConfig
-from grab.util.encoding import read_bom
+from grab.util.charset import parse_document_charset
 from grab.util.files import hashed_path
 from grab.util.html import decode_entities, find_refresh_url
 from grab.util.html import fix_special_entities as fix_special_entities_func
@@ -49,12 +49,6 @@ from grab.util.warning import warn
 
 NULL_BYTE = chr(0)
 RE_XML_DECLARATION = re.compile(rb"^[^<]{,100}<\?xml[^>]+\?>", re.I)
-RE_DECLARATION_ENCODING = re.compile(rb'encoding\s*=\s*["\']([^"\']+)["\']')
-RE_META_CHARSET = re.compile(rb"<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)", re.I)
-RE_META_CHARSET_HTML5 = re.compile(rb'<meta[^>]+charset\s*=\s*[\'"]?([-\w]+)', re.I)
-RE_UNICODE_XML_DECLARATION = re.compile(
-    RE_XML_DECLARATION.pattern.decode("utf-8"), re.I
-)
 
 THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")
@@ -163,70 +157,11 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def select(self, *args: Any, **kwargs: Any) -> SelectorList[_Element]:
         return XpathSelector(self.tree).select(*args, **kwargs)
 
-    def parse(
-        self,
-        charset: None | str = None,
-        headers: None | email.message.Message = None,
-    ) -> None:
-        """Parse headers.
-
-        This method is called after Grab instance performs network request.
-        """
-        if headers:
-            self.headers = headers
-        else:
-            # WTF: It is curl-related, I think
-            # Parse headers only from last response
-            # There could be multiple responses in `self.head`
-            # in case of 301/302 redirect
-            # Separate responses
-            if self.head:
-                responses = self.head.rsplit(b"\nHTTP/", 1)
-                # Cut off the 'HTTP/*' line from the last response
-                _, response_bytes = responses[-1].split(b"\n", 1)
-                response = response_bytes.decode("utf-8", "ignore")
-            else:
-                response = ""
-            self.headers = email.message_from_string(response)
-
+    def setup_charset(self, charset: None | str = None) -> None:
         if charset is None:
-            if isinstance(self.body, str):
-                self.charset = "utf-8"
-            else:
-                self.detect_charset()
+            self.detect_charset()
         else:
             self.charset = charset.lower()
-
-        self._unicode_body = None
-
-    def detect_charset_from_body_chunk(
-        self, body_chunk: bytes
-    ) -> tuple[None | str, None | bytes]:
-        charset: None | str = None
-        ret_bom: None | bytes = None
-        # Try to extract charset from http-equiv meta tag
-        match_charset = RE_META_CHARSET.search(body_chunk)
-        if match_charset:
-            charset = match_charset.group(1).decode("utf-8", "ignore")
-        else:
-            match_charset_html5 = RE_META_CHARSET_HTML5.search(body_chunk)
-            if match_charset_html5:
-                charset = match_charset_html5.group(1).decode("utf-8", "ignore")
-
-        # TODO: <meta charset="utf-8" />
-        bom_encoding, chunk_bom = read_bom(body_chunk)
-        if bom_encoding:
-            charset = bom_encoding
-            ret_bom = chunk_bom
-
-        # Try to process XML declaration
-        if not charset and body_chunk.startswith(b"<?xml"):
-            match = RE_XML_DECLARATION.search(body_chunk)
-            if match:
-                enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
-                if enc_match:
-                    charset = cast(bytes, enc_match.group(1)).decode("utf-8", "ignore")
-        return charset, ret_bom
 
     def detect_charset(self) -> None:
         """Detect charset of the response. Set charset inplace to "self.charset".
@@ -245,7 +180,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         body_chunk = self.get_body_chunk()
 
         if body_chunk:
-            charset, bom = self.detect_charset_from_body_chunk(body_chunk)
+            charset, bom = parse_document_charset(body_chunk)
             if bom:
                 self.bom = bom
 

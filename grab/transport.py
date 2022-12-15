@@ -424,8 +424,14 @@ class Urllib3Transport(BaseTransport):
             )
         try:
             response = document_class()
+
+            # DOCUMENT ARGS DIFF:
+            # grab.base: body, status, total_time, connect_time, name_lookup_time
+            # transport: body_path, cookies
             head = ""
+            # FIXME: head must include first line like "GET / HTTP/1.1"
             for key, val in self.get_response_header_items():
+                # WTF: is going here?
                 new_key = key.encode("latin").decode("utf-8", errors="ignore")
                 new_val = val.encode("latin").decode("utf-8", errors="ignore")
                 head += "%s: %s\r\n" % (new_key, new_val)
@@ -469,7 +475,8 @@ class Urllib3Transport(BaseTransport):
                 # if key == 'Location':
                 #    import pdb; pdb.set_trace()
                 hdr[new_key] = new_val
-            response.parse(charset=grab_config["document_charset"], headers=hdr)
+            response.headers = hdr
+            response.setup_charset(grab_config["document_charset"])
             jar = self.extract_cookiejar()  # self._response, self._request)
             response.cookies = CookieManager(jar)
             return response
