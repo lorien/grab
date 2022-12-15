@@ -108,13 +108,31 @@ class Urllib3Transport(BaseTransport):
 
     def __init__(self) -> None:
         super().__init__()
-        # http://urllib3.readthedocs.io/en/latest/user-guide.html#certificate-verification
-        self.pool = PoolManager(10, cert_reqs="CERT_REQUIRED", ca_certs=certifi.where())
+        self.pool = self.build_pool()
         # WTF: logging is configured here?
         logger = logging.getLogger("urllib3.connectionpool")
         logger.setLevel(logging.WARNING)
         self._request: None | Request = None
         self._response: None | Urllib3HTTPResponse = None
+
+    def __getstate__(self) -> dict[str, Any]:
+        state = self.__dict__.copy()
+        # PoolManager could not be pickled
+        del state["pool"]
+        # urllib3.HTTPReponse is also not good for pickling
+        state["_response"] = None
+        # let's reset request object too
+        state["_request"] = None
+        return state
+
+    def __setstate__(self, state: Mapping[str, Any]) -> None:
+        for slot, value in state.items():
+            setattr(self, slot, value)
+        self.pool = self.build_pool()
+
+    def build_pool(self) -> PoolManager:
+        # http://urllib3.readthedocs.io/en/latest/user-guide.html#certificate-verification
+        return PoolManager(10, cert_reqs="CERT_REQUIRED", ca_certs=certifi.where())
 
     def reset(self) -> None:
         self._response = None
