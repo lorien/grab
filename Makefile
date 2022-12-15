@@ -4,16 +4,6 @@ SHELL := /bin/bash
 FILES_CHECK_MYPY = grab
 FILES_CHECK_ALL = $(FILES_CHECK_MYPY) tests
 
-#coverage:
-#	pytest --cov grab --cov-report term-missing
-#
-#coveralls:
-#	bash -c "source var/coveralls.env && coveralls"
-#
-#docs:
-#	if [ -e docs/_build ]; then rm -r docs/_build; fi \
-#		&& sphinx-build -b html docs docs/_build
-
 bootstrap: venv deps dirs
 
 venv:
@@ -68,4 +58,4 @@ demo:
 	&& tox -e py38-demo
 
 quick:
-	pytest -n30 -x
+	pytest -n30 -x --cov grab --cov-report term-missing
