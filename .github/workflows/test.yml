@@ -31,7 +31,7 @@ jobs:
       #  mongodb-version: 5.0
 
     - name: Start Redis
-      if: runner.os == "Linux"
+      if: runner.os == 'Linux'
       uses: supercharge/redis-github-action@1.4.0
       with:
         redis-version: 5
