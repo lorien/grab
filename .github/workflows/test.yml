@@ -37,6 +37,7 @@ jobs:
         redis-version: 5
 
     - name: Run tests
+      shell: bash
       run: |
         if [ "$RUNNER_OS" == "Linux" ]; then
           coverage run runtest.py --test-all --backend=redis,mongodb,pyquery
