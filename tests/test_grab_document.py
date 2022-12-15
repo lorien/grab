@@ -1,5 +1,6 @@
 from test_server import Response
 
+from grab.document import normalize_pairs
 from grab.error import GrabFeatureIsDeprecated
 from tests.util import BaseGrabTestCase, build_grab
 
@@ -38,3 +39,15 @@ class GrabDocumentTestCase(BaseGrabTestCase):
 
     #    res3 = res1.copy(grab2.config)
     #    self.assertEqual(res3.body, b"bar")
+
+    def test_normalize_pairs_dict(self):
+        self.assertEqual(
+            normalize_pairs({"foo": "bar"}),
+            [("foo", "bar")],
+        )
+
+    def test_normalize_pairs_list(self):
+        self.assertEqual(
+            normalize_pairs([("foo", "bar"), ("1", "2")]),
+            [("foo", "bar"), ("1", "2")],
+        )

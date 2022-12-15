@@ -67,13 +67,8 @@ class GrabConfigProtocol(Protocol):
 def normalize_pairs(
     inp: Sequence[tuple[str, Any]] | Mapping[str, Any]
 ) -> Sequence[tuple[str, Any]]:
-    return (
-        # pylint: disable=deprecated-typing-alias
-        cast(typing.Sequence[typing.Tuple[str, Any]], inp.items())
-        if isinstance(inp, typing.Mapping)
-        else inp
-        # pylint: enable=deprecated-typing-alias
-    )
+    # pylint: disable=deprecated-typing-alias
+    return list(inp.items()) if isinstance(inp, typing.Mapping) else inp
 
 
 class Document:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
