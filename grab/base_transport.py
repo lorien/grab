@@ -13,28 +13,29 @@ from grab.types import GrabConfig
 
 
 class BaseTransport:
-    def reset(self) -> None:
-        pass
+    @abstractmethod
+    def reset(self) -> None:  # pragma: no cover
+        raise NotImplementedError
 
     @abstractmethod
     def prepare_response(
         self, grab_config: GrabConfig, *, document_class: type[Document] = Document
-    ) -> Document:
+    ) -> Document:  # pragma: no cover
         raise NotImplementedError
 
     @abstractmethod
     @contextmanager
-    def wrap_transport_error(self) -> Generator[None, None, None]:
+    def wrap_transport_error(self) -> Generator[None, None, None]:  # pragma: no cover
         raise NotImplementedError
 
     @abstractmethod
-    def request(self) -> None:
+    def request(self) -> None:  # pragma: no cover
         raise NotImplementedError
 
     @abstractmethod
     def process_config(
         self, grab_config: GrabConfig, grab_cookies: CookieManager
-    ) -> None:
+    ) -> None:  # pragma: no cover
         raise NotImplementedError
 
     @abstractmethod
@@ -44,7 +45,7 @@ class BaseTransport:
         cookie_manager: CookieManager,
         request_url: str,
         request_headers: dict[str, Any],
-    ) -> None | str:
+    ) -> None | str:  # pragma: no cover
         raise NotImplementedError
 
     def setup_body_file(
