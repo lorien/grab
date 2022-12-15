@@ -1,4 +1,3 @@
-import time
 from abc import abstractmethod
 from unittest import TestCase
 
@@ -163,7 +162,6 @@ class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
         from grab.spider.queue_backend.redis import RedisTaskQueue
 
         return RedisTaskQueue(
-            queue_name=("grab_test_%d" % time.time()),
             connection_args=load_test_config()["mongodb_task_queue"]["connection_args"],
         )
 
