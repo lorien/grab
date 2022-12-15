@@ -426,7 +426,7 @@ class Urllib3Transport(BaseTransport):
             response = document_class()
 
             # DOCUMENT ARGS DIFF:
-            # grab.base: body, status, total_time, connect_time, name_lookup_time
+            # grab.base: body, status
             # transport: body_path, cookies
             head = ""
             # FIXME: head must include first line like "GET / HTTP/1.1"
@@ -454,9 +454,6 @@ class Urllib3Transport(BaseTransport):
             # self.response_header_chunks = []
 
             response.code = self._response.status
-            # response.total_time =
-            # response.connect_time =
-            # response.name_lookup_time =
             # response.download_size =
             # response.upload_size =
             # response.download_speed =

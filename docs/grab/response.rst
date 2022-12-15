@@ -28,9 +28,6 @@ important things you should know:
 :cookies: cookies in the response
 :url: the URL of the response document. In case of some automatically processed redirect, the
     `url` attribute contains the final URL.
-:name_lookup_time: time spent to resolve host name
-:connect_time: time spent to connect to remote server
-:total_time: total time spent to complete the request
 :download_size: size of received data
 :upload_size: size of uploaded data except the HTTP headers
 
@@ -52,12 +49,6 @@ Now, a real example::
     <grab.cookie.CookieManager object at 0x1f6b248>
     >>> g.response.url
     'http://www.wikipedia.org/'
-    >>> g.response.name_lookup_time
-    0.103931
-    >>> g.response.connect_time
-    0.221996
-    >>> g.response.total_time
-    0.7791399999999999
     >>> g.response.download_size
     11100.0
     >>> g.response.upload_size

@@ -576,17 +576,13 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         doc = self.document_class(grab=self)
 
         # DOCUMENT ARGS:
-        # body, head, status, headers, charset, code, total_time,
-        # connect_time, name_lookup_time, url
+        # body, head, status, headers, charset, code, url
         doc.body = content
-        doc.status = ""
         doc.head = b"HTTP/1.1 200 OK\r\n\r\n"
+        doc.status = ""
         doc.headers = email.message.Message()
         doc.setup_charset(kwargs.get("charset"))
         doc.code = 200
-        doc.total_time = 0
-        doc.connect_time = 0
-        doc.name_lookup_time = 0
         doc.url = ""
 
         # WTF: WHat the hell it means?

@@ -81,9 +81,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         "_unicode_body",
         "bom",
         "timestamp",
-        "name_lookup_time",
-        "connect_time",
-        "total_time",
         "download_size",
         "upload_size",
         "download_speed",
@@ -113,9 +110,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self.charset = "utf-8"
         self.bom: None | bytes = None
         self.timestamp = datetime.utcnow()
-        self.name_lookup_time = 0
-        self.connect_time = 0
-        self.total_time = 0
         self.download_size = 0
         self.upload_size = 0
         self.download_speed = 0
@@ -217,9 +211,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             "code",
             "head",
             "body",
-            "total_time",
-            "connect_time",
-            "name_lookup_time",
             "url",
             "charset",
             "_unicode_body",
