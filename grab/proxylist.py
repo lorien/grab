@@ -4,6 +4,7 @@ import itertools
 import logging
 import re
 import typing
+from abc import abstractmethod
 from collections.abc import Iterator
 from random import randint
 from typing import IO, Any, NamedTuple, cast
@@ -88,7 +89,8 @@ class BaseProxySource:
         kwargs["proxy_userpwd"] = proxy_userpwd
         self.config = kwargs
 
-    def load_raw_data(self) -> str:
+    @abstractmethod
+    def load_raw_data(self) -> str:  # pragma: no cover
         raise NotImplementedError
 
     def load(self) -> list[Proxy]:

@@ -83,17 +83,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.run()
         self.assertEqual(bot.stat.counters["count"], 13)
 
-    def test_get_spider_name(self):
-        class TestSpider(Spider):
-            pass
-
-        self.assertEqual("test_spider", TestSpider.get_spider_name())
-
-        class TestSpider2(Spider):
-            spider_name = "foo_bar"
-
-        self.assertEqual("foo_bar", TestSpider2.get_spider_name())
-
     def test_handler_result_none(self):
         class TestSpider(Spider):
             def __init__(self, *args, **kwargs):

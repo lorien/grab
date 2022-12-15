@@ -15,7 +15,7 @@ NetworkResult = Dict[str, Any]  # pylint: disable=deprecated-typing-alias
 
 class BaseNetworkService(BaseService):
     @abstractmethod
-    def get_active_threads_number(self) -> int:
+    def get_active_threads_number(self) -> int:  # pragma: no cover
         raise NotImplementedError
 
 

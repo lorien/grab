@@ -21,7 +21,6 @@ from grab.error import (
     GrabTooManyRedirectsError,
     OriginalExceptionGrabError,
     ResponseNotValid,
-    raise_feature_is_deprecated,
 )
 from grab.proxylist import BaseProxySource, Proxy, ProxyList
 from grab.spider.error import FatalError, NoTaskHandler, SpiderError, SpiderMisuseError
@@ -34,7 +33,6 @@ from grab.stat import Stat
 from grab.types import GrabConfig
 from grab.util.metrics import format_traffic_value
 from grab.util.misc import camel_case_to_underscore
-from grab.util.warning import warn
 
 from .interface import FatalErrorQueueItem
 from .service.network import NetworkResult
@@ -63,20 +61,6 @@ class Spider:
     # then consider to use `task_generator` method instead of
     # `initial_urls` attribute
     initial_urls: list[str] = []
-
-    # *************
-    # Class Methods
-    # *************
-
-    @classmethod
-    def update_spider_config(cls, config: dict[str, Any]) -> None:
-        pass
-
-    @classmethod
-    def get_spider_name(cls) -> str:
-        if cls.spider_name:
-            return cls.spider_name
-        return camel_case_to_underscore(cls.__name__)
 
     # **************
     # Public Methods
@@ -187,9 +171,6 @@ class Spider:
 
     # pylint: enable=too-many-locals, too-many-arguments
 
-    def setup_cache(self, *_args: Any, **_kwargs: Any) -> None:
-        raise_feature_is_deprecated("Cache feature")
-
     def setup_queue(self, *_args: Any, **_kwargs: Any) -> None:
         """Set up queue."""
         raise GrabFeatureIsDeprecated(
@@ -286,45 +267,7 @@ class Spider:
             self.proxy = self.proxylist.get_random_proxy()
         self.proxy_auto_change = auto_change
 
-    def process_next_page(
-        self,
-        grab: Grab,
-        task: Task,
-        xpath: str,
-        resolve_base: bool = False,
-        **kwargs: Any,
-    ) -> bool:
-        r"""Generate task for next page.
-
-        :param grab: Grab instance
-        :param task: Task object which should be assigned to next page url
-        :param xpath: xpath expression which calculates list of URLS
-        :param \\**kwargs: extra settings for new task object
-
-        Example::
-
-            self.follow_links(grab, 'topic', '//div[@class="topic"]/a/@href')
-        """
-        try:
-            # next_url = grab.xpath_text(xpath)
-            next_url = grab.doc.select(xpath).text()
-        except IndexError:
-            return False
-        else:
-            url = grab.make_url_absolute(next_url, resolve_base=resolve_base)
-            page = task.get("page", 1) + 1
-            grab2 = grab.clone()
-            grab2.setup(url=url)
-            task2 = task.clone(task_try_count=1, grab=grab2, page=page, **kwargs)
-            self.add_task(task2)
-            return True
-
-    def render_stats(self, timing: None = None) -> str:
-        if timing is not None:
-            warn(
-                "Option timing of method render_stats is deprecated."
-                " There is no more timing feature."
-            )
+    def render_stats(self) -> str:
         out = [
             "------------ Stats: ------------",
             "Counters:",
@@ -643,26 +586,6 @@ class Spider:
                 return cast(typing.Callable[..., Any], getattr(self, fb_name))
                 # pylint: enable=deprecated-typing-alias
         return None
-
-    # ################
-    # Deprecated Things
-    # #################
-
-    @property
-    def cache_reader_service(self) -> None:
-        raise_feature_is_deprecated("Cache feature")
-
-    @cache_reader_service.setter
-    def cache_reader_service(self, _: Any) -> None:
-        raise_feature_is_deprecated("Cache feature")
-
-    @property
-    def cache_writer_service(self) -> None:
-        raise_feature_is_deprecated("Cache feature")
-
-    @cache_writer_service.setter
-    def cache_writer_service(self, _: Any) -> None:
-        raise_feature_is_deprecated("Cache feature")
 
     # #################
     # REFACTORING STUFF

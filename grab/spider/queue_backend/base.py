@@ -12,15 +12,18 @@ class BaseTaskQueue:
     def __init__(self, **kwargs: Any) -> None:
         pass
 
+    def random_queue_name(self) -> str:
+        return "task_queue_{}".format(str(uuid4()).replace("-", "_"))
+
     def put(
         self,
         task: Task,
         priority: int,
         schedule_time: None | datetime = None,
-    ) -> None:
+    ) -> None:  # pragma: no cover
         raise NotImplementedError
 
-    def get(self) -> Task:
+    def get(self) -> Task:  # pragma: no cover
         """Return `Task` object or raise `Queue.Empty` exception.
 
         @returns: `grab.spider.task.Task` object
@@ -29,15 +32,12 @@ class BaseTaskQueue:
         raise NotImplementedError
 
     @abstractmethod
-    def size(self) -> int:
+    def size(self) -> int:  # pragma: no cover
         raise NotImplementedError
 
-    def clear(self) -> None:
+    def clear(self) -> None:  # pragma: no cover
         """Remove all tasks from the queue."""
         raise NotImplementedError
 
-    def close(self) -> None:
+    def close(self) -> None:  # pragma: no cover
         raise NotImplementedError
-
-    def random_queue_name(self) -> str:
-        return "task_queue_{}".format(str(uuid4()).replace("-", "_"))
