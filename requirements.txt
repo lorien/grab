@@ -12,7 +12,7 @@
 #sphinx
 
 tox
-test_server>=0.0.35
+test_server>=0.0.42
 mock
 bumpversion
 pytest
