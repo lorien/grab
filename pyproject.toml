@@ -26,7 +26,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Internet :: WWW/HTTP",
-    #"Typing :: Typed",
+    "Typing :: Typed",
 ]
 dependencies = [
     "user_agent",
@@ -36,6 +36,9 @@ dependencies = [
     "certifi",
 ]
 
+[project.urls]
+homepage = "http://github.com/lorien/grab"
+
 [project.optional-dependencies]
 pyquery = ["pyquery"]
 cssselect = ["cssselect"]
@@ -43,9 +46,6 @@ cssselect = ["cssselect"]
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
-
-[project.urls]
-homepage = "http://github.com/lorien/grab"
 
 [tool.setuptools]
 packages=["grab", "grab.spider", "grab.spider.queue_backend", "grab.spider.service", "grab.util"]
