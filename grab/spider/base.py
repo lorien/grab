@@ -12,6 +12,8 @@ from traceback import format_exception, format_stack
 from types import TracebackType
 from typing import Any, Literal, cast
 
+from procstat import Stat
+
 from grab.base import Grab
 from grab.error import (
     GrabFeatureIsDeprecated,
@@ -32,7 +34,6 @@ from grab.spider.task import Task
 from grab.types import GrabConfig
 from grab.util.metrics import format_traffic_value
 from grab.util.misc import camel_case_to_underscore
-from procstat import Stat
 
 from .interface import FatalErrorQueueItem
 from .service.network import NetworkResult
