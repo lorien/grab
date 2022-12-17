@@ -89,7 +89,6 @@ def setup_logging():
         ("grab.base", logging.INFO),
         ("grab.spider.base", logging.INFO),
         ("grab.spider.parser_pipeline", logging.INFO),
-        ("grab.stat", logging.INFO),
     ):
         logger = logging.getLogger(name)
         logger.setLevel(level)

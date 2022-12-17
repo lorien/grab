@@ -6,9 +6,10 @@ from collections.abc import Callable
 from queue import Empty, Queue
 from typing import Any
 
+from procstat import Stat
+
 from grab.base import Grab
 from grab.spider.error import NoTaskHandler
-from grab.stat import Stat
 
 from ..interface import FatalErrorQueueItem
 from ..task import Task

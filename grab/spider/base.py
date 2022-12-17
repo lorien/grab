@@ -29,10 +29,10 @@ from grab.spider.queue_backend.memory import MemoryTaskQueue
 from grab.spider.service.base import BaseService
 from grab.spider.service.network import BaseNetworkService, NetworkServiceThreaded
 from grab.spider.task import Task
-from grab.stat import Stat
 from grab.types import GrabConfig
 from grab.util.metrics import format_traffic_value
 from grab.util.misc import camel_case_to_underscore
+from procstat import Stat
 
 from .interface import FatalErrorQueueItem
 from .service.network import NetworkResult
@@ -560,7 +560,7 @@ class Spider:
         for srv in services:
             if srv.is_alive():
                 logger.error("The %s has not stopped :(", srv)
-        self.stat.print_progress_line()
+        self.stat.render_moment()
         self.shutdown()
         self.task_queue.clear()
         self.task_queue.close()

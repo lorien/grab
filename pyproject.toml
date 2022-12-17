@@ -29,6 +29,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
+    "procstat>=0.0.4",
     "user_agent",
     "selection",
     "lxml",
