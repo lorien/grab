@@ -105,6 +105,7 @@ class Spider:
         self.grab_transport_name = grab_transport
         self.parser_requests_per_process = parser_requests_per_process
         self.stat = Stat()
+        self.runtime_events: dict[str, list[None | str]] = {}
         self.task_queue: BaseTaskQueue = task_queue if task_queue else MemoryTaskQueue()
         if config is not None:
             self.config = config
@@ -169,6 +170,9 @@ class Spider:
             task_dispatcher=self.task_dispatcher,
         )
 
+    def collect_runtime_event(self, name: str, value: None | str) -> None:
+        self.runtime_events.setdefault(name, []).append(value)
+
     # pylint: enable=too-many-locals, too-many-arguments
 
     def setup_queue(self, *_args: Any, **_kwargs: Any) -> None:
@@ -197,7 +201,7 @@ class Spider:
         if not task.url or not task.url.startswith(
             ("http://", "https://", "ftp://", "file://", "feed://")
         ):
-            self.stat.collect("task-with-invalid-url", task.url)
+            self.collect_runtime_event("task-with-invalid-url", task.url)
             msg = "Invalid task URL: %s" % task.url
             if raise_error:
                 raise SpiderError(msg)
@@ -280,8 +284,8 @@ class Spider:
         out.append("")
 
         out.append("Lists:")
-        # Process collections sorted by size desc
-        col_sizes = [(x, len(y)) for x, y in self.stat.collections.items()]
+        # Process event lists sorted by size in descendant order
+        col_sizes = [(x, len(y)) for x, y in self.runtime_events.items()]
         col_sizes = sorted(col_sizes, key=lambda x: x[1], reverse=True)
         for col_size in col_sizes:
             out.append("  %s: %d" % col_size)
@@ -424,7 +428,7 @@ class Spider:
         )
 
         task_url = task.url if task else None
-        self.stat.collect(
+        self.collect_runtime_event(
             "fatal",
             "%s|%s|%s|%s" % (func_name, ex.__class__.__name__, str(ex), task_url),
         )
@@ -568,9 +572,9 @@ class Spider:
 
     def log_rejected_task(self, task: Task, reason: str) -> None:
         if reason == "task-try-count":
-            self.stat.collect("task-count-rejected", task.url)
+            self.collect_runtime_event("task-count-rejected", task.url)
         elif reason == "network-try-count":
-            self.stat.collect("network-count-rejected", task.url)
+            self.collect_runtime_event("network-count-rejected", task.url)
         else:
             raise SpiderError("Unknown response from check_task_limits: %s" % reason)
 

@@ -33,7 +33,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.add_task(Task("page_fail", url=self.server.get_url()))
         bot.run()
         self.assertEqual(2, bot.stat.counters["foo"])
-        self.assertEqual(1, len(bot.stat.collections["fatal"]))
+        self.assertEqual(1, len(bot.runtime_events["fatal"]))
 
     def test_render_stats(self):
         self.server.add_response(Response())

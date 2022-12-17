@@ -10,7 +10,7 @@ from tests.util import ADDRESS, BaseGrabTestCase, build_spider, temp_file
 
 class SimpleSpider(Spider):
     def task_baz(self, grab, unused_task):
-        self.stat.collect("ports", int(grab.doc.headers.get("Listen-Port", 0)))
+        self.collect_runtime_event("ports", int(grab.doc.headers.get("Listen-Port", 0)))
 
 
 class TestSpiderProxyCase(BaseGrabTestCase):
@@ -57,7 +57,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
                 if x["server"].request_is_done()
             ][0]
             self.assertEqual(serv.request.headers.get("host"), "yandex.ru")
-            self.assertEqual(1, len(set(bot.stat.collections["ports"])))
+            self.assertEqual(1, len(set(bot.runtime_events["ports"])))
 
     def test_setup_proxylist2(self):
         with temp_file() as proxy_file:
@@ -81,7 +81,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             ]
             for serv in servers:
                 self.assertEqual(serv.request.headers.get("host"), "yandex.ru")
-            self.assertTrue(len(set(bot.stat.collections["ports"])) > 1)
+            self.assertTrue(len(set(bot.runtime_events["ports"])) > 1)
 
     def test_setup_proxylist4(self):
         with temp_file() as proxy_file:
@@ -107,7 +107,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             for serv in servers:
                 self.assertEqual(serv.request.headers.get("host"), "yandex.ru")
             self.assertEqual(len(servers), 1)
-            self.assertEqual(1, len(set(bot.stat.collections["ports"])))
+            self.assertEqual(1, len(set(bot.runtime_events["ports"])))
 
     def test_setup_proxylist5(self):
         with temp_file() as proxy_file:
@@ -132,8 +132,8 @@ class TestSpiderProxyCase(BaseGrabTestCase):
                 self.server.request.headers.get("host"),
                 "%s:%s" % (ADDRESS, self.server.port),
             )
-            self.assertEqual(1, len(set(bot.stat.collections["ports"])))
-            self.assertEqual(bot.stat.collections["ports"][0], self.server.port)
+            self.assertEqual(1, len(set(bot.runtime_events["ports"])))
+            self.assertEqual(bot.runtime_events["ports"][0], self.server.port)
 
     def test_spider_custom_proxy_source(self):
         proxy_port = self.server.port
@@ -141,7 +141,9 @@ class TestSpiderProxyCase(BaseGrabTestCase):
 
         class TestSpider(Spider):
             def task_page(self, grab, unused_task):
-                self.stat.collect("ports", int(grab.doc.headers.get("Listen-Port", 0)))
+                self.collect_runtime_event(
+                    "ports", int(grab.doc.headers.get("Listen-Port", 0))
+                )
 
         class CustomProxySource(BaseProxySource):
             def load(self):
@@ -158,4 +160,4 @@ class TestSpiderProxyCase(BaseGrabTestCase):
         bot.run()
 
         self.assertEqual(self.server.request.headers.get("host"), "yandex.ru")
-        self.assertEqual(set(bot.stat.collections["ports"]), {self.server.port})
+        self.assertEqual(set(bot.runtime_events["ports"]), {self.server.port})

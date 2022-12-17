@@ -115,7 +115,7 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
     def test_task_raw(self):
         class TestSpider(Spider):
             def task_page(self, grab, unused_task):
-                self.stat.collect("codes", grab.doc.code)
+                self.collect_runtime_event("codes", grab.doc.code)
 
         self.server.add_response(Response(status=502), count=4)
 
@@ -123,13 +123,13 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
-        self.assertEqual(0, len(bot.stat.collections["codes"]))
+        self.assertEqual(0, len(bot.runtime_events.get("codes", [])))
 
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.add_task(Task("page", url=self.server.get_url(), raw=True))
         bot.add_task(Task("page", url=self.server.get_url(), raw=True))
         bot.run()
-        self.assertEqual(2, len(bot.stat.collections["codes"]))
+        self.assertEqual(2, len(bot.runtime_events["codes"]))
 
     def test_task_callback(self):
         self.server.add_response(Response(), count=4)
@@ -267,13 +267,13 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
                 )
 
             def task_page(self, grab, unused_task):
-                self.stat.collect("points", grab.config["timeout"])
+                self.collect_runtime_event("points", grab.config["timeout"])
 
         bot = build_spider(TestSpider, meta={"server": self.server})
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.add_task(Task("page", grab=Grab(url=self.server.get_url(), timeout=1)))
         bot.run()
-        self.assertEqual({77}, set(bot.stat.collections["points"]))
+        self.assertEqual({77}, set(bot.runtime_events["points"]))
 
     def test_create_grab_instance(self):
         self.server.add_response(Response(), count=-1)
@@ -291,13 +291,13 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
                 )
 
             def task_page(self, grab, unused_task):
-                self.stat.collect("points", grab.config["timeout"])
+                self.collect_runtime_event("points", grab.config["timeout"])
 
         bot = build_spider(TestSpider, meta={"server": self.server})
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.add_task(Task("page", grab=Grab(url=self.server.get_url(), timeout=75)))
         bot.run()
-        self.assertEqual({77, 76, 75}, set(bot.stat.collections["points"]))
+        self.assertEqual({77, 76, 75}, set(bot.runtime_events["points"]))
 
     def test_add_task_invalid_url_no_error(self):
         class TestSpider(Spider):

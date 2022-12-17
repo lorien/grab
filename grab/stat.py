@@ -3,24 +3,18 @@ from __future__ import annotations
 
 import logging
 import time
-from collections import defaultdict
-from collections.abc import Generator
-from contextlib import contextmanager
-from typing import Any
-
-from grab.util.warning import warn
-
-DEFAULT_SPEED_KEY = "spider:request-processed"
-DEFAULT_LOGGING_PERIOD = 1
 
 
 class Stat:  # pylint: disable=too-many-instance-attributes
+    default_speed_key = "spider:request-processed"
+    default_logging_period = 1
+
     def __init__(
         self,
         logger_name: str = "grab.stat",
         log_file: None | str = None,
-        logging_period: int = DEFAULT_LOGGING_PERIOD,
-        speed_key: str = DEFAULT_SPEED_KEY,
+        logging_period: int = default_logging_period,
+        speed_key: str = default_speed_key,
         extra_speed_keys: None | list[str] = None,
     ) -> None:
         self.speed_key = speed_key
@@ -33,9 +27,8 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         self.logger = logging.getLogger(logger_name)
         self.log_file: None | str = None
         self.setup_logging_file(log_file)
-        self.counters: dict[str, int] = defaultdict(int)
-        self.collections: dict[str, list[Any]] = defaultdict(list)
-        self.counters_prev: dict[str, int] = defaultdict(int)
+        self.counters: dict[str, int] = {}
+        self.counters_prev: dict[str, int] = {}
         self.reset()
 
     def setup_speed_keys(
@@ -48,7 +41,6 @@ class Stat:  # pylint: disable=too-many-instance-attributes
 
     def reset(self) -> None:
         self.counters.clear()
-        self.collections.clear()
         self.counters_prev.clear()
 
     def setup_logging_file(self, log_file: None | str) -> None:
@@ -62,9 +54,6 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         for key in list(self.counters.keys()):
             if not any(key.startswith(x) for x in self.logging_ignore_prefixes):
                 result.append((key, "%s=%d" % (key, self.counters[key])))
-        for key in list(self.collections.keys()):
-            if not any(key.startswith(x) for x in self.logging_ignore_prefixes):
-                result.append((key, "%s=%d" % (key, len(self.collections[key]))))
         tokens = [x[1] for x in sorted(result, key=lambda x: x[0])]
         return ", ".join(tokens)
 
@@ -75,8 +64,8 @@ class Stat:  # pylint: disable=too-many-instance-attributes
             if not time_elapsed:
                 qps: float = 0
             else:
-                count_current = self.counters[key]
-                diff = count_current - self.counters_prev[key]
+                count_current = self.counters.get(key, 0)
+                diff = count_current - self.counters_prev.get(key, 0)
                 qps = diff / time_elapsed
                 self.counters_prev[key] = count_current
             label = "RPS" if (key == self.speed_key) else key
@@ -88,45 +77,9 @@ class Stat:  # pylint: disable=too-many-instance-attributes
         self.logger.debug("%s [%s]", self.get_speed_line(now), self.get_counter_line())
 
     def inc(self, key: str, delta: int = 1) -> None:
+        self.counters.setdefault(key, 0)
         self.counters[key] += delta
         now = time.time()
         if self.logging_period and now - self.time > self.logging_period:
             self.print_progress_line()
             self.time = now
-
-    def collect(self, key: str, val: Any) -> None:
-        self.collections[key].append(val)
-
-    def append(self, key: str, val: Any) -> None:
-        warn(
-            "Method `Stat::append` is deprecated. "
-            "Use `Stat::collect` method instead."
-        )
-        self.collect(key, val)
-
-
-class Timer:
-    def __init__(self) -> None:
-        self.time_points: dict[str, float] = {}
-        self.timers: dict[str, float] = defaultdict(int)
-
-    def start(self, key: str) -> None:
-        self.time_points[key] = time.time()
-
-    def stop(self, key: str) -> float:
-        elapsed = time.time() - self.time_points[key]
-        self.timers[key] += elapsed
-        del self.time_points[key]
-        return elapsed
-
-    def inc_timer(self, key: str, value: int | float) -> None:
-        self.timers[key] += value
-
-    @contextmanager
-    def log_time(self, key: str) -> Generator[None, None, None]:
-        # Threadsafe
-        start = time.time()
-        try:
-            yield
-        finally:
-            self.timers[key] += time.time() - start

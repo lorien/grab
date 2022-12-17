@@ -1,3 +1,5 @@
+from pprint import pprint  # pylint: disable=unused-import
+
 from test_server import Response
 
 from grab import Grab
@@ -26,7 +28,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         )
         bot.run()
 
-        self.assertEqual(1, len(bot.stat.collections["network-count-rejected"]))
+        self.assertEqual(1, len(bot.runtime_events["network-count-rejected"]))
         self.assertTrue("error:too-many-redirects" in bot.stat.counters)
 
     def test_redirect_with_invalid_byte(self):
@@ -50,13 +52,12 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         bot = build_spider(TestSpider)
         bot.run()
-        print("!!!!!!!!!!!", bot.stat.counters)
         # Different errors depending on combination
         # of network service and transport used
-        self.assertEqual(1, len(bot.stat.collections["network-count-rejected"]))
+        self.assertEqual(1, len(bot.runtime_events["network-count-rejected"]))
         self.assertTrue(
-            bot.stat.counters["error:new-connection-error"] == 5
-            or bot.stat.counters["error:location-parse-error"]
-            or bot.stat.counters["error:grab-could-not-resolve-host-error"] == 5
-            or bot.stat.counters["error:couldnt-resolve-host"] == 5
+            # bot.stat.counters["error:new-connection-error"] == 5
+            bot.stat.counters["error:location-parse-error"]
+            # or bot.stat.counters["error:grab-could-not-resolve-host-error"] == 5
+            # or bot.stat.counters["error:couldnt-resolve-host"] == 5
         )

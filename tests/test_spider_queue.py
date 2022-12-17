@@ -14,8 +14,8 @@ from tests.util import BaseGrabTestCase, build_spider, load_test_config
 class SpiderQueueMixin:
     class SimpleSpider(Spider):
         def task_page(self, unused_grab, task):
-            self.stat.collect("url_history", task.url)
-            self.stat.collect("priority_history", task.priority)
+            self.collect_runtime_event("url_history", task.url)
+            self.collect_runtime_event("priority_history", task.priority)
 
     @abstractmethod
     def build_task_queue(self) -> BaseTaskQueue:
@@ -37,7 +37,7 @@ class SpiderQueueMixin:
             bot.add_task(Task("page", url=url, priority=priority))
         bot.run()
         urls = [x[1] for x in sorted(requested_urls.items(), key=lambda x: x[0])]
-        self.assertEqual(urls, bot.stat.collections["url_history"])
+        self.assertEqual(urls, bot.runtime_events["url_history"])
 
     def test_queue_length(self):
         class CustomSpider(self.SimpleSpider):
@@ -96,11 +96,11 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
                 yield Task("page", url=server.get_url(), num=1)
 
             def task_page(self, unused_grab, task):
-                self.stat.collect("numbers", task.num)
+                self.collect_runtime_event("numbers", task.num)
 
         bot = build_spider(TestSpider, thread_number=1)
         bot.run()
-        self.assertEqual(bot.stat.collections["numbers"], [1, 3, 4, 2])
+        self.assertEqual(bot.runtime_events["numbers"], [1, 3, 4, 2])
 
     def test_schedule_list_clear(self):
         bot = build_spider(self.SimpleSpider)
@@ -139,11 +139,11 @@ class SpiderMongodbQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
                 yield Task("page", url=server.get_url(), delay=1, num=4)
 
             def task_page(self, unused_grab, task):
-                self.stat.collect("numbers", task.num)
+                self.collect_runtime_event("numbers", task.num)
 
         bot = build_spider(TestSpider, task_queue=self.build_task_queue())
         bot.run()
-        self.assertEqual(bot.stat.collections["numbers"], [1, 3, 4, 2])
+        self.assertEqual(bot.runtime_events["numbers"], [1, 3, 4, 2])
         # TODO: understand why that test fails
 
     def test_clear_collection(self):

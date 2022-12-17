@@ -8,7 +8,7 @@ from tests.util import BaseGrabTestCase, build_spider
 
 class SimpleSpider(Spider):
     def task_baz(self, grab, unused_task):
-        self.stat.collect("SAVED_ITEM", grab.doc.body)
+        self.collect_runtime_event("SAVED_ITEM", grab.doc.body)
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
@@ -20,7 +20,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot = build_spider(SimpleSpider)
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
-        self.assertEqual(b"Hello spider!", bot.stat.collections["SAVED_ITEM"][0])
+        self.assertEqual(b"Hello spider!", bot.runtime_events["SAVED_ITEM"][0])
 
     def test_network_limit(self):
         class CustomSimpleSpider(SimpleSpider):
@@ -57,7 +57,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot2 = build_spider(SimpleSpider, task_try_limit=2)
         bot2.add_task(Task("baz", self.server.get_url(), task_try_count=3))
         bot2.run()
-        self.assertEqual(bot2.stat.counters["spider:request-network"], 0)
+        self.assertEqual(bot2.stat.counters.get("spider:request-network", 0), 0)
 
     def test_task_retry(self):
         self.server.add_response(Response(status=403))
@@ -65,7 +65,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot = build_spider(SimpleSpider)
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
-        self.assertEqual(b"xxx", bot.stat.collections["SAVED_ITEM"][0])
+        self.assertEqual(b"xxx", bot.runtime_events["SAVED_ITEM"][0])
 
     def test_generator(self):
         server = self.server
