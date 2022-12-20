@@ -133,13 +133,6 @@ def default_config() -> GrabConfig:
         # For html type HTML DOM builder is used
         # For xml type XML DOM builder is used
         "content_type": "html",
-        # Fix &#X; entities, where X between 128 and 160
-        # Such entities are parsed by modern browsers as
-        # windows-1251 entities independently of the real charset of
-        # the document, If this option is True then such entities
-        # will be replaced with correct unicode entities e.g.:
-        # &#151; ->  &#8212;
-        "fix_special_entities": True,
         # Convert document body to lower case before building LXML tree
         # It does not affect `self.doc.body`
         "lowercased_tree": False,

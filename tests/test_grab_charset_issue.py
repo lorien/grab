@@ -13,19 +13,9 @@ class LXMLExtensionTest(BaseGrabTestCase):
         grab = build_grab()
         grab.go(self.server.get_url())
 
-        # By default &#[128-160]; are fixed
+        # By default &#[128-159]; are fixed
         self.assertFalse(grab.doc.select("//strong/text()").text() == chr(151))
         self.assertTrue(grab.doc.select("//strong/text()").text() == chr(8212))
-
-        # # disable fix-behaviour
-        # grab.setup(fix_special_entities=False)
-        # grab.go(self.server.get_url())
-        # self.assertTrue(grab.doc.select("//strong/text()").text() == chr(151))
-        # self.assertFalse(grab.doc.select("//strong/text()").text() == chr(8212))
-        # # Explicitly use unicode_body func
-        # grab = build_grab()
-        # grab.go(self.server.get_url())
-        # self.assertTrue("&#8212;" in grab.doc.unicode_body())
 
     def test_invalid_charset(self):
         html = b"""<head><meta http-equiv="Content-Type"

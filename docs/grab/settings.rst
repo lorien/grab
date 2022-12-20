@@ -443,19 +443,6 @@ This option controls which lxml parser is used to process the body of the respon
 If you want to parse XML, then you may need to change this option to "xml" to force the use of an XML parser which does not strip the content of CDATA nodes.
 
 
-.. _option_fix_special_entities:
-
-fix_special_entities
-^^^^^^^^^^^^^^^^^^^^
-
-:Type: bool
-:Default: True
-
-Fix &#X; entities, where X between 128 and 160. Such entities are parsed by modern
-browsers as windows-1251 entities, independently of the real charset of
-the document. If this option is True, then such entities
-will be replaced with appropriate unicode entities, e.g.: &#151; ->  &#8212;
-
 Debugging
 ---------
 

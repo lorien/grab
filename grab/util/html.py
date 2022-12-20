@@ -4,9 +4,6 @@ import re
 from html.entities import name2codepoint
 from re import Match
 
-from .encoding import make_bytes
-
-RE_SPECIAL_ENTITY = re.compile(rb"&#(1[2-6][0-9]);")
 RE_NAMED_ENTITY = re.compile(r"(&[a-z]+;)")
 RE_NUM_ENTITY = re.compile(r"(&#[0-9]+;)")
 RE_HEX_ENTITY = re.compile(r"(&#x[a-f0-9]+;)", re.I)
@@ -23,22 +20,6 @@ RE_REFRESH_URL = re.compile(
     re.I | re.X,
 )
 RE_BASE_URL = re.compile(r'<base[^>]+href\s*=["\']*([^\'"> ]+)', re.I)
-
-
-def special_entity_handler(match: Match[bytes]) -> bytes:
-    num = int(match.group(1))
-    if 128 <= num <= 160:
-        try:
-            num_chr = chr(num).encode("utf-8")
-            return make_bytes("&#%d;" % ord(num_chr.decode("cp1252")[1]))
-        except UnicodeDecodeError:
-            return match.group(0)
-    else:
-        return match.group(0)
-
-
-def fix_special_entities(body: bytes) -> bytes:
-    return RE_SPECIAL_ENTITY.sub(special_entity_handler, body)
 
 
 def process_named_entity(match: Match[str]) -> str:
