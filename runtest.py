@@ -53,7 +53,6 @@ GRAB_TEST_LIST = (
     # *** util.module
     "tests.test_util_log",
     "tests.test_util_encoding",
-    "tests.test_util_charset",
     # *** grab.export
     "tests.test_grab_error",
     "tests.test_ext_pyquery",
