@@ -1,4 +1,4 @@
-.PHONY: bootstrap venv deps dirs clean test release mypy pylint flake8 bandit check build
+.PHONY: bootstrap venv deps dirs clean pytest test release mypy pylint flake8 bandit check build
 
 SHELL := /bin/bash
 FILES_CHECK_MYPY = grab
@@ -23,9 +23,12 @@ clean:
 	find -name '*.swp' -delete
 	find -name '__pycache__' -delete
 
+pytest:
+	pytest -n30 -x --cov grab --cov-report term-missing
+
 test:
 	make check \
-	&& pytest -n30 -x --cov grab --cov-report term-missing \
+	&& make pytest \
 	&& tox -e py38-check
 
 #release:
