@@ -210,7 +210,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     @property
     def doc(self) -> Document:
         if self._doc is None:
-            self._doc = Document(self)
+            self._doc = Document(self.config)
         return self._doc
 
     @doc.setter
@@ -573,7 +573,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             )
 
         # Configure Document instance
-        doc = self.document_class(grab=self)
+        doc = self.document_class(self.config)
 
         # DOCUMENT ARGS:
         # body, head, status, headers, charset, code, url

@@ -5,7 +5,7 @@
 """The Document class is the result of network request made with Grab instance."""
 from __future__ import annotations
 
-import codecs
+# import codecs
 import email
 import email.message
 import json
@@ -26,6 +26,7 @@ from re import Match, Pattern
 from typing import IO, Any, Protocol, cast
 from urllib.parse import SplitResult, parse_qs, urlencode, urljoin, urlsplit
 
+import unicodec  # pylint: disable=wrong-import-order
 from lxml import etree
 from lxml.etree import _Element
 from lxml.html import (
@@ -40,15 +41,10 @@ from selection import SelectorList, XpathSelector
 from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabFeatureIsDeprecated, GrabMisuseError
 from grab.types import NULL, GrabConfig
-from grab.util.charset import parse_document_charset
 from grab.util.files import hashed_path
 from grab.util.html import decode_entities, find_refresh_url
-from grab.util.html import fix_special_entities as fix_special_entities_func
 from grab.util.text import normalize_spaces
 from grab.util.warning import warn
-
-NULL_BYTE = chr(0)
-RE_XML_DECLARATION = re.compile(rb"^[^<]{,100}<\?xml[^>]+\?>", re.I)
 
 THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")
@@ -79,7 +75,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         "cookies",
         "charset",
         "_unicode_body",
-        "bom",
         "timestamp",
         "download_size",
         "upload_size",
@@ -97,10 +92,10 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         "_grab_config",
     )
 
-    def __init__(self, grab: None | GrabConfigProtocol = None) -> None:
+    def __init__(self, grab_config: None | GrabConfig = None) -> None:
         self._grab_config: GrabConfig = {}
-        if grab:
-            self.process_grab_config(grab.config)
+        if grab_config:
+            self.process_grab_config(grab_config)
         self.status: None | str = None
         self.code: None | int = None
         self.head: None | bytes = None
@@ -108,7 +103,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self.url: None | str = None
         self.cookies = CookieManager()
         self.charset = "utf-8"
-        self.bom: None | bytes = None
         self.timestamp = datetime.utcnow()
         self.download_size = 0
         self.upload_size = 0
@@ -138,7 +132,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         # process content of the document
         for key in (
             "content_type",
-            "fix_special_entities",
             "lowercased_tree",
             "strip_null_bytes",
         ):
@@ -153,49 +146,16 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def setup_charset(self, charset: None | str = None) -> None:
         if charset is None:
-            self.detect_charset()
+            # self.detect_charset()
+            self.charset = unicodec.detect_content_encoding(
+                self.get_body_chunk() or b"",
+                content_type_header=(
+                    self.headers.get("Content-Type", None) if self.headers else None
+                ),
+                markup="xml" if self._grab_config["content_type"] == "xml" else "html",
+            )
         else:
             self.charset = charset.lower()
-
-    def detect_charset(self) -> None:
-        """Detect charset of the response. Set charset inplace to "self.charset".
-
-        Try following methods:
-        * meta[name="Http-Equiv"]
-        * XML declaration
-        * HTTP Content-Type header
-
-        Ignore unknown charsets.
-
-        Use utf-8 as fallback charset.
-        """
-        charset = None
-
-        body_chunk = self.get_body_chunk()
-
-        if body_chunk:
-            charset, bom = parse_document_charset(body_chunk)
-            if bom:
-                self.bom = bom
-
-        if not charset and self.headers and "Content-Type" in self.headers:
-            pos = self.headers["Content-Type"].find("charset=")
-            if pos > -1:
-                charset = self.headers["Content-Type"][(pos + 8) :]
-
-        if charset:
-            charset = charset.lower()
-            if not isinstance(charset, str):
-                # Convert to unicode (py2.x) or string (py3.x)
-                charset = charset.decode("utf-8")
-            # Check that python knows such charset
-            try:
-                codecs.lookup(charset)
-            except LookupError:
-                logger.debug("Unknown charset found: %s. Using utf-8 instead.", charset)
-                self.charset = "utf-8"
-            else:
-                self.charset = charset
 
     def copy(self, new_grab_config: None | GrabConfig = None) -> Document:
         """Clone the Response object."""
@@ -416,41 +376,33 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             return self._bytes_body[:4096]
         return None
 
-    def convert_body_to_unicode(
-        self,
-        body: bytes,
-        bom: None | bytes,
-        charset: str,
-        ignore_errors: bool,
-        fix_special_entities: bool,
-    ) -> str:
-        # WTF: How could it be unicode???
-        # if isinstance(body, unicode):
-        # body = body.encode('utf-8')
-        if bom is not None:
-            body = body[len(bom) :]
-        if fix_special_entities:
-            body = fix_special_entities_func(body)
-        errors = "ignore" if ignore_errors else "strict"
-        return body.decode(charset, errors).strip()
+    # def convert_body_to_unicode(
+    #    self,
+    #    body: bytes,
+    #    charset: str,
+    #    ignore_errors: bool,
+    # ) -> str:
+    #    # WTF: How could it be unicode???
+    #    # if isinstance(body, unicode):
+    #    # body = body.encode('utf-8')
+    #    #errors = "ignore" if ignore_errors else "strict"
+    #    #return body.decode(charset, errors).strip()
+    #    return decode_content(body
 
     def read_body_from_file(self) -> bytes:
         with open(cast(str, self.body_path), "rb") as inp:
             return cast(IO[bytes], inp).read()
 
     def unicode_body(
-        self, ignore_errors: bool = True, fix_special_entities: bool = True
-    ) -> None | str:
+        self,
+    ) -> None | str:  # , ignore_errors: bool = True) -> None | str:
         """Return response body as unicode string."""
         if self.body is None:
             return None
         if not self._unicode_body:
-            self._unicode_body = self.convert_body_to_unicode(
-                body=self.body,
-                bom=self.bom,
-                charset=self.charset,
-                ignore_errors=ignore_errors,
-                fix_special_entities=fix_special_entities,
+            # FIXME: ignore_errors option
+            self._unicode_body = unicodec.decode_content(
+                self.body, encoding=self.charset
             )
         return self._unicode_body
 
@@ -507,17 +459,11 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def build_html_tree(self) -> _Element:
         if self._lxml_tree is None:
             assert self.body is not None
-            body = self.body
-            fix_setting = self._grab_config["fix_special_entities"]
-            # body = self.unicode_body(fix_special_entities=fix_setting).strip()
-            if fix_setting:
-                body = fix_special_entities_func(body)
-            if self._grab_config["lowercased_tree"]:
-                body = body.lower()
-            # could not be applied to bytes body
-            # if self._grab_config["strip_null_bytes"]:
-            #    body = body.replace(NULL_BYTE, "")
-            body = RE_XML_DECLARATION.sub(b"", body)
+            # body = self.body
+            ubody = self.unicode_body()
+            body: None | bytes = (
+                ubody.encode(self.charset) if ubody is not None else None
+            )
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser
@@ -556,8 +502,10 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def build_xml_tree(self) -> _Element:
         if self._strict_lxml_tree is None:
-            assert self.body is not None
-            self._strict_lxml_tree = self._build_dom(self.body, "xml", self.charset)
+            ubody = self.unicode_body()
+            assert ubody is not None
+            body = ubody.encode(self.charset)
+            self._strict_lxml_tree = self._build_dom(body, "xml", self.charset)
         return self._strict_lxml_tree
 
     # FormExtension methods

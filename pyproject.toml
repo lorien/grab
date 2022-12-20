@@ -29,6 +29,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
+    "unicodec>=0.0.7",
     "procstat>=0.0.5",
     "user_agent",
     "selection",
@@ -57,6 +58,7 @@ packages=["grab", "grab.spider", "grab.spider.queue_backend", "grab.spider.servi
 [tool.isort]
 profile = "black"
 line_length = 88
+known_third_party = ["unicodec"]
 # skip_gitignore = true # throws errors in stderr when ".git" dir does not exist
 
 [tool.bandit]

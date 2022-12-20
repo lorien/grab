@@ -24,7 +24,7 @@ clean:
 	find -name '__pycache__' -delete
 
 test:
-	pytest -n30 -x --cov grab --cov-report term-missing
+	make mypy && make pylint && pytest -n30 -x --cov grab --cov-report term-missing
 
 #release:
 #	git push \

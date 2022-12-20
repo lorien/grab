@@ -423,7 +423,7 @@ class Urllib3Transport(BaseTransport):
                 " after network response is received"
             )
         try:
-            response = document_class()
+            response = document_class(grab_config)
 
             # DOCUMENT ARGS DIFF:
             # grab.base: body, status
