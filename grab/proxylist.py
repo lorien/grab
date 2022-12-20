@@ -6,7 +6,7 @@ import re
 import typing
 from abc import abstractmethod
 from collections.abc import Iterator
-from random import randint
+from secrets import SystemRandom
 from typing import IO, Any, NamedTuple, cast
 from urllib.error import URLError
 from urllib.request import urlopen
@@ -17,6 +17,7 @@ RE_SIMPLE_PROXY = re.compile(r"^([^:]+):(\d+)$")
 RE_AUTH_PROXY = re.compile(r"^([^:]+):(\d+):([^:]+):([^:]+)$")
 PROXY_FIELDS = ("host", "port", "username", "password", "proxy_type")
 logger = logging.getLogger("grab.proxylist")
+system_random = SystemRandom()
 
 
 class Proxy(NamedTuple):
@@ -181,7 +182,7 @@ class ProxyList:
 
     def get_random_proxy(self) -> Proxy:
         """Return random proxy."""
-        idx = randint(0, len(self._list) - 1)
+        idx = system_random.randint(0, len(self._list) - 1)
         return self._list[idx]
 
     def get_next_proxy(self) -> Proxy:

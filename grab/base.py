@@ -14,7 +14,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 from contextlib import suppress
 from copy import copy, deepcopy
 from datetime import datetime
-from random import randint
+from secrets import SystemRandom
 from typing import Any, cast
 from urllib.parse import urljoin
 
@@ -44,9 +44,9 @@ TRANSPORT_ALIAS = {
     "urllib3": "grab.transport.Urllib3Transport",
 }
 DEFAULT_TRANSPORT = "urllib3"
-
 logger = logging.getLogger("grab.base")
 logger_network = logging.getLogger("grab.network")
+system_random = SystemRandom()
 
 
 def copy_config(
@@ -617,9 +617,11 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         """Build headers which sends typical browser."""
         return {
             "Accept": "text/xml,application/xml,application/xhtml+xml"
-            ",text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d" % randint(2, 5),
-            "Accept-Language": "en-us,en;q=0.%d" % (randint(5, 9)),
-            "Accept-Charset": "utf-8,windows-1251;q=0.7,*;q=0.%d" % randint(5, 7),
+            ",text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d"
+            % system_random.randint(2, 5),
+            "Accept-Language": "en-us,en;q=0.%d" % (system_random.randint(5, 9)),
+            "Accept-Charset": "utf-8,windows-1251;q=0.7,*;q=0.%d"
+            % system_random.randint(5, 7),
             "Keep-Alive": "300",
         }
 

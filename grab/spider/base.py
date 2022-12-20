@@ -7,7 +7,7 @@ from collections.abc import Callable, Iterator
 from copy import deepcopy
 from datetime import datetime
 from queue import Empty, Queue
-from random import randint
+from secrets import SystemRandom
 from traceback import format_exception, format_stack
 from types import TracebackType
 from typing import Any, Literal, cast
@@ -47,6 +47,7 @@ DEFAULT_TASK_TRY_LIMIT = 5
 DEFAULT_NETWORK_TRY_LIMIT = 5
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
 logger = logging.getLogger("grab.spider.base")
+system_random = SystemRandom()
 
 
 # pylint: disable=too-many-instance-attributes, too-many-public-methods
@@ -376,7 +377,7 @@ class Spider:
     def generate_task_priority(self) -> int:
         if self.priority_mode == "const":
             return DEFAULT_TASK_PRIORITY
-        return randint(*RANDOM_TASK_PRIORITY_RANGE)
+        return system_random.randint(*RANDOM_TASK_PRIORITY_RANGE)
 
     def process_initial_urls(self) -> None:
         if self.initial_urls:

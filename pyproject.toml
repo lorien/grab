@@ -64,7 +64,13 @@ known_third_party = ["unicodec"]
 [tool.bandit]
 # B101 assert_used
 # B410 Using HtmlElement to parse untrusted XML data
-skips = ["B101", "B410"]
+# B320 Using lxml.etree.parse to parse untrusted XML data
+# B310 Audit url open for permitted schemes
+# B301 Pickle and modules that wrap it can be unsafe
+# B403 Consider possible security implications associated with pickle module 
+# B324  Use of weak MD4, MD5, or SHA1 hash for security
+# B303 Use of insecure MD2, MD4, MD5, or SHA1 hash function
+skips = ["B101", "B410", "B320", "B310", "B301", "B403", "B324", "B303"]
 
 [[tool.mypy.overrides]]
 module = "pyquery"

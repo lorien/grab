@@ -24,7 +24,9 @@ clean:
 	find -name '__pycache__' -delete
 
 test:
-	make mypy && make pylint && pytest -n30 -x --cov grab --cov-report term-missing
+	make check \
+	&& pytest -n30 -x --cov grab --cov-report term-missing \
+	&& tox -e py38-check
 
 #release:
 #	git push \
@@ -45,8 +47,14 @@ bandit:
 	bandit -qc pyproject.toml -r $(FILES_CHECK_ALL)
 
 check:
-	tox -e py3-check \
-	&& tox -e py38-check
+	echo "mypy" \
+	&& make mypy \
+	&& echo "pylint" \
+	&& make pylint \
+	&& echo "flake8" \
+	&& make flake8 \
+	&& echo "bandit" \
+	&& make bandit
 
 build:
 	rm -rf *.egg-info

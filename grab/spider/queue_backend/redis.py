@@ -4,9 +4,9 @@ from __future__ import annotations
 import logging
 import pickle
 import queue
-import random
 import time
 from datetime import datetime
+from secrets import SystemRandom
 from typing import Any, cast
 
 from fastrq.priorityqueue import PriorityQueue  # pytype: disable=import-error
@@ -15,6 +15,8 @@ from redis import Redis
 from grab.spider.error import SpiderMisuseError
 from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.task import Task
+
+system_random = SystemRandom()
 
 
 class CustomPriorityQueue(PriorityQueue):  # type: ignore # FIXME
@@ -63,7 +65,7 @@ class RedisTaskQueue(BaseTaskQueue):
         # in the PriorityQueue
 
         task.store["redis_qr_time"] = time.time()
-        task.store["redis_qr_rnd"] = random.random()
+        task.store["redis_qr_rnd"] = system_random.random()
         self.queue_object.push({pickle.dumps(task): priority})
 
     def get(self) -> Task:
