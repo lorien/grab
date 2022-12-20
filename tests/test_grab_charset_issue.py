@@ -17,12 +17,12 @@ class LXMLExtensionTest(BaseGrabTestCase):
         self.assertFalse(grab.doc.select("//strong/text()").text() == chr(151))
         self.assertTrue(grab.doc.select("//strong/text()").text() == chr(8212))
 
-        ## disable fix-behaviour
+        # # disable fix-behaviour
         # grab.setup(fix_special_entities=False)
         # grab.go(self.server.get_url())
         # self.assertTrue(grab.doc.select("//strong/text()").text() == chr(151))
         # self.assertFalse(grab.doc.select("//strong/text()").text() == chr(8212))
-        ## Explicitly use unicode_body func
+        # # Explicitly use unicode_body func
         # grab = build_grab()
         # grab.go(self.server.get_url())
         # self.assertTrue("&#8212;" in grab.doc.unicode_body())
