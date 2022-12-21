@@ -1,4 +1,4 @@
-.PHONY: bootstrap venv deps dirs clean pytest test release mypy pylint flake8 bandit check build docs
+.PHONY: bootstrap venv deps dirs clean pytest test release mypy pylint flake8 bandit check build docs eradicate
 
 SHELL := /bin/bash
 FILES_CHECK_MYPY = grab
@@ -44,7 +44,10 @@ pylint:
 	pylint -j0  $(FILES_CHECK_ALL)
 
 flake8:
-	flake8 -j auto --max-cognitive-complexity=17 $(FILES_CHECK_ALL)
+	flake8 -j auto --max-cognitive-complexity=17 --extend-ignore=E800 $(FILES_CHECK_ALL)
+
+eradicate:
+	flake8 -j auto --max-cognitive-complexity=17 --eradicate-whitelist-extend="License:" $(FILES_CHECK_ALL)
 
 bandit:
 	bandit -qc pyproject.toml -r $(FILES_CHECK_ALL)
@@ -63,10 +66,6 @@ build:
 	rm -rf *.egg-info
 	rm -rf dist/*
 	python -m build --sdist
-
-demo:
-	tox -e py3-demo \
-	&& tox -e py38-demo
 
 docs:
 	rm -rf docs/_build/html 
