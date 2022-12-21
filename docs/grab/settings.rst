@@ -342,19 +342,6 @@ no conversion required. But if
     
 then the unicode data has to be converted to `charset` encoding. By default that would be utf-8.
 
-.. _option_nobody:
-
-nobody
-^^^^^^
-
-:Type: bool
-:Default: False
-
-Ignore the body of the network response. When this option is enabled, the connection is
-abandoned at the moment when remote server transfers all response headers and
-begins to transfer the body of the response. You can use this option with any HTTP method.
-
-
 .. _option_body_maxsize:
 
 body_maxsize
@@ -366,68 +353,6 @@ body_maxsize
 A limit on the maximum size of data that should be received from the remote server.
 If the limit is reached, the connection is abandoned and you can work with the data 
 received so far.
-
-
-.. _option_lowercased_tree:
-
-lowercased_tree
-^^^^^^^^^^^^^^^
-
-:type: bool
-:Default: False
-
-Convert the content of the document to lowercase before passing it to the lxml library to build the DOM tree.
-This option does not affect the content of `response.body`, which always stores the original data.
-
-
-.. _option_strip_null_bytes:
-
-strip_null_bytes
-^^^^^^^^^^^^^^^^
-
-:Type: bool
-:Default: True
-
-Control the removal of null bytes from the body of HTML documents before they a re passed to lxml to build a DOM tree.
-lxml stops processing HTML documents at the first place where it finds a null byte. To avoid such issues Grab,
-removes null bytes from the document body by default. This option does not affect the content of `response.body` that always stores the original data.
-
-
-.. _option_body_inmemory:
-
-body_inmemory
-^^^^^^^^^^^^^
-
-:Type: bool
-:Default: True
-
-Control the way the network response is received. By default, Grab downloads data into memory.
-To handle large files, you can set `body_inmemory=False` to download the network response directly to the disk.
-
-
-.. _option_body_storage_dir:
-
-body_storage_dir
-^^^^^^^^^^^^^^^^
-
-:Type: bool
-:Default: None
-
-If you use `body_inmemory=False`, then you have to specify the directory where Grab will save network requests.
-
-
-.. _option_body_storage_filename:
-
-body_storage_filename
-^^^^^^^^^^^^^^^^^^^^^
-
-:Type: string
-:Default: None
-
-If you use `body_inmemory=False`, you can let Grab automatically choose names for the files where it saves network responses.
-By default, Grab randomly builds unique names for files. With the `body_storage_filename` option, you can choose the
-exact file name to save response to. Note that Grab will save every response to that file, so you need to change
-the `body_storage_filename` option before each new request, or set it to None to enable default randomly generated file names.
 
 
 .. _option_content_type:

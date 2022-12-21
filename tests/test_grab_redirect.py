@@ -158,6 +158,6 @@ class GrabRedirectTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(raw_callback=callback))
         self.server.add_response(Response(data=b"content-2"))
-        grab = build_grab(debug=True, follow_location=True)
+        grab = build_grab(follow_location=True)
         with self.assertRaises(GrabInvalidResponse):
             grab.go(self.server.get_url())

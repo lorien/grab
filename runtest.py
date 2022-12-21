@@ -22,7 +22,6 @@ GRAB_TEST_LIST = (
     "tests.test_grab_api",
     "tests.test_grab_transport",
     "tests.test_grab_response",
-    "tests.test_grab_debug",
     # *** Response processing
     "tests.test_grab_xml_processing",
     "tests.test_grab_response_body_processing",

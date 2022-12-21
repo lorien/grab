@@ -26,7 +26,7 @@ class TestCookies(BaseGrabTestCase):
             self.server.add_response(
                 Response(headers=[("Set-Cookie", "godzilla=monkey")])
             )
-            grab.setup(cookiefile=tmp_file, debug=True)
+            grab.setup(cookiefile=tmp_file)
             grab.go(self.server.get_url())
             self.assertEqual(self.server.request.cookies["spam"].value, "ham")
 
@@ -240,7 +240,7 @@ class TestCookies(BaseGrabTestCase):
             with open(tmp_file, "w", encoding="utf-8") as out:
                 json.dump(init_cookies, out)
 
-            grab = build_grab(debug=True)
+            grab = build_grab()
             grab.cookies.load_from_file(tmp_file)
 
             cookies = {

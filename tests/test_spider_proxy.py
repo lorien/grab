@@ -50,7 +50,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             # Simple test, one task
             bot = build_spider(SimpleSpider, thread_number=1)
             bot.load_proxylist(proxy_file, "text_file")
-            bot.add_task(Task("baz", grab=Grab(url="http://yandex.ru", debug=True)))
+            bot.add_task(Task("baz", grab=Grab(url="http://yandex.ru")))
             bot.run()
             serv = [
                 x["server"]

@@ -9,7 +9,7 @@ class TestContentLimit(BaseGrabTestCase):
 
     def test_nobody(self):
         grab = build_grab()
-        grab.setup(nobody=True)
+        grab.setup(body_maxsize=0)
         self.server.add_response(Response(data=b"foo"))
         grab.go(self.server.get_url())
         self.assertEqual(b"", grab.doc.body)

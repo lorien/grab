@@ -10,7 +10,6 @@ from tests.util import (
     BaseGrabTestCase,
     build_grab,
     build_grab_custom_subclass,
-    temp_dir,
 )
 
 
@@ -27,44 +26,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_body_inmemory_false(self):
-        with temp_dir() as tmp_dir:
-            grab_bad = build_grab()
-            grab_bad.setup(body_inmemory=False)
-            with self.assertRaises(GrabMisuseError):
-                grab_bad.go(self.server.get_url())
-
-            self.server.add_response(Response(data=b"foo"))
-            grab = build_grab_custom_subclass(CustomGrab)
-            grab.setup(body_inmemory=False)
-            grab.setup(body_storage_dir=tmp_dir)
-            grab.go(self.server.get_url())
-            self.assertTrue(os.path.exists(grab.doc.body_path))
-            self.assertTrue(tmp_dir in grab.doc.body_path)
-            with open(grab.doc.body_path, "rb") as inp:
-                self.assertEqual(b"foo", inp.read())
-            self.assertEqual(grab.doc.get_bytes_body(), None)
-            old_path = grab.doc.body_path
-
-            grab.go(self.server.get_url())
-            self.assertTrue(old_path != grab.doc.body_path)
-
-        with temp_dir() as tmp_dir:
-            self.server.add_response(Response(data=b"foo"))
-            grab = build_grab_custom_subclass(CustomGrab)
-            grab.setup(body_inmemory=False)
-            grab.setup(body_storage_dir=tmp_dir)
-            grab.setup(body_storage_filename="music.mp3")
-            grab.go(self.server.get_url())
-            self.assertTrue(os.path.exists(grab.doc.body_path))
-            self.assertTrue(tmp_dir in grab.doc.body_path)
-            with open(grab.doc.body_path, "rb") as inp:
-                self.assertEqual(b"foo", inp.read())
-            self.assertEqual(os.path.join(tmp_dir, "music.mp3"), grab.doc.body_path)
-            self.assertEqual(grab.doc.body, b"foo")
-            self.assertEqual(grab.doc.get_bytes_body(), None)
-
-    def test_body_inmemory_true(self):
+    def test_body_get_bytes_body_true(self):
         grab = build_grab_custom_subclass(CustomGrab)
         self.server.add_response(Response(data=b"bar"))
         grab.go(self.server.get_url())

@@ -1,14 +1,3 @@
-#feedparser
-#flake8
-#selenium
-#runscript
-#urllib3
-#pyquery
-## to fix appveyor
-#item
-#pylint
-#psutil
-#fastrq
 sphinx
 myst-nb
 sphinx_rtd_theme

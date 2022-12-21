@@ -2,7 +2,6 @@ from urllib.parse import quote
 
 from test_server import Response
 
-from grab import GrabMisuseError
 from tests.util import BaseGrabTestCase, build_grab
 
 
@@ -89,16 +88,14 @@ class TestPostFeature(BaseGrabTestCase):
         # Now try cp1251 with charset option
         grab = build_grab()
         data = "фыва"
-        grab.setup(post=data, url=self.server.get_url(), charset="cp1251", debug=True)
+        grab.setup(post=data, url=self.server.get_url(), charset="cp1251")
         grab.request()
         self.assertEqual(self.server.request.data, data.encode("cp1251"))
 
         # Now try dict with unicode value & charset option
         grab = build_grab()
         data = "фыва"
-        grab.setup(
-            post={"foo": data}, url=self.server.get_url(), charset="cp1251", debug=True
-        )
+        grab.setup(post={"foo": data}, url=self.server.get_url(), charset="cp1251")
         grab.request()
         test = ("foo=%s" % quote(data.encode("cp1251"))).encode("ascii")
         self.assertEqual(self.server.request.data, test)
@@ -106,7 +103,7 @@ class TestPostFeature(BaseGrabTestCase):
     def test_put(self):
         self.server.add_response(Response())
         grab = build_grab()
-        grab.setup(post=b"abc", url=self.server.get_url(), method="put", debug=True)
+        grab.setup(post=b"abc", url=self.server.get_url(), method="put")
         grab.request()
         self.assertEqual(self.server.request.method, "PUT")
         self.assertEqual(self.server.request.headers.get("content-length"), "3")
@@ -130,11 +127,6 @@ class TestPostFeature(BaseGrabTestCase):
 
         grab.go(self.server.get_url(), post="DATA")
         self.assertEqual(self.server.request.headers.get("content-length"), "4")
-
-    def test_method_post_nobody(self):
-        grab = build_grab()
-        grab.setup(method="post")
-        self.assertRaises(GrabMisuseError, grab.go, self.server.get_url())
 
     def test_post_multivalue_key(self):
         self.server.add_response(Response())

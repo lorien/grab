@@ -23,7 +23,7 @@ from http.cookiejar import CookieJar
 from io import BytesIO, StringIO
 from pprint import pprint  # pylint: disable=unused-import
 from re import Match, Pattern
-from typing import IO, Any, Protocol, cast
+from typing import Any, Protocol, cast
 from urllib.parse import SplitResult, parse_qs, urlencode, urljoin, urlsplit
 
 import unicodec  # pylint: disable=wrong-import-order
@@ -65,7 +65,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         "code",
         "head",
         "_bytes_body",
-        "body_path",
         "headers",
         "url",
         "cookies",
@@ -99,7 +98,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         code: None | int = None,
         url: None | str = None,
         cookies: None | CookieJar = None,
-        body_path: None | str = None,
     ) -> None:
         # Cache attributes
         self._bytes_body: None | bytes = None
@@ -114,7 +112,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         if grab_config:
             self.process_grab_config(grab_config)
         # Main attributes
-        self.body_path = body_path
         if body is not None:
             self.set_body(body)
         self.code = code
@@ -136,11 +133,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def process_grab_config(self, grab_config: Mapping[str, Any]) -> Any:
         # Save some grab.config items required to
         # process content of the document
-        for key in (
-            "content_type",
-            "lowercased_tree",
-            "strip_null_bytes",
-        ):
+        for key in ["content_type"]:
             self._grab_config[key] = grab_config[key]
 
     # WTF
@@ -347,16 +340,9 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     # BodyExtension methods
 
     def get_body_chunk(self) -> None | bytes:
-        if self.body_path:
-            with open(self.body_path, "rb") as inp:
-                return inp.read(4096)
-        elif self._bytes_body:
+        if self._bytes_body:
             return self._bytes_body[:4096]
         return None
-
-    def read_body_from_file(self) -> bytes:
-        with open(cast(str, self.body_path), "rb") as inp:
-            return cast(IO[bytes], inp).read()
 
     def unicode_body(
         self,
@@ -373,8 +359,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     @property
     def body(self) -> None | bytes:
-        if self.body_path:
-            return self.read_body_from_file()
         return cast(bytes, self._bytes_body)
 
     @body.setter
@@ -382,12 +366,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         raise GrabMisuseError("Document body could be set only in constructor")
 
     def set_body(self, body: bytes) -> None:
-        if self.body_path:
-            with open(self.body_path, "wb") as out:
-                out.write(body)
-            self._bytes_body = None
-        else:
-            self._bytes_body = body
+        self._bytes_body = body
         self._unicode_body = None
 
     # DomTreeExtension methods

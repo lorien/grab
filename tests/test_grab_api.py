@@ -99,7 +99,6 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertEqual(grab.config["post"], None)
         self.assertEqual(grab.config["multipart_post"], None)
         self.assertEqual(grab.config["method"], None)
-        self.assertEqual(grab.config["body_storage_filename"], None)
 
     def test_setup_document(self):
         data = b"""

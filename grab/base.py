@@ -61,83 +61,37 @@ def copy_config(
 
 
 def default_config() -> GrabConfig:
-    # TODO: Maybe config should be split into two entities:
-    # 1) config which is not changed during request
-    # 2) changeable settings
     return {
-        # Common
         "url": None,
-        # Debugging
-        # Only for DEPRECATED transport
-        "debug": False,
-        "verbose_logging": False,
-        # Only for selenium transport
-        "webdriver": "firefox",
-        "selenium_wait": 1,  # in seconds
-        # Proxy
         "proxy": None,
         "proxy_type": None,
         "proxy_userpwd": None,
         "proxy_auto_change": True,
-        # Method, Post
         "method": None,
         "post": None,
         "multipart_post": None,
-        # Headers, User-Agent, Referer
         "headers": {},
         "common_headers": {},
         "user_agent": None,
         "user_agent_file": None,
         "referer": None,
         "reuse_referer": True,
-        # Cookies
         "cookies": {},
         "reuse_cookies": True,
         "cookiefile": None,
-        # Timeouts
         "timeout": 15,
         "connect_timeout": 3,
-        # Connection
         "connection_reuse": True,
-        # Response processing
-        "nobody": False,
         "body_maxsize": None,
-        "body_inmemory": True,
-        "body_storage_dir": None,
-        "body_storage_filename": None,
-        "body_storage_create_dir": False,
         "reject_file_size": None,
-        # Content compression
         "encoding": "gzip",
-        # Network interface
-        "interface": None,
-        # DNS resolution
-        "resolve": None,
-        # Redirects
         "follow_refresh": False,
         "follow_location": True,
         "redirect_limit": 10,
-        # Authentication
         "userpwd": None,
-        # Character set to which any unicode data should be encoded
-        # before get placed in request
-        # This setting is overwritten after each request with
-        # charset of retrieved document
         "charset": "utf-8",
-        # Charset to use for converting content of response
-        # into unicode, by default it is detected automatically
         "document_charset": None,
-        # Content type control how DOM are built
-        # For html type HTML DOM builder is used
-        # For xml type XML DOM builder is used
         "content_type": "html",
-        # Convert document body to lower case before building LXML tree
-        # It does not affect `self.doc.body`
-        "lowercased_tree": False,
-        # Strip null bytes from document body before building lXML tree
-        # It does not affect `self.doc.body`
-        "strip_null_bytes": True,
-        # Internal object to store
         "state": {},
     }
 
@@ -513,7 +467,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.config["post"] = None
         self.config["multipart_post"] = None
         self.config["method"] = None
-        self.config["body_storage_filename"] = None
 
     def setup_document(
         self,

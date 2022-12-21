@@ -40,7 +40,7 @@ class TestProxy(BaseGrabTestCase):
         grab = build_grab()
 
         proxy = "%s:%s" % (ADDRESS, self.server.port)
-        grab.setup(proxy=proxy, proxy_type="http", debug=True)
+        grab.setup(proxy=proxy, proxy_type="http")
         self.server.add_response(Response(data=b"123"))
 
         grab.go("http://yandex.ru")

@@ -72,13 +72,11 @@ class Request:  # pylint: disable=too-many-instance-attributes
         url: str,
         method: str,
         headers: dict[str, Any],
-        config_nobody: bool,
         config_body_maxsize: int,
         timeout: int,
         connect_timeout: int,
         data: None | bytes = None,
         body_maxsize: None | int = None,
-        response_path: None | str = None,
         proxy_type: None | str = None,
         proxy: None | str = None,
         proxy_userpwd: None | str = None,
@@ -94,9 +92,7 @@ class Request:  # pylint: disable=too-many-instance-attributes
         self.op_started: None | float = None
         self.timeout = timeout
         self.connect_timeout = connect_timeout
-        self.config_nobody = config_nobody
         self.config_body_maxsize = config_body_maxsize
-        self.response_path: None | str = response_path
 
     def get_full_url(self) -> str:
         return self.url
@@ -213,17 +209,6 @@ class Urllib3Transport(BaseTransport):
             raise error.GrabInvalidUrl("%s: %s" % (str(ex), str(grab_config["url"])))
         # Method
         method = self.detect_request_method(grab_config)
-        # Body storage/memory storing
-        if grab_config["body_inmemory"]:
-            response_path = None
-        else:
-            if not grab_config["body_storage_dir"]:
-                raise GrabMisuseError("Option body_storage_dir is not defined")
-            response_path = self.setup_body_file(
-                grab_config["body_storage_dir"],
-                grab_config["body_storage_filename"],
-                create_dir=grab_config["body_storage_create_dir"],
-            )
         # POST data
         post_headers, req_data = self.process_config_post(grab_config, method)
         extra_headers.update(post_headers)
@@ -252,10 +237,8 @@ class Urllib3Transport(BaseTransport):
             url=request_url,
             method=method,
             config_body_maxsize=grab_config["body_maxsize"],
-            config_nobody=grab_config["nobody"],
             timeout=grab_config["timeout"],
             connect_timeout=grab_config["connect_timeout"],
-            response_path=response_path,
             proxy=req_proxy,
             proxy_type=req_proxy_type,
             proxy_userpwd=req_proxy_userpwd,
@@ -343,9 +326,9 @@ class Urllib3Transport(BaseTransport):
         self._response = res
 
     def read_with_timeout(self) -> bytes:
-        if cast(Request, self._request).config_nobody:
-            return b""
         maxsize = cast(Request, self._request).config_body_maxsize
+        if isinstance(maxsize, int) and not maxsize:
+            return b""
         chunks = []
         default_chunk_size = 10000
         chunk_size = (
@@ -409,16 +392,7 @@ class Urllib3Transport(BaseTransport):
             head_str += "\r\n"
             head = head_str.encode("utf-8")
 
-            if cast(Request, self._request).response_path:
-                # FIXME: Read/write by chunks.
-                # Now the whole content is read at once.
-                body = None
-                body_path = cast(str, cast(Request, self._request).response_path)
-                with open(body_path, "wb") as out:
-                    out.write(self.read_with_timeout())
-            else:
-                body = self.read_with_timeout()
-                body_path = None
+            body = self.read_with_timeout()
 
             hdr = email.message.Message()
             for key, val in self.get_response_header_items():
@@ -431,7 +405,6 @@ class Urllib3Transport(BaseTransport):
                 grab_config=grab_config,
                 head=head,
                 body=body,
-                body_path=body_path,
                 code=self._response.status,
                 url=(
                     self._response.get_redirect_location()
