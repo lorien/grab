@@ -40,7 +40,7 @@ class ExtensionRexTestCase(BaseGrabTestCase):
 
         # Create fake grab instance with fake response
         self.grab = build_grab()
-        self.grab.setup_document(HTML, charset="cp1251")
+        self.grab.setup_document(HTML, encoding="cp1251")
 
     def test_rex(self):
         # Search unicode rex in unicode body - default case

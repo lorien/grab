@@ -38,7 +38,7 @@ class TextExtensionTest(BaseGrabTestCase):
 
         # Create fake grab instance with fake response
         self.grab = build_grab()
-        self.grab.setup_document(HTML, charset="cp1251")
+        self.grab.setup_document(HTML, encoding="cp1251")
 
     def test_search(self):
         self.assertTrue(self.grab.doc.text_search("фыва".encode("cp1251")))

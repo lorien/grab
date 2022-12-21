@@ -55,7 +55,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
 
         # Create fake grab instance with fake response
         self.grab = build_grab()
-        self.grab.setup_document(HTML.encode("cp1251"), charset="cp1251")
+        self.grab.setup_document(HTML.encode("cp1251"), encoding="cp1251")
 
         self.lxml_tree = fromstring(self.grab.doc.body)
 

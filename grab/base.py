@@ -61,24 +61,24 @@ def copy_config(
 def default_config() -> GrabConfig:
     return {
         # Request Properties
+        "method": None,
         "url": None,
         "proxy": None,
         "proxy_type": None,
         "proxy_userpwd": None,
-        "method": None,
         "post": None,
         "multipart_post": None,
         "headers": {},
         "cookies": {},
-        "cookiefile": None,
         "timeout": 15,
         "connect_timeout": 3,
         "body_maxsize": None,
         "redirect_limit": 10,
         "charset": "utf-8",
-        "document_charset": None,
+        "encoding": None,
         "content_type": "html",
         # Session Properties
+        "cookiefile": None,
         "reuse_cookies": True,
         "common_headers": {},
         "follow_refresh": False,
@@ -142,7 +142,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         if kwargs:
             self.setup(**kwargs)
         if document_body is not None:
-            self.setup_document(document_body, charset=kwargs.get("document_charset"))
+            self.setup_document(document_body, encoding=kwargs.get("encoding"))
 
     @property
     def doc(self) -> None | Document:
@@ -463,7 +463,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         *,
         head: None | bytes = None,
         headers: None | email.message.Message = None,
-        charset: None | str = None,
+        encoding: None | str = None,
         code: None | int = None,
         url: None | str = None,
     ) -> None:
@@ -482,7 +482,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             body=body,
             head=head or b"HTTP/1.1 200 OK\r\n\r\n",
             headers=headers or email.message.Message(),
-            charset=charset,  # If None it will be autodetected
+            charset=encoding,  # If None it will be autodetected
             code=code or 200,
             url=url or "",
         )

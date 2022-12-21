@@ -73,7 +73,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
     def test_explicit_custom_charset(self):
         grab = build_grab(
             "<html><head></head><body><h1>привет</h1></body></html".encode("cp1251"),
-            document_charset="cp1251",
+            encoding="cp1251",
         )
         self.assertEqual("привет", grab.doc.select("//h1").text())
 

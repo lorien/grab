@@ -398,7 +398,7 @@ class Urllib3Transport(BaseTransport):
                     or cast(Request, self._request).url
                 ),
                 headers=hdr,
-                charset=grab_config["document_charset"],
+                charset=grab_config["encoding"],
                 cookies=jar,
             )
         finally:

@@ -233,17 +233,17 @@ If Grab should change the proxy before every network request.
 Response Processing Options
 ---------------------------
 
-.. _option_document_charset:
+.. _option_encoding:
 
-document_charset
-^^^^^^^^^^^^^^^^
+encoding
+^^^^^^^^
 
 :Type: string
 :Default: None
 
-The character set of the document's content.
-By default Grab detects the charset of the document automatically. If it detects the charset incorrectly you can specify exact charset with this option.
-The charset is used to get unicode representation of the document content and also to build DOM tree.
+The encoding (character set) is used to store document's content as bytes.
+By default Grab detects encoding of document automatically. If it detects the charset incorrectly you can specify exact charset with this option.
+The charset is used to convert document's bytes content into Unicode text also for biilding DOM tree of the document.
 
 .. _option_charset:
 
