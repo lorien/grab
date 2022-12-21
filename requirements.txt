@@ -9,7 +9,10 @@
 #pylint
 #psutil
 #fastrq
-#sphinx
+sphinx
+myst-nb
+sphinx_rtd_theme
+sphinx-autoapi
 
 tox
 test_server>=0.0.42

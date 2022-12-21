@@ -81,7 +81,6 @@ crawlers.
     spider/intro
     spider/task
     spider/task_queue
-    spider/cache
     spider/error_handling
     spider/transport
 
@@ -101,12 +100,7 @@ methods exist, what they do, what they return, and what parameters they accept.
 .. toctree::
     :maxdepth: 2
 
-    api/grab_base
-    api/grab_error
-    api/grab_cookie
-    api/grab_spider_base
-    api/grab_document
-    api/grab_spider_task
+    autoapi/index
 
 
 Indices and tables
