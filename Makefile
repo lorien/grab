@@ -44,10 +44,10 @@ pylint:
 	pylint -j0  $(FILES_CHECK_ALL)
 
 flake8:
-	flake8 -j auto --max-cognitive-complexity=17 --extend-ignore=E800 $(FILES_CHECK_ALL)
+	flake8 -j auto --max-cognitive-complexity=17 $(FILES_CHECK_ALL)
 
 eradicate:
-	flake8 -j auto --max-cognitive-complexity=17 --eradicate-whitelist-extend="License:" $(FILES_CHECK_ALL)
+	tox -e eradicate -- flake8 -j auto --eradicate-whitelist-extend="License:" $(FILES_CHECK_ALL)
 
 bandit:
 	bandit -qc pyproject.toml -r $(FILES_CHECK_ALL)
