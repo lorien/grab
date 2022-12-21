@@ -24,6 +24,8 @@ And, for sure, Grab source code is very shitty. And design is shitty too. I have
 
 Grab requires python of version 3.8 or higher.
 
+Feel free to give feedback in Telegram groups: [@grablab](https://t.me/grablab) and [@grablab\_ru](https://t.me/grablab_ru).
+
 ## Things to be done next
 
 * Refactor source code to remove all pylint disable comments like:
@@ -137,10 +139,3 @@ following examples do not work anymore.
     bot = ExampleSpider(thread_number=2)
     bot.run()
 ```
-
-
-## Community
-
-Telegram English chat: [https://t.me/grablab](https://t.me/grablab)
-
-Telegram Russian chat: [https://t.me/grablab\_ru](https://t.me/grablab_ru)
