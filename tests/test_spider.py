@@ -30,13 +30,11 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.server.add_response(Response(data=b"Hello spider!", sleep=1.1))
 
         bot = build_spider(CustomSimpleSpider, network_try_limit=1)
-        # bot.setup_grab(connect_timeout=1, timeout=1)
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
         self.assertEqual(bot.stat.counters["spider:request-network"], 1)
 
         bot = build_spider(CustomSimpleSpider, network_try_limit=2)
-        # bot.setup_grab(connect_timeout=1, timeout=1)
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
         self.assertEqual(bot.stat.counters["spider:request-network"], 2)
@@ -49,7 +47,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.server.add_response(Response(data=b"Hello spider!", sleep=1.1))
 
         bot = build_spider(CustomSimpleSpider, network_try_limit=1)
-        # bot.setup_grab(connect_timeout=1, timeout=1)
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
         self.assertEqual(bot.stat.counters["spider:task-baz"], 1)
@@ -175,8 +172,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.server.add_response(Response(), count=-1)
         bot = build_spider(TestSpider)
         bot.add_task(Task("page", url=self.server.get_url()))
-        # bot.run()
-        # self.assertEqual(1, bot.stat.counters['spider:error-spidererror'])
         self.assertRaises(SpiderError, bot.run)
 
     def test_task_queue_clear(self):

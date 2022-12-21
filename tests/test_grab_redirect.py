@@ -1,6 +1,6 @@
 from test_server import Response
 
-from grab.error import GrabTooManyRedirectsError
+from grab.error import GrabInvalidResponse, GrabTooManyRedirectsError
 from tests.util import BaseGrabTestCase, build_grab
 
 
@@ -149,15 +149,15 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         grab.go(self.server.get_url())
         self.assertTrue(b"done" in grab.doc.body)
 
-    # def test_redirect_utf_location(self):
-    #    def callback():
-    #        url = (self.server.get_url() + u"фыва").encode("utf-8")
-    #        return (
-    #            b"HTTP/1.1 301 OK\nLocation: %s\nLocation-Length: 9\n\ncontent-1" % url
-    #        )
+    def test_redirect_utf_location(self):
+        def callback():
+            url = (self.server.get_url() + "фыва").encode("utf-8")
+            return (
+                b"HTTP/1.1 301 OK\nLocation: %s\nLocation-Length: 9\n\ncontent-1" % url
+            )
 
-    #    self.server.add_response(Response(raw_callback=callback))
-    #    self.server.add_response(Response(data=b"content-2"))
-    #    grab = build_grab(debug=True, follow_location=True)
-    #    grab.go(self.server.get_url())
-    #    self.assertTrue(quote(u"/фыва".encode("utf-8"), safe="/") in grab.doc.url)
+        self.server.add_response(Response(raw_callback=callback))
+        self.server.add_response(Response(data=b"content-2"))
+        grab = build_grab(debug=True, follow_location=True)
+        with self.assertRaises(GrabInvalidResponse):
+            grab.go(self.server.get_url())

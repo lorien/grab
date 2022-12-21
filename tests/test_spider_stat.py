@@ -8,13 +8,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    # def test_stop_timer_invalid_input(self):
-    #    class TestSpider(Spider):
-    #        pass
-
-    #    bot = build_spider(TestSpider)
-    #    self.assertRaises(KeyError, bot.timer.stop, 'zzz')
-
     def test_counters_and_collections(self):
         class TestSpider(Spider):
             def prepare(self):

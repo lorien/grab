@@ -19,7 +19,6 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
         grab.go(self.server.get_url())
         self.assertEqual("фуу".encode("utf-8"), grab.doc.body)
 
-        # print(grab.doc.head)
         self.assertEqual(grab.doc.charset, "utf-8")
 
         grab = build_grab(document_charset="cp1251")

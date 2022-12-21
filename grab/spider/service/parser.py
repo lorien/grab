@@ -74,8 +74,6 @@ class ParserService(BaseService):  # pylint: disable=too-many-instance-attribute
                     try:
                         handler = self.find_task_handler(task)
                     except NoTaskHandler as ex:
-                        # WTF, disabling it for the moment
-                        # ex.tb = format_exc()
                         self.task_dispatcher.input_queue.put(
                             (ex, task, {"exc_info": sys.exc_info()})
                         )

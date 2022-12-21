@@ -7,15 +7,7 @@ from tests.util import NON_ROUTABLE_IP, build_grab
 
 
 class GrabErrorTestCase(TestCase):
-    # FIXME: does not work with pytest capturing
-    # def test_warn(self):
-    #    out = StringIO()
-    #    with mock.patch("sys.stderr", out):
-    #        warn("abc")
-    #    self.assertTrue("GrabDeprecationWarning: abc" in out.getvalue())
-
     def test_original_exceptions_urllib2(self):
-
         grab = build_grab()
         try:
             grab.go("http://%s" % NON_ROUTABLE_IP)

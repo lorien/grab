@@ -43,5 +43,4 @@ class TestCookies(BaseGrabTestCase):
             args = mocked.mock_calls[0][1]
             # request_counter is 0 and formatted as "00"
             self.assertEqual("00", args[1])
-
-    #    grab.log_request()  # should not raise exception
+        grab.log_request()  # should not raise exception

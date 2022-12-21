@@ -3,7 +3,7 @@ from copy import deepcopy
 
 from test_server import Response
 
-from grab import Grab, GrabError, GrabMisuseError
+from grab import GrabError, GrabMisuseError
 from tests.util import BaseGrabTestCase, build_grab, reset_request_counter, temp_file
 
 
@@ -48,28 +48,6 @@ class GrabApiTestCase(BaseGrabTestCase):
         content = b"<strong>test</strong>"
         grab = build_grab(document_body=content)
         self.assertEqual(grab.doc.body, content)
-
-    def test_inheritance(self):
-        class SimpleExtension:
-            data = {"counter": 0}
-
-            @classmethod
-            def get_data(cls):
-                return cls.data
-
-        class CustomGrab(Grab, SimpleExtension):
-            pass
-
-        SimpleExtension.get_data()["counter"] = 0
-        CustomGrab()
-        # self.assertEqual(SimpleExtension.get_data()['counter'], 1)
-
-        class VeryCustomGrab(CustomGrab):
-            pass
-
-        SimpleExtension.get_data()["counter"] = 0
-        VeryCustomGrab()
-        # self.assertEqual(SimpleExtension.get_data()['counter'], 1)
 
     def test_request_counter(self):
         reset_request_counter()

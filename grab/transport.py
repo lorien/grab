@@ -272,11 +272,6 @@ class Urllib3Transport(BaseTransport):
         except exceptions.ConnectTimeoutError as ex:
             raise error.GrabConnectionError("ConnectTimeoutError", ex)
         except exceptions.ProtocolError as ex:
-            # TODO:
-            # the code
-            # raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
-            # fails
-            # with error TypeError: 'OSError' object is not subscriptable
             raise error.GrabConnectionError("ProtocolError", ex)
         except exceptions.SSLError as ex:
             raise error.GrabConnectionError("SSLError", ex)
@@ -344,30 +339,8 @@ class Urllib3Transport(BaseTransport):
                 )
             except LocationParseError as ex:
                 raise error.GrabInvalidResponse(str(ex), ex)
-        # except exceptions.ReadTimeoutError as ex:
-        #    raise error.GrabTimeoutError('ReadTimeoutError', ex)
-        # except exceptions.ConnectTimeoutError as ex:
-        #    raise error.GrabConnectionError('ConnectTimeoutError', ex)
-        # except exceptions.ProtocolError as ex:
-        #    # TODO:
-        #    # the code
-        #    # raise error.GrabConnectionError(ex.args[1][0], ex.args[1][1])
-        #    # fails
-        #    # with error TypeError: 'OSError' object is not subscriptable
-        #    raise error.GrabConnectionError('ProtocolError', ex)
-        # except exceptions.SSLError as ex:
-        #    raise error.GrabConnectionError('SSLError', ex)
 
         self._response = res
-        # raise error.GrabNetworkError(ex.args[0], ex.args[1])
-        # raise error.GrabTimeoutError(ex.args[0], ex.args[1])
-        # raise error.GrabConnectionError(ex.args[0], ex.args[1])
-        # raise error.GrabAuthError(ex.args[0], ex.args[1])
-        # raise error.GrabTooManyRedirectsError(ex.args[0],
-        #                                      ex.args[1])
-        # raise error.GrabCouldNotResolveHostError(ex.args[0],
-        #                                         ex.args[1])
-        # raise error.GrabNetworkError(ex.args[0], ex.args[1])
 
     def read_with_timeout(self) -> bytes:
         if cast(Request, self._request).config_nobody:
@@ -426,9 +399,6 @@ class Urllib3Transport(BaseTransport):
             )
         try:
 
-            # DOCUMENT ARGS DIFF:
-            # grab.base: body
-            # transport: body_path, cookies
             head_str = ""
             # FIXME: head must include first line like "GET / HTTP/1.1"
             for key, val in self.get_response_header_items():
@@ -455,8 +425,6 @@ class Urllib3Transport(BaseTransport):
                 # WTF: is happening here?
                 new_key = key.encode("latin").decode("utf-8", errors="ignore")
                 new_val = val.encode("latin").decode("utf-8", errors="ignore")
-                # if key == 'Location':
-                #    import pdb; pdb.set_trace()
                 hdr[new_key] = new_val
             jar = self.extract_cookiejar()  # self._response, self._request)
             return document_class(
@@ -484,7 +452,6 @@ class Urllib3Transport(BaseTransport):
             jar.extract_cookies(
                 cast(
                     HTTPResponse,
-                    # MockResponse(self._response._original_response.headers),
                     MockResponse(self._response.headers),
                 ),
                 cast(

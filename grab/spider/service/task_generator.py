@@ -33,7 +33,7 @@ class TaskGeneratorService(BaseService):
 
     def worker_callback(self, worker: ServiceWorker) -> None:
         # at this point I guess the task queue is set
-        # i.e. spider.run() is called
+        # i.e. "spider.run()" is called
         task_queue = self.get_task_queue()
         while not worker.stop_event.is_set():
             worker.process_pause_signal()

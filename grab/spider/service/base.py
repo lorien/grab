@@ -112,12 +112,10 @@ class BaseService:
     def pause(self) -> None:
         for worker in self.iterate_workers(self.worker_registry):
             worker.pause()
-        # logging.debug('Service %s paused' % self.__class__.__name__)
 
     def resume(self) -> None:
         for worker in self.iterate_workers(self.worker_registry):
             worker.resume()
-        # logging.debug('Service %s resumed' % self.__class__.__name__)
 
     def register_workers(self, *args: Any) -> None:
         self.worker_registry = list(args)

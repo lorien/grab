@@ -10,23 +10,6 @@ class TestPostFeature(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    # def test_foo(self):
-    #    self.server.add_response(Response(), count=9)
-
-    #    #    grab.setup(post=[("foo", "bar"), ("gaz", "baz")])
-    #    #    grab.request()
-    #    #    self.assertEqual(self.server.request.data, b"foo=bar&gaz=baz")
-    #    # Now try dict with unicode value & charset option
-    #    grab = build_grab()
-    #    data = "фыва"
-    #    grab.setup(
-    #        post={"foo": data}, url=self.server.get_url(), charset="cp1251", debug=True
-    #    )
-    #    grab.request()
-    #    test = "foo=%s" % quote(data.encode("cp1251"))
-    #    test = test.encode("utf-8")  # py3 hack
-    #    self.assertEqual(self.server.request.data, test)
-
     def test_post(self):
         self.server.add_response(Response(), count=9)
         grab = build_grab(url=self.server.get_url())
@@ -83,17 +66,6 @@ class TestPostFeature(BaseGrabTestCase):
         grab.setup(multipart_post={"foo": "bar"})
         grab.request()
         self.assertTrue(b'name="foo"' in self.server.request.data)
-
-        # Few values with non-ascii data
-        # TODO: understand and fix
-        # AssertionError: 'foo=bar&gaz=%D0%94%D0%B5%D0%BB%'\
-        #                 'D1%8C%D1%84%D0%B8%D0%BD&abc=' !=
-        #                 'foo=bar&gaz=\xd0\x94\xd0\xb5\xd0'\
-        #                 '\xbb\xd1\x8c\xd1\x84\xd0\xb8\xd0\xbd&abc='
-        # grab.setup(post=({'foo': 'bar', 'gaz': u'Дельфин', 'abc': None}))
-        # grab.request()
-        # self.assertEqual(self.server.request['data'],
-        #                   'foo=bar&gaz=Дельфин&abc=')
 
         # tuple with one pair
         grab.setup(multipart_post=(("foo", "bar"),))

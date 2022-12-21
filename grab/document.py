@@ -5,7 +5,6 @@
 """The Document class is the result of network request made with Grab instance."""
 from __future__ import annotations
 
-# import codecs
 import email
 import email.message
 import json
@@ -190,11 +189,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             grab_config=self._grab_config,
             cookies=cj,
         )
-        # obj.process_grab_config(new_grab_config or self._grab_config)
-        # obj.headers = copy(self.headers)
-        # TODO: Maybe, deepcopy?
-        # obj.cookies = copy(self.cookies)
-        # return obj
 
     def save(self, path: str) -> None:
         """Save response body to file."""
@@ -360,19 +354,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             return self._bytes_body[:4096]
         return None
 
-    # def convert_body_to_unicode(
-    #    self,
-    #    body: bytes,
-    #    charset: str,
-    #    ignore_errors: bool,
-    # ) -> str:
-    #    # WTF: How could it be unicode???
-    #    # if isinstance(body, unicode):
-    #    # body = body.encode('utf-8')
-    #    #errors = "ignore" if ignore_errors else "strict"
-    #    #return body.decode(charset, errors).strip()
-    #    return decode_content(body
-
     def read_body_from_file(self) -> bytes:
         with open(cast(str, self.body_path), "rb") as inp:
             return cast(IO[bytes], inp).read()
@@ -444,7 +425,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def build_html_tree(self) -> _Element:
         if self._lxml_tree is None:
             assert self.body is not None
-            # body = self.body
             ubody = self.unicode_body()
             body: None | bytes = (
                 ubody.encode(self.charset) if ubody is not None else None
@@ -752,12 +732,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         post_items: list[tuple[str, Any]] = list(post.items())
         del post
-
-        # extra_post_items = (
-        #    cast(typing.Sequence[Tuple[str, Any]], extra_post.items())
-        #    if isinstance(extra_post, Mapping)
-        #    else extra_post
-        # )
 
         if extra_post:
             post_items = self.process_extra_post(

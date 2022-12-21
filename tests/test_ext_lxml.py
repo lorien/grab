@@ -2,8 +2,6 @@ from lxml.html import fromstring
 from test_server import Response
 
 from grab import DataNotFound
-
-# from grab.util import warning
 from tests.util import BaseGrabTestCase, build_grab
 
 HTML = """
@@ -46,12 +44,10 @@ XML = b"""
 class LXMLExtensionTest(BaseGrabTestCase):
     @classmethod
     def setUpClass(cls):
-        # warning.DISABLE_WARNINGS = True
         super(LXMLExtensionTest, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        # warning.DISABLE_WARNINGS = False
         super(LXMLExtensionTest, cls).tearDownClass()
 
     def setUp(self):
@@ -141,29 +137,9 @@ class LXMLExtensionTest(BaseGrabTestCase):
 
     def test_cdata_issue(self):
         self.server.add_response(Response(data=XML), count=2)
-
-        # By default HTML DOM builder is used
-        # It handles CDATA incorrectly
-        # Date: Dec 8, 2022 starts
-        # Comment: It does not loose data anymore
-        # grab = build_grab()
-        # grab.go(self.server.get_url())
-        # self.assertEqual(None, grab.doc.select("//weight").node().text)
-        # self.assertEqual(None, grab.doc.tree.xpath("//weight")[0].text)
-        # Update Dec 8, 2022 ends
-
-        # But XML DOM builder produces valid result
-        # self.assertEqual(None, grab.xpath_one('//weight').text)
         grab = build_grab(content_type="xml")
         grab.go(self.server.get_url())
         self.assertEqual("30", grab.doc.tree.xpath("//weight")[0].text)
-
-        # Use `content_type` option to change default DOM builder
-        # grab = build_grab()
-        # grab.fake_response(XML)
-        # grab.setup(content_type='xml')
-        # self.assertEqual('30', grab.xpath_one('//weight').text)
-        # self.assertEqual('30', grab.tree.xpath('//weight')[0].text)
 
     def test_xml_declaration(self):
         # HTML with XML declaration should be processed without errors.

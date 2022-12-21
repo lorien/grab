@@ -4,13 +4,6 @@ from test_server import Response
 
 from tests.util import BaseGrabTestCase, build_grab
 
-# from grab.error import (
-#    GrabInternalError,
-#    GrabCouldNotResolveHostError,
-#    GrabTimeoutError,
-#    GrabInvalidUrl,
-# )
-
 
 class GrabRequestTestCase(BaseGrabTestCase):
     def setUp(self):
@@ -49,33 +42,6 @@ class GrabRequestTestCase(BaseGrabTestCase):
         self.server.add_response(Response(callback=callback))
         grab = build_grab()
         grab.go(self.server.get_url())
-
-    # def test_redirect_with_invalid_byte(self):
-    #    url = self.server.get_url()
-    #    invalid_url = "http://\xa0" + url  # .encode('ascii')
-
-    #    def callback():
-    #        return {
-    #            "type": "response",
-    #            "status": 301,
-    #            "headers": [("Location", invalid_url)],
-    #            "data": b"",
-    #        }
-
-    #    self.server.add_response(Response(callback=callback))
-    #    grab = build_grab()
-    #    # GrabTimeoutError raised when tests are being ran on computer
-    #    # without access to the internet (no DNS service available)
-    #    self.assertRaises(
-    #        (
-    #            GrabInternalError,
-    #            GrabCouldNotResolveHostError,
-    #            GrabTimeoutError,
-    #            GrabInvalidUrl,
-    #        ),
-    #        grab.go,
-    #        self.server.get_url(),
-    #    )
 
     def test_options_method(self):
         self.server.add_response(Response())

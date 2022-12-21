@@ -455,8 +455,6 @@ class Spider:
             raise NoTaskHandler(
                 "No handler or callback defined for " "task %s" % task.name
             ) from ex
-        # else:
-        #    return handler
 
     def log_network_result_stats(self, res: NetworkResult, task: Task) -> None:
         # Increase stat counters

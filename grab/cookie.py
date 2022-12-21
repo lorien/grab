@@ -143,10 +143,6 @@ class MockResponse:
     def info(self) -> HTTPMessage | HTTPHeaderDict:
         return self._headers
 
-    # def getheaders(self, name: str) -> list[str, str]:
-    #    raise Exception("WTF????????????????????????")
-    #    # self._headers.getheaders(name)
-
 
 def create_cookie(  # pylint: disable=too-many-arguments, too-many-locals
     # required
@@ -229,10 +225,6 @@ class CookieManager:
             self.cookiejar = cookiejar
         else:
             self.cookiejar = CookieJar()
-        # self.disable_cookiejar_lock(self.cookiejar)
-
-    # def disable_cookiejar_lock(self, cj):
-    # cj._cookies_lock = dummy_threading.RLock()
 
     def set(self, name: str, value: str, domain: str, **kwargs: Any) -> None:
         """Add new cookie or replace existing cookie with same parameters.

@@ -18,7 +18,6 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         grab = build_grab()
         grab.go(self.server.get_url())
         self.assertEqual(b"Simple String", grab.doc.body)
-        # self.assertEqual('Simple String' in grab.doc.runtime_body)
 
     def test_status_code(self):
         self.server.add_response(Response(data=b"Simple String"))

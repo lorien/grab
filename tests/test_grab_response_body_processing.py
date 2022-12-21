@@ -74,33 +74,17 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         grab = build_grab()
         self.assertEqual(grab.doc, None)
 
-    # def test_assign_unicode_to_body(self):
-    #    grab = build_grab()
-    #    grab.doc.body = b"abc"
-    #    grab.doc.body = b"def"
-
-    #    with self.assertRaises(GrabMisuseError):
-    #        grab.doc.body = "Спутник"  # pylint: disable=redefined-variable-type
+    def test_external_set_document_body(self):
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        with self.assertRaises(GrabMisuseError):
+            grab.doc.body = b"asdf"
 
     def test_empty_response(self):
         self.server.add_response(Response(data=b""))
         grab = build_grab()
         grab.go(self.server.get_url())
         self.assertTrue(grab.doc.tree is not None)  # should not raise exception
-
-    # def test_emoji_processing(self):
-    #    #html = u'''
-    #    #<html><body>
-    #    #    <span class="a-color-base"> 👍🏻 </span>
-    #    #</body></html>
-    #    #'''.encode('utf-8')
-    #    grab = build_grab()
-    #    #import grab
-    #    #grab = grab.Grab()
-    #    #grab.go('https://github.com/lorien/grab/issues/199'
-    #            '#issuecomment-269854859')
-    #    grab.go('https://en.wikipedia.org/wiki/Emoji')
-    #    grab.doc.select("//*")
 
     def test_doc_tree_notags_document(self):
         data = b"test"

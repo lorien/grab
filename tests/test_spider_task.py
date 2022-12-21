@@ -164,20 +164,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         self.assertEqual(["0_handler", "1_func", "1_func", "1_func"], sorted(tokens))
 
     def test_task_url_and_grab_options(self):
-        # class TestSpider(Spider):
-        #    def __init__(self, *args, **kwargs):
-        #        super().__init__(*args, **kwargs)
-        #        self.done = False
-
-        #    def setup(self):
-        #        self.done = False
-
-        #    def task_page(self, unused_grab, unused_task):
-        #        self.done = True
-
-        # bot = build_spider(
-        #    TestSpider,
-        # )
         grab = Grab()
         grab.setup(url=self.server.get_url())
         self.assertRaises(

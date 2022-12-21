@@ -54,37 +54,6 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.run()
 
-    # FIXME: Fix this test, it fails now because
-    # spider do some logging which counts as output
-    # New information:
-    # extra output is caused by test_server library
-    # The python http server logs requests details to console like:
-    # - 127.0.0.1 - - [14/Dec/2022 20:16:53] "GET / HTTP/1.1" 555 -
-    # def test_no_warning(self):
-    #    """Simple spider should not generate
-    #    any warnings (warning module sends messages to stderr)
-    #    """
-    #    out = StringIO()
-    #    with mock.patch("sys.stderr", out):
-    #        server = self.server
-    #        server.add_response(Response(data=b"<div>test</div>"))
-
-    #        class SimpleSpider(Spider):
-    #            # pylint: disable=unused-argument
-    #            initial_urls = [server.get_url()]
-
-    #            def task_initial(self, grab, task):
-    #                yield Task("more", url=server.get_url())
-
-    #            def task_more(self, grab, task):
-    #                grab.doc("//div").text()
-
-    #        bot = build_spider(SimpleSpider)
-    #        bot.run()
-    #    val = out.getvalue()
-    #    print("!!!!!!!!!!!!!!!!! [{}]".format(val))
-    #    self.assertTrue(val == "")
-
     def test_grab_attribute_exception(self):
         server = self.server
         server.add_response(Response(sleep=2))

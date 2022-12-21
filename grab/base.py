@@ -268,7 +268,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         grab.config = self.dump_config()
 
         grab.doc = self.doc.copy() if self.doc else None
-        # grab.doc.grab = weakref.proxy(grab)
 
         for key in self.clonable_attributes:
             setattr(grab, key, getattr(self, key))

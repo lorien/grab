@@ -27,19 +27,6 @@ class GrabDocumentTestCase(BaseGrabTestCase):
         with self.assertRaises(GrabFeatureIsDeprecated):
             res1.copy(grab2)
 
-    # def test_document_copy_with_other_grab_config(self):
-    #    grab = build_grab()
-    #    self.server.add_response(Response(data=b"foo"))
-    #    res1 = grab.go(self.server.get_url())
-
-    #    grab2 = build_grab()
-    #    self.server.add_response(Response(data=b"bar"))
-    #    res2 = grab2.go(self.server.get_url())
-    #    self.assertEqual(res2.body, b"bar")
-
-    #    res3 = res1.copy(grab2.config)
-    #    self.assertEqual(res3.body, b"bar")
-
     def test_normalize_pairs_dict(self):
         self.assertEqual(
             normalize_pairs({"foo": "bar"}),
