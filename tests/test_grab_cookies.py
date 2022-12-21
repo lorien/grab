@@ -13,40 +13,6 @@ class TestCookies(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_cookiefile(self):
-        with temp_file() as tmp_file:
-            grab = build_grab()
-
-            cookies = [{"name": "spam", "value": "ham", "domain": self.server.address}]
-            with open(tmp_file, "w", encoding="utf-8") as out:
-                json.dump(cookies, out)
-
-            # One cookie are sent in server response
-            # Another cookies is passed via the `cookiefile` option
-            self.server.add_response(
-                Response(headers=[("Set-Cookie", "godzilla=monkey")])
-            )
-            grab.setup(cookiefile=tmp_file)
-            grab.request(self.server.get_url())
-            self.assertEqual(self.server.request.cookies["spam"].value, "ham")
-
-            # This is correct reslt of combining two cookies
-            merged_cookies = [("godzilla", "monkey"), ("spam", "ham")]
-
-            # grab.cookies should contains merged cookies
-            self.assertEqual(set(merged_cookies), set(grab.cookies.items()))
-
-            # `cookiefile` file should contains merged cookies
-            with open(tmp_file, encoding="utf-8") as inp:
-                self.assertEqual(
-                    set(merged_cookies),
-                    {(x["name"], x["value"]) for x in json.load(inp)},
-                )
-
-            # Just ensure it works
-            self.server.add_response(Response())
-            grab.request(self.server.get_url())
-
     def test_parsing_response_cookies(self):
         grab = build_grab()
         self.server.add_response(
@@ -167,16 +133,6 @@ class TestCookies(BaseGrabTestCase):
                 set(grab.cookies.items()),
                 {(x["name"], x["value"]) for x in cookies_list},
             )
-
-    def test_cookiefile_empty(self):
-        with temp_file() as tmp_file:
-            self.server.add_response(Response())
-            grab = build_grab()
-            # Empty file should not raise Exception
-            with open(tmp_file, "w", encoding="utf-8") as out:
-                out.write("")
-            grab.setup(cookiefile=tmp_file)
-            grab.request(self.server.get_url())
 
     def test_update_invalid_cookie(self):
         grab = build_grab()

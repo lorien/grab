@@ -58,19 +58,18 @@ def default_config() -> GrabConfig:
         "multipart_post": None,
         "headers": {},
         "cookies": {},
-        "timeout": 15,
-        "connect_timeout": 3,
+        "timeout": 15,  # must be timeout object
+        "connect_timeout": 3,  # must be timeout object
         "body_maxsize": None,
-        "redirect_limit": 10,
         "encoding": None,
-        # Not Clear Scope
+        "redirect_limit": 10,  # must be retry object
+        "follow_refresh": False,  # must be retry object
+        "follow_location": True,  # must be retry object
         "document_type": "html",
+        # Not Clear Scope
         # Session Properties
-        "cookiefile": None,
         "reuse_cookies": True,
         "common_headers": {},
-        "follow_refresh": False,
-        "follow_location": True,
         "proxy_auto_change": True,
         "state": {},
     }
@@ -190,16 +189,12 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         """
         grab = Grab(transport=self.transport_param)
         grab.config = self.dump_config()
-
         grab.doc = self.doc.copy() if self.doc else None
-
         for key in self.clonable_attributes:
             setattr(grab, key, getattr(self, key))
         grab.cookies = deepcopy(self.cookies)
-
         if kwargs:
             grab.setup(**kwargs)
-
         return grab
 
     def dump_config(self) -> dict[str, Any]:
@@ -298,7 +293,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             kwargs["url"] = url
         self.prepare_request(**kwargs)
         refresh_count = 0
-
         while True:
             self.log_request()
 
@@ -372,19 +366,12 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         # If POST data is not cleared then next request will try to use them
         # again!
         self.reset_temporary_options()
-
         self.doc = cast(BaseTransport, self.transport).prepare_response(
             self.config, document_class=self.document_class
         )
-
         if self.config["reuse_cookies"]:
             self.cookies.update(self.doc.cookies)
-
         self.doc.timestamp = now
-
-        if self.config["cookiefile"]:
-            self.cookies.save_to_file(self.config["cookiefile"])
-
         return self.doc
 
     def reset_temporary_options(self) -> None:
@@ -450,10 +437,8 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             for slot in cls_slots:
                 if slot != "__weakref__" and hasattr(self, slot):
                     state[slot] = getattr(self, slot)
-
         if state["_doc"]:
             state["_doc"].grab = weakref.proxy(self)
-
         return state
 
     def __setstate__(self, state: Mapping[str, Any]) -> None:

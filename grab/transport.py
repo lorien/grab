@@ -394,15 +394,6 @@ class Urllib3Transport(BaseTransport):
         request_url: str,
         request_headers: dict[str, Any],
     ) -> None | str:
-        # `cookiefile` option should be processed before `cookies` option
-        # because `load_cookies` updates `cookies` option
-        if grab_config["cookiefile"]:
-            # Do not raise exception if cookie file does not exist
-            try:
-                cookie_manager.load_from_file(grab_config["cookiefile"])
-            except IOError as ex:
-                logging.error(ex)
-
         request_host = urlsplit(request_url).hostname
         if request_host:
             if request_host.startswith("www."):
