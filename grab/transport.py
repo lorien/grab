@@ -425,46 +425,30 @@ class Urllib3Transport(BaseTransport):
                 " after network response is received"
             )
         try:
-            response = document_class(grab_config)
 
             # DOCUMENT ARGS DIFF:
-            # grab.base: body, status
+            # grab.base: body
             # transport: body_path, cookies
-            head = ""
+            head_str = ""
             # FIXME: head must include first line like "GET / HTTP/1.1"
             for key, val in self.get_response_header_items():
                 # WTF: is going here?
                 new_key = key.encode("latin").decode("utf-8", errors="ignore")
                 new_val = val.encode("latin").decode("utf-8", errors="ignore")
-                head += "%s: %s\r\n" % (new_key, new_val)
-            head += "\r\n"
-            response.head = head.encode("utf-8", errors="strict")
+                head_str += "%s: %s\r\n" % (new_key, new_val)
+            head_str += "\r\n"
+            head = head_str.encode("utf-8")
 
             if cast(Request, self._request).response_path:
                 # FIXME: Read/write by chunks.
                 # Now the whole content is read at once.
-                response.body_path = cast(
-                    str, cast(Request, self._request).response_path
-                )
-                with open(response.body_path, "wb") as out:
+                body = None
+                body_path = cast(str, cast(Request, self._request).response_path)
+                with open(body_path, "wb") as out:
                     out.write(self.read_with_timeout())
             else:
-                response.body_path = None
-                response.body = self.read_with_timeout()
-
-            # Clear memory
-            # self.response_header_chunks = []
-
-            response.code = self._response.status
-            # response.download_size =
-            # response.upload_size =
-            # response.download_speed =
-            # response.remote_ip =
-
-            response.url = (
-                self._response.get_redirect_location()
-                or cast(Request, self._request).url
-            )
+                body = self.read_with_timeout()
+                body_path = None
 
             hdr = email.message.Message()
             for key, val in self.get_response_header_items():
@@ -474,11 +458,21 @@ class Urllib3Transport(BaseTransport):
                 # if key == 'Location':
                 #    import pdb; pdb.set_trace()
                 hdr[new_key] = new_val
-            response.headers = hdr
-            response.setup_charset(grab_config["document_charset"])
             jar = self.extract_cookiejar()  # self._response, self._request)
-            response.cookies = CookieManager(jar)
-            return response
+            return document_class(
+                grab_config=grab_config,
+                head=head,
+                body=body,
+                body_path=body_path,
+                code=self._response.status,
+                url=(
+                    self._response.get_redirect_location()
+                    or cast(Request, self._request).url
+                ),
+                headers=hdr,
+                charset=grab_config["document_charset"],
+                cookies=jar,
+            )
         finally:
             self._response.release_conn()
 

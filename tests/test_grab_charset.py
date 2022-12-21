@@ -26,7 +26,7 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
         self.server.add_response(Response(data="фуу".encode("cp1251")))
         grab.go(self.server.get_url())
         self.assertEqual("фуу".encode("cp1251"), grab.doc.body)
-        self.assertEqual(grab.doc.charset, "cp1251")
+        self.assertEqual(grab.doc.charset, "windows-1251")  # normalized
 
     def test_document_charset_lowercase(self):
         self.server.add_response(

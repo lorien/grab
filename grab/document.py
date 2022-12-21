@@ -18,8 +18,9 @@ import typing
 import webbrowser
 from collections.abc import Mapping, MutableMapping, Sequence
 from contextlib import suppress
-from copy import copy
+from copy import deepcopy
 from datetime import datetime
+from http.cookiejar import CookieJar
 from io import BytesIO, StringIO
 from pprint import pprint  # pylint: disable=unused-import
 from re import Match, Pattern
@@ -62,7 +63,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     """Network response."""
 
     __slots__ = (
-        "status",
         "code",
         "head",
         "_bytes_body",
@@ -89,17 +89,43 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         "_grab_config",
     )
 
-    def __init__(self, grab_config: None | GrabConfig = None) -> None:
+    def __init__(
+        self,
+        *,
+        grab_config: None | GrabConfig = None,
+        body: None | bytes = None,
+        head: None | bytes = None,
+        headers: None | email.message.Message = None,
+        charset: None | str = None,
+        code: None | int = None,
+        url: None | str = None,
+        cookies: None | CookieJar = None,
+        body_path: None | str = None,
+    ) -> None:
+        # Cache attributes
+        self._bytes_body: None | bytes = None
+        self._unicode_body: None | str = None
+        self._lxml_tree: None | _Element = None
+        self._strict_lxml_tree: None | _Element = None
+        self._pyquery = None
+        self._lxml_form = None
+        self._file_fields: MutableMapping[str, Any] = {}
+        # Grab config
         self._grab_config: GrabConfig = {}
         if grab_config:
             self.process_grab_config(grab_config)
-        self.status: None | str = None
-        self.code: None | int = None
-        self.head: None | bytes = None
-        self.headers: None | email.message.Message = None
-        self.url: None | str = None
-        self.cookies = CookieManager()
-        self.charset = "utf-8"
+        # Main attributes
+        self.body_path = body_path
+        if body is not None:
+            self.body = body
+        self.code = code
+        self.head = head
+        self.headers = headers
+        self.url = url
+        # Charset must be processed AFTER body and headers are set
+        self.charset = self.process_charset(charset)
+        # other
+        self.cookies = CookieManager(cookies)
         self.timestamp = datetime.utcnow()
         self.download_size = 0
         self.upload_size = 0
@@ -107,22 +133,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self.error_code = None
         self.error_msg = None
         self.from_cache = False
-
-        # Body
-        self.body_path: None | str = None
-        self._bytes_body: None | bytes = None
-        self._unicode_body: None | str = None
-
-        # DOM Tree
-        self._lxml_tree: None | _Element = None
-        self._strict_lxml_tree: None | _Element = None
-
-        # Pyquery
-        self._pyquery = None
-
-        # Form
-        self._lxml_form = None
-        self._file_fields: MutableMapping[str, Any] = {}
 
     def process_grab_config(self, grab_config: Mapping[str, Any]) -> Any:
         # Save some grab.config items required to
@@ -141,18 +151,23 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def select(self, *args: Any, **kwargs: Any) -> SelectorList[_Element]:
         return XpathSelector(self.tree).select(*args, **kwargs)
 
-    def setup_charset(self, charset: None | str = None) -> None:
-        if charset is None:
-            # self.detect_charset()
-            self.charset = unicodec.detect_content_encoding(
-                self.get_body_chunk() or b"",
-                content_type_header=(
-                    self.headers.get("Content-Type", None) if self.headers else None
-                ),
-                markup="xml" if self._grab_config["content_type"] == "xml" else "html",
-            )
-        else:
-            self.charset = charset.lower()
+    def process_charset(self, charset: None | str = None) -> str:
+        """Process explicitly defined charset or auto-detect it.
+
+        If charset is explicitly defined, ensure it is a valid charset the python
+        can deal with. If charset is not specified, auto-detect it.
+
+        Raises unicodec.InvalidEncodingName if explicitly set charset is invalid.
+        """
+        if charset:
+            return unicodec.normalize_encoding_name(charset)
+        return unicodec.detect_content_encoding(
+            self.get_body_chunk() or b"",
+            content_type_header=(
+                self.headers.get("Content-Type", None) if self.headers else None
+            ),
+            markup="xml" if self._grab_config["content_type"] == "xml" else "html",
+        )
 
     def copy(self, new_grab_config: None | GrabConfig = None) -> Document:
         """Clone the Response object."""
@@ -162,24 +177,24 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                 " as second parameter anymore. It accepts now"
                 " Grab.config instance."
             )
-        obj = self.__class__()
-        copy_keys = (
-            "status",
-            "code",
-            "head",
-            "body",
-            "url",
-            "charset",
-            "_unicode_body",
-            "_grab_config",
+        cj = CookieJar()
+        for item in self.cookies.cookiejar:
+            cj.set_cookie(item)
+        return self.__class__(
+            code=self.code,
+            head=self.head,
+            body=self.body,
+            url=self.url,
+            headers=deepcopy(self.headers),
+            charset=self.charset,
+            grab_config=self._grab_config,
+            cookies=cj,
         )
-        for key in copy_keys:
-            setattr(obj, key, getattr(self, key))
-        obj.process_grab_config(new_grab_config or self._grab_config)
-        obj.headers = copy(self.headers)
+        # obj.process_grab_config(new_grab_config or self._grab_config)
+        # obj.headers = copy(self.headers)
         # TODO: Maybe, deepcopy?
-        obj.cookies = copy(self.cookies)
-        return obj
+        # obj.cookies = copy(self.cookies)
+        # return obj
 
     def save(self, path: str) -> None:
         """Save response body to file."""
@@ -190,6 +205,14 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         with open(path, "wb") as out:
             out.write(self._bytes_body if self._bytes_body is not None else b"")
+
+    @property
+    def status(self) -> None | int:
+        return self.code
+
+    @status.setter
+    def status(self, val: int) -> None:
+        self.code = val
 
     @property
     def json(self) -> Any:

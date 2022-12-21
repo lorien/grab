@@ -201,7 +201,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     @property
     def doc(self) -> Document:
         if self._doc is None:
-            self._doc = Document(self.config)
+            self._doc = Document(grab_config=self.config)
         return self._doc
 
     @doc.setter
@@ -517,39 +517,35 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.config["method"] = None
         self.config["body_storage_filename"] = None
 
-    def setup_document(self, content: bytes, **kwargs: Any) -> None:
-        """Set up `response` object without real network requests.
+    def setup_document(
+        self,
+        body: bytes,
+        *,
+        head: None | bytes = None,
+        headers: None | email.message.Message = None,
+        charset: None | str = None,
+        code: None | int = None,
+        url: None | str = None,
+    ) -> None:
+        """Construct Document object with explicitly specified body contents.
+
+        The bytes body is required parameter. All other Document parameters are optional
+        and have simple default values.
 
         Useful for testing and debugging.
-
-        All ``**kwargs`` will be passed to `Document` constructor.
         """
         self.reset()
-        if isinstance(content, str):
-            raise error.GrabMisuseError(
-                "Method `setup_document` accepts only "
-                "byte string in `content` argument."
-            )
-
-        # Configure Document instance
-        doc = self.document_class(self.config)
-
-        # DOCUMENT ARGS:
-        # body, head, status, headers, charset, code, url
-        doc.body = content
-        doc.head = b"HTTP/1.1 200 OK\r\n\r\n"
-        doc.status = ""
-        doc.headers = email.message.Message()
-        doc.setup_charset(kwargs.get("charset"))
-        doc.code = 200
-        doc.url = ""
-
-        # WTF: WHat the hell it means?
-        for key, value in kwargs.items():
-            # if key and value is None:
-            #    value = "utf-8"
-            setattr(doc, key, "utf-8" if (key and value is None) else value)
-
+        if isinstance(body, str):
+            raise error.GrabMisuseError("Content must be bytes.")
+        doc = self.document_class(
+            grab_config=self.config,
+            body=body,
+            head=head or b"HTTP/1.1 200 OK\r\n\r\n",
+            headers=headers or email.message.Message(),
+            charset=charset,  # If None it will be autodetected
+            code=code or 200,
+            url=url or "",
+        )
         self.doc = doc
 
     def change_proxy(self, random: bool = True) -> None:
