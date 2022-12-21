@@ -541,8 +541,3 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     def __setstate__(self, state: Mapping[str, Any]) -> None:
         for slot, value in state.items():
             setattr(self, slot, value)
-
-
-# For backward compatibility
-# WTF???
-BaseGrab = Grab
