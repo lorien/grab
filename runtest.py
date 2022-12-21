@@ -50,8 +50,6 @@ GRAB_TEST_LIST = (
     "tests.test_ext_lxml",
     "tests.test_ext_form",
     "tests.test_ext_doc",
-    # *** util.module
-    "tests.test_util_encoding",
     # *** grab.export
     "tests.test_grab_error",
     "tests.test_ext_pyquery",

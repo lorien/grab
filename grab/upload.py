@@ -5,8 +5,6 @@ import os
 import time
 from hashlib import md5
 
-from .util.encoding import make_bytes
-
 
 class BaseUploadItem:
     __slots__ = ()
@@ -38,7 +36,7 @@ class UploadContent(BaseUploadItem):
             self.content_type = content_type
 
     def get_random_filename(self) -> str:
-        return md5(make_bytes(str(time.time()))).hexdigest()[:10]
+        return md5(str(time.time()).encode()).hexdigest()[:10]
 
 
 class UploadFile(BaseUploadItem):

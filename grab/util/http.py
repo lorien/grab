@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+import typing
+from typing import Any, cast
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 
 from ..upload import BaseUploadItem
-from .encoding import make_bytes
 
 GEN_DELIMS = r":/?#[]@"
 SUB_DELIMS = r"!$&\'()*+,;="
@@ -37,23 +37,6 @@ def normalize_url(input_url: bytes | str) -> str:
     return url
 
 
-# def smart_urlencode(
-#    items: dict[str, Any]| list[tuple[str, Any]], charset: str = "utf-8"
-# ) -> str:
-#    """
-#    Normalize items to be a part of HTTP request's payload.
-#
-#    WOW, so much smart.
-#
-#    It differs from ``urllib.urlencode`` in that it can process unicode
-#    and some special values.
-#    """
-#    if isinstance(items, dict):
-#        items = list(items.items())
-#    res = normalize_http_values(items, charset=charset)
-#    return urlencode(res)
-
-
 def process_http_item(
     item: tuple[str | bytes, Any],
     charset: str,
@@ -67,23 +50,23 @@ def process_http_item(
         return ret
     # key
     if isinstance(key, str):
-        key = make_bytes(key, encoding=charset)
+        key = key.encode(encoding=charset)
     # value
     if isinstance(value, BaseUploadItem):
         pass
     elif isinstance(value, str):
-        value = make_bytes(value, encoding=charset)
+        value = value.encode(encoding=charset)
     elif value is None:
         value = b""
     else:
-        value = make_bytes(value)
+        value = str(value).encode(encoding=charset)
     return [(key, value)]
 
 
 def normalize_http_values(
     items: dict[str, Any] | list[tuple[str, Any]],
     charset: str = "utf-8",
-) -> list[tuple[bytes, Any]]:
+) -> list[tuple[bytes, bytes | BaseUploadItem]]:
     """Convert values in dict/list-of-tuples to bytes.
 
     Unicode is converted into bytestring using charset of previous response
@@ -103,10 +86,17 @@ def normalize_http_values(
     return ret
 
 
-def normalize_post_data(data: str | bytes, encoding: str = "utf-8") -> bytes:
+def normalize_post_data(
+    data: str | bytes | dict[str, Any] | list[tuple[str, Any]], encoding: str = "utf-8"
+) -> bytes:
     if isinstance(data, str):
         return data.encode(encoding)
     if isinstance(data, bytes):
         return data
-    # it calls `normalize_http_values()`
-    return make_bytes(urlencode(normalize_http_values(data, encoding)))
+    # pylint: disable=deprecated-typing-alias
+    return urlencode(
+        cast(
+            typing.List[typing.Tuple[bytes, bytes]],
+            normalize_http_values(data, encoding),
+        )
+    ).encode("utf-8")
