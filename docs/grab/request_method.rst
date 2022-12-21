@@ -56,14 +56,14 @@ Usually, you will want to use a dictionary:
 
 You can pass unicode strings and numbers in as values for the `post` dict, 
 they will be converted to byte strings automatically. If you want to specify a
-charset that will be used to convert unicode to byte string, then use
-`request_charset` option.
+encoding that will be used to convert unicode to byte string, then use
+`request_encoding` option.
 
 .. code:: python
 
     g = Grab()
     g.go('http://example.com/', post={'who': u'конь в пальто'},
-         charset='cp1251')
+         encoding='cp1251')
 
 If the `post` option is a string then it is submitted as-is:
 

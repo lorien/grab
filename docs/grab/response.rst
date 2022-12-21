@@ -14,9 +14,9 @@ You can also access the response object of a recent network query via the `g.res
     >>> from grab import Grab
     >>> g = Grab()
     >>> g.go('http://google.com')
-    <grab.response.Response object at 0x2cff9f0>
-    >>> g.response
-    <grab.response.Response object at 0x2cff9f0>
+    <grab.doc.Document object at 0x2cff9f0>
+    >>> g.doc
+    <grab.doc.Document object at 0x2cff9f0>
 
 You can find a full list of response attributes in the Response API document. Here are the most
 important things you should know:
@@ -24,7 +24,7 @@ important things you should know:
 :body: original body contents of HTTP response
 :code: HTTP status of response
 :headers: HTTP headers of response
-:charset: charset of the response
+:encoding: encoding of the response
 :cookies: cookies in the response
 :url: the URL of the response document. In case of some automatically processed redirect, the
     `url` attribute contains the final URL.
@@ -36,22 +36,22 @@ Now, a real example::
     >>> from grab import Grab
     >>> g = Grab()
     >>> g.go('http://wikipedia.org')
-    <grab.response.Response object at 0x1ff99f0>
-    >>> g.response.body[:100]
+    <grab.doc.Document object at 0x1ff99f0>
+    >>> g.doc.body[:100]
     '<!DOCTYPE html>\n<html lang="mul" dir="ltr">\n<head>\n<!-- Sysops: Please do not edit the main template'
-    >>> g.response.code
+    >>> g.doc.code
     200
-    >>> g.response.headers['Content-Type']
+    >>> g.doc.headers['Content-Type']
     'text/html; charset=utf-8'
-    >>> g.response.charset
+    >>> g.doc.encoding
     'utf-8'
-    >>> g.response.cookies
+    >>> g.doc.cookies
     <grab.cookie.CookieManager object at 0x1f6b248>
-    >>> g.response.url
+    >>> g.doc.url
     'http://www.wikipedia.org/'
-    >>> g.response.download_size
+    >>> g.doc.download_size
     11100.0
-    >>> g.response.upload_size
+    >>> g.doc.upload_size
     0.0
 
 Now let's see some useful methods available in the response object:

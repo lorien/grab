@@ -65,7 +65,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         "headers",
         "url",
         "cookies",
-        "charset",
+        "encoding",
         "_unicode_body",
         "timestamp",
         "download_size",
@@ -91,7 +91,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         body: None | bytes = None,
         head: None | bytes = None,
         headers: None | email.message.Message = None,
-        charset: None | str = None,
+        encoding: None | str = None,
         code: None | int = None,
         url: None | str = None,
         cookies: None | CookieJar = None,
@@ -115,8 +115,8 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self.head = head
         self.headers = headers
         self.url = url
-        # Charset must be processed AFTER body and headers are set
-        self.charset = self.process_charset(charset)
+        # Encoding must be processed AFTER body and headers are set
+        self.encoding = self.process_encoding(encoding)
         # other
         self.cookies = CookieManager(cookies)
         self.timestamp = datetime.utcnow()
@@ -140,16 +140,16 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def select(self, *args: Any, **kwargs: Any) -> SelectorList[_Element]:
         return XpathSelector(self.tree).select(*args, **kwargs)
 
-    def process_charset(self, charset: None | str = None) -> str:
-        """Process explicitly defined charset or auto-detect it.
+    def process_encoding(self, encoding: None | str = None) -> str:
+        """Process explicitly defined encoding or auto-detect it.
 
-        If charset is explicitly defined, ensure it is a valid charset the python
-        can deal with. If charset is not specified, auto-detect it.
+        If encoding is explicitly defined, ensure it is a valid encoding the python
+        can deal with. If encoding is not specified, auto-detect it.
 
-        Raises unicodec.InvalidEncodingName if explicitly set charset is invalid.
+        Raises unicodec.InvalidEncodingName if explicitly set encoding is invalid.
         """
-        if charset:
-            return unicodec.normalize_encoding_name(charset)
+        if encoding:
+            return unicodec.normalize_encoding_name(encoding)
         return unicodec.detect_content_encoding(
             self.get_body_chunk() or b"",
             content_type_header=(
@@ -175,7 +175,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             body=self.body,
             url=self.url,
             headers=deepcopy(self.headers),
-            charset=self.charset,
+            encoding=self.encoding,
             grab_config=self._grab_config,
             cookies=cj,
         )
@@ -202,7 +202,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def json(self) -> Any:
         """Return response body deserialized into JSON object."""
         assert self.body is not None
-        return json.loads(self.body.decode(self.charset))
+        return json.loads(self.body.decode(self.encoding))
 
     def url_details(self) -> SplitResult:
         """Return result of urlsplit function applied to response url."""
@@ -350,7 +350,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         if not self._unicode_body:
             # FIXME: ignore_errors option
             self._unicode_body = unicodec.decode_content(
-                self.body, encoding=self.charset
+                self.body, encoding=self.encoding
             )
         return self._unicode_body
 
@@ -380,20 +380,20 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         return BytesIO(inp) if isinstance(inp, bytes) else StringIO(inp)
 
     @classmethod
-    def _build_dom(cls, content: bytes | str, mode: str, charset: str) -> _Element:
+    def _build_dom(cls, content: bytes | str, mode: str, encoding: str) -> _Element:
         assert mode in {"html", "xml"}
         if mode == "html":
             if not hasattr(THREAD_STORAGE, "html_parsers"):
                 THREAD_STORAGE.html_parsers = {}
             parser = THREAD_STORAGE.html_parsers.setdefault(
-                charset, HTMLParser(encoding=charset)
+                encoding, HTMLParser(encoding=encoding)
             )
             dom = etree.parse(cls.wrap_io(content), parser=parser)
             return dom.getroot()
         if not hasattr(THREAD_STORAGE, "xml_parser"):
             THREAD_STORAGE.xml_parsers = {}
         parser = THREAD_STORAGE.xml_parsers.setdefault(
-            charset, etree.XMLParser(resolve_entities=False)
+            encoding, etree.XMLParser(resolve_entities=False)
         )
         dom = etree.parse(cls.wrap_io(content), parser=parser)
         return dom.getroot()
@@ -403,14 +403,14 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             assert self.body is not None
             ubody = self.unicode_body()
             body: None | bytes = (
-                ubody.encode(self.charset) if ubody is not None else None
+                ubody.encode(self.encoding) if ubody is not None else None
             )
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser
                 body = b"<html></html>"
             try:
-                self._lxml_tree = self._build_dom(body, "html", self.charset)
+                self._lxml_tree = self._build_dom(body, "html", self.encoding)
             except Exception as ex:
                 # FIXME: write test for this case
                 if b"<html" not in body and (
@@ -426,7 +426,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                     )
                 ):
                     body = b"<html>%s</html>" % body
-                    self._lxml_tree = self._build_dom(body, "html", self.charset)
+                    self._lxml_tree = self._build_dom(body, "html", self.encoding)
                 else:
                     raise
         return self._lxml_tree
@@ -435,8 +435,8 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         if self._strict_lxml_tree is None:
             ubody = self.unicode_body()
             assert ubody is not None
-            body = ubody.encode(self.charset)
-            self._strict_lxml_tree = self._build_dom(body, "xml", self.charset)
+            body = ubody.encode(self.encoding)
+            self._strict_lxml_tree = self._build_dom(body, "xml", self.encoding)
         return self._strict_lxml_tree
 
     # FormExtension methods

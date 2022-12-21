@@ -242,30 +242,8 @@ encoding
 :Default: None
 
 The encoding (character set) is used to store document's content as bytes.
-By default Grab detects encoding of document automatically. If it detects the charset incorrectly you can specify exact charset with this option.
-The charset is used to convert document's bytes content into Unicode text also for biilding DOM tree of the document.
-
-.. _option_charset:
-
-charset
-^^^^^^^
-
-:Type: string
-:Default: 'utf-8'
-
-To send a request to the network Grab should convert all unicode data into bytes. It uses the `charset` for encoding. For example:
-
-.. code:: python
-
-    g.setup(post=b'abc')
-    
-no conversion required. But if
-
-.. code:: python
-
-    g.setup(post='Превед, медвед!')
-    
-then the unicode data has to be converted to `charset` encoding. By default that would be utf-8.
+By default Grab detects encoding of document automatically. If it detects the encoding incorrectly you can specify exact encoding with this option.
+The encoding option is used to convert document's bytes content into Unicode text also for biilding DOM tree of the document.
 
 .. _option_body_maxsize:
 

@@ -39,37 +39,37 @@ def normalize_url(input_url: bytes | str) -> str:
 
 def process_http_item(
     item: tuple[str | bytes, Any],
-    charset: str,
+    encoding: str,
 ) -> list[tuple[bytes, bytes | BaseUploadItem]]:
     key: str | bytes = item[0]
     value: Any = item[1]
     if isinstance(value, (list, tuple)):
         ret = []
         for subval in value:
-            ret.extend(process_http_item((key, subval), charset))
+            ret.extend(process_http_item((key, subval), encoding))
         return ret
     # key
     if isinstance(key, str):
-        key = key.encode(encoding=charset)
+        key = key.encode(encoding=encoding)
     # value
     if isinstance(value, BaseUploadItem):
         pass
     elif isinstance(value, str):
-        value = value.encode(encoding=charset)
+        value = value.encode(encoding=encoding)
     elif value is None:
         value = b""
     else:
-        value = str(value).encode(encoding=charset)
+        value = str(value).encode(encoding=encoding)
     return [(key, value)]
 
 
 def normalize_http_values(
     items: dict[str, Any] | list[tuple[str, Any]],
-    charset: str = "utf-8",
+    encoding: str = "utf-8",
 ) -> list[tuple[bytes, bytes | BaseUploadItem]]:
     """Convert values in dict/list-of-tuples to bytes.
 
-    Unicode is converted into bytestring using charset of previous response
+    Unicode is converted into bytestring using encoding of previous response
     (or utf-8, if no requests were performed)
 
     None is converted into empty string.
@@ -82,7 +82,7 @@ def normalize_http_values(
     # Fix list into tuple because isinstance works only with tupled sequences
     ret = []
     for item in items:
-        ret.extend(process_http_item(item, charset))
+        ret.extend(process_http_item(item, encoding))
     return ret
 
 

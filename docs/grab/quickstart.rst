@@ -95,11 +95,11 @@ To get the response content as unicode use::
 
     >>> resp.unicode_body()
 
-Note that grab will automatically detect the character set (charset for 
-short) of the response content and convert it to unicode. You can detected 
-the charset with:: 
+Note that grab will automatically detect the encoding (character set)
+of the response's content and convert it to unicode. Detected encoding is
+available through "encoding" attribute::
 
-    >>> resp.charset
+    >>> resp.encoding
 
 If you need the original response body then use::
 

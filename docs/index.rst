@@ -59,7 +59,7 @@ Grab User Manual
     grab/redirect
     grab/forms
     grab/network_errors
-    grab/charset
+    grab/encoding
     grab/cookies
     grab/proxy
     grab/response_search

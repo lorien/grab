@@ -129,7 +129,7 @@ class Urllib3Transport(BaseTransport):
         self._request = None
 
     def process_config_post(
-        self, grab_config: Mapping[str, Any], method: str
+        self, grab_config: Mapping[str, Any], method: str, encoding: str
     ) -> tuple[dict[str, Any], None | bytes]:
         if method in {"POST", "PUT"} and (
             grab_config["post"] is None and grab_config["multipart_post"] is None
@@ -153,16 +153,12 @@ class Urllib3Transport(BaseTransport):
                 # WTF: why I encode things into bytes and then decode them back?
                 post_items: Sequence[tuple[bytes, Any]] = normalize_http_values(
                     grab_config["multipart_post"],
-                    charset=grab_config["charset"],
+                    encoding=encoding,
                 )
                 post_items2: Sequence[tuple[str, Any]] = [
                     (
-                        x[0].decode(grab_config["charset"])
-                        if isinstance(x[0], bytes)
-                        else x[0],
-                        x[1].decode(grab_config["charset"])
-                        if isinstance(x[1], bytes)
-                        else x[1],
+                        x[0].decode(encoding) if isinstance(x[0], bytes) else x[0],
+                        x[1].decode(encoding) if isinstance(x[1], bytes) else x[1],
                     )
                     for x in post_items
                 ]
@@ -173,7 +169,7 @@ class Urllib3Transport(BaseTransport):
                 extra_headers["Content-Type"] = content_type
             extra_headers["Content-Length"] = len(post_data)
         elif grab_config["post"] is not None:
-            post_data = normalize_post_data(grab_config["post"], grab_config["charset"])
+            post_data = normalize_post_data(grab_config["post"], encoding)
             extra_headers["Content-Length"] = len(post_data)
         return extra_headers, post_data
 
@@ -205,7 +201,9 @@ class Urllib3Transport(BaseTransport):
         # Method
         method = self.detect_request_method(grab_config)
         # POST data
-        post_headers, req_data = self.process_config_post(grab_config, method)
+        post_headers, req_data = self.process_config_post(
+            grab_config, method, grab_config["encoding"] or "utf-8"
+        )
         extra_headers.update(post_headers)
         # Proxy
         req_proxy, req_proxy_userpwd, req_proxy_type = self.process_proxy_config(
@@ -398,7 +396,7 @@ class Urllib3Transport(BaseTransport):
                     or cast(Request, self._request).url
                 ),
                 headers=hdr,
-                charset=grab_config["encoding"],
+                encoding=grab_config["encoding"],
                 cookies=jar,
             )
         finally:

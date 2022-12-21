@@ -17,7 +17,7 @@ class TestUploadContent(BaseGrabTestCase):
             '<input type="file" name="image">'
             "</form>" % url
         ).encode("ascii")
-        return build_grab(html, charset="utf-8")
+        return build_grab(html, encoding="utf-8")
 
     # *******************
     # UploadContent Tests

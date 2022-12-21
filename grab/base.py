@@ -74,7 +74,6 @@ def default_config() -> GrabConfig:
         "connect_timeout": 3,
         "body_maxsize": None,
         "redirect_limit": 10,
-        "charset": "utf-8",
         "encoding": None,
         "content_type": "html",
         # Session Properties
@@ -445,8 +444,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         self.doc.timestamp = now
 
-        self.config["charset"] = self.doc.charset
-
         if self.config["cookiefile"]:
             self.cookies.save_to_file(self.config["cookiefile"])
 
@@ -482,7 +479,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             body=body,
             head=head or b"HTTP/1.1 200 OK\r\n\r\n",
             headers=headers or email.message.Message(),
-            charset=encoding,  # If None it will be autodetected
+            encoding=encoding,  # If None it will be autodetected
             code=code or 200,
             url=url or "",
         )
