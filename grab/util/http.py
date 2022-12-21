@@ -5,7 +5,7 @@ from typing import Any
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 
 from ..upload import BaseUploadItem
-from .encoding import make_bytes, make_str
+from .encoding import make_bytes
 
 GEN_DELIMS = r":/?#[]@"
 SUB_DELIMS = r"!$&\'()*+,;="
@@ -17,9 +17,9 @@ RE_NOT_SAFE_CHAR = re.compile(
 RE_NON_ALPHA_DIGIT_NETLOC = re.compile(r"[^-.:@a-zA-Z0-9]")
 
 
-def normalize_url(url: bytes | str) -> str:
+def normalize_url(input_url: bytes | str) -> str:
     # https://tools.ietf.org/html/rfc3986
-    url = make_str(url)
+    url: str = input_url if isinstance(input_url, str) else input_url.decode("utf-8")
     if RE_NOT_SAFE_CHAR.search(url):
         parts = list(urlsplit(url))
         # Scheme
@@ -28,12 +28,12 @@ def normalize_url(url: bytes | str) -> str:
         if RE_NON_ALPHA_DIGIT_NETLOC.search(parts[1]):
             parts[1] = parts[1].encode("idna").decode("ascii")
         # Path
-        parts[2] = quote(make_str(parts[2]), safe=RESERVED_CHARS)
+        parts[2] = quote(parts[2], safe=RESERVED_CHARS)
         # Query
-        parts[3] = quote(make_str(parts[3]), safe=RESERVED_CHARS)
+        parts[3] = quote(parts[3], safe=RESERVED_CHARS)
         # Fragment
-        parts[4] = quote(make_str(parts[4]), safe=RESERVED_CHARS)
-        return urlunsplit(list(map(make_str, parts)))
+        parts[4] = quote(parts[4], safe=RESERVED_CHARS)
+        return urlunsplit(parts)
     return url
 
 

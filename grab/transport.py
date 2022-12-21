@@ -34,7 +34,6 @@ from grab.document import Document
 from grab.error import GrabMisuseError, GrabTimeoutError
 from grab.types import GrabConfig
 from grab.upload import UploadContent, UploadFile
-from grab.util.encoding import make_str
 from grab.util.http import normalize_http_values, normalize_post_data, normalize_url
 
 from .base_transport import BaseTransport
@@ -211,9 +210,7 @@ class Urllib3Transport(BaseTransport):
         try:
             request_url = normalize_url(grab_config["url"])
         except Exception as ex:
-            raise error.GrabInvalidUrl(
-                "%s: %s" % (str(ex), make_str(grab_config["url"], errors="ignore"))
-            )
+            raise error.GrabInvalidUrl("%s: %s" % (str(ex), str(grab_config["url"])))
         # Method
         method = self.detect_request_method(grab_config)
         # Body storage/memory storing
@@ -332,8 +329,6 @@ class Urllib3Transport(BaseTransport):
             # It is the timeout on read of next data chunk from the server
             # Total response timeout is handled by Grab
             timeout = Timeout(connect=req.connect_timeout, read=req.timeout)
-            # req_headers = dict((make_str(x), make_str(y))
-            #                   for (x, y) in req.headers.items())
             req_url = req.url
             req_method = req.method
             req.op_started = time.time()
