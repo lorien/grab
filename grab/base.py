@@ -265,14 +265,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         """
         return self.request(url=url, **kwargs)
 
-    def download(self, url: str, location: str, **kwargs: Any) -> int:
-        """Fetch document located at ``url`` and save to to ``location``."""
-        doc = self.go(url, **kwargs)
-        assert doc.body is not None
-        with open(location, "wb") as out:
-            out.write(doc.body)
-        return len(doc.body)
-
     def prepare_request(self, **kwargs: Any) -> None:
         """Configure all things to make real network request.
 

@@ -3,7 +3,7 @@ from copy import deepcopy
 from test_server import Response
 
 from grab import GrabError, GrabMisuseError
-from tests.util import BaseGrabTestCase, build_grab, temp_file
+from tests.util import BaseGrabTestCase, build_grab
 
 
 class GrabApiTestCase(BaseGrabTestCase):
@@ -47,13 +47,6 @@ class GrabApiTestCase(BaseGrabTestCase):
         content = b"<strong>test</strong>"
         grab = build_grab(document_body=content)
         self.assertEqual(grab.doc.body, content)
-
-    def test_download(self):
-        with temp_file() as save_file:
-            grab = build_grab()
-            self.server.add_response(Response(data=b"FOO"))
-            length = grab.download(self.server.get_url(), save_file)
-            self.assertEqual(3, length)
 
     def test_make_url_absolute(self):
         grab = build_grab()
