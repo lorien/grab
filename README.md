@@ -10,19 +10,16 @@
 ## Status of Project
 
 I myself have not used Grab for many years. I am not sure it is being used by anybody at present time.
-Nonetheless I work on the project from time to time, just for fun. In 2022 I have annotated
-whole Grab code base with type hints, it complies to mypy in strict mode. Also the whole code base complies to
-pylint and flake8 linters. There are few exceptions: very large methods and classes with too many local
-atributes and variables. I will refactor them eventually. Also I have set up running mypy, pylint, flake8
-and pytest in github actions.
+Nonetheless I decided to refactor the project, just for fun. I have annotated
+whole code base with mypy type hints (in strict mode). Also the whole code base complies to
+pylint and flake8 requirements. There are few exceptions: very large methods and classes with too many local
+atributes and variables. I will refactor them eventually.
 
-Initially Grab worked with pycurl as network backend. Then I have added urllib3 backend. At present time
-pycurl backend is not supported anymore.
+The current and the only network backend is [urllib3](https://github.com/urllib3/urllib3).
 
-I do not care if the project is not used anymore by anybody. I feel good by making Grab source code less shitty.
-And, for sure, Grab source code is very shitty. And design is shitty too. I have created it many years ago.
-
-Grab requires python of version 3.8 or higher.
+I have refactored a few components into external packages: [proxylist](https://github.com/lorien/proxylist),
+[procstat](https://github.com/lorien/procstat), [selection](https://github.com/lorien/selection),
+[unicodec](https://github.com/lorien/unicodec), [user\_agent](https://github.com/lorien/user_agent)
 
 Feel free to give feedback in Telegram groups: [@grablab](https://t.me/grablab) and [@grablab\_ru](https://t.me/grablab_ru)
 
@@ -36,14 +33,16 @@ Feel free to give feedback in Telegram groups: [@grablab](https://t.me/grablab) 
     * too-many-public-methods
 * Make 100% test coverage, it is about 90% now
 * Release new version to pypi
-* Fix uploading coverage stats to coveralls service
-
+* Refactor more components into external packages
+* More abstract interfaces
+* More data structures and types
+* Decouple connections between internal components
 
 ## Installation
 
-```
-$ pip install -U grab
-```
+You need pythoon version >= 3.8
+
+Run: `pip install -U grab`
 
 See details about installing Grab on different platforms here https://grab.readthedocs.io/en/latest/usage/installation.html
 
