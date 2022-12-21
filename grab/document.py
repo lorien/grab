@@ -452,16 +452,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                     raise
         return self._lxml_tree
 
-    @property
-    def xml_tree(self) -> _Element:
-        """Return DOM-tree of the document built with XML DOM builder."""
-        warn(
-            "Attribute `grab.xml_tree` is deprecated. "
-            "Use `Grab.doc.tree` attribute "
-            'AND content_type="xml" option instead.'
-        )
-        return self.build_xml_tree()
-
     def build_xml_tree(self) -> _Element:
         if self._strict_lxml_tree is None:
             ubody = self.unicode_body()
