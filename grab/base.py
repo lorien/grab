@@ -199,9 +199,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             self.setup_document(document_body, charset=kwargs.get("document_charset"))
 
     @property
-    def doc(self) -> Document:
-        if self._doc is None:
-            self._doc = Document(grab_config=self.config)
+    def doc(self) -> None | Document:
         return self._doc
 
     @doc.setter
@@ -269,7 +267,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         grab = Grab(transport=self.transport_param)
         grab.config = self.dump_config()
 
-        grab.doc = self.doc.copy()
+        grab.doc = self.doc.copy() if self.doc else None
         # grab.doc.grab = weakref.proxy(grab)
 
         for key in self.clonable_attributes:
@@ -290,7 +288,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         """
         self.load_config(grab.config)
 
-        self.doc = grab.doc.copy(new_grab_config=self.config)
+        self.doc = grab.doc.copy(new_grab_config=self.config) if grab.doc else None
 
         for key in self.clonable_attributes:
             setattr(self, key, getattr(grab, key))
@@ -400,7 +398,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             and doc.headers["Location"]
         ):
             return doc.headers["Location"], "location"
-        if self.config["follow_refresh"]:
+        if self.doc and self.config["follow_refresh"]:
             url = self.doc.get_meta_refresh_url()
             if url is not None:
                 return url, "refresh"
@@ -470,6 +468,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             g.doc.set_input('img', UploadFile('/path/to/image.png'))
             g.submit()
         """
+        assert self.doc is not None
         result = self.doc.get_form_request(**kwargs)
         if result["multipart_post"]:
             self.setup(multipart_post=result["multipart_post"])
@@ -587,7 +586,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     def make_url_absolute(self, url: str, resolve_base: bool = False) -> str:
         """Make url absolute using previous request url as base url."""
         if self.config["url"]:
-            if resolve_base:
+            if resolve_base and self.doc:
                 ubody = self.doc.unicode_body()
                 assert ubody is not None
                 base_url = find_base_url(ubody)

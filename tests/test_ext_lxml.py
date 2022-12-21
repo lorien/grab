@@ -105,7 +105,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
             "пче ла му ха item #100 2 item #2",
             self.grab.doc.select("/html/body").text(smart=True),
         )
-        self.assertRaises(DataNotFound, lambda: self.grab.doc("//code").text())
+        self.assertRaises(DataNotFound, lambda: self.grab.doc.select("//code").text())
         self.assertEqual("bee", self.grab.doc.select('//*[@id="bee"]/@id').text())
         self.assertRaises(
             DataNotFound, lambda: self.grab.doc.select('//*[@id="bee2"]/@id').text()

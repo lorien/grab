@@ -47,33 +47,44 @@ Use your own transport
 You can implement you own transport class and use it. Just pass
 your transport class to `transport` option.
 
-Here is the crazy example of wget-powered transport. Note that this is
-VERY simple transport that understands only one option: the URL.
+Here is minimal example to build Grab transport powered by wget.
 
 ..  code:: python
 
-    from grab import Grab
-    from grab.document import Document
+    import email.message
+    from contextlib import contextmanager
     from subprocess import check_output
 
+    from grab import Grab
+    from grab.base_transport import BaseTransport
+    from grab.document import Document
 
-    class WgetTransport:
-        def reset(self): pass
 
-        def process_config(self, grab.config):
-            self._request_url = grab.config['url']
+    class WgetTransport(BaseTransport):
+        def reset(self):
+            pass
+
+        def process_config(self, grab_config, cookies):
+            self._request_url = grab_config["url"]
 
         def request(self):
-            out = check_output(['/usr/bin/wget', '-O', '-',
-                                self._request_url])
+            out = check_output(["/usr/bin/wget", "-O", "-", self._request_url])
             self._response_body = out
 
-        def prepare_response(self, grab_config, *, document_class = Document):
-            doc = document_class()
-            doc.body = self._response_body
-            return doc
+        def prepare_response(self, grab_config, *, document_class=Document):
+            return document_class(
+                grab_config=grab_config,
+                body=self._response_body,
+                headers=email.message.Message(),
+            )
+
+        @contextmanager
+        def wrap_transport_error(self):
+            yield
 
 
     g = Grab(transport=WgetTransport)
-    g.go('http://protonmail.com')
-    assert 'Secure email' in g.doc('//title').text()
+    g.go("https://github.com")
+    print(g.doc("//title").text())
+    assert "github" in g.doc("//title").text().lower()
+

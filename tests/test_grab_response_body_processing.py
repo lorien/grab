@@ -70,13 +70,17 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         grab.go(self.server.get_url())
         self.assertEqual(grab.doc.get_bytes_body(), b"bar")
 
-    def test_assign_unicode_to_body(self):
+    def test_access_null_body(self):
         grab = build_grab()
-        grab.doc.body = b"abc"
-        grab.doc.body = b"def"
+        self.assertEqual(grab.doc, None)
 
-        with self.assertRaises(GrabMisuseError):
-            grab.doc.body = "Спутник"  # pylint: disable=redefined-variable-type
+    # def test_assign_unicode_to_body(self):
+    #    grab = build_grab()
+    #    grab.doc.body = b"abc"
+    #    grab.doc.body = b"def"
+
+    #    with self.assertRaises(GrabMisuseError):
+    #        grab.doc.body = "Спутник"  # pylint: disable=redefined-variable-type
 
     def test_empty_response(self):
         self.server.add_response(Response(data=b""))
@@ -101,7 +105,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
     def test_doc_tree_notags_document(self):
         data = b"test"
         grab = build_grab(data)
-        self.assertEqual(grab.doc("//html").text(), "test")
+        self.assertEqual(grab.doc.select("//html").text(), "test")
 
     def test_github_html_processing(self):
         # This test is for osx and py3.5
@@ -116,7 +120,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         grab = build_grab()
         grab.go(self.server.get_url())
         items = []
-        for elem in grab.doc('//a[contains(@class, "exploregrid-item")]'):
+        for elem in grab.doc.select('//a[contains(@class, "exploregrid-item")]'):
             items.append(grab.make_url_absolute(elem.attr("href")))
         self.assertTrue("tools-for-open-source" in items[2])
 

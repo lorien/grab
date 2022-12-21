@@ -117,7 +117,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         # Main attributes
         self.body_path = body_path
         if body is not None:
-            self.body = body
+            self.set_body(body)
         self.code = code
         self.head = head
         self.headers = headers
@@ -398,8 +398,9 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     @body.setter
     def body(self, body: bytes) -> None:
-        if isinstance(body, str):
-            raise GrabMisuseError("Document.body could be only byte string.")
+        raise GrabMisuseError("Document body could be set only in constructor")
+
+    def set_body(self, body: bytes) -> None:
         if self.body_path:
             with open(self.body_path, "wb") as out:
                 out.write(body)
