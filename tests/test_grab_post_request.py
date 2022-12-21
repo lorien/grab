@@ -29,7 +29,7 @@ class TestPostFeature(BaseGrabTestCase):
 
     def test_post(self):
         self.server.add_response(Response(), count=9)
-        grab = build_grab(url=self.server.get_url(), debug_post=True)
+        grab = build_grab(url=self.server.get_url())
 
         # Provide POST data in dict
         grab.setup(post={"foo": "bar"})
@@ -78,7 +78,7 @@ class TestPostFeature(BaseGrabTestCase):
 
     def test_multipart_post(self):
         self.server.add_response(Response(), count=3)
-        grab = build_grab(url=self.server.get_url(), debug_post=True)
+        grab = build_grab(url=self.server.get_url())
         # Dict
         grab.setup(multipart_post={"foo": "bar"})
         grab.request()

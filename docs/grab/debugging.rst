@@ -39,15 +39,3 @@ method is GET, and that the request goes through a proxy with authorization.
 For each network request Grab uses the next ID value from the sequence that is
 shared by all Grab instances. That does mean that even different Grab instances
 will generates network logging messages with unique ID. 
-
-You can also turn on logging of POST request content. Use the `debug_post`
-option::
-
-    >>> g.setup(debug_post=True)
-
-The output will be like this::
-
-    [01] POST http://yandex.ru
-    POST request:
-    foo                      : bar
-    name                     : Ivan

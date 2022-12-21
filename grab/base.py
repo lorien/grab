@@ -26,9 +26,7 @@ from grab.base_transport import BaseTransport
 from grab.cookie import CookieManager
 from grab.document import Document
 from grab.types import GrabConfig, TransportParam
-from grab.util.encoding import make_bytes
 from grab.util.html import find_base_url
-from grab.util.http import normalize_http_values
 
 __all__ = ("Grab",)
 # This counter will used in enumerating network queries.
@@ -70,8 +68,6 @@ def default_config() -> GrabConfig:
         # Common
         "url": None,
         # Debugging
-        "debug_post": False,
-        "debug_post_limit": 150,
         # Only for DEPRECATED transport
         "debug": False,
         "verbose_logging": False,
@@ -485,41 +481,9 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             return self.request()
         return None
 
-    def debug_post(self) -> None:
-        post = self.config["post"] or self.config["multipart_post"]
-        # if isinstance(post, dict):
-        #    post = list(post.items())
-        post_bytes: None | bytes = None
-        if post:
-            if isinstance(post, (bytes, str)):
-                post_bytes = (
-                    make_bytes(post[: self.config["debug_post_limit"]], errors="ignore")
-                    + b"..."
-                )
-            else:
-                items = normalize_http_values(post, charset=self.config["charset"])
-                new_items = []
-                for key, value in items:
-                    new_items.append(
-                        (
-                            key,
-                            value[: self.config["debug_post_limit"]] + b"..."
-                            if len(value) > self.config["debug_post_limit"]
-                            else value,
-                        )
-                    )
-                post_bytes = b"\n".join(b"%-25s: %s" % x for x in new_items)
-        if post:
-            logger_network.debug(
-                "[%02d] POST request:\n%r\n", self.request_counter, post_bytes
-            )
-
     def process_request_result(self) -> Document:
         """Process result of real request performed via transport extension."""
         now = datetime.utcnow()
-        # TODO: move into separate method
-        if self.config["debug_post"]:
-            self.debug_post()
 
         # It's important to delete old POST data after request is performed.
         # If POST data is not cleared then next request will try to use them

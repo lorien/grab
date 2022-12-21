@@ -9,13 +9,6 @@ class TestCookies(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_debug_post(self):
-        grab = build_grab(debug_post=True)
-        grab.setup(post={"foo": "bar"})
-        self.server.add_response(Response(data=b"x"))
-        grab.go(self.server.get_url())
-        self.assertEqual(b"x", grab.doc.body)
-
     def test_debug_nonascii_post(self):
         self.server.add_response(Response())
         grab = build_grab(debug=True)
@@ -27,35 +20,6 @@ class TestCookies(BaseGrabTestCase):
         grab = build_grab(debug=True)
         grab.setup(charset="cp1251", multipart_post=[("x", "фыва".encode("cp1251"))])
         grab.go(self.server.get_url())
-
-    def test_debug_post_integer_bug(self):
-        grab = build_grab(debug_post=True)
-        grab.setup(post={"foo": 3})
-        self.server.add_response(Response(data=b"x"))
-        grab.go(self.server.get_url())
-        self.assertEqual(b"x", grab.doc.body)
-
-    def test_debug_post_big_str(self):
-        self.server.add_response(Response())
-        grab = build_grab(debug_post=True)
-        big_value = "x" * 1000
-        grab.setup(post=big_value)
-        grab.go(self.server.get_url())
-        self.assertEqual(self.server.get_request().data, big_value.encode())
-
-    def test_debug_post_dict_big_value(self):
-        self.server.add_response(Response())
-        grab = build_grab(debug_post=True)
-        big_value = "x" * 1000
-        grab.setup(
-            post={
-                "foo": big_value,
-            }
-        )
-        grab.go(self.server.get_url())
-        self.assertEqual(
-            self.server.get_request().data, ("foo=%s" % big_value).encode()
-        )
 
     def test_log_request_extra_argument(self):
         self.server.add_response(Response())

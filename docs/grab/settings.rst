@@ -445,13 +445,3 @@ If you want to parse XML, then you may need to change this option to "xml" to fo
 
 Debugging
 ---------
-
-.. _option_debug_post:
-
-debug_post
-^^^^^^^^^^
-
-:Type: bool
-:Default: False
-
-Enable logging of POST request content.
