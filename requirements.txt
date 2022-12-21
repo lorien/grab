@@ -51,9 +51,7 @@ flake8-return
 flake8-simplify
 flake8-string-format
 flake8-cognitive-complexity
-flake8-eradicate
 mccabe
 mypy
 pep8-naming
 pylint
-
