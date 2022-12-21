@@ -80,18 +80,6 @@ Redirects follow the "Location" header in 301/302 network responses, and
 also follow the URL specified in meta refresh tags.
 
 
-.. _option_userpwd:
-
-
-userpwd
-^^^^^^^
-
-:Type: string
-:Default: None
-
-The username and the password to send during HTTP authorization. The value of that options is the string of format "username:password".
-
-
 HTTP Options
 ------------
 
@@ -222,30 +210,6 @@ cookiefile
 
 Before each request, Grab will read cookies from this file and join them with stored cookies. After each response, Grab will save all cookies to that file.
 The data stored in the file is a dict serialized as JSON.
-
-
-.. _option_referer:
-
-referer
-^^^^^^^
-
-:Type: string
-:Default: see below
-
-The content of the "Referer" HTTP-header. By default, Grab builds this header with the URL
-of the previously requested document.
-
-
-.. _option_reuse_referer:
-
-reuse_referer
-^^^^^^^^^^^^^
-
-:Type: bool
-:Default: True
-
-If this option is enabled, then Grab uses the URL of the previously requested document to build
-the content of the "Referer" HTTP header.
 
 
 Proxy Options

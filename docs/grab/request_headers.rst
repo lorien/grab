@@ -35,19 +35,3 @@ builtin list of real user agents. You can specify the exact User-Agent value wit
 the :ref:`option_user_agent` option. If you need to randomly choose user agents
 from your own list of user agents, then you can put your list into a text file
 and pass its location as :ref:`option_user_agent_file`.
-
-
-Referer header
---------------
-
-To specify the content of the Referer header, use the :ref:`option_referer`
-option. By default, Grab use the URL of previously request document as value
-of Referer header. If you do not like this behaviour, you can turn it off with
-:ref:`option_reuse_referer` option.
-
-HTTP Authentication
--------------------
-
-To send HTTP authentication headers, use the :ref:`option_userpwd` option with
-a value of the form "username:password".
-

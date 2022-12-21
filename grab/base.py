@@ -66,7 +66,6 @@ def default_config() -> GrabConfig:
         "proxy": None,
         "proxy_type": None,
         "proxy_userpwd": None,
-        "proxy_auto_change": True,
         "method": None,
         "post": None,
         "multipart_post": None,
@@ -74,24 +73,21 @@ def default_config() -> GrabConfig:
         "common_headers": {},
         "user_agent": None,
         "user_agent_file": None,
-        "referer": None,
-        "reuse_referer": True,
         "cookies": {},
         "reuse_cookies": True,
         "cookiefile": None,
         "timeout": 15,
         "connect_timeout": 3,
-        "connection_reuse": True,
         "body_maxsize": None,
-        "reject_file_size": None,
         "encoding": "gzip",
         "follow_refresh": False,
         "follow_location": True,
         "redirect_limit": 10,
-        "userpwd": None,
         "charset": "utf-8",
         "document_charset": None,
         "content_type": "html",
+        # non request
+        "proxy_auto_change": True,
         "state": {},
     }
 
@@ -386,7 +382,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                     if refresh_count > self.config["redirect_limit"]:
                         raise error.GrabTooManyRedirectsError()
                     self.prepare_request(
-                        url=self.make_url_absolute(redir_url), referer=None
+                        url=self.make_url_absolute(redir_url),
                     )
                     continue
                 return doc
@@ -457,9 +453,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         if self.config["cookiefile"]:
             self.cookies.save_to_file(self.config["cookiefile"])
-
-        if self.config["reuse_referer"]:
-            self.config["referer"] = self.doc.url
 
         return self.doc
 
