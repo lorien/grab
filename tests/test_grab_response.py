@@ -29,20 +29,6 @@ class TestResponse(BaseGrabTestCase):
             with open(tmp_file, "rb") as inp:
                 self.assertEqual(inp.read(), img_data)
 
-    def test_save_hash(self):
-        """Test `Response.save_hash` method."""
-        with temp_dir() as tmp_dir:
-            with open(IMG_FILE, "rb") as inp:
-                img_data = inp.read()
-            self.server.add_response(Response(data=img_data))
-
-            grab = build_grab()
-            grab.go(self.server.get_url())
-            path = grab.doc.save_hash(self.server.get_url(), tmp_dir)
-            with open(os.path.join(tmp_dir, path), "rb") as inp:
-                test_data = inp.read()
-            self.assertEqual(test_data, img_data)
-
     def test_custom_charset(self):
         self.server.add_response(
             Response(
