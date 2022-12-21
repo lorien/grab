@@ -554,6 +554,7 @@ class Spider:
                     break
         finally:
             self.shutdown_services(services)
+            self.stat.shutdown(join_threads=True)
 
     def shutdown_services(self, services: list[BaseService]) -> None:
         # TODO:

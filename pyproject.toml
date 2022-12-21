@@ -31,7 +31,7 @@ classifiers = [
 dependencies = [
     "proxylist>=0.2.1",
     "unicodec>=0.0.8",
-    "procstat>=0.0.5",
+    "procstat>=0.0.7",
     "user_agent",
     "selection",
     "lxml",
