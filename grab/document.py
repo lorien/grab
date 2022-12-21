@@ -43,7 +43,6 @@ from grab.error import DataNotFound, GrabFeatureIsDeprecated, GrabMisuseError
 from grab.types import NULL, GrabConfig
 from grab.util.files import hashed_path
 from grab.util.html import find_refresh_url
-from grab.util.text import normalize_spaces
 from grab.util.warning import warn
 
 THREAD_STORAGE = threading.local()
@@ -316,7 +315,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
                 raise DataNotFound("Regexp not found") from ex
             return default
         else:
-            return normalize_spaces(match.group(1))
+            return match.group(1)
 
     def rex_search(
         self,
