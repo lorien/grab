@@ -10,7 +10,7 @@ class GrabErrorTestCase(TestCase):
     def test_original_exceptions_urllib2(self):
         grab = build_grab()
         try:
-            grab.go("http://%s" % NON_ROUTABLE_IP)
+            grab.request("http://%s" % NON_ROUTABLE_IP)
         except GrabNetworkError as ex:
             self.assertTrue(isinstance(ex.original_exc, ConnectTimeoutError))
 
@@ -18,4 +18,4 @@ class GrabErrorTestCase(TestCase):
         grab = build_grab()
         self.assertTrue(grab.exception is None)
         with self.assertRaises(GrabNetworkError):
-            grab.go("http://%s" % NON_ROUTABLE_IP)
+            grab.request("http://%s" % NON_ROUTABLE_IP)

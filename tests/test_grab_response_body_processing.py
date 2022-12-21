@@ -29,7 +29,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
     def test_body_get_bytes_body_true(self):
         grab = build_grab_custom_subclass(CustomGrab)
         self.server.add_response(Response(data=b"bar"))
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual(grab.doc.get_bytes_body(), b"bar")
 
     def test_access_null_body(self):
@@ -38,14 +38,14 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
     def test_external_set_document_body(self):
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         with self.assertRaises(GrabMisuseError):
             grab.doc.body = b"asdf"
 
     def test_empty_response(self):
         self.server.add_response(Response(data=b""))
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertTrue(grab.doc.tree is not None)  # should not raise exception
 
     def test_doc_tree_notags_document(self):
@@ -64,7 +64,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             data = inp.read()
         self.server.add_response(Response(data=data))
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         items = []
         for elem in grab.doc.select('//a[contains(@class, "exploregrid-item")]'):
             items.append(grab.make_url_absolute(elem.attr("href")))
@@ -80,5 +80,5 @@ class GrabSimpleTestCase(BaseGrabTestCase):
     def test_json(self):
         self.server.add_response(Response(data=b'{"foo": "bar"}'))
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual({"foo": "bar"}, grab.doc.json)

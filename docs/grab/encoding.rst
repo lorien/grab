@@ -18,7 +18,7 @@ It uses this detected encoding to
 The original content of the network response is always accessible with `response.body` attribute.
 A unicode representation of the document body can be obtained by calling `response.unicode_body()`::
 
-    >>> g.go('http://mail.ru/')
+    >>> g.request('http://mail.ru/')
     <grab.response.Response object at 0x7f7d38af8940>
     >>> type(g.response.body)
     <type 'str'>

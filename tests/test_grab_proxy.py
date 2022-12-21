@@ -43,7 +43,7 @@ class TestProxy(BaseGrabTestCase):
         grab.setup(proxy=proxy, proxy_type="http")
         self.server.add_response(Response(data=b"123"))
 
-        grab.go("http://yandex.ru")
+        grab.request("http://yandex.ru")
         self.assertEqual(b"123", grab.doc.body)
         self.assertEqual("yandex.ru", self.server.request.headers.get("host"))
 
@@ -56,7 +56,7 @@ class TestProxy(BaseGrabTestCase):
             grab.proxylist = ProxyList.from_local_file(tmp_file, proxy_type="http")
             self.server.add_response(Response(data=b"123"))
             grab.change_proxy()
-            grab.go("http://yandex.ru")
+            grab.request("http://yandex.ru")
             self.assertEqual(b"123", grab.doc.body)
             self.assertEqual("yandex.ru", self.server.request.headers.get("host"))
 
@@ -72,7 +72,7 @@ class TestProxy(BaseGrabTestCase):
             self.assertEqual(grab.config["proxy_auto_change"], True)
             servers = set()
             for _ in range(10):
-                grab.go("http://yandex.ru")
+                grab.request("http://yandex.ru")
                 servers.add(grab.config["proxy"])
 
             self.assertTrue(len(servers) > 1)
@@ -87,7 +87,7 @@ class TestProxy(BaseGrabTestCase):
             # TODO: probably call proxy change manually
             servers = set()
             for _ in range(10):
-                grab.go("http://yandex.ru")
+                grab.request("http://yandex.ru")
                 servers.add(grab.config["proxy"])
             self.assertEqual(len(servers), 1)
 
@@ -98,7 +98,7 @@ class TestProxy(BaseGrabTestCase):
             grab.proxylist = ProxyList.from_local_file(tmp_file, proxy_type="http")
             grab.setup(proxy_auto_change=False)
             self.assertEqual(grab.config["proxy_auto_change"], False)
-            grab.go(self.server.get_url())
+            grab.request(self.server.get_url())
             self.assertEqual(grab.config["proxy"], None)
 
     def test_change_proxy(self):
@@ -130,7 +130,7 @@ class TestProxy(BaseGrabTestCase):
         items = [x["proxy"] for x in self.extra_servers.values()]
 
         grab.proxylist = ProxyList.from_lines_list(items, proxy_type="http")
-        grab.go("http://yandex.ru")
+        grab.request("http://yandex.ru")
         servers = [
             x["server"]
             for x in self.extra_servers.values()
@@ -158,12 +158,12 @@ class TestProxy(BaseGrabTestCase):
         grab.setup(proxy_auto_change=False)
         grab.proxylist = ProxyList(CustomProxySource("http"))
         grab.change_proxy(random=False)
-        grab.go("http://yandex.ru")
+        grab.request("http://yandex.ru")
         serv = extra_servers[0]["server"]
         self.assertEqual((serv.request.headers.get("host")), "yandex.ru")
         self.assertEqual(grab.doc.headers.get("listen-port"), str(serv.port))
         grab.change_proxy(random=False)
-        grab.go("http://yandex.ru")
+        grab.request("http://yandex.ru")
         serv = extra_servers[1]["server"]
         self.assertEqual(serv.request.headers.get("host"), "yandex.ru")
         self.assertEqual(grab.doc.headers.get("listen-port"), str(serv.port))

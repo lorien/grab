@@ -20,7 +20,7 @@ the `choose_form` method.
 Let's look at a simple example of how to use these form features::
 
     >>> g = Grab()
-    >>> g.go("http://ya.ru/")
+    >>> g.request("http://ya.ru/")
     >>> g.doc.set_input("text", "grab documenation")
     >>> g.doc.submit()
     >>> g.doc.select('//a[@class="b-serp-item__title-link"]/@href').text()

@@ -13,7 +13,7 @@ You can also access the response object of a recent network query via the `g.res
 
     >>> from grab import Grab
     >>> g = Grab()
-    >>> g.go('http://google.com')
+    >>> g.request('http://google.com')
     <grab.doc.Document object at 0x2cff9f0>
     >>> g.doc
     <grab.doc.Document object at 0x2cff9f0>
@@ -35,7 +35,7 @@ Now, a real example::
 
     >>> from grab import Grab
     >>> g = Grab()
-    >>> g.go('http://wikipedia.org')
+    >>> g.request('http://wikipedia.org')
     <grab.doc.Document object at 0x1ff99f0>
     >>> g.doc.body[:100]
     '<!DOCTYPE html>\n<html lang="mul" dir="ltr">\n<head>\n<!-- Sysops: Please do not edit the main template'

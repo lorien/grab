@@ -16,7 +16,7 @@ class GrabXMLProcessingTestCase(BaseGrabTestCase):
             )
         )
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertTrue(grab.doc.select("//foo").text() == "foo")
 
     def test_declaration_bug(self):

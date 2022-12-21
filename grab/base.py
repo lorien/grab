@@ -233,15 +233,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             kwargs["url"] = self.make_url_absolute(kwargs["url"])
         self.config.update(kwargs)
 
-    def go(self, url: str, **kwargs: Any) -> Document:  # pylint: disable=invalid-name
-        """Go to ``url``.
-
-        Args:
-            :url: could be absolute or relative. If relative then t will be
-                appended to the absolute URL of previous request.
-        """
-        return self.request(url=url, **kwargs)
-
     def prepare_request(self, **kwargs: Any) -> None:
         """Configure all things to make real network request.
 
@@ -295,7 +286,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
                 return url, "refresh"
         return None, None
 
-    def request(self, **kwargs: Any) -> Document:
+    def request(self, url: None | str = None, **kwargs: Any) -> Document:
         """Perform network request.
 
         You can specify grab settings in ``**kwargs``.
@@ -303,6 +294,8 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         Returns: ``Document`` objects.
         """
+        if url:
+            kwargs["url"] = url
         self.prepare_request(**kwargs)
         refresh_count = 0
 
@@ -341,7 +334,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         Example::
 
             # Assume that we going to some page with some form
-            g.go('some url')
+            g.request('some url')
             # Fill some fields
             g.doc.set_input('username', 'bob')
             g.doc.set_input('pwd', '123')

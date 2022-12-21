@@ -28,7 +28,7 @@ Also you can pass settings as parameters to `request` or `go`:
     g.setup(method='head')
     g.request(url='http://example.com')
     # OR
-    g.go('http://example.com')
+    g.request('http://example.com')
 
 `request` and `go` are almost same except for one small thing. You do not
 need to specify the explicit name of the first argument with `go`. The first

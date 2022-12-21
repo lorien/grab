@@ -25,7 +25,7 @@ The urllib3 uses native python sockets that could be patched by `gevent.monkey.p
     def worker():
         g = Grab(transport='urllib3')
         # Request the document that is served with 1 second delay
-        g.go('http://httpbin.org/delay/1')
+        g.request('http://httpbin.org/delay/1')
         return g.doc.json['headers']['User-Agent']
 
 
@@ -84,7 +84,7 @@ Here is minimal example to build Grab transport powered by wget.
 
 
     g = Grab(transport=WgetTransport)
-    g.go("https://github.com")
+    g.request("https://github.com")
     print(g.doc("//title").text())
     assert "github" in g.doc("//title").text().lower()
 

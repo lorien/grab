@@ -22,7 +22,7 @@ class TestUploadContent(BaseGrabTestCase):
             )
         )
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         return grab
 
     # *******************

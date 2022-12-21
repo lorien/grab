@@ -14,7 +14,7 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         grab = build_grab()
         self.server.add_response(Response(data=b"medved"))
         url = self.server.get_url("/превед?foo=bar")
-        grab.go(url)
+        grab.request(url)
         self.assertEqual(b"medved", grab.doc.body)
         self.assertEqual(
             "/%D0%BF%D1%80%D0%B5%D0%B2%D0%B5%D0%B4",
@@ -25,7 +25,7 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
     def test_nonascii_query(self):
         grab = build_grab()
         self.server.add_response(Response(data=b"medved"))
-        grab.go(self.server.get_url("/search?q=превед"))
+        grab.request(self.server.get_url("/search?q=превед"))
         self.assertEqual(b"medved", grab.doc.body)
         self.assertEqual("превед", self.server.request.args["q"])
 
@@ -36,7 +36,7 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         )
         self.server.add_response(Response(data=b"y"))
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual(b"y", grab.doc.body)
         self.assertEqual(grab.doc.url, quote(redirect_url, safe=":./?&"))
 
@@ -50,5 +50,5 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         )
         grab = build_grab()
         with self.assertRaises(GrabError) as ex:
-            grab.go(invalid_url)
+            grab.request(invalid_url)
         self.assertTrue("Failed to parse" in str(ex.exception))

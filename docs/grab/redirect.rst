@@ -19,14 +19,14 @@ Let's see how it works::
 
     >>> g = Grab()
     >>> g.setup(follow_location=False)
-    >>> g.go('http://google.com')
+    >>> g.request('http://google.com')
     <grab.response.Response object at 0x1246ae0>
     >>> g.response.code
     301
     >>> g.response.headers['Location']
     'http://www.google.com/'
     >>> g.setup(follow_location=True)
-    >>> g.go('http://google.com')
+    >>> g.request('http://google.com')
     <grab.response.Response object at 0x1246ae0>
     >>> g.response.code
     200
@@ -49,7 +49,7 @@ Original and Destination URLs
 You can always get information about what URL you've requested initially and what URL you ended up with::
 
     >>> g = Grab()
-    >>> g.go('http://google.com')
+    >>> g.request('http://google.com')
     <grab.response.Response object at 0x20fcae0>
     >>> g.config['url']
     'http://google.com'

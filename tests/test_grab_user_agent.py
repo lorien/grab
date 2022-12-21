@@ -12,7 +12,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         grab = build_grab()
         agents = set()
         for _ in range(3):
-            grab.go(self.server.get_url())
+            grab.request(self.server.get_url())
             agents.add(self.server.request.headers.get("user-agent"))
         self.assertTrue(len(agents) == 1)
 
@@ -21,6 +21,6 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         agents = set()
         for _ in range(3):
             grab = build_grab()
-            grab.go(self.server.get_url())
+            grab.request(self.server.get_url())
             agents.add(self.server.request.headers.get("user-agent"))
         self.assertTrue(len(agents) > 1)

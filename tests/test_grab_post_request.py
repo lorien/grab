@@ -120,17 +120,17 @@ class TestPostFeature(BaseGrabTestCase):
         self.server.add_response(Response(), count=2)
         grab = build_grab()
         grab.setup(method="post", post="")
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual(self.server.request.method, "POST")
         self.assertEqual(self.server.request.data, b"")
         self.assertEqual(self.server.request.headers.get("content-length"), "0")
 
-        grab.go(self.server.get_url(), post="DATA")
+        grab.request(self.server.get_url(), post="DATA")
         self.assertEqual(self.server.request.headers.get("content-length"), "4")
 
     def test_post_multivalue_key(self):
         self.server.add_response(Response())
         grab = build_grab()
         grab.setup(post=[("foo", [1, 2])])
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual(self.server.request.data, b"foo=1&foo=2")

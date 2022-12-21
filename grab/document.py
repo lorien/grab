@@ -492,7 +492,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
         Example::
 
-            g.go('some URL')
+            g.request('some URL')
             # Choose form automatically
             print g.form
 

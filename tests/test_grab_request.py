@@ -12,21 +12,21 @@ class GrabRequestTestCase(BaseGrabTestCase):
     def test_get_method(self):
         self.server.add_response(Response())
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual("GET", self.server.request.method)
 
     def test_delete_method(self):
         self.server.add_response(Response())
         grab = build_grab()
         grab.setup(method="delete")
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual("DELETE", self.server.request.method)
 
     def test_put_method(self):
         self.server.add_response(Response())
         grab = build_grab()
         grab.setup(method="put", post=b"abc")
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual("PUT", self.server.request.method)
         self.assertEqual("3", self.server.request.headers.get("content-length"))
 
@@ -41,19 +41,19 @@ class GrabRequestTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(callback=callback))
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
 
     def test_options_method(self):
         self.server.add_response(Response())
         grab = build_grab()
         grab.setup(method="options", post=b"abc")
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual("OPTIONS", self.server.request.method)
         self.assertEqual("3", self.server.request.headers.get("content-length"))
 
         self.server.add_response(Response())
         grab = build_grab()
         grab.setup(method="options")
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual("OPTIONS", self.server.request.method)
         self.assertTrue("Content-Length" not in self.server.request.headers)

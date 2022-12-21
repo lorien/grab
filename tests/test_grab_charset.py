@@ -11,19 +11,19 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
     def test_encoding_option(self):
         grab = build_grab()
         self.server.add_response(Response(data=b"foo"))
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual(b"foo", grab.doc.body)
 
         grab = build_grab()
         self.server.add_response(Response(data="фуу".encode("utf-8")))
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual("фуу".encode("utf-8"), grab.doc.body)
 
         self.assertEqual(grab.doc.encoding, "utf-8")
 
         grab = build_grab(encoding="cp1251")
         self.server.add_response(Response(data="фуу".encode("cp1251")))
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual("фуу".encode("cp1251"), grab.doc.body)
         self.assertEqual(grab.doc.encoding, "windows-1251")  # normalized
 
@@ -32,14 +32,14 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
             Response(headers=[("Content-Type", "text/html; charset=cp1251")])
         )
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual("windows-1251", grab.doc.encoding)
 
     def test_dash2_issue(self):
         html = b"<strong>&#151;</strong>"
         self.server.add_response(Response(data=html))
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
 
         # By default &#[128-159]; are fixed
         self.assertFalse(grab.doc.select("//strong/text()").text() == chr(151))
@@ -51,7 +51,7 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
                     </head><body>test</body>"""
         self.server.add_response(Response(data=html))
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertTrue(b"874" in grab.doc.body)
 
     def test_charset_html5(self):

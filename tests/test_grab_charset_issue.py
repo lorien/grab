@@ -11,7 +11,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
         html = b"<strong>&#151;</strong>"
         self.server.add_response(Response(data=html), count=3)
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
 
         # By default &#[128-159]; are fixed
         self.assertFalse(grab.doc.select("//strong/text()").text() == chr(151))
@@ -23,4 +23,4 @@ class LXMLExtensionTest(BaseGrabTestCase):
                     </head><body>test</body>"""
         self.server.add_response(Response(data=html))
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())

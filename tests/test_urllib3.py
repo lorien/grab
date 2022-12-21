@@ -37,4 +37,4 @@ class GrabApiTestCase(BaseGrabTestCase):
         )
         grab = build_grab()
         with self.assertRaises(GrabInvalidResponse):
-            grab.go(invalid_url)
+            grab.request(invalid_url)

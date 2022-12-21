@@ -17,7 +17,7 @@ GET is the default request method.
 .. code:: python
 
     g = Grab()
-    g.go('http://example.com/')
+    g.request('http://example.com/')
 
 If you need to pass arguments in through the query string, then you
 have to build the URL manually:
@@ -28,7 +28,7 @@ have to build the URL manually:
 
     g = Grab()
     qs = urlencode({'foo': 'bar', 'arg': 'val'})
-    g.go('http://dumpz.org/?%s' % qs)
+    g.request('http://dumpz.org/?%s' % qs)
 
 If your URL contains unsafe characters then you must escape them manually.
 
@@ -38,7 +38,7 @@ If your URL contains unsafe characters then you must escape them manually.
 
     g = Grab()
     url = u'https://ru.wikipedia.org/wiki/Россия'
-    g.go(quote(url.encode('utf-8')))
+    g.request(quote(url.encode('utf-8')))
 
 
 .. _grab_request_post:
@@ -52,7 +52,7 @@ Usually, you will want to use a dictionary:
 .. code:: python
 
     g = Grab()
-    g.go('http://example.com/', post={'foo': 'bar'})
+    g.request('http://example.com/', post={'foo': 'bar'})
 
 You can pass unicode strings and numbers in as values for the `post` dict, 
 they will be converted to byte strings automatically. If you want to specify a
@@ -62,7 +62,7 @@ encoding that will be used to convert unicode to byte string, then use
 .. code:: python
 
     g = Grab()
-    g.go('http://example.com/', post={'who': u'конь в пальто'},
+    g.request('http://example.com/', post={'who': u'конь в пальто'},
          encoding='cp1251')
 
 If the `post` option is a string then it is submitted as-is:
@@ -70,7 +70,7 @@ If the `post` option is a string then it is submitted as-is:
 .. code:: python
 
     g = Grab()
-    g.go('http://example.com/', post='raw data')
+    g.request('http://example.com/', post='raw data')
 
 
 If you want to pass multiple values with the same key use the list of tuples
@@ -79,7 +79,7 @@ version:
 .. code:: python
 
     g = Grab()
-    g.go('http://example.com/', post=[('key', 'val1'), ('key', 'val2')])
+    g.request('http://example.com/', post=[('key', 'val1'), ('key', 'val2')])
 
 By default, Grab will compose a POST request with 
 'application/x-www-form-urlencoded` encoding method. To enable 
@@ -88,7 +88,7 @@ By default, Grab will compose a POST request with
 .. code:: python
 
     g = Grab()
-    g.go('http://example.com/', multipart_post=[('key', 'val1'),
+    g.request('http://example.com/', multipart_post=[('key', 'val1'),
                                                 ('key', 'val2')])
 
 
@@ -97,7 +97,7 @@ To upload a file, use the `grab.upload.UploadFile` class:
 .. code:: python
 
     g = Grab()
-    g.go('http://example.com/',
+    g.request('http://example.com/',
          multipart_post={'foo': 'bar', 'file': UploadFile('/path/to/file')})
 
 .. _grab_request_put:
@@ -110,7 +110,7 @@ To make a PUT request use both the `post` and `method` arguments:
 .. code:: python
 
     g = Grab()
-    g.go('http://example.com/', post='raw data', method='put')
+    g.request('http://example.com/', post='raw data', method='put')
 
 
 .. _grab_request_other:
@@ -123,4 +123,4 @@ To make DELETE, OPTIONS and other HTTP requests, use the `method` option.
 .. code:: python
 
     g = Grab()
-    g.go('http://example.com/', method='options')
+    g.request('http://example.com/', method='options')

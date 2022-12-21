@@ -13,7 +13,7 @@ UploadFile example:
 
     g = Grab()
     g.setup(post={'image': UploadFile('/path/to/image.jpg')})
-    g.go('http://example.com/form.php')
+    g.request('http://example.com/form.php')
 
 
 UploadContent example:
@@ -24,7 +24,7 @@ UploadContent example:
 
     g = Grab()
     g.setup(post={'image': UploadContent('......', filename='image.jpg')})
-    g.go('http://example.com/form.php')
+    g.request('http://example.com/form.php')
 
 
 .. _grab_file_uploading_form:
@@ -41,7 +41,7 @@ form fields:
     from grab import Grab, UploadFile
 
     g = Grab()
-    g.go('http://example.com/form.php')
+    g.request('http://example.com/form.php')
     g.doc.set_input('image', UploadFile('/path/to/image.jpg'))
     g.doc.submit()
 

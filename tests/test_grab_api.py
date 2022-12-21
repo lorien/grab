@@ -18,11 +18,11 @@ class GrabApiTestCase(BaseGrabTestCase):
     def test_clone(self):
         grab = build_grab()
         self.server.add_response(Response(data=b"Moon"))
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertTrue(b"Moon" in grab.doc.body)
         self.server.add_response(Response(data=b"Foo"))
         grab2 = grab.clone(method="post", post="")
-        grab2.go(self.server.get_url())
+        grab2.request(self.server.get_url())
         self.assertTrue(b"Foo" in grab2.doc.body)
 
     def test_empty_clone(self):
@@ -32,7 +32,7 @@ class GrabApiTestCase(BaseGrabTestCase):
     def test_make_url_absolute(self):
         grab = build_grab()
         self.server.add_response(Response(data=b'<base href="http://foo/bar/">'))
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         absolute_url = grab.make_url_absolute("/foobar", resolve_base=True)
         self.assertEqual(absolute_url, "http://foo/foobar")
         grab = build_grab()
@@ -43,7 +43,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         grab = build_grab()
         grab.setup(post={"foo": "bar"})
 
-        self.assertRaises(GrabError, grab.go, url="Could-not-resolve-host-address")
+        self.assertRaises(GrabError, grab.request, url="Could-not-resolve-host-address")
         self.assertEqual(grab.config["post"], None)
         self.assertEqual(grab.config["multipart_post"], None)
         self.assertEqual(grab.config["method"], None)
@@ -69,7 +69,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         # To make request Grab processes config and build result headers
         # from `config['common_headers']` and `config['headers']
         # That merge should not change initial `config['common_headers']` value
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual(
             grab.config["common_headers"]["Accept"],
             ch_origin["Accept"],

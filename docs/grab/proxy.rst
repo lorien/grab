@@ -60,10 +60,10 @@ You can disable proxy rotation with :ref:`option_proxy_auto_change` option set t
     >>> logging.basicConfig(level=logging.DEBUG)
     >>> g = Grab()
     >>> g.proxylist = ProxyList.from_local_file("/web/proxy.txt", proxy_type="http")
-    >>> g.go('http://yandex.ru/')
+    >>> g.request('http://yandex.ru/')
     DEBUG:grab.network:[02] GET http://yandex.ru/ via 91.210.101.31:8080 proxy of type http with authorization
     <grab.response.Response object at 0x109d9f0>
-    >>> g.go('http://rambler.ru/')
+    >>> g.request('http://rambler.ru/')
     DEBUG:grab.network:[03] GET http://rambler.ru/ via 194.29.185.38:8080 proxy of type http with authorization
     <grab.response.Response object at 0x109d9f0>
 
@@ -74,14 +74,14 @@ Now let's see how Grab works when `proxy_auto_change` is False::
     >>> g = Grab()
     >>> g.proxylist = ProxyList.from_local_file("/web/proxy.txt", proxy_type="http")
     >>> g.setup(proxy_auto_change=False)
-    >>> g.go('http://ya.ru')
+    >>> g.request('http://ya.ru')
     DEBUG:grab.network:[04] GET http://ya.ru
     <grab.response.Response object at 0x109de50>
     >>> g.change_proxy()
-    >>> g.go('http://ya.ru')
+    >>> g.request('http://ya.ru')
     DEBUG:grab.network:[05] GET http://ya.ru via 62.122.73.30:8080 proxy of type http with authorization
     <grab.response.Response object at 0x109d9f0>
-    >>> g.go('http://ya.ru')
+    >>> g.request('http://ya.ru')
     DEBUG:grab.network:[06] GET http://ya.ru via 62.122.73.30:8080 proxy of type http with authorization
     <grab.response.Response object at 0x109d9f0>
 

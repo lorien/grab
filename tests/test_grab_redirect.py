@@ -66,7 +66,7 @@ class GrabRedirectTestCase(BaseGrabTestCase):
             )
         )
         grab = build_grab()
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual(self.server.request.path, "/")
         # The rstrip thing is just to fix this test for the moment
         # I can't tell what exactly happens inside grab :)
@@ -86,7 +86,7 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         self.server.add_response(Response())
         grab = build_grab()
         grab.setup(follow_refresh=True)
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual(self.server.request.path, "/foo")
         self.assertEqual(grab.doc.url, meta_url)
 
@@ -104,7 +104,7 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         self.server.add_response(Response())
         grab = build_grab()
         grab.setup(follow_refresh=True)
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertEqual(self.server.request.path, "/foo")
         self.assertEqual(grab.doc.url, meta_url)
 
@@ -116,7 +116,7 @@ class GrabRedirectTestCase(BaseGrabTestCase):
 
         grab = build_grab()
         grab.setup(redirect_limit=10, follow_refresh=True)
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertTrue(b"done" in grab.doc.body)
 
         self.server.add_response(
@@ -125,7 +125,7 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         )
         grab.setup(redirect_limit=5, follow_refresh=True)
         self.assertRaises(
-            GrabTooManyRedirectsError, lambda: grab.go(self.server.get_url())
+            GrabTooManyRedirectsError, lambda: grab.request(self.server.get_url())
         )
 
     def test_redirect_limit(self):
@@ -138,7 +138,7 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         grab.setup(redirect_limit=5)
 
         self.assertRaises(
-            GrabTooManyRedirectsError, lambda: grab.go(self.server.get_url())
+            GrabTooManyRedirectsError, lambda: grab.request(self.server.get_url())
         )
 
         self.server.add_response(
@@ -146,7 +146,7 @@ class GrabRedirectTestCase(BaseGrabTestCase):
             count=-1,
         )
         grab.setup(redirect_limit=20)
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         self.assertTrue(b"done" in grab.doc.body)
 
     def test_redirect_utf_location(self):
@@ -160,4 +160,4 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         self.server.add_response(Response(data=b"content-2"))
         grab = build_grab(follow_location=True)
         with self.assertRaises(GrabInvalidResponse):
-            grab.go(self.server.get_url())
+            grab.request(self.server.get_url())

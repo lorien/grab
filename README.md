@@ -96,7 +96,7 @@ following examples do not work anymore.
 
     g = Grab()
 
-    g.go('https://github.com/login')
+    g.request('https://github.com/login')
     g.doc.set_input('login', '****')
     g.doc.set_input('password', '****')
     g.doc.submit()
@@ -108,7 +108,7 @@ following examples do not work anymore.
     home_url = g.doc('//a[contains(@class, "header-nav-link name")]/@href').text()
     repo_url = home_url + '?tab=repositories'
 
-    g.go(repo_url)
+    g.request(repo_url)
 
     for elem in g.doc.select('//h3[@class="repo-list-name"]/a'):
         print('%s: %s' % (elem.text(),

@@ -16,7 +16,7 @@ class TestGrab(BaseGrabTestCase):
         self.server.add_response(
             Response(data=(b'<form><textarea name="text">the cat</textarea></form>'))
         )
-        grab.go(self.server.get_url())
+        grab.request(self.server.get_url())
         grab.doc.set_input("text", "foobar")
         data = pickle.dumps(grab, pickle.HIGHEST_PROTOCOL)
 
