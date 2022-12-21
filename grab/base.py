@@ -209,21 +209,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         return grab
 
-    def adopt(self, grab: Grab) -> None:
-        """Copy the state of another `Grab` instance.
-
-        WTF: this use case is needed for?
-        Use case: create backup of current state to the cloned instance and
-        then restore the state from it.
-        """
-        self.load_config(grab.config)
-
-        self.doc = grab.doc.copy(new_grab_config=self.config) if grab.doc else None
-
-        for key in self.clonable_attributes:
-            setattr(self, key, getattr(grab, key))
-        self.cookies = deepcopy(grab.cookies)
-
     def dump_config(self) -> dict[str, Any]:
         """Make clone of current config."""
         conf = cast(

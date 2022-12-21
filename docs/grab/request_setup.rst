@@ -75,11 +75,3 @@ If you need to copy a Grab object there is a more elegant way than using the
 
 `g2` gets the same state as `g1`. In particular, `g2` will have the same 
 cookies.  
-
-There is also `adopt`, which does the opposite of the `clone` method:
-
-.. code:: python
-
-    g2.adopt(g1)
-
-The `g2` instance receives the state of the `g1` instance.

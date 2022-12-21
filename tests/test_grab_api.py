@@ -28,21 +28,6 @@ class GrabApiTestCase(BaseGrabTestCase):
         grab = build_grab()
         grab.clone()
 
-    def test_adopt(self):
-        grab = build_grab()
-        self.server.add_response(Response(data=b"Moon"))
-        grab.go(self.server.get_url())
-        grab2 = build_grab()
-        self.assertEqual(grab2.config["url"], None)
-        grab2.adopt(grab)
-        self.assertTrue(b"Moon" in grab2.doc.body)
-        self.assertEqual(grab2.config["url"], self.server.get_url())
-
-    def test_empty_adopt(self):
-        grab = build_grab()
-        grab2 = build_grab()
-        grab2.adopt(grab)
-
     def test_default_content_for_fake_response(self):
         content = b"<strong>test</strong>"
         grab = build_grab(document_body=content)
