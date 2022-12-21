@@ -3,6 +3,7 @@ from copy import deepcopy
 from test_server import Response
 
 from grab import GrabError, GrabMisuseError
+from grab.document import Document
 from tests.util import BaseGrabTestCase, build_grab
 
 
@@ -28,11 +29,6 @@ class GrabApiTestCase(BaseGrabTestCase):
         grab = build_grab()
         grab.clone()
 
-    def test_default_content_for_fake_response(self):
-        content = b"<strong>test</strong>"
-        grab = build_grab(document_body=content)
-        self.assertEqual(grab.doc.body, content)
-
     def test_make_url_absolute(self):
         grab = build_grab()
         self.server.add_response(Response(data=b'<base href="http://foo/bar/">'))
@@ -52,18 +48,18 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertEqual(grab.config["multipart_post"], None)
         self.assertEqual(grab.config["method"], None)
 
-    def test_setup_document(self):
+    def test_document(self):
         data = b"""
         <h1>test</h1>
         """
-        grab = build_grab(data)
-        self.assertTrue(b"test" in grab.doc.body)
+        doc = Document(data)
+        self.assertTrue(b"test" in doc.body)
 
-    def test_setup_document_invalid_input(self):
+    def test_document_invalid_input(self):
         data = """
         <h1>test</h1>
         """
-        self.assertRaises(GrabMisuseError, build_grab, data)
+        self.assertRaises(GrabMisuseError, Document, data)
 
     def test_headers_affects_common_headers(self):
         grab = build_grab()

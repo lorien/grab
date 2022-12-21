@@ -50,8 +50,8 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
     def test_doc_tree_notags_document(self):
         data = b"test"
-        grab = build_grab(data)
-        self.assertEqual(grab.doc.select("//html").text(), "test")
+        doc = Document(data)
+        self.assertEqual(doc.select("//html").text(), "test")
 
     def test_github_html_processing(self):
         # This test is for osx and py3.5
@@ -71,11 +71,11 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         self.assertTrue("tools-for-open-source" in items[2])
 
     def test_explicit_custom_charset(self):
-        grab = build_grab(
+        doc = Document(
             "<html><head></head><body><h1>привет</h1></body></html".encode("cp1251"),
             encoding="cp1251",
         )
-        self.assertEqual("привет", grab.doc.select("//h1").text())
+        self.assertEqual("привет", doc.select("//h1").text())
 
     def test_json(self):
         self.server.add_response(Response(data=b'{"foo": "bar"}'))

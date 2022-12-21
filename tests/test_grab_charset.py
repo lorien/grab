@@ -1,6 +1,6 @@
 from test_server import Response
 
-from grab import Grab
+from grab.document import Document
 from tests.util import BaseGrabTestCase, build_grab
 
 
@@ -55,24 +55,23 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
         self.assertTrue(b"874" in grab.doc.body)
 
     def test_charset_html5(self):
-        grab = Grab()
-        grab.setup_document(b"<meta charset='cp1251'>")
-        self.assertEqual("windows-1251", grab.doc.encoding)
+        doc = Document(b"<meta charset='cp1251'>")
+        self.assertEqual("windows-1251", doc.encoding)
 
-        grab.setup_document(b"<meta charset='windows-1251'>")
-        self.assertEqual("windows-1251", grab.doc.encoding)
+        doc = Document(b"<meta charset='windows-1251'>")
+        self.assertEqual("windows-1251", doc.encoding)
 
-        grab.setup_document(b'<meta charset="windows-1252">')
-        self.assertEqual("windows-1252", grab.doc.encoding)
+        doc = Document(b'<meta charset="windows-1252">')
+        self.assertEqual("windows-1252", doc.encoding)
 
-        grab.setup_document(b"<meta charset=latin-1>")
-        self.assertEqual("latin-1", grab.doc.encoding)
+        doc = Document(b"<meta charset=latin-1>")
+        self.assertEqual("latin-1", doc.encoding)
 
-        grab.setup_document(b"<meta charset  =  'windows-1251'  >")
-        self.assertEqual("windows-1251", grab.doc.encoding)
+        doc = Document(b"<meta charset  =  'windows-1251'  >")
+        self.assertEqual("windows-1251", doc.encoding)
 
-        grab.setup_document(b'<meta charset  =  "windows-1252"   >')
-        self.assertEqual("windows-1252", grab.doc.encoding)
+        doc = Document(b'<meta charset  =  "windows-1252"   >')
+        self.assertEqual("windows-1252", doc.encoding)
 
-        grab.setup_document(b"<meta charset  =  latin-1  >")
-        self.assertEqual("latin-1", grab.doc.encoding)
+        doc = Document(b"<meta charset  =  latin-1  >")
+        self.assertEqual("latin-1", doc.encoding)

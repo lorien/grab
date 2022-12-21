@@ -3,6 +3,7 @@ from urllib.parse import parse_qsl
 from test_server import Response
 
 from grab import DataNotFound, GrabMisuseError
+from grab.document import Document
 from tests.util import BaseGrabTestCase, build_grab
 
 FORMS_HTML = b"""
@@ -76,45 +77,41 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
         self.server.reset()
 
         # Create fake grab instance with fake response
-        self.grab = build_grab()
-        self.grab.setup_document(FORMS_HTML)
+        self.doc = Document(FORMS_HTML)
 
     def test_choose_form1(self):
         """Test ``choose_form`` method."""
         # raise errors
-        self.assertRaises(DataNotFound, self.grab.doc.choose_form, 10)
-        self.assertRaises(DataNotFound, self.grab.doc.choose_form, id="bad_id")
-        self.assertRaises(DataNotFound, self.grab.doc.choose_form, id="fake_form")
-        self.assertRaises(GrabMisuseError, self.grab.doc.choose_form)
+        self.assertRaises(DataNotFound, self.doc.choose_form, 10)
+        self.assertRaises(DataNotFound, self.doc.choose_form, id="bad_id")
+        self.assertRaises(DataNotFound, self.doc.choose_form, id="fake_form")
+        self.assertRaises(GrabMisuseError, self.doc.choose_form)
 
         # check results
-        self.grab.doc.choose_form(0)
-        self.assertEqual("form", self.grab.doc.get_cached_form().tag)
-        self.assertEqual("search_form", self.grab.doc.get_cached_form().get("id"))
+        self.doc.choose_form(0)
+        self.assertEqual("form", self.doc.get_cached_form().tag)
+        self.assertEqual("search_form", self.doc.get_cached_form().get("id"))
 
     def test_choose_form2(self):
-        self.grab = build_grab()
-        self.grab.setup_document(FORMS_HTML)
+        self.doc = Document(FORMS_HTML)
 
-        self.grab.doc.choose_form(id="common_form")
-        self.assertEqual("form", self.grab.doc.get_cached_form().tag)
-        self.assertEqual("common_form", self.grab.doc.get_cached_form().get("id"))
+        self.doc.choose_form(id="common_form")
+        self.assertEqual("form", self.doc.get_cached_form().tag)
+        self.assertEqual("common_form", self.doc.get_cached_form().get("id"))
 
     def test_choose_form3(self):
-        self.grab = build_grab()
-        self.grab.setup_document(FORMS_HTML)
+        self.doc = Document(FORMS_HTML)
 
-        self.grab.doc.choose_form(name="dummy")
-        self.assertEqual("form", self.grab.doc.get_cached_form().tag)
-        self.assertEqual("dummy", self.grab.doc.get_cached_form().get("name"))
+        self.doc.choose_form(name="dummy")
+        self.assertEqual("form", self.doc.get_cached_form().tag)
+        self.assertEqual("dummy", self.doc.get_cached_form().get("name"))
 
     def test_choose_form4(self):
-        self.grab = build_grab()
-        self.grab.setup_document(FORMS_HTML)
+        self.doc = Document(FORMS_HTML)
 
-        self.grab.doc.choose_form(xpath='//form[contains(@action, "/dummy")]')
-        self.assertEqual("form", self.grab.doc.get_cached_form().tag)
-        self.assertEqual("dummy", self.grab.doc.get_cached_form().get("name"))
+        self.doc.choose_form(xpath='//form[contains(@action, "/dummy")]')
+        self.assertEqual("form", self.doc.get_cached_form().tag)
+        self.assertEqual("dummy", self.doc.get_cached_form().get("name"))
 
     def assert_equal_qs(self, qs1, qs2):
         args1 = set(parse_qsl(qs1))
@@ -216,7 +213,9 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
             <div><form action="" method="post"><input name="foo" type="text">
             <input name="bar" id="bar" type="text">
         """
-        grab = build_grab(html)
+        self.server.add_response(Response(data=html))
+        grab = build_grab()
+        grab.go(self.server.get_url())
         grab.doc.set_input_by_xpath('//input[re:test(@id, "^ba")]', "bar-value")
         grab.submit(make_request=False)
         self.assertEqual(
@@ -248,8 +247,8 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
                     value="2" checked="checked" />
             </form>
         """
-        grab = build_grab(html)
-        self.assertEqual({"foo"}, set(grab.doc.form_fields().keys()))
+        doc = Document(html)
+        self.assertEqual({"foo"}, set(doc.form_fields().keys()))
 
     def test_checkbox_checked_but_disabled(self):
         html = b"""
@@ -258,8 +257,8 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
                     value="1" checked="checked" disabled="disabled">
             </form>
         """
-        grab = build_grab(html)
-        self.assertTrue("foo" not in grab.doc.form_fields())
+        doc = Document(html)
+        self.assertTrue("foo" not in doc.form_fields())
 
     def test_checkbox_no_checked(self):
         html = b"""
@@ -270,8 +269,8 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
                     value="2">
             </form>
         """
-        grab = build_grab(html)
-        self.assertTrue("foo" not in grab.doc.form_fields())
+        doc = Document(html)
+        self.assertTrue("foo" not in doc.form_fields())
 
     def test_checkbox_one_checked(self):
         html = b"""
@@ -282,8 +281,8 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
                     value="2">
             </form>
         """
-        grab = build_grab(html)
-        self.assertEqual("1", grab.doc.form_fields()["foo"])
+        doc = Document(html)
+        self.assertEqual("1", doc.form_fields()["foo"])
 
     def test_checkbox_multi_checked(self):
         html = b"""
@@ -294,8 +293,8 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
                     value="2" checked="checked">
             </form>
         """
-        grab = build_grab(html)
-        self.assertEqual(["1", "2"], grab.doc.form_fields()["foo"])
+        doc = Document(html)
+        self.assertEqual(["1", "2"], doc.form_fields()["foo"])
 
     def test_select_disabled(self):
         html = b"""
@@ -305,8 +304,8 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
                 </select>
             </form>
         """
-        grab = build_grab(html)
-        self.assertTrue("foo" not in grab.doc.form_fields())
+        doc = Document(html)
+        self.assertTrue("foo" not in doc.form_fields())
 
     def test_select_not_multiple(self):
         html = b"""
@@ -316,8 +315,8 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
                 </select>
             </form>
         """
-        grab = build_grab(html)
-        self.assertEqual("1", grab.doc.form_fields()["foo"])
+        doc = Document(html)
+        self.assertEqual("1", doc.form_fields()["foo"])
 
     def test_select_multiple_no_options(self):
         html = b"""
@@ -326,8 +325,8 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
                 </select>
             </form>
         """
-        grab = build_grab(html)
-        self.assertTrue("foo" not in grab.doc.form_fields())
+        doc = Document(html)
+        self.assertTrue("foo" not in doc.form_fields())
 
     def test_select_multiple_one_selected(self):
         html = b"""
@@ -338,8 +337,8 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
                 </select>
             </form>
         """
-        grab = build_grab(html)
-        self.assertEqual("2", grab.doc.form_fields()["foo"])
+        doc = Document(html)
+        self.assertEqual("2", doc.form_fields()["foo"])
 
     def test_select_multiple_multi_selected(self):
         html = b"""
@@ -350,5 +349,5 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
                 </select>
             </form>
         """
-        grab = build_grab(html)
-        self.assertEqual(["1", "2"], grab.doc.form_fields()["foo"])
+        doc = Document(html)
+        self.assertEqual(["1", "2"], doc.form_fields()["foo"])

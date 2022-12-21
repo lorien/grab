@@ -36,7 +36,7 @@ from lxml.html import (
 from selection import SelectorList, XpathSelector
 
 from grab.cookie import CookieManager
-from grab.error import DataNotFound, GrabFeatureIsDeprecated, GrabMisuseError
+from grab.error import DataNotFound, GrabMisuseError
 from grab.types import NULL, GrabConfig
 from grab.util.html import find_refresh_url
 
@@ -59,6 +59,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     """Network response."""
 
     __slots__ = (
+        "document_type",
         "code",
         "head",
         "_bytes_body",
@@ -81,14 +82,13 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         "_lxml_form",
         "_file_fields",
         "from_cache",
-        "_grab_config",
     )
 
     def __init__(
         self,
-        *,
-        grab_config: None | GrabConfig = None,
         body: None | bytes = None,
+        *,
+        document_type: None | str = "html",
         head: None | bytes = None,
         headers: None | email.message.Message = None,
         encoding: None | str = None,
@@ -104,12 +104,11 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self._pyquery = None
         self._lxml_form = None
         self._file_fields: MutableMapping[str, Any] = {}
-        # Grab config
-        self._grab_config: GrabConfig = {}
-        if grab_config:
-            self.process_grab_config(grab_config)
         # Main attributes
+        self.document_type = document_type
         if body is not None:
+            if not isinstance(body, bytes):
+                raise GrabMisuseError("Document content must be bytes")
             self.set_body(body)
         self.code = code
         self.head = head
@@ -126,12 +125,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self.error_code = None
         self.error_msg = None
         self.from_cache = False
-
-    def process_grab_config(self, grab_config: Mapping[str, Any]) -> Any:
-        # Save some grab.config items required to
-        # process content of the document
-        for key in ["content_type"]:
-            self._grab_config[key] = grab_config[key]
 
     # WTF
     def __call__(self, query: str) -> SelectorList[_Element]:
@@ -155,17 +148,10 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             content_type_header=(
                 self.headers.get("Content-Type", None) if self.headers else None
             ),
-            markup="xml" if self._grab_config["content_type"] == "xml" else "html",
+            markup="xml" if self.document_type == "xml" else "html",
         )
 
-    def copy(self, new_grab_config: None | GrabConfig = None) -> Document:
-        """Clone the Response object."""
-        if new_grab_config.__class__.__name__ == "Grab":
-            raise GrabFeatureIsDeprecated(
-                "Method Document.copy does not accept Grab instance"
-                " as second parameter anymore. It accepts now"
-                " Grab.config instance."
-            )
+    def copy(self) -> Document:
         cj = CookieJar()
         for item in self.cookies.cookiejar:
             cj.set_cookie(item)
@@ -176,7 +162,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             url=self.url,
             headers=deepcopy(self.headers),
             encoding=self.encoding,
-            grab_config=self._grab_config,
+            document_type=self.document_type,
             cookies=cj,
         )
 
@@ -371,7 +357,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     @property
     def tree(self) -> _Element:
         """Return DOM tree of the document built with HTML DOM builder."""
-        if self._grab_config["content_type"] == "xml":
+        if self.document_type == "xml":
             return self.build_xml_tree()
         return self.build_html_tree()
 

@@ -1,5 +1,6 @@
 from test_server import Response
 
+from grab.document import Document
 from tests.util import BaseGrabTestCase, build_grab
 
 
@@ -27,11 +28,11 @@ class GrabXMLProcessingTestCase(BaseGrabTestCase):
         xml = (
             b'<?xml version="1.0" encoding="UTF-8"?>' b"<tree><leaf>text</leaf></tree>"
         )
-        grab = build_grab(document_body=xml)
-        self.assertTrue(grab.doc.text_search("text"))
-        self.assertEqual(grab.doc.select("//leaf").text(), "text")
+        doc = Document(xml)
+        self.assertTrue(doc.text_search("text"))
+        self.assertEqual(doc.select("//leaf").text(), "text")
 
         # Similar bugs
-        grab = build_grab(document_body=xml)
-        self.assertTrue(grab.doc.rex_search("text"))
-        self.assertEqual(grab.doc.select("//leaf").text(), "text")
+        doc = Document(xml)
+        self.assertTrue(doc.rex_search("text"))
+        self.assertEqual(doc.select("//leaf").text(), "text")

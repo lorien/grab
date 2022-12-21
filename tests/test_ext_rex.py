@@ -1,7 +1,8 @@
 import re
 
+from grab.document import Document
 from grab.error import DataNotFound
-from tests.util import BaseGrabTestCase, build_grab
+from tests.util import BaseGrabTestCase
 
 HTML = """
 <head>
@@ -39,38 +40,35 @@ class ExtensionRexTestCase(BaseGrabTestCase):
         self.server.reset()
 
         # Create fake grab instance with fake response
-        self.grab = build_grab()
-        self.grab.setup_document(HTML, encoding="cp1251")
+        self.doc = Document(HTML, encoding="cp1251")
 
     def test_rex(self):
         # Search unicode rex in unicode body - default case
         rex = re.compile("(фыва)", re.U)
-        self.assertEqual("фыва", self.grab.doc.rex_search(rex).group(1))
+        self.assertEqual("фыва", self.doc.rex_search(rex).group(1))
 
         # Search non-unicode rex in byte-string body
         rex = re.compile("(фыва)".encode("cp1251"))
-        self.assertEqual(
-            "фыва".encode("cp1251"), self.grab.doc.rex_search(rex).group(1)
-        )
+        self.assertEqual("фыва".encode("cp1251"), self.doc.rex_search(rex).group(1))
 
         # # Search for non-unicode rex in unicode body should fail
         pattern = "(фыва)".encode("utf-8")
         rex = re.compile(pattern)
-        self.assertRaises(DataNotFound, lambda: self.grab.doc.rex_search(rex))
+        self.assertRaises(DataNotFound, lambda: self.doc.rex_search(rex))
 
         # # Search for unicode rex in byte-string body should fail
         # updated: whatever it has mean 10 years ago,
         # it works in new grab which ignores byte argument
         rex = re.compile("фыва", re.U)
-        self.assertEqual("фыва", self.grab.doc.rex_search(rex).group(0))
+        self.assertEqual("фыва", self.doc.rex_search(rex).group(0))
 
         # # Search for unexesting fragment
         rex = re.compile("(фыва2)", re.U)
-        self.assertRaises(DataNotFound, lambda: self.grab.doc.rex_search(rex))
+        self.assertRaises(DataNotFound, lambda: self.doc.rex_search(rex))
 
     def test_assert_rex(self):
-        self.grab.doc.rex_assert(re.compile("фыва"))
-        self.grab.doc.rex_assert(re.compile("фыва".encode("cp1251")))
+        self.doc.rex_assert(re.compile("фыва"))
+        self.doc.rex_assert(re.compile("фыва".encode("cp1251")))
 
     def test_assert_rex_text(self):
-        self.assertEqual("ха", self.grab.doc.rex_text('<em id="fly-em">([^<]+)'))
+        self.assertEqual("ха", self.doc.rex_text('<em id="fly-em">([^<]+)'))

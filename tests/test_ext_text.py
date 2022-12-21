@@ -1,5 +1,6 @@
 from grab import DataNotFound
-from tests.util import BaseGrabTestCase, build_grab
+from grab.document import Document
+from tests.util import BaseGrabTestCase
 
 HTML = """
 <head>
@@ -37,23 +38,22 @@ class TextExtensionTest(BaseGrabTestCase):
         self.server.reset()
 
         # Create fake grab instance with fake response
-        self.grab = build_grab()
-        self.grab.setup_document(HTML, encoding="cp1251")
+        self.doc = Document(HTML, encoding="cp1251")
 
     def test_search(self):
-        self.assertTrue(self.grab.doc.text_search("фыва".encode("cp1251")))
-        self.assertTrue(self.grab.doc.text_search("фыва"))
-        self.assertFalse(self.grab.doc.text_search("фыва2"))
+        self.assertTrue(self.doc.text_search("фыва".encode("cp1251")))
+        self.assertTrue(self.doc.text_search("фыва"))
+        self.assertFalse(self.doc.text_search("фыва2"))
 
     def test_assert_substring(self):
-        self.grab.doc.text_assert("фыва")
-        self.grab.doc.text_assert("фыва".encode("cp1251"))
-        self.assertRaises(DataNotFound, self.grab.doc.text_assert, "фыва2")
+        self.doc.text_assert("фыва")
+        self.doc.text_assert("фыва".encode("cp1251"))
+        self.assertRaises(DataNotFound, self.doc.text_assert, "фыва2")
 
     def test_assert_substrings(self):
-        self.grab.doc.text_assert_any(("фыва",))
-        self.grab.doc.text_assert_any(("фывы нет", "фыва"))
-        self.grab.doc.text_assert_any(("фыва".encode("cp1251"), "где ты фыва?"))
+        self.doc.text_assert_any(("фыва",))
+        self.doc.text_assert_any(("фывы нет", "фыва"))
+        self.doc.text_assert_any(("фыва".encode("cp1251"), "где ты фыва?"))
         self.assertRaises(
-            DataNotFound, self.grab.doc.text_assert_any, ("фыва, вернись", "фыва-а-а-а")
+            DataNotFound, self.doc.text_assert_any, ("фыва, вернись", "фыва-а-а-а")
         )

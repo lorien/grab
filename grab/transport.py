@@ -387,7 +387,7 @@ class Urllib3Transport(BaseTransport):
                 hdr[new_key] = new_val
             jar = self.extract_cookiejar()  # self._response, self._request)
             return document_class(
-                grab_config=grab_config,
+                document_type=grab_config["document_type"],
                 head=head,
                 body=body,
                 code=self._response.status,

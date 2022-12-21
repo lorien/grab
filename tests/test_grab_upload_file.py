@@ -12,20 +12,26 @@ class TestUploadContent(BaseGrabTestCase):
 
     def prepare_form_grab(self):
         url = self.server.get_url()
-        html = (
-            '<form action="%s" method="post" enctype="multipart/form-data">'
-            '<input type="file" name="image">'
-            "</form>" % url
-        ).encode("ascii")
-        return build_grab(html, encoding="utf-8")
+        self.server.add_response(
+            Response(
+                data=(
+                    '<form action="%s" method="post" enctype="multipart/form-data">'
+                    '<input type="file" name="image">'
+                    "</form>" % url
+                ).encode("ascii")
+            )
+        )
+        grab = build_grab()
+        grab.go(self.server.get_url())
+        return grab
 
     # *******************
     # UploadContent Tests
     # *******************
 
     def test_upload_content_filename(self):
-        self.server.add_response(Response(), count=2)
         grab = self.prepare_form_grab()
+        self.server.add_response(Response(), count=2)
         data = b"foo"
         upload_data = UploadContent(data, filename="avatar.jpg")
         grab.doc.set_input("image", upload_data)
@@ -43,8 +49,8 @@ class TestUploadContent(BaseGrabTestCase):
         )
 
     def test_upload_content_random_filename(self):
-        self.server.add_response(Response(), count=2)
         grab = self.prepare_form_grab()
+        self.server.add_response(Response(), count=2)
         data = b"foo"
         upload_data = UploadContent(data)
         grab.doc.set_input("image", upload_data)
@@ -61,8 +67,8 @@ class TestUploadContent(BaseGrabTestCase):
         )
 
     def test_upload_content_content_type(self):
-        self.server.add_response(Response(), count=2)
         grab = self.prepare_form_grab()
+        self.server.add_response(Response(), count=2)
         data = b"foo"
         upload_data = UploadContent(data, content_type="application/grab")
         grab.doc.set_input("image", upload_data)
@@ -83,8 +89,8 @@ class TestUploadContent(BaseGrabTestCase):
 
     def test_upload_file(self):
         with temp_file() as file_path:
-            self.server.add_response(Response(), count=2)
             grab = self.prepare_form_grab()
+            self.server.add_response(Response(), count=2)
             data = b"foo"
             with open(file_path, "wb") as out:
                 out.write(data)
@@ -108,8 +114,8 @@ class TestUploadContent(BaseGrabTestCase):
 
     def test_upload_file_custom_filename(self):
         with temp_file() as file_path:
-            self.server.add_response(Response(), count=2)
             grab = self.prepare_form_grab()
+            self.server.add_response(Response(), count=2)
             data = b"foo"
             with open(file_path, "wb") as out:
                 out.write(data)
@@ -131,8 +137,8 @@ class TestUploadContent(BaseGrabTestCase):
 
     def test_upload_file_custom_content_type(self):
         with temp_file() as file_path:
-            self.server.add_response(Response(), count=2)
             grab = self.prepare_form_grab()
+            self.server.add_response(Response(), count=2)
             data = b"foo"
             with open(file_path, "wb") as out:
                 out.write(data)

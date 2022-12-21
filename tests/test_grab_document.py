@@ -1,7 +1,6 @@
 from test_server import Response
 
 from grab.document import normalize_pairs
-from grab.error import GrabFeatureIsDeprecated
 from tests.util import BaseGrabTestCase, build_grab
 
 
@@ -17,15 +16,6 @@ class GrabDocumentTestCase(BaseGrabTestCase):
 
         res2 = res1.copy()
         self.assertEqual("test", res2.select("//h1").text())
-
-    def test_document_copy_with_other_grab_deprecated(self):
-        grab = build_grab()
-        self.server.add_response(Response(data=b"<h1>test</h1>"))
-        res1 = grab.go(self.server.get_url())
-
-        grab2 = build_grab()
-        with self.assertRaises(GrabFeatureIsDeprecated):
-            res1.copy(grab2)
 
     def test_normalize_pairs_dict(self):
         self.assertEqual(

@@ -1,7 +1,6 @@
 """The core of grab package: the Grab class."""
 from __future__ import annotations
 
-import email.message
 import logging
 import threading
 import typing
@@ -64,7 +63,8 @@ def default_config() -> GrabConfig:
         "body_maxsize": None,
         "redirect_limit": 10,
         "encoding": None,
-        "content_type": "html",
+        # Not Clear Scope
+        "document_type": "html",
         # Session Properties
         "cookiefile": None,
         "reuse_cookies": True,
@@ -106,11 +106,9 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     def __init__(
         self,
-        document_body: None | bytes = None,
         transport: TransportParam = None,
         **kwargs: Any,
     ) -> None:
-        """Create Grab instance."""
         self.meta: dict[str, Any] = {}
         self._doc: None | Document = None
         self.config: GrabConfig = default_config()
@@ -118,17 +116,12 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.cookies = CookieManager()
         self.proxylist = ProxyList.from_lines_list([])
         self.exception: None | Exception = None
-
-        # makes pylint happy
         self.request_method: None | str = None
         self.transport_param: TransportParam = transport
         self.transport: None | BaseTransport = None
-
         self.reset()
         if kwargs:
             self.setup(**kwargs)
-        if document_body is not None:
-            self.setup_document(document_body, encoding=kwargs.get("encoding"))
 
     @property
     def doc(self) -> None | Document:
@@ -391,8 +384,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             self.config, document_class=self.document_class
         )
 
-        self.doc.process_grab_config(self.config)
-
         if self.config["reuse_cookies"]:
             self.cookies.update(self.doc.cookies)
 
@@ -407,37 +398,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.config["post"] = None
         self.config["multipart_post"] = None
         self.config["method"] = None
-
-    def setup_document(
-        self,
-        body: bytes,
-        *,
-        head: None | bytes = None,
-        headers: None | email.message.Message = None,
-        encoding: None | str = None,
-        code: None | int = None,
-        url: None | str = None,
-    ) -> None:
-        """Construct Document object with explicitly specified body contents.
-
-        The bytes body is required parameter. All other Document parameters are optional
-        and have simple default values.
-
-        Useful for testing and debugging.
-        """
-        self.reset()
-        if isinstance(body, str):
-            raise error.GrabMisuseError("Content must be bytes.")
-        doc = self.document_class(
-            grab_config=self.config,
-            body=body,
-            head=head or b"HTTP/1.1 200 OK\r\n\r\n",
-            headers=headers or email.message.Message(),
-            encoding=encoding,  # If None it will be autodetected
-            code=code or 200,
-            url=url or "",
-        )
-        self.doc = doc
 
     def change_proxy(self, random: bool = True) -> None:
         """Set random proxy from proxylist."""
