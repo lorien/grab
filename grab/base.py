@@ -285,26 +285,19 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     def log_request(self, extra: str = "") -> None:
         """Send request details to logging system."""
         thread_name = threading.current_thread().name.lower()
-        thread_name = "" if (thread_name == "mainthread") else "[%s] " % thread_name
-
-        if self.config["proxy"]:
-            if self.config["proxy_userpwd"]:
-                auth = " with authorization"
-            else:
-                auth = ""
-            proxy_info = " via %s proxy of type %s%s" % (
+        proxy_info = (
+            " via {} proxy of type {}{}".format(
                 self.config["proxy"],
                 self.config["proxy_type"],
-                auth,
+                " with auth" if self.config["proxy_userpwd"] else "",
             )
-        else:
-            proxy_info = ""
-        if extra:
-            extra = "[%s] " % extra
+            if self.config["proxy"]
+            else ""
+        )
         logger_network.debug(
             "%s%s%s %s%s",
-            thread_name,
-            extra,
+            "" if (thread_name == "mainthread") else "[{}] ".format(thread_name),
+            "[{}]".format(extra) if extra else "",
             self.request_method or "GET",
             self.config["url"],
             proxy_info,
