@@ -30,46 +30,23 @@ You can always see which proxy is used at the moment in `g.config['proxy']`::
 Proxy List Support
 ------------------
 
-Grab supports working with a list of multiple proxies. Use the `g.proxylist`
-attribute to get access to the proxy manager. By default, the proxy manager is created and initialized with an empty proxy list::
+Grab supports a work with a list of proxy servers. You need to manually create instance of ProxyList class from "proxylist" package (it
+is installed along Grab) and assign it to `g.proxylist` attribute. When you create ProxyList instance do not forget to specify the default
+proxy type ("socks5" or "http"), if proxy list does not provide information about proxy the Grab raises runtime error.
 
+Loading proxy list from local file:
+
+    >>> from proxylist import Proxylist
     >>> g = Grab()
-    >>> g.proxylist
-    <grab.proxy.ProxyList object at 0x2e15b10>
-    >>> g.proxylist.proxy_list
-    []
+    >>> g.proxylist = ProxyList.from_local_file("var/proxy.txt", proxy_type="socks5")
 
+Loading proxy list from network:
 
-Proxy List Source
------------------
-
-You need to setup the proxy list manager with details of the source that
-manager will load proxies from. Using the `g.proxylist.set_source` method, the first
-positional argument defines the type of source. Currently, two types are supported: 
-"file" and "remote".
-
-Example of loading proxies from local file::
-
+    >>> from proxylist import Proxylist
     >>> g = Grab()
-    >>> g.proxylist.set_source('file', location='/web/proxy.txt')
-    <grab.proxy.ProxyList object at 0x2e15b10>
-    >>> g.proxylist.proxy_list
-    >>> g.proxylist.set_source('file', location='/web/proxy.txt')
-    >>> g.proxylist.get_next()
-    >>> g.proxylist.get_next_proxy()
-    <grab.proxy.Proxy object at 0x2d7c610>
-    >>> g.proxylist.get_next_proxy().server
-    'example.com'
-    >>> g.proxylist.get_next_proxy().address
-    'example.com:8080'
-    >>> len(g.proxylist.proxy_list)
-    1000
+    >>> g.proxylist = ProxyList.from_network_file("https://example.com/proxy.txt", proxy_type="socks5")
 
-
-And here is how to load proxies from the web::
-
-    >>> g = Grab()
-    >>> g.proxylist.set_source('remote', url='http://example.com/proxy.txt')
+For more information about ProxyList class please refer to https://proxylist.readthedocs.io
 
 
 Automatic Proxy Rotation
@@ -82,7 +59,7 @@ You can disable proxy rotation with :ref:`option_proxy_auto_change` option set t
     >>> import logging
     >>> logging.basicConfig(level=logging.DEBUG)
     >>> g = Grab()
-    >>> g.proxylist.set_source('file', location='/web/proxy.txt')
+    >>> g.proxylist = ProxyList.from_local_file("/web/proxy.txt", proxy_type="http")
     >>> g.go('http://yandex.ru/')
     DEBUG:grab.network:[02] GET http://yandex.ru/ via 91.210.101.31:8080 proxy of type http with authorization
     <grab.response.Response object at 0x109d9f0>
@@ -95,7 +72,7 @@ Now let's see how Grab works when `proxy_auto_change` is False::
     >>> from grab import Grab
     >>> import logging
     >>> g = Grab()
-    >>> g.proxylist.set_source('file', location='/web/proxy.txt')
+    >>> g.proxylist = ProxyList.from_local_file("/web/proxy.txt", proxy_type="http")
     >>> g.setup(proxy_auto_change=False)
     >>> g.go('http://ya.ru')
     DEBUG:grab.network:[04] GET http://ya.ru
@@ -112,6 +89,6 @@ Now let's see how Grab works when `proxy_auto_change` is False::
 Getting Proxy From Proxy List
 -----------------------------
 
-Each time you call `g.proxylist.get_next_proxy`, you get the next proxy from the proxy list.
+Each time you call `g.proxylist.get_next_server()`, you get the next proxy from the proxy list.
 When you receive the last proxy in the list, you'll continue receiving proxies from the beginning of the list.
-You can also use `g.proxylist.get_random_proxy` to pick a random proxy from the proxy list.
+You can also use `g.proxylist.get_random_server()` to pick a random proxy from the proxy list.

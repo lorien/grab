@@ -18,11 +18,13 @@ from secrets import SystemRandom
 from typing import Any, cast
 from urllib.parse import urljoin
 
+from proxylist import ProxyList
+from proxylist.parser import parse_proxy_line
+
 from grab import error
 from grab.base_transport import BaseTransport
 from grab.cookie import CookieManager
 from grab.document import Document
-from grab.proxylist import ProxyList, parse_proxy_line
 from grab.types import GrabConfig, TransportParam
 from grab.util.encoding import make_bytes
 from grab.util.html import find_base_url
@@ -185,7 +187,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.config: GrabConfig = default_config()
         self.config["common_headers"] = self.common_headers()
         self.cookies = CookieManager()
-        self.proxylist = ProxyList()
+        self.proxylist = ProxyList.from_lines_list([])
         self.exception: None | Exception = None
 
         # makes pylint happy
@@ -590,9 +592,13 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         """Set random proxy from proxylist."""
         if self.proxylist.size():
             if random:
-                proxy = self.proxylist.get_random_proxy()
+                proxy = self.proxylist.get_random_server()
             else:
-                proxy = self.proxylist.get_next_proxy()
+                proxy = self.proxylist.get_next_server()
+            if proxy.proxy_type is None:
+                raise error.GrabMisuseError(
+                    "Could not use proxy without defined proxy type"
+                )
             self.setup(
                 proxy=proxy.get_address(),
                 proxy_userpwd=proxy.get_userpwd(),
@@ -636,8 +642,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.cookies.clear()
 
     def setup_with_proxyline(self, line: str, proxy_type: str = "http") -> None:
-        # TODO: remove from base class
-        # maybe to proxylist?
         host, port, user, pwd = parse_proxy_line(line)
         server_port = "%s:%s" % (host, port)
         self.setup(proxy=server_port, proxy_type=proxy_type)

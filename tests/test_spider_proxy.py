@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from proxylist import ProxyServer
+from proxylist.base import BaseProxySource
 from test_server import Response, TestServer
 
 from grab import Grab
-from grab.proxylist import BaseProxySource, Proxy
 from grab.spider import Spider, Task
 from tests.util import ADDRESS, BaseGrabTestCase, build_spider, temp_file
 
@@ -146,9 +147,9 @@ class TestSpiderProxyCase(BaseGrabTestCase):
                 )
 
         class CustomProxySource(BaseProxySource):
-            def load(self):
+            def get_servers_list(self):
                 return [
-                    Proxy(ADDRESS, proxy_port, None, None, "http"),
+                    ProxyServer(ADDRESS, proxy_port, None, None, "http"),
                 ]
 
             def load_raw_data(self):

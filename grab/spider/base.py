@@ -13,18 +13,20 @@ from types import TracebackType
 from typing import Any, Literal, cast
 
 from procstat import Stat
+from proxylist import ProxyList, ProxyServer
+from proxylist.base import BaseProxySource
 
 from grab.base import Grab
 from grab.error import (
     GrabFeatureIsDeprecated,
     GrabInvalidResponse,
     GrabInvalidUrl,
+    GrabMisuseError,
     GrabNetworkError,
     GrabTooManyRedirectsError,
     OriginalExceptionGrabError,
     ResponseNotValid,
 )
-from grab.proxylist import BaseProxySource, Proxy, ProxyList
 from grab.spider.error import FatalError, NoTaskHandler, SpiderError, SpiderMisuseError
 from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.queue_backend.memory import MemoryTaskQueue
@@ -135,7 +137,7 @@ class Spider:
         self.work_allowed = True
         self.proxylist_enabled: None | bool = None
         self.proxylist: None | ProxyList = None
-        self.proxy: None | Proxy = None
+        self.proxy: None | ProxyServer = None
         self.proxy_auto_change = False
         self.parser_pool_size = parser_pool_size
         assert network_service is None or isinstance(
@@ -248,14 +250,17 @@ class Spider:
             - ip:port:login:password
 
         """
-        self.proxylist = ProxyList()
         if isinstance(source, BaseProxySource):
-            self.proxylist.set_source(source)
+            self.proxylist = ProxyList(source)
         elif isinstance(source, str):
             if source_type == "text_file":
-                self.proxylist.load_file(source, proxy_type=proxy_type)
+                self.proxylist = ProxyList.from_local_file(
+                    source, proxy_type=proxy_type
+                )
             elif source_type == "url":
-                self.proxylist.load_url(source, proxy_type=proxy_type)
+                self.proxylist = ProxyList.from_network_file(
+                    source, proxy_type=proxy_type
+                )
             else:
                 raise SpiderMisuseError(
                     "Method `load_proxylist` received "
@@ -270,7 +275,9 @@ class Spider:
         self.proxylist_enabled = True
         self.proxy = None
         if not auto_change and auto_init:
-            self.proxy = self.proxylist.get_random_proxy()
+            self.proxy = self.proxylist.get_random_server()
+            if not self.proxy.proxy_type:
+                raise GrabMisuseError("Could not use proxy without defined proxy type")
         self.proxy_auto_change = auto_change
 
     def render_stats(self) -> str:
@@ -480,7 +487,11 @@ class Spider:
 
     def change_active_proxy(self, task: Task, grab: Grab) -> None:
         # pylint: disable=unused-argument
-        self.proxy = cast(ProxyList, self.proxylist).get_random_proxy()
+        self.proxy = cast(ProxyList, self.proxylist).get_random_server()
+        if not self.proxy.proxy_type:
+            raise SpiderMisuseError(
+                'Value of priority_mode option should be "random" or "const"'
+            )
 
     def get_task_queue(self) -> BaseTaskQueue:
         # this method is expected to be called
