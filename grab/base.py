@@ -17,6 +17,7 @@ from urllib.parse import urljoin
 
 from proxylist import ProxyList
 from proxylist.parser import parse_proxy_line
+from user_agent import generate_user_agent
 
 from grab import error
 from grab.base_transport import BaseTransport
@@ -68,7 +69,6 @@ def default_config() -> GrabConfig:
         "post": None,
         "multipart_post": None,
         "headers": {},
-        "user_agent": None,
         "cookies": {},
         "cookiefile": None,
         "timeout": 15,
@@ -522,6 +522,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             "Accept-Charset": "utf-8,windows-1251;q=0.7,*;q=0.%d"
             % system_random.randint(5, 7),
             "Keep-Alive": "300",
+            "User-Agent": generate_user_agent(),
         }
 
     def make_url_absolute(self, url: str, resolve_base: bool = False) -> str:

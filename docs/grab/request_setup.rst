@@ -8,8 +8,7 @@ object and configure it. You can do both things at the same time:
 
 .. code:: python
 
-    g = Grab(url='http://example.com/', method='head', timeout=10,
-             user_agent='grab')
+    g = Grab(url='http://example.com/', method='head', timeout=10)
     g.request()
 
 Or you can build the Grab object with some initial settings and configure it 
@@ -17,7 +16,7 @@ later:
 
 .. code:: python
 
-    g = Grab(timeout=10, user_agent='grab')
+    g = Grab(timeout=10)
     g.setup(url='http://example.com', method='head')
     g.request()
 
@@ -27,9 +26,9 @@ Also you can pass settings as parameters to `request` or `go`:
 
     g = Grab(timeout=10)
     g.setup(method='head')
-    g.request(url='http://example.com', user_agent='grab')
+    g.request(url='http://example.com')
     # OR
-    g.go('http://example.com', user_agent='grab')
+    g.go('http://example.com')
 
 `request` and `go` are almost same except for one small thing. You do not
 need to specify the explicit name of the first argument with `go`. The first

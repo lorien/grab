@@ -80,21 +80,6 @@ Redirects follow the "Location" header in 301/302 network responses, and
 also follow the URL specified in meta refresh tags.
 
 
-HTTP Options
-------------
-
-.. _option_user_agent:
-
-user_agent
-^^^^^^^^^^
-
-:Type: string
-:Default: see below
-
-Sets the content of the "User-Agent" HTTP-header. By default, Grab randomly chooses a user agent
-from the list of real user agents that is built into Grab itself.
-
-
 .. _option_method:
 
 method

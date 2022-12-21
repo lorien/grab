@@ -22,7 +22,6 @@ from urllib3.filepost import encode_multipart_formdata
 from urllib3.response import HTTPResponse as Urllib3HTTPResponse
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
-from user_agent import generate_user_agent
 
 from grab import error
 from grab.cookie import CookieManager, MockRequest, MockResponse
@@ -212,10 +211,6 @@ class Urllib3Transport(BaseTransport):
         req_proxy, req_proxy_userpwd, req_proxy_type = self.process_proxy_config(
             grab_config
         )
-        # User-Agent
-        if grab_config["user_agent"] is None:
-            grab_config["user_agent"] = generate_user_agent()
-        extra_headers["User-Agent"] = cast(str, grab_config["user_agent"])
         # Headers
         extra_headers.update(grab_config["common_headers"])
         if grab_config["headers"]:

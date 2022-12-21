@@ -26,10 +26,3 @@ If you need to change one of these headers, you can override its value with the
 :ref:`option_headers` option. You can also subclass the Grab class and define
 your own `common_headers` method to completely override the logic of
 generating these extra headers.
-
-User-Agent header
------------------
-
-By default, for each request Grab randomly chooses one user agent from a
-builtin list of real user agents. You can specify the exact User-Agent value with
-the :ref:`option_user_agent` option.

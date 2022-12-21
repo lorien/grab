@@ -23,7 +23,7 @@ The urllib3 uses native python sockets that could be patched by `gevent.monkey.p
 
 
     def worker():
-        g = Grab(user_agent='Medved', transport='urllib3')
+        g = Grab(transport='urllib3')
         # Request the document that is served with 1 second delay
         g.go('http://httpbin.org/delay/1')
         return g.doc.json['headers']['User-Agent']

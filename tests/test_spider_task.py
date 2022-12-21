@@ -93,7 +93,7 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
 
         grab = Grab()
         grab.setup(url=self.server.get_url())
-        grab.setup(user_agent="Foo")
+        grab.setup(headers={"User-Agent": "Foo"})
 
         task = Task("baz", grab=grab)
         bot.add_task(task.clone())

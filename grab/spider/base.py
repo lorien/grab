@@ -99,8 +99,6 @@ class Spider:
             are scheduled manually in the spider business logic
         * priority_mode - could be "random" or "const"
         * meta - arbitrary user data
-        * retry_rebuild_user_agent - generate new random user-agent for each
-            network request which is performed again due to network error
         """
         self.fatal_error_queue: Queue[FatalErrorQueueItem] = Queue()
         self._started: None | float = None
