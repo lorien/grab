@@ -32,6 +32,4 @@ User-Agent header
 
 By default, for each request Grab randomly chooses one user agent from a
 builtin list of real user agents. You can specify the exact User-Agent value with
-the :ref:`option_user_agent` option. If you need to randomly choose user agents
-from your own list of user agents, then you can put your list into a text file
-and pass its location as :ref:`option_user_agent_file`.
+the :ref:`option_user_agent` option.

@@ -95,18 +95,6 @@ Sets the content of the "User-Agent" HTTP-header. By default, Grab randomly choo
 from the list of real user agents that is built into Grab itself.
 
 
-.. _option_user_agent_file:
-
-user_agent_file
-^^^^^^^^^^^^^^^
-
-:Type: string
-:Default: None
-
-Path to the text file with User-Agent strings. If this option is specified, then
-Grab randomly chooses one line from that file.
-
-
 .. _option_method:
 
 method
@@ -259,18 +247,6 @@ If Grab should change the proxy before every network request.
 
 Response Processing Options
 ---------------------------
-
-.. _option_encoding:
-
-encoding
-^^^^^^^^
-
-:Type: string
-:Default: "gzip"
-
-List of methods that the remote server could use to compress the content of its response. The default value of this option is "gzip". To disable all
-compression, pass the empty string to this option.
-
 
 .. _option_document_charset:
 

@@ -1,6 +1,6 @@
 from test_server import Response
 
-from tests.util import BaseGrabTestCase, build_grab, temp_file
+from tests.util import BaseGrabTestCase, build_grab
 
 
 class GrabSimpleTestCase(BaseGrabTestCase):
@@ -47,30 +47,3 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         grab.setup(user_agent="foo")
         grab.go(self.server.get_url())
         self.assertEqual(self.server.request.headers.get("user-agent"), "foo")
-
-        with temp_file() as ua_file:
-            # user agent from file should be loaded
-            with open(ua_file, "w", encoding="utf-8") as out:
-                out.write("GOD")
-            grab.setup(user_agent=None, user_agent_file=ua_file)
-            grab.go(self.server.get_url())
-            self.assertEqual(self.server.request.headers.get("user-agent"), "GOD")
-
-        with temp_file() as ua_file:
-            # random user agent from file should be loaded
-            with open(ua_file, "w", encoding="utf-8") as out:
-                out.write("GOD1\nGOD2")
-            grab.setup(user_agent=None, user_agent_file=ua_file)
-            grab.go(self.server.get_url())
-            self.assertTrue(
-                self.server.request.headers.get("user-agent") in {"GOD1", "GOD2"}
-            )
-            agent = grab.config["user_agent"]
-
-        # User-agent should not change
-        grab.go(self.server.get_url())
-        self.assertEqual(self.server.request.headers.get("user-agent"), agent)
-
-        # User-agent should not change
-        grab.go(self.server.get_url())
-        self.assertEqual(self.server.request.headers.get("user-agent"), agent)

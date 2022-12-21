@@ -1,7 +1,4 @@
 """The core of grab package: the Grab class."""
-# Copyright: 2011, Grigoriy Petukhov
-# Author: Grigoriy Petukhov (http://lorien.name)
-# License: BSD
 from __future__ import annotations
 
 import email.message
@@ -62,6 +59,7 @@ def copy_config(
 
 def default_config() -> GrabConfig:
     return {
+        # Request Properties
         "url": None,
         "proxy": None,
         "proxy_type": None,
@@ -70,23 +68,21 @@ def default_config() -> GrabConfig:
         "post": None,
         "multipart_post": None,
         "headers": {},
-        "common_headers": {},
         "user_agent": None,
-        "user_agent_file": None,
         "cookies": {},
-        "reuse_cookies": True,
         "cookiefile": None,
         "timeout": 15,
         "connect_timeout": 3,
         "body_maxsize": None,
-        "encoding": "gzip",
-        "follow_refresh": False,
-        "follow_location": True,
         "redirect_limit": 10,
         "charset": "utf-8",
         "document_charset": None,
         "content_type": "html",
-        # non request
+        # Session Properties
+        "reuse_cookies": True,
+        "common_headers": {},
+        "follow_refresh": False,
+        "follow_location": True,
         "proxy_auto_change": True,
         "state": {},
     }

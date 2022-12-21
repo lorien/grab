@@ -1,11 +1,7 @@
-# Copyright: 2015, Grigoriy Petukhov
-# Author: Grigoriy Petukhov (http://getdata.pro)
-# License: MIT
 from __future__ import annotations
 
 import email.message
 import logging
-import secrets
 import ssl
 import time
 import urllib.request
@@ -218,11 +214,7 @@ class Urllib3Transport(BaseTransport):
         )
         # User-Agent
         if grab_config["user_agent"] is None:
-            if grab_config["user_agent_file"] is not None:
-                with open(grab_config["user_agent_file"], encoding="utf-8") as inp:
-                    grab_config["user_agent"] = secrets.choice(inp.read().splitlines())
-            else:
-                grab_config["user_agent"] = generate_user_agent()
+            grab_config["user_agent"] = generate_user_agent()
         extra_headers["User-Agent"] = cast(str, grab_config["user_agent"])
         # Headers
         extra_headers.update(grab_config["common_headers"])

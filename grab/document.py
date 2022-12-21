@@ -1,6 +1,3 @@
-# Copyright: 2013, Grigoriy Petukhov
-# Author: Grigoriy Petukhov (http://lorien.name)
-# License: MIT
 # pylint: disable=too-many-lines
 """The Document class is the result of network request made with Grab instance."""
 from __future__ import annotations
