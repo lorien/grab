@@ -1,3 +1,5 @@
+from pprint import pprint  # pylint: disable=unused-import
+
 from test_server import Response
 
 from grab import Grab, GrabTimeoutError
@@ -118,4 +120,4 @@ class SpiderErrorTestCase(BaseGrabTestCase):
 
         bot = build_spider(SimpleSpider)
         bot.run()
-        self.assertTrue("error:read-timeout-error" in bot.stat.counters)
+        self.assertTrue("error:ReadTimeoutError" in bot.stat.counters)

@@ -29,7 +29,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.run()
 
         self.assertEqual(1, len(bot.runtime_events["network-count-rejected"]))
-        self.assertTrue("error:too-many-redirects" in bot.stat.counters)
+        self.assertTrue("error:GrabTooManyRedirectsError" in bot.stat.counters)
 
     def test_redirect_with_invalid_byte(self):
         server = self.server
@@ -57,7 +57,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         self.assertEqual(1, len(bot.runtime_events["network-count-rejected"]))
         self.assertTrue(
             # bot.stat.counters["error:new-connection-error"] == 5
-            bot.stat.counters["error:location-parse-error"]
+            bot.stat.counters["error:LocationParseError"]
             # or bot.stat.counters["error:grab-could-not-resolve-host-error"] == 5
             # or bot.stat.counters["error:couldnt-resolve-host"] == 5
         )

@@ -35,7 +35,6 @@ from grab.spider.service.network import BaseNetworkService, NetworkServiceThread
 from grab.spider.task import Task
 from grab.types import GrabConfig
 from grab.util.metrics import format_traffic_value
-from grab.util.misc import camel_case_to_underscore
 
 from .interface import FatalErrorQueueItem
 from .service.network import NetworkResult
@@ -580,7 +579,17 @@ class Spider:
         logger.debug("Work done")
 
     def log_failed_network_result(self, res: NetworkResult) -> None:
-        msg = ("http-%s" % res["grab"].doc.code) if res["ok"] else res["error_abbr"]
+        orig_exc = (
+            res["exc"].original_exc
+            if isinstance(res["exc"], OriginalExceptionGrabError)
+            else res["exc"]
+        )
+        msg = (
+            ("http-%s" % res["grab"].doc.code)
+            if res["ok"]
+            else orig_exc.__class__.__name__
+        )
+
         self.stat.inc("error:%s" % msg)
 
     def log_rejected_task(self, task: Task, reason: str) -> None:
@@ -622,7 +631,7 @@ class Spider:
         * ResponseNotValid-based exception
         * Arbitrary exception
         * Network response:
-            {ok, ecode, emsg, error_abbr, exc, grab, grab_config_backup}
+            {ok, ecode, emsg, exc, grab, grab_config_backup}
 
         Exception can come only from parser_service and it always has
         meta {"from": "parser", "exc_info": <...>}
@@ -690,13 +699,11 @@ class Spider:
             self.stat.inc("spider:request-network")
             self.stat.inc("spider:task-%s-network" % task.name)
 
-            # self.freelist.pop()
             try:
                 result: dict[str, Any] = {
                     "ok": True,
                     "ecode": None,
                     "emsg": None,
-                    "error_abbr": None,
                     "grab": grab,
                     "grab_config_backup": (grab_config_backup),
                     "task": task,
@@ -710,47 +717,15 @@ class Spider:
                     GrabInvalidResponse,
                     GrabTooManyRedirectsError,
                 ) as ex:
-                    is_redir_err = isinstance(ex, GrabTooManyRedirectsError)
-                    orig_exc_name = (
-                        ex.original_exc.__class__.__name__
-                        if hasattr(ex, "original_exc")
-                        else None
-                    )
-                    # UnicodeError: see #323
-                    ex_cls = (
-                        ex
-                        if (
-                            not isinstance(ex, OriginalExceptionGrabError)
-                            or isinstance(ex, GrabInvalidUrl)
-                            or orig_exc_name == "error"
-                            or orig_exc_name == "UnicodeError"
-                        )
-                        else cast(OriginalExceptionGrabError, ex).original_exc
-                    )
-                    result.update(
-                        {
-                            "ok": False,
-                            "exc": ex,
-                            "error_abbr": (
-                                "too-many-redirects"
-                                if is_redir_err
-                                else self.make_class_abbr(ex_cls.__class__.__name__)
-                            ),
-                        }
-                    )
+                    result.update({"ok": False, "exc": ex})
                 self.task_dispatcher.input_queue.put((result, task, None))
             finally:
                 pass
-                # self.freelist.append(1)
         else:
             self.log_rejected_task(task, reason)
             handler = self.get_fallback_handler(task)
             if handler:
                 handler(task)
-
-    def make_class_abbr(self, name: str) -> str:
-        val = camel_case_to_underscore(name)
-        return val.replace("_", "-")
 
 
 # pylint: enable=too-many-instance-attributes, too-many-public-methods
