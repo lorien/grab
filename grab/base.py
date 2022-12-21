@@ -15,7 +15,6 @@ from typing import Any, cast
 from urllib.parse import urljoin
 
 from proxylist import ProxyList
-from proxylist.parser import parse_proxy_line
 from user_agent import generate_user_agent
 
 from grab import error
@@ -481,10 +480,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         else:
             logger.debug("Proxy list is empty")
 
-    #
-    # Private methods
-    #
-
     @classmethod
     def common_headers(cls) -> dict[str, str]:
         """Build headers which sends typical browser."""
@@ -515,14 +510,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         """Clear all remembered cookies."""
         self.config["cookies"] = {}
         self.cookies.clear()
-
-    def setup_with_proxyline(self, line: str, proxy_type: str = "http") -> None:
-        host, port, user, pwd = parse_proxy_line(line)
-        server_port = "%s:%s" % (host, port)
-        self.setup(proxy=server_port, proxy_type=proxy_type)
-        if user:
-            userpwd = "%s:%s" % (user, pwd)
-            self.setup(proxy_userpwd=userpwd)
 
     def __getstate__(self) -> dict[str, Any]:
         """Reset cached lxml objects which could not be pickled."""
