@@ -42,7 +42,6 @@ from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabFeatureIsDeprecated, GrabMisuseError
 from grab.types import NULL, GrabConfig
 from grab.util.html import find_refresh_url
-from grab.util.warning import warn
 
 THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")

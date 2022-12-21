@@ -1,21 +1,24 @@
 """Custom exception which Grab instance could generate.
 
-Taxonomy:
+Exceptions
+----------
+- GrabError
+    - GrabNetworkError
+        - GrabTimeoutError
+        - GrabConnectionError
+        - GrabCouldNotResolveHostError
+    - GrabAuthError
+    - GrabMisuseError
+    - GrabTooManyRedirectsError
+    - GrabInvalidUrl
+    - GrabInternalError
+    - GrabFeatureIsDeprecated
+    - ResponseNotValid
+- DataNotFound == IndexError
 
-Exception
-|-> GrabError
-    |-> GrabNetworkError
-        |-> GrabTimeoutError
-        |-> GrabConnectionError
-        |-> GrabCouldNotResolveHostError
-    |-> GrabAuthError
-    |-> GrabMisuseError
-    |-> GrabTooManyRedirectsError
-    |-> GrabInvalidUrl
-    |-> GrabInternalError
-    |-> GrabFeatureIsDeprecated
-    |-> ResponseNotValid
-|-> DataNotFound == IndexError
+Warnings
+--------
+- GrabDeprecationWarning
 """
 from typing import Any
 
@@ -95,4 +98,8 @@ DataNotFound = IndexError
 
 
 class ResponseNotValid(GrabError):
+    pass
+
+
+class GrabDeprecationWarning(UserWarning):
     pass
