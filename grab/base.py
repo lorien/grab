@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import email.message
-import itertools
 import logging
 import threading
 import typing
@@ -27,15 +26,6 @@ from grab.types import GrabConfig, TransportParam
 from grab.util.html import find_base_url
 
 __all__ = ("Grab",)
-# This counter will used in enumerating network queries.
-# Its value will be displayed in logging messages and also used
-# in names of dumps
-# I use mutable module variable to allow different
-# instances of Grab to maintain single counter
-# This could be helpful in debugging when your script
-# creates multiple Grab instances - in case of shared counter
-# grab instances do not overwrite dump logs
-REQUEST_COUNTER = itertools.count(1)
 MUTABLE_CONFIG_KEYS = ["post", "multipart_post", "headers", "cookies"]
 TRANSPORT_CACHE: MutableMapping[tuple[str, str], type[BaseTransport]] = {}
 TRANSPORT_ALIAS = {
@@ -94,7 +84,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         "transport",
         "transport_param",
         "request_method",
-        "request_counter",
         "__weakref__",
         "cookies",
         "meta",
@@ -132,7 +121,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.exception: None | Exception = None
 
         # makes pylint happy
-        self.request_counter = 0
         self.request_method: None | str = None
         self.transport_param: TransportParam = transport
         self.transport: None | BaseTransport = None
@@ -196,7 +184,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         This methods is automatically called before each network request.
         """
         self.request_method = None
-        self.request_counter = 0
         self.exception = None
         if self.transport:
             self.transport.reset()
@@ -295,7 +282,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         if self.transport is None:
             self.setup_transport(self.transport_param)
         self.reset()
-        self.request_counter = next(REQUEST_COUNTER)
         if kwargs:
             self.setup(**kwargs)
         if self.proxylist.size() and self.config["proxy_auto_change"]:
@@ -308,7 +294,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     def log_request(self, extra: str = "") -> None:
         """Send request details to logging system."""
         thread_name = threading.current_thread().name.lower()
-        thread_name = "" if (thread_name == "mainthread") else "-%s" % thread_name
+        thread_name = "" if (thread_name == "mainthread") else "[%s] " % thread_name
 
         if self.config["proxy"]:
             if self.config["proxy_userpwd"]:
@@ -325,8 +311,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         if extra:
             extra = "[%s] " % extra
         logger_network.debug(
-            "[%s%s] %s%s %s%s",
-            ("%02d" % self.request_counter),
+            "%s%s%s %s%s",
             thread_name,
             extra,
             self.request_method or "GET",

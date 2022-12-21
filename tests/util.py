@@ -1,5 +1,4 @@
 import functools
-import itertools
 import json
 import logging
 import os
@@ -12,7 +11,7 @@ from unittest import TestCase
 
 from test_server import TestServer
 
-from grab import Grab, base
+from grab import Grab
 
 logger = logging.getLogger("tests.util")
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -127,7 +126,3 @@ def skip_test_if(condition, why_message):
         return caller
 
     return decorator
-
-
-def reset_request_counter():
-    base.REQUEST_COUNTER = itertools.count(1)

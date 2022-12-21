@@ -1,10 +1,9 @@
-import threading
 from copy import deepcopy
 
 from test_server import Response
 
 from grab import GrabError, GrabMisuseError
-from tests.util import BaseGrabTestCase, build_grab, reset_request_counter, temp_file
+from tests.util import BaseGrabTestCase, build_grab, temp_file
 
 
 class GrabApiTestCase(BaseGrabTestCase):
@@ -48,31 +47,6 @@ class GrabApiTestCase(BaseGrabTestCase):
         content = b"<strong>test</strong>"
         grab = build_grab(document_body=content)
         self.assertEqual(grab.doc.body, content)
-
-    def test_request_counter(self):
-        reset_request_counter()
-        grab = build_grab()
-        grab.go(self.server.get_url())
-        self.assertEqual(grab.request_counter, 1)
-
-        grab.go(self.server.get_url())
-        self.assertEqual(grab.request_counter, 2)
-
-        def func():
-            grab = build_grab()
-            grab.go(self.server.get_url())
-
-        # Make 10 requests in concurrent threads
-        threads = []
-        for _ in range(10):
-            thread = threading.Thread(target=func)
-            threads.append(thread)
-            thread.start()
-        for thread in threads:
-            thread.join()
-
-        grab.go(self.server.get_url())
-        self.assertEqual(grab.request_counter, 13)
 
     def test_download(self):
         with temp_file() as save_file:
