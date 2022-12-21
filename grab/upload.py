@@ -5,10 +5,10 @@ import os
 import time
 from hashlib import md5
 
-from grab.util.encoding import make_bytes
+from .util.encoding import make_bytes
 
 
-class BaseUploadObject:
+class BaseUploadItem:
     __slots__ = ()
 
     def find_content_type(self, filename: str) -> str:
@@ -18,7 +18,7 @@ class BaseUploadObject:
         return ctype
 
 
-class UploadContent(BaseUploadObject):
+class UploadContent(BaseUploadItem):
     __slots__ = ("content", "filename", "content_type")
 
     def __init__(
@@ -41,7 +41,7 @@ class UploadContent(BaseUploadObject):
         return md5(make_bytes(str(time.time()))).hexdigest()[:10]
 
 
-class UploadFile(BaseUploadObject):
+class UploadFile(BaseUploadItem):
     __slots__ = ("path", "filename", "content_type")
 
     def __init__(

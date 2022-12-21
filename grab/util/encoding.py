@@ -19,9 +19,3 @@ def make_bytes(value: Any, encoding: str = "utf-8", errors: str = "strict") -> b
     if isinstance(value, bytes):
         return value
     return str(value).encode(encoding, errors=errors)
-
-
-def decode_bytes(value: Any, encoding: str) -> Any:
-    if isinstance(value, bytes):
-        return value.decode(encoding)
-    return value

@@ -34,7 +34,7 @@ from grab.document import Document
 from grab.error import GrabMisuseError, GrabTimeoutError
 from grab.types import GrabConfig
 from grab.upload import UploadContent, UploadFile
-from grab.util.encoding import decode_bytes, make_str
+from grab.util.encoding import make_str
 from grab.util.http import normalize_http_values, normalize_post_data, normalize_url
 
 from .base_transport import BaseTransport
@@ -164,12 +164,15 @@ class Urllib3Transport(BaseTransport):
                 post_items: Sequence[tuple[bytes, Any]] = normalize_http_values(
                     grab_config["multipart_post"],
                     charset=grab_config["charset"],
-                    ignore_classes=(UploadFile, UploadContent),
                 )
                 post_items2: Sequence[tuple[str, Any]] = [
                     (
-                        decode_bytes(x[0], grab_config["charset"]),
-                        decode_bytes(x[1], grab_config["charset"]),
+                        x[0].decode(grab_config["charset"])
+                        if isinstance(x[0], bytes)
+                        else x[0],
+                        x[1].decode(grab_config["charset"])
+                        if isinstance(x[1], bytes)
+                        else x[1],
                     )
                     for x in post_items
                 ]
