@@ -1,4 +1,5 @@
 from .base import Grab
+from .document import Document
 from .error import (
     DataNotFound,
     GrabError,
@@ -6,7 +7,7 @@ from .error import (
     GrabNetworkError,
     GrabTimeoutError,
 )
+from .request import Request
 from .upload import UploadContent, UploadFile
 
 __version__ = "0.6.41"
-VERSION_NUMERIC = tuple(map(int, __version__.split(".")))

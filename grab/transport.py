@@ -27,6 +27,7 @@ from grab import error
 from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.document import Document
 from grab.error import GrabMisuseError, GrabTimeoutError
+from grab.request import Request
 from grab.types import GrabConfig
 from grab.upload import UploadContent, UploadFile
 from grab.util.http import normalize_http_values, normalize_post_data, normalize_url
@@ -58,39 +59,6 @@ def process_upload_items(
         else:
             result.append((key, val))
     return result
-
-
-class Request:  # pylint: disable=too-many-instance-attributes
-    def __init__(  # pylint: disable=too-many-arguments
-        self,
-        *,
-        url: str,
-        method: str,
-        headers: dict[str, Any],
-        config_body_maxsize: int,
-        timeout: int,
-        connect_timeout: int,
-        data: None | bytes = None,
-        body_maxsize: None | int = None,
-        proxy_type: None | str = None,
-        proxy: None | str = None,
-        proxy_userpwd: None | str = None,
-    ) -> None:
-        self.url = url
-        self.method = method
-        self.data = data
-        self.proxy = proxy
-        self.proxy_userpwd = proxy_userpwd
-        self.proxy_type = proxy_type
-        self.headers = headers
-        self.body_maxsize = body_maxsize
-        self.op_started: None | float = None
-        self.timeout = timeout
-        self.connect_timeout = connect_timeout
-        self.config_body_maxsize = config_body_maxsize
-
-    def get_full_url(self) -> str:
-        return self.url
 
 
 class Urllib3Transport(BaseTransport):
@@ -221,7 +189,7 @@ class Urllib3Transport(BaseTransport):
         self._request = Request(
             url=request_url,
             method=method,
-            config_body_maxsize=grab_config["body_maxsize"],
+            body_maxsize=grab_config["body_maxsize"],
             timeout=grab_config["timeout"],
             connect_timeout=grab_config["connect_timeout"],
             proxy=req_proxy,
@@ -311,7 +279,7 @@ class Urllib3Transport(BaseTransport):
         self._response = res
 
     def read_with_timeout(self) -> bytes:
-        maxsize = cast(Request, self._request).config_body_maxsize
+        maxsize = cast(Request, self._request).body_maxsize
         if isinstance(maxsize, int) and not maxsize:
             return b""
         chunks = []
