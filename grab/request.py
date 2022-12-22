@@ -42,7 +42,6 @@ class Request:  # pylint: disable=too-many-instance-attributes
         return self.url
 
     def _process_timeout_param(self, value: None | float | Timeout) -> Timeout:
-        print("PROCESS", value)
         if isinstance(value, Timeout):
             return value
         if value is None:

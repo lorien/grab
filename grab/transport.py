@@ -203,7 +203,6 @@ class Urllib3Transport(BaseTransport):
         if grab_config["headers"]:
             req_headers.update(grab_config["headers"])
 
-        print("before-req-config", grab_config["timeout"])
         self._request = Request(
             url=request_url,
             encoding=grab_config["encoding"],
@@ -219,7 +218,6 @@ class Urllib3Transport(BaseTransport):
             post=grab_config["post"],
             multipart_post=grab_config["multipart_post"],
         )
-        print("self-req", self._request.timeout)
         update_cookie_manager(grab_cookies, self._request.cookies, self._request.url)
         self._request_item = assemble(self._request, grab_cookies)
 
@@ -283,7 +281,6 @@ class Urllib3Transport(BaseTransport):
             # The read timeout is not total response time timeout
             # It is the timeout on read of next data chunk from the server
             # Total response timeout is handled by Grab
-            print("REQ", req.timeout)
             timeout = Timeout(connect=req.timeout.connect, read=req.timeout.read)
             req_url = req.url
             req_method = req.method
@@ -317,6 +314,7 @@ class Urllib3Transport(BaseTransport):
             min(default_chunk_size, maxsize + 1) if maxsize else default_chunk_size
         )
         bytes_read = 0
+        op_started = time.time()
         while True:
             chunk = cast(HTTPResponse, self._response).read(chunk_size)
             if chunk:
@@ -327,9 +325,13 @@ class Urllib3Transport(BaseTransport):
                     break
             else:
                 break
+            print("self._request.timeout.total:", self._request.timeout.total)
+            print("time.time():", time.time())
+            print("self._connect_time:", self._connect_time)
             if (
                 self._request.timeout.total
-                and (time.time() - self._connect_time) > self._request.timeout.total
+                and (time.time() - (op_started + self._connect_time))
+                > self._request.timeout.total
             ):
                 raise GrabTimeoutError
         data = b"".join(chunks)
