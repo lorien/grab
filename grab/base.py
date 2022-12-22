@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import threading
-import weakref
 from collections.abc import Mapping, MutableMapping
 from copy import copy, deepcopy
 from datetime import datetime
@@ -69,7 +68,6 @@ class Grab:
         "config",
         "transport",
         "request_method",
-        "__weakref__",
         "cookies",
         "meta",
         "_doc",
@@ -349,10 +347,8 @@ class Grab:
         for cls in type(self).mro():
             cls_slots = getattr(cls, "__slots__", ())
             for slot in cls_slots:
-                if slot != "__weakref__" and hasattr(self, slot):
+                if hasattr(self, slot):
                     state[slot] = getattr(self, slot)
-        if state["_doc"]:
-            state["_doc"].grab = weakref.proxy(self)
         return state
 
     def __setstate__(self, state: Mapping[str, Any]) -> None:

@@ -209,7 +209,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         for cls in type(self).mro():
             cls_slots = getattr(cls, "__slots__", ())
             for slot in cls_slots:
-                if slot != "__weakref__" and hasattr(self, slot):
+                if hasattr(self, slot):
                     state[slot] = getattr(self, slot)
         state["_lxml_tree"] = None
         state["_strict_lxml_tree"] = None
