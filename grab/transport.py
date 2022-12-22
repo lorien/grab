@@ -205,7 +205,6 @@ class Urllib3Transport(BaseTransport):
             url=request_url,
             encoding=grab_config["encoding"],
             method=method,
-            body_maxsize=grab_config["body_maxsize"],
             timeout=grab_config["timeout"],
             proxy=grab_config["proxy"],
             proxy_type=grab_config["proxy_type"],
@@ -303,24 +302,16 @@ class Urllib3Transport(BaseTransport):
     def read_with_timeout(self) -> bytes:
         assert self._request is not None
         assert self._connect_time is not None
-        maxsize = self._request.body_maxsize
-        if isinstance(maxsize, int) and not maxsize:
-            return b""
+        assert self._response is not None
         chunks = []
-        default_chunk_size = 10000
-        chunk_size = (
-            min(default_chunk_size, maxsize + 1) if maxsize else default_chunk_size
-        )
+        chunk_size = 10000
         bytes_read = 0
         op_started = time.time()
         while True:
-            chunk = cast(HTTPResponse, self._response).read(chunk_size)
+            chunk = self._response.read(chunk_size)
             if chunk:
                 bytes_read += len(chunk)
                 chunks.append(chunk)
-                if maxsize and bytes_read > maxsize:
-                    # reached limit on bytes to read
-                    break
             else:
                 break
             if (
@@ -329,10 +320,7 @@ class Urllib3Transport(BaseTransport):
                 > self._request.timeout.total
             ):
                 raise GrabTimeoutError
-        data = b"".join(chunks)
-        if maxsize:
-            return data[:maxsize]
-        return data
+        return b"".join(chunks)
 
     def get_response_header_items(self) -> list[tuple[str, Any]]:
         """Return current response headers as items.
@@ -354,11 +342,7 @@ class Urllib3Transport(BaseTransport):
         Good to know: on python3 urllib3 headers are converted to str type
         using latin encoding.
         """
-        if not self._response:
-            raise GrabMisuseError(
-                "Method prepare response must be callled only"
-                " after network response is received"
-            )
+        assert self._response is not None
         try:
 
             head_str = ""

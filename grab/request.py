@@ -18,7 +18,6 @@ class Request:  # pylint: disable=too-many-instance-attributes
         cookies: None | dict[str, Any] = None,
         encoding: None | str = None,
         # data: None | bytes = None,
-        body_maxsize: None | int = None,
         proxy_type: None | str = None,
         proxy: None | str = None,
         proxy_userpwd: None | str = None,
@@ -35,7 +34,6 @@ class Request:  # pylint: disable=too-many-instance-attributes
         self.proxy_userpwd = proxy_userpwd
         self.proxy_type = proxy_type
         self.headers = headers or {}
-        self.body_maxsize = body_maxsize
         self.timeout: Timeout = self._process_timeout_param(timeout)
 
     def get_full_url(self) -> str:

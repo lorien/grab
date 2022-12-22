@@ -54,7 +54,6 @@ Grab User Manual
     grab/settings
     grab/debugging
     grab/request_headers
-    grab/response_body
     grab/file_uploading
     grab/redirect
     grab/forms

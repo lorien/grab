@@ -234,18 +234,6 @@ The encoding (character set) is used to store document's content as bytes.
 By default Grab detects encoding of document automatically. If it detects the encoding incorrectly you can specify exact encoding with this option.
 The encoding option is used to convert document's bytes content into Unicode text also for biilding DOM tree of the document.
 
-.. _option_body_maxsize:
-
-body_maxsize
-^^^^^^^^^^^^
-
-:Type: int
-:Default: None
-
-A limit on the maximum size of data that should be received from the remote server.
-If the limit is reached, the connection is abandoned and you can work with the data 
-received so far.
-
 
 .. _option_content_type:
 

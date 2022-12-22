@@ -44,13 +44,14 @@ def default_config() -> GrabConfig:
         "proxy": None,
         "proxy_type": None,
         "proxy_userpwd": None,
-        "post": None,
-        "multipart_post": None,
         "headers": None,
         "cookies": None,
         "timeout": None,
-        "body_maxsize": None,
         "encoding": None,
+        # Payload, needs refactoring
+        "post": None,
+        "multipart_post": None,
+        # Not Sure
         "redirect_limit": 10,  # must be retry object
         "follow_location": True,  # must be retry object
         "document_type": "html",

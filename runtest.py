@@ -39,7 +39,6 @@ GRAB_TEST_LIST = (
     # *** Refactor
     "tests.test_grab_proxy",
     "tests.test_grab_upload_file",
-    "tests.test_grab_limit_option",
     "tests.test_grab_charset_issue",
     "tests.test_grab_pickle",
     "tests.test_proxylist",
