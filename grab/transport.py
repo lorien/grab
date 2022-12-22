@@ -191,8 +191,6 @@ class Urllib3Transport(BaseTransport):
     def process_config(
         self, grab_config: MutableMapping[str, Any], grab_cookies: CookieManager
     ) -> None:
-        if not isinstance(grab_config["cookies"], dict):
-            raise error.GrabMisuseError("cookies option should be a dict")
         try:
             request_url = normalize_url(grab_config["url"])
         except Exception as ex:

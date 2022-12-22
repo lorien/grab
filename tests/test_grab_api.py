@@ -2,8 +2,8 @@ from copy import deepcopy
 
 from test_server import Response
 
-from grab import GrabError, GrabMisuseError
 from grab.document import Document
+from grab.error import GrabConnectionError, GrabMisuseError
 from tests.util import BaseGrabTestCase, build_grab
 
 
@@ -43,7 +43,8 @@ class GrabApiTestCase(BaseGrabTestCase):
         grab = build_grab()
         grab.setup(post={"foo": "bar"})
 
-        self.assertRaises(GrabError, grab.request, url="Could-not-resolve-host-address")
+        with self.assertRaises(GrabConnectionError):
+            grab.request(url="Could-not-resolve-host-address")
         self.assertEqual(grab.config["post"], None)
         self.assertEqual(grab.config["multipart_post"], None)
         self.assertEqual(grab.config["method"], None)
