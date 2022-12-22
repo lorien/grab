@@ -33,16 +33,6 @@ Let's see how it works::
     >>> g.response.url
     'http://www.google.ru/?gws_rd=cr&ei=BspFUtS8EOWq4ATAooGADA'
 
-Meta Refresh Redirect
----------------------
-
-An HTML Page could contain special tags that instructs the browser to go to a specified URL::
-
-    <meta http-equiv="Refresh" content="0; url=http://some/url" />
-
-By default, Grab ignores such instructions. If you want automatically follow meta refresh
-tags, then set :ref:`option_follow_refresh` to True.
-
 Original and Destination URLs
 -----------------------------
 

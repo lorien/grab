@@ -38,7 +38,6 @@ from selection import SelectorList, XpathSelector
 from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabMisuseError
 from grab.types import NULL, GrabConfig
-from grab.util.html import find_refresh_url
 
 THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")
@@ -220,9 +219,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def __setstate__(self, state: Mapping[str, Any]) -> None:
         for slot, value in state.items():
             setattr(self, slot, value)
-
-    def get_meta_refresh_url(self) -> None | str:
-        return find_refresh_url(cast(str, self.unicode_body()))
 
     # TextExtension methods
 

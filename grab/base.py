@@ -52,7 +52,6 @@ def default_config() -> GrabConfig:
         "body_maxsize": None,
         "encoding": None,
         "redirect_limit": 10,  # must be retry object
-        "follow_refresh": False,  # must be retry object
         "follow_location": True,  # must be retry object
         "document_type": "html",
         # Session Properties
@@ -211,19 +210,15 @@ class Grab:
             proxy_info,
         )
 
-    def find_redirect_url(self, doc: Document) -> tuple[None | str, None | str]:
+    def find_redirect_url(self, doc: Document) -> None | str:
         assert doc.headers is not None
         if (
             self.config["follow_location"]
             and doc.code in {301, 302, 303, 307, 308}
             and doc.headers["Location"]
         ):
-            return doc.headers["Location"], "location"
-        if self.doc and self.config["follow_refresh"]:
-            url = self.doc.get_meta_refresh_url()
-            if url is not None:
-                return url, "refresh"
-        return None, None
+            return cast(str, doc.headers["Location"])
+        return None
 
     def request(self, url: None | str = None, **kwargs: Any) -> Document:
         """Perform network request.
@@ -236,7 +231,7 @@ class Grab:
         if url is not None:
             kwargs["url"] = url
         self.prepare_request(**kwargs)
-        refresh_count = 0
+        redir_count = 0
         while True:
             self.log_request()
             try:
@@ -247,10 +242,10 @@ class Grab:
             else:
                 with self.transport.wrap_transport_error():
                     doc = self.process_request_result()
-                redir_url, _ = self.find_redirect_url(doc)
+                redir_url = self.find_redirect_url(doc)
                 if redir_url is not None:
-                    refresh_count += 1
-                    if refresh_count > self.config["redirect_limit"]:
+                    redir_count += 1
+                    if redir_count > self.config["redirect_limit"]:
                         raise GrabTooManyRedirectsError()
                     self.prepare_request(
                         url=self.make_url_absolute(redir_url),

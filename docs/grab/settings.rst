@@ -45,17 +45,6 @@ Maximum time for connection to the remote server and receipt of an initial
 response. If it is exceeded, GrabNetworkTimeout is raised.
 
 
-.. _option_follow_refresh:
-
-follow_refresh
-^^^^^^^^^^^^^^
-
-:Type: bool
-:Default: False
-
-Automatically follow the URL specified in <meta http-equiv="refresh"> tag.
-
-
 .. _option_follow_location:
 
 follow_location
