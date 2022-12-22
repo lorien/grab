@@ -26,11 +26,9 @@ class Timeout:
         Unspecified connect timeout is set to total timeout.
         Unspecified read timeout is set to total timeout.
         """
-        print(total, connect, read)
         self.total = total if total is not UNDEFINED_PARAM else DEFAULT_TOTAL_TIMEOUT
         self.connect = connect if connect is not UNDEFINED_PARAM else self.total
         self.read = read if read is not UNDEFINED_PARAM else self.total
-        print(self.total, self.connect, self.read)
 
     def __repr__(self) -> str:
         return "{}(connect={!r}, read={!r}, total={!r})".format(

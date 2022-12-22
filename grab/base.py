@@ -173,7 +173,6 @@ class Grab:
         if "url" in kwargs and self.config.get("url"):
             kwargs["url"] = self.make_url_absolute(kwargs["url"])
         self.config.update(kwargs)
-        print(self.config["timeout"])
 
     def prepare_request(self, **kwargs: Any) -> None:
         """Configure all things to make real network request.

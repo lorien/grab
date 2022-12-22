@@ -323,9 +323,6 @@ class Urllib3Transport(BaseTransport):
                     break
             else:
                 break
-            print("self._request.timeout.total:", self._request.timeout.total)
-            print("time.time():", time.time())
-            print("self._connect_time:", self._connect_time)
             if (
                 self._request.timeout.total
                 and (time.time() - (op_started + self._connect_time))
