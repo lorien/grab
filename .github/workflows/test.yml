@@ -20,7 +20,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install -U -r requirements.txt
+        pip install -U -r requirements_dev.txt
         pip install -U -r requirements_backend.txt
         pip install -U -e .[cssselect,pyquery]
 

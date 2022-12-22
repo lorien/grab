@@ -10,7 +10,7 @@ venv:
 	virtualenv -p python3 .env
 
 deps:
-	.env/bin/pip install -r requirements.txt
+	.env/bin/pip install -r requirements_dev.txt
 	.env/bin/pip install -r requirements_backend.txt
 	.env/bin/pip install -e .[cssselect,pyquery]
 
