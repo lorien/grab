@@ -3,6 +3,7 @@ from test_server import Response
 from grab import Grab
 from grab.spider import Spider, Task
 from grab.spider.error import FatalError, SpiderError
+from grab.util.timeout import Timeout
 from tests.util import BaseGrabTestCase, build_spider
 
 
@@ -25,7 +26,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     def test_network_limit(self):
         class CustomSimpleSpider(SimpleSpider):
             def create_grab_instance(self, **kwargs):
-                return Grab(connect_timeout=1, timeout=1)
+                return Grab(timeout=Timeout(connect=1, total=1))
 
         self.server.add_response(Response(data=b"Hello spider!", sleep=1.1))
 
@@ -42,7 +43,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     def test_task_limit(self):
         class CustomSimpleSpider(SimpleSpider):
             def create_grab_instance(self, **kwargs):
-                return Grab(connect_timeout=1, timeout=1)
+                return Grab(timeout=Timeout(connect=1, total=1))
 
         self.server.add_response(Response(data=b"Hello spider!", sleep=1.1))
 

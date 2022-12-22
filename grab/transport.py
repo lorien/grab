@@ -159,7 +159,9 @@ class Urllib3Transport(BaseTransport):
         logger.setLevel(logging.WARNING)
         self._request: None | Request = None
         self._response: None | Urllib3HTTPResponse = None
+        self._connect_time: None | float = None
         self._request_item: tuple[dict[str, Any], bytes | None] = {}, None
+        self.reset()
 
     def __getstate__(self) -> dict[str, Any]:
         state = self.__dict__.copy()
@@ -181,8 +183,9 @@ class Urllib3Transport(BaseTransport):
         return PoolManager(10, cert_reqs="CERT_REQUIRED", ca_certs=certifi.where())
 
     def reset(self) -> None:
-        self._response = None
         self._request = None
+        self._response = None
+        self._connect_time = None
         self._request_item = {}, None
 
     def process_config(
@@ -200,13 +203,13 @@ class Urllib3Transport(BaseTransport):
         if grab_config["headers"]:
             req_headers.update(grab_config["headers"])
 
+        print("before-req-config", grab_config["timeout"])
         self._request = Request(
             url=request_url,
             encoding=grab_config["encoding"],
             method=method,
             body_maxsize=grab_config["body_maxsize"],
             timeout=grab_config["timeout"],
-            connect_timeout=grab_config["connect_timeout"],
             proxy=grab_config["proxy"],
             proxy_type=grab_config["proxy_type"],
             proxy_userpwd=grab_config["proxy_userpwd"],
@@ -216,6 +219,7 @@ class Urllib3Transport(BaseTransport):
             post=grab_config["post"],
             multipart_post=grab_config["multipart_post"],
         )
+        print("self-req", self._request.timeout)
         update_cookie_manager(grab_cookies, self._request.cookies, self._request.url)
         self._request_item = assemble(self._request, grab_cookies)
 
@@ -279,12 +283,13 @@ class Urllib3Transport(BaseTransport):
             # The read timeout is not total response time timeout
             # It is the timeout on read of next data chunk from the server
             # Total response timeout is handled by Grab
-            timeout = Timeout(connect=req.connect_timeout, read=req.timeout)
+            print("REQ", req.timeout)
+            timeout = Timeout(connect=req.timeout.connect, read=req.timeout.read)
             req_url = req.url
             req_method = req.method
-            req.op_started = time.time()
             req_hdr, req_data = self._request_item
             try:
+                start_time = time.time()
                 res = pool.urlopen(  # type: ignore # FIXME
                     req_method,
                     req_url,
@@ -294,13 +299,16 @@ class Urllib3Transport(BaseTransport):
                     headers=req_hdr,
                     preload_content=False,
                 )
+                self._connect_time = time.time() - start_time
             except LocationParseError as ex:
                 raise error.GrabInvalidResponse(str(ex), ex)
 
         self._response = res
 
     def read_with_timeout(self) -> bytes:
-        maxsize = cast(Request, self._request).body_maxsize
+        assert self._request is not None
+        assert self._connect_time is not None
+        maxsize = self._request.body_maxsize
         if isinstance(maxsize, int) and not maxsize:
             return b""
         chunks = []
@@ -319,9 +327,9 @@ class Urllib3Transport(BaseTransport):
                     break
             else:
                 break
-            if cast(Request, self._request).timeout and (
-                time.time() - cast(float, cast(Request, self._request).op_started)
-                > cast(float, cast(Request, self._request).timeout)
+            if (
+                self._request.timeout.total
+                and (time.time() - self._connect_time) > self._request.timeout.total
             ):
                 raise GrabTimeoutError
         data = b"".join(chunks)

@@ -26,10 +26,8 @@ clean:
 pytest:
 	pytest -n30 -x --cov grab --cov-report term-missing
 
-test:
-	make check \
-	&& make pytest \
-	&& tox -e py38-check
+test: check pytest
+	tox -e py38-check
 
 #release:
 #	git push \
@@ -52,15 +50,7 @@ eradicate:
 bandit:
 	bandit -qc pyproject.toml -r $(FILES_CHECK_ALL)
 
-check:
-	echo "mypy" \
-	&& make mypy \
-	&& echo "pylint" \
-	&& make pylint \
-	&& echo "flake8" \
-	&& make flake8 \
-	&& echo "bandit" \
-	&& make bandit
+check: mypy pylint flake8 bandit
 
 build:
 	rm -rf *.egg-info

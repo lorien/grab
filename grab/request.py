@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .util.timeout import Timeout
+
 __all__ = ["Request"]
 
 
@@ -12,8 +14,7 @@ class Request:  # pylint: disable=too-many-instance-attributes
         url: str,
         method: str = "GET",
         headers: None | dict[str, Any] = None,
-        timeout: int = 10,
-        connect_timeout: int = 10,
+        timeout: None | int | Timeout = None,
         cookies: None | dict[str, Any] = None,
         encoding: None | str = None,
         # data: None | bytes = None,
@@ -35,10 +36,15 @@ class Request:  # pylint: disable=too-many-instance-attributes
         self.proxy_type = proxy_type
         self.headers = headers or {}
         self.body_maxsize = body_maxsize
-        self.timeout = timeout
-        self.connect_timeout = connect_timeout
-        # internal
-        self.op_started: None | float = None
+        self.timeout: Timeout = self._process_timeout_param(timeout)
 
     def get_full_url(self) -> str:
         return self.url
+
+    def _process_timeout_param(self, value: None | float | Timeout) -> Timeout:
+        print("PROCESS", value)
+        if isinstance(value, Timeout):
+            return value
+        if value is None:
+            return Timeout()
+        return Timeout(total=float(value))
