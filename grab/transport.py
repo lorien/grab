@@ -7,6 +7,7 @@ import time
 import urllib.request
 from collections.abc import Generator, Mapping, MutableMapping, Sequence
 from contextlib import contextmanager
+from copy import copy
 from http.client import HTTPResponse
 from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
@@ -19,6 +20,9 @@ from urllib3.contrib.socks import SOCKSProxyManager
 from urllib3.exceptions import LocationParseError
 from urllib3.fields import RequestField
 from urllib3.filepost import encode_multipart_formdata
+
+# from urllib3.fields import RequestField
+# from urllib3.filepost import encode_multipart_formdata
 from urllib3.response import HTTPResponse as Urllib3HTTPResponse
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
@@ -33,6 +37,18 @@ from grab.upload import UploadContent, UploadFile
 from grab.util.http import normalize_http_values, normalize_post_data, normalize_url
 
 from .base_transport import BaseTransport
+
+
+def assemble(req: Request) -> tuple[dict[str, Any], bytes | None]:
+    req_hdr = copy(req.headers)
+    post_headers, req_data = process_config_post(
+        req.post,
+        req.multipart_post,
+        req.method,
+        req.encoding or "utf-8",
+    )
+    req_hdr.update(post_headers)
+    return req_hdr, req_data
 
 
 def process_upload_items(
@@ -141,34 +157,24 @@ class Urllib3Transport(BaseTransport):
     def process_config(
         self, grab_config: MutableMapping[str, Any], grab_cookies: CookieManager
     ) -> None:
-        extra_headers: dict[str, str] = {}
         try:
             request_url = normalize_url(grab_config["url"])
         except Exception as ex:
             raise error.GrabInvalidUrl("%s: %s" % (str(ex), str(grab_config["url"])))
         method = self.detect_request_method(grab_config)
-        # Will be methods of Request class
-        # (1) -- post data
-        post_headers, req_data = process_config_post(
-            grab_config["post"],
-            grab_config["multipart_post"],
-            method,
-            grab_config["encoding"] or "utf-8",
-        )
-        extra_headers.update(post_headers)
-        # (2) -- common headers
-        extra_headers.update(grab_config["common_headers"])
-        # (3) -- headers
+        # HEADERS
+        req_headers: dict[str, str] = copy(grab_config["common_headers"])
         if grab_config["headers"]:
-            extra_headers.update(grab_config["headers"])
-        # (4) -- cookies
+            req_headers.update(grab_config["headers"])
+        # Cookies
         cookie_hdr = self.process_cookie_options(
-            grab_config["cookies"], grab_cookies, request_url, extra_headers
+            grab_config["cookies"], grab_cookies, request_url, req_headers
         )
         if cookie_hdr:
-            extra_headers["Cookie"] = cookie_hdr
+            req_headers["Cookie"] = cookie_hdr
         self._request = Request(
             url=request_url,
+            encoding=grab_config["encoding"],
             method=method,
             body_maxsize=grab_config["body_maxsize"],
             timeout=grab_config["timeout"],
@@ -176,8 +182,10 @@ class Urllib3Transport(BaseTransport):
             proxy=grab_config["proxy"],
             proxy_type=grab_config["proxy_type"],
             proxy_userpwd=grab_config["proxy_userpwd"],
-            headers=extra_headers,
-            data=req_data,
+            headers=req_headers,
+            # data=req_data,
+            post=grab_config["post"],
+            multipart_post=grab_config["multipart_post"],
         )
 
     @contextmanager
@@ -245,13 +253,14 @@ class Urllib3Transport(BaseTransport):
             req_method = req.method
             req.op_started = time.time()
             try:
+                req_hdr, req_data = assemble(req)
                 res = pool.urlopen(  # type: ignore # FIXME
                     req_method,
                     req_url,
-                    body=req.data,
+                    body=req_data,
                     timeout=timeout,
                     retries=retry,
-                    headers=req.headers,
+                    headers=req_hdr,
                     preload_content=False,
                 )
             except LocationParseError as ex:
