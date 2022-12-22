@@ -64,13 +64,14 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.run()
         self.assertEqual(b"xxx", bot.runtime_events["SAVED_ITEM"][0])
 
-    def test_generator(self):
+    def testz_generator(self):
+        number = 13
         server = self.server
-        server.add_response(Response(), count=13)
+        server.add_response(Response(), count=number)
 
         class TestSpider(Spider):
             def task_generator(self):
-                for _ in range(13):
+                for _ in range(number):
                     yield Task("page", url=server.get_url())
 
             def task_page(self, unused_grab, unused_task):
@@ -78,7 +79,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         bot = build_spider(TestSpider)
         bot.run()
-        self.assertEqual(bot.stat.counters["count"], 13)
+        self.assertEqual(bot.stat.counters["count"], number)
 
     def test_handler_result_none(self):
         class TestSpider(Spider):

@@ -12,6 +12,7 @@ from unittest import TestCase
 from test_server import TestServer
 
 from grab import Grab
+from grab.transport import Urllib3Transport
 
 logger = logging.getLogger("tests.util")
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -76,7 +77,7 @@ def temp_file(root_dir=None):
 
 def build_grab_custom_subclass(grab_cls, *args, **kwargs):
     """Build the specific Grab-subclass instance with default options."""
-    kwargs.setdefault("transport", "urllib3")
+    kwargs.setdefault("transport", Urllib3Transport)
     return grab_cls(*args, **kwargs)
 
 
@@ -87,7 +88,7 @@ def build_grab(*args, **kwargs):
 
 def build_spider(cls, **kwargs):
     """Build the Spider instance with default options."""
-    kwargs.setdefault("grab_transport", "urllib3")
+    kwargs.setdefault("grab_transport", Urllib3Transport)
     kwargs.setdefault("network_service", GLOBAL["network_service"])
     return cls(**kwargs)
 

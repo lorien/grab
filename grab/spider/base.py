@@ -4,7 +4,6 @@ import logging
 import time
 import typing
 from collections.abc import Callable, Iterator
-from copy import deepcopy
 from datetime import datetime
 from queue import Empty, Queue
 from secrets import SystemRandom
@@ -17,6 +16,7 @@ from proxylist import ProxyList, ProxyServer
 from proxylist.base import BaseProxySource
 
 from grab.base import Grab
+from grab.base_transport import BaseTransport
 from grab.error import (
     GrabFeatureIsDeprecated,
     GrabInvalidResponse,
@@ -82,7 +82,7 @@ class Spider:
         parser_requests_per_process: int = 10000,
         parser_pool_size: int = 1,
         network_service: None | BaseNetworkService = None,
-        grab_transport: str = "urllib3",
+        grab_transport: None | BaseTransport | type[BaseTransport] = None,
     ) -> None:
         """Create Spider instance, duh.
 
@@ -102,8 +102,7 @@ class Spider:
         """
         self.fatal_error_queue: Queue[FatalErrorQueueItem] = Queue()
         self._started: None | float = None
-        assert grab_transport in {"urllib3"}
-        self.grab_transport_name = grab_transport
+        self.grab_transport = grab_transport
         self.parser_requests_per_process = parser_requests_per_process
         self.stat = Stat()
         self.runtime_events: dict[str, list[None | str]] = {}
@@ -125,7 +124,6 @@ class Spider:
         self.network_try_limit = network_try_limit or int(
             self.config.get("network_try_limit", DEFAULT_NETWORK_TRY_LIMIT)
         )
-        self._grab_config: dict[str, Any] = {}
         if priority_mode not in ["random", "const"]:
             raise SpiderMisuseError(
                 'Value of priority_mode option should be "random" or "const"'
@@ -336,17 +334,7 @@ class Spider:
         """
 
     def create_grab_instance(self, **kwargs: Any) -> Grab:
-        # WTF: I have no idea what is happening here
-        # Back-ward compatibility for deprecated `grab_config` attribute
-        # Here I use `_grab_config` to not trigger warning messages
-        kwargs["transport"] = self.grab_transport_name
-        if self._grab_config and kwargs:
-            merged_config = deepcopy(self._grab_config)
-            merged_config.update(kwargs)
-            return Grab(**merged_config)
-        if self._grab_config and not kwargs:
-            return Grab(**self._grab_config)
-        return Grab(**kwargs)
+        return Grab(transport=self.grab_transport, **kwargs)
 
     def task_generator(self) -> Iterator[Task]:
         """You can override this method to load new tasks.
@@ -407,7 +395,6 @@ class Spider:
         # Generate new common headers
         cast(GrabConfig, grab.config)["common_headers"] = grab.common_headers()
         self.update_grab_instance(grab)
-        grab.setup_transport(self.grab_transport_name)
         return grab
 
     def is_valid_network_response_code(self, code: int, task: Task) -> bool:

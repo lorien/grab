@@ -5,8 +5,7 @@ import logging
 import threading
 import typing
 import weakref
-from collections.abc import Mapping, MutableMapping, Sequence
-from contextlib import suppress
+from collections.abc import Mapping, Sequence
 from copy import copy, deepcopy
 from datetime import datetime
 from secrets import SystemRandom
@@ -16,20 +15,16 @@ from urllib.parse import urljoin
 from proxylist import ProxyList
 from user_agent import generate_user_agent
 
-from grab import error
 from grab.base_transport import BaseTransport
 from grab.cookie import CookieManager
 from grab.document import Document
-from grab.types import GrabConfig, TransportParam
+from grab.error import GrabError, GrabMisuseError, GrabTooManyRedirectsError
+from grab.transport import Urllib3Transport
+from grab.types import GrabConfig
 from grab.util.html import find_base_url
 
 __all__ = ("Grab",)
 MUTABLE_CONFIG_KEYS = ["post", "multipart_post", "headers", "cookies"]
-TRANSPORT_CACHE: MutableMapping[tuple[str, str], type[BaseTransport]] = {}
-TRANSPORT_ALIAS = {
-    "urllib3": "grab.transport.Urllib3Transport",
-}
-DEFAULT_TRANSPORT = "urllib3"
 logger = logging.getLogger("grab.base")
 logger_network = logging.getLogger("grab.network")
 system_random = SystemRandom()
@@ -80,7 +75,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         "proxylist",
         "config",
         "transport",
-        "transport_param",
+        # "transport_param",
         "request_method",
         "__weakref__",
         "cookies",
@@ -105,9 +100,25 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     def __init__(
         self,
-        transport: TransportParam = None,
+        transport: None | BaseTransport | type[BaseTransport] = None,
         **kwargs: Any,
     ) -> None:
+        if transport and (
+            not isinstance(transport, BaseTransport)
+            and not issubclass(transport, BaseTransport)
+        ):
+            raise GrabMisuseError(
+                'Parameter "transport" must be instance'
+                " of BaseTransport implementation"
+                " or implementation of BaseTransport"
+            )
+        self.transport: BaseTransport
+        if transport is None:
+            self.transport = Urllib3Transport()
+        elif isinstance(transport, BaseTransport):
+            self.transport = transport
+        else:
+            self.transport = transport()
         self.meta: dict[str, Any] = {}
         self._doc: None | Document = None
         self.config: GrabConfig = default_config()
@@ -116,8 +127,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.proxylist = ProxyList.from_lines_list([])
         self.exception: None | Exception = None
         self.request_method: None | str = None
-        self.transport_param: TransportParam = transport
-        self.transport: None | BaseTransport = None
         self.reset()
         if kwargs:
             self.setup(**kwargs)
@@ -129,42 +138,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     @doc.setter
     def doc(self, obj: Document) -> None:
         self._doc = obj
-
-    def setup_transport(
-        self,
-        transport_param: TransportParam,
-        reset: bool = False,
-    ) -> None:
-        if self.transport is not None and not reset:
-            raise error.GrabMisuseError(
-                "Transport is already set up. Use"
-                " setup_transport(..., reset=True) to explicitly setup"
-                " new transport"
-            )
-        if transport_param is None:
-            transport_param = DEFAULT_TRANSPORT
-        if isinstance(transport_param, str):
-            with suppress(KeyError):
-                transport_param = TRANSPORT_ALIAS[transport_param]
-            if "." not in transport_param:
-                raise error.GrabMisuseError("Unknown transport: %s" % transport_param)
-            mod_path, cls_name = transport_param.rsplit(".", 1)
-            try:
-                cls: type[BaseTransport] = TRANSPORT_CACHE[(mod_path, cls_name)]
-            except KeyError:
-                mod = __import__(mod_path, globals(), locals(), ["foo"])
-                cls = getattr(mod, cls_name)
-                TRANSPORT_CACHE[(mod_path, cls_name)] = cls
-            self.transport_param = transport_param
-            self.transport = cls()
-        elif callable(transport_param):
-            self.transport_param = transport_param
-            self.transport = transport_param()
-        else:
-            raise error.GrabMisuseError(
-                "Option `transport` should be string "
-                "or class or callable. Got %s" % type(transport_param)
-            )
 
     def reset(self) -> None:
         """Reset Grab instnce.
@@ -187,7 +160,8 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         :param \\**kwargs: overrides settings of cloned grab instance
         """
-        grab = Grab(transport=self.transport_param)
+        # TODO: self.transport must be cloned ?
+        grab = Grab(transport=self.transport)
         grab.config = self.dump_config()
         grab.doc = self.doc.copy() if self.doc else None
         for key in self.clonable_attributes:
@@ -222,7 +196,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         """Set up Grab instance configuration."""
         for key in kwargs:
             if key not in self.config.keys():
-                raise error.GrabMisuseError("Unknown option: %s" % key)
+                raise GrabMisuseError("Unknown option: %s" % key)
 
         if "url" in kwargs and self.config.get("url"):
             kwargs["url"] = self.make_url_absolute(kwargs["url"])
@@ -234,17 +208,15 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         This method is called before doing real request via
         transport extension.
         """
-        if self.transport is None:
-            self.setup_transport(self.transport_param)
+        # if self.transport is None:
+        #    self.setup_transport(self.transport_param)
         self.reset()
         if kwargs:
             self.setup(**kwargs)
         if self.proxylist.size() and self.config["proxy_auto_change"]:
             self.change_proxy()
-        self.request_method = cast(BaseTransport, self.transport).detect_request_method(
-            self.config
-        )
-        cast(BaseTransport, self.transport).process_config(self.config, self.cookies)
+        self.request_method = self.transport.detect_request_method(self.config)
+        self.transport.process_config(self.config, self.cookies)
 
     def log_request(self, extra: str = "") -> None:
         """Send request details to logging system."""
@@ -297,19 +269,19 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             self.log_request()
 
             try:
-                cast(BaseTransport, self.transport).request()
-            except error.GrabError as ex:
+                self.transport.request()
+            except GrabError as ex:
                 self.exception = ex
                 self.reset_temporary_options()
                 raise
             else:
-                with cast(BaseTransport, self.transport).wrap_transport_error():
+                with self.transport.wrap_transport_error():
                     doc = self.process_request_result()
                 redir_url, _ = self.find_redirect_url(doc)
                 if redir_url is not None:
                     refresh_count += 1
                     if refresh_count > self.config["redirect_limit"]:
-                        raise error.GrabTooManyRedirectsError()
+                        raise GrabTooManyRedirectsError()
                     self.prepare_request(
                         url=self.make_url_absolute(redir_url),
                     )
@@ -366,7 +338,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         # If POST data is not cleared then next request will try to use them
         # again!
         self.reset_temporary_options()
-        self.doc = cast(BaseTransport, self.transport).prepare_response(
+        self.doc = self.transport.prepare_response(
             self.config, document_class=self.document_class
         )
         if self.config["reuse_cookies"]:
@@ -387,9 +359,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             else:
                 proxy = self.proxylist.get_next_server()
             if proxy.proxy_type is None:
-                raise error.GrabMisuseError(
-                    "Could not use proxy without defined proxy type"
-                )
+                raise GrabMisuseError("Could not use proxy without defined proxy type")
             self.setup(
                 proxy=proxy.get_address(),
                 proxy_userpwd=proxy.get_userpwd(),
