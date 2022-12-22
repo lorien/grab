@@ -39,7 +39,9 @@ from grab.util.http import normalize_http_values, normalize_post_data, normalize
 from .base_transport import BaseTransport
 
 
-def assemble(req: Request) -> tuple[dict[str, Any], bytes | None]:
+def assemble(
+    req: Request, cookie_manager: CookieManager
+) -> tuple[dict[str, Any], bytes | None]:
     req_hdr = copy(req.headers)
     post_headers, req_data = process_config_post(
         req.post,
@@ -48,6 +50,11 @@ def assemble(req: Request) -> tuple[dict[str, Any], bytes | None]:
         req.encoding or "utf-8",
     )
     req_hdr.update(post_headers)
+
+    cookie_hdr = cookie_manager.get_cookie_header(req.url, req_hdr)
+    if cookie_hdr:
+        req_hdr["Cookie"] = cookie_hdr
+
     return req_hdr, req_data
 
 
@@ -119,6 +126,28 @@ def process_config_post(
     return extra_headers, post_data
 
 
+def update_cookie_manager(
+    cookie_manager: CookieManager,
+    cookies: Mapping[str, Any],
+    request_url: str,
+) -> None:
+    request_host = urlsplit(request_url).hostname
+    if request_host and cookies:
+        if request_host.startswith("www."):
+            request_host_no_www = request_host[4:]
+        else:
+            request_host_no_www = request_host
+
+        # Process `cookies` option that is simple dict i.e.
+        # it provides only `name` and `value` attributes of cookie
+        # No domain, no path, no expires, etc
+        # To put these cookies into cookie manager we need to
+        # provide the domain of current request url
+        # Trying to guess better domain name by removing leading "www."
+        for name, value in cookies.items():
+            cookie_manager.set(name=name, value=value, domain=request_host_no_www)
+
+
 class Urllib3Transport(BaseTransport):
     """Grab network transport based on urllib3 library."""
 
@@ -130,6 +159,7 @@ class Urllib3Transport(BaseTransport):
         logger.setLevel(logging.WARNING)
         self._request: None | Request = None
         self._response: None | Urllib3HTTPResponse = None
+        self._request_item: tuple[dict[str, Any], bytes | None] = {}, None
 
     def __getstate__(self) -> dict[str, Any]:
         state = self.__dict__.copy()
@@ -153,10 +183,13 @@ class Urllib3Transport(BaseTransport):
     def reset(self) -> None:
         self._response = None
         self._request = None
+        self._request_item = {}, None
 
     def process_config(
         self, grab_config: MutableMapping[str, Any], grab_cookies: CookieManager
     ) -> None:
+        if not isinstance(grab_config["cookies"], dict):
+            raise error.GrabMisuseError("cookies option should be a dict")
         try:
             request_url = normalize_url(grab_config["url"])
         except Exception as ex:
@@ -166,12 +199,7 @@ class Urllib3Transport(BaseTransport):
         req_headers: dict[str, str] = copy(grab_config["common_headers"])
         if grab_config["headers"]:
             req_headers.update(grab_config["headers"])
-        # Cookies
-        cookie_hdr = self.process_cookie_options(
-            grab_config["cookies"], grab_cookies, request_url, req_headers
-        )
-        if cookie_hdr:
-            req_headers["Cookie"] = cookie_hdr
+
         self._request = Request(
             url=request_url,
             encoding=grab_config["encoding"],
@@ -183,10 +211,13 @@ class Urllib3Transport(BaseTransport):
             proxy_type=grab_config["proxy_type"],
             proxy_userpwd=grab_config["proxy_userpwd"],
             headers=req_headers,
+            cookies=grab_config["cookies"],
             # data=req_data,
             post=grab_config["post"],
             multipart_post=grab_config["multipart_post"],
         )
+        update_cookie_manager(grab_cookies, self._request.cookies, self._request.url)
+        self._request_item = assemble(self._request, grab_cookies)
 
     @contextmanager
     def wrap_transport_error(self) -> Generator[None, None, None]:
@@ -252,8 +283,8 @@ class Urllib3Transport(BaseTransport):
             req_url = req.url
             req_method = req.method
             req.op_started = time.time()
+            req_hdr, req_data = self._request_item
             try:
-                req_hdr, req_data = assemble(req)
                 res = pool.urlopen(  # type: ignore # FIXME
                     req_method,
                     req_url,
@@ -376,34 +407,3 @@ class Urllib3Transport(BaseTransport):
                 ),
             )
         return jar
-
-    def process_cookie_options(
-        self,
-        cookies: Mapping[str, Any],
-        cookie_manager: CookieManager,
-        request_url: str,
-        request_headers: dict[str, Any],
-    ) -> None | str:
-        request_host = urlsplit(request_url).hostname
-        if request_host:
-            if request_host.startswith("www."):
-                request_host_no_www = request_host[4:]
-            else:
-                request_host_no_www = request_host
-
-            # Process `cookies` option that is simple dict i.e.
-            # it provides only `name` and `value` attributes of cookie
-            # No domain, no path, no expires, etc
-            # I pass these no-domain cookies to *each* requested domain
-            # by setting these cookies with corresponding domain attribute
-            # Trying to guess better domain name by removing leading "www."
-            if cookies:
-                if not isinstance(cookies, dict):
-                    raise error.GrabMisuseError("cookies option should be a dict")
-                for name, value in cookies.items():
-                    cookie_manager.set(
-                        name=name, value=value, domain=request_host_no_www
-                    )
-
-        cookie_hdr = cookie_manager.get_cookie_header(request_url, request_headers)
-        return cookie_hdr if cookie_hdr else None

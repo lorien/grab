@@ -38,15 +38,15 @@ class BaseTransport:
     ) -> None:  # pragma: no cover
         raise NotImplementedError
 
-    @abstractmethod
-    def process_cookie_options(
-        self,
-        cookies: Mapping[str, Any],
-        cookie_manager: CookieManager,
-        request_url: str,
-        request_headers: dict[str, Any],
-    ) -> None | str:  # pragma: no cover
-        raise NotImplementedError
+    # @abstractmethod
+    # def process_cookie_options(
+    #    self,
+    #    cookies: Mapping[str, Any],
+    #    cookie_manager: CookieManager,
+    #    request_url: str,
+    #    request_headers: dict[str, Any],
+    # ) -> None | str:  # pragma: no cover
+    #    raise NotImplementedError
 
     def setup_body_file(
         self,
