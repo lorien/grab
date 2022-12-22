@@ -5,7 +5,7 @@ import logging
 import threading
 import typing
 import weakref
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from copy import copy, deepcopy
 from datetime import datetime
 from secrets import SystemRandom
@@ -30,13 +30,10 @@ logger_network = logging.getLogger("grab.network")
 system_random = SystemRandom()
 
 
-def copy_config(
-    config: GrabConfig, mutable_config_keys: None | Sequence[str] = None
-) -> GrabConfig:
+def copy_config(config: GrabConfig) -> GrabConfig:
     """Copy grab config with correct handling of mutable config values."""
     cloned_config = copy(config)
-    # Apply ``copy`` function to mutable config values
-    for key in mutable_config_keys or MUTABLE_CONFIG_KEYS:
+    for key in MUTABLE_CONFIG_KEYS:
         cloned_config[key] = copy(config[key])
     return cloned_config
 
@@ -170,7 +167,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         conf = cast(
             # pylint: disable=deprecated-typing-alias
             typing.Dict[str, Any],
-            copy_config(self.config, self.mutable_config_keys)
+            copy_config(self.config)
             # pylint: enable=deprecated-typing-alias
         )
         conf["state"] = {
@@ -180,7 +177,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
     def load_config(self, config: GrabConfig) -> None:
         """Configure grab instance with external config object."""
-        self.config = copy_config(config, self.mutable_config_keys)
+        self.config = copy_config(config)
         if "cookiejar_cookies" in config["state"]:
             self.cookies = CookieManager.from_cookie_list(
                 config["state"]["cookiejar_cookies"]
