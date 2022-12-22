@@ -41,7 +41,7 @@ class BaseTransport:
     @abstractmethod
     def process_cookie_options(
         self,
-        grab_config: GrabConfig,
+        cookies: Mapping[str, Any],
         cookie_manager: CookieManager,
         request_url: str,
         request_headers: dict[str, Any],

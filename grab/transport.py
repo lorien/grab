@@ -61,6 +61,48 @@ def process_upload_items(
     return result
 
 
+def process_config_post(
+    post: Any, multipart_post: Any, method: str, encoding: str
+) -> tuple[dict[str, Any], None | bytes]:
+    if method in {"POST", "PUT"} and (post is None and multipart_post is None):
+        raise GrabMisuseError(
+            "Neither `post` or `multipart_post`"
+            " options was specified for the %s"
+            " request" % method
+        )
+    extra_headers = {}
+    post_data: None | bytes = None
+    if multipart_post is not None:
+        post_data = multipart_post
+        if isinstance(post_data, str):
+            raise GrabMisuseError("Option multipart_post data does not accept unicode.")
+        if isinstance(post_data, bytes):
+            pass
+        else:
+            # WTF: why I encode things into bytes and then decode them back?
+            post_items: Sequence[tuple[bytes, Any]] = normalize_http_values(
+                multipart_post,
+                encoding=encoding,
+            )
+            post_items2: Sequence[tuple[str, Any]] = [
+                (
+                    x[0].decode(encoding) if isinstance(x[0], bytes) else x[0],
+                    x[1].decode(encoding) if isinstance(x[1], bytes) else x[1],
+                )
+                for x in post_items
+            ]
+            post_items3 = process_upload_items(post_items2)
+            post_data, content_type = encode_multipart_formdata(
+                post_items3
+            )  # type: ignore # FIXME
+            extra_headers["Content-Type"] = content_type
+        extra_headers["Content-Length"] = len(post_data)
+    elif post is not None:
+        post_data = normalize_post_data(post, encoding)
+        extra_headers["Content-Length"] = len(post_data)
+    return extra_headers, post_data
+
+
 class Urllib3Transport(BaseTransport):
     """Grab network transport based on urllib3 library."""
 
@@ -96,93 +138,32 @@ class Urllib3Transport(BaseTransport):
         self._response = None
         self._request = None
 
-    def process_config_post(
-        self, grab_config: Mapping[str, Any], method: str, encoding: str
-    ) -> tuple[dict[str, Any], None | bytes]:
-        if method in {"POST", "PUT"} and (
-            grab_config["post"] is None and grab_config["multipart_post"] is None
-        ):
-            raise GrabMisuseError(
-                "Neither `post` or `multipart_post`"
-                " options was specified for the %s"
-                " request" % method
-            )
-        extra_headers = {}
-        post_data: None | bytes = None
-        if grab_config["multipart_post"] is not None:
-            post_data = grab_config["multipart_post"]
-            if isinstance(post_data, str):
-                raise GrabMisuseError(
-                    "Option multipart_post data does not accept unicode."
-                )
-            if isinstance(post_data, bytes):
-                pass
-            else:
-                # WTF: why I encode things into bytes and then decode them back?
-                post_items: Sequence[tuple[bytes, Any]] = normalize_http_values(
-                    grab_config["multipart_post"],
-                    encoding=encoding,
-                )
-                post_items2: Sequence[tuple[str, Any]] = [
-                    (
-                        x[0].decode(encoding) if isinstance(x[0], bytes) else x[0],
-                        x[1].decode(encoding) if isinstance(x[1], bytes) else x[1],
-                    )
-                    for x in post_items
-                ]
-                post_items3 = process_upload_items(post_items2)
-                post_data, content_type = encode_multipart_formdata(
-                    post_items3
-                )  # type: ignore # FIXME
-                extra_headers["Content-Type"] = content_type
-            extra_headers["Content-Length"] = len(post_data)
-        elif grab_config["post"] is not None:
-            post_data = normalize_post_data(grab_config["post"], encoding)
-            extra_headers["Content-Length"] = len(post_data)
-        return extra_headers, post_data
-
-    def process_proxy_config(
-        self, grab_config: GrabConfig
-    ) -> tuple[None | str, None | str, None | str]:
-        # Proxy
-        req_proxy = None
-        if grab_config["proxy"]:
-            req_proxy = grab_config["proxy"]
-        req_proxy_userpwd = None
-        if grab_config["proxy_userpwd"]:
-            req_proxy_userpwd = grab_config["proxy_userpwd"]
-        req_proxy_type = None
-        if grab_config["proxy_type"]:
-            req_proxy_type = grab_config["proxy_type"]
-        return req_proxy, req_proxy_userpwd, req_proxy_type
-
     def process_config(
         self, grab_config: MutableMapping[str, Any], grab_cookies: CookieManager
     ) -> None:
-        # Init
         extra_headers: dict[str, str] = {}
-        # URL
         try:
             request_url = normalize_url(grab_config["url"])
         except Exception as ex:
             raise error.GrabInvalidUrl("%s: %s" % (str(ex), str(grab_config["url"])))
-        # Method
         method = self.detect_request_method(grab_config)
-        # POST data
-        post_headers, req_data = self.process_config_post(
-            grab_config, method, grab_config["encoding"] or "utf-8"
+        # Will be methods of Request class
+        # (1) -- post data
+        post_headers, req_data = process_config_post(
+            grab_config["post"],
+            grab_config["multipart_post"],
+            method,
+            grab_config["encoding"] or "utf-8",
         )
         extra_headers.update(post_headers)
-        # Proxy
-        req_proxy, req_proxy_userpwd, req_proxy_type = self.process_proxy_config(
-            grab_config
-        )
-        # Headers
+        # (2) -- common headers
         extra_headers.update(grab_config["common_headers"])
+        # (3) -- headers
         if grab_config["headers"]:
             extra_headers.update(grab_config["headers"])
+        # (4) -- cookies
         cookie_hdr = self.process_cookie_options(
-            grab_config, grab_cookies, request_url, extra_headers
+            grab_config["cookies"], grab_cookies, request_url, extra_headers
         )
         if cookie_hdr:
             extra_headers["Cookie"] = cookie_hdr
@@ -192,9 +173,9 @@ class Urllib3Transport(BaseTransport):
             body_maxsize=grab_config["body_maxsize"],
             timeout=grab_config["timeout"],
             connect_timeout=grab_config["connect_timeout"],
-            proxy=req_proxy,
-            proxy_type=req_proxy_type,
-            proxy_userpwd=req_proxy_userpwd,
+            proxy=grab_config["proxy"],
+            proxy_type=grab_config["proxy_type"],
+            proxy_userpwd=grab_config["proxy_userpwd"],
             headers=extra_headers,
             data=req_data,
         )
@@ -389,7 +370,7 @@ class Urllib3Transport(BaseTransport):
 
     def process_cookie_options(
         self,
-        grab_config: Mapping[str, Any],
+        cookies: Mapping[str, Any],
         cookie_manager: CookieManager,
         request_url: str,
         request_headers: dict[str, Any],
@@ -407,10 +388,10 @@ class Urllib3Transport(BaseTransport):
             # I pass these no-domain cookies to *each* requested domain
             # by setting these cookies with corresponding domain attribute
             # Trying to guess better domain name by removing leading "www."
-            if grab_config["cookies"]:
-                if not isinstance(grab_config["cookies"], dict):
+            if cookies:
+                if not isinstance(cookies, dict):
                     raise error.GrabMisuseError("cookies option should be a dict")
-                for name, value in grab_config["cookies"].items():
+                for name, value in cookies.items():
                     cookie_manager.set(
                         name=name, value=value, domain=request_host_no_www
                     )
