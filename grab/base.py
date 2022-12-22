@@ -81,44 +81,18 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         "cookies",
         "meta",
         "exception",
-        # Dirty hack to make it possible to inherit Grab from
-        # multiple base classes with __slots__
         "_doc",
     )
     document_class: type[Document] = Document
-
-    # Attributes which should be processed when clone
-    # of Grab instance is creating
+    # Attributes which should be processed when Grab instance is cloned
     clonable_attributes = ("proxylist",)
-
-    # Complex config items which points to mutable objects
-    mutable_config_keys = copy(MUTABLE_CONFIG_KEYS)
-
-    #
-    # Public methods
-    #
 
     def __init__(
         self,
         transport: None | BaseTransport | type[BaseTransport] = None,
         **kwargs: Any,
     ) -> None:
-        if transport and (
-            not isinstance(transport, BaseTransport)
-            and not issubclass(transport, BaseTransport)
-        ):
-            raise GrabMisuseError(
-                'Parameter "transport" must be instance'
-                " of BaseTransport implementation"
-                " or implementation of BaseTransport"
-            )
-        self.transport: BaseTransport
-        if transport is None:
-            self.transport = Urllib3Transport()
-        elif isinstance(transport, BaseTransport):
-            self.transport = transport
-        else:
-            self.transport = transport()
+        self.transport = self.process_transport_option(transport, Urllib3Transport)
         self.meta: dict[str, Any] = {}
         self._doc: None | Document = None
         self.config: GrabConfig = default_config()
@@ -130,6 +104,26 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         self.reset()
         if kwargs:
             self.setup(**kwargs)
+
+    def process_transport_option(
+        self,
+        transport: None | BaseTransport | type[BaseTransport],
+        default_transport: type[BaseTransport],
+    ) -> BaseTransport:
+        if transport and (
+            not isinstance(transport, BaseTransport)
+            and not issubclass(transport, BaseTransport)
+        ):
+            raise GrabMisuseError(
+                'Parameter "transport" must be instance'
+                " of BaseTransport implementation"
+                " or implementation of BaseTransport"
+            )
+        if transport is None:
+            return default_transport()
+        if isinstance(transport, BaseTransport):
+            return transport
+        return transport()
 
     @property
     def doc(self) -> None | Document:
