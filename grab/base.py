@@ -1,11 +1,9 @@
-"""The core of grab package: the Grab class."""
 from __future__ import annotations
 
 import logging
 import threading
-import typing
 import weakref
-from collections.abc import Mapping
+from collections.abc import Mapping, MutableMapping
 from copy import copy, deepcopy
 from datetime import datetime
 from secrets import SystemRandom
@@ -23,7 +21,7 @@ from grab.transport import Urllib3Transport
 from grab.types import GrabConfig
 from grab.util.html import find_base_url
 
-__all__ = ("Grab",)
+__all__ = ["Grab"]
 MUTABLE_CONFIG_KEYS = ["post", "multipart_post", "headers", "cookies"]
 logger = logging.getLogger("grab.base")
 logger_network = logging.getLogger("grab.network")
@@ -58,7 +56,6 @@ def default_config() -> GrabConfig:
         "follow_refresh": False,  # must be retry object
         "follow_location": True,  # must be retry object
         "document_type": "html",
-        # Not Clear Scope
         # Session Properties
         "reuse_cookies": True,
         "common_headers": {},
@@ -67,12 +64,11 @@ def default_config() -> GrabConfig:
     }
 
 
-class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
+class Grab:
     __slots__ = (
         "proxylist",
         "config",
         "transport",
-        # "transport_param",
         "request_method",
         "__weakref__",
         "cookies",
@@ -82,7 +78,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
     )
     document_class: type[Document] = Document
     # Attributes which should be processed when Grab instance is cloned
-    clonable_attributes = ("proxylist",)
+    clonable_attributes = ["proxylist"]
 
     def __init__(
         self,
@@ -90,7 +86,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         **kwargs: Any,
     ) -> None:
         self.transport = self.process_transport_option(transport, Urllib3Transport)
-        self.meta: dict[str, Any] = {}
         self._doc: None | Document = None
         self.config: GrabConfig = default_config()
         self.config["common_headers"] = self.common_headers()
@@ -111,11 +106,7 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             not isinstance(transport, BaseTransport)
             and not issubclass(transport, BaseTransport)
         ):
-            raise GrabMisuseError(
-                'Parameter "transport" must be instance'
-                " of BaseTransport implementation"
-                " or implementation of BaseTransport"
-            )
+            raise GrabMisuseError("Invalid Grab transport: {}".format(transport))
         if transport is None:
             return default_transport()
         if isinstance(transport, BaseTransport):
@@ -162,14 +153,9 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             grab.setup(**kwargs)
         return grab
 
-    def dump_config(self) -> dict[str, Any]:
+    def dump_config(self) -> MutableMapping[str, Any]:
         """Make clone of current config."""
-        conf = cast(
-            # pylint: disable=deprecated-typing-alias
-            typing.Dict[str, Any],
-            copy_config(self.config)
-            # pylint: enable=deprecated-typing-alias
-        )
+        conf = copy_config(self.config)
         conf["state"] = {
             "cookiejar_cookies": list(self.cookies.cookiejar),
         }
@@ -250,13 +236,12 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
 
         Returns: ``Document`` objects.
         """
-        if url:
+        if url is not None:
             kwargs["url"] = url
         self.prepare_request(**kwargs)
         refresh_count = 0
         while True:
             self.log_request()
-
             try:
                 self.transport.request()
             except GrabError as ex:
@@ -285,27 +270,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
             performed
 
         For details see `Document.submit()` method
-
-        Example::
-
-            # Assume that we going to some page with some form
-            g.request('some url')
-            # Fill some fields
-            g.doc.set_input('username', 'bob')
-            g.doc.set_input('pwd', '123')
-            # Submit the form
-            g.submit()
-
-            # or we can just fill the form
-            # and do manual submission
-            g.doc.set_input('foo', 'bar')
-            g.submit(make_request=False)
-            g.request()
-
-            # for multipart forms we can specify files
-            from grab import UploadFile
-            g.doc.set_input('img', UploadFile('/path/to/image.png'))
-            g.submit()
         """
         assert self.doc is not None
         result = self.doc.get_form_request(**kwargs)
