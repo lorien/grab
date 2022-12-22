@@ -208,8 +208,6 @@ class Grab:  # pylint: disable=too-many-instance-attributes, too-many-public-met
         This method is called before doing real request via
         transport extension.
         """
-        # if self.transport is None:
-        #    self.setup_transport(self.transport_param)
         self.reset()
         if kwargs:
             self.setup(**kwargs)
