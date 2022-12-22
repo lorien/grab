@@ -3,24 +3,34 @@
 Testing Grab Framework
 ======================
 
-To run the full set of Grab tests you should install the additional 
-dependencies listed in `requirements_dev.txt` and 
-`requirements_dev_backend.txt.`
+Building test environment
+-------------------------
 
-To run all tests run the command:
+Run command:
+
+.. code:: shell
+
+    make bootstrap
+
+
+
+Fastest way to run all Grab tests
+---------------------------------
+
+.. code:: shell
+
+    pytest -n30
+
+Classic way to run tests
+------------------------
+
+Run the commands:
 
 .. code:: shell
 
 	./runtest.py --test-all --backend=mongodb,redis,pyquery
 
-
-.. _usage_testing_control:
-
-Controlling what parts of Grab to test
---------------------------------------
-
-You can run tests for specific parts of the Grab framework. Here are the
-available options for `runtest.py`::
+With runtestpy you can choose which set of tests to run. Available runtest.py options::
 
     --test-grab - Grab API tests
     --test-spider - Grab::Spider API tests
@@ -37,46 +47,14 @@ If you want to run specific test cases then use the `-t` option. For example:
     ./runtest.py -t test.grab_api
 
 
-.. _usage_testing_tox:
-
-Testing with Tox
-----------------
-
-To run Grab tests in different python environments you can use `tox` command::
-
-    tox
-
-By default it will run the full set of tests in two environments: python3.4 
-and python2.7 
-
-You can specify a specific environment with `-e` option::
-
-    tox -e py34
-
-To run all tests except backend tests, use `-nobackend` suffix::
-
-    tox -e py34-nobackend,py27-nobackend
-
-
-.. _usage_testing_database_configuration:
-
-Database configuration
-----------------------
-
-To run tests on a specific machine you may need to change the default database
-connection settings. Default settings are stored in the `test_settings.py`
-file. You can override any default setting in the `test_settings_local.py`
-file.
-
-
 .. _usage_testing_travis:
 
-Travis Testing
+Github Testing
 --------------
 
 The Grab project is configured to run the full set of tests for each new 
 commit placed into the project repository. You can see the status of a recent 
-commit and the status of all previous commits here: https://travis-ci.org/lorien/grab 
+commit and the status of all previous commits here: https://github.com/lorien/grab/actions
 
 
 .. _usage_testing_coverage:
@@ -84,16 +62,27 @@ commit and the status of all previous commits here: https://travis-ci.org/lorien
 Test Coverage
 -------------
 
-To see test coverage run the commands::
+To see test coverage just run full set of tests through pytest
 
-    coverage erase
-    coverage run --source=grab ./runtest.py --test-all --backend=mongodb,redis,pyquery
-    coverage report -m
+.. code:: shell
 
-Also you can use shortcut::
+    pytest -n30 -x --cov grab --cov-report term-missing
 
-    make coverage
+You can use shortcut::
+
+    make pytest
 
 The Grab project is configured to submit coverage statistics to the 
 coveralls.io service after each test session is completed by travis-ci. You 
-can see the coverage history at this URL: https://coveralls.io/r/lorien/grab
+can see the coverage history at this URL: https://coveralls.io/github/lorien/grab
+
+Linters
+-------
+
+Run with:
+
+.. code:: shell
+
+   make check
+
+That will run mypy, pylint and flake8 linters.

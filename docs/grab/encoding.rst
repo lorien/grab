@@ -4,7 +4,7 @@ HTML Document Encoding
 ======================
 
 Why does encoding matter?
-------------------------
+-------------------------
 
 By default, Grab automatically detects the encoding of the body of the HTML document.
 It uses this detected encoding to
@@ -28,7 +28,7 @@ A unicode representation of the document body can be obtained by calling `respon
     'utf-8'
 
 Encoding Detection Algorithm
----------------------------
+----------------------------
 
 Grab users https://github.com/lorien/unicodec library to detect encoding of the document. The unicodec library searches for
 encoding in following sources (from most priority to less):
@@ -49,6 +49,6 @@ encoding in following sources (from most priority to less):
 If no source indicates the encoding, or if the found encoding has an invalid value, then grab falls back to a default of UTF-8.
 
 Setting the encoding manually
-----------------------------
+-----------------------------
 
 You can bypass automatic encoding detection and specify it manually with :ref:`option_encoding` option.

@@ -3,26 +3,10 @@
 Grab Installation
 =================
 
-.. _requirement_parsing_error:
-
-Common problems
----------------
-
-
-1) If you got out of memory error while installing lxml on linux machine with 512Mb RAM
-or less then check that you swap file is enabled.
-
-
 .. _installation_linux:
 
 Installation on Linux
 ---------------------
-
-Update installation tools:
-
-.. code:: shell
-
-    pip install -U pip
 
 Run the command:
 
@@ -39,11 +23,6 @@ need to install:
 .. code:: shell
 
     apt-get install libxml2-dev libxslt-dev
-
-If your system has 512Mb RAM or less you might experience issues during installation
-of Grab dependencies. Installation of lxml requires quite a few RAM. In such case
-enable swap file if it is disabled.
-
 
 .. _installation_windows:
 
@@ -67,39 +46,16 @@ https://bootstrap.pypa.io/get-pip.py and then run the command
 
     python get-pip.py
 
-Step 4. Install Grab
+Run the command::
 
-Now you can install Grab via pip with this command::
+.. code:: shell
 
     python -m pip install grab
-
-.. _installation_freebsd:
-
-Installation on FreeBSD
------------------------
-
-Update installation tools:
-
-.. code:: shell
-
-    pip install -U setuptools pip
-
-Run the command:
-
-.. code:: shell
-
-    pip install -U grab
 
 .. _installation_macos:
 
 Installation on MacOS
 ---------------------
-
-Update installation tools:
-
-.. code:: shell
-
-    pip install -U setuptools pip
 
 Run the command:
 

@@ -239,11 +239,9 @@ class Spider:
             If set to `True` then automatically random proxy rotation
             will be used.
 
-
         Proxy source format should be one of the following (for each line):
-            - ip:port
-            - ip:port:login:password
-
+        - ip:port
+        - ip:port:login:password
         """
         if isinstance(source, BaseProxySource):
             self.proxylist = ProxyList(source)
