@@ -73,7 +73,6 @@ class Grab:
         "__weakref__",
         "cookies",
         "meta",
-        "exception",
         "_doc",
     )
     document_class: type[Document] = Document
@@ -91,7 +90,6 @@ class Grab:
         self.config["common_headers"] = self.common_headers()
         self.cookies = CookieManager()
         self.proxylist = ProxyList.from_lines_list([])
-        self.exception: None | Exception = None
         self.request_method: None | str = None
         self.reset()
         if kwargs:
@@ -130,7 +128,6 @@ class Grab:
         This methods is automatically called before each network request.
         """
         self.request_method = None
-        self.exception = None
         if self.transport:
             self.transport.reset()
 
@@ -244,8 +241,7 @@ class Grab:
             self.log_request()
             try:
                 self.transport.request()
-            except GrabError as ex:
-                self.exception = ex
+            except GrabError:
                 self.reset_temporary_options()
                 raise
             else:

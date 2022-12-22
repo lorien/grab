@@ -2,7 +2,7 @@ from pprint import pprint  # pylint: disable=unused-import
 
 from test_server import Response
 
-from grab import Grab, GrabTimeoutError
+from grab import Grab
 from grab.spider import Spider, Task
 from tests.util import BaseGrabTestCase, build_spider
 
@@ -53,23 +53,6 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         )
         bot = build_spider(TestSpider, network_try_limit=1)
         bot.run()
-
-    def test_grab_attribute_exception(self):
-        server = self.server
-        server.add_response(Response(sleep=2))
-
-        class SimpleSpider(Spider):
-            def task_generator(self):
-                grab = Grab()
-                grab.setup(url=server.get_url(), timeout=1)
-                yield Task("page", grab=grab, raw=True)
-
-            def task_page(self, grab, unused_task):
-                self.meta["exc"] = grab.exception
-
-        bot = build_spider(SimpleSpider)
-        bot.run()
-        self.assertTrue(isinstance(bot.meta["exc"], GrabTimeoutError))
 
     def test_stat_error_name_threaded_urllib3(self):
 
