@@ -48,12 +48,12 @@ def default_config() -> GrabConfig:
         "cookies": None,
         "timeout": None,
         "encoding": None,
-        # Payload, needs refactoring
-        "post": None,
-        "multipart_post": None,
+        # Needs refactoring
+        "post": None,  # ???
+        "multipart_post": None,  # ???
+        "redirect_limit": 10,  # -> Retry
+        "follow_location": True,  # -> Redirect
         # Not Sure
-        "redirect_limit": 10,  # must be retry object
-        "follow_location": True,  # must be retry object
         "document_type": "html",
         # Session Properties
         "reuse_cookies": True,
