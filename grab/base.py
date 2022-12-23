@@ -3,8 +3,9 @@ from __future__ import annotations
 import logging
 import threading
 from collections.abc import Mapping, MutableMapping
-from copy import copy, deepcopy
+from copy import copy
 from datetime import datetime
+from http.cookiejar import CookieJar
 from secrets import SystemRandom
 from typing import Any, cast
 from urllib.parse import urljoin, urlsplit
@@ -13,12 +14,12 @@ from proxylist import ProxyList
 from user_agent import generate_user_agent
 
 from grab.base_transport import BaseTransport
-from grab.cookie import CookieManager
 from grab.document import Document
 from grab.error import GrabError, GrabMisuseError, GrabTooManyRedirectsError
 from grab.request import Request
 from grab.transport import Urllib3Transport
 from grab.types import GrabConfig
+from grab.util.cookies import create_cookie
 from grab.util.html import find_base_url
 from grab.util.http import merge_with_dict
 
@@ -87,7 +88,7 @@ class Grab:
         self._doc: None | Document = None
         self.config: GrabConfig = default_config()
         self.config["common_headers"] = self.common_headers()
-        self.cookies = CookieManager()
+        self.cookies = CookieJar()
         self.proxylist = ProxyList.from_lines_list([])
         if kwargs:
             self.setup(**kwargs)
@@ -130,7 +131,10 @@ class Grab:
         grab.doc = self.doc.copy() if self.doc else None
         for key in self.clonable_attributes:
             setattr(grab, key, getattr(self, key))
-        grab.cookies = deepcopy(self.cookies)
+        jar = CookieJar()
+        for item in self.cookies:
+            jar.set_cookie(item)
+        grab.cookies = jar
         if kwargs:
             grab.setup(**kwargs)
         return grab
@@ -139,7 +143,7 @@ class Grab:
         """Make clone of current config."""
         conf = copy_config(self.config)
         conf["state"] = {
-            "cookiejar_cookies": list(self.cookies.cookiejar),
+            "cookiejar_cookies": list(self.cookies),
         }
         return conf
 
@@ -147,9 +151,10 @@ class Grab:
         """Configure grab instance with external config object."""
         self.config = copy_config(config)
         if "cookiejar_cookies" in config["state"]:
-            self.cookies = CookieManager.from_cookie_list(
-                config["state"]["cookiejar_cookies"]
-            )
+            jar = CookieJar()
+            for cookie in config["state"]["cookiejar_cookies"]:
+                jar.set_cookie(cookie)
+            self.cookies = jar
 
     def setup(self, **kwargs: Any) -> None:
         """Set up Grab instance configuration."""
@@ -218,7 +223,9 @@ class Grab:
             # If cookie item is provided in form with no domain specified,
             # then use domain value extracted from request URL
             for name, value in cookies.items():
-                self.cookies.set(name=name, value=value, domain=request_host)
+                self.cookies.set_cookie(
+                    create_cookie(name=name, value=value, domain=request_host)
+                )
 
     def log_request(self, req: Request, extra: str = "") -> None:
         """Send request details to logging system."""
@@ -317,7 +324,8 @@ class Grab:
             req, document_class=self.document_class
         )
         if self.config["reuse_cookies"]:
-            self.cookies.update(self.doc.cookies)
+            for item in self.doc.cookies:
+                self.cookies.set_cookie(item)
         self.doc.timestamp = now
         return self.doc
 
@@ -376,15 +384,26 @@ class Grab:
         self.cookies.clear()
 
     def __getstate__(self) -> dict[str, Any]:
-        """Reset cached lxml objects which could not be pickled."""
+        # TODO: should we use deep traversing?
         state = {}
         for cls in type(self).mro():
             cls_slots = getattr(cls, "__slots__", ())
-            for slot in cls_slots:
-                if hasattr(self, slot):
-                    state[slot] = getattr(self, slot)
+            for slot_name in cls_slots:
+                if hasattr(self, slot_name):
+                    if slot_name == "cookies":
+                        state["_cookies_items"] = list(self.cookies)
+                    else:
+                        state[slot_name] = getattr(self, slot_name)
         return state
 
     def __setstate__(self, state: Mapping[str, Any]) -> None:
-        for slot, value in state.items():
-            setattr(self, slot, value)
+        # TODO: should we use deep traversing?
+        # TODO: check assigned key is in slots
+        for slot_name, value in state.items():
+            if slot_name == "_cookies_items":
+                jar = CookieJar()
+                for item in value:
+                    jar.set_cookie(item)
+                self.cookies = jar
+            else:
+                setattr(self, slot_name, value)

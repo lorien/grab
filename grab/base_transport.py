@@ -5,9 +5,9 @@ import tempfile
 from abc import abstractmethod
 from collections.abc import Generator, Mapping
 from contextlib import contextmanager
+from http.cookiejar import CookieJar
 from typing import Any, Optional, cast
 
-from grab.cookie import CookieManager
 from grab.document import Document
 from grab.request import Request
 
@@ -29,20 +29,8 @@ class BaseTransport:
         raise NotImplementedError
 
     @abstractmethod
-    def request(
-        self, req: Request, grab_cookies: CookieManager
-    ) -> None:  # pragma: no cover
+    def request(self, req: Request, cookiejar: CookieJar) -> None:  # pragma: no cover
         raise NotImplementedError
-
-    # @abstractmethod
-    # def process_cookie_options(
-    #    self,
-    #    cookies: Mapping[str, Any],
-    #    cookie_manager: CookieManager,
-    #    request_url: str,
-    #    request_headers: dict[str, Any],
-    # ) -> None | str:  # pragma: no cover
-    #    raise NotImplementedError
 
     def setup_body_file(
         self,

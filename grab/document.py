@@ -35,7 +35,6 @@ from lxml.html import (
 )
 from selection import SelectorList, XpathSelector
 
-from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabMisuseError
 from grab.types import NULL, GrabConfig
 
@@ -116,7 +115,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         # Encoding must be processed AFTER body and headers are set
         self.encoding = self.process_encoding(encoding)
         # other
-        self.cookies = CookieManager(cookies)
+        self.cookies = cookies or CookieJar()
         self.timestamp = datetime.utcnow()
         self.download_size = 0
         self.upload_size = 0
@@ -152,7 +151,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def copy(self) -> Document:
         cj = CookieJar()
-        for item in self.cookies.cookiejar:
+        for item in self.cookies:
             cj.set_cookie(item)
         return self.__class__(
             code=self.code,
@@ -205,20 +204,30 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
 
     def __getstate__(self) -> Mapping[str, Any]:
         """Reset cached lxml objects which could not be pickled."""
-        state = {}
+        state: dict[str, Any] = {}
         for cls in type(self).mro():
             cls_slots = getattr(cls, "__slots__", ())
-            for slot in cls_slots:
-                if hasattr(self, slot):
-                    state[slot] = getattr(self, slot)
+            for slot_name in cls_slots:
+                if hasattr(self, slot_name):
+                    if slot_name == "cookies":
+                        state["_cookies_items"] = list(self.cookies)
+                    else:
+                        state[slot_name] = getattr(self, slot_name)
         state["_lxml_tree"] = None
         state["_strict_lxml_tree"] = None
         state["_lxml_form"] = None
         return state
 
     def __setstate__(self, state: Mapping[str, Any]) -> None:
-        for slot, value in state.items():
-            setattr(self, slot, value)
+        # TODO: check assigned key is in slots
+        for slot_name, value in state.items():
+            if slot_name == "_cookies_items":
+                jar = CookieJar()
+                for item in value:
+                    jar.set_cookie(item)
+                self.cookies = jar
+            else:
+                setattr(self, slot_name, value)
 
     # TextExtension methods
 

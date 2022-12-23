@@ -46,7 +46,7 @@ Now, a real example::
     >>> g.doc.encoding
     'utf-8'
     >>> g.doc.cookies
-    <grab.cookie.CookieManager object at 0x1f6b248>
+    <CookieJar[Cookie(...), Cookie(..)]>
     >>> g.doc.url
     'http://www.wikipedia.org/'
     >>> g.doc.download_size

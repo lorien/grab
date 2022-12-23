@@ -9,8 +9,6 @@ Some code got from
 """
 from __future__ import annotations
 
-import json
-from collections.abc import Mapping, Sequence
 from copy import copy
 from http.client import HTTPMessage
 from http.cookiejar import Cookie, CookieJar
@@ -19,23 +17,6 @@ from urllib.parse import urlparse, urlunparse
 from urllib.request import Request
 
 from urllib3._collections import HTTPHeaderDict
-
-from grab.error import GrabMisuseError
-
-COOKIE_ATTRS = (
-    "name",
-    "value",
-    "version",
-    "port",
-    "domain",
-    "path",
-    "secure",
-    "expires",
-    "discard",
-    "comment",
-    "comment_url",
-    "rfc2109",
-)
 
 
 # Reference:
@@ -145,11 +126,10 @@ class MockResponse:
 
 
 def create_cookie(  # pylint: disable=too-many-arguments, too-many-locals
-    # required
+    *,
     name: str,
     value: str,
     domain: str,
-    # non required
     comment: None | str = None,
     comment_url: None | str = None,
     discard: bool = True,
@@ -208,122 +188,10 @@ def create_cookie(  # pylint: disable=too-many-arguments, too-many-locals
     )
 
 
-class CookieManager:
-    """Class to operate cookies of Grab instance.
-
-    Each Grab instance has `cookies` attribute that is instance of
-    `CookieManager` class.
-
-    That class contains helpful methods to create, load, save cookies from/to
-    different places.
-    """
-
-    __slots__ = ("cookiejar",)
-
-    def __init__(self, cookiejar: None | CookieJar = None) -> None:
-        if cookiejar is not None:
-            self.cookiejar = cookiejar
-        else:
-            self.cookiejar = CookieJar()
-
-    def set(self, name: str, value: str, domain: str, **kwargs: Any) -> None:
-        """Add new cookie or replace existing cookie with same parameters.
-
-        :param name: name of cookie
-        :param value: value of cookie
-        :param kwargs: extra attributes of cookie
-        """
-        if domain == "localhost":
-            domain = ""
-
-        self.cookiejar.set_cookie(create_cookie(name, value, domain, **kwargs))
-
-    def update(self, cookies: CookieJar | CookieManager) -> None:
-        if isinstance(cookies, CookieJar):
-            for cookie in cookies:
-                self.cookiejar.set_cookie(cookie)
-        elif isinstance(cookies, CookieManager):
-            for cookie in cookies.cookiejar:
-                self.cookiejar.set_cookie(cookie)
-        else:
-            raise GrabMisuseError(
-                "Unknown type of cookies argument: %s" % type(cookies)
-            )
-
-    @classmethod
-    def from_cookie_list(cls, clist: Sequence[Cookie]) -> CookieManager:
-        jar = CookieJar()
-        for cookie in clist:
-            jar.set_cookie(cookie)
-        return cls(jar)
-
-    def clear(self) -> None:
-        self.cookiejar = CookieJar()
-
-    def __getstate__(self) -> dict[str, Any]:
-        state = {}
-        for cls in type(self).mro():
-            cls_slots = getattr(cls, "__slots__", ())
-            for slot in cls_slots:
-                if hasattr(self, slot):
-                    state[slot] = getattr(self, slot)
-
-        state["_cookiejar_cookies"] = list(self.cookiejar)
-        del state["cookiejar"]
-
-        return state
-
-    def __setstate__(self, state: Mapping[str, Any]) -> None:
-        self.cookiejar = CookieJar()
-        for cookie in state["_cookiejar_cookies"]:
-            self.cookiejar.set_cookie(cookie)
-        for key, value in state.items():
-            if key != "_cookiejar_cookies":
-                setattr(self, key, value)
-
-    def __getitem__(self, key: str) -> None | str:
-        for cookie in self.cookiejar:
-            if cookie.name == key:
-                return cookie.value
-        raise KeyError
-
-    def items(self) -> list[tuple[str, None | str]]:
-        res = []
-        for cookie in self.cookiejar:
-            res.append((cookie.name, cookie.value))
-        return res
-
-    def load_from_file(self, path: str) -> None:
-        """Load cookies from the file.
-
-        Content of file should be a JSON-serialized list of dicts.
-        """
-        with open(path, encoding="utf-8") as inf:
-            data = inf.read()
-            items = json.loads(data) if data else {}
-        for item in items:
-            extra = {
-                x: y for x, y in item.items() if x not in ["name", "value", "domain"]
-            }
-            self.set(item["name"], item["value"], item["domain"], **extra)
-
-    def get_dict(self) -> list[dict[str, Any]]:
-        res = []
-        for cookie in self.cookiejar:
-            res.append({x: getattr(cookie, x) for x in COOKIE_ATTRS})
-        return res
-
-    def save_to_file(self, path: str) -> None:
-        """Dump all cookies to file.
-
-        Cookies are dumped as JSON-serialized dict of keys and values.
-        """
-        with open(path, "w", encoding="utf-8") as out:
-            out.write(json.dumps(self.get_dict()))
-
-    def get_cookie_header(self, url: str, headers: dict[str, str]) -> None | str:
-        # :param req: object with httplib.Request interface
-        #    Actually, it have to have `url` and `headers` attributes
-        mocked_req = MockRequest(url, headers)
-        self.cookiejar.add_cookie_header(cast(Request, mocked_req))
-        return mocked_req.get_new_headers().get("Cookie")
+def build_cookie_header(
+    cookiejar: CookieJar, url: str, headers: dict[str, str]
+) -> None | str:
+    """Build HTTP Cookie header value for given cookies."""
+    mocked_req = MockRequest(url, headers)
+    cookiejar.add_cookie_header(cast(Request, mocked_req))
+    return mocked_req.get_new_headers().get("Cookie")

@@ -26,10 +26,10 @@ from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
 
 from grab import error
-from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.document import Document
 from grab.error import GrabMisuseError, GrabTimeoutError
 from grab.request import Request
+from grab.util.cookies import MockRequest, MockResponse, build_cookie_header
 from grab.util.http import merge_with_dict
 
 from .base_transport import BaseTransport
@@ -38,7 +38,7 @@ URL_DATA_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS"}
 
 
 def assemble(  # noqa: CCR001
-    req: Request, cookie_manager: CookieManager
+    req: Request, cookiejar: CookieJar
 ) -> tuple[str, dict[str, Any], bytes | None]:
     req_url = req.url
     req_hdr = copy(req.headers)
@@ -75,7 +75,7 @@ def assemble(  # noqa: CCR001
                 {"Content-Type": content_type, "Content-Length": len(req_body)},
                 replace=True,
             )
-    cookie_hdr = cookie_manager.get_cookie_header(req.url, req_hdr)
+    cookie_hdr = build_cookie_header(cookiejar, req.url, req_hdr)
     if cookie_hdr:
         req_hdr["Cookie"] = cookie_hdr
     return req_url, req_hdr, req_body
@@ -155,7 +155,7 @@ class Urllib3Transport(BaseTransport):
             )
         return self.pool
 
-    def request(self, req: Request, grab_cookies: CookieManager) -> None:
+    def request(self, req: Request, cookiejar: CookieJar) -> None:
         pool: PoolManager | SOCKSProxyManager | ProxyManager = (
             self.select_pool_for_request(req)
         )
@@ -179,7 +179,7 @@ class Urllib3Transport(BaseTransport):
             req_url = req.url
             req_method = req.method
 
-            req_url, req_hdr, req_data = assemble(req, grab_cookies)
+            req_url, req_hdr, req_data = assemble(req, cookiejar)
             try:
                 start_time = time.time()
                 res = pool.urlopen(  # type: ignore # FIXME

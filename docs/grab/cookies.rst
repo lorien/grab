@@ -13,24 +13,16 @@ Custom Cookies
 
 To send some custom cookies, use the :ref:`option_cookies` option. The value of that option should be a dict.
 When you specify some cookies with :ref:`option_cookies` option and then fire network request, all specified
-cookies are bound to the hostname of the request. If you want more granular control on custom cookies, you can
-use the `grab.cookies` cookie manager to specify a cookie with any attributes you want::
+cookies are bound to the hostname of the request.
 
+Internally Grab instance stores cookies in `http.cookiejar:CookieJar` instance.
+
+It is important to understand that Response object contains only cookies has been provided by the server in
+recent HTTP response. If you need all session cookies use "Grab:cookies" attribute.
+
+If you want more granular control on custom cookies, you can
+use the `grab.util.cookies.create_cookie` function to create Cookie object and add its to Grab instance::
+
+    >>> from grab.util.cookies import create_cookie
     >>> g = Grab()
-    >>> g.cookies.set(name='foo', value='bar', domain='yandex.ru', path='/host')
-
-Loading/dumping cookies
------------------------
-
-To dump current cookies to a file, use :py:meth:`grab.cookie.CookieManager.save_to_file`.
-
-To load cookies from a file, use :py:meth:`grab.cookie.CookieManager.load_from_file`.
-
-Permanent file to load/store cookies
-------------------------------------
-
-With the :ref:`option_cookiefile` option, you can specify the path to the file that Grab will use to store/load
-cookies for each request. Grab will load any cookies from that file before each network request, and after a response
-is received Grab will save all cookies to that file.
-
-More details about `grab.cookies` you can get in :ref:`API grab.cookie <api_grab_cookie>`
+    >>> g.cookies.set_cookie(create_cookie(name='foo', value='bar', domain='yandex.ru', path='/host'))
