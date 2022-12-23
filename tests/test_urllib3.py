@@ -1,7 +1,7 @@
 from urllib3 import PoolManager
 from urllib3.exceptions import LocationParseError
 
-from grab.error import GrabInvalidResponse
+from grab.errors import GrabInvalidResponse
 from tests.util import BaseGrabTestCase, build_grab
 
 

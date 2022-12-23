@@ -4,7 +4,7 @@ from pprint import pprint  # pylint: disable=unused-import
 from test_server import Response
 
 from grab.document import Document
-from grab.error import GrabConnectionError, GrabMisuseError
+from grab.errors import GrabConnectionError, GrabMisuseError
 from tests.util import BaseGrabTestCase, build_grab
 
 

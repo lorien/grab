@@ -1,6 +1,6 @@
 from test_server import Response
 
-from grab.error import GrabInvalidResponse, GrabTooManyRedirectsError
+from grab.errors import GrabInvalidResponse, GrabTooManyRedirectsError
 from tests.util import BaseGrabTestCase, build_grab
 
 

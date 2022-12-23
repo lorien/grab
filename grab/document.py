@@ -35,7 +35,7 @@ from lxml.html import (
 )
 from selection import SelectorList, XpathSelector
 
-from grab.error import DataNotFound, GrabMisuseError
+from grab.errors import DataNotFound, GrabMisuseError
 from grab.types import NULL, GrabConfig
 
 THREAD_STORAGE = threading.local()

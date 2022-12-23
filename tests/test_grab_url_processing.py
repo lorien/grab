@@ -1,6 +1,6 @@
 from test_server import Response
 
-from grab.error import GrabError
+from grab.errors import GrabError
 from tests.util import BaseGrabTestCase, build_grab
 
 

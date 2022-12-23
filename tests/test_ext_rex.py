@@ -1,7 +1,7 @@
 import re
 
 from grab.document import Document
-from grab.error import DataNotFound
+from grab.errors import DataNotFound
 from tests.util import BaseGrabTestCase
 
 HTML = """

@@ -1,6 +1,6 @@
 from test_server import Response
 
-from grab.error import GrabTimeoutError
+from grab.errors import GrabTimeoutError
 from tests.util import BaseGrabTestCase, build_grab
 
 

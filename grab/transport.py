@@ -25,9 +25,13 @@ from urllib3.response import HTTPResponse as Urllib3HTTPResponse
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
 
-from grab import error
 from grab.document import Document
-from grab.error import GrabMisuseError, GrabTimeoutError
+from grab.errors import (
+    GrabConnectionError,
+    GrabInvalidResponse,
+    GrabMisuseError,
+    GrabTimeoutError,
+)
 from grab.request import Request
 from grab.util.cookies import MockRequest, MockResponse, build_cookie_header
 from grab.util.http import merge_with_dict
@@ -122,15 +126,15 @@ class Urllib3Transport(BaseTransport):
         try:
             yield
         except exceptions.ReadTimeoutError as ex:
-            raise error.GrabTimeoutError("ReadTimeoutError", ex)
+            raise GrabTimeoutError("ReadTimeoutError", ex) from ex
         except exceptions.ConnectTimeoutError as ex:
-            raise error.GrabConnectionError("ConnectTimeoutError", ex)
+            raise GrabConnectionError("ConnectTimeoutError", ex) from ex
         except exceptions.ProtocolError as ex:
-            raise error.GrabConnectionError("ProtocolError", ex)
+            raise GrabConnectionError("ProtocolError", ex) from ex
         except exceptions.SSLError as ex:
-            raise error.GrabConnectionError("SSLError", ex)
+            raise GrabConnectionError("SSLError", ex) from ex
         except ssl.SSLError as ex:
-            raise error.GrabConnectionError("SSLError", ex)
+            raise GrabConnectionError("SSLError", ex) from ex
 
     def select_pool_for_request(
         self, req: Request
@@ -193,7 +197,7 @@ class Urllib3Transport(BaseTransport):
                 )
                 self._connect_time = time.time() - start_time
             except LocationParseError as ex:
-                raise error.GrabInvalidResponse(str(ex), ex)
+                raise GrabInvalidResponse(str(ex), ex) from ex
 
         self._response = res
 

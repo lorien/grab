@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from test_server import Response
 
-from grab.error import GrabFeatureIsDeprecated
+from grab.errors import GrabFeatureIsDeprecated
 from grab.spider import Spider, Task
 from grab.spider.error import SpiderMisuseError
 from grab.spider.queue_backend.base import BaseTaskQueue

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from grab.base import Grab, copy_config
-from grab.error import raise_feature_is_deprecated
+from grab.errors import raise_feature_is_deprecated
 from grab.spider.error import SpiderMisuseError
 from grab.types import GrabConfig
 

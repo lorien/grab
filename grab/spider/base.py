@@ -17,7 +17,7 @@ from proxylist.base import BaseProxySource
 
 from grab.base import Grab
 from grab.base_transport import BaseTransport
-from grab.error import (
+from grab.errors import (
     GrabFeatureIsDeprecated,
     GrabInvalidResponse,
     GrabInvalidUrl,

@@ -15,7 +15,7 @@ from user_agent import generate_user_agent
 
 from grab.base_transport import BaseTransport
 from grab.document import Document
-from grab.error import GrabError, GrabMisuseError, GrabTooManyRedirectsError
+from grab.errors import GrabError, GrabMisuseError, GrabTooManyRedirectsError
 from grab.request import Request
 from grab.transport import Urllib3Transport
 from grab.types import GrabConfig

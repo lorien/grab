@@ -1,4 +1,4 @@
-from grab.error import GrabError
+from grab.errors import GrabError
 
 __all__ = (
     "SpiderError",

@@ -1,6 +1,6 @@
 from .base import Grab
 from .document import Document
-from .error import (
+from .errors import (
     DataNotFound,
     GrabError,
     GrabMisuseError,
