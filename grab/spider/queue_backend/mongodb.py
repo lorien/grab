@@ -13,7 +13,6 @@ from pymongo.collection import Collection
 
 from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.task import Task
-from grab.types import JsonDocument
 
 LOG = logging.getLogger("grab.spider.queue_backend.mongodb")
 
@@ -28,10 +27,8 @@ class MongodbTaskQueue(BaseTaskQueue):
         super().__init__()
         self.database_name: str = database_name
         self.collection_name: str = collection_name or self.random_queue_name()
-        self.connection: MongoClient[JsonDocument] = MongoClient(
-            **(connection_args or {})
-        )
-        self.collection: Collection[JsonDocument] = self.connection[self.database_name][
+        self.connection: MongoClient[Any] = MongoClient(**(connection_args or {}))
+        self.collection: Collection[Any] = self.connection[self.database_name][
             self.collection_name
         ]
         LOG.debug(
