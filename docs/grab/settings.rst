@@ -84,34 +84,36 @@ The HTTP request method to use. By default, GET is used. If you specify `post` o
 
 .. _option_post:
 
-post
-^^^^
-
-:Type: sequence of pairs or dict or string
-:Default: None
-
-Data to be sent with the POST request. Depending on the type of data, the corresponding method
-of handling that data is selected. The default type for POST requests is "application/x-www-form-urlencoded".
-
-In case of `dict` or sequence of pairs, the following algorithm is applied to each value:
-
-* objects of `grab.upload.UploadFile` class are converted into corresponding urllib3 objects
-* unicode strings are converted into byte strings
-* None values are converted into empty strings
-
-If `post` value is just a string, then it is placed into the network request without any modification.
-
-
-.. _option_multipart_post:
-
-multipart_post
-^^^^^^^^^^^^^^
+fields
+^^^^^^
 
 :Type: sequence of pairs or dict
 :Default: None
 
-Data to be sent with the POST request. This option forces the POST request to be
-in "multipart/form-data" form.
+Data to be sent in serialized form. Serialization depends on the type of request.
+For GET on mulitpart post requests the "urlencode" method is used.
+By default POST/PUT requests are multipart.
+
+.. _option_multipart:
+
+multipart
+^^^^^^^^^
+
+:Type: boolean
+:Default: True
+
+Control if multipart encoding must be used for PUT/POST requests.
+
+
+.. _option_multipart_post:
+
+body
+^^^^
+
+:Type: bytes
+:Default: None
+
+Raw bytes content to send
 
 
 .. _option_headers:

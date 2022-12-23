@@ -67,22 +67,6 @@ When you call `submit`, Grab will build a POST request using the values passed
 in via `set_input`.  If you did not specify values for some form elements 
 then Grab will use their default values.  
 
-Grab also provides an interface to upload files::
-
-    >>> from grab import Grab, UploadFile
-    >>> g = Grab()
-    >>> g.setup(post={'name': 'Flower', 'file': UploadFile('/path/to/image.png')})
-    >>> g.submit()
-
-Also you can upload files via the form API::
-
-    >>> from grab import Grab, UloadFile
-    >>> g = Grab()
-    >>> g.request('http://example.com/some-form')
-    >>> g.set_input('name', 'A flower')
-    >>> g.set_input('file', UploadFile('/path/to/image.png'))
-    >>> g.submit()
-
 Response Content
 ----------------
 

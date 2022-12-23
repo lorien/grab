@@ -91,15 +91,6 @@ By default, Grab will compose a POST request with
     g.request('http://example.com/', multipart_post=[('key', 'val1'),
                                                 ('key', 'val2')])
 
-
-To upload a file, use the `grab.upload.UploadFile` class:
-
-.. code:: python
-
-    g = Grab()
-    g.request('http://example.com/',
-         multipart_post={'foo': 'bar', 'file': UploadFile('/path/to/file')})
-
 .. _grab_request_put:
 
 PUT Request

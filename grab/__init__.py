@@ -8,6 +8,5 @@ from .errors import (
     GrabTimeoutError,
 )
 from .request import Request
-from .upload import UploadContent, UploadFile
 
 __version__ = "0.6.41"
