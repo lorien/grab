@@ -2,7 +2,7 @@ from test_server import Response
 
 from grab import Grab
 from grab.spider import Spider, Task
-from grab.spider.error import FatalError, SpiderError
+from grab.spider.errors import FatalError, SpiderError
 from grab.util.timeout import Timeout
 from tests.util import BaseGrabTestCase, build_spider
 

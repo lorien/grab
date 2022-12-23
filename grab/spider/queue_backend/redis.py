@@ -12,9 +12,9 @@ from typing import Any, cast
 from fastrq.priorityqueue import PriorityQueue  # pytype: disable=import-error
 from redis import Redis
 
-from grab.spider.error import SpiderMisuseError
-from grab.spider.queue_backend.base import BaseTaskQueue
-from grab.spider.task import Task
+from ..errors import SpiderMisuseError
+from ..task import Task
+from .base import BaseTaskQueue
 
 system_random = SystemRandom()
 

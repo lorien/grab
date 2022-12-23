@@ -9,8 +9,8 @@ from typing import Any
 from procstat import Stat
 
 from grab.base import Grab
-from grab.spider.error import NoTaskHandler
 
+from ..errors import NoTaskHandler
 from ..interface import FatalErrorQueueItem
 from ..task import Task
 from .base import BaseService, ServiceWorker

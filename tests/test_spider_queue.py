@@ -5,7 +5,7 @@ from test_server import Response
 
 from grab.errors import GrabFeatureIsDeprecated
 from grab.spider import Spider, Task
-from grab.spider.error import SpiderMisuseError
+from grab.spider.errors import SpiderMisuseError
 from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.queue_backend.memory import MemoryTaskQueue
 from tests.util import BaseGrabTestCase, build_spider, load_test_config

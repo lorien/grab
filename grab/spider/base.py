@@ -15,9 +15,9 @@ from procstat import Stat
 from proxylist import ProxyList, ProxyServer
 from proxylist.base import BaseProxySource
 
-from grab.base import Grab
-from grab.base_transport import BaseTransport
-from grab.errors import (
+from ..base import Grab
+from ..base_transport import BaseTransport
+from ..errors import (
     GrabFeatureIsDeprecated,
     GrabInvalidResponse,
     GrabInvalidUrl,
@@ -27,20 +27,18 @@ from grab.errors import (
     OriginalExceptionGrabError,
     ResponseNotValid,
 )
-from grab.spider.error import FatalError, NoTaskHandler, SpiderError, SpiderMisuseError
-from grab.spider.queue_backend.base import BaseTaskQueue
-from grab.spider.queue_backend.memory import MemoryTaskQueue
-from grab.spider.service.base import BaseService
-from grab.spider.service.network import BaseNetworkService, NetworkServiceThreaded
-from grab.spider.task import Task
-from grab.types import GrabConfig
-from grab.util.metrics import format_traffic_value
-
+from ..types import GrabConfig
+from ..util.metrics import format_traffic_value
+from .errors import FatalError, NoTaskHandler, SpiderError, SpiderMisuseError
 from .interface import FatalErrorQueueItem
-from .service.network import NetworkResult
+from .queue_backend.base import BaseTaskQueue
+from .queue_backend.memory import MemoryTaskQueue
+from .service.base import BaseService
+from .service.network import BaseNetworkService, NetworkResult, NetworkServiceThreaded
 from .service.parser import ParserService
 from .service.task_dispatcher import TaskDispatcherService
 from .service.task_generator import TaskGeneratorService
+from .task import Task
 
 DEFAULT_TASK_PRIORITY = 100
 DEFAULT_NETWORK_STREAM_NUMBER = 3
