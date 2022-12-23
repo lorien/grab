@@ -53,7 +53,6 @@ GRAB_TEST_LIST = (
     # *** Other things
     "tests.test_xml_security",
     "tests.test_server",
-    "tests.test_util_http",
 )
 
 # ************

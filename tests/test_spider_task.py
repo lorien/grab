@@ -340,7 +340,7 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot = build_spider(TestSpider)
 
         grab = Grab()
-        grab.setup(url=self.server.get_url(), post={"x": "y"})
+        grab.setup(url=self.server.get_url(), fields={"x": "y"})
         task = Task("foo", grab=grab)
         bot.add_task(task)
         bot.run()

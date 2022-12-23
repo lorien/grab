@@ -5,24 +5,22 @@ import logging
 import ssl
 import time
 import urllib.request
-from collections.abc import Generator, Mapping, MutableMapping, Sequence
+from collections.abc import Generator, Mapping, MutableMapping
 from contextlib import contextmanager
 from copy import copy
 from http.client import HTTPResponse
 from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
 from typing import Any, cast
-from urllib.parse import urlsplit
+from urllib.parse import urlencode, urlsplit
 
 import certifi
 from urllib3 import PoolManager, ProxyManager, exceptions, make_headers
 from urllib3.contrib.socks import SOCKSProxyManager
 from urllib3.exceptions import LocationParseError
-from urllib3.fields import RequestField
-from urllib3.filepost import encode_multipart_formdata
 
 # from urllib3.fields import RequestField
-# from urllib3.filepost import encode_multipart_formdata
+from urllib3.filepost import encode_multipart_formdata
 from urllib3.response import HTTPResponse as Urllib3HTTPResponse
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
@@ -33,97 +31,55 @@ from grab.document import Document
 from grab.error import GrabMisuseError, GrabTimeoutError
 from grab.request import Request
 from grab.types import GrabConfig
-from grab.upload import UploadContent, UploadFile
-from grab.util.http import normalize_http_values, normalize_post_data, normalize_url
+from grab.util.http import merge_with_dict
 
 from .base_transport import BaseTransport
 
+URL_DATA_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS"}
 
-def assemble(
+
+def assemble(  # noqa: CCR001
     req: Request, cookie_manager: CookieManager
-) -> tuple[dict[str, Any], bytes | None]:
+) -> tuple[str, dict[str, Any], bytes | None]:
+    req_url = req.url
     req_hdr = copy(req.headers)
-    post_headers, req_data = process_config_post(
-        req.post,
-        req.multipart_post,
-        req.method,
-        req.encoding or "utf-8",
-    )
-    req_hdr.update(post_headers)
-
+    req_body = None
+    if req.method in URL_DATA_METHODS:
+        if req.body:
+            raise GrabMisuseError(
+                "It is not allowed to specify 'body' option"
+                " for request of method '{}'".format(req.method)
+            )
+        if req.fields:
+            req_url = req_url + "?" + urlencode(req.fields)
+    else:
+        if req.body:
+            req_body = req.body
+        if req.fields:
+            if req.body:
+                raise GrabMisuseError(
+                    "It is not allowed to configure request with"
+                    " both 'body' and 'fields' options."
+                )
+            if req.multipart:
+                req_body, content_type = encode_multipart_formdata(  # type: ignore
+                    req.fields
+                )
+                req_body = cast(bytes, req_body)
+            else:
+                req_body, content_type = (
+                    urlencode(req.fields).encode(),
+                    "application/x-www-form-urlencoded",
+                )
+            merge_with_dict(
+                req_hdr,
+                {"Content-Type": content_type, "Content-Length": len(req_body)},
+                replace=True,
+            )
     cookie_hdr = cookie_manager.get_cookie_header(req.url, req_hdr)
     if cookie_hdr:
         req_hdr["Cookie"] = cookie_hdr
-
-    return req_hdr, req_data
-
-
-def process_upload_items(
-    items: Sequence[tuple[str, Any]]
-) -> Sequence[RequestField | tuple[str, Any]]:
-    result: list[RequestField | tuple[str, Any]] = []
-    for key, val in items:
-        if isinstance(val, UploadContent):
-            headers = {"Content-Type": val.content_type}
-            field = RequestField(
-                name=key, data=val.content, filename=val.filename, headers=headers
-            )
-            field.make_multipart(content_type=val.content_type)
-            result.append(field)
-        elif isinstance(val, UploadFile):
-            with open(val.path, "rb") as inp:
-                data = inp.read()
-            headers = {"Content-Type": val.content_type}
-            field = RequestField(
-                name=key, data=data, filename=val.filename, headers=headers
-            )
-            field.make_multipart(content_type=val.content_type)
-            result.append(field)
-        else:
-            result.append((key, val))
-    return result
-
-
-def process_config_post(
-    post: Any, multipart_post: Any, method: str, encoding: str
-) -> tuple[dict[str, Any], None | bytes]:
-    if method in {"POST", "PUT"} and (post is None and multipart_post is None):
-        raise GrabMisuseError(
-            "Neither `post` or `multipart_post`"
-            " options was specified for the %s"
-            " request" % method
-        )
-    extra_headers = {}
-    post_data: None | bytes = None
-    if multipart_post is not None:
-        post_data = multipart_post
-        if isinstance(post_data, str):
-            raise GrabMisuseError("Option multipart_post data does not accept unicode.")
-        if isinstance(post_data, bytes):
-            pass
-        else:
-            # WTF: why I encode things into bytes and then decode them back?
-            post_items: Sequence[tuple[bytes, Any]] = normalize_http_values(
-                multipart_post,
-                encoding=encoding,
-            )
-            post_items2: Sequence[tuple[str, Any]] = [
-                (
-                    x[0].decode(encoding) if isinstance(x[0], bytes) else x[0],
-                    x[1].decode(encoding) if isinstance(x[1], bytes) else x[1],
-                )
-                for x in post_items
-            ]
-            post_items3 = process_upload_items(post_items2)
-            post_data, content_type = encode_multipart_formdata(
-                post_items3
-            )  # type: ignore # FIXME
-            extra_headers["Content-Type"] = content_type
-        extra_headers["Content-Length"] = len(post_data)
-    elif post is not None:
-        post_data = normalize_post_data(post, encoding)
-        extra_headers["Content-Length"] = len(post_data)
-    return extra_headers, post_data
+    return req_url, req_hdr, req_body
 
 
 def update_cookie_manager(
@@ -160,7 +116,7 @@ class Urllib3Transport(BaseTransport):
         self._request: None | Request = None
         self._response: None | Urllib3HTTPResponse = None
         self._connect_time: None | float = None
-        self._request_item: tuple[dict[str, Any], bytes | None] = {}, None
+        self._request_item: tuple[str, dict[str, Any], bytes | None] = "", {}, None
         self.reset()
 
     def __getstate__(self) -> dict[str, Any]:
@@ -186,37 +142,28 @@ class Urllib3Transport(BaseTransport):
         self._request = None
         self._response = None
         self._connect_time = None
-        self._request_item = {}, None
+        self._request_item = "", {}, None
 
     def process_config(
         self, grab_config: MutableMapping[str, Any], grab_cookies: CookieManager
-    ) -> None:
-        try:
-            request_url = normalize_url(grab_config["url"])
-        except Exception as ex:
-            raise error.GrabInvalidUrl("%s: %s" % (str(ex), str(grab_config["url"])))
-        method = self.detect_request_method(grab_config)
-        # HEADERS
-        req_headers: dict[str, str] = copy(grab_config["common_headers"])
-        if grab_config["headers"]:
-            req_headers.update(grab_config["headers"])
-
+    ) -> Request:
         self._request = Request(
-            url=request_url,
+            url=grab_config["url"],
             encoding=grab_config["encoding"],
-            method=method,
+            method=grab_config["method"],
             timeout=grab_config["timeout"],
             proxy=grab_config["proxy"],
             proxy_type=grab_config["proxy_type"],
             proxy_userpwd=grab_config["proxy_userpwd"],
-            headers=req_headers,
+            headers=grab_config["headers"],
             cookies=grab_config["cookies"],
-            # data=req_data,
-            post=grab_config["post"],
-            multipart_post=grab_config["multipart_post"],
+            body=grab_config["body"],
+            fields=grab_config["fields"],
+            multipart=grab_config["multipart"],
         )
         update_cookie_manager(grab_cookies, self._request.cookies, self._request.url)
         self._request_item = assemble(self._request, grab_cookies)
+        return self._request
 
     @contextmanager
     def wrap_transport_error(self) -> Generator[None, None, None]:
@@ -281,7 +228,7 @@ class Urllib3Transport(BaseTransport):
             timeout = Timeout(connect=req.timeout.connect, read=req.timeout.read)
             req_url = req.url
             req_method = req.method
-            req_hdr, req_data = self._request_item
+            req_url, req_hdr, req_data = self._request_item
             try:
                 start_time = time.time()
                 res = pool.urlopen(  # type: ignore # FIXME

@@ -16,12 +16,14 @@ from grab.base_transport import BaseTransport
 from grab.cookie import CookieManager
 from grab.document import Document
 from grab.error import GrabError, GrabMisuseError, GrabTooManyRedirectsError
+from grab.request import Request
 from grab.transport import Urllib3Transport
 from grab.types import GrabConfig
 from grab.util.html import find_base_url
+from grab.util.http import merge_with_dict
 
 __all__ = ["Grab"]
-MUTABLE_CONFIG_KEYS = ["post", "multipart_post", "headers", "cookies"]
+MUTABLE_CONFIG_KEYS = ["fields", "headers", "cookies"]
 logger = logging.getLogger("grab.base")
 logger_network = logging.getLogger("grab.network")
 system_random = SystemRandom()
@@ -47,16 +49,18 @@ def default_config() -> GrabConfig:
         "cookies": None,
         "timeout": None,
         "encoding": None,
+        # Payload
+        "body": None,
+        "fields": None,
+        "multipart": None,
         # Needs refactoring
-        "post": None,  # ???
-        "multipart_post": None,  # ???
         "redirect_limit": 10,  # -> Retry
         "follow_location": True,  # -> Redirect
         # Not Sure
         "document_type": "html",
         # Session Properties
+        "common_headers": None,
         "reuse_cookies": True,
-        "common_headers": {},
         "proxy_auto_change": True,
         "state": {},
     }
@@ -87,8 +91,6 @@ class Grab:
         self.config["common_headers"] = self.common_headers()
         self.cookies = CookieManager()
         self.proxylist = ProxyList.from_lines_list([])
-        self.request_method: None | str = None
-        self.reset()
         if kwargs:
             self.setup(**kwargs)
 
@@ -115,18 +117,6 @@ class Grab:
     @doc.setter
     def doc(self, obj: Document) -> None:
         self._doc = obj
-
-    def reset(self) -> None:
-        """Reset Grab instnce.
-
-        Resets all attributes which could be modified during previous request
-        or which is not initialized yet if this is the new Grab instance.
-
-        This methods is automatically called before each network request.
-        """
-        self.request_method = None
-        if self.transport:
-            self.transport.reset()
 
     def clone(self, **kwargs: Any) -> Grab:
         r"""Create clone of Grab instance.
@@ -173,38 +163,51 @@ class Grab:
             kwargs["url"] = self.make_url_absolute(kwargs["url"])
         self.config.update(kwargs)
 
-    def prepare_request(self, **kwargs: Any) -> None:
+    def prepare_request(self) -> Request:
         """Configure all things to make real network request.
 
-        This method is called before doing real request via
-        transport extension.
+        This method is called before doing real request via transport extension.
         """
-        self.reset()
-        if kwargs:
-            self.setup(**kwargs)
+        self.transport.reset()
+        if self.config["url"] is None:
+            raise GrabMisuseError("Request URL must be set")
+        # TODO: activate
+        # if self.config["method"] is None:
+        #    raise GrabMisuseError("Request method must be set")
+        # TODO: remove
+        if not self.config["method"]:
+            self.config["method"] = (
+                "POST" if self.config["body"] or self.config["fields"] else "GET"
+            )
+        self.config["method"] = self.config["method"].upper()
+        # proxylist extension
         if self.proxylist.size() and self.config["proxy_auto_change"]:
             self.change_proxy()
-        self.request_method = self.transport.detect_request_method(self.config)
-        self.transport.process_config(self.config, self.cookies)
+        # common headers extension
+        if not self.config["headers"]:
+            self.config["headers"] = {}
+        if self.config["common_headers"]:
+            merge_with_dict(self.config["headers"], self.config["common_headers"])
+        return self.transport.process_config(self.config, self.cookies)
 
-    def log_request(self, extra: str = "") -> None:
+    def log_request(self, req: Request, extra: str = "") -> None:
         """Send request details to logging system."""
         thread_name = threading.current_thread().name.lower()
         proxy_info = (
             " via {} proxy of type {}{}".format(
-                self.config["proxy"],
-                self.config["proxy_type"],
+                req.proxy,
+                req.proxy_type,
                 " with auth" if self.config["proxy_userpwd"] else "",
             )
-            if self.config["proxy"]
+            if req.proxy
             else ""
         )
         logger_network.debug(
             "%s%s%s %s%s",
             "" if (thread_name == "mainthread") else "[{}] ".format(thread_name),
             "[{}]".format(extra) if extra else "",
-            self.request_method or "GET",
-            self.config["url"],
+            req.method or "GET",
+            req.url,
             proxy_info,
         )
 
@@ -228,10 +231,11 @@ class Grab:
         """
         if url is not None:
             kwargs["url"] = url
-        self.prepare_request(**kwargs)
+        self.setup(**kwargs)
+        req = self.prepare_request()
         redir_count = 0
         while True:
-            self.log_request()
+            self.log_request(req)
             try:
                 self.transport.request()
             except GrabError:
@@ -245,9 +249,8 @@ class Grab:
                     redir_count += 1
                     if redir_count > self.config["redirect_limit"]:
                         raise GrabTooManyRedirectsError()
-                    self.prepare_request(
-                        url=self.make_url_absolute(redir_url),
-                    )
+                    self.setup(url=self.make_url_absolute(redir_url))
+                    req = self.prepare_request()
                     continue
                 return doc
 
@@ -261,13 +264,13 @@ class Grab:
         For details see `Document.submit()` method
         """
         assert self.doc is not None
-        result = self.doc.get_form_request(**kwargs)
-        if result["multipart_post"]:
-            self.setup(multipart_post=result["multipart_post"])
-        if result["post"]:
-            self.setup(post=result["post"])
-        if result["url"]:
-            self.setup(url=result["url"])
+        url, method, is_multipart, fields = self.doc.get_form_request(**kwargs)
+        self.setup(
+            url=url,
+            method=method,
+            fields=fields,
+            multipart=is_multipart,
+        )
         if make_request:
             return self.request()
         return None
@@ -289,8 +292,9 @@ class Grab:
         return self.doc
 
     def reset_temporary_options(self) -> None:
-        self.config["post"] = None
-        self.config["multipart_post"] = None
+        self.config["body"] = None
+        self.config["fields"] = None
+        self.config["multipart"] = None
         self.config["method"] = None
 
     def change_proxy(self, random: bool = True) -> None:

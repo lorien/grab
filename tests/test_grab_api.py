@@ -1,4 +1,5 @@
 from copy import deepcopy
+from pprint import pprint  # pylint: disable=unused-import
 
 from test_server import Response
 
@@ -20,8 +21,10 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.server.add_response(Response(data=b"Moon"))
         grab.request(self.server.get_url())
         self.assertTrue(b"Moon" in grab.doc.body)
+
         self.server.add_response(Response(data=b"Foo"))
-        grab2 = grab.clone(method="post", post="")
+        grab2 = grab.clone(method="post", body=b"")
+
         grab2.request(self.server.get_url())
         self.assertTrue(b"Foo" in grab2.doc.body)
 
@@ -41,12 +44,12 @@ class GrabApiTestCase(BaseGrabTestCase):
 
     def test_error_request(self):
         grab = build_grab()
-        grab.setup(post={"foo": "bar"})
+        grab.setup(fields={"foo": "bar"})
 
         with self.assertRaises(GrabConnectionError):
             grab.request(url="Could-not-resolve-host-address")
-        self.assertEqual(grab.config["post"], None)
-        self.assertEqual(grab.config["multipart_post"], None)
+        self.assertEqual(grab.config["body"], None)
+        self.assertEqual(grab.config["fields"], None)
         self.assertEqual(grab.config["method"], None)
 
     def test_document(self):

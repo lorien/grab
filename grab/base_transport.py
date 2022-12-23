@@ -9,6 +9,7 @@ from typing import Any, Optional, cast
 
 from grab.cookie import CookieManager
 from grab.document import Document
+from grab.request import Request
 from grab.types import GrabConfig
 
 
@@ -35,7 +36,7 @@ class BaseTransport:
     @abstractmethod
     def process_config(
         self, grab_config: GrabConfig, grab_cookies: CookieManager
-    ) -> None:  # pragma: no cover
+    ) -> Request:  # pragma: no cover
         raise NotImplementedError
 
     # @abstractmethod
@@ -72,6 +73,6 @@ class BaseTransport:
         # pylint: enable=consider-alternative-union-syntax
         if method:
             return method.upper()
-        if grab_config["post"] or grab_config["multipart_post"]:
+        if grab_config["body"] or grab_config["fields"]:
             return "POST"
         return "GET"

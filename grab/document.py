@@ -21,7 +21,7 @@ from io import BytesIO, StringIO
 from pprint import pprint  # pylint: disable=unused-import
 from re import Match, Pattern
 from typing import Any, Protocol, cast
-from urllib.parse import SplitResult, parse_qs, urlencode, urljoin, urlsplit
+from urllib.parse import SplitResult, parse_qs, urljoin, urlsplit
 
 import unicodec  # pylint: disable=wrong-import-order
 from lxml import etree
@@ -653,7 +653,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         url: None | str = None,
         extra_post: None | Mapping[str, Any] | Sequence[tuple[str, Any]] = None,
         remove_from_post: None | Sequence[str] = None,
-    ) -> MutableMapping[str, Any]:
+    ) -> tuple[str, str, bool, Sequence[tuple[str, Any]]]:
         """Submit default form.
 
         :param submit_name: name of button which should be "clicked" to
@@ -675,48 +675,29 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         post = self.form_fields()
         self.clean_submit_controls(post, submit_name)
         assert self.url is not None
-
         action_url = (
             urljoin(self.url, url) if url else urljoin(self.url, self.form.action)
         )
-
         # Values from `extra_post` should override values in form
         # `extra_post` allows multiple value of one key
-
         # Process saved values of file fields
         if self.form.method == "POST" and "multipart" in self.form.get("enctype", ""):
             for key, obj in self._file_fields.items():
                 post[key] = obj
-
         post_items: list[tuple[str, Any]] = list(post.items())
         del post
-
         if extra_post:
             post_items = self.process_extra_post(
                 post_items, normalize_pairs(extra_post)
             )
-
         if remove_from_post:
             post_items = [(x, y) for x, y in post_items if x not in remove_from_post]
-
-        result: MutableMapping[str, Any] = {
-            "multipart_post": None,
-            "post": None,
-            "url": None,
-        }
-
-        if self.form.method == "POST":
-            if "multipart" in self.form.get("enctype", ""):
-                result["multipart_post"] = post_items
-            else:
-                result["post"] = post_items
-            result["url"] = action_url
-
-        else:
-            url = action_url.split("?")[0] + "?" + urlencode(post_items)
-            result["url"] = url
-
-        return result
+        return (
+            action_url,
+            self.form.method.upper(),
+            "multipart" in self.form.get("enctype", ""),
+            post_items,
+        )
 
     def build_fields_to_remove(
         self, fields: Mapping[str, Any], form_inputs: Sequence[HtmlElement]

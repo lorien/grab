@@ -220,7 +220,7 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
         grab.submit(make_request=False)
         self.assertEqual(
             {("foo", None), ("bar", "bar-value")},
-            set(grab.config["post"]),
+            set(grab.config["fields"]),
         )
 
     def test_unicode_textarea_form(self):
