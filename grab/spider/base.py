@@ -27,7 +27,6 @@ from ..errors import (
     OriginalExceptionGrabError,
     ResponseNotValid,
 )
-from ..types import GrabConfig
 from ..util.metrics import format_traffic_value
 from .errors import FatalError, NoTaskHandler, SpiderError, SpiderMisuseError
 from .interface import FatalErrorQueueItem
@@ -389,7 +388,7 @@ class Spider:
             grab.setup(url=task.url)
 
         # Generate new common headers
-        cast(GrabConfig, grab.config)["common_headers"] = grab.common_headers()
+        grab.config["common_headers"] = grab.common_headers()
         self.update_grab_instance(grab)
         return grab
 

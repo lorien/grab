@@ -20,7 +20,7 @@ from http.cookiejar import CookieJar
 from io import BytesIO, StringIO
 from pprint import pprint  # pylint: disable=unused-import
 from re import Match, Pattern
-from typing import Any, Protocol, cast
+from typing import Any, cast
 from urllib.parse import SplitResult, parse_qs, urljoin, urlsplit
 
 import unicodec  # pylint: disable=wrong-import-order
@@ -36,14 +36,10 @@ from lxml.html import (
 from selection import SelectorList, XpathSelector
 
 from grab.errors import DataNotFound, GrabMisuseError
-from grab.types import NULL, GrabConfig
+from grab.types import NULL
 
 THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")
-
-
-class GrabConfigProtocol(Protocol):
-    config: GrabConfig
 
 
 def normalize_pairs(
