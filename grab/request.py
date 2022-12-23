@@ -25,6 +25,7 @@ class Request:  # pylint: disable=too-many-instance-attributes
         fields: Any = None,
         body: None | bytes = None,
         multipart: None | bool = None,
+        document_type: None | str = None,
     ) -> None:
         self.encoding = encoding
         self.url = url
@@ -52,6 +53,7 @@ class Request:  # pylint: disable=too-many-instance-attributes
         self.body = body
         self.fields = fields
         self.multipart = multipart if multipart is not None else True
+        self.document_type = document_type
 
     def get_full_url(self) -> str:
         return self.url

@@ -7,7 +7,7 @@ from copy import copy, deepcopy
 from datetime import datetime
 from secrets import SystemRandom
 from typing import Any, cast
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 
 from proxylist import ProxyList
 from user_agent import generate_user_agent
@@ -49,15 +49,13 @@ def default_config() -> GrabConfig:
         "cookies": None,
         "timeout": None,
         "encoding": None,
-        # Payload
+        "document_type": "html",
         "body": None,
         "fields": None,
         "multipart": None,
         # Needs refactoring
         "redirect_limit": 10,  # -> Retry
         "follow_location": True,  # -> Redirect
-        # Not Sure
-        "document_type": "html",
         # Session Properties
         "common_headers": None,
         "reuse_cookies": True,
@@ -188,7 +186,39 @@ class Grab:
             self.config["headers"] = {}
         if self.config["common_headers"]:
             merge_with_dict(self.config["headers"], self.config["common_headers"])
-        return self.transport.process_config(self.config, self.cookies)
+        # cookies extension
+        req = self.create_request_from_config(self.config)
+        self.sync_cookie_manager_with_request_cookies(req.cookies, req.url)
+        return req
+
+    def create_request_from_config(self, config: MutableMapping[str, Any]) -> Request:
+        return Request(
+            url=config["url"],
+            encoding=config["encoding"],
+            method=config["method"],
+            timeout=config["timeout"],
+            proxy=config["proxy"],
+            proxy_type=config["proxy_type"],
+            proxy_userpwd=config["proxy_userpwd"],
+            headers=config["headers"],
+            cookies=config["cookies"],
+            body=config["body"],
+            fields=config["fields"],
+            multipart=config["multipart"],
+            document_type=config["document_type"],
+        )
+
+    def sync_cookie_manager_with_request_cookies(
+        self,
+        cookies: Mapping[str, Any],
+        request_url: str,
+    ) -> None:
+        request_host = urlsplit(request_url).hostname
+        if request_host and cookies:
+            # If cookie item is provided in form with no domain specified,
+            # then use domain value extracted from request URL
+            for name, value in cookies.items():
+                self.cookies.set(name=name, value=value, domain=request_host)
 
     def log_request(self, req: Request, extra: str = "") -> None:
         """Send request details to logging system."""
@@ -237,13 +267,13 @@ class Grab:
         while True:
             self.log_request(req)
             try:
-                self.transport.request()
+                self.transport.request(req, self.cookies)
             except GrabError:
                 self.reset_temporary_options()
                 raise
             else:
                 with self.transport.wrap_transport_error():
-                    doc = self.process_request_result()
+                    doc = self.process_request_result(req)
                 redir_url = self.find_redirect_url(doc)
                 if redir_url is not None:
                     redir_count += 1
@@ -275,7 +305,7 @@ class Grab:
             return self.request()
         return None
 
-    def process_request_result(self) -> Document:
+    def process_request_result(self, req: Request) -> Document:
         """Process result of real request performed via transport extension."""
         now = datetime.utcnow()
 
@@ -284,7 +314,7 @@ class Grab:
         # again!
         self.reset_temporary_options()
         self.doc = self.transport.prepare_response(
-            self.config, document_class=self.document_class
+            req, document_class=self.document_class
         )
         if self.config["reuse_cookies"]:
             self.cookies.update(self.doc.cookies)

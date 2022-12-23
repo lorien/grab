@@ -5,14 +5,14 @@ import logging
 import ssl
 import time
 import urllib.request
-from collections.abc import Generator, Mapping, MutableMapping
+from collections.abc import Generator, Mapping
 from contextlib import contextmanager
 from copy import copy
 from http.client import HTTPResponse
 from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
 from typing import Any, cast
-from urllib.parse import urlencode, urlsplit
+from urllib.parse import urlencode
 
 import certifi
 from urllib3 import PoolManager, ProxyManager, exceptions, make_headers
@@ -30,7 +30,6 @@ from grab.cookie import CookieManager, MockRequest, MockResponse
 from grab.document import Document
 from grab.error import GrabMisuseError, GrabTimeoutError
 from grab.request import Request
-from grab.types import GrabConfig
 from grab.util.http import merge_with_dict
 
 from .base_transport import BaseTransport
@@ -82,28 +81,6 @@ def assemble(  # noqa: CCR001
     return req_url, req_hdr, req_body
 
 
-def update_cookie_manager(
-    cookie_manager: CookieManager,
-    cookies: Mapping[str, Any],
-    request_url: str,
-) -> None:
-    request_host = urlsplit(request_url).hostname
-    if request_host and cookies:
-        if request_host.startswith("www."):
-            request_host_no_www = request_host[4:]
-        else:
-            request_host_no_www = request_host
-
-        # Process `cookies` option that is simple dict i.e.
-        # it provides only `name` and `value` attributes of cookie
-        # No domain, no path, no expires, etc
-        # To put these cookies into cookie manager we need to
-        # provide the domain of current request url
-        # Trying to guess better domain name by removing leading "www."
-        for name, value in cookies.items():
-            cookie_manager.set(name=name, value=value, domain=request_host_no_www)
-
-
 class Urllib3Transport(BaseTransport):
     """Grab network transport based on urllib3 library."""
 
@@ -113,10 +90,8 @@ class Urllib3Transport(BaseTransport):
         # WTF: logging is configured here?
         logger = logging.getLogger("urllib3.connectionpool")
         logger.setLevel(logging.WARNING)
-        self._request: None | Request = None
         self._response: None | Urllib3HTTPResponse = None
         self._connect_time: None | float = None
-        self._request_item: tuple[str, dict[str, Any], bytes | None] = "", {}, None
         self.reset()
 
     def __getstate__(self) -> dict[str, Any]:
@@ -139,31 +114,8 @@ class Urllib3Transport(BaseTransport):
         return PoolManager(10, cert_reqs="CERT_REQUIRED", ca_certs=certifi.where())
 
     def reset(self) -> None:
-        self._request = None
         self._response = None
         self._connect_time = None
-        self._request_item = "", {}, None
-
-    def process_config(
-        self, grab_config: MutableMapping[str, Any], grab_cookies: CookieManager
-    ) -> Request:
-        self._request = Request(
-            url=grab_config["url"],
-            encoding=grab_config["encoding"],
-            method=grab_config["method"],
-            timeout=grab_config["timeout"],
-            proxy=grab_config["proxy"],
-            proxy_type=grab_config["proxy_type"],
-            proxy_userpwd=grab_config["proxy_userpwd"],
-            headers=grab_config["headers"],
-            cookies=grab_config["cookies"],
-            body=grab_config["body"],
-            fields=grab_config["fields"],
-            multipart=grab_config["multipart"],
-        )
-        update_cookie_manager(grab_cookies, self._request.cookies, self._request.url)
-        self._request_item = assemble(self._request, grab_cookies)
-        return self._request
 
     @contextmanager
     def wrap_transport_error(self) -> Generator[None, None, None]:
@@ -203,9 +155,7 @@ class Urllib3Transport(BaseTransport):
             )
         return self.pool
 
-    def request(self) -> None:
-        req = cast(Request, self._request)
-
+    def request(self, req: Request, grab_cookies: CookieManager) -> None:
         pool: PoolManager | SOCKSProxyManager | ProxyManager = (
             self.select_pool_for_request(req)
         )
@@ -228,7 +178,8 @@ class Urllib3Transport(BaseTransport):
             timeout = Timeout(connect=req.timeout.connect, read=req.timeout.read)
             req_url = req.url
             req_method = req.method
-            req_url, req_hdr, req_data = self._request_item
+
+            req_url, req_hdr, req_data = assemble(req, grab_cookies)
             try:
                 start_time = time.time()
                 res = pool.urlopen(  # type: ignore # FIXME
@@ -246,8 +197,7 @@ class Urllib3Transport(BaseTransport):
 
         self._response = res
 
-    def read_with_timeout(self) -> bytes:
-        assert self._request is not None
+    def read_with_timeout(self, req: Request) -> bytes:
         assert self._connect_time is not None
         assert self._response is not None
         chunks = []
@@ -262,9 +212,9 @@ class Urllib3Transport(BaseTransport):
             else:
                 break
             if (
-                self._request.timeout.total
+                req.timeout.total
                 and (time.time() - (op_started + self._connect_time))
-                > self._request.timeout.total
+                > req.timeout.total
             ):
                 raise GrabTimeoutError
         return b"".join(chunks)
@@ -279,7 +229,7 @@ class Urllib3Transport(BaseTransport):
         return headers.items()
 
     def prepare_response(
-        self, grab_config: GrabConfig, *, document_class: type[Document] = Document
+        self, req: Request, *, document_class: type[Document] = Document
     ) -> Document:
         """Prepare response, duh.
 
@@ -302,7 +252,7 @@ class Urllib3Transport(BaseTransport):
             head_str += "\r\n"
             head = head_str.encode("utf-8")
 
-            body = self.read_with_timeout()
+            body = self.read_with_timeout(req)
 
             hdr = email.message.Message()
             for key, val in self.get_response_header_items():
@@ -310,36 +260,30 @@ class Urllib3Transport(BaseTransport):
                 new_key = key.encode("latin").decode("utf-8", errors="ignore")
                 new_val = val.encode("latin").decode("utf-8", errors="ignore")
                 hdr[new_key] = new_val
-            jar = self.extract_cookiejar()  # self._response, self._request)
+            jar = self.extract_cookiejar(req)  # self._response, self._request)
             return document_class(
-                document_type=grab_config["document_type"],
+                document_type=(
+                    req.document_type if req.document_type is not None else "html"
+                ),
                 head=head,
                 body=body,
                 code=self._response.status,
-                url=(
-                    self._response.get_redirect_location()
-                    or cast(Request, self._request).url
-                ),
+                url=(self._response.get_redirect_location() or req.url),
                 headers=hdr,
-                encoding=grab_config["encoding"],
+                encoding=req.encoding,
                 cookies=jar,
             )
         finally:
             self._response.release_conn()
 
-    def extract_cookiejar(self) -> CookieJar:
+    def extract_cookiejar(self, req: Request) -> CookieJar:
         jar = CookieJar()
+        # TODO: WTF it means?
         # self._respose could be None
         # if this method is called from custom prepare response
-        if self._response and self._request:
+        if self._response:
             jar.extract_cookies(
-                cast(
-                    HTTPResponse,
-                    MockResponse(self._response.headers),
-                ),
-                cast(
-                    urllib.request.Request,
-                    MockRequest(self._request.url, self._request.headers),
-                ),
+                cast(HTTPResponse, MockResponse(self._response.headers)),
+                cast(urllib.request.Request, MockRequest(req.url, req.headers)),
             )
         return jar
