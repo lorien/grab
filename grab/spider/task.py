@@ -5,8 +5,8 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 from typing import Any
 
-from ..base import Grab, copy_config
 from ..errors import raise_feature_is_deprecated
+from ..grab import Grab, copy_config
 from .errors import SpiderMisuseError
 
 

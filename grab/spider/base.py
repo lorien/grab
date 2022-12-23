@@ -15,7 +15,6 @@ from procstat import Stat
 from proxylist import ProxyList, ProxyServer
 from proxylist.base import BaseProxySource
 
-from ..base import Grab
 from ..base_transport import BaseTransport
 from ..errors import (
     GrabFeatureIsDeprecated,
@@ -27,6 +26,7 @@ from ..errors import (
     OriginalExceptionGrabError,
     ResponseNotValid,
 )
+from ..grab import Grab
 from ..util.metrics import format_traffic_value
 from .errors import FatalError, NoTaskHandler, SpiderError, SpiderMisuseError
 from .interface import FatalErrorQueueItem

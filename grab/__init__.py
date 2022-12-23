@@ -1,4 +1,3 @@
-from .base import Grab
 from .document import Document
 from .errors import (
     DataNotFound,
@@ -7,6 +6,7 @@ from .errors import (
     GrabNetworkError,
     GrabTimeoutError,
 )
+from .grab import Grab
 from .request import Request
 
 __version__ = "0.6.41"

@@ -2,9 +2,9 @@ import os
 
 from test_server import Response
 
-from grab import GrabMisuseError
-from grab.base import Grab
 from grab.document import Document
+from grab.errors import GrabMisuseError
+from grab.grab import Grab
 from tests.util import (
     TEST_DIR,
     BaseGrabTestCase,
