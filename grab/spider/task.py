@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, MutableMapping
 from copy import deepcopy
 from datetime import datetime, timedelta
 from typing import Any
 
 from ..base import Grab, copy_config
 from ..errors import raise_feature_is_deprecated
-from ..types import GrabConfig
 from .errors import SpiderMisuseError
 
 
@@ -23,7 +22,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         name: None | str = None,
         url: None | str = None,
         grab: None | Grab = None,
-        grab_config: None | GrabConfig = None,
+        grab_config: None | MutableMapping[str, Any] = None,
         priority: None | int = None,
         priority_set_explicitly: bool = True,
         network_try_count: int = 0,
@@ -102,7 +101,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             default value if attribute does not exist.
         """
         self.schedule_time: None | datetime = None
-        self.grab_config: None | GrabConfig = None
+        self.grab_config: None | MutableMapping[str, Any] = None
         if disable_cache or refresh_cache or cache_timeout:
             raise_feature_is_deprecated("Cache feature")
         if name == "generator":
@@ -135,7 +134,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         self,
         url: None | str,
         grab: None | Grab,
-        grab_config: None | GrabConfig,
+        grab_config: None | MutableMapping[str, Any],
     ) -> None:
         if url is None and grab is None and grab_config is None:
             raise SpiderMisuseError(
@@ -173,12 +172,15 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         else:
             self.schedule_time = None
 
-    def setup_grab_config(self, grab_config: GrabConfig) -> None:
+    def setup_grab_config(self, grab_config: MutableMapping[str, Any]) -> None:
         self.grab_config = copy_config(grab_config)
         self.url = grab_config["url"]
 
     def test_clone_options_integrity(
-        self, url: None | str, grab: None | Grab, grab_config: None | GrabConfig
+        self,
+        url: None | str,
+        grab: None | Grab,
+        grab_config: None | MutableMapping[str, Any],
     ) -> None:
         if url is not None and grab is not None:
             raise SpiderMisuseError("Options url and grab could not be used together")

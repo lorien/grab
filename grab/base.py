@@ -18,7 +18,6 @@ from grab.document import Document
 from grab.errors import GrabError, GrabMisuseError, GrabTooManyRedirectsError
 from grab.request import Request
 from grab.transport import Urllib3Transport
-from grab.types import GrabConfig
 from grab.util.cookies import create_cookie
 from grab.util.html import find_base_url
 from grab.util.http import merge_with_dict
@@ -30,7 +29,7 @@ logger_network = logging.getLogger("grab.network")
 system_random = SystemRandom()
 
 
-def copy_config(config: GrabConfig) -> GrabConfig:
+def copy_config(config: MutableMapping[str, Any]) -> MutableMapping[str, Any]:
     """Copy grab config with correct handling of mutable config values."""
     cloned_config = copy(config)
     for key in MUTABLE_CONFIG_KEYS:
@@ -38,7 +37,7 @@ def copy_config(config: GrabConfig) -> GrabConfig:
     return cloned_config
 
 
-def default_config() -> GrabConfig:
+def default_config() -> MutableMapping[str, Any]:
     return {
         # Request Properties
         "method": None,
@@ -86,7 +85,7 @@ class Grab:
     ) -> None:
         self.transport = self.process_transport_option(transport, Urllib3Transport)
         self._doc: None | Document = None
-        self.config: GrabConfig = default_config()
+        self.config: MutableMapping[str, Any] = default_config()
         self.config["common_headers"] = self.common_headers()
         self.cookies = CookieJar()
         self.proxylist = ProxyList.from_lines_list([])
@@ -147,7 +146,7 @@ class Grab:
         }
         return conf
 
-    def load_config(self, config: GrabConfig) -> None:
+    def load_config(self, config: MutableMapping[str, Any]) -> None:
         """Configure grab instance with external config object."""
         self.config = copy_config(config)
         if "cookiejar_cookies" in config["state"]:

@@ -36,10 +36,10 @@ from lxml.html import (
 from selection import SelectorList, XpathSelector
 
 from grab.errors import DataNotFound, GrabMisuseError
-from grab.types import NULL
 
 THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")
+UNDEFINED = object()
 
 
 def normalize_pairs(
@@ -261,13 +261,13 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self,
         regexp: str | bytes | Pattern[str] | Pattern[bytes],
         flags: int = 0,
-        default: Any = NULL,
+        default: Any = UNDEFINED,
     ) -> Any:
         """Return content of first matching group of regexp found in response body."""
         try:
             match = self.rex_search(regexp, flags=flags)
         except DataNotFound as ex:
-            if default is NULL:
+            if default is UNDEFINED:
                 raise DataNotFound("Regexp not found") from ex
             return default
         else:
@@ -277,7 +277,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self,
         regexp: str | bytes | Pattern[str] | Pattern[bytes],
         flags: int = 0,
-        default: Any = NULL,
+        default: Any = UNDEFINED,
     ) -> Any:
         """Search the regular expression in response body.
 
@@ -294,7 +294,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         )
         if match:
             return match
-        if default is NULL:
+        if default is UNDEFINED:
             raise DataNotFound("Could not find regexp: %s" % regexp)
         return default
 
