@@ -15,7 +15,7 @@ from procstat import Stat
 from proxylist import ProxyList, ProxyServer
 from proxylist.base import BaseProxySource
 
-from ..base_transport import BaseTransport
+from ..base import BaseTransport
 from ..errors import (
     GrabFeatureIsDeprecated,
     GrabInvalidResponse,

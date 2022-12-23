@@ -13,7 +13,7 @@ from urllib.parse import urljoin, urlsplit
 from proxylist import ProxyList
 from user_agent import generate_user_agent
 
-from grab.base_transport import BaseTransport
+from grab.base import BaseTransport
 from grab.document import Document
 from grab.errors import GrabError, GrabMisuseError, GrabTooManyRedirectsError
 from grab.request import Request

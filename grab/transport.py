@@ -36,7 +36,7 @@ from grab.request import Request
 from grab.util.cookies import MockRequest, MockResponse, build_cookie_header
 from grab.util.http import merge_with_dict
 
-from .base_transport import BaseTransport
+from .base import BaseTransport
 
 URL_DATA_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS"}
 
