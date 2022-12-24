@@ -37,9 +37,26 @@ def default_grab_config() -> MutableMapping[str, Any]:
     }
 
 
+def resolve_transport_entity(
+    transport: None | BaseTransport | type[BaseTransport],
+    default: type[BaseTransport],
+) -> BaseTransport:
+    if transport and (
+        not isinstance(transport, BaseTransport)
+        and not issubclass(transport, BaseTransport)
+    ):
+        raise GrabMisuseError("Invalid Grab transport: {}".format(transport))
+    if transport is None:
+        return default()
+    if isinstance(transport, BaseTransport):
+        return transport
+    return transport()
+
+
 class Grab:
     __slots__ = ("config", "transport", "cookies", "_doc")
     document_class: type[Document] = Document
+    transport_class = Urllib3Transport
 
     def __init__(
         self,
@@ -48,26 +65,10 @@ class Grab:
     ) -> None:
         self.config: MutableMapping[str, Any] = default_grab_config()
         self.config["common_headers"] = self.common_headers()
-        self.transport = self.process_transport_option(transport, Urllib3Transport)
+        self.transport = resolve_transport_entity(transport, self.transport_class)
         self.cookies = CookieJar()
         if kwargs:
             self.setup(**kwargs)
-
-    def process_transport_option(
-        self,
-        transport: None | BaseTransport | type[BaseTransport],
-        default_transport: type[BaseTransport],
-    ) -> BaseTransport:
-        if transport and (
-            not isinstance(transport, BaseTransport)
-            and not issubclass(transport, BaseTransport)
-        ):
-            raise GrabMisuseError("Invalid Grab transport: {}".format(transport))
-        if transport is None:
-            return default_transport()
-        if isinstance(transport, BaseTransport):
-            return transport
-        return transport()
 
     def clone(self, **kwargs: Any) -> Grab:
         r"""Create clone of Grab instance.
@@ -266,3 +267,21 @@ class Grab:
                 if key not in self.__slots__:
                     raise ValueError("Key '{}' is not in __slots__'".format(key))
                 setattr(self, key, value)
+
+
+def resolve_grab_entity(entity: None | Grab | type[Grab], default: type[Grab]) -> Grab:
+    if entity is None:
+        assert issubclass(default, Grab)
+        return default()
+    if isinstance(entity, Grab):
+        return entity
+    return entity()
+
+
+def request(
+    url: None | str | Request = None,
+    grab: None | Grab | type[Grab] = None,
+    **request_kwargs: Any,
+) -> Document:
+    grab = resolve_grab_entity(grab, default=Grab)
+    return grab.request(url, **request_kwargs)
