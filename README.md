@@ -29,7 +29,6 @@ Feel free to give feedback in Telegram groups: [@grablab](https://t.me/grablab) 
     * too-many-instance-attributes
     * too-many-arguments
     * too-many-locals
-    * too-nany-lines
     * too-many-public-methods
 * Make 100% test coverage, it is about 95% now
 * Release new version to pypi

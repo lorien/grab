@@ -73,7 +73,7 @@ DISABLED_RADIO_HTML = b"""
 """
 
 
-class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-methods
+class TestHtmlForms(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
@@ -208,6 +208,14 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
         self.server.add_response(Response())
         doc = grab.request(self.server.get_url())
         grab.submit(doc)
+
+
+class TestJustAnotherChunkHtmlForms(BaseGrabTestCase):
+    def setUp(self):
+        self.server.reset()
+
+        # Create fake grab instance with fake response
+        self.doc = Document(FORMS_HTML)
 
     def test_set_input_by_xpath_regex(self):
         html = b"""
