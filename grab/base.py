@@ -13,6 +13,8 @@ from grab.request import Request
 
 
 class BaseGrab:
+    __slots__ = ()
+
     @overload
     @abstractmethod
     def request(self, url: Request, **request_kwargs: Any) -> Document:
@@ -31,6 +33,8 @@ class BaseGrab:
 
 
 class BaseTransport:
+    __slots__ = ()
+
     @abstractmethod
     def reset(self) -> None:  # pragma: no cover
         raise NotImplementedError

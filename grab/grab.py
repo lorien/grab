@@ -35,7 +35,7 @@ def default_grab_config() -> MutableMapping[str, Any]:
 
 
 class Grab(BaseGrab):
-    __slots__ = ("config", "transport", "cookies", "_doc")
+    __slots__ = ("config", "transport", "cookies")
     document_class: type[Document] = Document
     transport_class = Urllib3Transport
 
@@ -177,7 +177,7 @@ class Grab(BaseGrab):
         """Clear all remembered cookies."""
         self.cookies.clear()
 
-    def __getstate__(self) -> dict[str, Any]:
+    def __getstate__(self) -> MutableMapping[str, Any]:
         state = {}
         for slot_name in self.__slots__:
             if slot_name == "cookies":
