@@ -5,7 +5,6 @@ import threading
 from collections.abc import Mapping, MutableMapping
 from contextlib import suppress
 from copy import copy
-from datetime import datetime
 from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
 from secrets import SystemRandom
@@ -63,7 +62,6 @@ class Grab:
         self.config["common_headers"] = self.common_headers()
         self.transport = self.process_transport_option(transport, Urllib3Transport)
         self.cookies = CookieJar()
-        self._doc: None | Document = None
         if kwargs:
             self.setup(**kwargs)
 
@@ -83,14 +81,6 @@ class Grab:
             return transport
         return transport()
 
-    @property
-    def doc(self) -> None | Document:
-        return self._doc
-
-    @doc.setter
-    def doc(self, obj: Document) -> None:
-        self._doc = obj
-
     def clone(self, **kwargs: Any) -> Grab:
         r"""Create clone of Grab instance.
 
@@ -101,7 +91,6 @@ class Grab:
         """
         grab = Grab(transport=self.transport)
         grab.config = copy_config(self.config)
-        grab.doc = self.doc.copy() if self.doc else None
         grab.cookies = build_jar(list(self.cookies))  # building again makes a copy
         if kwargs:
             grab.setup(**kwargs)
@@ -244,7 +233,7 @@ class Grab:
                     continue
             return doc
 
-    def submit(self, **kwargs: Any) -> Document:
+    def submit(self, doc: Document, **kwargs: Any) -> Document:
         """Submit current form.
 
         :param make_request: if `False` then grab instance will be
@@ -253,8 +242,7 @@ class Grab:
 
         For details see `Document.submit()` method
         """
-        assert self.doc is not None
-        url, method, is_multipart, fields = self.doc.get_form_request(**kwargs)
+        url, method, is_multipart, fields = doc.get_form_request(**kwargs)
         return self.request(
             url=url,
             method=method,
@@ -264,15 +252,11 @@ class Grab:
 
     def process_request_result(self, req: Request) -> Document:
         """Process result of real request performed via transport extension."""
-        now = datetime.utcnow()
-        self.doc = self.transport.prepare_response(
-            req, document_class=self.document_class
-        )
+        doc = self.transport.prepare_response(req, document_class=self.document_class)
         if self.config["reuse_cookies"]:
-            for item in self.doc.cookies:
+            for item in doc.cookies:
                 self.cookies.set_cookie(item)
-        self.doc.timestamp = now
-        return self.doc
+        return doc
 
     @classmethod
     def common_headers(cls) -> dict[str, str]:

@@ -16,13 +16,13 @@ class TestGrab(BaseGrabTestCase):
         self.server.add_response(
             Response(data=(b'<form><textarea name="text">the cat</textarea></form>'))
         )
-        grab.request(self.server.get_url())
-        grab.doc.set_input("text", "foobar")
-        data = pickle.dumps(grab, pickle.HIGHEST_PROTOCOL)
+        doc = grab.request(self.server.get_url())
+        doc.set_input("text", "foobar")
+        data = pickle.dumps(doc, pickle.HIGHEST_PROTOCOL)
 
-        def func(pickled_grab, resultq):
-            grab2 = pickle.loads(pickled_grab)
-            text = grab2.doc.select("//textarea").text()
+        def func(pickled_doc, resultq):
+            doc = pickle.loads(pickled_doc)
+            text = doc.select("//textarea").text()
             resultq.put(text)
 
         result_queue = Queue()

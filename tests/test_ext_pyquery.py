@@ -14,9 +14,9 @@ class ExtensionPyqueryTestCase(BaseGrabTestCase):
             Response(data=b"<body><h1>Hello world</h1><footer>2014</footer>")
         )
         grab = build_grab()
-        grab.request(self.server.get_url())
+        doc = grab.request(self.server.get_url())
 
-        self.assertEqual(grab.doc.pyquery("h1").text(), "Hello world")
+        self.assertEqual(doc.pyquery("h1").text(), "Hello world")
 
     def test_national_utf_symbol(self):
         msg = (
@@ -27,5 +27,5 @@ class ExtensionPyqueryTestCase(BaseGrabTestCase):
             Response(data=b"<html><body><p>%s</p></body>" % msg.encode("utf-8"))
         )
         grab = build_grab()
-        grab.request(self.server.get_url())
-        self.assertEqual(grab.doc.pyquery("p")[0].text_content(), msg)
+        doc = grab.request(self.server.get_url())
+        self.assertEqual(doc.pyquery("p")[0].text_content(), msg)

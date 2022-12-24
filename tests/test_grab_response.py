@@ -24,8 +24,8 @@ class TestResponse(BaseGrabTestCase):
             self.server.add_response(Response(data=img_data))
 
             grab = build_grab()
-            grab.request(self.server.get_url())
-            grab.doc.save(tmp_file)
+            doc = grab.request(self.server.get_url())
+            doc.save(tmp_file)
             with open(tmp_file, "rb") as inp:
                 self.assertEqual(inp.read(), img_data)
 
@@ -42,8 +42,8 @@ class TestResponse(BaseGrabTestCase):
         )
         grab = build_grab()
         grab.setup(encoding="utf-8")
-        grab.request(self.server.get_url())
-        self.assertTrue("крокодил" in grab.doc.unicode_body())
+        doc = grab.request(self.server.get_url())
+        self.assertTrue("крокодил" in doc.unicode_body())
 
     def test_xml_declaration(self):
         # unicode_body() should return HTML with xml declaration (if it
@@ -57,7 +57,7 @@ class TestResponse(BaseGrabTestCase):
             )
         )
         grab = build_grab()
-        grab.request(self.server.get_url())
-        ubody = grab.doc.unicode_body()
+        doc = grab.request(self.server.get_url())
+        ubody = doc.unicode_body()
         self.assertTrue("тест" in ubody)
         self.assertTrue("<?xml" in ubody)

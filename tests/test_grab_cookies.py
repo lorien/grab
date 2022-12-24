@@ -14,10 +14,8 @@ class TestCookies(BaseGrabTestCase):
         self.server.add_response(
             Response(headers=[("Set-Cookie", "foo=bar"), ("Set-Cookie", "1=2")])
         )
-        grab.request(self.server.get_url())
-        self.assertTrue(
-            any(x.name == "foo" and x.value == "bar" for x in grab.doc.cookies)
-        )
+        doc = grab.request(self.server.get_url())
+        self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
 
     def test_multiple_cookies(self):
         grab = build_grab()
@@ -35,10 +33,8 @@ class TestCookies(BaseGrabTestCase):
         grab = build_grab()
         grab.setup(reuse_cookies=True)
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
-        grab.request(self.server.get_url())
-        self.assertTrue(
-            any(x.name == "foo" and x.value == "bar" for x in grab.doc.cookies)
-        )
+        doc = grab.request(self.server.get_url())
+        self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
         self.server.add_response(Response())
         grab.request(self.server.get_url())
         self.assertEqual(
@@ -56,10 +52,8 @@ class TestCookies(BaseGrabTestCase):
         grab = build_grab()
         grab.setup(reuse_cookies=False)
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
-        grab.request(self.server.get_url())
-        self.assertTrue(
-            any(x.name == "foo" and x.value == "bar" for x in grab.doc.cookies)
-        )
+        doc = grab.request(self.server.get_url())
+        self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
         self.server.add_response(Response())
         grab.request(self.server.get_url())
         self.assertFalse(self.server.request.cookies)
@@ -68,10 +62,8 @@ class TestCookies(BaseGrabTestCase):
         grab = build_grab()
         grab.setup(reuse_cookies=True)
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
-        grab.request(self.server.get_url())
-        self.assertTrue(
-            any(x.name == "foo" and x.value == "bar" for x in grab.doc.cookies)
-        )
+        doc = grab.request(self.server.get_url())
+        self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
         grab.clear_cookies()
         self.server.add_response(Response())
         grab.request(self.server.get_url())
@@ -80,10 +72,8 @@ class TestCookies(BaseGrabTestCase):
     def test_redirect_session(self):
         grab = build_grab()
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
-        grab.request(self.server.get_url())
-        self.assertTrue(
-            any(x.name == "foo" and x.value == "bar" for x in grab.doc.cookies)
-        )
+        doc = grab.request(self.server.get_url())
+        self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
 
         # Setup one-time redirect
         grab = build_grab()

@@ -15,7 +15,6 @@ import webbrowser
 from collections.abc import Mapping, MutableMapping, Sequence
 from contextlib import suppress
 from copy import deepcopy
-from datetime import datetime
 from http.cookiejar import CookieJar
 from io import BytesIO, StringIO
 from pprint import pprint  # pylint: disable=unused-import
@@ -62,7 +61,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         "cookies",
         "encoding",
         "_unicode_body",
-        "timestamp",
         "download_size",
         "upload_size",
         "download_speed",
@@ -112,7 +110,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         self.encoding = self.process_encoding(encoding)
         # other
         self.cookies = cookies or CookieJar()
-        self.timestamp = datetime.utcnow()
         self.download_size = 0
         self.upload_size = 0
         self.download_speed = 0

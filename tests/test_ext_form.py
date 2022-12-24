@@ -125,30 +125,30 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
             Response(data=POST_FORM % self.server.get_url().encode())
         )
         self.server.add_response(Response())
-        grab.request(self.server.get_url())
-        grab.doc.set_input("name", "Alex")
-        grab.submit()
+        doc = grab.request(self.server.get_url())
+        doc.set_input("name", "Alex")
+        grab.submit(doc)
         self.assert_equal_qs(self.server.request.data, b"name=Alex&secret=123")
 
         # Default submit control
         self.server.add_response(Response(data=MULTIPLE_SUBMIT_FORM))
         self.server.add_response(Response())
-        grab.request(self.server.get_url())
-        grab.submit()
+        doc = grab.request(self.server.get_url())
+        grab.submit(doc)
         self.assert_equal_qs(self.server.request.data, b"secret=123&submit1=submit1")
 
         # Selected submit control
         self.server.add_response(Response(data=MULTIPLE_SUBMIT_FORM))
         self.server.add_response(Response())
-        grab.request(self.server.get_url())
-        grab.submit(submit_name="submit2")
+        doc = grab.request(self.server.get_url())
+        grab.submit(doc, submit_name="submit2")
         self.assert_equal_qs(self.server.request.data, b"secret=123&submit2=submit2")
 
         # Default submit control if submit control name is invalid
         self.server.add_response(Response(data=MULTIPLE_SUBMIT_FORM))
         self.server.add_response(Response())
-        grab.request(self.server.get_url())
-        grab.submit(submit_name="submit3")
+        doc = grab.request(self.server.get_url())
+        grab.submit(doc, submit_name="submit3")
         self.assert_equal_qs(self.server.request.data, b"secret=123&submit1=submit1")
 
     def test_submit_remove_from_post_argument(self):
@@ -156,58 +156,58 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
         self.server.add_response(Response(data=MULTIPLE_SUBMIT_FORM))
         self.server.add_response(Response())
 
-        grab.request(self.server.get_url())
-        grab.submit(submit_name="submit3")
+        doc = grab.request(self.server.get_url())
+        grab.submit(doc, submit_name="submit3")
         self.assert_equal_qs(self.server.request.data, b"secret=123&submit1=submit1")
 
         self.server.add_response(Response(data=MULTIPLE_SUBMIT_FORM))
         self.server.add_response(Response())
-        grab.request(self.server.get_url())
-        grab.submit(remove_from_post=["submit1"])
+        doc = grab.request(self.server.get_url())
+        grab.submit(doc, remove_from_post=["submit1"])
         self.assert_equal_qs(self.server.request.data, b"secret=123")
 
     def test_set_methods1(self):
         grab = build_grab()
         self.server.add_response(Response(data=FORMS_HTML))
-        grab.request(self.server.get_url())
+        doc = grab.request(self.server.get_url())
 
-        self.assertEqual(grab.doc.get_cached_form(), None)
+        self.assertEqual(doc.get_cached_form(), None)
 
-        grab.doc.set_input("gender", "1")
-        self.assertEqual("common_form", grab.doc.get_cached_form().get("id"))
+        doc.set_input("gender", "1")
+        self.assertEqual("common_form", doc.get_cached_form().get("id"))
 
-        self.assertRaises(KeyError, lambda: grab.doc.set_input("query", "asdf"))
+        self.assertRaises(KeyError, lambda: doc.set_input("query", "asdf"))
 
     def test_set_methods2(self):
         grab = build_grab()
         self.server.add_response(Response(data=FORMS_HTML))
-        grab.request(self.server.get_url())
-        grab.doc.set_input_by_id("search_box", "asdf")
-        self.assertEqual("search_form", grab.doc.get_cached_form().get("id"))
+        doc = grab.request(self.server.get_url())
+        doc.set_input_by_id("search_box", "asdf")
+        self.assertEqual("search_form", doc.get_cached_form().get("id"))
 
-        grab.doc.choose_form(xpath='//form[@id="common_form"]')
-        grab.doc.set_input_by_number(0, "asdf")
+        doc.choose_form(xpath='//form[@id="common_form"]')
+        doc.set_input_by_number(0, "asdf")
 
     def test_set_methods3(self):
         grab = build_grab()
         self.server.add_response(Response(data=FORMS_HTML))
-        grab.request(self.server.get_url())
-        grab.doc.set_input_by_xpath('//*[@name="gender"]', "2")
-        self.assertEqual("common_form", grab.doc.get_cached_form().get("id"))
+        doc = grab.request(self.server.get_url())
+        doc.set_input_by_xpath('//*[@name="gender"]', "2")
+        self.assertEqual("common_form", doc.get_cached_form().get("id"))
 
     def test_html_without_forms(self):
         grab = build_grab()
         self.server.add_response(Response(data=NO_FORM_HTML))
-        grab.request(self.server.get_url())
-        self.assertRaises(DataNotFound, lambda: grab.doc.form)
+        doc = grab.request(self.server.get_url())
+        self.assertRaises(DataNotFound, lambda: doc.form)
 
     def test_disabled_radio(self):
         """Test issue #57."""
         grab = build_grab()
         self.server.add_response(Response(data=DISABLED_RADIO_HTML))
         self.server.add_response(Response())
-        grab.request(self.server.get_url())
-        grab.submit()
+        doc = grab.request(self.server.get_url())
+        grab.submit(doc)
 
     def test_set_input_by_xpath_regex(self):
         html = b"""
@@ -217,9 +217,9 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
         self.server.add_response(Response(data=html))
         self.server.add_response(Response())
         grab = build_grab()
-        grab.request(self.server.get_url())
-        grab.doc.set_input_by_xpath('//input[re:test(@id, "^ba")]', "bar-value")
-        grab.submit()
+        doc = grab.request(self.server.get_url())
+        doc.set_input_by_xpath('//input[re:test(@id, "^ba")]', "bar-value")
+        grab.submit(doc)
         self.assertEqual(self.server.request.data, b"foo=None&bar=bar-value")
 
     def test_unicode_textarea_form(self):
@@ -233,8 +233,8 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
         self.server.add_response(Response(data=html.encode("utf-8")))
         self.server.add_response(Response())
         grab = build_grab()
-        grab.request(self.server.get_url())
-        grab.submit()
+        doc = grab.request(self.server.get_url())
+        grab.submit(doc)
         self.assertTrue("Beställa".encode("utf-8") in self.server.request.data)
 
     def test_field_disabled(self):

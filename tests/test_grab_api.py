@@ -19,14 +19,14 @@ class GrabApiTestCase(BaseGrabTestCase):
     def test_clone(self):
         grab = build_grab()
         self.server.add_response(Response(data=b"Moon"))
-        grab.request(self.server.get_url())
-        self.assertTrue(b"Moon" in grab.doc.body)
+        doc = grab.request(self.server.get_url())
+        self.assertTrue(b"Moon" in doc.body)
 
         self.server.add_response(Response(data=b"Foo"))
         grab2 = grab.clone(method="POST", body=b"")
 
-        grab2.request(self.server.get_url())
-        self.assertTrue(b"Foo" in grab2.doc.body)
+        doc = grab2.request(self.server.get_url())
+        self.assertTrue(b"Foo" in doc.body)
 
     def test_empty_clone(self):
         grab = build_grab()

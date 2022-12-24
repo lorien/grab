@@ -12,8 +12,8 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         grab = build_grab()
         self.server.add_response(Response(data=b"medved"))
         url = self.server.get_url("/превед?foo=bar")
-        grab.request(url)
-        self.assertEqual(b"medved", grab.doc.body)
+        doc = grab.request(url)
+        self.assertEqual(b"medved", doc.body)
         self.assertEqual(
             "/%D0%BF%D1%80%D0%B5%D0%B2%D0%B5%D0%B4",
             # u'/превед',
@@ -23,8 +23,8 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
     def test_nonascii_query(self):
         grab = build_grab()
         self.server.add_response(Response(data=b"medved"))
-        grab.request(self.server.get_url("/search?q=превед"))
-        self.assertEqual(b"medved", grab.doc.body)
+        doc = grab.request(self.server.get_url("/search?q=превед"))
+        self.assertEqual(b"medved", doc.body)
         self.assertEqual("превед", self.server.request.args["q"])
 
     def test_null_byte_url(self):
@@ -34,10 +34,10 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         )
         self.server.add_response(Response(data=b"y"))
         grab = build_grab()
-        grab.request(self.server.get_url())
-        self.assertEqual(b"y", grab.doc.body)
-        # FIX this line: grab.doc.url is http://127.0.0.1:39457/%00/
-        # self.assertEqual(grab.doc.url, quote(redirect_url, safe=":./?&"))
+        doc = grab.request(self.server.get_url())
+        self.assertEqual(b"y", doc.body)
+        # FIX this line: doc.url is http://127.0.0.1:39457/%00/
+        # self.assertEqual(doc.url, quote(redirect_url, safe=":./?&"))
 
     def test_urllib3_idna_error(self):
         invalid_url = (

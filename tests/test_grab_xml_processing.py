@@ -16,8 +16,8 @@ class GrabXMLProcessingTestCase(BaseGrabTestCase):
             )
         )
         grab = build_grab()
-        grab.request(self.server.get_url())
-        self.assertTrue(grab.doc.select("//foo").text() == "foo")
+        doc = grab.request(self.server.get_url())
+        self.assertTrue(doc.select("//foo").text() == "foo")
 
     def test_declaration_bug(self):
         # 1. Build Grab instance with XML with xml declaration

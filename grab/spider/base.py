@@ -428,8 +428,8 @@ class Spider:
             self.stat.inc("spider:task-%s-initial" % task.name)
 
         # Update traffic statistics
-        if res["grab"] and res["grab"].doc:
-            doc = res["grab"].doc
+        if res["grab"] and res["doc"]:
+            doc = res["doc"]
             self.stat.inc("spider:download-size", doc.download_size)
             self.stat.inc("spider:upload-size", doc.upload_size)
 
@@ -547,9 +547,7 @@ class Spider:
             else res["exc"]
         )
         msg = (
-            ("http-%s" % res["grab"].doc.code)
-            if res["ok"]
-            else orig_exc.__class__.__name__
+            ("http-%s" % res["doc"].code) if res["ok"] else orig_exc.__class__.__name__
         )
 
         self.stat.inc("error:%s" % msg)
@@ -635,7 +633,7 @@ class Spider:
         if task.get("raw"):
             is_valid = True
         elif result["ok"]:
-            res_code = result["grab"].doc.code
+            res_code = result["doc"].code
             is_valid = self.is_valid_network_response_code(res_code, task)
         if is_valid:
             self.parser_service.input_queue.put((result, task))

@@ -52,8 +52,8 @@ class GrabRedirectTestCase(BaseGrabTestCase):
             count=-1,
         )
         grab.setup(redirect_limit=20)
-        grab.request(self.server.get_url())
-        self.assertTrue(b"done" in grab.doc.body)
+        doc = grab.request(self.server.get_url())
+        self.assertTrue(b"done" in doc.body)
 
     def test_redirect_utf_location(self):
         def callback():

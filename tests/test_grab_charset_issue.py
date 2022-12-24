@@ -11,11 +11,11 @@ class LXMLExtensionTest(BaseGrabTestCase):
         html = b"<strong>&#151;</strong>"
         self.server.add_response(Response(data=html), count=3)
         grab = build_grab()
-        grab.request(self.server.get_url())
+        doc = grab.request(self.server.get_url())
 
         # By default &#[128-159]; are fixed
-        self.assertFalse(grab.doc.select("//strong/text()").text() == chr(151))
-        self.assertTrue(grab.doc.select("//strong/text()").text() == chr(8212))
+        self.assertFalse(doc.select("//strong/text()").text() == chr(151))
+        self.assertTrue(doc.select("//strong/text()").text() == chr(8212))
 
     def test_invalid_charset(self):
         html = b"""<head><meta http-equiv="Content-Type"
