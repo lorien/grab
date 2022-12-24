@@ -20,8 +20,7 @@ class TestCookies(BaseGrabTestCase):
     def test_multiple_cookies(self):
         grab = build_grab()
         self.server.add_response(Response())
-        grab.setup(cookies={"foo": "1", "bar": "2"})
-        grab.request(self.server.get_url())
+        grab.request(self.server.get_url(), cookies={"foo": "1", "bar": "2"})
         self.assertEqual(
             {(x.key, x.value) for x in self.server.request.cookies.values()},
             {("foo", "1"), ("bar", "2")},

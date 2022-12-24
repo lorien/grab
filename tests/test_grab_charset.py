@@ -21,9 +21,9 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
 
         self.assertEqual(doc.encoding, "utf-8")
 
-        grab = build_grab(encoding="cp1251")
+        grab = build_grab()
         self.server.add_response(Response(data="фуу".encode("cp1251")))
-        doc = grab.request(self.server.get_url())
+        doc = grab.request(self.server.get_url(), encoding="cp1251")
         self.assertEqual("фуу".encode("cp1251"), doc.body)
         self.assertEqual(doc.encoding, "windows-1251")  # normalized
 

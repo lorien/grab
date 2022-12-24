@@ -18,15 +18,13 @@ class GrabRequestTestCase(BaseGrabTestCase):
     def test_delete_method(self):
         self.server.add_response(Response())
         grab = build_grab()
-        grab.setup(method="DELETE")
-        grab.request(self.server.get_url())
+        grab.request(self.server.get_url(), method="DELETE")
         self.assertEqual("DELETE", self.server.request.method)
 
     def test_put_method(self):
         self.server.add_response(Response())
         grab = build_grab()
-        grab.setup(method="PUT", body=b"abc")
-        grab.request(self.server.get_url())
+        grab.request(self.server.get_url(), method="PUT", body=b"abc")
         self.assertEqual("PUT", self.server.request.method)
         self.assertEqual("3", self.server.request.headers.get("content-length"))
 

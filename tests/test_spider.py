@@ -1,6 +1,6 @@
 from test_server import Response
 
-from grab import Grab
+from grab import Request
 from grab.spider import Spider, Task
 from grab.spider.errors import FatalError, SpiderError
 from grab.util.timeout import Timeout
@@ -25,35 +25,74 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_network_limit(self):
         class CustomSimpleSpider(SimpleSpider):
-            def create_grab_instance(self, **kwargs):
-                return Grab(timeout=Timeout(connect=1, total=1))
+            pass
+            # def create_grab_instance(self, **kwargs):
+            #    return Grab(timeout=Timeout(connect=1, total=1))
 
         self.server.add_response(Response(data=b"Hello spider!", sleep=1.1))
 
         bot = build_spider(CustomSimpleSpider, network_try_limit=1)
-        bot.add_task(Task("baz", self.server.get_url()))
+        bot.add_task(
+            Task(
+                "baz",
+                Request(
+                    method="GET",
+                    url=self.server.get_url(),
+                    timeout=Timeout(connect=1, total=1),
+                ),
+            )
+        )
         bot.run()
         self.assertEqual(bot.stat.counters["spider:request-network"], 1)
 
         bot = build_spider(CustomSimpleSpider, network_try_limit=2)
-        bot.add_task(Task("baz", self.server.get_url()))
+        bot.add_task(
+            Task(
+                "baz",
+                Request(
+                    method="GET",
+                    url=self.server.get_url(),
+                    timeout=Timeout(connect=1, total=1),
+                ),
+            )
+        )
         bot.run()
         self.assertEqual(bot.stat.counters["spider:request-network"], 2)
 
     def test_task_limit(self):
         class CustomSimpleSpider(SimpleSpider):
-            def create_grab_instance(self, **kwargs):
-                return Grab(timeout=Timeout(connect=1, total=1))
+            pass
+            # def create_grab_instance(self, **kwargs):
+            #    return Grab(timeout=Timeout(connect=1, total=1))
 
         self.server.add_response(Response(data=b"Hello spider!", sleep=1.1))
 
         bot = build_spider(CustomSimpleSpider, network_try_limit=1)
-        bot.add_task(Task("baz", self.server.get_url()))
+        bot.add_task(
+            Task(
+                "baz",
+                Request(
+                    method="GET",
+                    url=self.server.get_url(),
+                    timeout=Timeout(connect=1, total=1),
+                ),
+            )
+        )
         bot.run()
         self.assertEqual(bot.stat.counters["spider:task-baz"], 1)
 
         bot2 = build_spider(SimpleSpider, task_try_limit=2)
-        bot2.add_task(Task("baz", self.server.get_url(), task_try_count=3))
+        bot2.add_task(
+            Task(
+                "baz",
+                Request(
+                    method="GET",
+                    url=self.server.get_url(),
+                    timeout=Timeout(connect=1, total=1),
+                ),
+                task_try_count=3,
+            )
+        )
         bot2.run()
         self.assertEqual(bot2.stat.counters.get("spider:request-network", 0), 0)
 

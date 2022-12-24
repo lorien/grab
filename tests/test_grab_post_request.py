@@ -11,62 +11,112 @@ class TestPostFeature(BaseGrabTestCase):
 
     def test_post(self):
         self.server.add_response(Response(), count=9)
-        grab = build_grab(url=self.server.get_url())
-        grab.setup(method="POST", multipart=False)
+        grab = build_grab()
 
         # Provide POST data in dict
-        grab.request(multipart=False, fields={"foo": "bar"})
+        grab.request(
+            url=self.server.get_url(),
+            fields={"foo": "bar"},
+            method="POST",
+            multipart=False,
+        )
         self.assertEqual(self.server.request.data, b"foo=bar")
 
         # Provide POST data in tuple
-        grab.request(fields=(("foo", "TUPLE"),))
+        grab.request(
+            url=self.server.get_url(),
+            fields=(("foo", "TUPLE"),),
+            method="POST",
+            multipart=False,
+        )
         self.assertEqual(self.server.request.data, b"foo=TUPLE")
 
         # Provide POST data in list
-        grab.request(fields=[("foo", "LIST")])
+        grab.request(
+            url=self.server.get_url(),
+            fields=[("foo", "LIST")],
+            method="POST",
+            multipart=False,
+        )
         self.assertEqual(self.server.request.data, b"foo=LIST")
 
         # Order of elements should not be changed (1)
-        grab.request(fields=[("foo", "LIST"), ("bar", "BAR")])
+        grab.request(
+            url=self.server.get_url(),
+            fields=[("foo", "LIST"), ("bar", "BAR")],
+            method="POST",
+            multipart=False,
+        )
         self.assertEqual(self.server.request.data, b"foo=LIST&bar=BAR")
 
         # Order of elements should not be changed (2)
-        grab.request(fields=[("bar", "BAR"), ("foo", "LIST")])
+        grab.request(
+            url=self.server.get_url(),
+            fields=[("bar", "BAR"), ("foo", "LIST")],
+            method="POST",
+            multipart=False,
+        )
         self.assertEqual(self.server.request.data, b"bar=BAR&foo=LIST")
 
         # Provide POST data in byte-string
-        grab.request(body="Hello world!")
+        grab.request(
+            url=self.server.get_url(),
+            body="Hello world!",
+            method="POST",
+            multipart=False,
+        )
         self.assertEqual(self.server.request.data, b"Hello world!")
 
         # Provide POST data in unicode-string
-        grab.request(body="Hello world!")
+        grab.request(
+            url=self.server.get_url(),
+            body="Hello world!",
+            method="POST",
+            multipart=False,
+        )
         self.assertEqual(self.server.request.data, b"Hello world!")
 
         # Provide POST data in non-ascii unicode-string
-        # grab.setup(body="Привет, мир!")
-        # grab.request()
+        # grab.request(body="Привет, мир!", method="POST", multipart=False)
         # self.assertEqual(self.server.request.data, "Привет, мир!".encode("utf-8"))
 
         # Two values with one key
-        grab.request(fields=[("foo", "bar"), ("foo", "baz")])
+        grab.request(
+            url=self.server.get_url(),
+            fields=[("foo", "bar"), ("foo", "baz")],
+            method="POST",
+            multipart=False,
+        )
         self.assertEqual(self.server.request.data, b"foo=bar&foo=baz")
 
     def test_multipart_post(self):
         self.server.add_response(Response(), count=3)
-        grab = build_grab(url=self.server.get_url())
+        grab = build_grab()
         # Dict
-        grab.setup(multipart=True, method="POST", fields={"foo": "bar"})
-        grab.request()
+        grab.request(
+            url=self.server.get_url(),
+            multipart=True,
+            method="POST",
+            fields={"foo": "bar"},
+        )
         self.assertTrue(b'name="foo"' in self.server.request.data)
 
         # tuple with one pair
-        grab.setup(multipart=True, fields=(("foo", "bar"),))
-        grab.request()
+        grab.request(
+            method="POST",
+            url=self.server.get_url(),
+            multipart=True,
+            fields=(("foo", "bar"),),
+        )
         self.assertTrue(b'name="foo"' in self.server.request.data)
 
         # tuple with two pairs
-        grab.setup(multipart=True, fields=(("foo", "bar"), ("foo", "baz")))
-        grab.request()
+        grab.request(
+            url=self.server.get_url(),
+            multipart=True,
+            fields=(("foo", "bar"), ("foo", "baz")),
+            method="POST",
+        )
         self.assertTrue(b'name="foo"' in self.server.request.data)
 
     # def test_unicode_post(self):
@@ -96,27 +146,24 @@ class TestPostFeature(BaseGrabTestCase):
     def test_put(self):
         self.server.add_response(Response())
         grab = build_grab()
-        grab.setup(body=b"abc", url=self.server.get_url(), method="PUT")
-        grab.request()
+        grab.request(body=b"abc", url=self.server.get_url(), method="PUT")
         self.assertEqual(self.server.request.method, "PUT")
         self.assertEqual(self.server.request.headers.get("content-length"), "3")
 
     def test_patch(self):
         self.server.add_response(Response())
         grab = build_grab()
-        grab.setup(body=b"abc", url=self.server.get_url(), method="PATCH")
-        grab.request()
+        grab.request(body=b"abc", url=self.server.get_url(), method="PATCH")
         self.assertEqual(self.server.request.method, "PATCH")
         self.assertEqual(self.server.request.headers.get("content-length"), "3")
 
     def test_empty_post(self):
         self.server.add_response(Response(), count=2)
         grab = build_grab()
-        grab.setup(method="POST", body="")
-        grab.request(self.server.get_url())
+        grab.request(self.server.get_url(), method="POST", body="")
         self.assertEqual(self.server.request.method, "POST")
         self.assertEqual(self.server.request.data, b"")
         self.assertEqual(self.server.request.headers.get("content-length"), "0")
 
-        grab.request(self.server.get_url(), body="DATA")
+        grab.request(self.server.get_url(), body="DATA", method="POST")
         self.assertEqual(self.server.request.headers.get("content-length"), "4")

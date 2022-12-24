@@ -42,7 +42,6 @@ def copy_config(config: MutableMapping[str, Any]) -> MutableMapping[str, Any]:
 
 def default_grab_config() -> MutableMapping[str, Any]:
     return {
-        "request": {},
         "common_headers": None,
         "reuse_cookies": True,
     }
@@ -100,8 +99,6 @@ class Grab:
         for key, val in kwargs.items():
             if key in self.config:
                 self.config[key] = val
-            elif key in Request.init_keys:
-                self.config["request"][key] = val
             else:
                 raise GrabMisuseError("Unknown option: %s" % key)
 
@@ -113,9 +110,6 @@ class Grab:
             if key not in Request.init_keys:
                 raise GrabMisuseError("Invalid request parameter: {}".format(key))
             cfg[key] = val
-        for key, val in self.config["request"].items():
-            if key not in cfg:
-                cfg[key] = val
         for key in Request.init_keys:
             if key not in cfg:
                 cfg[key] = None

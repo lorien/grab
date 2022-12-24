@@ -41,7 +41,6 @@ class TestResponse(BaseGrabTestCase):
             )
         )
         grab = build_grab()
-        grab.setup(encoding="utf-8")
         doc = grab.request(self.server.get_url())
         self.assertTrue("крокодил" in doc.unicode_body())
 

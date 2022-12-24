@@ -39,11 +39,10 @@ class TestProxy(BaseGrabTestCase):
     def test_proxy_option(self):
         grab = build_grab()
 
-        proxy = "%s:%s" % (ADDRESS, self.server.port)
-        grab.setup(proxy=proxy, proxy_type="http")
         self.server.add_response(Response(data=b"123"))
 
-        doc = grab.request("http://yandex.ru")
+        proxy = "%s:%s" % (ADDRESS, self.server.port)
+        doc = grab.request("http://yandex.ru", proxy=proxy, proxy_type="http")
         self.assertEqual(b"123", doc.body)
         self.assertEqual("yandex.ru", self.server.request.headers.get("host"))
 

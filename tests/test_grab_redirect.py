@@ -41,18 +41,17 @@ class GrabRedirectTestCase(BaseGrabTestCase):
         )
 
         grab = build_grab()
-        grab.setup(redirect_limit=5)
 
         self.assertRaises(
-            GrabTooManyRedirectsError, lambda: grab.request(self.server.get_url())
+            GrabTooManyRedirectsError,
+            lambda: grab.request(redirect_limit=5, url=self.server.get_url()),
         )
 
         self.server.add_response(
             Response(callback=build_location_callback(self.server.get_url(), 10)),
             count=-1,
         )
-        grab.setup(redirect_limit=20)
-        doc = grab.request(self.server.get_url())
+        doc = grab.request(self.server.get_url(), redirect_limit=20)
         self.assertTrue(b"done" in doc.body)
 
     def test_redirect_utf_location(self):
@@ -64,6 +63,6 @@ class GrabRedirectTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(raw_callback=callback))
         self.server.add_response(Response(data=b"content-2"))
-        grab = build_grab(follow_location=True)
+        grab = build_grab()
         with self.assertRaises(GrabInvalidResponse):
-            grab.request(self.server.get_url())
+            grab.request(follow_location=True, url=self.server.get_url())

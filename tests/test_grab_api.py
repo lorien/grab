@@ -23,7 +23,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertTrue(b"Moon" in doc.body)
 
         self.server.add_response(Response(data=b"Foo"))
-        grab2 = grab.clone(method="POST", body=b"")
+        grab2 = grab.clone()
 
         doc = grab2.request(self.server.get_url())
         self.assertTrue(b"Foo" in doc.body)
@@ -58,12 +58,11 @@ class GrabApiTestCase(BaseGrabTestCase):
     def test_headers_affects_common_headers(self):
         grab = build_grab()
         ch_origin = deepcopy(grab.config["common_headers"])
-        # Provide custom header which is also in common_headers
-        grab.setup(headers={"Accept": "zzz"})
         # To make request Grab processes config and build result headers
         # from `config['common_headers']` and `config['headers']
         # That merge should not change initial `config['common_headers']` value
-        grab.request(self.server.get_url())
+        # Provide custom header which is also in common_headers
+        grab.request(self.server.get_url(), headers={"Accept": "zzz"})
         self.assertEqual(
             grab.config["common_headers"]["Accept"],
             ch_origin["Accept"],

@@ -137,8 +137,8 @@ class LXMLExtensionTest(BaseGrabTestCase):
 
     def test_cdata_issue(self):
         self.server.add_response(Response(data=XML), count=2)
-        grab = build_grab(document_type="xml")
-        doc = grab.request(self.server.get_url())
+        grab = build_grab()
+        doc = grab.request(self.server.get_url(), document_type="xml")
         self.assertEqual("30", doc.tree.xpath("//weight")[0].text)
 
     def test_xml_declaration(self):
