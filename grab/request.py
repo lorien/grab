@@ -98,3 +98,14 @@ class Request:  # pylint: disable=too-many-instance-attributes
         return "Request({})".format(
             ", ".join("{}={!r}".format(*x) for x in self.__dict__.items())
         )
+
+    @classmethod
+    def create_from_mapping(cls, mapping: Mapping[str, Any]) -> Request:
+        for key in mapping:
+            if key not in cls.init_keys:
+                raise TypeError(
+                    "Constructor of {} does not accept {} keyword parameter".format(
+                        cls.__name__, key
+                    )
+                )
+        return cls(**mapping)

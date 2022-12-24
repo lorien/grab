@@ -17,7 +17,7 @@ from .transport import Urllib3Transport
 from .types import resolve_grab_entity, resolve_transport_entity
 from .util.cookies import build_jar, create_cookie
 
-__all__ = ["Grab"]
+__all__ = ["Grab", "request"]
 logger = logging.getLogger(__name__)
 logger_network = logging.getLogger("grab.network")
 system_random = SystemRandom()
@@ -93,16 +93,10 @@ class Grab(BaseGrab):
             cfg["method"] = "GET"
         if cfg["follow_location"] is None:
             cfg["follow_location"] = True
-        req = self.create_request_from_config(cfg)
+        req = Request.create_from_mapping(cfg)
         # COOKIES EXTENSION
         self.update_session_cookies(req.cookies, req.url)
         return req
-
-    def create_request_from_config(self, config: MutableMapping[str, Any]) -> Request:
-        for key in config:
-            if key not in Request.init_keys:
-                raise GrabMisuseError("Unknown request parameter: {}".format(key))
-        return Request(**config)
 
     def update_session_cookies(
         self, cookies: Mapping[str, Any], request_url: str
