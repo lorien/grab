@@ -27,24 +27,6 @@ MUTABLE_CONFIG_KEYS = ["fields", "headers", "cookies"]
 logger = logging.getLogger(__name__)
 logger_network = logging.getLogger("grab.network")
 system_random = SystemRandom()
-DEFAULT_REQUEST_CONFIG = {
-    "method": None,
-    "url": None,
-    "proxy": None,
-    "proxy_type": None,
-    "proxy_userpwd": None,
-    "headers": None,
-    "cookies": None,
-    "timeout": None,
-    "encoding": None,
-    "document_type": None,
-    "body": None,
-    "fields": None,
-    "multipart": None,
-    # Needs refactoring
-    "redirect_limit": None,  # -> Retry/Redirect object
-    "follow_location": None,  # -> Redirect/Redirect object
-}
 
 
 def copy_config(config: MutableMapping[str, Any]) -> MutableMapping[str, Any]:
@@ -130,7 +112,7 @@ class Grab:
         for key, val in kwargs.items():
             if key in self.config:
                 self.config[key] = val
-            elif key in DEFAULT_REQUEST_CONFIG:
+            elif key in Request.init_keys:
                 self.config["request"][key] = val
             else:
                 raise GrabMisuseError("Unknown option: %s" % key)
@@ -140,15 +122,15 @@ class Grab:
     ) -> MutableMapping[str, Any]:
         cfg: MutableMapping[str, Any] = {}
         for key, val in request_config.items():
-            if key not in DEFAULT_REQUEST_CONFIG:
+            if key not in Request.init_keys:
                 raise GrabMisuseError("Invalid request parameter: {}".format(key))
             cfg[key] = val
         for key, val in self.config["request"].items():
             if key not in cfg:
                 cfg[key] = val
-        for key, val in DEFAULT_REQUEST_CONFIG.items():
+        for key in Request.init_keys:
             if key not in cfg:
-                cfg[key] = val
+                cfg[key] = None
         return cfg
 
     def prepare_request(self, request_config: MutableMapping[str, Any]) -> Request:
@@ -172,19 +154,17 @@ class Grab:
             )
         req = self.create_request_from_config(cfg)
         # COOKIES EXTENSION
-        self.sync_cookie_manager_with_request_cookies(req.cookies, req.url)
+        self.update_session_cookies(req.cookies, req.url)
         return req
 
     def create_request_from_config(self, config: MutableMapping[str, Any]) -> Request:
         for key in config:
-            if key not in DEFAULT_REQUEST_CONFIG:
+            if key not in Request.init_keys:
                 raise GrabMisuseError("Unknown request parameter: {}".format(key))
         return Request(**config)
 
-    def sync_cookie_manager_with_request_cookies(
-        self,
-        cookies: Mapping[str, Any],
-        request_url: str,
+    def update_session_cookies(
+        self, cookies: Mapping[str, Any], request_url: str
     ) -> None:
         request_host = urlsplit(request_url).hostname
         if request_host and cookies:

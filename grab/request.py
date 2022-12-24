@@ -10,6 +10,25 @@ DEFAULT_REDIRECT_LIMIT = 20  # like in many web browsers
 
 
 class Request:  # pylint: disable=too-many-instance-attributes
+    init_keys = {
+        "method",
+        "url",
+        "headers",
+        "timeout",
+        "cookies",
+        "encoding",
+        "proxy",
+        "proxy_type",
+        "proxy_userpwd",
+        "fields",
+        "body",
+        "multipart",
+        "document_type",
+        "redirect_limit",
+        "follow_location",
+        "meta",
+    }
+
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals
         self,
         method: str,
