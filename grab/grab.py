@@ -66,32 +66,19 @@ class Grab(BaseGrab):
             else:
                 raise GrabMisuseError("Unknown option: %s" % key)
 
-    def merge_request_configs(
-        self, request_config: MutableMapping[str, Any]
-    ) -> MutableMapping[str, Any]:
-        cfg: MutableMapping[str, Any] = {}
-        for key, val in request_config.items():
-            if key not in Request.init_keys:
-                raise GrabMisuseError("Invalid request parameter: {}".format(key))
-            cfg[key] = val
-        for key in Request.init_keys:
-            if key not in cfg:
-                cfg[key] = None
-        return cfg
-
     def prepare_request(self, request_config: MutableMapping[str, Any]) -> Request:
         """Configure all things to make real network request.
 
         This method is called before doing real request via transport extension.
         """
         self.transport.reset()
-        cfg = self.merge_request_configs(request_config)
+        cfg = copy(request_config)
         # REASONABLE DEFAULTS
-        if cfg["url"] is None:
-            raise GrabMisuseError("Request URL must be set")
-        if not cfg["method"]:
+        if cfg.get("url") is None:
+            raise ValueError("Request could not be instantiated with no URL")
+        if not cfg.get("method"):
             cfg["method"] = "GET"
-        if cfg["follow_location"] is None:
+        if cfg.get("follow_location") is None:
             cfg["follow_location"] = True
         req = Request.create_from_mapping(cfg)
         # COOKIES EXTENSION
