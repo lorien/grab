@@ -1,7 +1,8 @@
 from test_server import Response
 
+from grab import request
 from grab.errors import GrabInvalidResponse, GrabTooManyRedirectsError
-from tests.util import BaseGrabTestCase, build_grab
+from tests.util import BaseGrabTestCase
 
 
 def build_location_callback(url, counter):
@@ -40,18 +41,16 @@ class GrabRedirectTestCase(BaseGrabTestCase):
             count=-1,
         )
 
-        grab = build_grab()
-
         self.assertRaises(
             GrabTooManyRedirectsError,
-            lambda: grab.request(redirect_limit=5, url=self.server.get_url()),
+            lambda: request(redirect_limit=5, url=self.server.get_url()),
         )
 
         self.server.add_response(
             Response(callback=build_location_callback(self.server.get_url(), 10)),
             count=-1,
         )
-        doc = grab.request(self.server.get_url(), redirect_limit=20)
+        doc = request(self.server.get_url(), redirect_limit=20)
         self.assertTrue(b"done" in doc.body)
 
     def test_redirect_utf_location(self):
@@ -63,6 +62,5 @@ class GrabRedirectTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(raw_callback=callback))
         self.server.add_response(Response(data=b"content-2"))
-        grab = build_grab()
         with self.assertRaises(GrabInvalidResponse):
-            grab.request(follow_location=True, url=self.server.get_url())
+            request(follow_location=True, url=self.server.get_url())

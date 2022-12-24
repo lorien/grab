@@ -4,7 +4,7 @@ from grab import Request
 from grab.errors import GrabMisuseError, ResponseNotValid
 from grab.spider import NoTaskHandler, Spider, SpiderMisuseError, Task, base
 from grab.spider.errors import SpiderError
-from tests.util import BaseGrabTestCase, build_spider
+from tests.util import BaseGrabTestCase
 
 
 class SimpleSpider(Spider):
@@ -19,7 +19,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
     def test_task_priority(self):
         # Automatic random priority
         base.RANDOM_TASK_PRIORITY_RANGE = (10, 20)
-        bot = build_spider(SimpleSpider, priority_mode="random")
+        bot = SimpleSpider(priority_mode="random")
         task = Task("baz", url="http://xxx.com")
         self.assertEqual(task.priority, None)
         bot.add_task(task)
@@ -27,7 +27,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
         # Automatic constant priority
         base.DEFAULT_TASK_PRIORITY = 33
-        bot = build_spider(SimpleSpider, priority_mode="const")
+        bot = SimpleSpider(priority_mode="const")
         task = Task("baz", url="http://xxx.com")
         self.assertEqual(task.priority, None)
         bot.add_task(task)
@@ -35,7 +35,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
         # Automatic priority does not override explicitly set priority
         base.DEFAULT_TASK_PRIORITY = 33
-        bot = build_spider(SimpleSpider, priority_mode="const")
+        bot = SimpleSpider(priority_mode="const")
         task = Task("baz", url="http://xxx.com", priority=1)
         self.assertEqual(1, task.priority)
         bot.add_task(task)
@@ -44,9 +44,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         self.assertRaises(SpiderMisuseError, lambda: SimpleSpider(priority_mode="foo"))
 
     # def test_task_url(self):
-    #    bot = build_spider(
-    #        SimpleSpider,
-    #    )
+    #    bot = SimpleSpider()
     #    task = Task("baz", url="http://xxx.com")
     #    self.assertEqual("http://xxx.com", task.url)
     #    bot.add_task(task)
@@ -59,9 +57,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
     #    self.assertEqual("http://yyy.com", task.grab_config["url"])
 
     def test_task_clone(self):
-        bot = build_spider(
-            SimpleSpider,
-        )
+        bot = SimpleSpider()
 
         task = Task("baz", url="http://xxx.com")
         bot.add_task(task.clone())
@@ -82,9 +78,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
     def test_task_useragent(self):
         self.server.add_response(Response(), count=1)
-        bot = build_spider(
-            SimpleSpider,
-        )
+        bot = SimpleSpider()
 
         task = Task(
             "baz",
@@ -104,9 +98,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         class TestSpider(Spider):
             pass
 
-        bot = build_spider(
-            TestSpider,
-        )
+        bot = TestSpider()
         bot.add_task(Task("page", url=self.server.get_url()))
         self.assertRaises(NoTaskHandler, bot.run)
 
@@ -117,13 +109,13 @@ class TestSpiderTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(status=502), count=4)
 
-        bot = build_spider(TestSpider, network_try_limit=1)
+        bot = TestSpider(network_try_limit=1)
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
         self.assertEqual(0, len(bot.runtime_events.get("codes", [])))
 
-        bot = build_spider(TestSpider, network_try_limit=1)
+        bot = TestSpider(network_try_limit=1)
         bot.add_task(Task("page", url=self.server.get_url(), raw=True))
         bot.add_task(Task("page", url=self.server.get_url(), raw=True))
         bot.run()
@@ -146,9 +138,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         tokens = []
         func = FuncWithState(tokens)
 
-        bot = build_spider(
-            TestSpider,
-        )
+        bot = TestSpider()
         bot.meta["tokens"] = tokens
         # classic handler
         bot.add_task(Task("page", url=self.server.get_url()))
@@ -189,7 +179,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
     #    self.assertEqual(task2.request.url, "http://bar.com/")
 
     # def test_task_clone_kwargs(self):
-    #    grab = build_grab()
+    #    grab = Grab()
     #    task = Task("foo", Request("GET", "http://foo.com/", metafoo=1))
     #    task2 = task.clone(foo=2)
     #    self.assertEqual(2, task2.foo)  # pylint: disable=no-member
@@ -218,9 +208,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         task2 = Task("bar", url="http://foo.com/")
         task3 = Task(url="http://foo.com/")
 
-        bot = build_spider(
-            TestSpider,
-        )
+        bot = TestSpider()
 
         self.assertEqual(bot.get_fallback_handler(task1), bot.do_smth)
         self.assertEqual(bot.get_fallback_handler(task2), bot.task_bar_fallback)
@@ -243,7 +231,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
     #        def task_page(self, grab, unused_task):
     #            self.collect_runtime_event("points", grab.config["timeout"])
 
-    #    bot = build_spider(TestSpider, meta={"server": self.server})
+    #    bot = TestSpider(meta={"server": self.server})
     #    bot.add_task(Task("page", url=self.server.get_url()))
     #    bot.add_task(
     #        Task(
@@ -277,7 +265,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
     #        def task_page(self, doc, task):
     #            self.collect_runtime_event("points", task.request.meta["foo"])
 
-    #    bot = build_spider(TestSpider, meta={"server": self.server})
+    #    bot = TestSpider(meta={"server": self.server})
     #    bot.add_task(Task("page", url=self.server.get_url()))
     #    bot.add_task(
     #        Task("page", Request(method="GET", url=self.server.get_url(), timeout=75))
@@ -289,9 +277,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         class TestSpider(Spider):
             pass
 
-        bot = build_spider(
-            TestSpider,
-        )
+        bot = TestSpider()
         bot.add_task(Task("page", url="zz://zz"))
         self.assertEqual(0, bot.task_queue.size())
         bot.add_task(Task("page", url="zz://zz"), raise_error=False)
@@ -303,9 +289,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         class TestSpider(Spider):
             pass
 
-        bot = build_spider(
-            TestSpider,
-        )
+        bot = TestSpider()
         self.assertRaises(
             SpiderError, bot.add_task, Task("page", url="zz://zz"), raise_error=True
         )
@@ -320,10 +304,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
             def task_page(self, unused_grab, unused_task):
                 pass
 
-        bot = build_spider(
-            TestSpider,
-            parser_requests_per_process=2,
-        )
+        bot = TestSpider(parser_requests_per_process=2)
         for _ in range(5):
             bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
@@ -337,7 +318,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
                 if not task.get("fin"):
                     yield task.clone(fin=True)
 
-        bot = build_spider(TestSpider)
+        bot = TestSpider()
 
         task = Task(
             "foo", Request(method="POST", url=self.server.get_url(), fields={"x": "y"})
@@ -354,7 +335,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
                 self.stat.inc("xxx")
                 raise ResponseNotValid
 
-        bot = build_spider(SomeSimpleSpider)
+        bot = SomeSimpleSpider()
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
         self.assertEqual(bot.task_try_limit, bot.stat.counters["xxx"])
@@ -369,7 +350,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
     #        def task_page2(self, grab, task):
     #            pass
 
-    #    bot = build_spider(TestSpider)
+    #    bot = TestSpider()
     #    task = Task("page", url=self.server.get_url())
     #    bot.add_task(task)
     #    bot.run()
@@ -386,7 +367,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
             def task_generator(self):
                 yield from ()
 
-        bot = build_spider(TestSpider)
+        bot = TestSpider()
         task = Task("page", url=self.server.get_url())
         bot.add_task(task)
         bot.run()
@@ -403,7 +384,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
             def task_initial(self, unused_grab, unused_task):
                 self.stat.inc("foo", 1)
 
-        bot = build_spider(TestSpider)
+        bot = TestSpider()
         bot.run()
 
         self.assertEqual(1, bot.stat.counters["foo"])

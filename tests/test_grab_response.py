@@ -2,7 +2,8 @@ import os.path
 
 from test_server import Response
 
-from tests.util import TEST_DIR, BaseGrabTestCase, build_grab, temp_dir
+from grab import request
+from tests.util import TEST_DIR, BaseGrabTestCase, temp_dir
 
 HTML = """
 Hello world
@@ -23,8 +24,7 @@ class TestResponse(BaseGrabTestCase):
             tmp_file = os.path.join(tmp_dir, "file.bin")
             self.server.add_response(Response(data=img_data))
 
-            grab = build_grab()
-            doc = grab.request(self.server.get_url())
+            doc = request(self.server.get_url())
             doc.save(tmp_file)
             with open(tmp_file, "rb") as inp:
                 self.assertEqual(inp.read(), img_data)
@@ -40,8 +40,7 @@ class TestResponse(BaseGrabTestCase):
                 ).encode("utf-8")
             )
         )
-        grab = build_grab()
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         self.assertTrue("крокодил" in doc.unicode_body())
 
     def test_xml_declaration(self):
@@ -55,8 +54,7 @@ class TestResponse(BaseGrabTestCase):
                 ).encode("utf-8")
             )
         )
-        grab = build_grab()
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         ubody = doc.unicode_body()
         self.assertTrue("тест" in ubody)
         self.assertTrue("<?xml" in ubody)

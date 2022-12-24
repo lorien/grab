@@ -3,9 +3,10 @@ from pprint import pprint  # pylint: disable=unused-import
 
 from test_server import Response
 
+from grab import Grab, request
 from grab.document import Document
 from grab.errors import GrabMisuseError
-from tests.util import BaseGrabTestCase, build_grab
+from tests.util import BaseGrabTestCase
 
 
 class GrabApiTestCase(BaseGrabTestCase):
@@ -13,11 +14,11 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_incorrect_option_name(self):
-        grab = build_grab()
-        self.assertRaises(GrabMisuseError, grab.setup, save_the_word=True)
+        with self.assertRaises(GrabMisuseError):
+            Grab().setup(save_the_word=True)
 
     def test_clone(self):
-        grab = build_grab()
+        grab = Grab()
         self.server.add_response(Response(data=b"Moon"))
         doc = grab.request(self.server.get_url())
         self.assertTrue(b"Moon" in doc.body)
@@ -29,16 +30,13 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertTrue(b"Foo" in doc.body)
 
     def test_empty_clone(self):
-        grab = build_grab()
-        grab.clone()
+        Grab().clone()
 
     # def test_make_url_absolute(self):
-    #    grab = build_grab()
     #    self.server.add_response(Response(data=b'<base href="http://foo/bar/">'))
-    #    grab.request(self.server.get_url())
+    #    request(self.server.get_url())
     #    absolute_url = grab.make_url_absolute("/foobar", resolve_base=True)
     #    self.assertEqual(absolute_url, "http://foo/foobar")
-    #    grab = build_grab()
     #    absolute_url = grab.make_url_absolute("/foobar")
     #    self.assertEqual(absolute_url, "/foobar")
 
@@ -56,13 +54,11 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertRaises(GrabMisuseError, Document, data)
 
     def test_headers_affects_common_headers(self):
-        grab = build_grab()
+        grab = Grab()
         ch_origin = deepcopy(grab.config["common_headers"])
-        # To make request Grab processes config and build result headers
-        # from `config['common_headers']` and `config['headers']
-        # That merge should not change initial `config['common_headers']` value
-        # Provide custom header which is also in common_headers
-        grab.request(self.server.get_url(), headers={"Accept": "zzz"})
+        # Setting explicity headers which is already in common headers
+        # must not affect on content of common headers
+        request(self.server.get_url(), headers={"Accept": "zzz"})
         self.assertEqual(
             grab.config["common_headers"]["Accept"],
             ch_origin["Accept"],

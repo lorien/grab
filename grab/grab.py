@@ -216,13 +216,7 @@ class Grab:
 
         For details see `Document.submit()` method
         """
-        url, method, is_multipart, fields = doc.get_form_request(**kwargs)
-        return self.request(
-            url=url,
-            method=method,
-            multipart=is_multipart,
-            fields=fields,
-        )
+        return self.request(Request(**doc.get_form_request(**kwargs)))
 
     def process_request_result(self, req: Request) -> Document:
         """Process result of real request performed via transport extension."""

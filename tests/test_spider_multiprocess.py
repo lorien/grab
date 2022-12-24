@@ -1,7 +1,7 @@
 from test_server import Response
 
 from grab.spider import Spider, Task
-from tests.util import BaseGrabTestCase, build_spider
+from tests.util import BaseGrabTestCase
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
@@ -33,7 +33,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         # This test tests that in non-multiprocess-mode changes made
         # inside handler applied to main spider instance.
         self.server.add_response(Response(), count=-1)
-        bot = build_spider(self.SimpleSpider)
+        bot = self.SimpleSpider()
         bot.meta["url"] = self.server.get_url()
         bot.add_task(Task("page", self.server.get_url()))
         bot.run()

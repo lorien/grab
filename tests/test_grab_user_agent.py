@@ -1,6 +1,7 @@
 from test_server import Response
 
-from tests.util import BaseGrabTestCase, build_grab
+from grab import request
+from tests.util import BaseGrabTestCase
 
 
 class GrabSimpleTestCase(BaseGrabTestCase):
@@ -9,10 +10,9 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
     def test_default_user_agent_is_not_random(self):
         self.server.add_response(Response())
-        grab = build_grab()
         agents = set()
         for _ in range(3):
-            grab.request(self.server.get_url())
+            request(self.server.get_url())
             agents.add(self.server.request.headers.get("user-agent"))
         self.assertTrue(len(agents) == 1)
 
@@ -20,7 +20,6 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         self.server.add_response(Response(), count=-1)
         agents = set()
         for _ in range(3):
-            grab = build_grab()
-            grab.request(self.server.get_url())
+            request(self.server.get_url())
             agents.add(self.server.request.headers.get("user-agent"))
         self.assertTrue(len(agents) > 1)

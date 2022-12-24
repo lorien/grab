@@ -6,12 +6,7 @@ from test_server import Response
 from grab.document import Document
 from grab.errors import GrabMisuseError
 from grab.grab import Grab
-from tests.util import (
-    TEST_DIR,
-    BaseGrabTestCase,
-    build_grab,
-    build_grab_custom_subclass,
-)
+from tests.util import TEST_DIR, BaseGrabTestCase
 
 
 class CustomDocument(Document):
@@ -28,20 +23,20 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_body_get_bytes_body_true(self):
-        grab = build_grab_custom_subclass(CustomGrab)
+        grab = CustomGrab()
         self.server.add_response(Response(data=b"bar"))
         doc = grab.request(self.server.get_url())
         self.assertEqual(doc.get_bytes_body(), b"bar")
 
     def test_external_set_document_body(self):
-        grab = build_grab()
+        grab = Grab()
         doc = grab.request(self.server.get_url())
         with self.assertRaises(GrabMisuseError):
             doc.body = b"asdf"
 
     def test_empty_response(self):
         self.server.add_response(Response(data=b""))
-        grab = build_grab()
+        grab = Grab()
         doc = grab.request(self.server.get_url())
         self.assertTrue(doc.tree is not None)  # should not raise exception
 
@@ -60,7 +55,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         with open(path, "rb") as inp:
             data = inp.read()
         self.server.add_response(Response(data=data))
-        grab = build_grab()
+        grab = Grab()
         doc = grab.request(self.server.get_url())
         items = []
         for elem in doc.select('//a[contains(@class, "exploregrid-item")]'):
@@ -76,6 +71,6 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
     def test_json(self):
         self.server.add_response(Response(data=b'{"foo": "bar"}'))
-        grab = build_grab()
+        grab = Grab()
         doc = grab.request(self.server.get_url())
         self.assertEqual({"foo": "bar"}, doc.json)

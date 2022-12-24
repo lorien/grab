@@ -1,7 +1,7 @@
 from test_server import Response
 
 from grab.spider import Spider, Task
-from tests.util import BaseGrabTestCase, build_spider
+from tests.util import BaseGrabTestCase
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
@@ -21,7 +21,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 raise Exception("Shit happens!")
 
         self.server.add_response(Response(), count=2)
-        bot = build_spider(TestSpider)
+        bot = TestSpider()
         bot.add_task(Task("page_valid", url=self.server.get_url()))
         bot.add_task(Task("page_fail", url=self.server.get_url()))
         bot.run()
@@ -39,7 +39,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def task_page(self, grab, task):
                 pass
 
-        bot = build_spider(TestSpider)
+        bot = TestSpider()
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
         bot.render_stats()

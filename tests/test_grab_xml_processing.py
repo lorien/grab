@@ -1,7 +1,8 @@
 from test_server import Response
 
+from grab import request
 from grab.document import Document
-from tests.util import BaseGrabTestCase, build_grab
+from tests.util import BaseGrabTestCase
 
 
 class GrabXMLProcessingTestCase(BaseGrabTestCase):
@@ -15,8 +16,7 @@ class GrabXMLProcessingTestCase(BaseGrabTestCase):
                 b"<root><foo>foo</foo></root>"
             )
         )
-        grab = build_grab()
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         self.assertTrue(doc.select("//foo").text() == "foo")
 
     def test_declaration_bug(self):

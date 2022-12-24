@@ -3,9 +3,9 @@ from urllib.parse import parse_qsl
 
 from test_server import Response
 
-from grab import DataNotFound, GrabMisuseError
+from grab import DataNotFound, GrabMisuseError, request
 from grab.document import Document
-from tests.util import BaseGrabTestCase, build_grab
+from tests.util import BaseGrabTestCase
 
 FORMS_HTML = b"""
 <head>
@@ -120,56 +120,53 @@ class TestHtmlForms(BaseGrabTestCase):
         self.assertEqual(args1, args2)
 
     def test_submit(self):
-        grab = build_grab()
         self.server.add_response(
             Response(data=POST_FORM % self.server.get_url().encode())
         )
         self.server.add_response(Response())
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         doc.set_input("name", "Alex")
-        grab.submit(doc)
+        request(**doc.get_form_request())
         self.assert_equal_qs(self.server.request.data, b"name=Alex&secret=123")
 
         # Default submit control
         self.server.add_response(Response(data=MULTIPLE_SUBMIT_FORM))
         self.server.add_response(Response())
-        doc = grab.request(self.server.get_url())
-        grab.submit(doc)
+        doc = request(self.server.get_url())
+        request(**doc.get_form_request())
         self.assert_equal_qs(self.server.request.data, b"secret=123&submit1=submit1")
 
         # Selected submit control
         self.server.add_response(Response(data=MULTIPLE_SUBMIT_FORM))
         self.server.add_response(Response())
-        doc = grab.request(self.server.get_url())
-        grab.submit(doc, submit_name="submit2")
+        doc = request(self.server.get_url())
+        request(**doc.get_form_request(submit_name="submit2"))
         self.assert_equal_qs(self.server.request.data, b"secret=123&submit2=submit2")
 
         # Default submit control if submit control name is invalid
         self.server.add_response(Response(data=MULTIPLE_SUBMIT_FORM))
         self.server.add_response(Response())
-        doc = grab.request(self.server.get_url())
-        grab.submit(doc, submit_name="submit3")
+        doc = request(self.server.get_url())
+        request(**doc.get_form_request(submit_name="submit3"))
         self.assert_equal_qs(self.server.request.data, b"secret=123&submit1=submit1")
 
     def test_submit_remove_from_post_argument(self):
-        grab = build_grab()
         self.server.add_response(Response(data=MULTIPLE_SUBMIT_FORM))
         self.server.add_response(Response())
 
-        doc = grab.request(self.server.get_url())
-        grab.submit(doc, submit_name="submit3")
+        doc = request(self.server.get_url())
+        request(**doc.get_form_request(submit_name="submit3"))
         self.assert_equal_qs(self.server.request.data, b"secret=123&submit1=submit1")
 
         self.server.add_response(Response(data=MULTIPLE_SUBMIT_FORM))
         self.server.add_response(Response())
-        doc = grab.request(self.server.get_url())
-        grab.submit(doc, remove_from_post=["submit1"])
+        doc = request(self.server.get_url())
+        request(**doc.get_form_request(remove_from_post=["submit1"]))
         self.assert_equal_qs(self.server.request.data, b"secret=123")
 
     def test_set_methods1(self):
-        grab = build_grab()
         self.server.add_response(Response(data=FORMS_HTML))
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
 
         self.assertEqual(doc.get_cached_form(), None)
 
@@ -179,9 +176,8 @@ class TestHtmlForms(BaseGrabTestCase):
         self.assertRaises(KeyError, lambda: doc.set_input("query", "asdf"))
 
     def test_set_methods2(self):
-        grab = build_grab()
         self.server.add_response(Response(data=FORMS_HTML))
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         doc.set_input_by_id("search_box", "asdf")
         self.assertEqual("search_form", doc.get_cached_form().get("id"))
 
@@ -189,25 +185,22 @@ class TestHtmlForms(BaseGrabTestCase):
         doc.set_input_by_number(0, "asdf")
 
     def test_set_methods3(self):
-        grab = build_grab()
         self.server.add_response(Response(data=FORMS_HTML))
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         doc.set_input_by_xpath('//*[@name="gender"]', "2")
         self.assertEqual("common_form", doc.get_cached_form().get("id"))
 
     def test_html_without_forms(self):
-        grab = build_grab()
         self.server.add_response(Response(data=NO_FORM_HTML))
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         self.assertRaises(DataNotFound, lambda: doc.form)
 
     def test_disabled_radio(self):
         """Test issue #57."""
-        grab = build_grab()
         self.server.add_response(Response(data=DISABLED_RADIO_HTML))
         self.server.add_response(Response())
-        doc = grab.request(self.server.get_url())
-        grab.submit(doc)
+        doc = request(self.server.get_url())
+        request(**doc.get_form_request())
 
 
 class TestJustAnotherChunkHtmlForms(BaseGrabTestCase):
@@ -224,10 +217,9 @@ class TestJustAnotherChunkHtmlForms(BaseGrabTestCase):
         """
         self.server.add_response(Response(data=html))
         self.server.add_response(Response())
-        grab = build_grab()
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         doc.set_input_by_xpath('//input[re:test(@id, "^ba")]', "bar-value")
-        grab.submit(doc)
+        request(**doc.get_form_request())
         self.assertEqual(self.server.request.data, b"foo=None&bar=bar-value")
 
     def test_unicode_textarea_form(self):
@@ -240,9 +232,8 @@ class TestJustAnotherChunkHtmlForms(BaseGrabTestCase):
         """
         self.server.add_response(Response(data=html.encode("utf-8")))
         self.server.add_response(Response())
-        grab = build_grab()
-        doc = grab.request(self.server.get_url())
-        grab.submit(doc)
+        doc = request(self.server.get_url())
+        request(**doc.get_form_request())
         self.assertTrue("Beställa".encode("utf-8") in self.server.request.data)
 
     def test_field_disabled(self):

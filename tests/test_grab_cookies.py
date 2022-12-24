@@ -2,7 +2,8 @@ from pprint import pprint  # pylint: disable=unused-import
 
 from test_server import Response
 
-from tests.util import BaseGrabTestCase, build_grab  # , temp_file
+from grab import Grab, request
+from tests.util import BaseGrabTestCase  # , temp_file
 
 
 class TestCookies(BaseGrabTestCase):
@@ -10,17 +11,15 @@ class TestCookies(BaseGrabTestCase):
         self.server.reset()
 
     def test_parsing_response_cookies(self):
-        grab = build_grab()
         self.server.add_response(
             Response(headers=[("Set-Cookie", "foo=bar"), ("Set-Cookie", "1=2")])
         )
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
 
     def test_multiple_cookies(self):
-        grab = build_grab()
         self.server.add_response(Response())
-        grab.request(self.server.get_url(), cookies={"foo": "1", "bar": "2"})
+        request(self.server.get_url(), cookies={"foo": "1", "bar": "2"})
         self.assertEqual(
             {(x.key, x.value) for x in self.server.request.cookies.values()},
             {("foo", "1"), ("bar", "2")},
@@ -29,8 +28,7 @@ class TestCookies(BaseGrabTestCase):
     def test_session(self):
         # Test that if Grab gets some cookies from the server
         # then it sends it back
-        grab = build_grab()
-        grab.setup(reuse_cookies=True)
+        grab = Grab(reuse_cookies=True)
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
         doc = grab.request(self.server.get_url())
         self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
@@ -48,8 +46,7 @@ class TestCookies(BaseGrabTestCase):
         )
 
         # Test reuse_cookies=False
-        grab = build_grab()
-        grab.setup(reuse_cookies=False)
+        grab = Grab(reuse_cookies=False)
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
         doc = grab.request(self.server.get_url())
         self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
@@ -58,8 +55,7 @@ class TestCookies(BaseGrabTestCase):
         self.assertFalse(self.server.request.cookies)
 
         # Test something
-        grab = build_grab()
-        grab.setup(reuse_cookies=True)
+        grab = Grab(reuse_cookies=True)
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
         doc = grab.request(self.server.get_url())
         self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
@@ -69,13 +65,12 @@ class TestCookies(BaseGrabTestCase):
         self.assertFalse(self.server.request.cookies)
 
     def test_redirect_session(self):
-        grab = build_grab()
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
+        grab = Grab()
         doc = grab.request(self.server.get_url())
         self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
 
         # Setup one-time redirect
-        grab = build_grab()
         self.server.add_response(
             Response(
                 headers=[
@@ -92,10 +87,9 @@ class TestCookies(BaseGrabTestCase):
     # def test_load_dump(self):
     #    with temp_file() as tmp_file:
     #        self.server.add_response(Response())
-    #        grab = build_grab()
     #        cookies = {"foo": "bar", "spam": "ham"}
     #        grab.setup(cookies=cookies)
-    #        grab.request(self.server.get_url())
+    #        request(self.server.get_url())
     #        grab.cookies.save_to_file(tmp_file)
     #        with open(tmp_file, encoding="utf-8") as inp:
     #            self.assertEqual(
@@ -104,10 +98,9 @@ class TestCookies(BaseGrabTestCase):
     #            )
 
     #        self.server.add_response(Response())
-    #        grab = build_grab()
     #        cookies = {"foo": "bar", "spam": "begemot"}
     #        grab.setup(cookies=cookies)
-    #        grab.request(self.server.get_url())
+    #        request(self.server.get_url())
     #        grab.cookies.save_to_file(tmp_file)
     #        with open(tmp_file, encoding="utf-8") as inp:
     #            self.assertEqual(
@@ -116,7 +109,6 @@ class TestCookies(BaseGrabTestCase):
     #            )
 
     #        # Test load cookies
-    #        grab = build_grab()
     #        cookies_list = [
     #            {"name": "foo", "value": "bar", "domain": self.server.address},
     #            {"name": "spam", "value": "begemot", "domain": self.server.address},
@@ -130,12 +122,12 @@ class TestCookies(BaseGrabTestCase):
     #        )
 
     # def test_update_invalid_cookie(self):
-    #    grab = build_grab()
     #    self.assertRaises(GrabMisuseError, grab.cookies.update, None)
     #    self.assertRaises(GrabMisuseError, grab.cookies.update, "asdf")
     #    self.assertRaises(GrabMisuseError, grab.cookies.update, ["asdf"])
 
     def test_path(self):
+        grab = Grab()
         self.server.add_response(
             Response(
                 headers=[
@@ -146,7 +138,6 @@ class TestCookies(BaseGrabTestCase):
         )
 
         # work with "/" path
-        grab = build_grab()
         # get cookies
         grab.request(self.server.get_url("/"))
 
@@ -169,7 +160,6 @@ class TestCookies(BaseGrabTestCase):
     #        with open(tmp_file, "w", encoding="utf-8") as out:
     #            json.dump(init_cookies, out)
 
-    #        grab = build_grab()
     #        grab.cookies.load_from_file(tmp_file)
 
     #        cookies = {
@@ -178,11 +168,10 @@ class TestCookies(BaseGrabTestCase):
     #        }
 
     #        grab.setup(cookies=cookies)
-    #        grab.request(self.server.get_url())
+    #        request(self.server.get_url())
     #        self.assertEqual(2, len(self.server.get_request().cookies))
 
     # def test_cookie_merging_replace(self):
-    #    grab = build_grab()
     #    grab.cookies.set("foo", "bar", "localhost")
     #    grab.cookies.set("foo", "bar2", "localhost")
     #    self.assertEqual(1, len(grab.cookies.items()))
@@ -196,8 +185,6 @@ class TestCookies(BaseGrabTestCase):
     #    self.assertEqual(2, len(grab.cookies.items()))
 
     def test_unicode_cookie(self):
-        grab = build_grab()
-
         def callback():
             return b"HTTP/1.0 200 OK\nSet-Cookie: preved=%s\n\n" % "медвед".encode(
                 "utf-8"
@@ -206,7 +193,7 @@ class TestCookies(BaseGrabTestCase):
         self.server.add_response(Response(raw_callback=callback))
         self.server.add_response(Response())
         # request page and receive unicode cookie
-        grab.request(self.server.get_url())
+        request(self.server.get_url())
         # request page one more time, sending cookie
         # should not fail
-        grab.request(self.server.get_url())
+        request(self.server.get_url())

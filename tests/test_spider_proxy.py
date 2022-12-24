@@ -6,7 +6,7 @@ from test_server import Response, TestServer
 
 from grab import Request
 from grab.spider import Spider, Task
-from tests.util import ADDRESS, BaseGrabTestCase, build_spider, temp_file
+from tests.util import ADDRESS, BaseGrabTestCase, temp_file
 
 
 class SimpleSpider(Spider):
@@ -48,7 +48,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
     #        with open(proxy_file, "w", encoding="utf-8") as out:
     #            out.write(content)
     #        # Simple test, one task
-    #        bot = build_spider(SimpleSpider, thread_number=1)
+    #        bot = SimpleSpider(thread_number=1)
     #        bot.load_proxylist(proxy_file, "text_file")
     #        bot.add_task(Task("baz", "http://yandex.ru"))
     #        bot.run()
@@ -69,7 +69,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
     #            out.write(content)
 
     #        # By default auto_change is True
-    #        bot = build_spider(SimpleSpider, thread_number=1)
+    #        bot = SimpleSpider(thread_number=1)
     #        bot.load_proxylist(proxy_file, "text_file")
     #        for _ in range(10):
     #            bot.add_task(
@@ -96,7 +96,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
 
     #        # Disable auto_change
     #        # By default auto_init is True
-    #        bot = build_spider(SimpleSpider, thread_number=1)
+    #        bot = SimpleSpider(thread_number=1)
     #        bot.load_proxylist(proxy_file, "text_file", auto_change=False)
     #        for _ in range(1):
     #            bot.add_task(
@@ -125,7 +125,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             # Disable auto_change
             # Disable auto_init
             # Proxylist will not be used by default
-            bot = build_spider(SimpleSpider, thread_number=1)
+            bot = SimpleSpider(thread_number=1)
             bot.load_proxylist(
                 proxy_file, "text_file", auto_change=False, auto_init=False
             )
@@ -161,7 +161,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
     #        def load_raw_data(self):
     #            return None
 
-    #    bot = build_spider(TestSpider)
+    #    bot = TestSpider()
     #    bot.load_proxylist(CustomProxySource())
     #    bot.add_task(Task("page", url="http://yandex.ru/"))
     #    bot.run()

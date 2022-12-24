@@ -1,6 +1,7 @@
 from test_server import Response
 
-from tests.util import BaseGrabTestCase, build_grab
+from grab import request
+from tests.util import BaseGrabTestCase
 
 
 class LXMLExtensionTest(BaseGrabTestCase):
@@ -10,8 +11,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
     def test_dash_issue(self):
         html = b"<strong>&#151;</strong>"
         self.server.add_response(Response(data=html), count=3)
-        grab = build_grab()
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
 
         # By default &#[128-159]; are fixed
         self.assertFalse(doc.select("//strong/text()").text() == chr(151))
@@ -22,5 +22,4 @@ class LXMLExtensionTest(BaseGrabTestCase):
                     content="text/html; charset=windows-874">'
                     </head><body>test</body>"""
         self.server.add_response(Response(data=html))
-        grab = build_grab()
-        grab.request(self.server.get_url())
+        request(self.server.get_url())

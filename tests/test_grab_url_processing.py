@@ -1,7 +1,8 @@
 from test_server import Response
 
+from grab import request
 from grab.errors import GrabError
-from tests.util import BaseGrabTestCase, build_grab
+from tests.util import BaseGrabTestCase
 
 
 class GrabUrlProcessingTestCase(BaseGrabTestCase):
@@ -9,10 +10,9 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_nonascii_path(self):
-        grab = build_grab()
         self.server.add_response(Response(data=b"medved"))
         url = self.server.get_url("/превед?foo=bar")
-        doc = grab.request(url)
+        doc = request(url)
         self.assertEqual(b"medved", doc.body)
         self.assertEqual(
             "/%D0%BF%D1%80%D0%B5%D0%B2%D0%B5%D0%B4",
@@ -21,9 +21,8 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         )
 
     def test_nonascii_query(self):
-        grab = build_grab()
         self.server.add_response(Response(data=b"medved"))
-        doc = grab.request(self.server.get_url("/search?q=превед"))
+        doc = request(self.server.get_url("/search?q=превед"))
         self.assertEqual(b"medved", doc.body)
         self.assertEqual("превед", self.server.request.args["q"])
 
@@ -33,8 +32,7 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
             Response(status=302, data=b"x", headers=[("Location", redirect_url)])
         )
         self.server.add_response(Response(data=b"y"))
-        grab = build_grab()
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         self.assertEqual(b"y", doc.body)
         # FIX this line: doc.url is http://127.0.0.1:39457/%00/
         # self.assertEqual(doc.url, quote(redirect_url, safe=":./?&"))
@@ -47,7 +45,6 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
             "http://www.textbooksnow.com/webapp/wcs/stores"
             "/servlet/ProductDisplay?langId=-1&storeId="
         )
-        grab = build_grab()
         with self.assertRaises(GrabError) as ex:
-            grab.request(invalid_url)
+            request(invalid_url)
         self.assertTrue("Failed to parse" in str(ex.exception))

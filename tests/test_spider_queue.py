@@ -8,7 +8,7 @@ from grab.spider import Spider, Task
 from grab.spider.errors import SpiderMisuseError
 from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.queue_backend.memory import MemoryTaskQueue
-from tests.util import BaseGrabTestCase, build_spider, load_test_config
+from tests.util import BaseGrabTestCase, load_test_config
 
 
 class SpiderQueueMixin:
@@ -23,8 +23,7 @@ class SpiderQueueMixin:
 
     def test_basic_priority(self):
         self.server.add_response(Response(), count=5)
-        bot = build_spider(
-            self.SimpleSpider,
+        bot = self.SimpleSpider(
             parser_pool_size=1,
             thread_number=1,
             task_queue=self.build_task_queue(),
@@ -49,8 +48,7 @@ class SpiderQueueMixin:
                 self.final_taskq_size = self.task_queue.size()
 
         self.server.add_response(Response(), count=5)
-        bot = build_spider(
-            CustomSpider,
+        bot = CustomSpider(
             task_queue=self.build_task_queue(),
         )
         bot.task_queue.clear()
@@ -61,12 +59,11 @@ class SpiderQueueMixin:
         self.assertEqual(0, bot.final_taskq_size)
 
     def test_task_queue_render_stats(self):
-        bot = build_spider(self.SimpleSpider)
+        bot = self.SimpleSpider()
         bot.render_stats()
 
     def test_clear(self):
-        bot = build_spider(
-            self.SimpleSpider,
+        bot = self.SimpleSpider(
             task_queue=self.build_task_queue(),
         )
         bot.task_queue.clear()
@@ -98,12 +95,12 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
             def task_page(self, unused_grab, task):
                 self.collect_runtime_event("numbers", task.num)
 
-        bot = build_spider(TestSpider, thread_number=1)
+        bot = TestSpider(thread_number=1)
         bot.run()
         self.assertEqual(bot.runtime_events["numbers"], [1, 3, 4, 2])
 
     def test_schedule_list_clear(self):
-        bot = build_spider(self.SimpleSpider)
+        bot = self.SimpleSpider()
         bot.task_queue.clear()
 
         for delay in range(5):
@@ -141,13 +138,13 @@ class SpiderMongodbQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
             def task_page(self, unused_grab, task):
                 self.collect_runtime_event("numbers", task.num)
 
-        bot = build_spider(TestSpider, task_queue=self.build_task_queue())
+        bot = TestSpider(task_queue=self.build_task_queue())
         bot.run()
         self.assertEqual(bot.runtime_events["numbers"], [1, 3, 4, 2])
         # TODO: understand why that test fails
 
     def test_clear_collection(self):
-        bot = build_spider(self.SimpleSpider, task_queue=self.build_task_queue())
+        bot = self.SimpleSpider(task_queue=self.build_task_queue())
         bot.task_queue.clear()
 
 
@@ -166,7 +163,7 @@ class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
         )
 
     def test_delay_error(self):
-        bot = build_spider(self.SimpleSpider, task_queue=self.build_task_queue())
+        bot = self.SimpleSpider(task_queue=self.build_task_queue())
         bot.task_queue.clear()
         self.assertRaises(
             SpiderMisuseError,
@@ -180,6 +177,6 @@ class TaskQueueTestCase(TestCase):
         pass
 
     def test_deprecated_setup_queue(self):
-        bot = build_spider(self.SimpleSpider)
+        bot = self.SimpleSpider()
         with self.assertRaises(GrabFeatureIsDeprecated):
             bot.setup_queue("foobar")

@@ -3,7 +3,7 @@ from pprint import pprint  # pylint: disable=unused-import
 from test_server import Response
 
 from grab.spider import Spider, Task
-from tests.util import BaseGrabTestCase, build_spider
+from tests.util import BaseGrabTestCase
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
@@ -15,7 +15,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     #        def task_page(self, unused_grab, unused_task):
     #            pass
 
-    #    bot = build_spider(TestSpider)
+    #    bot = TestSpider()
     #    bot.add_task(Task("page", url=self.server.get_url()))
 
     #    self.server.add_response(
@@ -48,7 +48,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def task_page(self, unused_grab, unused_task):
                 pass
 
-        bot = build_spider(TestSpider)
+        bot = TestSpider()
         bot.run()
         # Different errors depending on combination
         # of network service and transport used

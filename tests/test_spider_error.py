@@ -4,7 +4,7 @@ from test_server import Response
 
 from grab import Request
 from grab.spider import Spider, Task
-from tests.util import BaseGrabTestCase, build_spider
+from tests.util import BaseGrabTestCase
 
 # That URLs breaks Grab's URL normalization process
 # with error "label empty or too long"
@@ -26,7 +26,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
             def task_generator(self):
                 yield Task("page", url=INVALID_URL)
 
-        bot = build_spider(SomeSpider)
+        bot = SomeSpider()
         bot.run()
 
     def test_redirect_with_invalid_url(self):
@@ -51,7 +51,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
                 headers=[("Location", INVALID_URL)],
             )
         )
-        bot = build_spider(TestSpider, network_try_limit=1)
+        bot = TestSpider(network_try_limit=1)
         bot.run()
 
     def test_stat_error_name_threaded_urllib3(self):
@@ -71,6 +71,6 @@ class SpiderErrorTestCase(BaseGrabTestCase):
             def task_page(self, grab, unused_task):
                 pass
 
-        bot = build_spider(SimpleSpider)
+        bot = SimpleSpider()
         bot.run()
         self.assertTrue("error:ReadTimeoutError" in bot.stat.counters)

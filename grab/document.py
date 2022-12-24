@@ -18,7 +18,7 @@ from http.cookiejar import CookieJar
 from io import BytesIO, StringIO
 from pprint import pprint  # pylint: disable=unused-import
 from re import Match, Pattern
-from typing import Any, cast
+from typing import Any, TypedDict, cast
 from urllib.parse import SplitResult, parse_qs, urljoin, urlsplit
 
 import unicodec  # pylint: disable=wrong-import-order
@@ -38,6 +38,13 @@ from grab.errors import DataNotFound, GrabMisuseError
 THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")
 UNDEFINED = object()
+
+
+class FormRequestParams(TypedDict):
+    url: str
+    method: str
+    multipart: bool
+    fields: Sequence[tuple[str, Any]]
 
 
 def normalize_pairs(
@@ -654,7 +661,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         url: None | str = None,
         extra_post: None | Mapping[str, Any] | Sequence[tuple[str, Any]] = None,
         remove_from_post: None | Sequence[str] = None,
-    ) -> tuple[str, str, bool, Sequence[tuple[str, Any]]]:
+    ) -> FormRequestParams:
         """Submit default form.
 
         :param submit_name: name of button which should be "clicked" to
@@ -693,12 +700,12 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             )
         if remove_from_post:
             post_items = [(x, y) for x, y in post_items if x not in remove_from_post]
-        return (
-            action_url,
-            self.form.method.upper(),
-            "multipart" in self.form.get("enctype", ""),
-            post_items,
-        )
+        return {
+            "url": action_url,
+            "method": self.form.method.upper(),
+            "multipart": "multipart" in self.form.get("enctype", ""),
+            "fields": post_items,
+        }
 
     def build_fields_to_remove(
         self, fields: Mapping[str, Any], form_inputs: Sequence[HtmlElement]

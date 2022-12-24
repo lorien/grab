@@ -1,8 +1,9 @@
 from urllib3 import PoolManager
 from urllib3.exceptions import LocationParseError
 
+from grab import request
 from grab.errors import GrabInvalidResponse
-from tests.util import BaseGrabTestCase, build_grab
+from tests.util import BaseGrabTestCase
 
 
 class GrabApiTestCase(BaseGrabTestCase):
@@ -35,6 +36,5 @@ class GrabApiTestCase(BaseGrabTestCase):
             "http://www.textbooksnow.com/webapp/wcs/stores"
             "/servlet/ProductDisplay?langId=-1&storeId="
         )
-        grab = build_grab()
         with self.assertRaises(GrabInvalidResponse):
-            grab.request(invalid_url)
+            request(invalid_url)

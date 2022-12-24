@@ -3,7 +3,7 @@
 # from test_server import Response
 #
 # from grab import UploadContent, UploadFile
-# from tests.util import BaseGrabTestCase, build_grab, temp_file
+# from tests.util import BaseGrabTestCase, temp_file
 #
 #
 # class TestUploadContent(BaseGrabTestCase):
@@ -21,7 +21,7 @@
 #                ).encode("ascii")
 #            )
 #        )
-#        grab = build_grab()
+#        grab = Grab()
 #        grab.request(self.server.get_url())
 #        return grab
 #

@@ -4,7 +4,7 @@ from grab import Request
 from grab.spider import Spider, Task
 from grab.spider.errors import FatalError, SpiderError
 from grab.util.timeout import Timeout
-from tests.util import BaseGrabTestCase, build_spider
+from tests.util import BaseGrabTestCase
 
 
 class SimpleSpider(Spider):
@@ -18,7 +18,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
     def test_spider(self):
         self.server.add_response(Response(data=b"Hello spider!"))
-        bot = build_spider(SimpleSpider)
+        bot = SimpleSpider()
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
         self.assertEqual(b"Hello spider!", bot.runtime_events["SAVED_ITEM"][0])
@@ -31,7 +31,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(data=b"Hello spider!", sleep=1.1))
 
-        bot = build_spider(CustomSimpleSpider, network_try_limit=1)
+        bot = CustomSimpleSpider(network_try_limit=1)
         bot.add_task(
             Task(
                 "baz",
@@ -45,7 +45,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.run()
         self.assertEqual(bot.stat.counters["spider:request-network"], 1)
 
-        bot = build_spider(CustomSimpleSpider, network_try_limit=2)
+        bot = CustomSimpleSpider(network_try_limit=2)
         bot.add_task(
             Task(
                 "baz",
@@ -67,7 +67,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(data=b"Hello spider!", sleep=1.1))
 
-        bot = build_spider(CustomSimpleSpider, network_try_limit=1)
+        bot = CustomSimpleSpider(network_try_limit=1)
         bot.add_task(
             Task(
                 "baz",
@@ -81,7 +81,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.run()
         self.assertEqual(bot.stat.counters["spider:task-baz"], 1)
 
-        bot2 = build_spider(SimpleSpider, task_try_limit=2)
+        bot2 = SimpleSpider(task_try_limit=2)
         bot2.add_task(
             Task(
                 "baz",
@@ -99,7 +99,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     def test_task_retry(self):
         self.server.add_response(Response(status=403))
         self.server.add_response(Response(data=b"xxx"))
-        bot = build_spider(SimpleSpider)
+        bot = SimpleSpider()
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
         self.assertEqual(b"xxx", bot.runtime_events["SAVED_ITEM"][0])
@@ -117,7 +117,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def task_page(self, unused_grab, unused_task):
                 self.stat.inc("count")
 
-        bot = build_spider(TestSpider)
+        bot = TestSpider()
         bot.run()
         self.assertEqual(bot.stat.counters["count"], number)
 
@@ -134,7 +134,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 yield None
 
         self.server.add_response(Response(), count=-1)
-        bot = build_spider(TestSpider)
+        bot = TestSpider()
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
 
@@ -155,7 +155,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(status=403))
 
-        bot = build_spider(TestSpider, network_try_limit=1)
+        bot = TestSpider(network_try_limit=1)
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
         self.assertEqual(bot.points, [1])
@@ -177,7 +177,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         self.server.add_response(Response(status=403))
 
-        bot = build_spider(TestSpider, network_try_limit=1)
+        bot = TestSpider(network_try_limit=1)
         bot.add_task(
             Task("page", url=self.server.get_url(), fallback_name="fallback_zz")
         )
@@ -192,7 +192,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
             def check_task_limits(self, task):
                 return False, "zz"
 
-        bot = build_spider(TestSpider)
+        bot = TestSpider()
         bot.add_task(
             Task("page", url=self.server.get_url(), fallback_name="fallback_zz")
         )
@@ -211,7 +211,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 yield 1
 
         self.server.add_response(Response(), count=-1)
-        bot = build_spider(TestSpider)
+        bot = TestSpider()
         bot.add_task(Task("page", url=self.server.get_url()))
         self.assertRaises(SpiderError, bot.run)
 
@@ -221,7 +221,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 self.stop()
 
         self.server.add_response(Response(), count=-1)
-        bot = build_spider(TestSpider)
+        bot = TestSpider()
         for _ in range(5):
             bot.add_task(Task("page", url=self.server.get_url()))
         self.assertEqual(5, bot.task_queue.size())
@@ -234,6 +234,6 @@ class BasicSpiderTestCase(BaseGrabTestCase):
                 raise FatalError
 
         self.server.add_response(Response(), count=-1)
-        bot = build_spider(TestSpider)
+        bot = TestSpider()
         bot.add_task(Task("page", url=self.server.get_url()))
         self.assertRaises(FatalError, bot.run)

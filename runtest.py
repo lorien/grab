@@ -7,8 +7,6 @@ import threading
 import unittest
 from argparse import ArgumentParser
 
-from tests.util import GLOBAL
-
 VALID_BACKENDS = {"mongodb", "redis", "pyquery"}
 
 # **********
@@ -103,7 +101,6 @@ def main():
     setup_logging()
     parser = ArgumentParser()
     parser.add_argument("-t", "--test", help="Run only specified tests")
-    parser.add_argument("--network-service", default=None)
     parser.add_argument(
         "--test-grab",
         action="store_true",
@@ -130,8 +127,7 @@ def main():
     )
     parser.add_argument("--failfast", action="store_true", help="Stop at first fail")
     opts = parser.parse_args()
-    GLOBAL["network_service"] = opts.network_service
-    GLOBAL["backends"].update(parse_backend_argument(opts.backend))
+    backends = parse_backend_argument(opts.backend)
     test_list = []
 
     if opts.test_all:
@@ -163,7 +159,7 @@ def main():
         mod_suite = loader.loadTestsFromName(path)
         for some_suite in mod_suite:
             for test in some_suite:
-                if not hasattr(test, "backend") or test.backend in GLOBAL["backends"]:
+                if not hasattr(test, "backend") or test.backend in backends:
                     suite.addTest(test)
     runner = unittest.TextTestRunner(failfast=opts.failfast)
     result = runner.run(suite)

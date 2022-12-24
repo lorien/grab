@@ -1,7 +1,8 @@
 from test_server import Response
 
+from grab import request
 from grab.document import normalize_pairs
-from tests.util import BaseGrabTestCase, build_grab
+from tests.util import BaseGrabTestCase
 
 
 class GrabDocumentTestCase(BaseGrabTestCase):
@@ -9,9 +10,8 @@ class GrabDocumentTestCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_document_copy_works(self):
-        grab = build_grab()
         self.server.add_response(Response(data=b"<h1>test</h1>"))
-        res1 = grab.request(self.server.get_url())
+        res1 = request(self.server.get_url())
         self.assertEqual("test", res1.select("//h1").text())
 
         res2 = res1.copy()

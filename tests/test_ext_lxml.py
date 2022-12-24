@@ -1,9 +1,9 @@
 from lxml.html import fromstring
 from test_server import Response
 
-from grab import DataNotFound
+from grab import DataNotFound, request
 from grab.document import Document
-from tests.util import BaseGrabTestCase, build_grab
+from tests.util import BaseGrabTestCase
 
 HTML = """
 <head>
@@ -137,8 +137,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
 
     def test_cdata_issue(self):
         self.server.add_response(Response(data=XML), count=2)
-        grab = build_grab()
-        doc = grab.request(self.server.get_url(), document_type="xml")
+        doc = request(self.server.get_url(), document_type="xml")
         self.assertEqual("30", doc.tree.xpath("//weight")[0].text)
 
     def test_xml_declaration(self):
@@ -151,17 +150,14 @@ class LXMLExtensionTest(BaseGrabTestCase):
                 )
             )
         )
-        grab = build_grab()
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         self.assertEqual("test", doc.select("//h1").text())
 
     def test_empty_document(self):
         self.server.add_response(Response(data=b"oops"))
-        grab = build_grab()
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         doc.select("//anytag").exists()
 
         self.server.add_response(Response(data=b"<frameset></frameset>"))
-        grab = build_grab()
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         doc.select("//anytag").exists()

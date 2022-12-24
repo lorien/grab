@@ -1,6 +1,7 @@
 from test_server import Response
 
-from tests.util import BaseGrabTestCase, build_grab
+from grab import request
+from tests.util import BaseGrabTestCase
 
 
 class ExtensionPyqueryTestCase(BaseGrabTestCase):
@@ -13,8 +14,7 @@ class ExtensionPyqueryTestCase(BaseGrabTestCase):
         self.server.add_response(
             Response(data=b"<body><h1>Hello world</h1><footer>2014</footer>")
         )
-        grab = build_grab()
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
 
         self.assertEqual(doc.pyquery("h1").text(), "Hello world")
 
@@ -26,6 +26,5 @@ class ExtensionPyqueryTestCase(BaseGrabTestCase):
         self.server.add_response(
             Response(data=b"<html><body><p>%s</p></body>" % msg.encode("utf-8"))
         )
-        grab = build_grab()
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         self.assertEqual(doc.pyquery("p")[0].text_content(), msg)

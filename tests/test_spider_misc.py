@@ -1,7 +1,7 @@
 from test_server import Response
 
 from grab.spider import Spider, Task
-from tests.util import BaseGrabTestCase, build_spider
+from tests.util import BaseGrabTestCase
 
 
 class MiscTest(BaseGrabTestCase):
@@ -27,6 +27,6 @@ class MiscTest(BaseGrabTestCase):
             def task_two(self, unused_grab, unused_task):
                 self.stat.inc("page_count")
 
-        bot = build_spider(SimpleSpider, thread_number=1)
+        bot = SimpleSpider(thread_number=1)
         bot.run()
         self.assertEqual(2, bot.stat.counters["page_count"])

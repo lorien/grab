@@ -3,7 +3,8 @@ from queue import Queue
 
 from test_server import Response
 
-from tests.util import BaseGrabTestCase, build_grab
+from grab import request
+from tests.util import BaseGrabTestCase
 
 
 class TestGrab(BaseGrabTestCase):
@@ -12,11 +13,10 @@ class TestGrab(BaseGrabTestCase):
 
     def test_pickling(self):
         """Test that Grab instance could be pickled and unpickled."""
-        grab = build_grab()
         self.server.add_response(
             Response(data=(b'<form><textarea name="text">the cat</textarea></form>'))
         )
-        doc = grab.request(self.server.get_url())
+        doc = request(self.server.get_url())
         doc.set_input("text", "foobar")
         data = pickle.dumps(doc, pickle.HIGHEST_PROTOCOL)
 
