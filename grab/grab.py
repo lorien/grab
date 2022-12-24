@@ -6,20 +6,19 @@ from collections.abc import Mapping, MutableMapping
 from copy import copy
 from datetime import datetime
 from http.cookiejar import CookieJar
+from pprint import pprint  # pylint: disable=unused-import
 from secrets import SystemRandom
-from typing import Any, cast
+from typing import Any, cast, overload
 from urllib.parse import urljoin, urlsplit
 
-from proxylist import ProxyList
 from user_agent import generate_user_agent
 
 from grab.base import BaseTransport
 from grab.document import Document
-from grab.errors import GrabError, GrabMisuseError, GrabTooManyRedirectsError
+from grab.errors import GrabMisuseError, GrabTooManyRedirectsError
 from grab.request import Request
 from grab.transport import Urllib3Transport
 from grab.util.cookies import create_cookie
-from grab.util.html import find_base_url
 from grab.util.http import merge_with_dict
 
 __all__ = ["Grab"]
@@ -31,42 +30,49 @@ system_random = SystemRandom()
 
 def copy_config(config: MutableMapping[str, Any]) -> MutableMapping[str, Any]:
     """Copy grab config with correct handling of mutable config values."""
-    cloned_config = copy(config)
-    for key in MUTABLE_CONFIG_KEYS:
-        cloned_config[key] = copy(config[key])
+    cloned_config = {}
+    for key, val in config.items():
+        if key == "request":
+            cloned_config[key] = copy_config(val)
+        elif key in MUTABLE_CONFIG_KEYS:
+            cloned_config[key] = copy(val)
+        else:
+            cloned_config[key] = val
     return cloned_config
 
 
-def default_config() -> MutableMapping[str, Any]:
+DEFAULT_REQUEST_CONFIG = {
+    # Request Properties
+    "method": None,
+    "url": None,
+    "proxy": None,
+    "proxy_type": None,
+    "proxy_userpwd": None,
+    "headers": None,
+    "cookies": None,
+    "timeout": None,
+    "encoding": None,
+    "document_type": None,
+    "body": None,
+    "fields": None,
+    "multipart": None,
+    # Needs refactoring
+    "redirect_limit": None,  # -> Retry/Redirect object
+    "follow_location": None,  # -> Redirect/Redirect object
+}
+
+
+def default_grab_config() -> MutableMapping[str, Any]:
     return {
-        # Request Properties
-        "method": None,
-        "url": None,
-        "proxy": None,
-        "proxy_type": None,
-        "proxy_userpwd": None,
-        "headers": None,
-        "cookies": None,
-        "timeout": None,
-        "encoding": None,
-        "document_type": "html",
-        "body": None,
-        "fields": None,
-        "multipart": None,
-        # Needs refactoring
-        "redirect_limit": 10,  # -> Retry
-        "follow_location": True,  # -> Redirect
-        # Session Properties
+        "request": {},
         "common_headers": None,
         "reuse_cookies": True,
-        "proxy_auto_change": True,
         "state": {},
     }
 
 
 class Grab:
     __slots__ = (
-        "proxylist",
         "config",
         "transport",
         "request_method",
@@ -76,7 +82,6 @@ class Grab:
     )
     document_class: type[Document] = Document
     # Attributes which should be processed when Grab instance is cloned
-    clonable_attributes = ["proxylist"]
 
     def __init__(
         self,
@@ -85,10 +90,9 @@ class Grab:
     ) -> None:
         self.transport = self.process_transport_option(transport, Urllib3Transport)
         self._doc: None | Document = None
-        self.config: MutableMapping[str, Any] = default_config()
+        self.config: MutableMapping[str, Any] = default_grab_config()
         self.config["common_headers"] = self.common_headers()
         self.cookies = CookieJar()
-        self.proxylist = ProxyList.from_lines_list([])
         if kwargs:
             self.setup(**kwargs)
 
@@ -128,8 +132,6 @@ class Grab:
         grab = Grab(transport=self.transport)
         grab.config = self.dump_config()
         grab.doc = self.doc.copy() if self.doc else None
-        for key in self.clonable_attributes:
-            setattr(grab, key, getattr(self, key))
         jar = CookieJar()
         for item in self.cookies:
             jar.set_cookie(item)
@@ -157,60 +159,59 @@ class Grab:
 
     def setup(self, **kwargs: Any) -> None:
         """Set up Grab instance configuration."""
-        for key in kwargs:
-            if key not in self.config.keys():
+        for key, val in kwargs.items():
+            if key in self.config:
+                self.config[key] = val
+            elif key in DEFAULT_REQUEST_CONFIG:
+                self.config["request"][key] = val
+            else:
                 raise GrabMisuseError("Unknown option: %s" % key)
 
-        if "url" in kwargs and self.config.get("url"):
-            kwargs["url"] = self.make_url_absolute(kwargs["url"])
-        self.config.update(kwargs)
+    def merge_request_configs(
+        self, request_config: MutableMapping[str, Any]
+    ) -> MutableMapping[str, Any]:
+        cfg: MutableMapping[str, Any] = {}
+        for key, val in request_config.items():
+            if key not in DEFAULT_REQUEST_CONFIG:
+                raise GrabMisuseError("Invalid request parameter: {}".format(key))
+            cfg[key] = val
+        for key, val in self.config["request"].items():
+            if key not in cfg:
+                cfg[key] = val
+        for key, val in DEFAULT_REQUEST_CONFIG.items():
+            if key not in cfg:
+                cfg[key] = val
+        return cfg
 
-    def prepare_request(self) -> Request:
+    def prepare_request(self, request_config: MutableMapping[str, Any]) -> Request:
         """Configure all things to make real network request.
 
         This method is called before doing real request via transport extension.
         """
         self.transport.reset()
-        if self.config["url"] is None:
+        cfg = self.merge_request_configs(request_config)
+        # REASONABLE DEFAULTS
+        if cfg["url"] is None:
             raise GrabMisuseError("Request URL must be set")
-        # TODO: activate
-        # if self.config["method"] is None:
-        #    raise GrabMisuseError("Request method must be set")
-        # TODO: remove
-        if not self.config["method"]:
-            self.config["method"] = (
-                "POST" if self.config["body"] or self.config["fields"] else "GET"
-            )
-        self.config["method"] = self.config["method"].upper()
-        # proxylist extension
-        if self.proxylist.size() and self.config["proxy_auto_change"]:
-            self.change_proxy()
-        # common headers extension
-        if not self.config["headers"]:
-            self.config["headers"] = {}
+        if not cfg["method"]:
+            cfg["method"] = "GET"
+        if cfg["follow_location"] is None:
+            cfg["follow_location"] = True
+        # COMMON HEADERS EXTENSION
         if self.config["common_headers"]:
-            merge_with_dict(self.config["headers"], self.config["common_headers"])
-        # cookies extension
-        req = self.create_request_from_config(self.config)
+            cfg["headers"] = merge_with_dict(
+                (cfg["headers"] or {}), self.config["common_headers"], replace=False
+            )
+        req = self.create_request_from_config(cfg)
+        # COOKIES EXTENSION
         self.sync_cookie_manager_with_request_cookies(req.cookies, req.url)
         return req
 
     def create_request_from_config(self, config: MutableMapping[str, Any]) -> Request:
-        return Request(
-            url=config["url"],
-            encoding=config["encoding"],
-            method=config["method"],
-            timeout=config["timeout"],
-            proxy=config["proxy"],
-            proxy_type=config["proxy_type"],
-            proxy_userpwd=config["proxy_userpwd"],
-            headers=config["headers"],
-            cookies=config["cookies"],
-            body=config["body"],
-            fields=config["fields"],
-            multipart=config["multipart"],
-            document_type=config["document_type"],
-        )
+        for key in config:
+            if key not in DEFAULT_REQUEST_CONFIG:
+                raise GrabMisuseError("Unknown request parameter: {}".format(key))
+        return Request(**config)
 
     def sync_cookie_manager_with_request_cookies(
         self,
@@ -233,7 +234,7 @@ class Grab:
             " via {} proxy of type {}{}".format(
                 req.proxy,
                 req.proxy_type,
-                " with auth" if self.config["proxy_userpwd"] else "",
+                " with auth" if req.proxy_userpwd else "",
             )
             if req.proxy
             else ""
@@ -249,15 +250,21 @@ class Grab:
 
     def find_redirect_url(self, doc: Document) -> None | str:
         assert doc.headers is not None
-        if (
-            self.config["follow_location"]
-            and doc.code in {301, 302, 303, 307, 308}
-            and doc.headers["Location"]
-        ):
+        if doc.code in {301, 302, 303, 307, 308} and doc.headers["Location"]:
             return cast(str, doc.headers["Location"])
         return None
 
-    def request(self, url: None | str = None, **kwargs: Any) -> Document:
+    @overload
+    def request(self, url: Request, **request_kwargs: Any) -> Document:
+        ...
+
+    @overload
+    def request(self, url: None | str = None, **request_kwargs: Any) -> Document:
+        ...
+
+    def request(
+        self, url: None | str | Request = None, **request_kwargs: Any
+    ) -> Document:
         """Perform network request.
 
         You can specify grab settings in ``**kwargs``.
@@ -265,32 +272,31 @@ class Grab:
 
         Returns: ``Document`` objects.
         """
-        if url is not None:
-            kwargs["url"] = url
-        self.setup(**kwargs)
-        req = self.prepare_request()
+        if isinstance(url, Request):
+            req = url
+        else:
+            if url is not None:
+                request_kwargs["url"] = url
+            req = self.prepare_request(request_kwargs)
         redir_count = 0
         while True:
             self.log_request(req)
-            try:
-                self.transport.request(req, self.cookies)
-            except GrabError:
-                self.reset_temporary_options()
-                raise
-            else:
-                with self.transport.wrap_transport_error():
-                    doc = self.process_request_result(req)
+            self.transport.request(req, self.cookies)
+            with self.transport.wrap_transport_error():
+                doc = self.process_request_result(req)
+            if req.follow_location:
                 redir_url = self.find_redirect_url(doc)
                 if redir_url is not None:
                     redir_count += 1
-                    if redir_count > self.config["redirect_limit"]:
+                    if redir_count > req.redirect_limit:
                         raise GrabTooManyRedirectsError()
-                    self.setup(url=self.make_url_absolute(redir_url))
-                    req = self.prepare_request()
+                    redir_url = urljoin(req.url, redir_url)
+                    request_kwargs["url"] = redir_url
+                    req = self.prepare_request(request_kwargs)
                     continue
-                return doc
+            return doc
 
-    def submit(self, make_request: bool = True, **kwargs: Any) -> None | Document:
+    def submit(self, **kwargs: Any) -> Document:
         """Submit current form.
 
         :param make_request: if `False` then grab instance will be
@@ -301,24 +307,17 @@ class Grab:
         """
         assert self.doc is not None
         url, method, is_multipart, fields = self.doc.get_form_request(**kwargs)
-        self.setup(
+        return self.request(
             url=url,
             method=method,
-            fields=fields,
             multipart=is_multipart,
+            fields=fields,
         )
-        if make_request:
-            return self.request()
-        return None
 
     def process_request_result(self, req: Request) -> Document:
         """Process result of real request performed via transport extension."""
         now = datetime.utcnow()
 
-        # It's important to delete old POST data after request is performed.
-        # If POST data is not cleared then next request will try to use them
-        # again!
-        self.reset_temporary_options()
         self.doc = self.transport.prepare_response(
             req, document_class=self.document_class
         )
@@ -327,29 +326,6 @@ class Grab:
                 self.cookies.set_cookie(item)
         self.doc.timestamp = now
         return self.doc
-
-    def reset_temporary_options(self) -> None:
-        self.config["body"] = None
-        self.config["fields"] = None
-        self.config["multipart"] = None
-        self.config["method"] = None
-
-    def change_proxy(self, random: bool = True) -> None:
-        """Set random proxy from proxylist."""
-        if self.proxylist.size():
-            if random:
-                proxy = self.proxylist.get_random_server()
-            else:
-                proxy = self.proxylist.get_next_server()
-            if proxy.proxy_type is None:
-                raise GrabMisuseError("Could not use proxy without defined proxy type")
-            self.setup(
-                proxy=proxy.get_address(),
-                proxy_userpwd=proxy.get_userpwd(),
-                proxy_type=proxy.proxy_type,
-            )
-        else:
-            logger.debug("Proxy list is empty")
 
     @classmethod
     def common_headers(cls) -> dict[str, str]:
@@ -364,18 +340,6 @@ class Grab:
             "Keep-Alive": "300",
             "User-Agent": generate_user_agent(),
         }
-
-    def make_url_absolute(self, url: str, resolve_base: bool = False) -> str:
-        """Make url absolute using previous request url as base url."""
-        if self.config["url"]:
-            if resolve_base and self.doc:
-                ubody = self.doc.unicode_body()
-                assert ubody is not None
-                base_url = find_base_url(ubody)
-                if base_url:
-                    return urljoin(base_url, url)
-            return urljoin(cast(str, self.config["url"]), url)
-        return url
 
     def clear_cookies(self) -> None:
         """Clear all remembered cookies."""

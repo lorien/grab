@@ -95,7 +95,7 @@ class ParserService(BaseService):  # pylint: disable=too-many-instance-attribute
         self, handler: Callable[[Grab, Task], None], result: NetworkResult, task: Task
     ) -> None:
         try:
-            handler_result = handler(result["grab"], task)
+            handler_result = handler(result["doc"], task)
             if handler_result is None:
                 pass
             else:

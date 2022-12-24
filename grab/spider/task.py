@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from collections.abc import Callable, MutableMapping
+from collections.abc import Callable, Mapping
 from copy import deepcopy
 from datetime import datetime, timedelta
 from typing import Any
 
-from ..errors import raise_feature_is_deprecated
-from ..grab import Grab, copy_config
+from ..errors import GrabMisuseError
+from ..request import Request
 from .errors import SpiderMisuseError
 
 
@@ -17,12 +17,11 @@ class BaseTask:
 class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
     """Task for spider."""
 
-    def __init__(  # pylint: disable=too-many-arguments, too-many-locals
+    def __init__(  # pylint:disable=too-many-arguments,too-many-locals,too-many-branches
         self,
         name: None | str = None,
-        url: None | str = None,
-        grab: None | Grab = None,
-        grab_config: None | MutableMapping[str, Any] = None,
+        url: None | str | Request = None,
+        request: None | Request = None,
         priority: None | int = None,
         priority_set_explicitly: bool = True,
         network_try_count: int = 0,
@@ -34,30 +33,17 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         callback: None | Callable[..., None] = None,
         fallback_name: None | str = None,
         store: None | dict[str, Any] = None,
-        # deprecated
-        disable_cache: bool = False,
-        refresh_cache: bool = False,
-        cache_timeout: None | int = None,
-        # kwargs
         **kwargs: Any,
     ) -> None:
         """Create `Task` object.
 
-        If more than one of url, grab and grab_config options are non-empty
+        If more than one of url, grab_config options are non-empty
         then they processed in following order:
-        * grab overwrite grab_config
         * grab_config overwrite url
 
         Args:
             :param name: name of the task. After successful network operation
                 task's result will be passed to `task_<name>` method.
-            :param url: URL of network document. Any task requires `url` or
-                `grab` option to be specified.
-            :param grab: configured `Grab` instance. You can use that option in
-                case when `url` option is not enough. Do not forget to
-                configure `url` option of `Grab` instance because in this case
-                the `url` option of `Task` constructor will be overwritten
-                with `grab.config['url']`.
             :param priority: priority of the Task. Tasks with lower priority
                 will be processed earlier. By default each new task is assigned
                 with random priority from (80, 100) range.
@@ -100,10 +86,23 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             later as attributes or with `get` method which allows to use
             default value if attribute does not exist.
         """
+        self.check_init_kwargs(kwargs)
+        if url is not None and request is not None:
+            raise GrabMisuseError("Options url and ruquest are mutually exclusive")
+        if request is not None:
+            if not isinstance(request, Request):
+                raise TypeError("Option 'requst' must be Request instance")
+            self.request = request
+        elif url is not None:
+            if isinstance(url, str):
+                self.request = Request(method="GET", url=url)
+            elif isinstance(url, Request):
+                self.request = url
+            else:
+                raise TypeError("Parameter 'url' must be str or Request instance")
+        else:
+            raise GrabMisuseError("Either url or request option must be set")
         self.schedule_time: None | datetime = None
-        self.grab_config: None | MutableMapping[str, Any] = None
-        if disable_cache or refresh_cache or cache_timeout:
-            raise_feature_is_deprecated("Cache feature")
         if name == "generator":
             # The name "generator" is restricted because
             # `task_generator` handler could not be created because
@@ -111,8 +110,6 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             # generates new tasks
             raise SpiderMisuseError('Task name could not be "generator"')
         self.name = name
-        self.url: None | str = None
-        self.process_init_url_grab_options(url, grab, grab_config)
         if valid_status is None:
             self.valid_status = []
         else:
@@ -130,37 +127,11 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def process_init_url_grab_options(
-        self,
-        url: None | str,
-        grab: None | Grab,
-        grab_config: None | MutableMapping[str, Any],
-    ) -> None:
-        if url is None and grab is None and grab_config is None:
-            raise SpiderMisuseError(
-                "Either url, grab or grab_config argument "
-                "of Task constructor should not be None"
-            )
-
-        if url is not None and grab is not None:
-            raise SpiderMisuseError("Options url and grab could not be used together")
-
-        if url is not None and grab_config is not None:
-            raise SpiderMisuseError(
-                "Options url and grab_config could not be used together"
-            )
-
-        if grab is not None and grab_config is not None:
-            raise SpiderMisuseError(
-                "Options grab and grab_config could not be used together"
-            )
-        if grab:
-            self.setup_grab_config(grab.dump_config())
-        elif grab_config:
-            self.setup_grab_config(grab_config)
-        else:
-            self.grab_config = None
-            self.url = url
+    def check_init_kwargs(self, kwargs: Mapping[str, Any]) -> None:
+        if "grab" in kwargs:
+            raise GrabMisuseError("Task does not accept 'grab' parameter")
+        if "grab_config" in kwargs:
+            raise GrabMisuseError("Task does not accept 'grab_config' parameter")
 
     def get(self, key: str, default: Any = None) -> Any:
         """Return value of attribute or None if such attribute does not exist."""
@@ -172,67 +143,38 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         else:
             self.schedule_time = None
 
-    def setup_grab_config(self, grab_config: MutableMapping[str, Any]) -> None:
-        self.grab_config = copy_config(grab_config)
-        self.url = grab_config["url"]
-
-    def test_clone_options_integrity(
-        self,
-        url: None | str,
-        grab: None | Grab,
-        grab_config: None | MutableMapping[str, Any],
-    ) -> None:
-        if url is not None and grab is not None:
-            raise SpiderMisuseError("Options url and grab could not be used together")
-        if url is not None and grab_config is not None:
-            raise SpiderMisuseError(
-                "Options url and grab_config could not be used together"
-            )
-        if grab is not None and grab_config is not None:
-            raise SpiderMisuseError(
-                "Options grab and grab_config could not be used together"
-            )
-
-    def clone(self, **kwargs: Any) -> Task:
+    def clone(
+        self, url: None | str = None, request: None | Request = None, **kwargs: Any
+    ) -> Task:
         """Clone Task instance.
 
         Reset network_try_count, increase task_try_count.
         Reset priority attribute if it was not set explicitly.
         """
+        if url and request:
+            raise GrabMisuseError("Options url and request are mutually exclusive")
         # First, create exact copy of the current Task object
         attr_copy = deepcopy(self.__dict__)
-        if attr_copy.get("grab_config") is not None:
-            del attr_copy["url"]
         if not attr_copy["priority_set_explicitly"]:
             attr_copy["priority"] = None
         task = Task(**attr_copy)
+        if url:
+            task.request.url = url
+        if request:
+            task.request = request
         # Reset some task properties if they have not
         # been set explicitly in kwargs
         if "network_try_count" not in kwargs:
             task.network_try_count = 0
         if "task_try_count" not in kwargs:
             task.task_try_count = self.task_try_count + 1
-        self.test_clone_options_integrity(
-            kwargs.get("url"), kwargs.get("grab"), kwargs.get("grab_config")
-        )
-        if kwargs.get("grab"):
-            task.setup_grab_config(kwargs["grab"].dump_config())
-            del kwargs["grab"]
-        elif kwargs.get("grab_config"):
-            task.setup_grab_config(kwargs["grab_config"])
-            del kwargs["grab_config"]
-        elif kwargs.get("url"):
-            task.url = kwargs["url"]
-            if task.grab_config:
-                task.grab_config["url"] = kwargs["url"]
-            del kwargs["url"]
         for key, value in kwargs.items():
             setattr(task, key, value)
         task.process_delay_option(None)
         return task
 
     def __repr__(self) -> str:
-        return "<Task: %s>" % self.url
+        return "<Task: %s>" % self.request.url
 
     def __lt__(self, other: Task) -> bool:
         if self.priority is None or other.priority is None:

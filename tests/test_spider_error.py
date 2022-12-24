@@ -2,7 +2,7 @@ from pprint import pprint  # pylint: disable=unused-import
 
 from test_server import Response
 
-from grab import Grab
+from grab import Request
 from grab.spider import Spider, Task
 from tests.util import BaseGrabTestCase, build_spider
 
@@ -64,8 +64,9 @@ class SpiderErrorTestCase(BaseGrabTestCase):
                 self.network_try_limit = 1
 
             def task_generator(self):
-                grab = Grab(url=server.get_url(), timeout=1)
-                yield Task("page", grab=grab)
+                yield Task(
+                    "page", Request(method="GET", url=server.get_url(), timeout=1)
+                )
 
             def task_page(self, grab, unused_task):
                 pass

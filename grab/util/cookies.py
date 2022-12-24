@@ -9,6 +9,7 @@ Some code got from
 """
 from __future__ import annotations
 
+from collections.abc import Mapping
 from copy import copy
 from http.client import HTTPMessage
 from http.cookiejar import Cookie, CookieJar
@@ -189,9 +190,9 @@ def create_cookie(  # pylint: disable=too-many-arguments, too-many-locals
 
 
 def build_cookie_header(
-    cookiejar: CookieJar, url: str, headers: dict[str, str]
+    cookiejar: CookieJar, url: str, headers: Mapping[str, str]
 ) -> None | str:
     """Build HTTP Cookie header value for given cookies."""
-    mocked_req = MockRequest(url, headers)
+    mocked_req = MockRequest(url, dict(headers))
     cookiejar.add_cookie_header(cast(Request, mocked_req))
     return mocked_req.get_new_headers().get("Cookie")

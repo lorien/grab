@@ -8,8 +8,8 @@ from tests.util import BaseGrabTestCase, build_spider
 
 
 class SimpleSpider(Spider):
-    def task_baz(self, grab, unused_task):
-        self.collect_runtime_event("SAVED_ITEM", grab.doc.body)
+    def task_baz(self, doc, unused_task):
+        self.collect_runtime_event("SAVED_ITEM", doc.body)
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):

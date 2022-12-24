@@ -35,11 +35,6 @@ see examples of different task creation. All three examples do the same:
     # Using `url` argument
     t = Task('wikipedia', url 'http://wikipedia.org/')
 
-    # Using Grab instance
-    g = Grab()
-    g.setup(url='http://wikipedia.org/')
-    t = Task('wikipedia', grab=g)
-
     # Using configured state of Grab instance
     g = Grab()
     g.setup(url='http://wikipedia.org/')
@@ -196,7 +191,7 @@ it will not be affected by `create_grab_instance_method`:
 
         def task_generator(self):
             g = Grab(url='http://example.com')
-            yield Task('page', grab=g)
+            yield Task('page', grab_config=g.dump_config())
             # The grab instance in the yielded task
             # will not be affected by `create_grab_instance` method.
 
@@ -219,5 +214,5 @@ option.
 
         def task_generator(self):
             g = Grab(url='http://example.com', timeout=5)
-            yield Task('page', grab=g)
+            yield Task('page', grab_config=g.dump_config())
             # The effective timeout setting will be equal to 20!

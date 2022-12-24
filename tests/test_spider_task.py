@@ -1,10 +1,10 @@
 from test_server import Response
 
-from grab import Grab
-from grab.errors import ResponseNotValid
+from grab import Request
+from grab.errors import GrabMisuseError, ResponseNotValid
 from grab.spider import NoTaskHandler, Spider, SpiderMisuseError, Task, base
 from grab.spider.errors import SpiderError
-from tests.util import BaseGrabTestCase, build_grab, build_spider
+from tests.util import BaseGrabTestCase, build_spider
 
 
 class SimpleSpider(Spider):
@@ -43,21 +43,20 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
 
         self.assertRaises(SpiderMisuseError, lambda: SimpleSpider(priority_mode="foo"))
 
-    def test_task_url(self):
-        bot = build_spider(
-            SimpleSpider,
-        )
-        task = Task("baz", url="http://xxx.com")
-        self.assertEqual("http://xxx.com", task.url)
-        bot.add_task(task)
-        self.assertEqual("http://xxx.com", task.url)
-        self.assertEqual(None, task.grab_config)
+    # def test_task_url(self):
+    #    bot = build_spider(
+    #        SimpleSpider,
+    #    )
+    #    task = Task("baz", url="http://xxx.com")
+    #    self.assertEqual("http://xxx.com", task.url)
+    #    bot.add_task(task)
+    #    self.assertEqual("http://xxx.com", task.url)
+    #    self.assertEqual(None, task.grab_config)
 
-        grab = Grab(url="http://yyy.com")
-        task = Task("baz", grab=grab)
-        bot.add_task(task)
-        self.assertEqual("http://yyy.com", task.url)
-        self.assertEqual("http://yyy.com", task.grab_config["url"])
+    #    task = Task("baz", "http://yyy.com")
+    #    bot.add_task(task)
+    #    self.assertEqual("http://yyy.com", task.url)
+    #    self.assertEqual("http://yyy.com", task.grab_config["url"])
 
     def test_task_clone(self):
         bot = build_spider(
@@ -69,21 +68,17 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
 
         # Pass grab to clone
         task = Task("baz", url="http://xxx.com")
-        grab = Grab()
-        grab.setup(url="zzz")
-        bot.add_task(task.clone(grab=grab))
+        bot.add_task(task.clone(url="zzz"))
 
         # Pass grab_config to clone
         task = Task("baz", url="http://xxx.com")
-        grab = Grab()
-        grab.setup(url="zzz")
-        bot.add_task(task.clone(grab_config=grab.config))
+        bot.add_task(task.clone(url="zzz"))
 
     def test_task_clone_with_url_param(self):
         task = Task("baz", url="http://example.com/path")
         task2 = task.clone(url="http://example.com/new")
         self.assertEqual(task2.name, "baz")
-        self.assertEqual(task2.url, "http://example.com/new")
+        self.assertEqual(task2.request.url, "http://example.com/new")
 
     def test_task_useragent(self):
         self.server.add_response(Response(), count=1)
@@ -91,11 +86,14 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
             SimpleSpider,
         )
 
-        grab = Grab()
-        grab.setup(url=self.server.get_url())
-        grab.setup(headers={"User-Agent": "Foo"})
-
-        task = Task("baz", grab=grab)
+        task = Task(
+            "baz",
+            Request(
+                method="GET",
+                url=self.server.get_url(),
+                headers={"User-Agent": "Foo"},
+            ),
+        )
         bot.add_task(task.clone())
         bot.run()
         self.assertEqual(self.server.request.headers.get("user-agent"), "Foo")
@@ -114,8 +112,8 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
 
     def test_task_raw(self):
         class TestSpider(Spider):
-            def task_page(self, grab, unused_task):
-                self.collect_runtime_event("codes", grab.doc.code)
+            def task_page(self, doc, unused_task):
+                self.collect_runtime_event("codes", doc.code)
 
         self.server.add_response(Response(status=502), count=4)
 
@@ -163,13 +161,6 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot.run()
         self.assertEqual(["0_handler", "1_func", "1_func", "1_func"], sorted(tokens))
 
-    def test_task_url_and_grab_options(self):
-        grab = Grab()
-        grab.setup(url=self.server.get_url())
-        self.assertRaises(
-            SpiderMisuseError, Task, "page", grab=grab, url=self.server.get_url()
-        )
-
     def test_task_invalid_name(self):
         self.assertRaises(
             SpiderMisuseError, Task, "generator", url="http://example.com"
@@ -177,35 +168,33 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
 
     def test_task_constructor_invalid_args(self):
         # no url, no grab, no grab_config
-        self.assertRaises(SpiderMisuseError, Task, "foo")
-        # both url and grab_config
-        self.assertRaises(SpiderMisuseError, Task, "foo", url=1, grab_config=1)
-        # both grab and grab_config
-        self.assertRaises(SpiderMisuseError, Task, "foo", grab=1, grab_config=1)
+        with self.assertRaises(GrabMisuseError):
+            Task("foo")
+        # both url and request
+        with self.assertRaises(GrabMisuseError):
+            Task("foo", url=1, request=Request("GET", "asdf"))
 
-    def test_task_clone_invalid_args(self):
-        task = Task("foo", url="http://example.com")
-        # both url and grab
-        self.assertRaises(SpiderMisuseError, task.clone, url=1, grab=1)
-        # both url and grab_config
-        self.assertRaises(SpiderMisuseError, task.clone, url=1, grab_config=1)
-        # both grab_config and grab
-        self.assertRaises(SpiderMisuseError, task.clone, grab=1, grab_config=1)
+    # def test_task_clone_invalid_args(self):
+    #    task = Task("foo", url="http://example.com")
+    #    # both url and grab
+    #    self.assertRaises(SpiderMisuseError, task.clone, url=1, grab=1)
+    #    # both url and grab_config
+    #    self.assertRaises(SpiderMisuseError, task.clone, url=1, grab_config=1)
+    #    # both grab_config and grab
+    #    self.assertRaises(SpiderMisuseError, task.clone, grab=1, grab_config=1)
 
-    def test_task_clone_grab_config_and_url(self):
-        grab = build_grab()
-        grab.setup(url="http://foo.com/")
-        task = Task("foo", grab=grab)
-        task2 = task.clone(url="http://bar.com/")
-        self.assertEqual(task2.url, "http://bar.com/")
-        self.assertEqual(task2.grab_config["url"], "http://bar.com/")
+    # def test_task_clone_grab_config_and_url(self):
+    #    grab = build_grab()
+    #    grab.setup(url="http://foo.com/")
+    #    task = Task("foo", grab_config=grab.dump_config())
+    #    task2 = task.clone(url="http://bar.com/")
+    #    self.assertEqual(task2.request.url, "http://bar.com/")
 
-    def test_task_clone_kwargs(self):
-        grab = build_grab()
-        grab.setup(url="http://foo.com/")
-        task = Task("foo", grab=grab, foo=1)
-        task2 = task.clone(foo=2)
-        self.assertEqual(2, task2.foo)  # pylint: disable=no-member
+    # def test_task_clone_kwargs(self):
+    #    grab = build_grab()
+    #    task = Task("foo", Request("GET", "http://foo.com/", metafoo=1))
+    #    task2 = task.clone(foo=2)
+    #    self.assertEqual(2, task2.foo)  # pylint: disable=no-member
 
     def test_task_comparison(self):
         task1 = Task("foo", url="http://foo.com/", priority=1)
@@ -239,51 +228,64 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         self.assertEqual(bot.get_fallback_handler(task2), bot.task_bar_fallback)
         self.assertEqual(bot.get_fallback_handler(task3), None)
 
-    def test_update_grab_instance(self):
-        self.server.add_response(Response(), count=2)
+    # def test_update_grab_instance(self):
+    #    self.server.add_response(Response(), count=2)
 
-        class TestSpider(Spider):
-            def update_grab_instance(self, grab):
-                grab.setup(timeout=77)
+    #    class TestSpider(Spider):
+    #        def update_grab_instance(self, grab):
+    #            grab.setup(timeout=77)
 
-            def task_generator(self):
-                yield Task("page", url=self.meta["server"].get_url())
-                yield Task(
-                    "page", grab=Grab(url=self.meta["server"].get_url(), timeout=1)
-                )
+    #        def task_generator(self):
+    #            yield Task("page", url=self.meta["server"].get_url())
+    #            yield Task(
+    #                "page",
+    #                grab_config=Grab(url=self.meta["server"].get_url(), timeout=1),
+    #            )
 
-            def task_page(self, grab, unused_task):
-                self.collect_runtime_event("points", grab.config["timeout"])
+    #        def task_page(self, grab, unused_task):
+    #            self.collect_runtime_event("points", grab.config["timeout"])
 
-        bot = build_spider(TestSpider, meta={"server": self.server})
-        bot.add_task(Task("page", url=self.server.get_url()))
-        bot.add_task(Task("page", grab=Grab(url=self.server.get_url(), timeout=1)))
-        bot.run()
-        self.assertEqual({77}, set(bot.runtime_events["points"]))
+    #    bot = build_spider(TestSpider, meta={"server": self.server})
+    #    bot.add_task(Task("page", url=self.server.get_url()))
+    #    bot.add_task(
+    #        Task(
+    #            "page",
+    #            grab_config=Grab(url=self.server.get_url(), timeout=1).dump_config(),
+    #        )
+    #    )
+    #    bot.run()
+    #    self.assertEqual({77}, set(bot.runtime_events["points"]))
 
-    def test_create_grab_instance(self):
-        self.server.add_response(Response(), count=-1)
+    # def test_create_grab_instance(self):
+    #    self.server.add_response(Response(), count=-1)
 
-        class TestSpider(Spider):
-            def create_grab_instance(self, **kwargs):
-                grab = super().create_grab_instance(**kwargs)
-                grab.setup(timeout=77)
-                return grab
+    #    class TestSpider(Spider):
+    #        def create_grab_instance(self, **kwargs):
+    #            grab = super().create_grab_instance(**kwargs)
+    #            grab.setup(timeout=77)
+    #            return grab
 
-            def task_generator(self):
-                yield Task("page", url=self.meta["server"].get_url())
-                yield Task(
-                    "page", grab=Grab(url=self.meta["server"].get_url(), timeout=76)
-                )
+    #        def task_generator(self):
+    #            yield Task("page", url=self.meta["server"].get_url())
+    #            yield Task(
+    #                "page",
+    #                Request(
+    #                    method="GET",
+    #                    url=self.meta["server"].get_url(),
+    #                    meta={"foo": 76},
+    #                ),
+    #            )
 
-            def task_page(self, grab, unused_task):
-                self.collect_runtime_event("points", grab.config["timeout"])
+    #        def task_page(self, doc, task):
+    #            self.collect_runtime_event("points", task.request.meta["foo"])
 
-        bot = build_spider(TestSpider, meta={"server": self.server})
-        bot.add_task(Task("page", url=self.server.get_url()))
-        bot.add_task(Task("page", grab=Grab(url=self.server.get_url(), timeout=75)))
-        bot.run()
-        self.assertEqual({77, 76, 75}, set(bot.runtime_events["points"]))
+    #    bot = build_spider(TestSpider, meta={"server": self.server})
+    #    bot.add_task(Task("page", url=self.server.get_url()))
+    #    bot.add_task(
+    #        Task("page", Request(method="GET", url=self.server.get_url(), timeout=75))
+    #    )
+    #    bot.run()
+    #    self.assertEqual({77, 76, 75}, set(bot.runtime_events["points"]))
 
     def test_add_task_invalid_url_no_error(self):
         class TestSpider(Spider):
@@ -339,9 +341,9 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
 
         bot = build_spider(TestSpider)
 
-        grab = Grab()
-        grab.setup(url=self.server.get_url(), fields={"x": "y"})
-        task = Task("foo", grab=grab)
+        task = Task(
+            "foo", Request(method="POST", url=self.server.get_url(), fields={"x": "y"})
+        )
         bot.add_task(task)
         bot.run()
         self.assertEqual("POST", self.server.request.method)
@@ -359,23 +361,23 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot.run()
         self.assertEqual(bot.task_try_limit, bot.stat.counters["xxx"])
 
-    def test_task_clone_without_modification(self):
-        self.server.add_response(Response(), count=2)
+    # def test_task_clone_without_modification(self):
+    #    self.server.add_response(Response(), count=2)
 
-        class TestSpider(Spider):
-            def task_page(self, grab, unused_task):
-                grab2 = grab.clone()
-                yield Task("page2", grab=grab2)
+    #    class TestSpider(Spider):
+    #        def task_page(self, grab, task):
+    #            grab2 = grab.clone()
+    #            yield Task("page2", task.clgrab_config=grab2.dump_config())
 
-            def task_page2(self, grab, task):
-                pass
+    #        def task_page2(self, grab, task):
+    #            pass
 
-        bot = build_spider(TestSpider)
-        task = Task("page", url=self.server.get_url())
-        bot.add_task(task)
-        bot.run()
-        self.assertEqual(1, bot.stat.counters["spider:task-page"])
-        self.assertEqual(1, bot.stat.counters["spider:task-page2"])
+    #    bot = build_spider(TestSpider)
+    #    task = Task("page", url=self.server.get_url())
+    #    bot.add_task(task)
+    #    bot.run()
+    #    self.assertEqual(1, bot.stat.counters["spider:task-page"])
+    #    self.assertEqual(1, bot.stat.counters["spider:task-page2"])
 
     def test_task_generator_no_yield(self):
         self.server.add_response(Response())
@@ -408,3 +410,7 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
         bot.run()
 
         self.assertEqual(1, bot.stat.counters["foo"])
+
+    def test_constructor_positional_args_name_ok(self):
+        task = Task("baz", Request("GET", "http://yandex.ru"))
+        self.assertTrue("yandex" in task.request.url)

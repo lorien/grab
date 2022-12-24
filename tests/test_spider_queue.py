@@ -14,7 +14,7 @@ from tests.util import BaseGrabTestCase, build_spider, load_test_config
 class SpiderQueueMixin:
     class SimpleSpider(Spider):
         def task_page(self, unused_grab, task):
-            self.collect_runtime_event("url_history", task.url)
+            self.collect_runtime_event("url_history", task.request.url)
             self.collect_runtime_event("priority_history", task.priority)
 
     @abstractmethod

@@ -1,3 +1,4 @@
+from pprint import pprint  # pylint: disable=unused-import
 from urllib.parse import parse_qsl
 
 from test_server import Response
@@ -206,7 +207,7 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
         self.server.add_response(Response(data=DISABLED_RADIO_HTML))
         self.server.add_response(Response())
         grab.request(self.server.get_url())
-        grab.submit(make_request=False)
+        grab.submit()
 
     def test_set_input_by_xpath_regex(self):
         html = b"""
@@ -214,14 +215,12 @@ class TestHtmlForms(BaseGrabTestCase):  # pylint: disable=too-many-public-method
             <input name="bar" id="bar" type="text">
         """
         self.server.add_response(Response(data=html))
+        self.server.add_response(Response())
         grab = build_grab()
         grab.request(self.server.get_url())
         grab.doc.set_input_by_xpath('//input[re:test(@id, "^ba")]', "bar-value")
-        grab.submit(make_request=False)
-        self.assertEqual(
-            {("foo", None), ("bar", "bar-value")},
-            set(grab.config["fields"]),
-        )
+        grab.submit()
+        self.assertEqual(self.server.request.data, b"foo=None&bar=bar-value")
 
     def test_unicode_textarea_form(self):
         html = """

@@ -27,6 +27,7 @@ from ..errors import (
     ResponseNotValid,
 )
 from ..grab import Grab
+from ..request import Request
 from ..util.metrics import format_traffic_value
 from .errors import FatalError, NoTaskHandler, SpiderError, SpiderMisuseError
 from .interface import FatalErrorQueueItem
@@ -194,11 +195,11 @@ class Spider:
         else:
             task.priority_set_explicitly = True
 
-        if not task.url or not task.url.startswith(
+        if not task.request.url or not task.request.url.startswith(
             ("http://", "https://", "ftp://", "file://", "feed://")
         ):
-            self.collect_runtime_event("task-with-invalid-url", task.url)
-            msg = "Invalid task URL: %s" % task.url
+            self.collect_runtime_event("task-with-invalid-url", task.request.url)
+            msg = "Invalid task URL: %s" % task.request.url
             if raise_error:
                 raise SpiderError(msg)
             logger.error(
@@ -322,12 +323,6 @@ class Spider:
     def shutdown(self) -> None:
         """Override this method to do some final actions after parsing has been done."""
 
-    def update_grab_instance(self, grab: Grab) -> None:
-        """Update config of any `Grab` instance created by the spider.
-
-        WTF it means?
-        """
-
     def create_grab_instance(self, **kwargs: Any) -> Grab:
         return Grab(transport=self.grab_transport, **kwargs)
 
@@ -369,7 +364,7 @@ class Spider:
     def process_initial_urls(self) -> None:
         if self.initial_urls:
             for url in self.initial_urls:
-                self.add_task(Task("initial", url=url))
+                self.add_task(Task(name="initial", request=Request("GET", url)))
 
     def get_task_from_queue(self) -> None | Literal[True] | Task:
         try:
@@ -379,18 +374,6 @@ class Spider:
             if size:
                 return True
             return None
-
-    def setup_grab_for_task(self, task: Task) -> Grab:
-        grab = self.create_grab_instance()
-        if task.grab_config:
-            grab.load_config(task.grab_config)
-        else:
-            grab.setup(url=task.url)
-
-        # Generate new common headers
-        grab.config["common_headers"] = grab.common_headers()
-        self.update_grab_instance(grab)
-        return grab
 
     def is_valid_network_response_code(self, code: int, task: Task) -> bool:
         """Test if response is valid.
@@ -415,7 +398,7 @@ class Spider:
             "".join(format_exception(*exc_info)),
         )
 
-        task_url = task.url if task else None
+        task_url = task.request.url if task else None
         self.collect_runtime_event(
             "fatal",
             "%s|%s|%s|%s" % (func_name, ex.__class__.__name__, str(ex), task_url),
@@ -573,9 +556,9 @@ class Spider:
 
     def log_rejected_task(self, task: Task, reason: str) -> None:
         if reason == "task-try-count":
-            self.collect_runtime_event("task-count-rejected", task.url)
+            self.collect_runtime_event("task-count-rejected", task.request.url)
         elif reason == "network-try-count":
-            self.collect_runtime_event("network-count-rejected", task.url)
+            self.collect_runtime_event("network-count-rejected", task.request.url)
         else:
             raise SpiderError("Unknown response from check_task_limits: %s" % reason)
 
@@ -659,12 +642,7 @@ class Spider:
         else:
             self.log_failed_network_result(result)
             # Try to do network request one more time
-            # TODO:
-            # Implement valid_try_limit
-            # Use it if request failed not because of network error
-            # But because of content integrity check
             if self.network_try_limit > 0:
-                task.setup_grab_config(result["grab_config_backup"])
                 self.add_task(task)
         self.stat.inc("spider:request")
 
@@ -672,8 +650,7 @@ class Spider:
         task.network_try_count += 1
         is_valid, reason = self.check_task_limits(task)
         if is_valid:
-            grab = self.setup_grab_for_task(task)
-            grab_config_backup = grab.dump_config()
+            grab = self.create_grab_instance()
             self.process_grab_proxy(task, grab)
             self.stat.inc("spider:request-network")
             self.stat.inc("spider:task-%s-network" % task.name)
@@ -684,12 +661,12 @@ class Spider:
                     "ecode": None,
                     "emsg": None,
                     "grab": grab,
-                    "grab_config_backup": (grab_config_backup),
                     "task": task,
                     "exc": None,
+                    "doc": None,
                 }
                 try:
-                    grab.request()
+                    result["doc"] = grab.request(task.request)
                 except (
                     GrabNetworkError,
                     GrabInvalidUrl,

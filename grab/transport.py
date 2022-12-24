@@ -5,7 +5,7 @@ import logging
 import ssl
 import time
 import urllib.request
-from collections.abc import Generator, Mapping
+from collections.abc import Generator, Mapping, MutableMapping
 from contextlib import contextmanager
 from copy import copy
 from http.client import HTTPResponse
@@ -43,7 +43,7 @@ URL_DATA_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS"}
 
 def assemble(  # noqa: CCR001
     req: Request, cookiejar: CookieJar
-) -> tuple[str, dict[str, Any], bytes | None]:
+) -> tuple[str, MutableMapping[str, Any], bytes | None]:
     req_url = req.url
     req_hdr = copy(req.headers)
     req_body = None
@@ -74,7 +74,7 @@ def assemble(  # noqa: CCR001
                     urlencode(req.fields).encode(),
                     "application/x-www-form-urlencoded",
                 )
-            merge_with_dict(
+            req_hdr = merge_with_dict(
                 req_hdr,
                 {"Content-Type": content_type, "Content-Length": len(req_body)},
                 replace=True,
@@ -288,6 +288,6 @@ class Urllib3Transport(BaseTransport):
         if self._response:
             jar.extract_cookies(
                 cast(HTTPResponse, MockResponse(self._response.headers)),
-                cast(urllib.request.Request, MockRequest(req.url, req.headers)),
+                cast(urllib.request.Request, MockRequest(req.url, dict(req.headers))),
             )
         return jar

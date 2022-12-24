@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urljoin
 
 from test_server import Response
 
@@ -67,7 +68,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         grab.request(self.server.get_url())
         items = []
         for elem in grab.doc.select('//a[contains(@class, "exploregrid-item")]'):
-            items.append(grab.make_url_absolute(elem.attr("href")))
+            items.append(urljoin(grab.doc.url, elem.attr("href")))
         self.assertTrue("tools-for-open-source" in items[2])
 
     def test_explicit_custom_charset(self):

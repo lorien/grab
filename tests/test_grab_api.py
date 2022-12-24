@@ -4,7 +4,7 @@ from pprint import pprint  # pylint: disable=unused-import
 from test_server import Response
 
 from grab.document import Document
-from grab.errors import GrabConnectionError, GrabMisuseError
+from grab.errors import GrabMisuseError
 from tests.util import BaseGrabTestCase, build_grab
 
 
@@ -23,7 +23,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.assertTrue(b"Moon" in grab.doc.body)
 
         self.server.add_response(Response(data=b"Foo"))
-        grab2 = grab.clone(method="post", body=b"")
+        grab2 = grab.clone(method="POST", body=b"")
 
         grab2.request(self.server.get_url())
         self.assertTrue(b"Foo" in grab2.doc.body)
@@ -32,25 +32,15 @@ class GrabApiTestCase(BaseGrabTestCase):
         grab = build_grab()
         grab.clone()
 
-    def test_make_url_absolute(self):
-        grab = build_grab()
-        self.server.add_response(Response(data=b'<base href="http://foo/bar/">'))
-        grab.request(self.server.get_url())
-        absolute_url = grab.make_url_absolute("/foobar", resolve_base=True)
-        self.assertEqual(absolute_url, "http://foo/foobar")
-        grab = build_grab()
-        absolute_url = grab.make_url_absolute("/foobar")
-        self.assertEqual(absolute_url, "/foobar")
-
-    def test_error_request(self):
-        grab = build_grab()
-        grab.setup(fields={"foo": "bar"})
-
-        with self.assertRaises(GrabConnectionError):
-            grab.request(url="Could-not-resolve-host-address")
-        self.assertEqual(grab.config["body"], None)
-        self.assertEqual(grab.config["fields"], None)
-        self.assertEqual(grab.config["method"], None)
+    # def test_make_url_absolute(self):
+    #    grab = build_grab()
+    #    self.server.add_response(Response(data=b'<base href="http://foo/bar/">'))
+    #    grab.request(self.server.get_url())
+    #    absolute_url = grab.make_url_absolute("/foobar", resolve_base=True)
+    #    self.assertEqual(absolute_url, "http://foo/foobar")
+    #    grab = build_grab()
+    #    absolute_url = grab.make_url_absolute("/foobar")
+    #    self.assertEqual(absolute_url, "/foobar")
 
     def test_document(self):
         data = b"""

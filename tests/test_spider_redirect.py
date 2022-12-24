@@ -2,7 +2,6 @@ from pprint import pprint  # pylint: disable=unused-import
 
 from test_server import Response
 
-from grab import Grab
 from grab.spider import Spider, Task
 from tests.util import BaseGrabTestCase, build_spider
 
@@ -11,25 +10,25 @@ class BasicSpiderTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_too_many_redirects(self):
-        class TestSpider(Spider):
-            def task_page(self, unused_grab, unused_task):
-                pass
+    # def test_too_many_redirects(self):
+    #    class TestSpider(Spider):
+    #        def task_page(self, unused_grab, unused_task):
+    #            pass
 
-        bot = build_spider(TestSpider)
-        bot.add_task(Task("page", url=self.server.get_url()))
+    #    bot = build_spider(TestSpider)
+    #    bot.add_task(Task("page", url=self.server.get_url()))
 
-        self.server.add_response(
-            Response(
-                headers=[("Location", self.server.get_url())],
-                status=302,
-            ),
-            count=-1,
-        )
-        bot.run()
+    #    self.server.add_response(
+    #        Response(
+    #            headers=[("Location", self.server.get_url())],
+    #            status=302,
+    #        ),
+    #        count=-1,
+    #    )
+    #    bot.run()
 
-        self.assertEqual(1, len(bot.runtime_events["network-count-rejected"]))
-        self.assertTrue("error:GrabTooManyRedirectsError" in bot.stat.counters)
+    #    self.assertEqual(1, len(bot.runtime_events["network-count-rejected"]))
+    #    self.assertTrue("error:GrabTooManyRedirectsError" in bot.stat.counters)
 
     def test_redirect_with_invalid_byte(self):
         server = self.server
@@ -44,8 +43,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         class TestSpider(Spider):
             def task_generator(self):
-                grab = Grab(url=server.get_url())
-                yield Task("page", grab=grab)
+                yield Task("page", server.get_url())
 
             def task_page(self, unused_grab, unused_task):
                 pass
