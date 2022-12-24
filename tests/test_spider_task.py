@@ -184,9 +184,7 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
     #    self.assertRaises(SpiderMisuseError, task.clone, grab=1, grab_config=1)
 
     # def test_task_clone_grab_config_and_url(self):
-    #    grab = build_grab()
-    #    grab.setup(url="http://foo.com/")
-    #    task = Task("foo", grab_config=grab.dump_config())
+    #    task = Task("foo", "http://foo.com/")
     #    task2 = task.clone(url="http://bar.com/")
     #    self.assertEqual(task2.request.url, "http://bar.com/")
 
@@ -250,7 +248,7 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
     #    bot.add_task(
     #        Task(
     #            "page",
-    #            grab_config=Grab(url=self.server.get_url(), timeout=1).dump_config(),
+    #            Request(method="GET", url=self.server.get_url(), timeout=1)
     #        )
     #    )
     #    bot.run()
@@ -366,8 +364,7 @@ class TestSpiderTestCase(BaseGrabTestCase):  # pylint: disable=too-many-public-m
 
     #    class TestSpider(Spider):
     #        def task_page(self, grab, task):
-    #            grab2 = grab.clone()
-    #            yield Task("page2", task.clgrab_config=grab2.dump_config())
+    #            yield Task("page2", task.request)
 
     #        def task_page2(self, grab, task):
     #            pass

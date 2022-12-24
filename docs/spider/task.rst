@@ -27,7 +27,7 @@ Constructor of Task Class
 -------------------------
 
 Constructor of Task Class accepts multiple arguments. At least you have to
-specify URL of requested document OR the configured Grab object. Next, you
+specify name of task and either URL or Request instance. Next, you
 see examples of different task creation. All three examples do the same:
 
 .. code:: python
@@ -35,20 +35,9 @@ see examples of different task creation. All three examples do the same:
     # Using `url` argument
     t = Task('wikipedia', url 'http://wikipedia.org/')
 
-    # Using configured state of Grab instance
-    g = Grab()
-    g.setup(url='http://wikipedia.org/')
-    config = g.dump_config()
-    t = Task('wikipedia', grab_config=config)
+    # Using Request instancec
+    t = Task('wikipedia', Request(url="http://wikipedia.org/"))
 
-
-Also you can specify these arguments:
-
-:priority: task priority, it's unsigned natural number, the less number mean the higher priority.
-:disable_cache: don't use spider's cache for this request, network response will not stored into cache as well.
-:refresh_cache: do not use spider's cache, in case of success response it will refresh cache.
-:valid_status: procces the following response codes in task handler. By default only 2xx and 404 statuses will be processed in task handlers.
-:use_proxylist: use spider's global proxy list, by default this option is True
 
 
 Task Object as Data Storage
@@ -194,25 +183,3 @@ it will not be affected by `create_grab_instance_method`:
             yield Task('page', grab_config=g.dump_config())
             # The grab instance in the yielded task
             # will not be affected by `create_grab_instance` method.
-
-
-.. _spider_updating_any_grab_instance:
-
-Updating Any Grab Instance
---------------------------
-
-With method `update_grab_instance` you can update any Grab instance, even those
-instances that you have passed explicitly to the Task object. Be aware, that
-any option configured in this method overwrites the previously configured
-option.
-
-.. code:: python
-
-    class TestSpider(Spider):
-        def update_grab_instance(self, grab):
-            grab.setup(timeout=20)
-
-        def task_generator(self):
-            g = Grab(url='http://example.com', timeout=5)
-            yield Task('page', grab_config=g.dump_config())
-            # The effective timeout setting will be equal to 20!

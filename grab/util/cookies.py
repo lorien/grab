@@ -9,7 +9,7 @@ Some code got from
 """
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from copy import copy
 from http.client import HTTPMessage
 from http.cookiejar import Cookie, CookieJar
@@ -196,3 +196,10 @@ def build_cookie_header(
     mocked_req = MockRequest(url, dict(headers))
     cookiejar.add_cookie_header(cast(Request, mocked_req))
     return mocked_req.get_new_headers().get("Cookie")
+
+
+def build_jar(cookies: Sequence[Cookie]) -> CookieJar:
+    jar = CookieJar()
+    for item in cookies:
+        jar.set_cookie(item)
+    return jar
