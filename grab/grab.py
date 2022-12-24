@@ -150,16 +150,17 @@ class Grab(BaseGrab):
             self.transport.request(req, self.cookies)
             with self.transport.wrap_transport_error():
                 doc = self.process_request_result(req)
-            if req.follow_location:
-                redir_url = self.find_redirect_url(doc)
-                if redir_url is not None:
-                    redir_count += 1
-                    if redir_count > req.redirect_limit:
-                        raise GrabTooManyRedirectsError()
-                    redir_url = urljoin(req.url, redir_url)
-                    request_kwargs["url"] = redir_url
-                    req = self.prepare_request(request_kwargs)
-                    continue
+            if (
+                req.follow_location
+                and (redir_url := self.find_redirect_url(doc)) is not None
+            ):
+                redir_count += 1
+                if redir_count > req.redirect_limit:
+                    raise GrabTooManyRedirectsError()
+                redir_url = urljoin(req.url, redir_url)
+                request_kwargs["url"] = redir_url
+                req = self.prepare_request(request_kwargs)
+                continue
             return doc
 
     def submit(self, doc: Document, **kwargs: Any) -> Document:
