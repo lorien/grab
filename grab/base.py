@@ -6,10 +6,28 @@ from abc import abstractmethod
 from collections.abc import Generator, Mapping
 from contextlib import contextmanager
 from http.cookiejar import CookieJar
-from typing import Any, Optional, cast
+from typing import Any, Optional, cast, overload
 
 from grab.document import Document
 from grab.request import Request
+
+
+class BaseGrab:
+    @overload
+    @abstractmethod
+    def request(self, url: Request, **request_kwargs: Any) -> Document:
+        ...
+
+    @overload
+    @abstractmethod
+    def request(self, url: None | str = None, **request_kwargs: Any) -> Document:
+        ...
+
+    @abstractmethod
+    def request(
+        self, url: None | str | Request = None, **request_kwargs: Any
+    ) -> Document:
+        ...
 
 
 class BaseTransport:

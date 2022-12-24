@@ -11,13 +11,14 @@ from urllib.parse import urljoin, urlsplit
 
 from user_agent import generate_user_agent
 
-from grab.base import BaseTransport
-from grab.document import Document
-from grab.errors import GrabMisuseError, GrabTooManyRedirectsError
-from grab.request import Request
-from grab.transport import Urllib3Transport
-from grab.util.cookies import build_jar, create_cookie
-from grab.util.http import merge_with_dict
+from .base import BaseGrab, BaseTransport
+from .document import Document
+from .errors import GrabMisuseError, GrabTooManyRedirectsError
+from .request import Request
+from .transport import Urllib3Transport
+from .types import resolve_grab_entity, resolve_transport_entity
+from .util.cookies import build_jar, create_cookie
+from .util.http import merge_with_dict
 
 __all__ = ["Grab"]
 logger = logging.getLogger(__name__)
@@ -37,23 +38,7 @@ def default_grab_config() -> MutableMapping[str, Any]:
     }
 
 
-def resolve_transport_entity(
-    transport: None | BaseTransport | type[BaseTransport],
-    default: type[BaseTransport],
-) -> BaseTransport:
-    if transport and (
-        not isinstance(transport, BaseTransport)
-        and not issubclass(transport, BaseTransport)
-    ):
-        raise GrabMisuseError("Invalid Grab transport: {}".format(transport))
-    if transport is None:
-        return default()
-    if isinstance(transport, BaseTransport):
-        return transport
-    return transport()
-
-
-class Grab:
+class Grab(BaseGrab):
     __slots__ = ("config", "transport", "cookies", "_doc")
     document_class: type[Document] = Document
     transport_class = Urllib3Transport
@@ -71,13 +56,6 @@ class Grab:
             self.setup(**kwargs)
 
     def clone(self, **kwargs: Any) -> Grab:
-        r"""Create clone of Grab instance.
-
-        Cloned instance will have the same state: cookies, referrer, response
-        document data
-
-        :param \\**kwargs: overrides settings of cloned grab instance
-        """
         grab = Grab(transport=self.transport)
         grab.config = copy_config(self.config)
         grab.cookies = build_jar(list(self.cookies))  # building again makes a copy
@@ -176,13 +154,6 @@ class Grab:
     def request(
         self, url: None | str | Request = None, **request_kwargs: Any
     ) -> Document:
-        """Perform network request.
-
-        You can specify grab settings in ``**kwargs``.
-        Any keyword argument will be passed to ``self.config``.
-
-        Returns: ``Document`` objects.
-        """
         if isinstance(url, Request):
             req = url
         else:
@@ -208,14 +179,6 @@ class Grab:
             return doc
 
     def submit(self, doc: Document, **kwargs: Any) -> Document:
-        """Submit current form.
-
-        :param make_request: if `False` then grab instance will be
-            configured with form post data but request will not be
-            performed
-
-        For details see `Document.submit()` method
-        """
         return self.request(Request(**doc.get_form_request(**kwargs)))
 
     def process_request_result(self, req: Request) -> Document:
@@ -263,18 +226,9 @@ class Grab:
                 setattr(self, key, value)
 
 
-def resolve_grab_entity(entity: None | Grab | type[Grab], default: type[Grab]) -> Grab:
-    if entity is None:
-        assert issubclass(default, Grab)
-        return default()
-    if isinstance(entity, Grab):
-        return entity
-    return entity()
-
-
 def request(
     url: None | str | Request = None,
-    grab: None | Grab | type[Grab] = None,
+    grab: None | BaseGrab | type[BaseGrab] = None,
     **request_kwargs: Any,
 ) -> Document:
     grab = resolve_grab_entity(grab, default=Grab)
