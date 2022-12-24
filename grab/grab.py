@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping, MutableMapping
-from contextlib import suppress
 from copy import copy
 from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
@@ -21,23 +20,14 @@ from grab.util.cookies import build_jar, create_cookie
 from grab.util.http import merge_with_dict
 
 __all__ = ["Grab"]
-MUTABLE_CONFIG_KEYS = ["fields", "headers", "cookies"]
 logger = logging.getLogger(__name__)
 logger_network = logging.getLogger("grab.network")
 system_random = SystemRandom()
 
 
-def copy_config(config: MutableMapping[str, Any]) -> MutableMapping[str, Any]:
+def copy_config(config: Mapping[str, Any]) -> MutableMapping[str, Any]:
     """Copy grab config with correct handling of mutable config values."""
-    cloned_config = {}
-    for key, val in config.items():
-        if key == "request":
-            cloned_config[key] = copy_config(val)
-        elif key in MUTABLE_CONFIG_KEYS:
-            cloned_config[key] = copy(val)
-        else:
-            cloned_config[key] = val
-    return cloned_config
+    return {x: copy(y) for x, y in config.items()}
 
 
 def default_grab_config() -> MutableMapping[str, Any]:
@@ -257,8 +247,6 @@ class Grab:
 
     def clear_cookies(self) -> None:
         """Clear all remembered cookies."""
-        with suppress(KeyError):
-            del self.config["request"]["cookies"]
         self.cookies.clear()
 
     def __getstate__(self) -> dict[str, Any]:
