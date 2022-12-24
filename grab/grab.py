@@ -24,26 +24,10 @@ from grab.util.http import merge_with_dict
 
 __all__ = ["Grab"]
 MUTABLE_CONFIG_KEYS = ["fields", "headers", "cookies"]
-logger = logging.getLogger("grab.base")
+logger = logging.getLogger(__name__)
 logger_network = logging.getLogger("grab.network")
 system_random = SystemRandom()
-
-
-def copy_config(config: MutableMapping[str, Any]) -> MutableMapping[str, Any]:
-    """Copy grab config with correct handling of mutable config values."""
-    cloned_config = {}
-    for key, val in config.items():
-        if key == "request":
-            cloned_config[key] = copy_config(val)
-        elif key in MUTABLE_CONFIG_KEYS:
-            cloned_config[key] = copy(val)
-        else:
-            cloned_config[key] = val
-    return cloned_config
-
-
 DEFAULT_REQUEST_CONFIG = {
-    # Request Properties
     "method": None,
     "url": None,
     "proxy": None,
@@ -63,19 +47,30 @@ DEFAULT_REQUEST_CONFIG = {
 }
 
 
+def copy_config(config: MutableMapping[str, Any]) -> MutableMapping[str, Any]:
+    """Copy grab config with correct handling of mutable config values."""
+    cloned_config = {}
+    for key, val in config.items():
+        if key == "request":
+            cloned_config[key] = copy_config(val)
+        elif key in MUTABLE_CONFIG_KEYS:
+            cloned_config[key] = copy(val)
+        else:
+            cloned_config[key] = val
+    return cloned_config
+
+
 def default_grab_config() -> MutableMapping[str, Any]:
     return {
         "request": {},
         "common_headers": None,
         "reuse_cookies": True,
-        "state": {},
     }
 
 
 class Grab:
     __slots__ = ("config", "transport", "cookies", "_doc")
     document_class: type[Document] = Document
-    # Attributes which should be processed when Grab instance is cloned
 
     def __init__(
         self,
