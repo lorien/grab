@@ -9,8 +9,6 @@ from secrets import SystemRandom
 from typing import Any, cast, overload
 from urllib.parse import urljoin, urlsplit
 
-from user_agent import generate_user_agent
-
 from .base import BaseGrab, BaseTransport
 from .document import Document
 from .errors import GrabMisuseError, GrabTooManyRedirectsError
@@ -18,7 +16,6 @@ from .request import Request
 from .transport import Urllib3Transport
 from .types import resolve_grab_entity, resolve_transport_entity
 from .util.cookies import build_jar, create_cookie
-from .util.http import merge_with_dict
 
 __all__ = ["Grab"]
 logger = logging.getLogger(__name__)
@@ -33,7 +30,6 @@ def copy_config(config: Mapping[str, Any]) -> MutableMapping[str, Any]:
 
 def default_grab_config() -> MutableMapping[str, Any]:
     return {
-        "common_headers": None,
         "reuse_cookies": True,
     }
 
@@ -49,7 +45,6 @@ class Grab(BaseGrab):
         **kwargs: Any,
     ) -> None:
         self.config: MutableMapping[str, Any] = default_grab_config()
-        self.config["common_headers"] = self.common_headers()
         self.transport = resolve_transport_entity(transport, self.transport_class)
         self.cookies = CookieJar()
         if kwargs:
@@ -98,11 +93,6 @@ class Grab(BaseGrab):
             cfg["method"] = "GET"
         if cfg["follow_location"] is None:
             cfg["follow_location"] = True
-        # COMMON HEADERS EXTENSION
-        if self.config["common_headers"]:
-            cfg["headers"] = merge_with_dict(
-                (cfg["headers"] or {}), self.config["common_headers"], replace=False
-            )
         req = self.create_request_from_config(cfg)
         # COOKIES EXTENSION
         self.update_session_cookies(req.cookies, req.url)
@@ -188,20 +178,6 @@ class Grab(BaseGrab):
             for item in doc.cookies:
                 self.cookies.set_cookie(item)
         return doc
-
-    @classmethod
-    def common_headers(cls) -> dict[str, str]:
-        """Build headers which sends typical browser."""
-        return {
-            "Accept": "text/xml,application/xml,application/xhtml+xml"
-            ",text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.%d"
-            % system_random.randint(2, 5),
-            "Accept-Language": "en-us,en;q=0.%d" % (system_random.randint(5, 9)),
-            "Accept-Charset": "utf-8,windows-1251;q=0.7,*;q=0.%d"
-            % system_random.randint(5, 7),
-            "Keep-Alive": "300",
-            "User-Agent": generate_user_agent(),
-        }
 
     def clear_cookies(self) -> None:
         """Clear all remembered cookies."""

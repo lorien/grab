@@ -1,9 +1,8 @@
-from copy import deepcopy
 from pprint import pprint  # pylint: disable=unused-import
 
 from test_server import Response
 
-from grab import Grab, request
+from grab import Grab
 from grab.document import Document
 from grab.errors import GrabMisuseError
 from tests.util import BaseGrabTestCase
@@ -52,14 +51,3 @@ class GrabApiTestCase(BaseGrabTestCase):
         <h1>test</h1>
         """
         self.assertRaises(GrabMisuseError, Document, data)
-
-    def test_headers_affects_common_headers(self):
-        grab = Grab()
-        ch_origin = deepcopy(grab.config["common_headers"])
-        # Setting explicity headers which is already in common headers
-        # must not affect on content of common headers
-        request(self.server.get_url(), headers={"Accept": "zzz"})
-        self.assertEqual(
-            grab.config["common_headers"]["Accept"],
-            ch_origin["Accept"],
-        )
