@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import threading
 from collections.abc import Mapping, MutableMapping
 from contextlib import suppress
 from copy import copy
@@ -164,26 +163,16 @@ class Grab:
                     create_cookie(name=name, value=value, domain=request_host)
                 )
 
-    def log_request(self, req: Request, extra: str = "") -> None:
-        """Send request details to logging system."""
-        thread_name = threading.current_thread().name.lower()
+    def log_request(self, req: Request) -> None:
+        """Log request details via logging system."""
         proxy_info = (
-            " via {} proxy of type {}{}".format(
-                req.proxy,
-                req.proxy_type,
-                " with auth" if req.proxy_userpwd else "",
+            " via proxy {}://{}{}".format(
+                req.proxy_type, req.proxy, " with auth" if req.proxy_userpwd else ""
             )
             if req.proxy
             else ""
         )
-        logger_network.debug(
-            "%s%s%s %s%s",
-            "" if (thread_name == "mainthread") else "[{}] ".format(thread_name),
-            "[{}]".format(extra) if extra else "",
-            req.method or "GET",
-            req.url,
-            proxy_info,
-        )
+        logger_network.debug("%s %s%s", req.method or "GET", req.url, proxy_info)
 
     def find_redirect_url(self, doc: Document) -> None | str:
         assert doc.headers is not None
