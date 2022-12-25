@@ -12,7 +12,7 @@ from .util.cookies import build_jar, create_cookie
 
 
 class CookiesExtension(BaseExtension):
-    mount_points = ["request_cookies", "prepare_request_post", "response_post"]
+    extension_points = ["request_cookies", "prepare_request_post", "response_post"]
 
     def __init__(self, cookiejar: None | CookieJar = None) -> None:
         self.cookiejar = cookiejar if cookiejar else CookieJar()

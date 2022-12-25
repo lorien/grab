@@ -80,7 +80,7 @@ class Grab(BaseGrab):
         if cfg.get("follow_location") is None:
             cfg["follow_location"] = True
         req = Request.create_from_mapping(cfg)
-        for ext in self.mount_point_handlers["prepare_request_post"]:
+        for ext in self.extension_point_handlers["prepare_request_post"]:
             ext.process_prepare_request_post(req)
         return req
 
@@ -103,7 +103,7 @@ class Grab(BaseGrab):
 
     def get_request_cookies(self, req: Request) -> CookieJar:
         jar = CookieJar()
-        for ext in self.mount_point_handlers["request_cookies"]:
+        for ext in self.extension_point_handlers["request_cookies"]:
             ext.process_request_cookies(req, jar)
         return jar
 
@@ -149,7 +149,7 @@ class Grab(BaseGrab):
     def process_request_result(self, req: Request) -> Document:
         """Process result of real request performed via transport extension."""
         doc = self.transport.prepare_response(req, document_class=self.document_class)
-        for ext in self.mount_point_handlers["response_post"]:
+        for ext in self.extension_point_handlers["response_post"]:
             ext.process_response_post(req, doc)
         return doc
 

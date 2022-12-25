@@ -11,16 +11,16 @@ from grab.request import Request
 
 
 class BaseExtension(metaclass=ABCMeta):
-    mount_points: list[str] = []
+    extension_points: list[str] = []
 
     __slots__ = ()
 
-    def __set_name__(self, owner: BaseGrab, name: str) -> None:
-        owner.extensions[name] = {
+    def __set_name__(self, owner: BaseGrab, attr: str) -> None:
+        owner.extensions[attr] = {
             "instance": self,
         }
-        for point_name in self.mount_points:
-            owner.mount_point_handlers[point_name].append(self)
+        for name in self.extension_points:
+            owner.extension_point_handlers[name].append(self)
 
     def process_prepare_request_post(self, req: Request) -> None:
         pass
@@ -44,7 +44,7 @@ class BaseGrab(metaclass=ABCMeta):
     __slots__ = ()
 
     extensions: MutableMapping[str, MutableMapping[str, Any]] = {}
-    mount_point_handlers: MutableMapping[str, list[BaseExtension]] = {
+    extension_point_handlers: MutableMapping[str, list[BaseExtension]] = {
         "request_cookies": [],
         "prepare_request_post": [],
         "response_post": [],
