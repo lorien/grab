@@ -33,7 +33,8 @@ from lxml.html import (
 )
 from selection import SelectorList, XpathSelector
 
-from grab.errors import DataNotFound, GrabMisuseError
+from .base import BaseResponse
+from .errors import DataNotFound, GrabMisuseError
 
 THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")
@@ -54,7 +55,9 @@ def normalize_pairs(
     return list(inp.items()) if isinstance(inp, typing.Mapping) else inp
 
 
-class Document:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
+class Document(
+    BaseResponse
+):  # pylint: disable=too-many-instance-attributes, too-many-public-methods
     """Network response."""
 
     __slots__ = (

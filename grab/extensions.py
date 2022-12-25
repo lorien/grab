@@ -7,11 +7,11 @@ from urllib.parse import urlsplit
 
 from .base import BaseExtension
 from .document import Document
-from .request import Request
+from .request import HttpRequest
 from .util.cookies import build_jar, create_cookie
 
 
-class CookiesExtension(BaseExtension):
+class CookiesExtension(BaseExtension[HttpRequest, Document]):
     extension_points = ["request_cookies", "prepare_request_post", "response_post"]
 
     def __init__(self, cookiejar: None | CookieJar = None) -> None:
@@ -53,17 +53,17 @@ class CookiesExtension(BaseExtension):
             else:
                 setattr(self, name, value)
 
-    def process_prepare_request_post(self, req: Request) -> None:
+    def process_prepare_request_post(self, req: HttpRequest) -> None:
         self.update(req.cookies, req.url)
 
     def process_request_cookies(
-        self, req: Request, jar: CookieJar  # pylint: disable=unused-argument
+        self, req: HttpRequest, jar: CookieJar  # pylint: disable=unused-argument
     ) -> None:
         for cookie in self.cookiejar:
             jar.set_cookie(cookie)
 
     def process_response_post(
-        self, req: Request, doc: Document  # pylint: disable=unused-argument
+        self, req: HttpRequest, doc: Document  # pylint: disable=unused-argument
     ) -> None:
         for item in doc.cookies:
             self.cookiejar.set_cookie(item)

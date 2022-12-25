@@ -4,7 +4,7 @@ from __future__ import annotations
 # from proxylist.base import BaseProxySource
 from test_server import Response, TestServer
 
-from grab import Request
+from grab import HttpRequest
 from grab.spider import Spider, Task
 from tests.util import ADDRESS, BaseGrabTestCase, temp_file
 
@@ -73,7 +73,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
     #        bot.load_proxylist(proxy_file, "text_file")
     #        for _ in range(10):
     #            bot.add_task(
-    #                Task(name="baz", request=Request("GET", "http://yandex.ru"))
+    #                Task(name="baz", request=HttpRequest("GET", "http://yandex.ru"))
     #            )
     #        bot.run()
 
@@ -100,7 +100,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
     #        bot.load_proxylist(proxy_file, "text_file", auto_change=False)
     #        for _ in range(1):
     #            bot.add_task(
-    #                Task(name="baz", request=Request("GET", "http://yandex.ru"))
+    #                Task(name="baz", request=HttpRequest("GET", "http://yandex.ru"))
     #            )
     #        bot.run()
 
@@ -131,7 +131,7 @@ class TestSpiderProxyCase(BaseGrabTestCase):
             )
             for _ in range(10):
                 bot.add_task(
-                    Task(name="baz", request=Request("GET", self.server.get_url()))
+                    Task(name="baz", request=HttpRequest("GET", self.server.get_url()))
                 )
             bot.run()
 

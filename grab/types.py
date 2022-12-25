@@ -8,13 +8,15 @@ from __future__ import annotations
 
 import inspect
 
-from .base import BaseExtension, BaseGrab, BaseTransport
+from .base import BaseExtension, BaseGrab, BaseTransport, RequestT, ResponseT
 
 
 def resolve_transport_entity(
-    entity: None | BaseTransport | type[BaseTransport],
-    default: type[BaseTransport],
-) -> BaseTransport:
+    entity: None
+    | BaseTransport[RequestT, ResponseT]
+    | type[BaseTransport[RequestT, ResponseT]],
+    default: type[BaseTransport[RequestT, ResponseT]],
+) -> BaseTransport[RequestT, ResponseT]:
     if entity and (
         not isinstance(entity, BaseTransport) and not issubclass(entity, BaseTransport)
     ):
@@ -27,8 +29,9 @@ def resolve_transport_entity(
 
 
 def resolve_grab_entity(
-    entity: None | BaseGrab | type[BaseGrab], default: type[BaseGrab]
-) -> BaseGrab:
+    entity: None | BaseGrab[RequestT, ResponseT] | type[BaseGrab[RequestT, ResponseT]],
+    default: type[BaseGrab[RequestT, ResponseT]],
+) -> BaseGrab[RequestT, ResponseT]:
     if entity and (
         not isinstance(entity, BaseGrab) and not issubclass(entity, BaseGrab)
     ):
@@ -42,8 +45,9 @@ def resolve_grab_entity(
 
 
 def resolve_extension_entity(
-    entity: BaseExtension | type[BaseExtension],
-) -> BaseExtension:
+    entity: BaseExtension[RequestT, ResponseT]
+    | type[BaseExtension[RequestT, ResponseT]],
+) -> BaseExtension[RequestT, ResponseT]:
     if (
         not entity
         or not isinstance(entity, BaseExtension)

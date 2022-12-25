@@ -1,6 +1,6 @@
 from test_server import Response
 
-from grab import Request
+from grab import HttpRequest
 from grab.spider import Spider, Task
 from grab.spider.errors import FatalError, SpiderError
 from grab.util.timeout import Timeout
@@ -35,7 +35,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.add_task(
             Task(
                 "baz",
-                Request(
+                HttpRequest(
                     method="GET",
                     url=self.server.get_url(),
                     timeout=Timeout(connect=1, total=1),
@@ -49,7 +49,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.add_task(
             Task(
                 "baz",
-                Request(
+                HttpRequest(
                     method="GET",
                     url=self.server.get_url(),
                     timeout=Timeout(connect=1, total=1),
@@ -71,7 +71,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot.add_task(
             Task(
                 "baz",
-                Request(
+                HttpRequest(
                     method="GET",
                     url=self.server.get_url(),
                     timeout=Timeout(connect=1, total=1),
@@ -85,7 +85,7 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         bot2.add_task(
             Task(
                 "baz",
-                Request(
+                HttpRequest(
                     method="GET",
                     url=self.server.get_url(),
                     timeout=Timeout(connect=1, total=1),

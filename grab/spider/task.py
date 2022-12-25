@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from ..errors import GrabMisuseError
-from ..request import Request
+from ..request import HttpRequest
 from .errors import SpiderMisuseError
 
 
@@ -20,8 +20,8 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
     def __init__(  # pylint:disable=too-many-arguments,too-many-locals,too-many-branches
         self,
         name: None | str = None,
-        url: None | str | Request = None,
-        request: None | Request = None,
+        url: None | str | HttpRequest = None,
+        request: None | HttpRequest = None,
         priority: None | int = None,
         priority_set_explicitly: bool = True,
         network_try_count: int = 0,
@@ -90,16 +90,16 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         if url is not None and request is not None:
             raise GrabMisuseError("Options url and ruquest are mutually exclusive")
         if request is not None:
-            if not isinstance(request, Request):
-                raise TypeError("Option 'requst' must be Request instance")
+            if not isinstance(request, HttpRequest):
+                raise TypeError("Option 'requst' must be HttpRequest instance")
             self.request = request
         elif url is not None:
             if isinstance(url, str):
-                self.request = Request(method="GET", url=url)
-            elif isinstance(url, Request):
+                self.request = HttpRequest(method="GET", url=url)
+            elif isinstance(url, HttpRequest):
                 self.request = url
             else:
-                raise TypeError("Parameter 'url' must be str or Request instance")
+                raise TypeError("Parameter 'url' must be str or HttpRequest instance")
         else:
             raise GrabMisuseError("Either url or request option must be set")
         self.schedule_time: None | datetime = None
@@ -144,7 +144,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
             self.schedule_time = None
 
     def clone(
-        self, url: None | str = None, request: None | Request = None, **kwargs: Any
+        self, url: None | str = None, request: None | HttpRequest = None, **kwargs: Any
     ) -> Task:
         """Clone Task instance.
 

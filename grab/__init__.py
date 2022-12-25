@@ -7,6 +7,6 @@ from .errors import (
     GrabTimeoutError,
 )
 from .grab import Grab, request
-from .request import Request
+from .request import HttpRequest
 
 __version__ = "0.6.41"

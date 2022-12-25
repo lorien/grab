@@ -1,40 +1,68 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from collections.abc import Generator, MutableMapping
+from collections.abc import Generator, Mapping, MutableMapping
 from contextlib import contextmanager
 from copy import deepcopy
 from http.cookiejar import CookieJar
-from typing import Any, TypeVar, overload
+from typing import Any, Generic, TypeVar, overload
 
-from grab.document import Document
-from grab.request import Request
+__all__ = ["BaseRequest", "BaseExtension", "BaseGrab", "BaseTransport"]
 
+RequestT = TypeVar("RequestT", bound="BaseRequest")
+ResponseT = TypeVar("ResponseT", bound="BaseResponse")
 T = TypeVar("T")
 
 
-class BaseExtension(metaclass=ABCMeta):
+class BaseRequest(metaclass=ABCMeta):
+    init_keys: set[str] = set()
+
+    def __repr__(self) -> str:
+        return "{}({})".format(
+            self.__class__.__name__,
+            ", ".join("{}={!r}".format(*x) for x in self.__dict__.items()),
+        )
+
+    @classmethod
+    def create_from_mapping(
+        cls: type[RequestT], mapping: Mapping[str, Any]
+    ) -> RequestT:
+        for key in mapping:
+            if key not in cls.init_keys:
+                raise TypeError(
+                    "Constructor of {} does not accept {} keyword parameter".format(
+                        cls.__name__, key
+                    )
+                )
+        return cls(**mapping)
+
+
+class BaseResponse:
+    pass
+
+
+class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     extension_points: list[str] = []
 
     __slots__ = ()
 
-    def __set_name__(self, owner: BaseGrab, attr: str) -> None:
+    def __set_name__(self, owner: BaseGrab[RequestT, ResponseT], attr: str) -> None:
         owner.extensions[attr] = {
             "instance": self,
         }
         for name in self.extension_points:
             owner.extension_point_handlers[name].append(self)
 
-    def process_prepare_request_post(self, req: Request) -> None:
+    def process_prepare_request_post(self, req: RequestT) -> None:
         pass
 
     def process_request_cookies(
-        self, req: Request, jar: CookieJar  # pylint: disable=unused-argument
+        self, req: RequestT, jar: CookieJar  # pylint: disable=unused-argument
     ) -> None:
         pass
 
     def process_response_post(
-        self, req: Request, doc: Document  # pylint: disable=unused-argument
+        self, req: RequestT, doc: ResponseT  # pylint: disable=unused-argument
     ) -> None:
         pass
 
@@ -43,11 +71,13 @@ class BaseExtension(metaclass=ABCMeta):
         ...
 
 
-class BaseGrab(metaclass=ABCMeta):
+class BaseGrab(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     __slots__ = ()
 
     extensions: MutableMapping[str, MutableMapping[str, Any]] = {}
-    extension_point_handlers: MutableMapping[str, list[BaseExtension]] = {
+    extension_point_handlers: MutableMapping[
+        str, list[BaseExtension[RequestT, ResponseT]]
+    ] = {
         "request_cookies": [],
         "prepare_request_post": [],
         "response_post": [],
@@ -59,25 +89,25 @@ class BaseGrab(metaclass=ABCMeta):
 
     @overload
     @abstractmethod
-    def request(self, url: Request, **request_kwargs: Any) -> Document:
+    def request(self, url: RequestT, **request_kwargs: Any) -> ResponseT:
         ...
 
     @overload
     @abstractmethod
-    def request(self, url: None | str = None, **request_kwargs: Any) -> Document:
+    def request(self, url: None | str = None, **request_kwargs: Any) -> ResponseT:
         ...
 
     @abstractmethod
     def request(
-        self, url: None | str | Request = None, **request_kwargs: Any
-    ) -> Document:
+        self, url: None | str | RequestT = None, **request_kwargs: Any
+    ) -> ResponseT:
         ...
 
     def clone(self: T) -> T:
         return deepcopy(self)
 
 
-class BaseTransport(metaclass=ABCMeta):
+class BaseTransport(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     __slots__ = ()
 
     @abstractmethod
@@ -86,8 +116,8 @@ class BaseTransport(metaclass=ABCMeta):
 
     @abstractmethod
     def prepare_response(
-        self, req: Request, *, document_class: type[Document] = Document
-    ) -> Document:  # pragma: no cover
+        self, req: RequestT, *, document_class: type[ResponseT]
+    ) -> ResponseT:  # pragma: no cover
         raise NotImplementedError
 
     @abstractmethod
@@ -96,5 +126,5 @@ class BaseTransport(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def request(self, req: Request, cookiejar: CookieJar) -> None:  # pragma: no cover
+    def request(self, req: RequestT, cookiejar: CookieJar) -> None:  # pragma: no cover
         raise NotImplementedError

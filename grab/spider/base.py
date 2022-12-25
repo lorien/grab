@@ -16,6 +16,7 @@ from proxylist import ProxyList, ProxyServer
 from proxylist.base import BaseProxySource
 
 from ..base import BaseTransport
+from ..document import Document
 from ..errors import (
     GrabFeatureIsDeprecated,
     GrabInvalidResponse,
@@ -27,7 +28,7 @@ from ..errors import (
     ResponseNotValid,
 )
 from ..grab import Grab
-from ..request import Request
+from ..request import HttpRequest
 from ..util.metrics import format_traffic_value
 from .errors import FatalError, NoTaskHandler, SpiderError, SpiderMisuseError
 from .interface import FatalErrorQueueItem
@@ -80,7 +81,9 @@ class Spider:
         parser_requests_per_process: int = 10000,
         parser_pool_size: int = 1,
         network_service: None | BaseNetworkService = None,
-        grab_transport: None | BaseTransport | type[BaseTransport] = None,
+        grab_transport: None
+        | BaseTransport[HttpRequest, Document]
+        | type[BaseTransport[HttpRequest, Document]] = None,
     ) -> None:
         """Create Spider instance, duh.
 
@@ -364,7 +367,7 @@ class Spider:
     def process_initial_urls(self) -> None:
         if self.initial_urls:
             for url in self.initial_urls:
-                self.add_task(Task(name="initial", request=Request("GET", url)))
+                self.add_task(Task(name="initial", request=HttpRequest("GET", url)))
 
     def get_task_from_queue(self) -> None | Literal[True] | Task:
         try:

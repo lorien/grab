@@ -2,7 +2,7 @@ from pprint import pprint  # pylint: disable=unused-import
 
 from test_server import Response
 
-from grab import Request
+from grab import HttpRequest
 from grab.spider import Spider, Task
 from tests.util import BaseGrabTestCase
 
@@ -65,7 +65,7 @@ class SpiderErrorTestCase(BaseGrabTestCase):
 
             def task_generator(self):
                 yield Task(
-                    "page", Request(method="GET", url=server.get_url(), timeout=1)
+                    "page", HttpRequest(method="GET", url=server.get_url(), timeout=1)
                 )
 
             def task_page(self, grab, unused_task):

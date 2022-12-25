@@ -22,13 +22,12 @@ from urllib3.response import HTTPResponse as Urllib3HTTPResponse
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
 
-from grab.document import Document
-from grab.errors import GrabConnectionError, GrabInvalidResponse, GrabTimeoutError
-from grab.request import Request
-from grab.util.cookies import build_cookie_header, extract_response_cookies
-from grab.util.structures import merge_with_dict
-
 from .base import BaseTransport
+from .document import Document
+from .errors import GrabConnectionError, GrabInvalidResponse, GrabTimeoutError
+from .request import HttpRequest
+from .util.cookies import build_cookie_header, extract_response_cookies
+from .util.structures import merge_with_dict
 
 URL_DATA_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS"}
 
@@ -40,7 +39,7 @@ class CompiledRequestData(TypedDict):
     body: None | bytes
 
 
-class Urllib3Transport(BaseTransport):
+class Urllib3Transport(BaseTransport[HttpRequest, Document]):
     """Grab network transport based on urllib3 library."""
 
     def __init__(self) -> None:
@@ -92,7 +91,7 @@ class Urllib3Transport(BaseTransport):
             raise GrabConnectionError("SSLError", ex) from ex
 
     def select_pool_for_request(
-        self, req: Request
+        self, req: HttpRequest
     ) -> PoolManager | ProxyManager | SOCKSProxyManager:
         if req.proxy:
             if req.proxy_userpwd:
@@ -114,7 +113,7 @@ class Urllib3Transport(BaseTransport):
             )
         return self.pool
 
-    def request(self, req: Request, cookiejar: CookieJar) -> None:
+    def request(self, req: HttpRequest, cookiejar: CookieJar) -> None:
         pool: PoolManager | SOCKSProxyManager | ProxyManager = (
             self.select_pool_for_request(req)
         )
@@ -153,7 +152,7 @@ class Urllib3Transport(BaseTransport):
 
         self._response = res
 
-    def read_with_timeout(self, req: Request) -> bytes:
+    def read_with_timeout(self, req: HttpRequest) -> bytes:
         assert self._connect_time is not None
         assert self._response is not None
         chunks = []
@@ -185,7 +184,7 @@ class Urllib3Transport(BaseTransport):
         return headers.items()
 
     def prepare_response(
-        self, req: Request, *, document_class: type[Document] = Document
+        self, req: HttpRequest, *, document_class: type[Document] = Document
     ) -> Document:
         """Prepare response, duh.
 
@@ -235,7 +234,7 @@ class Urllib3Transport(BaseTransport):
 
     def compile_request_data(  # noqa: CCR001
         self,
-        req: Request,
+        req: HttpRequest,
         cookiejar: CookieJar,
     ) -> CompiledRequestData:
         req_url = req.url

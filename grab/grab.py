@@ -12,7 +12,7 @@ from urllib.parse import urljoin
 from .base import BaseGrab, BaseTransport
 from .document import Document
 from .errors import GrabTooManyRedirectsError
-from .request import Request
+from .request import HttpRequest
 from .transport import Urllib3Transport
 from .types import resolve_grab_entity, resolve_transport_entity
 
@@ -27,19 +27,21 @@ def copy_config(config: Mapping[str, Any]) -> MutableMapping[str, Any]:
     return {x: copy(y) for x, y in config.items()}
 
 
-class Grab(BaseGrab):
+class Grab(BaseGrab[HttpRequest, Document]):
     document_class: type[Document] = Document
     transport_class = Urllib3Transport
 
     def __init__(
         self,
-        transport: None | BaseTransport | type[BaseTransport] = None,
+        transport: None
+        | BaseTransport[HttpRequest, Document]
+        | type[BaseTransport[HttpRequest, Document]] = None,
     ) -> None:
         self.config: MutableMapping[str, Any] = {}
         self.transport = resolve_transport_entity(transport, self.transport_class)
         super().__init__()
 
-    def prepare_request(self, request_config: MutableMapping[str, Any]) -> Request:
+    def prepare_request(self, request_config: MutableMapping[str, Any]) -> HttpRequest:
         """Configure all things to make real network request.
 
         This method is called before doing real request via transport extension.
@@ -52,12 +54,12 @@ class Grab(BaseGrab):
             cfg["method"] = "GET"
         if cfg.get("follow_location") is None:
             cfg["follow_location"] = True
-        req = Request.create_from_mapping(cfg)
+        req = HttpRequest.create_from_mapping(cfg)
         for ext in self.extension_point_handlers["prepare_request_post"]:
             ext.process_prepare_request_post(req)
         return req
 
-    def log_request(self, req: Request) -> None:
+    def log_request(self, req: HttpRequest) -> None:
         """Log request details via logging system."""
         proxy_info = (
             " via proxy {}://{}{}".format(
@@ -74,14 +76,14 @@ class Grab(BaseGrab):
             return cast(str, doc.headers["Location"])
         return None
 
-    def get_request_cookies(self, req: Request) -> CookieJar:
+    def get_request_cookies(self, req: HttpRequest) -> CookieJar:
         jar = CookieJar()
         for ext in self.extension_point_handlers["request_cookies"]:
             ext.process_request_cookies(req, jar)
         return jar
 
     @overload
-    def request(self, url: Request, **request_kwargs: Any) -> Document:
+    def request(self, url: HttpRequest, **request_kwargs: Any) -> Document:
         ...
 
     @overload
@@ -89,9 +91,9 @@ class Grab(BaseGrab):
         ...
 
     def request(
-        self, url: None | str | Request = None, **request_kwargs: Any
+        self, url: None | str | HttpRequest = None, **request_kwargs: Any
     ) -> Document:
-        if isinstance(url, Request):
+        if isinstance(url, HttpRequest):
             req = url
         else:
             if url is not None:
@@ -117,9 +119,9 @@ class Grab(BaseGrab):
             return doc
 
     def submit(self, doc: Document, **kwargs: Any) -> Document:
-        return self.request(Request(**doc.get_form_request(**kwargs)))
+        return self.request(HttpRequest(**doc.get_form_request(**kwargs)))
 
-    def process_request_result(self, req: Request) -> Document:
+    def process_request_result(self, req: HttpRequest) -> Document:
         """Process result of real request performed via transport extension."""
         doc = self.transport.prepare_response(req, document_class=self.document_class)
         for ext in self.extension_point_handlers["response_post"]:
@@ -128,8 +130,10 @@ class Grab(BaseGrab):
 
 
 def request(
-    url: None | str | Request = None,
-    grab: None | BaseGrab | type[BaseGrab] = None,
+    url: None | str | HttpRequest = None,
+    grab: None
+    | BaseGrab[HttpRequest, Document]
+    | type[BaseGrab[HttpRequest, Document]] = None,
     **request_kwargs: Any,
 ) -> Document:
     grab = resolve_grab_entity(grab, default=Grab)

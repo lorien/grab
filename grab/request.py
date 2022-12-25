@@ -3,13 +3,14 @@ from __future__ import annotations
 from collections.abc import Mapping, MutableMapping
 from typing import Any
 
+from .base import BaseRequest
 from .util.timeout import Timeout
 
-__all__ = ["Request"]
+__all__ = ["HttpRequest"]
 DEFAULT_REDIRECT_LIMIT = 20  # like in many web browsers
 
 
-class Request:  # pylint: disable=too-many-instance-attributes
+class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
     init_keys = {
         "method",
         "url",
@@ -93,19 +94,3 @@ class Request:  # pylint: disable=too-many-instance-attributes
         if value is None:
             return Timeout()
         return Timeout(total=float(value))
-
-    def __repr__(self) -> str:
-        return "Request({})".format(
-            ", ".join("{}={!r}".format(*x) for x in self.__dict__.items())
-        )
-
-    @classmethod
-    def create_from_mapping(cls, mapping: Mapping[str, Any]) -> Request:
-        for key in mapping:
-            if key not in cls.init_keys:
-                raise TypeError(
-                    "Constructor of {} does not accept {} keyword parameter".format(
-                        cls.__name__, key
-                    )
-                )
-        return cls(**mapping)
