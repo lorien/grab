@@ -7,7 +7,7 @@ from copy import deepcopy
 from http.cookiejar import CookieJar
 from typing import Any, Generic, TypeVar
 
-__all__ = ["BaseRequest", "BaseExtension", "BaseGrab", "BaseTransport"]
+__all__ = ["BaseRequest", "BaseExtension", "BaseClient", "BaseTransport"]
 
 RequestT = TypeVar("RequestT", bound="BaseRequest")
 ResponseT = TypeVar("ResponseT", bound="BaseResponse")
@@ -46,7 +46,7 @@ class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
 
     __slots__ = ()
 
-    def __set_name__(self, owner: BaseGrab[RequestT, ResponseT], attr: str) -> None:
+    def __set_name__(self, owner: BaseClient[RequestT, ResponseT], attr: str) -> None:
         owner.extensions[attr] = {
             "instance": self,
         }
@@ -71,7 +71,7 @@ class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         ...
 
 
-class BaseGrab(Generic[RequestT, ResponseT], metaclass=ABCMeta):
+class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     __slots__ = ()
 
     extensions: MutableMapping[str, MutableMapping[str, Any]] = {}

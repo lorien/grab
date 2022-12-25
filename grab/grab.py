@@ -9,7 +9,7 @@ from secrets import SystemRandom
 from typing import Any, cast
 from urllib.parse import urljoin
 
-from .base import BaseGrab, BaseTransport
+from .base import BaseClient, BaseTransport
 from .document import Document
 from .errors import GrabTooManyRedirectsError
 from .request import HttpRequest
@@ -27,7 +27,7 @@ def copy_config(config: Mapping[str, Any]) -> MutableMapping[str, Any]:
     return {x: copy(y) for x, y in config.items()}
 
 
-class Grab(BaseGrab[HttpRequest, Document]):
+class Grab(BaseClient[HttpRequest, Document]):
     document_class: type[Document] = Document
     transport_class = Urllib3Transport
 

@@ -10,7 +10,7 @@ import inspect
 import typing
 from typing import TypeVar, cast
 
-from .base import BaseExtension, BaseGrab, BaseTransport, RequestT, ResponseT
+from .base import BaseClient, BaseExtension, BaseTransport, RequestT, ResponseT
 
 T = TypeVar("T")
 
@@ -33,17 +33,19 @@ def resolve_transport_entity(
 
 
 def resolve_grab_entity(
-    entity: None | BaseGrab[RequestT, ResponseT] | type[BaseGrab[RequestT, ResponseT]],
-    default: type[BaseGrab[RequestT, ResponseT]],
-) -> BaseGrab[RequestT, ResponseT]:
+    entity: None
+    | BaseClient[RequestT, ResponseT]
+    | type[BaseClient[RequestT, ResponseT]],
+    default: type[BaseClient[RequestT, ResponseT]],
+) -> BaseClient[RequestT, ResponseT]:
     if entity and (
-        not isinstance(entity, BaseGrab) and not issubclass(entity, BaseGrab)
+        not isinstance(entity, BaseClient) and not issubclass(entity, BaseClient)
     ):
-        raise TypeError("Invalid BaseGrab entity: {}".format(entity))
+        raise TypeError("Invalid BaseClient entity: {}".format(entity))
     if entity is None:
-        assert issubclass(default, BaseGrab)
+        assert issubclass(default, BaseClient)
         return default()
-    if isinstance(entity, BaseGrab):
+    if isinstance(entity, BaseClient):
         return entity
     return entity()
 
