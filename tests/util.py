@@ -67,7 +67,7 @@ def temp_file(root_dir=None):
             raise
 
 
-class BaseGrabTestCase(TestCase):
+class BaseTestCase(TestCase):
     server: TestServer
 
     @classmethod

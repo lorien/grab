@@ -3,10 +3,10 @@ from urllib3.exceptions import LocationParseError
 
 from grab import request
 from grab.errors import GrabInvalidResponse
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
-class GrabApiTestCase(BaseGrabTestCase):
+class GrabApiTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

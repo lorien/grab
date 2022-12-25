@@ -3,10 +3,10 @@ from pprint import pprint  # pylint: disable=unused-import
 from test_server import Response
 
 from grab import request
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
-class TestPostFeature(BaseGrabTestCase):
+class TestPostFeature(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

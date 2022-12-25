@@ -5,10 +5,10 @@ from test_server import Response
 from grab import Grab
 from grab.document import Document
 from grab.errors import GrabMisuseError
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
-class GrabApiTestCase(BaseGrabTestCase):
+class GrabApiTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

@@ -3,10 +3,10 @@ from pprint import pprint  # pylint: disable=unused-import
 from test_server import Response
 
 from grab.spider import Spider, Task
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
-class BasicSpiderTestCase(BaseGrabTestCase):
+class BasicSpiderTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

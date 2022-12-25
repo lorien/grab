@@ -1,12 +1,12 @@
 from proxylist import ProxyList
 from test_server import Response
 
-from tests.util import BaseGrabTestCase, temp_file
+from tests.util import BaseTestCase, temp_file
 
 DEFAULT_PLIST_DATA = b"1.1.1.1:8080\n1.1.1.2:8080\n"
 
 
-class ProxyListTestCase(BaseGrabTestCase):
+class ProxyListTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

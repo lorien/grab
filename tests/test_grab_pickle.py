@@ -1,10 +1,10 @@
 import pickle
 
 from grab import Grab
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
-class TestGrab(BaseGrabTestCase):
+class TestGrab(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

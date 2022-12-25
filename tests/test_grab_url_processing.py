@@ -2,10 +2,10 @@ from test_server import Response
 
 from grab import request
 from grab.errors import GrabError
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
-class GrabUrlProcessingTestCase(BaseGrabTestCase):
+class GrabUrlProcessingTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

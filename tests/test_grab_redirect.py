@@ -2,7 +2,7 @@ from test_server import Response
 
 from grab import request
 from grab.errors import GrabInvalidResponse, GrabTooManyRedirectsError
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
 def build_location_callback(url, counter):
@@ -31,7 +31,7 @@ def build_location_callback(url, counter):
     return callback
 
 
-class GrabRedirectTestCase(BaseGrabTestCase):
+class GrabRedirectTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

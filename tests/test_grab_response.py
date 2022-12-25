@@ -3,14 +3,14 @@ import os.path
 from test_server import Response
 
 from grab import request
-from tests.util import BaseGrabTestCase, temp_dir
+from tests.util import BaseTestCase, temp_dir
 
 HTML = """
 Hello world
 """
 
 
-class TestResponse(BaseGrabTestCase):
+class TestResponse(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

@@ -3,7 +3,7 @@ from test_server import Response
 
 from grab import DataNotFound, request
 from grab.document import Document
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 HTML = """
 <head>
@@ -42,7 +42,7 @@ XML = b"""
 """
 
 
-class LXMLExtensionTest(BaseGrabTestCase):
+class LXMLExtensionTest(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(LXMLExtensionTest, cls).setUpClass()

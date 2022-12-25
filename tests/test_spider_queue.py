@@ -8,7 +8,7 @@ from grab.spider import Spider, Task
 from grab.spider.errors import SpiderMisuseError
 from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.queue_backend.memory import MemoryTaskQueue
-from tests.util import BaseGrabTestCase, load_test_config
+from tests.util import BaseTestCase, load_test_config
 
 
 class SpiderQueueMixin:
@@ -75,7 +75,7 @@ class SpiderQueueMixin:
         self.assertEqual(0, bot.task_queue.size())
 
 
-class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
+class SpiderMemoryQueueTestCase(BaseTestCase, SpiderQueueMixin):
     def build_task_queue(self):
         return MemoryTaskQueue()
 
@@ -111,7 +111,7 @@ class SpiderMemoryQueueTestCase(BaseGrabTestCase, SpiderQueueMixin):
         self.assertEqual(0, len(bot.task_queue.schedule_list))
 
 
-class SpiderMongodbQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
+class SpiderMongodbQueueTestCase(SpiderQueueMixin, BaseTestCase):
     backend = "mongodb"
 
     def build_task_queue(self):
@@ -148,7 +148,7 @@ class SpiderMongodbQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
         bot.task_queue.clear()
 
 
-class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseGrabTestCase):
+class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseTestCase):
     backend = "redis"
 
     def build_task_queue(self):

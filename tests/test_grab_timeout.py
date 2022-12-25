@@ -2,10 +2,10 @@ from test_server import Response
 
 from grab import request
 from grab.errors import GrabTimeoutError
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
-class GrabTimeoutCase(BaseGrabTestCase):
+class GrabTimeoutCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

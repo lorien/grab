@@ -4,7 +4,7 @@ from grab import HttpRequest
 from grab.errors import GrabMisuseError, ResponseNotValid
 from grab.spider import NoTaskHandler, Spider, SpiderMisuseError, Task, base
 from grab.spider.errors import SpiderError
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
 class SimpleSpider(Spider):
@@ -12,7 +12,7 @@ class SimpleSpider(Spider):
         pass
 
 
-class TestSpiderTestCase(BaseGrabTestCase):
+class TestSpiderTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

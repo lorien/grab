@@ -1,10 +1,10 @@
 from test_server import Response
 
 from grab import request
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
-class ExtensionPyqueryTestCase(BaseGrabTestCase):
+class ExtensionPyqueryTestCase(BaseTestCase):
     backend = "pyquery"
 
     def setUp(self):

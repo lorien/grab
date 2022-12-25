@@ -1,10 +1,10 @@
 from test_server import Response
 
 from grab import request
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
-class GrabSimpleTestCase(BaseGrabTestCase):
+class GrabSimpleTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

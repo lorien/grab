@@ -2,10 +2,10 @@ from urllib.request import urlopen
 
 from test_server import Response
 
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
-class RawTestCase(BaseGrabTestCase):
+class RawTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

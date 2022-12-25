@@ -4,7 +4,7 @@ from grab import HttpRequest
 from grab.spider import Spider, Task
 from grab.spider.errors import FatalError, SpiderError
 from grab.util.timeout import Timeout
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
 class SimpleSpider(Spider):
@@ -12,7 +12,7 @@ class SimpleSpider(Spider):
         self.collect_runtime_event("SAVED_ITEM", doc.body)
 
 
-class BasicSpiderTestCase(BaseGrabTestCase):
+class BasicSpiderTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

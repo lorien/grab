@@ -5,10 +5,10 @@ from io import BytesIO
 
 from lxml.etree import parse
 
-from tests.util import BaseGrabTestCase, temp_dir
+from tests.util import BaseTestCase, temp_dir
 
 
-class GrabSimpleTestCase(BaseGrabTestCase):
+class GrabSimpleTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

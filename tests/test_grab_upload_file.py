@@ -3,10 +3,10 @@
 # from test_server import Response
 #
 # from grab import UploadContent, UploadFile
-# from tests.util import BaseGrabTestCase, temp_file
+# from tests.util import BaseTestCase, temp_file
 #
 #
-# class TestUploadContent(BaseGrabTestCase):
+# class TestUploadContent(BaseTestCase):
 #    def setUp(self):
 #        self.server.reset()
 #

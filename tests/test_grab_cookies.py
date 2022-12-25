@@ -4,14 +4,14 @@ from test_server import Response
 
 from grab import Grab, request
 from grab.extensions import CookiesExtension
-from tests.util import BaseGrabTestCase  # , temp_file
+from tests.util import BaseTestCase  # , temp_file
 
 
 class CustomGrab(Grab):
     cookies = CookiesExtension()
 
 
-class TestCookies(BaseGrabTestCase):
+class TestCookies(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

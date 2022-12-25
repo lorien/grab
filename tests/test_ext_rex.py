@@ -2,7 +2,7 @@ import re
 
 from grab.document import Document
 from grab.errors import DataNotFound
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 HTML = """
 <head>
@@ -35,7 +35,7 @@ HTML = """
 )
 
 
-class ExtensionRexTestCase(BaseGrabTestCase):
+class ExtensionRexTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

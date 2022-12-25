@@ -1,6 +1,6 @@
 from grab import DataNotFound
 from grab.document import Document
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 HTML = """
 <head>
@@ -33,7 +33,7 @@ HTML = """
 )
 
 
-class TextExtensionTest(BaseGrabTestCase):
+class TextExtensionTest(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

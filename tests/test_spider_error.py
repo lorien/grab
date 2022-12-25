@@ -4,7 +4,7 @@ from test_server import Response
 
 from grab import HttpRequest
 from grab.spider import Spider, Task
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 # That URLs breaks Grab's URL normalization process
 # with error "label empty or too long"
@@ -17,7 +17,7 @@ INVALID_URL = (
 )
 
 
-class SpiderErrorTestCase(BaseGrabTestCase):
+class SpiderErrorTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

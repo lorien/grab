@@ -6,7 +6,7 @@ from test_server import Response
 from grab.document import Document
 from grab.errors import GrabMisuseError
 from grab.grab import Grab
-from tests.util import TEST_DIR, BaseGrabTestCase
+from tests.util import TEST_DIR, BaseTestCase
 
 
 class CustomDocument(Document):
@@ -18,7 +18,7 @@ class CustomGrab(Grab):
     document_class = CustomDocument
 
 
-class GrabSimpleTestCase(BaseGrabTestCase):
+class GrabSimpleTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

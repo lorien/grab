@@ -6,7 +6,7 @@ from test_server import Response, TestServer
 
 from grab import HttpRequest
 from grab.spider import Spider, Task
-from tests.util import ADDRESS, BaseGrabTestCase, temp_file
+from tests.util import ADDRESS, BaseTestCase, temp_file
 
 
 class SimpleSpider(Spider):
@@ -14,7 +14,7 @@ class SimpleSpider(Spider):
         self.collect_runtime_event("ports", int(doc.headers.get("Listen-Port", 0)))
 
 
-class TestSpiderProxyCase(BaseGrabTestCase):
+class TestSpiderProxyCase(BaseTestCase):
     extra_servers: dict[int, dict]
 
     @classmethod

@@ -5,13 +5,13 @@ from __future__ import annotations
 from test_server import Response, TestServer
 
 from grab import request
-from tests.util import BaseGrabTestCase  # , temp_file
+from tests.util import BaseTestCase  # , temp_file
 
 TestServer.__test__ = False  # make pytest do not explore it for test cases
 ADDRESS = "127.0.0.1"
 
 
-class TestProxy(BaseGrabTestCase):
+class TestProxy(BaseTestCase):
     extra_servers: dict[int, dict]
 
     @classmethod

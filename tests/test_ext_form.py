@@ -5,7 +5,7 @@ from test_server import Response
 
 from grab import DataNotFound, GrabMisuseError, request
 from grab.document import Document
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 FORMS_HTML = b"""
 <head>
@@ -73,7 +73,7 @@ DISABLED_RADIO_HTML = b"""
 """
 
 
-class TestHtmlForms(BaseGrabTestCase):
+class TestHtmlForms(BaseTestCase):
     def setUp(self):
         self.server.reset()
 
@@ -203,7 +203,7 @@ class TestHtmlForms(BaseGrabTestCase):
         request(**doc.get_form_request())
 
 
-class TestJustAnotherChunkHtmlForms(BaseGrabTestCase):
+class TestJustAnotherChunkHtmlForms(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

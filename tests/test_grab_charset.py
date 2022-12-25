@@ -2,10 +2,10 @@ from test_server import Response
 
 from grab import request
 from grab.document import Document
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
-class GrabCharsetDetectionTestCase(BaseGrabTestCase):
+class GrabCharsetDetectionTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 

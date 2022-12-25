@@ -1,10 +1,10 @@
 from test_server import Response
 
 from grab.spider import Spider, Task
-from tests.util import BaseGrabTestCase
+from tests.util import BaseTestCase
 
 
-class BasicSpiderTestCase(BaseGrabTestCase):
+class BasicSpiderTestCase(BaseTestCase):
     class SimpleSpider(Spider):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
