@@ -13,8 +13,8 @@ import typing
 import webbrowser
 from collections.abc import Mapping, MutableMapping, Sequence
 from contextlib import suppress
-from copy import deepcopy
-from http.cookiejar import CookieJar
+from copy import copy, deepcopy
+from http.cookiejar import Cookie
 from io import BytesIO, StringIO
 from pprint import pprint  # pylint: disable=unused-import
 from re import Match, Pattern
@@ -92,7 +92,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         encoding: None | str = None,
         code: None | int = None,
         url: None | str = None,
-        cookies: None | CookieJar = None,
+        cookies: None | Sequence[Cookie] = None,
     ) -> None:
         # Cache attributes
         self._bytes_body: None | bytes = None
@@ -115,7 +115,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         # Encoding must be processed AFTER body and headers are set
         self.encoding = self.process_encoding(encoding)
         # other
-        self.cookies = cookies or CookieJar()
+        self.cookies = cookies or []
         self.download_size = 0
         self.upload_size = 0
         self.download_speed = 0
@@ -149,9 +149,6 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
         )
 
     def copy(self) -> Document:
-        cj = CookieJar()
-        for item in self.cookies:
-            cj.set_cookie(item)
         return self.__class__(
             code=self.code,
             head=self.head,
@@ -160,7 +157,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             headers=deepcopy(self.headers),
             encoding=self.encoding,
             document_type=self.document_type,
-            cookies=cj,
+            cookies=copy(self.cookies),
         )
 
     def save(self, path: str) -> None:
@@ -208,10 +205,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
             cls_slots = getattr(cls, "__slots__", ())
             for slot_name in cls_slots:
                 if hasattr(self, slot_name):
-                    if slot_name == "cookies":
-                        state["_cookies_items"] = list(self.cookies)
-                    else:
-                        state[slot_name] = getattr(self, slot_name)
+                    state[slot_name] = getattr(self, slot_name)
         state["_lxml_tree"] = None
         state["_strict_lxml_tree"] = None
         state["_lxml_form"] = None
@@ -220,13 +214,7 @@ class Document:  # pylint: disable=too-many-instance-attributes, too-many-public
     def __setstate__(self, state: Mapping[str, Any]) -> None:
         # TODO: check assigned key is in slots
         for slot_name, value in state.items():
-            if slot_name == "_cookies_items":
-                jar = CookieJar()
-                for item in value:
-                    jar.set_cookie(item)
-                self.cookies = jar
-            else:
-                setattr(self, slot_name, value)
+            setattr(self, slot_name, value)
 
     # TextExtension methods
 

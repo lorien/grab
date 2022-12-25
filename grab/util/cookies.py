@@ -9,15 +9,17 @@ Some code got from
 """
 from __future__ import annotations
 
+import urllib.request
 from collections.abc import Mapping, Sequence
 from copy import copy
-from http.client import HTTPMessage
+from http.client import HTTPMessage, HTTPResponse
 from http.cookiejar import Cookie, CookieJar
 from typing import Any, cast
 from urllib.parse import urlparse, urlunparse
-from urllib.request import Request
 
 from urllib3._collections import HTTPHeaderDict
+
+from grab.request import Request as GrabRequest
 
 
 # Reference:
@@ -194,7 +196,7 @@ def build_cookie_header(
 ) -> None | str:
     """Build HTTP Cookie header value for given cookies."""
     mocked_req = MockRequest(url, dict(headers))
-    cookiejar.add_cookie_header(cast(Request, mocked_req))
+    cookiejar.add_cookie_header(cast(urllib.request.Request, mocked_req))
     return mocked_req.get_new_headers().get("Cookie")
 
 
@@ -203,3 +205,14 @@ def build_jar(cookies: Sequence[Cookie]) -> CookieJar:
     for item in cookies:
         jar.set_cookie(item)
     return jar
+
+
+def extract_response_cookies(
+    req: GrabRequest, response_headers: HTTPMessage | HTTPHeaderDict
+) -> Sequence[Cookie]:
+    jar = CookieJar()
+    jar.extract_cookies(
+        cast(HTTPResponse, MockResponse(response_headers)),
+        cast(urllib.request.Request, MockRequest(req.url, dict(req.headers))),
+    )
+    return list(jar)

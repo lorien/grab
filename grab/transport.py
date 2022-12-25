@@ -4,7 +4,6 @@ import email.message
 import logging
 import ssl
 import time
-import urllib.request
 from collections.abc import Generator, Mapping, MutableMapping
 from contextlib import contextmanager
 from copy import copy
@@ -33,8 +32,8 @@ from grab.errors import (
     GrabTimeoutError,
 )
 from grab.request import Request
-from grab.util.cookies import MockRequest, MockResponse, build_cookie_header
-from grab.util.http import merge_with_dict
+from grab.util.cookies import build_cookie_header, extract_response_cookies
+from grab.util.structures import merge_with_dict
 
 from .base import BaseTransport
 
@@ -264,7 +263,6 @@ class Urllib3Transport(BaseTransport):
                 new_key = key.encode("latin").decode("utf-8", errors="ignore")
                 new_val = val.encode("latin").decode("utf-8", errors="ignore")
                 hdr[new_key] = new_val
-            jar = self.extract_cookiejar(req)  # self._response, self._request)
             return document_class(
                 document_type=(
                     req.document_type if req.document_type is not None else "html"
@@ -275,19 +273,7 @@ class Urllib3Transport(BaseTransport):
                 url=(self._response.get_redirect_location() or req.url),
                 headers=hdr,
                 encoding=req.encoding,
-                cookies=jar,
+                cookies=extract_response_cookies(req, self._response.headers),
             )
         finally:
             self._response.release_conn()
-
-    def extract_cookiejar(self, req: Request) -> CookieJar:
-        jar = CookieJar()
-        # TODO: WTF it means?
-        # self._respose could be None
-        # if this method is called from custom prepare response
-        if self._response:
-            jar.extract_cookies(
-                cast(HTTPResponse, MockResponse(self._response.headers)),
-                cast(urllib.request.Request, MockRequest(req.url, dict(req.headers))),
-            )
-        return jar
