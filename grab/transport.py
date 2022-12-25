@@ -4,33 +4,26 @@ import email.message
 import logging
 import ssl
 import time
-from collections.abc import Generator, Mapping, MutableMapping
+from collections.abc import Generator, Mapping
 from contextlib import contextmanager
 from copy import copy
 from http.client import HTTPResponse
 from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
-from typing import Any, cast
+from typing import Any, TypedDict, cast
 from urllib.parse import urlencode
 
 import certifi
 from urllib3 import PoolManager, ProxyManager, exceptions, make_headers
 from urllib3.contrib.socks import SOCKSProxyManager
 from urllib3.exceptions import LocationParseError
-
-# from urllib3.fields import RequestField
 from urllib3.filepost import encode_multipart_formdata
 from urllib3.response import HTTPResponse as Urllib3HTTPResponse
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
 
 from grab.document import Document
-from grab.errors import (
-    GrabConnectionError,
-    GrabInvalidResponse,
-    GrabMisuseError,
-    GrabTimeoutError,
-)
+from grab.errors import GrabConnectionError, GrabInvalidResponse, GrabTimeoutError
 from grab.request import Request
 from grab.util.cookies import build_cookie_header, extract_response_cookies
 from grab.util.structures import merge_with_dict
@@ -40,48 +33,11 @@ from .base import BaseTransport
 URL_DATA_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS"}
 
 
-def assemble(  # noqa: CCR001
-    req: Request, cookiejar: CookieJar
-) -> tuple[str, MutableMapping[str, Any], bytes | None]:
-    req_url = req.url
-    req_hdr = copy(req.headers)
-    req_body = None
-    if req.method in URL_DATA_METHODS:
-        if req.body:
-            raise GrabMisuseError(
-                "It is not allowed to specify 'body' option"
-                " for request of method '{}'".format(req.method)
-            )
-        if req.fields:
-            req_url = req_url + "?" + urlencode(req.fields)
-    else:
-        if req.body:
-            req_body = req.body
-        if req.fields:
-            if req.body:
-                raise GrabMisuseError(
-                    "It is not allowed to configure request with"
-                    " both 'body' and 'fields' options."
-                )
-            if req.multipart:
-                req_body, content_type = encode_multipart_formdata(  # type: ignore
-                    req.fields
-                )
-                req_body = cast(bytes, req_body)
-            else:
-                req_body, content_type = (
-                    urlencode(req.fields).encode(),
-                    "application/x-www-form-urlencoded",
-                )
-            req_hdr = merge_with_dict(
-                req_hdr,
-                {"Content-Type": content_type, "Content-Length": len(req_body)},
-                replace=True,
-            )
-    cookie_hdr = build_cookie_header(cookiejar, req.url, req_hdr)
-    if cookie_hdr:
-        req_hdr["Cookie"] = cookie_hdr
-    return req_url, req_hdr, req_body
+class CompiledRequestData(TypedDict):
+    method: str
+    url: str
+    headers: Mapping[str, Any]
+    body: None | bytes
 
 
 class Urllib3Transport(BaseTransport):
@@ -179,19 +135,16 @@ class Urllib3Transport(BaseTransport):
             # It is the timeout on read of next data chunk from the server
             # Total response timeout is handled by Grab
             timeout = Timeout(connect=req.timeout.connect, read=req.timeout.read)
-            req_url = req.url
-            req_method = req.method
-
-            req_url, req_hdr, req_data = assemble(req, cookiejar)
+            req_data = self.compile_request_data(req, cookiejar)
             try:
                 start_time = time.time()
                 res = pool.urlopen(  # type: ignore # FIXME
-                    req_method,
-                    req_url,
-                    body=req_data,
+                    req_data["method"],
+                    req_data["url"],
+                    body=req_data["body"],
                     timeout=timeout,
                     retries=retry,
-                    headers=req_hdr,
+                    headers=req_data["headers"],
                     preload_content=False,
                 )
                 self._connect_time = time.time() - start_time
@@ -273,7 +226,57 @@ class Urllib3Transport(BaseTransport):
                 url=(self._response.get_redirect_location() or req.url),
                 headers=hdr,
                 encoding=req.encoding,
-                cookies=extract_response_cookies(req, self._response.headers),
+                cookies=extract_response_cookies(
+                    req.url, req.headers, self._response.headers
+                ),
             )
         finally:
             self._response.release_conn()
+
+    def compile_request_data(  # noqa: CCR001
+        self,
+        req: Request,
+        cookiejar: CookieJar,
+    ) -> CompiledRequestData:
+        req_url = req.url
+        req_hdr = copy(req.headers)
+        req_body = None
+        if req.method in URL_DATA_METHODS:
+            if req.body:
+                raise ValueError(
+                    "Request.body could not be used with {} method".format(req.method)
+                )
+            if req.fields:
+                req_url = req_url + "?" + urlencode(req.fields)
+        else:
+            if req.body:
+                req_body = req.body
+            if req.fields:
+                if req.body:
+                    raise ValueError(
+                        "Request.body and Request.fields could not be set both"
+                    )
+                if req.multipart:
+                    req_body, content_type = encode_multipart_formdata(  # type: ignore
+                        req.fields
+                    )
+                    req_body = cast(bytes, req_body)
+                else:
+                    req_body, content_type = (
+                        urlencode(req.fields).encode(),
+                        "application/x-www-form-urlencoded",
+                    )
+                req_hdr = merge_with_dict(
+                    req_hdr,
+                    {"Content-Type": content_type, "Content-Length": len(req_body)},
+                    replace=True,
+                )
+        cookie_hdr = build_cookie_header(cookiejar, req.url, req_hdr)
+        if cookie_hdr:
+            req_hdr["Cookie"] = cookie_hdr
+        return {
+            "method": req.method,
+            "url": req_url,
+            "headers": req_hdr,
+            "body": req_body,
+        }

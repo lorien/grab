@@ -19,8 +19,6 @@ from urllib.parse import urlparse, urlunparse
 
 from urllib3._collections import HTTPHeaderDict
 
-from grab.request import Request as GrabRequest
-
 
 # Reference:
 # https://docs.python.org/3/library/http.cookiejar.html#http.cookiejar.CookieJar.add_cookie_header
@@ -208,11 +206,13 @@ def build_jar(cookies: Sequence[Cookie]) -> CookieJar:
 
 
 def extract_response_cookies(
-    req: GrabRequest, response_headers: HTTPMessage | HTTPHeaderDict
+    req_url: str,
+    req_headers: Mapping[str, Any] | HTTPMessage | HTTPHeaderDict,
+    response_headers: HTTPMessage | HTTPHeaderDict,
 ) -> Sequence[Cookie]:
     jar = CookieJar()
     jar.extract_cookies(
         cast(HTTPResponse, MockResponse(response_headers)),
-        cast(urllib.request.Request, MockRequest(req.url, dict(req.headers))),
+        cast(urllib.request.Request, MockRequest(req_url, dict(req_headers))),
     )
     return list(jar)
