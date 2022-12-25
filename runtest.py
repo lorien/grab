@@ -30,7 +30,6 @@ GRAB_TEST_LIST = (
     "tests.test_grab_get_request",
     "tests.test_grab_post_request",
     "tests.test_grab_request",
-    "tests.test_grab_user_agent",
     "tests.test_grab_cookies",
     "tests.test_grab_url_processing",
     "tests.test_grab_timeout",
