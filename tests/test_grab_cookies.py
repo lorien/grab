@@ -3,7 +3,12 @@ from pprint import pprint  # pylint: disable=unused-import
 from test_server import Response
 
 from grab import Grab, request
+from grab.extensions import CookiesExtension
 from tests.util import BaseGrabTestCase  # , temp_file
+
+
+class CustomGrab(Grab):
+    cookies = CookiesExtension()
 
 
 class TestCookies(BaseGrabTestCase):
@@ -28,7 +33,8 @@ class TestCookies(BaseGrabTestCase):
     def test_session(self):
         # Test that if Grab gets some cookies from the server
         # then it sends it back
-        grab = Grab(reuse_cookies=True)
+
+        grab = CustomGrab()
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
         doc = grab.request(self.server.get_url())
         self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
@@ -45,28 +51,29 @@ class TestCookies(BaseGrabTestCase):
             {(x.key, x.value) for x in self.server.request.cookies.values()},
         )
 
-        # Test reuse_cookies=False
-        grab = Grab(reuse_cookies=False)
-        self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
-        doc = grab.request(self.server.get_url())
-        self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
-        self.server.add_response(Response())
-        grab.request(self.server.get_url())
-        self.assertFalse(self.server.request.cookies)
+        # # Test reuse_cookies=False
+        # grab = Grab(reuse_cookies=False)
+        # self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
+        # doc = grab.request(self.server.get_url())
+        # self.assertTrue(
+        # any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
+        # self.server.add_response(Response())
+        # grab.request(self.server.get_url())
+        # self.assertFalse(self.server.request.cookies)
 
         # Test something
-        grab = Grab(reuse_cookies=True)
+        grab = CustomGrab()
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
         doc = grab.request(self.server.get_url())
         self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
-        grab.clear_cookies()
+        grab.cookies.clear()
         self.server.add_response(Response())
         grab.request(self.server.get_url())
         self.assertFalse(self.server.request.cookies)
 
     def test_redirect_session(self):
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
-        grab = Grab()
+        grab = CustomGrab()
         doc = grab.request(self.server.get_url())
         self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
 
@@ -82,7 +89,9 @@ class TestCookies(BaseGrabTestCase):
         )
         self.server.add_response(Response())
         grab.request(self.server.get_url())
-        self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in grab.cookies))
+        self.assertTrue(
+            any(x.name == "foo" and x.value == "bar" for x in grab.cookies.cookiejar)
+        )
 
     # def test_load_dump(self):
     #    with temp_file() as tmp_file:
@@ -127,7 +136,7 @@ class TestCookies(BaseGrabTestCase):
     #    self.assertRaises(GrabMisuseError, grab.cookies.update, ["asdf"])
 
     def test_path(self):
-        grab = Grab()
+        grab = CustomGrab()
         self.server.add_response(
             Response(
                 headers=[

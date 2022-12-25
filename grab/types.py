@@ -6,7 +6,9 @@ base class.
 """
 from __future__ import annotations
 
-from .base import BaseGrab, BaseTransport
+import inspect
+
+from .base import BaseExtension, BaseGrab, BaseTransport
 
 
 def resolve_transport_entity(
@@ -37,3 +39,15 @@ def resolve_grab_entity(
     if isinstance(entity, BaseGrab):
         return entity
     return entity()
+
+
+def resolve_extension_entity(
+    entity: BaseExtension | type[BaseExtension],
+) -> BaseExtension:
+    if (
+        not entity
+        or not isinstance(entity, BaseExtension)
+        or (not inspect.isclass(entity) or not issubclass(entity, BaseExtension))
+    ):
+        raise TypeError("Invalid BaseExtension entity: {}".format(entity))
+    return entity if isinstance(entity, BaseExtension) else entity()
