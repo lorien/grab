@@ -51,7 +51,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
         # It should works with recent lxml builds on any platform.
         # In the past it failed on previous lxml releases on macos platform
-        path = os.path.join(TEST_DIR, "files/github_showcases.html")
+        path = os.path.join(TEST_DIR, "fixtures/github_showcases.html")
         with open(path, "rb") as inp:
             data = inp.read()
         self.server.add_response(Response(data=data))

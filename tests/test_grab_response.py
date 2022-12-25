@@ -3,13 +3,11 @@ import os.path
 from test_server import Response
 
 from grab import request
-from tests.util import TEST_DIR, BaseGrabTestCase, temp_dir
+from tests.util import BaseGrabTestCase, temp_dir
 
 HTML = """
 Hello world
 """
-
-IMG_FILE = os.path.join(TEST_DIR, "files", "yandex.png")
 
 
 class TestResponse(BaseGrabTestCase):
@@ -19,8 +17,7 @@ class TestResponse(BaseGrabTestCase):
     def test_save(self):
         """Test `Response.save` method."""
         with temp_dir() as tmp_dir:
-            with open(IMG_FILE, "rb") as inp:
-                img_data = inp.read()
+            img_data = b"zzzzzzzzzzzzzzzzz"
             tmp_file = os.path.join(tmp_dir, "file.bin")
             self.server.add_response(Response(data=img_data))
 
