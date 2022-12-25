@@ -1,7 +1,7 @@
 from unittest import TestCase
 
+from grab import Grab, request
 from grab.document import Document
-from grab.grab import Grab, request
 
 
 class RequestFuncTestCase(TestCase):

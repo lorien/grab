@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from grab.grab import Grab
+from grab import Grab
 from grab.transport import Urllib3Transport
 from grab.types import resolve_grab_entity, resolve_transport_entity
 

@@ -8,7 +8,7 @@ from typing import Any
 
 from procstat import Stat
 
-from grab.grab import Grab
+from grab import Grab
 
 from ..errors import NoTaskHandler
 from ..interface import FatalErrorQueueItem

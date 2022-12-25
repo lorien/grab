@@ -16,7 +16,7 @@ from .request import HttpRequest
 from .transport import Urllib3Transport
 from .types import resolve_entity, resolve_transport_entity
 
-__all__ = ["Grab", "request"]
+__all__ = ["Grab", "HttpClient", "request"]
 logger = logging.getLogger(__name__)
 logger_network = logging.getLogger("grab.network")
 system_random = SystemRandom()
@@ -27,7 +27,7 @@ def copy_config(config: Mapping[str, Any]) -> MutableMapping[str, Any]:
     return {x: copy(y) for x, y in config.items()}
 
 
-class Grab(BaseClient[HttpRequest, Document]):
+class HttpClient(BaseClient[HttpRequest, Document]):
     document_class: type[Document] = Document
     transport_class = Urllib3Transport
 
@@ -120,10 +120,13 @@ class Grab(BaseClient[HttpRequest, Document]):
         return doc
 
 
+Grab = HttpClient
+
+
 def request(
     url: None | str | HttpRequest = None,
-    grab: None | Grab | type[Grab] = None,
+    grab: None | HttpClient | type[HttpClient] = None,
     **request_kwargs: Any,
 ) -> Document:
-    grab = resolve_entity(Grab, grab, default=Grab)
+    grab = resolve_entity(HttpClient, grab, default=HttpClient)
     return grab.request(url, **request_kwargs)

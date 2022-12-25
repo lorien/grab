@@ -15,6 +15,7 @@ from procstat import Stat
 from proxylist import ProxyList, ProxyServer
 from proxylist.base import BaseProxySource
 
+from .. import Grab
 from ..base import BaseTransport
 from ..document import Document
 from ..errors import (
@@ -27,7 +28,6 @@ from ..errors import (
     OriginalExceptionGrabError,
     ResponseNotValid,
 )
-from ..grab import Grab
 from ..request import HttpRequest
 from ..util.metrics import format_traffic_value
 from .errors import FatalError, NoTaskHandler, SpiderError, SpiderMisuseError
