@@ -30,6 +30,7 @@ from .util.cookies import build_cookie_header, extract_response_cookies
 from .util.structures import merge_with_dict
 
 URL_DATA_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS"}
+LOG = logging.getLogger(__file__)
 
 
 class CompiledRequestData(TypedDict):
@@ -113,10 +114,22 @@ class Urllib3Transport(BaseTransport[HttpRequest, Document]):
             )
         return self.pool
 
+    def log_request(self, req: HttpRequest) -> None:
+        """Log request details via logging system."""
+        proxy_info = (
+            " via proxy {}://{}{}".format(
+                req.proxy_type, req.proxy, " with auth" if req.proxy_userpwd else ""
+            )
+            if req.proxy
+            else ""
+        )
+        LOG.debug("%s %s%s", req.method or "GET", req.url, proxy_info)
+
     def request(self, req: HttpRequest, cookiejar: CookieJar) -> None:
         pool: PoolManager | SOCKSProxyManager | ProxyManager = (
             self.select_pool_for_request(req)
         )
+        self.log_request(req)
         with self.wrap_transport_error():
             # Retries can be disabled by passing False:
             # http://urllib3.readthedocs.io/en/latest/reference/urllib3.util.html#module-urllib3.util.retry

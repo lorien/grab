@@ -5,7 +5,6 @@ from collections.abc import Mapping, MutableMapping
 from copy import copy
 from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
-from secrets import SystemRandom
 from typing import Any, cast
 from urllib.parse import urljoin
 
@@ -18,8 +17,6 @@ from .types import resolve_entity, resolve_transport_entity
 
 __all__ = ["Grab", "HttpClient", "request"]
 logger = logging.getLogger(__name__)
-logger_network = logging.getLogger("grab.network")
-system_random = SystemRandom()
 
 
 def copy_config(config: Mapping[str, Any]) -> MutableMapping[str, Any]:
@@ -59,17 +56,6 @@ class HttpClient(BaseClient[HttpRequest, Document]):
             ext.process_prepare_request_post(req)
         return req
 
-    def log_request(self, req: HttpRequest) -> None:
-        """Log request details via logging system."""
-        proxy_info = (
-            " via proxy {}://{}{}".format(
-                req.proxy_type, req.proxy, " with auth" if req.proxy_userpwd else ""
-            )
-            if req.proxy
-            else ""
-        )
-        logger_network.debug("%s %s%s", req.method or "GET", req.url, proxy_info)
-
     def find_redirect_url(self, doc: Document) -> None | str:
         assert doc.headers is not None
         if doc.code in {301, 302, 303, 307, 308} and doc.headers["Location"]:
@@ -92,7 +78,6 @@ class HttpClient(BaseClient[HttpRequest, Document]):
             req = self.prepare_request(request_kwargs)
         redir_count = 0
         while True:
-            self.log_request(req)
             self.transport.request(req, self.get_request_cookies(req))
             with self.transport.wrap_transport_error():
                 doc = self.process_request_result(req)
