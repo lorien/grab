@@ -6,7 +6,7 @@ from copy import copy
 from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
 from secrets import SystemRandom
-from typing import Any, cast, overload
+from typing import Any, cast
 from urllib.parse import urljoin
 
 from .base import BaseGrab, BaseTransport
@@ -14,7 +14,7 @@ from .document import Document
 from .errors import GrabTooManyRedirectsError
 from .request import HttpRequest
 from .transport import Urllib3Transport
-from .types import resolve_grab_entity, resolve_transport_entity
+from .types import resolve_entity, resolve_transport_entity
 
 __all__ = ["Grab", "request"]
 logger = logging.getLogger(__name__)
@@ -82,22 +82,13 @@ class Grab(BaseGrab[HttpRequest, Document]):
             ext.process_request_cookies(req, jar)
         return jar
 
-    @overload
-    def request(self, url: HttpRequest, **request_kwargs: Any) -> Document:
-        ...
-
-    @overload
-    def request(self, url: None | str = None, **request_kwargs: Any) -> Document:
-        ...
-
     def request(
-        self, url: None | str | HttpRequest = None, **request_kwargs: Any
+        self, req: None | str | HttpRequest = None, **request_kwargs: Any
     ) -> Document:
-        if isinstance(url, HttpRequest):
-            req = url
-        else:
-            if url is not None:
-                request_kwargs["url"] = url
+        if not isinstance(req, HttpRequest):
+            if req is not None:
+                assert isinstance(req, str)
+                request_kwargs["url"] = req
             req = self.prepare_request(request_kwargs)
         redir_count = 0
         while True:
@@ -131,10 +122,8 @@ class Grab(BaseGrab[HttpRequest, Document]):
 
 def request(
     url: None | str | HttpRequest = None,
-    grab: None
-    | BaseGrab[HttpRequest, Document]
-    | type[BaseGrab[HttpRequest, Document]] = None,
+    grab: None | Grab | type[Grab] = None,
     **request_kwargs: Any,
 ) -> Document:
-    grab = resolve_grab_entity(grab, default=Grab)
+    grab = resolve_entity(Grab, grab, default=Grab)
     return grab.request(url, **request_kwargs)

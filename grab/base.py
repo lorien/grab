@@ -5,7 +5,7 @@ from collections.abc import Generator, Mapping, MutableMapping
 from contextlib import contextmanager
 from copy import deepcopy
 from http.cookiejar import CookieJar
-from typing import Any, Generic, TypeVar, overload
+from typing import Any, Generic, TypeVar
 
 __all__ = ["BaseRequest", "BaseExtension", "BaseGrab", "BaseTransport"]
 
@@ -87,20 +87,8 @@ class BaseGrab(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         for item in self.extensions.values():
             item["instance"].reset()
 
-    @overload
     @abstractmethod
-    def request(self, url: RequestT, **request_kwargs: Any) -> ResponseT:
-        ...
-
-    @overload
-    @abstractmethod
-    def request(self, url: None | str = None, **request_kwargs: Any) -> ResponseT:
-        ...
-
-    @abstractmethod
-    def request(
-        self, url: None | str | RequestT = None, **request_kwargs: Any
-    ) -> ResponseT:
+    def request(self, req: None | RequestT = None, **request_kwargs: Any) -> ResponseT:
         ...
 
     def clone(self: T) -> T:

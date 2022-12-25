@@ -7,8 +7,12 @@ base class.
 from __future__ import annotations
 
 import inspect
+import typing
+from typing import TypeVar, cast
 
 from .base import BaseExtension, BaseGrab, BaseTransport, RequestT, ResponseT
+
+T = TypeVar("T")
 
 
 def resolve_transport_entity(
@@ -55,3 +59,22 @@ def resolve_extension_entity(
     ):
         raise TypeError("Invalid BaseExtension entity: {}".format(entity))
     return entity if isinstance(entity, BaseExtension) else entity()
+
+
+def resolve_entity(
+    base_type: type[T],
+    entity: None | T | type[T],
+    default: type[T],
+) -> T:
+    if entity and (
+        not isinstance(entity, base_type)
+        and (not inspect.isclass(entity) or not issubclass(entity, base_type))
+    ):
+        raise TypeError("Invalid {} entity: {}".format(base_type, entity))
+    if entity is None:
+        assert issubclass(default, base_type)
+        return default()
+    if isinstance(entity, base_type):
+        return entity
+    # pylint: disable=deprecated-typing-alias
+    return cast(typing.Type[T], entity)()
