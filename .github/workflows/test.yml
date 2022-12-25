@@ -40,7 +40,7 @@ jobs:
       shell: bash
       run: |
         if [ "$RUNNER_OS" == "Linux" ]; then
-          coverage run runtest.py --test-all --backend=redis,mongodb,pyquery
+          pytest -n=logical -x --cov grab --cov-report term-missing
         else
           coverage run runtest.py --test-all --backend=mongodb,pyquery
         fi
