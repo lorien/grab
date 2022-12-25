@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from collections.abc import Generator, Mapping, MutableMapping
+from collections.abc import Callable, Generator, Mapping, MutableMapping
 from contextlib import contextmanager
 from copy import deepcopy
 from http.cookiejar import CookieJar
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Literal, TypeVar
+
+from typing_extensions import TypedDict
 
 __all__ = ["BaseRequest", "BaseExtension", "BaseClient", "BaseTransport"]
 
@@ -42,7 +44,12 @@ class BaseResponse:
 
 
 class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
-    extension_points: list[str] = []
+    extension_point_handlers: Mapping[
+        Literal["prepare_request_post"]
+        | Literal["request_cookies"]
+        | Literal["response_post"],
+        Callable[..., Any],
+    ] = {}
 
     __slots__ = ()
 
@@ -50,8 +57,8 @@ class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         owner.extensions[attr] = {
             "instance": self,
         }
-        for name in self.extension_points:
-            owner.extension_point_handlers[name].append(self)
+        for point_name, func in self.extension_point_handlers.items():
+            owner.extension_point_handlers[point_name].append(func)
 
     def process_prepare_request_post(self, req: RequestT) -> None:
         pass
@@ -71,15 +78,19 @@ class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         ...
 
 
+class ExtensionPointHandlers(TypedDict, Generic[RequestT, ResponseT]):
+    prepare_request_post: list[Callable[[RequestT], None]]
+    request_cookies: list[Callable[[RequestT, CookieJar], None]]
+    response_post: list[Callable[[RequestT, ResponseT], None]]
+
+
 class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     __slots__ = ()
 
     extensions: MutableMapping[str, MutableMapping[str, Any]] = {}
-    extension_point_handlers: MutableMapping[
-        str, list[BaseExtension[RequestT, ResponseT]]
-    ] = {
-        "request_cookies": [],
+    extension_point_handlers: ExtensionPointHandlers[RequestT, ResponseT] = {
         "prepare_request_post": [],
+        "request_cookies": [],
         "response_post": [],
     }
 

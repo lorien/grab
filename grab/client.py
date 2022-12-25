@@ -52,8 +52,8 @@ class HttpClient(BaseClient[HttpRequest, Document]):
         if cfg.get("follow_location") is None:
             cfg["follow_location"] = True
         req = HttpRequest.create_from_mapping(cfg)
-        for ext in self.extension_point_handlers["prepare_request_post"]:
-            ext.process_prepare_request_post(req)
+        for func in self.extension_point_handlers["prepare_request_post"]:
+            func(req)
         return req
 
     def find_redirect_url(self, doc: Document) -> None | str:
@@ -64,8 +64,8 @@ class HttpClient(BaseClient[HttpRequest, Document]):
 
     def get_request_cookies(self, req: HttpRequest) -> CookieJar:
         jar = CookieJar()
-        for ext in self.extension_point_handlers["request_cookies"]:
-            ext.process_request_cookies(req, jar)
+        for func in self.extension_point_handlers["request_cookies"]:
+            func(req, jar)
         return jar
 
     def request(
@@ -97,8 +97,8 @@ class HttpClient(BaseClient[HttpRequest, Document]):
     def process_request_result(self, req: HttpRequest) -> Document:
         """Process result of real request performed via transport extension."""
         doc = self.transport.prepare_response(req, document_class=self.document_class)
-        for ext in self.extension_point_handlers["response_post"]:
-            ext.process_response_post(req, doc)
+        for func in self.extension_point_handlers["response_post"]:
+            func(req, doc)
         return doc
 
 

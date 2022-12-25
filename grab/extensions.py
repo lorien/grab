@@ -12,10 +12,13 @@ from .util.cookies import build_jar, create_cookie
 
 
 class CookiesExtension(BaseExtension[HttpRequest, Document]):
-    extension_points = ["request_cookies", "prepare_request_post", "response_post"]
-
     def __init__(self, cookiejar: None | CookieJar = None) -> None:
         self.cookiejar = cookiejar if cookiejar else CookieJar()
+        self.extension_point_handlers = {
+            "prepare_request_post": self.process_prepare_request_post,
+            "request_cookies": self.process_request_cookies,
+            "response_post": self.process_response_post,
+        }
 
     def set_cookie(self, cookie: Cookie) -> None:
         self.cookiejar.set_cookie(cookie)
