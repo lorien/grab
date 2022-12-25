@@ -94,9 +94,6 @@ class HttpClient(BaseClient[HttpRequest, Document]):
                 continue
             return doc
 
-    def submit(self, doc: Document, **kwargs: Any) -> Document:
-        return self.request(HttpRequest(**doc.get_form_request(**kwargs)))
-
     def process_request_result(self, req: HttpRequest) -> Document:
         """Process result of real request performed via transport extension."""
         doc = self.transport.prepare_response(req, document_class=self.document_class)
