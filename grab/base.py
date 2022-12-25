@@ -3,11 +3,14 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from collections.abc import Generator, MutableMapping
 from contextlib import contextmanager
+from copy import deepcopy
 from http.cookiejar import CookieJar
-from typing import Any, overload
+from typing import Any, TypeVar, overload
 
 from grab.document import Document
 from grab.request import Request
+
+T = TypeVar("T")
 
 
 class BaseExtension(metaclass=ABCMeta):
@@ -50,6 +53,10 @@ class BaseGrab(metaclass=ABCMeta):
         "response_post": [],
     }
 
+    def __init__(self) -> None:
+        for item in self.extensions.values():
+            item["instance"].reset()
+
     @overload
     @abstractmethod
     def request(self, url: Request, **request_kwargs: Any) -> Document:
@@ -65,6 +72,9 @@ class BaseGrab(metaclass=ABCMeta):
         self, url: None | str | Request = None, **request_kwargs: Any
     ) -> Document:
         ...
+
+    def clone(self: T) -> T:
+        return deepcopy(self)
 
 
 class BaseTransport(metaclass=ABCMeta):

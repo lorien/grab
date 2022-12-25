@@ -12,10 +12,6 @@ class GrabApiTestCase(BaseGrabTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_incorrect_option_name(self):
-        with self.assertRaises(GrabMisuseError):
-            Grab().setup(save_the_word=True)
-
     def test_clone(self):
         grab = Grab()
         self.server.add_response(Response(data=b"Moon"))

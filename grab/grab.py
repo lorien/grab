@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping, MutableMapping
-from copy import copy, deepcopy
+from copy import copy
 from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
 from secrets import SystemRandom
@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 
 from .base import BaseGrab, BaseTransport
 from .document import Document
-from .errors import GrabMisuseError, GrabTooManyRedirectsError
+from .errors import GrabTooManyRedirectsError
 from .request import Request
 from .transport import Urllib3Transport
 from .types import resolve_grab_entity, resolve_transport_entity
@@ -27,10 +27,6 @@ def copy_config(config: Mapping[str, Any]) -> MutableMapping[str, Any]:
     return {x: copy(y) for x, y in config.items()}
 
 
-def default_grab_config() -> MutableMapping[str, Any]:
-    return {}
-
-
 class Grab(BaseGrab):
     document_class: type[Document] = Document
     transport_class = Urllib3Transport
@@ -38,33 +34,10 @@ class Grab(BaseGrab):
     def __init__(
         self,
         transport: None | BaseTransport | type[BaseTransport] = None,
-        **kwargs: Any,
     ) -> None:
-        self.config: MutableMapping[str, Any] = default_grab_config()
+        self.config: MutableMapping[str, Any] = {}
         self.transport = resolve_transport_entity(transport, self.transport_class)
-        for item in self.extensions.values():
-            item["instance"].reset()
-        if kwargs:
-            self.setup(**kwargs)
-
-    def clone(self, **kwargs: Any) -> Grab:
-        grab = deepcopy(self)
-        # grab = Grab(transport=self.transport)
-        # grab.config = copy_config(self.config)
-        # # COOKIES EXTENSION
-        # grab.cookies = self.cookies.clone()
-        if kwargs:
-            grab.setup(**kwargs)
-        return grab
-
-    def setup(self, **kwargs: Any) -> None:
-        """Set up Grab instance configuration."""
-        for key, val in kwargs.items():
-            # COOKIES EXTENSION
-            if key in self.config:
-                self.config[key] = val
-            else:
-                raise GrabMisuseError("Unknown option: %s" % key)
+        super().__init__()
 
     def prepare_request(self, request_config: MutableMapping[str, Any]) -> Request:
         """Configure all things to make real network request.
