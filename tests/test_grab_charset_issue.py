@@ -8,7 +8,7 @@ class LXMLExtensionTest(BaseTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_dash_issue(self):
+    def test_dash_issue(self) -> None:
         html = b"<strong>&#151;</strong>"
         self.server.add_response(Response(data=html), count=3)
         doc = request(self.server.get_url())
@@ -17,7 +17,7 @@ class LXMLExtensionTest(BaseTestCase):
         self.assertFalse(doc.select("//strong/text()").text() == chr(151))
         self.assertTrue(doc.select("//strong/text()").text() == chr(8212))
 
-    def test_invalid_charset(self):
+    def test_invalid_charset(self) -> None:
         html = b"""<head><meta http-equiv="Content-Type"
                     content="text/html; charset=windows-874">'
                     </head><body>test</body>"""

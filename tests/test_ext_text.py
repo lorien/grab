@@ -34,23 +34,23 @@ HTML = """
 
 
 class TextExtensionTest(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
         # Create fake grab instance with fake response
         self.doc = Document(HTML, encoding="cp1251")
 
-    def test_search(self):
+    def test_search(self) -> None:
         self.assertTrue(self.doc.text_search("фыва".encode("cp1251")))
         self.assertTrue(self.doc.text_search("фыва"))
         self.assertFalse(self.doc.text_search("фыва2"))
 
-    def test_assert_substring(self):
+    def test_assert_substring(self) -> None:
         self.doc.text_assert("фыва")
         self.doc.text_assert("фыва".encode("cp1251"))
         self.assertRaises(DataNotFound, self.doc.text_assert, "фыва2")
 
-    def test_assert_substrings(self):
+    def test_assert_substrings(self) -> None:
         self.doc.text_assert_any(("фыва",))
         self.doc.text_assert_any(("фывы нет", "фыва"))
         self.doc.text_assert_any(("фыва".encode("cp1251"), "где ты фыва?"))

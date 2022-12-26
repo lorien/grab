@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from test_server import Response
 
 from grab import request
@@ -5,7 +7,7 @@ from grab.errors import GrabInvalidResponse, GrabTooManyRedirectsError
 from tests.util import BaseTestCase
 
 
-def build_location_callback(url, counter):
+def build_location_callback(url: str, counter: int) -> Callable:
     meta = {
         "counter": counter,
         "url": url,
@@ -32,10 +34,10 @@ def build_location_callback(url, counter):
 
 
 class GrabRedirectTestCase(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
-    def test_redirect_limit(self):
+    def test_redirect_limit(self) -> None:
         self.server.add_response(
             Response(callback=build_location_callback(self.server.get_url(), 10)),
             count=-1,
@@ -53,7 +55,7 @@ class GrabRedirectTestCase(BaseTestCase):
         doc = request(self.server.get_url(), redirect_limit=20)
         self.assertTrue(b"done" in doc.body)
 
-    def test_redirect_utf_location(self):
+    def test_redirect_utf_location(self) -> None:
         def callback():
             url = (self.server.get_url() + "фыва").encode("utf-8")
             return (

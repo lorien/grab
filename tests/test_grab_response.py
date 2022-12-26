@@ -11,10 +11,10 @@ Hello world
 
 
 class TestResponse(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
-    def test_save(self):
+    def test_save(self) -> None:
         """Test `Response.save` method."""
         with temp_dir() as tmp_dir:
             img_data = b"zzzzzzzzzzzzzzzzz"
@@ -26,7 +26,7 @@ class TestResponse(BaseTestCase):
             with open(tmp_file, "rb") as inp:
                 self.assertEqual(inp.read(), img_data)
 
-    def test_custom_charset(self):
+    def test_custom_charset(self) -> None:
         self.server.add_response(
             Response(
                 data=(
@@ -40,7 +40,7 @@ class TestResponse(BaseTestCase):
         doc = request(self.server.get_url())
         self.assertTrue("крокодил" in doc.unicode_body())
 
-    def test_xml_declaration(self):
+    def test_xml_declaration(self) -> None:
         # unicode_body() should return HTML with xml declaration (if it
         # exists in original HTML)
         self.server.add_response(

@@ -9,7 +9,7 @@ class GrabCharsetDetectionTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_encoding_option(self):
+    def test_encoding_option(self) -> None:
         self.server.add_response(Response(data=b"foo"))
         doc = request(self.server.get_url())
         self.assertEqual(b"foo", doc.body)
@@ -25,14 +25,14 @@ class GrabCharsetDetectionTestCase(BaseTestCase):
         self.assertEqual("фуу".encode("cp1251"), doc.body)
         self.assertEqual(doc.encoding, "windows-1251")  # normalized
 
-    def test_encoding_lowercase(self):
+    def test_encoding_lowercase(self) -> None:
         self.server.add_response(
             Response(headers=[("Content-Type", "text/html; charset=cp1251")])
         )
         doc = request(self.server.get_url())
         self.assertEqual("windows-1251", doc.encoding)
 
-    def test_dash2_issue(self):
+    def test_dash2_issue(self) -> None:
         html = b"<strong>&#151;</strong>"
         self.server.add_response(Response(data=html))
         doc = request(self.server.get_url())
@@ -41,7 +41,7 @@ class GrabCharsetDetectionTestCase(BaseTestCase):
         self.assertFalse(doc.select("//strong/text()").text() == chr(151))
         self.assertTrue(doc.select("//strong/text()").text() == chr(8212))
 
-    def test_invalid_charset(self):
+    def test_invalid_charset(self) -> None:
         html = b"""<head><meta http-equiv="Content-Type"
                     content="text/html; charset=windows-874">'
                     </head><body>test</body>"""
@@ -49,7 +49,7 @@ class GrabCharsetDetectionTestCase(BaseTestCase):
         doc = request(self.server.get_url())
         self.assertTrue(b"874" in doc.body)
 
-    def test_charset_html5(self):
+    def test_charset_html5(self) -> None:
         doc = Document(b"<meta charset='cp1251'>")
         self.assertEqual("windows-1251", doc.encoding)
 

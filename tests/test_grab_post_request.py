@@ -7,10 +7,10 @@ from tests.util import BaseTestCase
 
 
 class TestPostFeature(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
-    def test_post(self):
+    def test_post(self) -> None:
         self.server.add_response(Response(), count=9)
 
         # Provide POST data in dict
@@ -89,7 +89,7 @@ class TestPostFeature(BaseTestCase):
         )
         self.assertEqual(self.server.request.data, b"foo=bar&foo=baz")
 
-    def test_multipart_post(self):
+    def test_multipart_post(self) -> None:
         self.server.add_response(Response(), count=3)
         # Dict
         request(
@@ -139,19 +139,19 @@ class TestPostFeature(BaseTestCase):
     #    test = ("foo=%s" % quote(data.encode("cp1251"))).encode("ascii")
     #    self.assertEqual(self.server.request.data, test)
 
-    def test_put(self):
+    def test_put(self) -> None:
         self.server.add_response(Response())
         request(body=b"abc", url=self.server.get_url(), method="PUT")
         self.assertEqual(self.server.request.method, "PUT")
         self.assertEqual(self.server.request.headers.get("content-length"), "3")
 
-    def test_patch(self):
+    def test_patch(self) -> None:
         self.server.add_response(Response())
         request(body=b"abc", url=self.server.get_url(), method="PATCH")
         self.assertEqual(self.server.request.method, "PATCH")
         self.assertEqual(self.server.request.headers.get("content-length"), "3")
 
-    def test_empty_post(self):
+    def test_empty_post(self) -> None:
         self.server.add_response(Response(), count=2)
         request(self.server.get_url(), method="POST", body="")
         self.assertEqual(self.server.request.method, "POST")

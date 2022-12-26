@@ -16,14 +16,14 @@ class BasicSpiderTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_spider(self):
+    def test_spider(self) -> None:
         self.server.add_response(Response(data=b"Hello spider!"))
         bot = SimpleSpider()
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
         self.assertEqual(b"Hello spider!", bot.runtime_events["SAVED_ITEM"][0])
 
-    def test_network_limit(self):
+    def test_network_limit(self) -> None:
         class CustomSimpleSpider(SimpleSpider):
             pass
             # def create_grab_instance(self, **kwargs):
@@ -59,7 +59,7 @@ class BasicSpiderTestCase(BaseTestCase):
         bot.run()
         self.assertEqual(bot.stat.counters["spider:request-network"], 2)
 
-    def test_task_limit(self):
+    def test_task_limit(self) -> None:
         class CustomSimpleSpider(SimpleSpider):
             pass
             # def create_grab_instance(self, **kwargs):
@@ -96,7 +96,7 @@ class BasicSpiderTestCase(BaseTestCase):
         bot2.run()
         self.assertEqual(bot2.stat.counters.get("spider:request-network", 0), 0)
 
-    def test_task_retry(self):
+    def test_task_retry(self) -> None:
         self.server.add_response(Response(status=403))
         self.server.add_response(Response(data=b"xxx"))
         bot = SimpleSpider()
@@ -104,7 +104,7 @@ class BasicSpiderTestCase(BaseTestCase):
         bot.run()
         self.assertEqual(b"xxx", bot.runtime_events["SAVED_ITEM"][0])
 
-    def testz_generator(self):
+    def testz_generator(self) -> None:
         number = 13
         server = self.server
         server.add_response(Response(), count=number)
@@ -121,7 +121,7 @@ class BasicSpiderTestCase(BaseTestCase):
         bot.run()
         self.assertEqual(bot.stat.counters["count"], number)
 
-    def test_handler_result_none(self):
+    def test_handler_result_none(self) -> None:
         class TestSpider(Spider):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
@@ -138,7 +138,7 @@ class BasicSpiderTestCase(BaseTestCase):
         bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
 
-    def test_fallback_handler_by_default_name(self):
+    def test_fallback_handler_by_default_name(self) -> None:
         class TestSpider(Spider):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
@@ -160,7 +160,7 @@ class BasicSpiderTestCase(BaseTestCase):
         bot.run()
         self.assertEqual(bot.points, [1])
 
-    def test_fallback_handler_by_fallback_name(self):
+    def test_fallback_handler_by_fallback_name(self) -> None:
         class TestSpider(Spider):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
@@ -184,7 +184,7 @@ class BasicSpiderTestCase(BaseTestCase):
         bot.run()
         self.assertEqual(bot.points, [1])
 
-    def test_check_task_limits_invalid_value(self):
+    def test_check_task_limits_invalid_value(self) -> None:
         class TestSpider(Spider):
             def task_page(self, grab, task):
                 pass
@@ -198,7 +198,7 @@ class BasicSpiderTestCase(BaseTestCase):
         )
         self.assertRaises(SpiderError, bot.run)
 
-    def test_handler_result_invalid(self):
+    def test_handler_result_invalid(self) -> None:
         class TestSpider(Spider):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
@@ -215,7 +215,7 @@ class BasicSpiderTestCase(BaseTestCase):
         bot.add_task(Task("page", url=self.server.get_url()))
         self.assertRaises(SpiderError, bot.run)
 
-    def test_task_queue_clear(self):
+    def test_task_queue_clear(self) -> None:
         class TestSpider(Spider):
             def task_page(self, unused_grab, unused_task):
                 self.stop()
@@ -228,7 +228,7 @@ class BasicSpiderTestCase(BaseTestCase):
         bot.run()
         self.assertEqual(0, bot.task_queue.size())
 
-    def test_fatal_error(self):
+    def test_fatal_error(self) -> None:
         class TestSpider(Spider):
             def task_page(self, unused_grab, unused_task):
                 raise FatalError

@@ -44,14 +44,14 @@ XML = b"""
 
 class LXMLExtensionTest(BaseTestCase):
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         super(LXMLExtensionTest, cls).setUpClass()
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         super(LXMLExtensionTest, cls).tearDownClass()
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
         # Create fake grab instance with fake response
@@ -61,7 +61,7 @@ class LXMLExtensionTest(BaseTestCase):
         )
         self.lxml_tree = fromstring(self.doc.body)
 
-    def test_lxml_text_content_fail(self):
+    def test_lxml_text_content_fail(self) -> None:
         # lxml node text_content() method do not put spaces between text
         # content of adjacent XML nodes
         self.assertEqual(
@@ -73,14 +73,14 @@ class LXMLExtensionTest(BaseTestCase):
             "му\nха",
         )
 
-    def test_lxml_xpath(self):
+    def test_lxml_xpath(self) -> None:
         names = {x.tag for x in self.lxml_tree.xpath('//div[@id="bee"]//*')}
         self.assertEqual({"em", "div", "strong", "style", "script"}, names)
         xpath_query = '//div[@id="bee"]//*[name() != "script" and name() != "style"]'
         names = {x.tag for x in self.lxml_tree.xpath(xpath_query)}
         self.assertEqual({"em", "div", "strong"}, names)
 
-    def test_xpath(self):
+    def test_xpath(self) -> None:
         self.assertEqual("bee-em", self.doc.select("//em").node().get("id"))
         self.assertEqual(
             "num-2", self.doc.select('//*[text() = "item #2"]').node().get("id")
@@ -91,7 +91,7 @@ class LXMLExtensionTest(BaseTestCase):
         self.assertEqual(None, self.doc.select("//zzz").node(default=None))
         self.assertEqual("foo", self.doc.select("//zzz").node(default="foo"))
 
-    def test_xpath_text(self):
+    def test_xpath_text(self) -> None:
         self.assertEqual("пче ла", self.doc.select('//*[@id="bee"]').text(smart=True))
         self.assertEqual(
             "пчела mozilla = 777; body { color: green; }",
@@ -107,7 +107,7 @@ class LXMLExtensionTest(BaseTestCase):
             DataNotFound, lambda: self.doc.select('//*[@id="bee2"]/@id').text()
         )
 
-    def test_xpath_number(self):
+    def test_xpath_number(self) -> None:
         self.assertEqual(100, self.doc.select("//li").number())
         self.assertEqual(100, self.doc.select("//li").number(make_int=True))
         self.assertEqual("100", self.doc.select("//li").number(make_int=False))
@@ -119,28 +119,28 @@ class LXMLExtensionTest(BaseTestCase):
         self.assertRaises(DataNotFound, lambda: self.doc.select("//liza").number())
         self.assertEqual("foo", self.doc.select("//zzz").number(default="foo"))
 
-    def test_xpath_list(self):
+    def test_xpath_list(self) -> None:
         self.assertEqual(
             ["num-1", "num-2"],
             [x.get("id") for x in self.doc.select("//li").node_list()],
         )
 
-    def test_css_list(self):
+    def test_css_list(self) -> None:
         self.assertEqual(
             ["num-1", "num-2"],
             [x.get("id") for x in self.doc.tree.cssselect("li")],
         )
 
-    def test_xpath_exists(self):
+    def test_xpath_exists(self) -> None:
         self.assertTrue(self.doc.select('//li[@id="num-1"]').exists())
         self.assertFalse(self.doc.select('//li[@id="num-3"]').exists())
 
-    def test_cdata_issue(self):
+    def test_cdata_issue(self) -> None:
         self.server.add_response(Response(data=XML), count=2)
         doc = request(self.server.get_url(), document_type="xml")
         self.assertEqual("30", doc.tree.xpath("//weight")[0].text)
 
-    def test_xml_declaration(self):
+    def test_xml_declaration(self) -> None:
         # HTML with XML declaration should be processed without errors.
         self.server.add_response(
             Response(
@@ -153,7 +153,7 @@ class LXMLExtensionTest(BaseTestCase):
         doc = request(self.server.get_url())
         self.assertEqual("test", doc.select("//h1").text())
 
-    def test_empty_document(self):
+    def test_empty_document(self) -> None:
         self.server.add_response(Response(data=b"oops"))
         doc = request(self.server.get_url())
         doc.select("//anytag").exists()

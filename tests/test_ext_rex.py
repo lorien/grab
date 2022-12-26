@@ -36,13 +36,13 @@ HTML = """
 
 
 class ExtensionRexTestCase(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
         # Create fake grab instance with fake response
         self.doc = Document(HTML, encoding="cp1251")
 
-    def test_rex(self):
+    def test_rex(self) -> None:
         # Search unicode rex in unicode body - default case
         rex = re.compile("(фыва)", re.U)
         self.assertEqual("фыва", self.doc.rex_search(rex).group(1))
@@ -66,9 +66,9 @@ class ExtensionRexTestCase(BaseTestCase):
         rex = re.compile("(фыва2)", re.U)
         self.assertRaises(DataNotFound, lambda: self.doc.rex_search(rex))
 
-    def test_assert_rex(self):
+    def test_assert_rex(self) -> None:
         self.doc.rex_assert(re.compile("фыва"))
         self.doc.rex_assert(re.compile("фыва".encode("cp1251")))
 
-    def test_assert_rex_text(self):
+    def test_assert_rex_text(self) -> None:
         self.assertEqual("ха", self.doc.rex_text('<em id="fly-em">([^<]+)'))

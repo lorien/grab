@@ -8,7 +8,7 @@ class BasicSpiderTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_counters_and_collections(self):
+    def test_counters_and_collections(self) -> None:
         class TestSpider(Spider):
             def prepare(self):
                 self.stat.logging_period = 0
@@ -28,7 +28,7 @@ class BasicSpiderTestCase(BaseTestCase):
         self.assertEqual(2, bot.stat.counters["foo"])
         self.assertEqual(1, len(bot.runtime_events["fatal"]))
 
-    def test_render_stats(self):
+    def test_render_stats(self) -> None:
         self.server.add_response(Response())
 
         class TestSpider(Spider):

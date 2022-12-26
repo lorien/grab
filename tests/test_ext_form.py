@@ -74,13 +74,13 @@ DISABLED_RADIO_HTML = b"""
 
 
 class TestHtmlForms(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
         # Create fake grab instance with fake response
         self.doc = Document(FORMS_HTML)
 
-    def test_choose_form1(self):
+    def test_choose_form1(self) -> None:
         """Test ``choose_form`` method."""
         # raise errors
         self.assertRaises(DataNotFound, self.doc.choose_form, 10)
@@ -93,33 +93,33 @@ class TestHtmlForms(BaseTestCase):
         self.assertEqual("form", self.doc.get_cached_form().tag)
         self.assertEqual("search_form", self.doc.get_cached_form().get("id"))
 
-    def test_choose_form2(self):
+    def test_choose_form2(self) -> None:
         self.doc = Document(FORMS_HTML)
 
         self.doc.choose_form(id="common_form")
         self.assertEqual("form", self.doc.get_cached_form().tag)
         self.assertEqual("common_form", self.doc.get_cached_form().get("id"))
 
-    def test_choose_form3(self):
+    def test_choose_form3(self) -> None:
         self.doc = Document(FORMS_HTML)
 
         self.doc.choose_form(name="dummy")
         self.assertEqual("form", self.doc.get_cached_form().tag)
         self.assertEqual("dummy", self.doc.get_cached_form().get("name"))
 
-    def test_choose_form4(self):
+    def test_choose_form4(self) -> None:
         self.doc = Document(FORMS_HTML)
 
         self.doc.choose_form(xpath='//form[contains(@action, "/dummy")]')
         self.assertEqual("form", self.doc.get_cached_form().tag)
         self.assertEqual("dummy", self.doc.get_cached_form().get("name"))
 
-    def assert_equal_qs(self, qs1, qs2):
+    def assert_equal_qs(self, qs1: bytes, qs2: bytes) -> None:
         args1 = set(parse_qsl(qs1))
         args2 = set(parse_qsl(qs2))
         self.assertEqual(args1, args2)
 
-    def test_submit(self):
+    def test_submit(self) -> None:
         self.server.add_response(
             Response(data=POST_FORM % self.server.get_url().encode())
         )
@@ -150,7 +150,7 @@ class TestHtmlForms(BaseTestCase):
         request(**doc.get_form_request(submit_name="submit3"))
         self.assert_equal_qs(self.server.request.data, b"secret=123&submit1=submit1")
 
-    def test_submit_remove_from_post_argument(self):
+    def test_submit_remove_from_post_argument(self) -> None:
         self.server.add_response(Response(data=MULTIPLE_SUBMIT_FORM))
         self.server.add_response(Response())
 
@@ -164,7 +164,7 @@ class TestHtmlForms(BaseTestCase):
         request(**doc.get_form_request(remove_from_post=["submit1"]))
         self.assert_equal_qs(self.server.request.data, b"secret=123")
 
-    def test_set_methods1(self):
+    def test_set_methods1(self) -> None:
         self.server.add_response(Response(data=FORMS_HTML))
         doc = request(self.server.get_url())
 
@@ -175,7 +175,7 @@ class TestHtmlForms(BaseTestCase):
 
         self.assertRaises(KeyError, lambda: doc.set_input("query", "asdf"))
 
-    def test_set_methods2(self):
+    def test_set_methods2(self) -> None:
         self.server.add_response(Response(data=FORMS_HTML))
         doc = request(self.server.get_url())
         doc.set_input_by_id("search_box", "asdf")
@@ -184,18 +184,18 @@ class TestHtmlForms(BaseTestCase):
         doc.choose_form(xpath='//form[@id="common_form"]')
         doc.set_input_by_number(0, "asdf")
 
-    def test_set_methods3(self):
+    def test_set_methods3(self) -> None:
         self.server.add_response(Response(data=FORMS_HTML))
         doc = request(self.server.get_url())
         doc.set_input_by_xpath('//*[@name="gender"]', "2")
         self.assertEqual("common_form", doc.get_cached_form().get("id"))
 
-    def test_html_without_forms(self):
+    def test_html_without_forms(self) -> None:
         self.server.add_response(Response(data=NO_FORM_HTML))
         doc = request(self.server.get_url())
         self.assertRaises(DataNotFound, lambda: doc.form)
 
-    def test_disabled_radio(self):
+    def test_disabled_radio(self) -> None:
         """Test issue #57."""
         self.server.add_response(Response(data=DISABLED_RADIO_HTML))
         self.server.add_response(Response())
@@ -204,13 +204,13 @@ class TestHtmlForms(BaseTestCase):
 
 
 class TestJustAnotherChunkHtmlForms(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
         # Create fake grab instance with fake response
         self.doc = Document(FORMS_HTML)
 
-    def test_set_input_by_xpath_regex(self):
+    def test_set_input_by_xpath_regex(self) -> None:
         html = b"""
             <div><form action="" method="post"><input name="foo" type="text">
             <input name="bar" id="bar" type="text">
@@ -222,7 +222,7 @@ class TestJustAnotherChunkHtmlForms(BaseTestCase):
         request(**doc.get_form_request())
         self.assertEqual(self.server.request.data, b"foo=None&bar=bar-value")
 
-    def test_unicode_textarea_form(self):
+    def test_unicode_textarea_form(self) -> None:
         html = """
             <form enctype="multipart/form-data" action=""
                 method="post" accept-charset="UTF-8">
@@ -236,7 +236,7 @@ class TestJustAnotherChunkHtmlForms(BaseTestCase):
         request(**doc.get_form_request())
         self.assertTrue("Beställa".encode("utf-8") in self.server.request.data)
 
-    def test_field_disabled(self):
+    def test_field_disabled(self) -> None:
         html = b"""
             <form>
                 <input id="aa" type="radio" name="foo"
@@ -248,7 +248,7 @@ class TestJustAnotherChunkHtmlForms(BaseTestCase):
         doc = Document(html)
         self.assertEqual({"foo"}, set(doc.form_fields().keys()))
 
-    def test_checkbox_checked_but_disabled(self):
+    def test_checkbox_checked_but_disabled(self) -> None:
         html = b"""
             <form>
                 <input type="checkbox" name="foo"
@@ -258,7 +258,7 @@ class TestJustAnotherChunkHtmlForms(BaseTestCase):
         doc = Document(html)
         self.assertTrue("foo" not in doc.form_fields())
 
-    def test_checkbox_no_checked(self):
+    def test_checkbox_no_checked(self) -> None:
         html = b"""
             <form>
                 <input type="checkbox" name="foo"
@@ -270,7 +270,7 @@ class TestJustAnotherChunkHtmlForms(BaseTestCase):
         doc = Document(html)
         self.assertTrue("foo" not in doc.form_fields())
 
-    def test_checkbox_one_checked(self):
+    def test_checkbox_one_checked(self) -> None:
         html = b"""
             <form>
                 <input type="checkbox" name="foo"
@@ -282,7 +282,7 @@ class TestJustAnotherChunkHtmlForms(BaseTestCase):
         doc = Document(html)
         self.assertEqual("1", doc.form_fields()["foo"])
 
-    def test_checkbox_multi_checked(self):
+    def test_checkbox_multi_checked(self) -> None:
         html = b"""
             <form>
                 <input type="checkbox" name="foo"
@@ -294,7 +294,7 @@ class TestJustAnotherChunkHtmlForms(BaseTestCase):
         doc = Document(html)
         self.assertEqual(["1", "2"], doc.form_fields()["foo"])
 
-    def test_select_disabled(self):
+    def test_select_disabled(self) -> None:
         html = b"""
             <form>
                 <select name="foo" disabled="disabled">
@@ -305,7 +305,7 @@ class TestJustAnotherChunkHtmlForms(BaseTestCase):
         doc = Document(html)
         self.assertTrue("foo" not in doc.form_fields())
 
-    def test_select_not_multiple(self):
+    def test_select_not_multiple(self) -> None:
         html = b"""
             <form>
                 <select name="foo">
@@ -316,7 +316,7 @@ class TestJustAnotherChunkHtmlForms(BaseTestCase):
         doc = Document(html)
         self.assertEqual("1", doc.form_fields()["foo"])
 
-    def test_select_multiple_no_options(self):
+    def test_select_multiple_no_options(self) -> None:
         html = b"""
             <form>
                 <select name="foo" multiple="multiple">
@@ -326,7 +326,7 @@ class TestJustAnotherChunkHtmlForms(BaseTestCase):
         doc = Document(html)
         self.assertTrue("foo" not in doc.form_fields())
 
-    def test_select_multiple_one_selected(self):
+    def test_select_multiple_one_selected(self) -> None:
         html = b"""
             <form>
                 <select name="foo" multiple="multiple">
@@ -338,7 +338,7 @@ class TestJustAnotherChunkHtmlForms(BaseTestCase):
         doc = Document(html)
         self.assertEqual("2", doc.form_fields()["foo"])
 
-    def test_select_multiple_multi_selected(self):
+    def test_select_multiple_multi_selected(self) -> None:
         html = b"""
             <form>
                 <select name="foo" multiple="multiple">

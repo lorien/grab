@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Any, cast
 from unittest import TestCase
 
 from test_server import Response
@@ -21,7 +22,7 @@ class SpiderQueueMixin:
     def build_task_queue(self) -> BaseTaskQueue:
         raise NotImplementedError
 
-    def test_basic_priority(self):
+    def test_basic_priority(self) -> None:
         self.server.add_response(Response(), count=5)
         bot = self.SimpleSpider(
             parser_pool_size=1,
@@ -38,7 +39,7 @@ class SpiderQueueMixin:
         urls = [x[1] for x in sorted(requested_urls.items(), key=lambda x: x[0])]
         self.assertEqual(urls, bot.runtime_events["url_history"])
 
-    def test_queue_length(self):
+    def test_queue_length(self) -> None:
         class CustomSpider(self.SimpleSpider):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
@@ -58,11 +59,11 @@ class SpiderQueueMixin:
         bot.run()
         self.assertEqual(0, bot.final_taskq_size)
 
-    def test_task_queue_render_stats(self):
+    def test_task_queue_render_stats(self) -> None:
         bot = self.SimpleSpider()
         bot.render_stats()
 
-    def test_clear(self):
+    def test_clear(self) -> None:
         bot = self.SimpleSpider(
             task_queue=self.build_task_queue(),
         )
@@ -76,10 +77,10 @@ class SpiderQueueMixin:
 
 
 class SpiderMemoryQueueTestCase(BaseTestCase, SpiderQueueMixin):
-    def build_task_queue(self):
+    def build_task_queue(self) -> MemoryTaskQueue:
         return MemoryTaskQueue()
 
-    def test_schedule(self):
+    def test_schedule(self) -> None:
         # In this test I create a number of delayed task
         # and then check the order in which they was executed
         server = self.server
@@ -99,7 +100,7 @@ class SpiderMemoryQueueTestCase(BaseTestCase, SpiderQueueMixin):
         bot.run()
         self.assertEqual(bot.runtime_events["numbers"], [1, 3, 4, 2])
 
-    def test_schedule_list_clear(self):
+    def test_schedule_list_clear(self) -> None:
         bot = self.SimpleSpider()
         bot.task_queue.clear()
 
@@ -114,7 +115,7 @@ class SpiderMemoryQueueTestCase(BaseTestCase, SpiderQueueMixin):
 class SpiderMongodbQueueTestCase(SpiderQueueMixin, BaseTestCase):
     backend = "mongodb"
 
-    def build_task_queue(self):
+    def build_task_queue(self) -> Any:
         # pylint: disable=import-outside-toplevel
         from grab.spider.queue_backend.mongodb import MongodbTaskQueue
 
@@ -122,7 +123,10 @@ class SpiderMongodbQueueTestCase(SpiderQueueMixin, BaseTestCase):
             connection_args=load_test_config()["mongodb_task_queue"]["connection_args"]
         )
 
-    def test_schedule(self):
+    def test_schedule(self) -> None:
+        # pylint: disable=import-outside-toplevel
+        from grab.spider.queue_backend.mongodb import MongodbTaskQueue
+
         # In this test I create a number of delayed task
         # and then check the order in which they was executed
         server = self.server
@@ -138,12 +142,12 @@ class SpiderMongodbQueueTestCase(SpiderQueueMixin, BaseTestCase):
             def task_page(self, unused_grab, task):
                 self.collect_runtime_event("numbers", task.num)
 
-        bot = TestSpider(task_queue=self.build_task_queue())
+        bot = TestSpider(task_queue=cast(MongodbTaskQueue, self.build_task_queue()))
         bot.run()
         self.assertEqual(bot.runtime_events["numbers"], [1, 3, 4, 2])
         # TODO: understand why that test fails
 
-    def test_clear_collection(self):
+    def test_clear_collection(self) -> None:
         bot = self.SimpleSpider(task_queue=self.build_task_queue())
         bot.task_queue.clear()
 
@@ -176,7 +180,7 @@ class TaskQueueTestCase(TestCase):
     class SimpleSpider(Spider):
         pass
 
-    def test_deprecated_setup_queue(self):
+    def test_deprecated_setup_queue(self) -> None:
         bot = self.SimpleSpider()
         with self.assertRaises(GrabFeatureIsDeprecated):
             bot.setup_queue("foobar")

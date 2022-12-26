@@ -6,7 +6,7 @@ from grab.types import resolve_grab_entity, resolve_transport_entity
 
 
 class ResolveHttpClientEntityTestCase(TestCase):
-    def test_resolve_grab_entity_default(self):
+    def test_resolve_grab_entity_default(self) -> None:
         class SuperHttpClient(HttpClient):
             pass
 
@@ -14,11 +14,11 @@ class ResolveHttpClientEntityTestCase(TestCase):
             isinstance(resolve_grab_entity(None, SuperHttpClient), SuperHttpClient)
         )
 
-    def test_resolve_grab_entity_none_nodefault(self):
+    def test_resolve_grab_entity_none_nodefault(self) -> None:
         with self.assertRaises(TypeError):
             resolve_grab_entity(None, None)
 
-    def test_resolve_grab_entity_instance(self):
+    def test_resolve_grab_entity_instance(self) -> None:
         class SuperHttpClient(HttpClient):
             pass
 
@@ -28,7 +28,7 @@ class ResolveHttpClientEntityTestCase(TestCase):
             )
         )
 
-    def test_resolve_grab_entity_class(self):
+    def test_resolve_grab_entity_class(self) -> None:
         class SuperHttpClient(HttpClient):
             pass
 
@@ -40,7 +40,7 @@ class ResolveHttpClientEntityTestCase(TestCase):
 
 
 class ResolveTransportEntityTestCase(TestCase):
-    def test_resolve_transport_entity_default(self):
+    def test_resolve_transport_entity_default(self) -> None:
         class SuperTransport(Urllib3Transport):
             pass
 
@@ -48,11 +48,11 @@ class ResolveTransportEntityTestCase(TestCase):
             isinstance(resolve_transport_entity(None, SuperTransport), SuperTransport)
         )
 
-    def test_resolve_transport_entity_none_nodefault(self):
+    def test_resolve_transport_entity_none_nodefault(self) -> None:
         with self.assertRaises(TypeError):
             resolve_transport_entity(None, None)
 
-    def test_resolve_transport_entity_instance(self):
+    def test_resolve_transport_entity_instance(self) -> None:
         class SuperTransport(Urllib3Transport):
             pass
 
@@ -62,7 +62,7 @@ class ResolveTransportEntityTestCase(TestCase):
             )
         )
 
-    def test_resolve_transport_entity_class(self):
+    def test_resolve_transport_entity_class(self) -> None:
         class SuperTransport(Urllib3Transport):
             pass
 

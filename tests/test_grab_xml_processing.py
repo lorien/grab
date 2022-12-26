@@ -6,10 +6,10 @@ from tests.util import BaseTestCase
 
 
 class GrabXMLProcessingTestCase(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
-    def test_xml_with_declaration(self):
+    def test_xml_with_declaration(self) -> None:
         self.server.add_response(
             Response(
                 data=b'<?xml version="1.0" encoding="UTF-8"?>'
@@ -19,7 +19,7 @@ class GrabXMLProcessingTestCase(BaseTestCase):
         doc = request(self.server.get_url())
         self.assertTrue(doc.select("//foo").text() == "foo")
 
-    def test_declaration_bug(self):
+    def test_declaration_bug(self) -> None:
         # 1. Build Grab instance with XML with xml declaration
         # 2. Call search method
         # 3. Call xpath

@@ -9,7 +9,7 @@ class RawTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_response(self):
+    def test_response(self) -> None:
         def callback():
             return b"HTTP/1.1 200 OK\n\nFOO"
 
@@ -17,7 +17,7 @@ class RawTestCase(BaseTestCase):
         with urlopen(self.server.get_url()) as inp:
             self.assertEqual(inp.read(), b"FOO")
 
-    def test_sequential_responses(self):
+    def test_sequential_responses(self) -> None:
         def callback1():
             return b"HTTP/1.1 200 OK\n\nFOO"
 

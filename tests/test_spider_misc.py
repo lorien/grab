@@ -8,7 +8,7 @@ class MiscTest(BaseTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_null_grab_bug(self):
+    def test_null_grab_bug(self) -> None:
         # Test following bug:
         # Create task and process it
         # In task handler spawn another task with grab instance

@@ -7,7 +7,7 @@ from tests.util import NON_ROUTABLE_IP
 
 
 class GrabErrorTestCase(TestCase):
-    def test_original_exceptions_urllib2(self):
+    def test_original_exceptions_urllib2(self) -> None:
         try:
             request("http://%s" % NON_ROUTABLE_IP, timeout=1)
         except GrabNetworkError as ex:

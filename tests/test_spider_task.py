@@ -13,10 +13,10 @@ class SimpleSpider(Spider):
 
 
 class TestSpiderTestCase(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
-    def test_task_priority(self):
+    def test_task_priority(self) -> None:
         # Automatic random priority
         base.RANDOM_TASK_PRIORITY_RANGE = (10, 20)
         bot = SimpleSpider(priority_mode="random")
@@ -56,7 +56,7 @@ class TestSpiderTestCase(BaseTestCase):
     #    self.assertEqual("http://yyy.com", task.url)
     #    self.assertEqual("http://yyy.com", task.grab_config["url"])
 
-    def test_task_clone(self):
+    def test_task_clone(self) -> None:
         bot = SimpleSpider()
 
         task = Task("baz", url="http://xxx.com")
@@ -70,13 +70,13 @@ class TestSpiderTestCase(BaseTestCase):
         task = Task("baz", url="http://xxx.com")
         bot.add_task(task.clone(url="zzz"))
 
-    def test_task_clone_with_url_param(self):
+    def test_task_clone_with_url_param(self) -> None:
         task = Task("baz", url="http://example.com/path")
         task2 = task.clone(url="http://example.com/new")
         self.assertEqual(task2.name, "baz")
         self.assertEqual(task2.request.url, "http://example.com/new")
 
-    def test_task_useragent(self):
+    def test_task_useragent(self) -> None:
         self.server.add_response(Response(), count=1)
         bot = SimpleSpider()
 
@@ -92,7 +92,7 @@ class TestSpiderTestCase(BaseTestCase):
         bot.run()
         self.assertEqual(self.server.request.headers.get("user-agent"), "Foo")
 
-    def test_task_nohandler_error(self):
+    def test_task_nohandler_error(self) -> None:
         self.server.add_response(Response(), count=1)
 
         class TestSpider(Spider):
@@ -102,7 +102,7 @@ class TestSpiderTestCase(BaseTestCase):
         bot.add_task(Task("page", url=self.server.get_url()))
         self.assertRaises(NoTaskHandler, bot.run)
 
-    def test_task_raw(self):
+    def test_task_raw(self) -> None:
         class TestSpider(Spider):
             def task_page(self, doc, unused_task):
                 self.collect_runtime_event("codes", doc.code)
@@ -121,7 +121,7 @@ class TestSpiderTestCase(BaseTestCase):
         bot.run()
         self.assertEqual(2, len(bot.runtime_events["codes"]))
 
-    def test_task_callback(self):
+    def test_task_callback(self) -> None:
         self.server.add_response(Response(), count=4)
 
         class TestSpider(Spider):
@@ -151,12 +151,12 @@ class TestSpiderTestCase(BaseTestCase):
         bot.run()
         self.assertEqual(["0_handler", "1_func", "1_func", "1_func"], sorted(tokens))
 
-    def test_task_invalid_name(self):
+    def test_task_invalid_name(self) -> None:
         self.assertRaises(
             SpiderMisuseError, Task, "generator", url="http://example.com"
         )
 
-    def test_task_constructor_invalid_args(self):
+    def test_task_constructor_invalid_args(self) -> None:
         # no url, no grab, no grab_config
         with self.assertRaises(GrabMisuseError):
             Task("foo")
@@ -184,7 +184,7 @@ class TestSpiderTestCase(BaseTestCase):
     #    task2 = task.clone(foo=2)
     #    self.assertEqual(2, task2.foo)  # pylint: disable=no-member
 
-    def test_task_comparison(self):
+    def test_task_comparison(self) -> None:
         task1 = Task("foo", url="http://foo.com/", priority=1)
         task2 = Task("foo", url="http://foo.com/", priority=2)
         task3 = Task("foo", url="http://foo.com/")
@@ -196,7 +196,7 @@ class TestSpiderTestCase(BaseTestCase):
         self.assertTrue(task1 == task3)
         self.assertTrue(task2 == task3)
 
-    def test_task_get_fallback_handler(self):
+    def test_task_get_fallback_handler(self) -> None:
         class TestSpider(Spider):
             def do_smth(self, task):
                 pass
@@ -274,7 +274,7 @@ class TestSpiderTestCase(BaseTestCase):
     #    bot.run()
     #    self.assertEqual({77, 76, 75}, set(bot.runtime_events["points"]))
 
-    def test_add_task_invalid_url_no_error(self):
+    def test_add_task_invalid_url_no_error(self) -> None:
         class TestSpider(Spider):
             pass
 
@@ -286,7 +286,7 @@ class TestSpiderTestCase(BaseTestCase):
         bot.add_task(Task("page", url="http://example.com/"))
         self.assertEqual(1, bot.task_queue.size())
 
-    def test_add_task_invalid_url_raise_error(self):
+    def test_add_task_invalid_url_raise_error(self) -> None:
         class TestSpider(Spider):
             pass
 
@@ -298,7 +298,7 @@ class TestSpiderTestCase(BaseTestCase):
         bot.add_task(Task("page", url="http://example.com/"))
         self.assertEqual(1, bot.task_queue.size())
 
-    def test_worker_restored(self):
+    def test_worker_restored(self) -> None:
         self.server.add_response(Response(), count=5)
 
         class TestSpider(Spider):
@@ -311,7 +311,7 @@ class TestSpiderTestCase(BaseTestCase):
         bot.run()
         self.assertTrue(bot.stat.counters["parser:worker-restarted"] == 2)
 
-    def test_task_clone_post_request(self):
+    def test_task_clone_post_request(self) -> None:
         self.server.add_response(Response(), count=2)
 
         class TestSpider(Spider):
@@ -329,7 +329,7 @@ class TestSpiderTestCase(BaseTestCase):
         bot.run()
         self.assertEqual("POST", self.server.request.method)
 
-    def test_response_not_valid(self):
+    def test_response_not_valid(self) -> None:
         self.server.add_response(Response(), count=-1)
 
         class SomeSimpleSpider(Spider):
@@ -359,7 +359,7 @@ class TestSpiderTestCase(BaseTestCase):
     #    self.assertEqual(1, bot.stat.counters["spider:task-page"])
     #    self.assertEqual(1, bot.stat.counters["spider:task-page2"])
 
-    def test_task_generator_no_yield(self):
+    def test_task_generator_no_yield(self) -> None:
         self.server.add_response(Response())
 
         class TestSpider(Spider):
@@ -375,7 +375,7 @@ class TestSpiderTestCase(BaseTestCase):
         bot.run()
         self.assertEqual(1, bot.stat.counters["foo"])
 
-    def test_initial_urls(self):
+    def test_initial_urls(self) -> None:
         self.server.add_response(Response())
 
         url = self.server.get_url()
@@ -391,6 +391,6 @@ class TestSpiderTestCase(BaseTestCase):
 
         self.assertEqual(1, bot.stat.counters["foo"])
 
-    def test_constructor_positional_args_name_ok(self):
+    def test_constructor_positional_args_name_ok(self) -> None:
         task = Task("baz", HttpRequest("http://yandex.ru"))
         self.assertTrue("yandex" in task.request.url)

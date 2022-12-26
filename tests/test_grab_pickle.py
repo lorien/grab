@@ -8,6 +8,6 @@ class TestGrab(BaseTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_pickle_grab(self):
+    def test_pickle_grab(self) -> None:
         grab = Grab()
         pickle.dumps(grab)

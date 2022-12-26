@@ -18,10 +18,10 @@ INVALID_URL = (
 
 
 class SpiderErrorTestCase(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
-    def test_generator_with_invalid_url(self):
+    def test_generator_with_invalid_url(self) -> None:
         class SomeSpider(Spider):
             def task_generator(self):
                 yield Task("page", url=INVALID_URL)
@@ -29,7 +29,7 @@ class SpiderErrorTestCase(BaseTestCase):
         bot = SomeSpider()
         bot.run()
 
-    def test_redirect_with_invalid_url(self):
+    def test_redirect_with_invalid_url(self) -> None:
 
         server = self.server
 
@@ -54,7 +54,7 @@ class SpiderErrorTestCase(BaseTestCase):
         bot = TestSpider(network_try_limit=1)
         bot.run()
 
-    def test_stat_error_name_threaded_urllib3(self):
+    def test_stat_error_name_threaded_urllib3(self) -> None:
 
         server = self.server
         server.add_response(Response(sleep=2))

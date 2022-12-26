@@ -10,23 +10,23 @@ class GrabRequestTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_get_method(self):
+    def test_get_method(self) -> None:
         self.server.add_response(Response())
         request(self.server.get_url())
         self.assertEqual("GET", self.server.request.method)
 
-    def test_delete_method(self):
+    def test_delete_method(self) -> None:
         self.server.add_response(Response())
         request(self.server.get_url(), method="DELETE")
         self.assertEqual("DELETE", self.server.request.method)
 
-    def test_put_method(self):
+    def test_put_method(self) -> None:
         self.server.add_response(Response())
         request(self.server.get_url(), method="PUT", body=b"abc")
         self.assertEqual("PUT", self.server.request.method)
         self.assertEqual("3", self.server.request.headers.get("content-length"))
 
-    def test_head_with_invalid_bytes(self):
+    def test_head_with_invalid_bytes(self) -> None:
         def callback():
             return {
                 "type": "response",

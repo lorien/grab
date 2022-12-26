@@ -10,7 +10,7 @@ class ExtensionPyqueryTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_pyquery_handler(self):
+    def test_pyquery_handler(self) -> None:
         self.server.add_response(
             Response(data=b"<body><h1>Hello world</h1><footer>2014</footer>")
         )
@@ -18,7 +18,7 @@ class ExtensionPyqueryTestCase(BaseTestCase):
 
         self.assertEqual(doc.pyquery("h1").text(), "Hello world")
 
-    def test_national_utf_symbol(self):
+    def test_national_utf_symbol(self) -> None:
         msg = (
             "P.S. Bir daha öz fikrimi xatırladım ki,rhen ve "
             "qelben sene bağlı insan başqasına ehtiyac duymaz."

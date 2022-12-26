@@ -12,7 +12,7 @@ class GrabSimpleTestCase(BaseTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_lxml_security_bug(self):
+    def test_lxml_security_bug(self) -> None:
         with temp_dir() as tmp_dir:
             injection_path = os.path.join(tmp_dir, "injection")
             with open(injection_path, "w", encoding="utf-8") as out:

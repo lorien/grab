@@ -18,7 +18,7 @@ class TestSpiderProxyCase(BaseTestCase):
     extra_servers: dict[int, dict]
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         super(TestSpiderProxyCase, cls).setUpClass()
         cls.extra_servers = {}
         for _ in range(3):
@@ -30,12 +30,12 @@ class TestSpiderProxyCase(BaseTestCase):
             }
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         super(TestSpiderProxyCase, cls).tearDownClass()
         for item in cls.extra_servers.values():
             item["server"].stop()
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
         for item in self.extra_servers.values():
             item["server"].reset()
@@ -114,7 +114,7 @@ class TestSpiderProxyCase(BaseTestCase):
     #        self.assertEqual(len(servers), 1)
     #        self.assertEqual(1, len(set(bot.runtime_events["ports"])))
 
-    def test_setup_proxylist5(self):
+    def test_setup_proxylist5(self) -> None:
         with temp_file() as proxy_file:
             self.server.add_response(Response(), count=10)
             for item in self.extra_servers.values():

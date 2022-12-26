@@ -10,14 +10,14 @@ class TestCookies(BaseTestCase):
     def setUp(self):
         self.server.reset()
 
-    def test_parsing_response_cookies(self):
+    def test_parsing_response_cookies(self) -> None:
         self.server.add_response(
             Response(headers=[("Set-Cookie", "foo=bar"), ("Set-Cookie", "1=2")])
         )
         doc = request(self.server.get_url())
         self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
 
-    def test_multiple_cookies(self):
+    def test_multiple_cookies(self) -> None:
         self.server.add_response(Response())
         request(self.server.get_url(), cookies={"foo": "1", "bar": "2"})
         self.assertEqual(
@@ -25,7 +25,7 @@ class TestCookies(BaseTestCase):
             {("foo", "1"), ("bar", "2")},
         )
 
-    def test_session(self):
+    def test_session(self) -> None:
         # Test that if Grab gets some cookies from the server
         # then it sends it back
 
@@ -66,7 +66,7 @@ class TestCookies(BaseTestCase):
         grab.request(self.server.get_url())
         self.assertFalse(self.server.request.cookies)
 
-    def test_redirect_session(self):
+    def test_redirect_session(self) -> None:
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
         grab = Grab()
         doc = grab.request(self.server.get_url())
@@ -130,7 +130,7 @@ class TestCookies(BaseTestCase):
     #    self.assertRaises(GrabMisuseError, grab.cookies.update, "asdf")
     #    self.assertRaises(GrabMisuseError, grab.cookies.update, ["asdf"])
 
-    def test_path(self):
+    def test_path(self) -> None:
         grab = Grab()
         self.server.add_response(
             Response(
@@ -188,7 +188,7 @@ class TestCookies(BaseTestCase):
     #    grab.cookies.set("foo", "bar2", domain="ya.ru")
     #    self.assertEqual(2, len(grab.cookies.items()))
 
-    def test_unicode_cookie(self):
+    def test_unicode_cookie(self) -> None:
         def callback():
             return b"HTTP/1.0 200 OK\nSet-Cookie: preved=%s\n\n" % "медвед".encode(
                 "utf-8"
