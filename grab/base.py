@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import typing
 from abc import ABCMeta, abstractmethod
 from collections.abc import Callable, Generator, Mapping, MutableMapping
 from contextlib import contextmanager
 from copy import deepcopy
 from http.cookiejar import CookieJar
-from typing import Any, Generic, Literal, TypeVar
+from typing import Any, Generic, Literal, TypeVar, cast
 
 __all__ = ["BaseRequest", "BaseExtension", "BaseClient", "BaseTransport"]
 
@@ -80,8 +81,19 @@ class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         ...
 
 
+class Retry:
+    def __init__(self) -> None:
+        self.state: MutableMapping[str, int] = {}
+
+
 class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     __slots__ = ()
+    transport: BaseTransport[RequestT, ResponseT]
+
+    @property
+    @abstractmethod
+    def request_class(self) -> type[RequestT]:
+        ...
 
     extensions: MutableMapping[str, MutableMapping[str, Any]] = {}
     ext_handlers: Mapping[str, list[Callable[..., Any]]] = {
@@ -97,8 +109,31 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
             item["instance"].reset()
 
     @abstractmethod
-    def request(self, req: None | RequestT = None, **request_kwargs: Any) -> ResponseT:
+    def process_request_result(self, req: RequestT) -> ResponseT:
         ...
+
+    def request(self, req: None | RequestT = None, **request_kwargs: Any) -> ResponseT:
+        if req is None:
+            req = self.request_class.create_from_mapping(request_kwargs)
+        retry = Retry()
+        all(x(retry) for x in self.ext_handlers["init-retry"])
+        while True:
+            for func in self.ext_handlers["request:pre"]:
+                func(req)
+            self.transport.reset()
+            self.transport.request(req)
+            with self.transport.wrap_transport_error():
+                doc = self.process_request_result(req)
+            if any(
+                (
+                    (item := func(retry, req, doc)) != (None, None)
+                    for func in self.ext_handlers["retry"]
+                )
+            ):
+                # pylint: disable=deprecated-typing-alias
+                retry, req = cast(typing.Tuple[Retry, RequestT], item)
+                continue
+            return doc
 
     def clone(self: T) -> T:
         return deepcopy(self)
@@ -123,5 +158,5 @@ class BaseTransport(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def request(self, req: RequestT, cookiejar: CookieJar) -> None:  # pragma: no cover
+    def request(self, req: RequestT) -> None:  # pragma: no cover
         raise NotImplementedError

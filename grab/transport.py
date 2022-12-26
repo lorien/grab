@@ -7,7 +7,6 @@ import time
 from collections.abc import Generator, Mapping
 from contextlib import contextmanager
 from http.client import HTTPResponse
-from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
 from typing import Any, cast
 
@@ -113,7 +112,7 @@ class Urllib3Transport(BaseTransport[HttpRequest, Document]):
         )
         LOG.debug("%s %s%s", req.method or "GET", req.url, proxy_info)
 
-    def request(self, req: HttpRequest, cookiejar: CookieJar) -> None:
+    def request(self, req: HttpRequest) -> None:
         pool: PoolManager | SOCKSProxyManager | ProxyManager = (
             self.select_pool_for_request(req)
         )
@@ -135,7 +134,7 @@ class Urllib3Transport(BaseTransport[HttpRequest, Document]):
             # It is the timeout on read of next data chunk from the server
             # Total response timeout is handled by Grab
             timeout = Timeout(connect=req.timeout.connect, read=req.timeout.read)
-            req_data = req.compile_request_data(cookiejar)
+            req_data = req.compile_request_data()
             try:
                 start_time = time.time()
                 res = pool.urlopen(  # type: ignore # FIXME

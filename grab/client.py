@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 import logging
-import typing
 from collections.abc import Mapping, MutableMapping
 from copy import copy
-from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
-from typing import Any, cast
+from typing import Any
 
 from .base import BaseClient, BaseTransport
 from .document import Document
@@ -24,15 +22,11 @@ def copy_config(config: Mapping[str, Any]) -> MutableMapping[str, Any]:
     return {x: copy(y) for x, y in config.items()}
 
 
-class Retry:
-    def __init__(self) -> None:
-        self.state: MutableMapping[str, int] = {}
-
-
 class HttpClient(BaseClient[HttpRequest, Document]):
     document_class: type[Document] = Document
     transport_class = Urllib3Transport
     extension = RedirectExtension()
+    request_class = HttpRequest
 
     def __init__(
         self,
@@ -44,39 +38,14 @@ class HttpClient(BaseClient[HttpRequest, Document]):
         self.transport = resolve_transport_entity(transport, self.transport_class)
         super().__init__()
 
-    def get_request_cookies(self, req: HttpRequest) -> CookieJar:
-        jar = CookieJar()
-        for func in self.ext_handlers["request_cookies"]:
-            func(req, jar)
-        return jar
-
     def request(
         self, req: None | str | HttpRequest = None, **request_kwargs: Any
     ) -> Document:
-        if not isinstance(req, HttpRequest):
-            if req is not None:
-                assert isinstance(req, str)
-                request_kwargs["url"] = req
-            req = HttpRequest.create_from_mapping(request_kwargs)
-        retry = Retry()
-        all(x(retry) for x in self.ext_handlers["init-retry"])
-        while True:
-            for func in self.ext_handlers["request:pre"]:
-                func(req)
-            self.transport.reset()
-            self.transport.request(req, self.get_request_cookies(req))
-            with self.transport.wrap_transport_error():
-                doc = self.process_request_result(req)
-            if any(
-                (
-                    (item := func(retry, req, doc)) != (None, None)
-                    for func in self.ext_handlers["retry"]
-                )
-            ):
-                # pylint: disable=deprecated-typing-alias
-                retry, req = cast(typing.Tuple[Retry, HttpRequest], item)
-                continue
-            return doc
+        if req is not None and not isinstance(req, HttpRequest):
+            assert isinstance(req, str)
+            request_kwargs["url"] = req
+            req = None
+        return super().request(req, **request_kwargs)
 
     def process_request_result(self, req: HttpRequest) -> Document:
         """Process result of real request performed via transport extension."""

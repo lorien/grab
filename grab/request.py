@@ -2,14 +2,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping
 from copy import copy
-from http.cookiejar import CookieJar
 from typing import Any, TypedDict, cast
 from urllib.parse import urlencode
 
 from urllib3.filepost import encode_multipart_formdata
 
 from .base import BaseRequest
-from .util.cookies import build_cookie_header
 from .util.structures import merge_with_dict
 from .util.timeout import Timeout
 
@@ -107,6 +105,7 @@ class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
         self.multipart = multipart if multipart is not None else True
         self.document_type = document_type
         self.meta = meta or {}
+        self.cookie_header: None | str = None
 
     def get_full_url(self) -> str:
         return self.url
@@ -120,7 +119,6 @@ class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
 
     def compile_request_data(  # noqa: CCR001
         self,
-        cookiejar: CookieJar,
     ) -> CompiledRequestData:
         req_url = self.url
         req_hdr = copy(self.headers)
@@ -155,9 +153,8 @@ class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
                     {"Content-Type": content_type, "Content-Length": len(req_body)},
                     replace=True,
                 )
-        cookie_hdr = build_cookie_header(cookiejar, self.url, req_hdr)
-        if cookie_hdr:
-            req_hdr["Cookie"] = cookie_hdr
+        if self.cookie_header:
+            req_hdr["Cookie"] = self.cookie_header
         return {
             "method": self.method,
             "url": req_url,

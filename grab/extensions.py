@@ -9,7 +9,7 @@ from .base import BaseExtension
 from .document import Document
 from .errors import GrabTooManyRedirectsError
 from .request import HttpRequest
-from .util.cookies import build_jar, create_cookie
+from .util.cookies import build_cookie_header, build_jar, create_cookie
 
 
 class RedirectExtension(BaseExtension[HttpRequest, Document]):
@@ -53,7 +53,6 @@ class CookiesExtension(BaseExtension[HttpRequest, Document]):
         self.cookiejar = cookiejar if cookiejar else CookieJar()
         self.ext_handlers = {
             "request:pre": self.process_request_pre,
-            "request_cookies": self.process_request_cookies,
             "response:post": self.process_response_post,
         }
 
@@ -95,12 +94,13 @@ class CookiesExtension(BaseExtension[HttpRequest, Document]):
 
     def process_request_pre(self, req: HttpRequest) -> None:
         self.update(req.cookies, req.url)
-
-    def process_request_cookies(
-        self, req: HttpRequest, jar: CookieJar  # pylint: disable=unused-argument
-    ) -> None:
-        for cookie in self.cookiejar:
-            jar.set_cookie(cookie)
+        if hdr := build_cookie_header(self.cookiejar, req.url, req.headers):
+            if req.headers.get("Cookie"):
+                raise ValueError(
+                    "Could not configure request with session cookies"
+                    " because it has already Cookie header"
+                )
+            req.cookie_header = hdr
 
     def process_response_post(
         self, req: HttpRequest, doc: Document  # pylint: disable=unused-argument
