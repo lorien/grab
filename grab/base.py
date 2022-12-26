@@ -45,9 +45,9 @@ class BaseResponse:
 
 class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     ext_handlers: Mapping[
-        Literal["prepare_request_post"]
+        Literal["request:pre"]
         | Literal["request_cookies"]
-        | Literal["response_post"]
+        | Literal["response:post"]
         | Literal["init-retry"]
         | Literal["retry"],
         Callable[..., Any],
@@ -85,9 +85,9 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
 
     extensions: MutableMapping[str, MutableMapping[str, Any]] = {}
     ext_handlers: Mapping[str, list[Callable[..., Any]]] = {
-        "prepare_request_post": [],
+        "request:pre": [],
         "request_cookies": [],
-        "response_post": [],
+        "response:post": [],
         "init-retry": [],
         "retry": [],
     }

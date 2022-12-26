@@ -52,9 +52,9 @@ class CookiesExtension(BaseExtension[HttpRequest, Document]):
     def __init__(self, cookiejar: None | CookieJar = None) -> None:
         self.cookiejar = cookiejar if cookiejar else CookieJar()
         self.ext_handlers = {
-            "prepare_request_post": self.process_prepare_request_post,
+            "request:pre": self.process_prepare_request_post,
             "request_cookies": self.process_request_cookies,
-            "response_post": self.process_response_post,
+            "response:post": self.process_response_post,
         }
 
     def set_cookie(self, cookie: Cookie) -> None:

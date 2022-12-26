@@ -49,7 +49,6 @@ class HttpClient(BaseClient[HttpRequest, Document]):
 
         This method is called before doing real request via transport extension.
         """
-        self.transport.reset()
         cfg = copy(request_config)
         if cfg.get("url") is None:
             raise ValueError("Request could not be instantiated with no URL")
@@ -57,10 +56,7 @@ class HttpClient(BaseClient[HttpRequest, Document]):
             cfg["method"] = "GET"
         if cfg.get("follow_location") is None:
             cfg["follow_location"] = True
-        req = HttpRequest.create_from_mapping(cfg)
-        for func in self.ext_handlers["prepare_request_post"]:
-            func(req)
-        return req
+        return HttpRequest.create_from_mapping(cfg)
 
     def get_request_cookies(self, req: HttpRequest) -> CookieJar:
         jar = CookieJar()
@@ -76,10 +72,12 @@ class HttpClient(BaseClient[HttpRequest, Document]):
                 assert isinstance(req, str)
                 request_kwargs["url"] = req
             req = self.prepare_request(request_kwargs)
-        # redir_count = 0
         retry = Retry()
         all(x(retry) for x in self.ext_handlers["init-retry"])
         while True:
+            for func in self.ext_handlers["request:pre"]:
+                func(req)
+            self.transport.reset()
             self.transport.request(req, self.get_request_cookies(req))
             with self.transport.wrap_transport_error():
                 doc = self.process_request_result(req)
@@ -97,7 +95,7 @@ class HttpClient(BaseClient[HttpRequest, Document]):
     def process_request_result(self, req: HttpRequest) -> Document:
         """Process result of real request performed via transport extension."""
         doc = self.transport.prepare_response(req, document_class=self.document_class)
-        for func in self.ext_handlers["response_post"]:
+        for func in self.ext_handlers["response:post"]:
             func(req, doc)
         return doc
 
