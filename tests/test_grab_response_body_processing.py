@@ -3,7 +3,7 @@ from urllib.parse import urljoin
 
 from test_server import Response
 
-from grab import Grab
+from grab import HttpClient
 from grab.document import Document
 from grab.errors import GrabMisuseError
 from tests.util import TEST_DIR, BaseTestCase
@@ -14,7 +14,7 @@ class CustomDocument(Document):
         return self._bytes_body
 
 
-class CustomGrab(Grab):
+class CustomHttpClient(HttpClient):
     document_class = CustomDocument
 
 
@@ -23,20 +23,20 @@ class GrabSimpleTestCase(BaseTestCase):
         self.server.reset()
 
     def test_body_get_bytes_body_true(self):
-        grab = CustomGrab()
+        grab = CustomHttpClient()
         self.server.add_response(Response(data=b"bar"))
         doc = grab.request(self.server.get_url())
         self.assertEqual(doc.get_bytes_body(), b"bar")
 
     def test_external_set_document_body(self):
-        grab = Grab()
+        grab = HttpClient()
         doc = grab.request(self.server.get_url())
         with self.assertRaises(GrabMisuseError):
             doc.body = b"asdf"
 
     def test_empty_response(self):
         self.server.add_response(Response(data=b""))
-        grab = Grab()
+        grab = HttpClient()
         doc = grab.request(self.server.get_url())
         self.assertTrue(doc.tree is not None)  # should not raise exception
 
@@ -55,7 +55,7 @@ class GrabSimpleTestCase(BaseTestCase):
         with open(path, "rb") as inp:
             data = inp.read()
         self.server.add_response(Response(data=data))
-        grab = Grab()
+        grab = HttpClient()
         doc = grab.request(self.server.get_url())
         items = []
         for elem in doc.select('//a[contains(@class, "exploregrid-item")]'):
@@ -71,6 +71,6 @@ class GrabSimpleTestCase(BaseTestCase):
 
     def test_json(self):
         self.server.add_response(Response(data=b'{"foo": "bar"}'))
-        grab = Grab()
+        grab = HttpClient()
         doc = grab.request(self.server.get_url())
         self.assertEqual({"foo": "bar"}, doc.json)

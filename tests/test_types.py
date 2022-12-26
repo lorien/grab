@@ -1,32 +1,42 @@
 from unittest import TestCase
 
-from grab import Grab
+from grab import HttpClient
 from grab.transport import Urllib3Transport
 from grab.types import resolve_grab_entity, resolve_transport_entity
 
 
-class ResolveGrabEntityTestCase(TestCase):
+class ResolveHttpClientEntityTestCase(TestCase):
     def test_resolve_grab_entity_default(self):
-        class SuperGrab(Grab):
+        class SuperHttpClient(HttpClient):
             pass
 
-        self.assertTrue(isinstance(resolve_grab_entity(None, SuperGrab), SuperGrab))
+        self.assertTrue(
+            isinstance(resolve_grab_entity(None, SuperHttpClient), SuperHttpClient)
+        )
 
     def test_resolve_grab_entity_none_nodefault(self):
         with self.assertRaises(TypeError):
             resolve_grab_entity(None, None)
 
     def test_resolve_grab_entity_instance(self):
-        class SuperGrab(Grab):
+        class SuperHttpClient(HttpClient):
             pass
 
-        self.assertTrue(isinstance(resolve_grab_entity(SuperGrab(), Grab), SuperGrab))
+        self.assertTrue(
+            isinstance(
+                resolve_grab_entity(SuperHttpClient(), HttpClient), SuperHttpClient
+            )
+        )
 
     def test_resolve_grab_entity_class(self):
-        class SuperGrab(Grab):
+        class SuperHttpClient(HttpClient):
             pass
 
-        self.assertTrue(isinstance(resolve_grab_entity(SuperGrab, Grab), SuperGrab))
+        self.assertTrue(
+            isinstance(
+                resolve_grab_entity(SuperHttpClient, HttpClient), SuperHttpClient
+            )
+        )
 
 
 class ResolveTransportEntityTestCase(TestCase):
@@ -47,7 +57,9 @@ class ResolveTransportEntityTestCase(TestCase):
             pass
 
         self.assertTrue(
-            isinstance(resolve_transport_entity(SuperTransport(), Grab), SuperTransport)
+            isinstance(
+                resolve_transport_entity(SuperTransport(), HttpClient), SuperTransport
+            )
         )
 
     def test_resolve_transport_entity_class(self):
@@ -55,5 +67,7 @@ class ResolveTransportEntityTestCase(TestCase):
             pass
 
         self.assertTrue(
-            isinstance(resolve_transport_entity(SuperTransport, Grab), SuperTransport)
+            isinstance(
+                resolve_transport_entity(SuperTransport, HttpClient), SuperTransport
+            )
         )

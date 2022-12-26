@@ -1,4 +1,4 @@
-from .client import Grab, HttpClient, request
+from .client import HttpClient, request
 from .document import Document
 from .errors import (
     DataNotFound,
@@ -7,6 +7,7 @@ from .errors import (
     GrabNetworkError,
     GrabTimeoutError,
 )
+from .grab import Grab
 from .request import HttpRequest
 
 __all__ = [

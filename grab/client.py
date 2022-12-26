@@ -15,7 +15,7 @@ from .request import HttpRequest
 from .transport import Urllib3Transport
 from .types import resolve_entity, resolve_transport_entity
 
-__all__ = ["Grab", "HttpClient", "request"]
+__all__ = ["HttpClient", "request"]
 logger = logging.getLogger(__name__)
 
 
@@ -102,13 +102,10 @@ class HttpClient(BaseClient[HttpRequest, Document]):
         return doc
 
 
-Grab = HttpClient
-
-
 def request(
     url: None | str | HttpRequest = None,
-    grab: None | HttpClient | type[HttpClient] = None,
+    client: None | HttpClient | type[HttpClient] = None,
     **request_kwargs: Any,
 ) -> Document:
-    grab = resolve_entity(HttpClient, grab, default=HttpClient)
-    return grab.request(url, **request_kwargs)
+    client = resolve_entity(HttpClient, client, default=HttpClient)
+    return client.request(url, **request_kwargs)

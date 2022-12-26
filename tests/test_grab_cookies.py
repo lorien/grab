@@ -3,12 +3,7 @@ from pprint import pprint  # pylint: disable=unused-import
 from test_server import Response
 
 from grab import Grab, request
-from grab.extensions import CookiesExtension
 from tests.util import BaseTestCase  # , temp_file
-
-
-class CustomGrab(Grab):
-    cookies = CookiesExtension()
 
 
 class TestCookies(BaseTestCase):
@@ -34,7 +29,7 @@ class TestCookies(BaseTestCase):
         # Test that if Grab gets some cookies from the server
         # then it sends it back
 
-        grab = CustomGrab()
+        grab = Grab()
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
         doc = grab.request(self.server.get_url())
         self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
@@ -62,7 +57,7 @@ class TestCookies(BaseTestCase):
         # self.assertFalse(self.server.request.cookies)
 
         # Test something
-        grab = CustomGrab()
+        grab = Grab()
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
         doc = grab.request(self.server.get_url())
         self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
@@ -73,7 +68,7 @@ class TestCookies(BaseTestCase):
 
     def test_redirect_session(self):
         self.server.add_response(Response(headers=[("Set-Cookie", "foo=bar")]))
-        grab = CustomGrab()
+        grab = Grab()
         doc = grab.request(self.server.get_url())
         self.assertTrue(any(x.name == "foo" and x.value == "bar" for x in doc.cookies))
 
@@ -136,7 +131,7 @@ class TestCookies(BaseTestCase):
     #    self.assertRaises(GrabMisuseError, grab.cookies.update, ["asdf"])
 
     def test_path(self):
-        grab = CustomGrab()
+        grab = Grab()
         self.server.add_response(
             Response(
                 headers=[

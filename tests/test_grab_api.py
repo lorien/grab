@@ -2,7 +2,7 @@ from pprint import pprint  # pylint: disable=unused-import
 
 from test_server import Response
 
-from grab import Grab
+from grab import HttpClient
 from grab.document import Document
 from grab.errors import GrabMisuseError
 from tests.util import BaseTestCase
@@ -13,7 +13,7 @@ class GrabApiTestCase(BaseTestCase):
         self.server.reset()
 
     def test_clone(self):
-        grab = Grab()
+        grab = HttpClient()
         self.server.add_response(Response(data=b"Moon"))
         doc = grab.request(self.server.get_url())
         self.assertTrue(b"Moon" in doc.body)
@@ -25,7 +25,7 @@ class GrabApiTestCase(BaseTestCase):
         self.assertTrue(b"Foo" in doc.body)
 
     def test_empty_clone(self):
-        Grab().clone()
+        HttpClient().clone()
 
     # def test_make_url_absolute(self):
     #    self.server.add_response(Response(data=b'<base href="http://foo/bar/">'))

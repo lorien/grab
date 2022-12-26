@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from grab import Grab, request
+from grab import HttpClient, request
 from grab.document import Document
 
 
@@ -9,10 +9,12 @@ class RequestFuncTestCase(TestCase):
         class DummyDocument(Document):
             pass
 
-        class DummyGrab(Grab):
+        class DummyHttpClient(HttpClient):
             def request(self, *_args, **_kwargs):
                 return DummyDocument()
 
         self.assertTrue(
-            isinstance(request("http://example.com", grab=DummyGrab), DummyDocument)
+            isinstance(
+                request("http://example.com", client=DummyHttpClient), DummyDocument
+            )
         )
