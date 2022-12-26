@@ -1,7 +1,4 @@
-import sys
 from unittest import TestCase
-
-import pytest
 
 from grab import HttpClient
 from grab.transport import Urllib3Transport

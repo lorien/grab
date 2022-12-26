@@ -39,11 +39,7 @@ jobs:
     - name: Run tests
       shell: bash
       run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
-          pytest -n=logical -x --cov grab --cov-report term-missing
-        else
-          coverage run runtest.py --test-all --backend=mongodb,pyquery
-        fi
+        pytest -n=logical -x --cov grab --cov-report term-missing
         coverage lcov -o .coverage.lcov
 
     - name: Coveralls Parallel

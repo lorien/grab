@@ -13,41 +13,30 @@ Run command:
     make bootstrap
 
 
+Run tests
+---------
 
-Fastest way to run all Grab tests
----------------------------------
-
-.. code:: shell
+Run all tests in 30 parallel threads::
 
     pytest -n30
 
-Classic way to run tests
-------------------------
+Run all tests in 30 parallel threads, fail on first error::
 
-Run the commands:
+    pytest -n30 -x
 
-.. code:: shell
+Same as previous but via make command::
 
-	./runtest.py --test-all --backend=mongodb,redis,pyquery
+    make pytest
 
-With runtestpy you can choose which set of tests to run. Available runtest.py options::
+Run specific test::
 
-    --test-grab - Grab API tests
-    --test-spider - Grab::Spider API tests
-    --test-all - shortcut to run both Grab and Grab::Spider tests
-    --backend=redis - enable tests of things that work with redis
-    --backend=mysql - enable tests of things that work with mysql
-    --backend=mongodb - enable tests of things that work with mongo
-    --backend=pyquery - enable tests of things that work with pyquery
+    pytest tests/test_util_types.py
 
-If you want to run specific test cases then use the `-t` option. For example:
+Run all test cases which has "redis" in their name::
 
-.. code:: shell
+    pytest -k redis
 
-    ./runtest.py -t test.grab_api
-
-
-.. _usage_testing_travis:
+.. _usage_testing_github:
 
 Github Testing
 --------------

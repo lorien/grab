@@ -1,7 +1,9 @@
+import os
 from abc import abstractmethod
 from typing import Any, cast
 from unittest import TestCase
 
+import pytest
 from test_server import Response
 
 from grab.errors import GrabFeatureIsDeprecated
@@ -10,6 +12,8 @@ from grab.spider.errors import SpiderMisuseError
 from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.queue_backend.memory import MemoryTaskQueue
 from tests.util import BaseTestCase, load_test_config
+
+skip_on_windows = pytest.mark.skipif(os.name == "nt", reason="does not work on windows")
 
 
 class SpiderQueueMixin:
@@ -152,6 +156,7 @@ class SpiderMongodbQueueTestCase(SpiderQueueMixin, BaseTestCase):
         bot.task_queue.clear()
 
 
+@skip_on_windows
 class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseTestCase):
     backend = "redis"
 
