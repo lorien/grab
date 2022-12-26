@@ -24,6 +24,7 @@ class TestSpiderProxyCase(BaseTestCase):
         for _ in range(3):
             serv = TestServer(address=ADDRESS, port=0)
             serv.start()
+            assert serv.port is not None
             cls.extra_servers[serv.port] = {
                 "server": serv,
                 "proxy": "%s:%d" % (ADDRESS, serv.port),

@@ -103,7 +103,7 @@ class Document(
         self._lxml_tree: None | _Element = None
         self._strict_lxml_tree: None | _Element = None
         self._pyquery = None
-        self._lxml_form = None
+        self._lxml_form: None | FormElement = None
         self._file_fields: MutableMapping[str, Any] = {}
         # Main attributes
         self.document_type = document_type
@@ -507,7 +507,7 @@ class Document(
                 raise DataNotFound("Response does not contains any form")
         return self._lxml_form
 
-    def get_cached_form(self) -> None | FormElement:
+    def get_cached_form(self) -> FormElement:
         """Get form which has been already selected.
 
         Returns None if form has not been selected yet.
@@ -515,6 +515,9 @@ class Document(
         It is for testing mainly. To not trigger pylint warnings about
         accessing protected element.
         """
+        if self._lxml_form is None:
+            raise ValueError("Requested form does not exist")
+        assert isinstance(self._lxml_form, FormElement)
         return self._lxml_form
 
     def set_input(self, name: str, value: Any) -> None:

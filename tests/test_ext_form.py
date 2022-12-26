@@ -168,7 +168,8 @@ class TestHtmlForms(BaseTestCase):
         self.server.add_response(Response(data=FORMS_HTML))
         doc = request(self.server.get_url())
 
-        self.assertEqual(doc.get_cached_form(), None)
+        with self.assertRaises(ValueError):
+            doc.get_cached_form()
 
         doc.set_input("gender", "1")
         self.assertEqual("common_form", doc.get_cached_form().get("id"))

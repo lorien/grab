@@ -1,6 +1,10 @@
+from __future__ import annotations
+
+from collections.abc import Generator
+
 from test_server import Response
 
-from grab import HttpRequest
+from grab import Document, HttpRequest
 from grab.errors import GrabMisuseError, ResponseNotValid
 from grab.spider import NoTaskHandler, Spider, SpiderMisuseError, Task, base
 from grab.spider.errors import SpiderError
@@ -8,7 +12,7 @@ from tests.util import BaseTestCase
 
 
 class SimpleSpider(Spider):
-    def task_baz(self, grab, unused_task):
+    def task_baz(self, grab: Document, unused_task: Task) -> None:
         pass
 
 
@@ -23,6 +27,7 @@ class TestSpiderTestCase(BaseTestCase):
         task = Task("baz", url="http://xxx.com")
         self.assertEqual(task.priority, None)
         bot.add_task(task)
+        assert task.priority is not None
         self.assertTrue(10 <= task.priority <= 20)
 
         # Automatic constant priority
@@ -104,8 +109,8 @@ class TestSpiderTestCase(BaseTestCase):
 
     def test_task_raw(self) -> None:
         class TestSpider(Spider):
-            def task_page(self, doc, unused_task):
-                self.collect_runtime_event("codes", doc.code)
+            def task_page(self, doc: Document, _task: Task) -> None:
+                self.collect_runtime_event("codes", str(doc.code))
 
         self.server.add_response(Response(status=502), count=4)
 
@@ -125,17 +130,17 @@ class TestSpiderTestCase(BaseTestCase):
         self.server.add_response(Response(), count=4)
 
         class TestSpider(Spider):
-            def task_page(self, unused_grab, unused_task):
+            def task_page(self, _doc: Document, _task: Task) -> None:
                 self.meta["tokens"].append("0_handler")
 
         class FuncWithState:
-            def __init__(self, tokens):
+            def __init__(self, tokens: list[str]) -> None:
                 self.tokens = tokens
 
-            def __call__(self, grab, task):
+            def __call__(self, _grab: Document, _task: Task) -> None:
                 self.tokens.append("1_func")
 
-        tokens = []
+        tokens: list[str] = []
         func = FuncWithState(tokens)
 
         bot = TestSpider()
@@ -162,7 +167,7 @@ class TestSpiderTestCase(BaseTestCase):
             Task("foo")
         # both url and request
         with self.assertRaises(GrabMisuseError):
-            Task("foo", url=1, request=HttpRequest("asdf"))
+            Task("foo", url=1, request=HttpRequest("asdf"))  # type: ignore
 
     # def test_task_clone_invalid_args(self):
     #    task = Task("foo", url="http://example.com")
@@ -198,10 +203,10 @@ class TestSpiderTestCase(BaseTestCase):
 
     def test_task_get_fallback_handler(self) -> None:
         class TestSpider(Spider):
-            def do_smth(self, task):
+            def do_smth(self, task: Task) -> None:
                 pass
 
-            def task_bar_fallback(self, task):
+            def task_bar_fallback(self, task: Task) -> None:
                 pass
 
         task1 = Task("foo", url="http://foo.com/", fallback_name="do_smth")
@@ -302,7 +307,7 @@ class TestSpiderTestCase(BaseTestCase):
         self.server.add_response(Response(), count=5)
 
         class TestSpider(Spider):
-            def task_page(self, unused_grab, unused_task):
+            def task_page(self, _doc: Document, _task: Task) -> None:
                 pass
 
         bot = TestSpider(parser_requests_per_process=2)
@@ -315,7 +320,9 @@ class TestSpiderTestCase(BaseTestCase):
         self.server.add_response(Response(), count=2)
 
         class TestSpider(Spider):
-            def task_foo(self, unused_grab, task):
+            def task_foo(
+                self, _doc: Document, _task: Task
+            ) -> Generator[Task, None, None]:
                 if not task.get("fin"):
                     yield task.clone(fin=True)
 
@@ -333,7 +340,7 @@ class TestSpiderTestCase(BaseTestCase):
         self.server.add_response(Response(), count=-1)
 
         class SomeSimpleSpider(Spider):
-            def task_page(self, unused_grab, unused_task):
+            def task_page(self, _doc: Document, _task: Task) -> None:
                 self.stat.inc("xxx")
                 raise ResponseNotValid
 
@@ -363,10 +370,10 @@ class TestSpiderTestCase(BaseTestCase):
         self.server.add_response(Response())
 
         class TestSpider(Spider):
-            def task_page(self, unused_grab, unused_task):
+            def task_page(self, _doc: Document, _task: Task) -> None:
                 self.stat.inc("foo")
 
-            def task_generator(self):
+            def task_generator(self) -> Generator[Task, None, None]:
                 yield from ()
 
         bot = TestSpider()
@@ -383,7 +390,7 @@ class TestSpiderTestCase(BaseTestCase):
         class TestSpider(Spider):
             initial_urls = [url]
 
-            def task_initial(self, unused_grab, unused_task):
+            def task_initial(self, _doc: Document, _task: Task) -> None:
                 self.stat.inc("foo", 1)
 
         bot = TestSpider()

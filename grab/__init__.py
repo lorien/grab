@@ -12,7 +12,9 @@ from .request import HttpRequest
 
 __all__ = [
     "Grab",
+    "DataNotFound",
     "HttpClient",
+    "HttpRequest",
     "request",
     "Document",
     "GrabError",
