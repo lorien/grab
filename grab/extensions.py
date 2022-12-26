@@ -36,7 +36,7 @@ class RedirectExtension(BaseExtension[HttpRequest, Document]):
         self, retry: Any, req: HttpRequest, resp: Document
     ) -> tuple[None, None] | tuple[Any, HttpRequest]:
         if (
-            req.follow_location
+            req.process_redirect
             and (redir_url := self.find_redirect_url(resp)) is not None
         ):
             retry.state["redirect_count"] += 1

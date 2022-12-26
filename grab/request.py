@@ -8,6 +8,8 @@ from .util.timeout import Timeout
 
 __all__ = ["HttpRequest"]
 DEFAULT_REDIRECT_LIMIT = 20  # like in many web browsers
+DEFAULT_PROCESS_REDIRECT = True
+DEFAULT_METHOD = "GET"
 
 
 class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
@@ -26,15 +28,15 @@ class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
         "multipart",
         "document_type",
         "redirect_limit",
-        "follow_location",
+        "process_redirect",
         "meta",
     }
 
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals
         self,
-        method: str,
         url: str,
         *,
+        method: None | str = None,
         headers: None | MutableMapping[str, Any] = None,
         timeout: None | int | Timeout = None,
         cookies: None | dict[str, Any] = None,
@@ -49,15 +51,21 @@ class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
         multipart: None | bool = None,
         document_type: None | str = None,
         redirect_limit: None | int = None,
-        follow_location: None | bool = None,
+        process_redirect: None | bool = None,
         meta: None | Mapping[str, Any] = None,
     ) -> None:
-        self.follow_location = follow_location
+        self.process_redirect = (
+            process_redirect if process_redirect else DEFAULT_PROCESS_REDIRECT
+        )
         self.redirect_limit = (
             redirect_limit if redirect_limit is not None else DEFAULT_REDIRECT_LIMIT
         )
         self.encoding = encoding
+        if url is None:
+            raise ValueError("URL must be set")
         self.url = url
+        if method is None:
+            method = DEFAULT_METHOD
         if method not in {
             "GET",
             "POST",

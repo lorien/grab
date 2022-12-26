@@ -131,7 +131,7 @@ class TestSpiderProxyCase(BaseTestCase):
             )
             for _ in range(10):
                 bot.add_task(
-                    Task(name="baz", request=HttpRequest("GET", self.server.get_url()))
+                    Task(name="baz", request=HttpRequest(self.server.get_url()))
                 )
             bot.run()
 

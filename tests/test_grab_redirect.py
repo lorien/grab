@@ -63,4 +63,4 @@ class GrabRedirectTestCase(BaseTestCase):
         self.server.add_response(Response(raw_callback=callback))
         self.server.add_response(Response(data=b"content-2"))
         with self.assertRaises(GrabInvalidResponse):
-            request(follow_location=True, url=self.server.get_url())
+            request(process_redirect=True, url=self.server.get_url())

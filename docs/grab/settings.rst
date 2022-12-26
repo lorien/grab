@@ -45,15 +45,15 @@ Maximum time for connection to the remote server and receipt of an initial
 response. If it is exceeded, GrabNetworkTimeout is raised.
 
 
-.. _option_follow_location:
+.. _option_process_redirect:
 
-follow_location
+process_redirect
 ^^^^^^^^^^^^^^^
 
 :Type: bool
 :Default: True
 
-Automatically follow the location in 301/302 response.
+Automatically process HTTP 30* redirects.
 
 
 .. _option_redirect_limit:

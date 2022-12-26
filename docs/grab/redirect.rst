@@ -13,19 +13,19 @@ HTTP 301/302 Redirect
 
 By default, Grab follows any 301 or 302 redirect. You can control the maximum number
 of redirects per network query with the :ref:`option_redirect_limit` option. To completely
-disable handling of HTTP redirects, set :ref:`option_follow_location` to False.
+disable handling of HTTP redirects, set :ref:`option_process_redirect` to False.
 
 Let's see how it works::
 
     >>> g = Grab()
-    >>> g.setup(follow_location=False)
+    >>> g.setup(process_redirect=False)
     >>> g.request('http://google.com')
     <grab.response.Response object at 0x1246ae0>
     >>> g.response.code
     301
     >>> g.response.headers['Location']
     'http://www.google.com/'
-    >>> g.setup(follow_location=True)
+    >>> g.setup(process_redirect=True)
     >>> g.request('http://google.com')
     <grab.response.Response object at 0x1246ae0>
     >>> g.response.code

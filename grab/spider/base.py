@@ -367,7 +367,7 @@ class Spider:
     def process_initial_urls(self) -> None:
         if self.initial_urls:
             for url in self.initial_urls:
-                self.add_task(Task(name="initial", request=HttpRequest("GET", url)))
+                self.add_task(Task(name="initial", request=HttpRequest(url)))
 
     def get_task_from_queue(self) -> None | Literal[True] | Task:
         try:

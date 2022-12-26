@@ -162,7 +162,7 @@ class TestSpiderTestCase(BaseTestCase):
             Task("foo")
         # both url and request
         with self.assertRaises(GrabMisuseError):
-            Task("foo", url=1, request=HttpRequest("GET", "asdf"))
+            Task("foo", url=1, request=HttpRequest("asdf"))
 
     # def test_task_clone_invalid_args(self):
     #    task = Task("foo", url="http://example.com")
@@ -392,5 +392,5 @@ class TestSpiderTestCase(BaseTestCase):
         self.assertEqual(1, bot.stat.counters["foo"])
 
     def test_constructor_positional_args_name_ok(self):
-        task = Task("baz", HttpRequest("GET", "http://yandex.ru"))
+        task = Task("baz", HttpRequest("http://yandex.ru"))
         self.assertTrue("yandex" in task.request.url)

@@ -44,20 +44,6 @@ class HttpClient(BaseClient[HttpRequest, Document]):
         self.transport = resolve_transport_entity(transport, self.transport_class)
         super().__init__()
 
-    def prepare_request(self, request_config: MutableMapping[str, Any]) -> HttpRequest:
-        """Configure all things to make real network request.
-
-        This method is called before doing real request via transport extension.
-        """
-        cfg = copy(request_config)
-        if cfg.get("url") is None:
-            raise ValueError("Request could not be instantiated with no URL")
-        if not cfg.get("method"):
-            cfg["method"] = "GET"
-        if cfg.get("follow_location") is None:
-            cfg["follow_location"] = True
-        return HttpRequest.create_from_mapping(cfg)
-
     def get_request_cookies(self, req: HttpRequest) -> CookieJar:
         jar = CookieJar()
         for func in self.ext_handlers["request_cookies"]:
@@ -71,7 +57,7 @@ class HttpClient(BaseClient[HttpRequest, Document]):
             if req is not None:
                 assert isinstance(req, str)
                 request_kwargs["url"] = req
-            req = self.prepare_request(request_kwargs)
+            req = HttpRequest.create_from_mapping(request_kwargs)
         retry = Retry()
         all(x(retry) for x in self.ext_handlers["init-retry"])
         while True:
