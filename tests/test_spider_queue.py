@@ -1,4 +1,4 @@
-import os
+import sys
 from abc import abstractmethod
 from typing import Any, cast
 from unittest import TestCase
@@ -13,7 +13,10 @@ from grab.spider.queue_backend.base import BaseTaskQueue
 from grab.spider.queue_backend.memory import MemoryTaskQueue
 from tests.util import BaseTestCase, load_test_config
 
-skip_on_windows = pytest.mark.skipif(os.name == "nt", reason="does not work on windows")
+skip_on_win_and_mac = pytest.mark.skipif(
+    sys.platform in {"win32", "darwin"},
+    reason="There is no Github Action Service to support this test case on Windows or MacOS",
+)
 
 
 class SpiderQueueMixin:
@@ -156,7 +159,7 @@ class SpiderMongodbQueueTestCase(SpiderQueueMixin, BaseTestCase):
         bot.task_queue.clear()
 
 
-@skip_on_windows
+@skip_on_win_and_mac
 class SpiderRedisQueueTestCase(SpiderQueueMixin, BaseTestCase):
     backend = "redis"
 
