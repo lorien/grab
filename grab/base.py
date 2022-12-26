@@ -5,8 +5,7 @@ from abc import ABCMeta, abstractmethod
 from collections.abc import Callable, Generator, Mapping, MutableMapping
 from contextlib import contextmanager
 from copy import deepcopy
-from http.cookiejar import CookieJar
-from typing import Any, Generic, Literal, TypeVar, cast
+from typing import Any, Generic, TypeVar, cast
 
 __all__ = ["BaseRequest", "BaseExtension", "BaseClient", "BaseTransport"]
 RequestT = TypeVar("RequestT", bound="BaseRequest")
@@ -14,23 +13,6 @@ ResponseT = TypeVar("ResponseT", bound="BaseResponse")
 RequestDupT = TypeVar("RequestDupT", bound="BaseRequest")
 ResponseDupT = TypeVar("ResponseDupT", bound="BaseResponse")
 T = TypeVar("T")
-
-
-def resolve_transport_entity(
-    entity: None
-    | BaseTransport[RequestT, ResponseT]
-    | type[BaseTransport[RequestT, ResponseT]],
-    default: type[BaseTransport[RequestT, ResponseT]],
-) -> BaseTransport[RequestT, ResponseT]:
-    if entity and (
-        not isinstance(entity, BaseTransport) and not issubclass(entity, BaseTransport)
-    ):
-        raise TypeError("Invalid BaseTransport entity: {}".format(entity))
-    if entity is None:
-        return default()
-    if isinstance(entity, BaseTransport):
-        return entity
-    return entity()
 
 
 class BaseRequest(metaclass=ABCMeta):
@@ -61,15 +43,7 @@ class BaseResponse:
 
 
 class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
-    ext_handlers: Mapping[
-        Literal["request:pre"]
-        | Literal["request_cookies"]
-        | Literal["response:post"]
-        | Literal["init-retry"]
-        | Literal["retry"],
-        Callable[..., Any],
-    ] = {}
-
+    ext_handlers: Mapping[str, Callable[..., Any]] = {}
     __slots__ = ()
 
     def __set_name__(self, owner: BaseClient[RequestT, ResponseT], attr: str) -> None:
@@ -78,19 +52,6 @@ class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         }
         for point_name, func in self.ext_handlers.items():
             owner.ext_handlers[point_name].append(func)
-
-    def process_prepare_request_post(self, req: RequestT) -> None:
-        pass
-
-    def process_request_cookies(
-        self, req: RequestT, jar: CookieJar  # pylint: disable=unused-argument
-    ) -> None:
-        pass
-
-    def process_response_post(
-        self, req: RequestT, doc: ResponseT  # pylint: disable=unused-argument
-    ) -> None:
-        pass
 
     @abstractmethod
     def reset(self) -> None:
@@ -131,7 +92,7 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         | BaseTransport[RequestT, ResponseT]
         | type[BaseTransport[RequestT, ResponseT]] = None,
     ):
-        self.transport = resolve_transport_entity(
+        self.transport = self.default_transport_class.resolve_entity(
             transport, self.default_transport_class
         )
         for item in self.extensions.values():
@@ -188,3 +149,22 @@ class BaseTransport(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     @abstractmethod
     def request(self, req: RequestT) -> None:  # pragma: no cover
         raise NotImplementedError
+
+    @classmethod
+    def resolve_entity(
+        cls,
+        entity: None
+        | BaseTransport[RequestT, ResponseT]
+        | type[BaseTransport[RequestT, ResponseT]],
+        default: type[BaseTransport[RequestT, ResponseT]],
+    ) -> BaseTransport[RequestT, ResponseT]:
+        if entity and (
+            not isinstance(entity, BaseTransport)
+            and not issubclass(entity, BaseTransport)
+        ):
+            raise TypeError("Invalid BaseTransport entity: {}".format(entity))
+        if entity is None:
+            return default()
+        if isinstance(entity, BaseTransport):
+            return entity
+        return entity()
