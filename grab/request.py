@@ -1,15 +1,30 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping
-from typing import Any
+from copy import copy
+from http.cookiejar import CookieJar
+from typing import Any, TypedDict, cast
+from urllib.parse import urlencode
+
+from urllib3.filepost import encode_multipart_formdata
 
 from .base import BaseRequest
+from .util.cookies import build_cookie_header
+from .util.structures import merge_with_dict
 from .util.timeout import Timeout
 
 __all__ = ["HttpRequest"]
+URL_DATA_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS"}
 DEFAULT_REDIRECT_LIMIT = 20  # like in many web browsers
 DEFAULT_PROCESS_REDIRECT = True
 DEFAULT_METHOD = "GET"
+
+
+class CompiledRequestData(TypedDict):
+    method: str
+    url: str
+    headers: Mapping[str, Any]
+    body: None | bytes
 
 
 class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
@@ -102,3 +117,50 @@ class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
         if value is None:
             return Timeout()
         return Timeout(total=float(value))
+
+    def compile_request_data(  # noqa: CCR001
+        self,
+        cookiejar: CookieJar,
+    ) -> CompiledRequestData:
+        req_url = self.url
+        req_hdr = copy(self.headers)
+        req_body = None
+        if self.method in URL_DATA_METHODS:
+            if self.body:
+                raise ValueError(
+                    "Request.body could not be used with {} method".format(self.method)
+                )
+            if self.fields:
+                req_url = req_url + "?" + urlencode(self.fields)
+        else:
+            if self.body:
+                req_body = self.body
+            if self.fields:
+                if self.body:
+                    raise ValueError(
+                        "Request.body and Request.fields could not be set both"
+                    )
+                if self.multipart:
+                    req_body, content_type = encode_multipart_formdata(  # type: ignore
+                        self.fields
+                    )
+                    req_body = cast(bytes, req_body)
+                else:
+                    req_body, content_type = (
+                        urlencode(self.fields).encode(),
+                        "application/x-www-form-urlencoded",
+                    )
+                req_hdr = merge_with_dict(
+                    req_hdr,
+                    {"Content-Type": content_type, "Content-Length": len(req_body)},
+                    replace=True,
+                )
+        cookie_hdr = build_cookie_header(cookiejar, self.url, req_hdr)
+        if cookie_hdr:
+            req_hdr["Cookie"] = cookie_hdr
+        return {
+            "method": self.method,
+            "url": req_url,
+            "headers": req_hdr,
+            "body": req_body,
+        }
