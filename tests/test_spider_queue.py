@@ -15,7 +15,10 @@ from tests.util import BaseTestCase, load_test_config
 
 skip_on_win_and_mac = pytest.mark.skipif(
     sys.platform in {"win32", "darwin"},
-    reason="There is no Github Action Service to support this test case on Windows or MacOS",
+    reason=(
+        "There is no Github Action Service to support"
+        " this test case on Windows or MacOS"
+    ),
 )
 
 
