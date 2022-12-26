@@ -15,7 +15,7 @@ from .util.cookies import build_jar, create_cookie
 class RedirectExtension(BaseExtension[HttpRequest, Document]):
     def __init__(self, cookiejar: None | CookieJar = None) -> None:
         self.cookiejar = cookiejar if cookiejar else CookieJar()
-        self.extension_point_handlers = {
+        self.ext_handlers = {
             "init-retry": self.process_init_retry,
             "retry": self.process_retry,
         }
@@ -51,7 +51,7 @@ class RedirectExtension(BaseExtension[HttpRequest, Document]):
 class CookiesExtension(BaseExtension[HttpRequest, Document]):
     def __init__(self, cookiejar: None | CookieJar = None) -> None:
         self.cookiejar = cookiejar if cookiejar else CookieJar()
-        self.extension_point_handlers = {
+        self.ext_handlers = {
             "prepare_request_post": self.process_prepare_request_post,
             "request_cookies": self.process_request_cookies,
             "response_post": self.process_response_post,

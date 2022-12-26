@@ -58,13 +58,13 @@ class HttpClient(BaseClient[HttpRequest, Document]):
         if cfg.get("follow_location") is None:
             cfg["follow_location"] = True
         req = HttpRequest.create_from_mapping(cfg)
-        for func in self.extension_point_handlers["prepare_request_post"]:
+        for func in self.ext_handlers["prepare_request_post"]:
             func(req)
         return req
 
     def get_request_cookies(self, req: HttpRequest) -> CookieJar:
         jar = CookieJar()
-        for func in self.extension_point_handlers["request_cookies"]:
+        for func in self.ext_handlers["request_cookies"]:
             func(req, jar)
         return jar
 
@@ -78,7 +78,7 @@ class HttpClient(BaseClient[HttpRequest, Document]):
             req = self.prepare_request(request_kwargs)
         # redir_count = 0
         retry = Retry()
-        all(x(retry) for x in self.extension_point_handlers["init-retry"])
+        all(x(retry) for x in self.ext_handlers["init-retry"])
         while True:
             self.transport.request(req, self.get_request_cookies(req))
             with self.transport.wrap_transport_error():
@@ -86,7 +86,7 @@ class HttpClient(BaseClient[HttpRequest, Document]):
             if any(
                 (
                     (item := func(retry, req, doc)) != (None, None)
-                    for func in self.extension_point_handlers["retry"]
+                    for func in self.ext_handlers["retry"]
                 )
             ):
                 # pylint: disable=deprecated-typing-alias
@@ -97,7 +97,7 @@ class HttpClient(BaseClient[HttpRequest, Document]):
     def process_request_result(self, req: HttpRequest) -> Document:
         """Process result of real request performed via transport extension."""
         doc = self.transport.prepare_response(req, document_class=self.document_class)
-        for func in self.extension_point_handlers["response_post"]:
+        for func in self.ext_handlers["response_post"]:
             func(req, doc)
         return doc
 

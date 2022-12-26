@@ -44,7 +44,7 @@ class BaseResponse:
 
 
 class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
-    extension_point_handlers: Mapping[
+    ext_handlers: Mapping[
         Literal["prepare_request_post"]
         | Literal["request_cookies"]
         | Literal["response_post"]
@@ -59,8 +59,8 @@ class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         owner.extensions[attr] = {
             "instance": self,
         }
-        for point_name, func in self.extension_point_handlers.items():
-            owner.extension_point_handlers[point_name].append(func)
+        for point_name, func in self.ext_handlers.items():
+            owner.ext_handlers[point_name].append(func)
 
     def process_prepare_request_post(self, req: RequestT) -> None:
         pass
@@ -84,7 +84,7 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     __slots__ = ()
 
     extensions: MutableMapping[str, MutableMapping[str, Any]] = {}
-    extension_point_handlers: Mapping[str, list[Callable[..., Any]]] = {
+    ext_handlers: Mapping[str, list[Callable[..., Any]]] = {
         "prepare_request_post": [],
         "request_cookies": [],
         "response_post": [],
