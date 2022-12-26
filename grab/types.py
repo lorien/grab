@@ -10,22 +10,7 @@ import inspect
 import typing
 from typing import TypeVar, cast
 
-from .base import BaseExtension, RequestT, ResponseT
-
 T = TypeVar("T")
-
-
-def resolve_extension_entity(
-    entity: BaseExtension[RequestT, ResponseT]
-    | type[BaseExtension[RequestT, ResponseT]],
-) -> BaseExtension[RequestT, ResponseT]:
-    if (
-        not entity
-        or not isinstance(entity, BaseExtension)
-        or (not inspect.isclass(entity) or not issubclass(entity, BaseExtension))
-    ):
-        raise TypeError("Invalid BaseExtension entity: {}".format(entity))
-    return entity if isinstance(entity, BaseExtension) else entity()
 
 
 def resolve_entity(
