@@ -9,12 +9,28 @@ from http.cookiejar import CookieJar
 from typing import Any, Generic, Literal, TypeVar, cast
 
 __all__ = ["BaseRequest", "BaseExtension", "BaseClient", "BaseTransport"]
-
 RequestT = TypeVar("RequestT", bound="BaseRequest")
 ResponseT = TypeVar("ResponseT", bound="BaseResponse")
 RequestDupT = TypeVar("RequestDupT", bound="BaseRequest")
 ResponseDupT = TypeVar("ResponseDupT", bound="BaseResponse")
 T = TypeVar("T")
+
+
+def resolve_transport_entity(
+    entity: None
+    | BaseTransport[RequestT, ResponseT]
+    | type[BaseTransport[RequestT, ResponseT]],
+    default: type[BaseTransport[RequestT, ResponseT]],
+) -> BaseTransport[RequestT, ResponseT]:
+    if entity and (
+        not isinstance(entity, BaseTransport) and not issubclass(entity, BaseTransport)
+    ):
+        raise TypeError("Invalid BaseTransport entity: {}".format(entity))
+    if entity is None:
+        return default()
+    if isinstance(entity, BaseTransport):
+        return entity
+    return entity()
 
 
 class BaseRequest(metaclass=ABCMeta):
@@ -87,12 +103,17 @@ class Retry:
 
 
 class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
-    __slots__ = ()
+    __slots__ = ["transport"]
     transport: BaseTransport[RequestT, ResponseT]
 
     @property
     @abstractmethod
     def request_class(self) -> type[RequestT]:
+        ...
+
+    @property
+    @abstractmethod
+    def default_transport_class(self) -> type[BaseTransport[RequestT, ResponseT]]:
         ...
 
     extensions: MutableMapping[str, MutableMapping[str, Any]] = {}
@@ -104,7 +125,15 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         "retry": [],
     }
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        transport: None
+        | BaseTransport[RequestT, ResponseT]
+        | type[BaseTransport[RequestT, ResponseT]] = None,
+    ):
+        self.transport = resolve_transport_entity(
+            transport, self.default_transport_class
+        )
         for item in self.extensions.values():
             item["instance"].reset()
 
@@ -118,8 +147,7 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         retry = Retry()
         all(x(retry) for x in self.ext_handlers["init-retry"])
         while True:
-            for func in self.ext_handlers["request:pre"]:
-                func(req)
+            all(func(req) for func in self.ext_handlers["request:pre"])
             self.transport.reset()
             self.transport.request(req)
             with self.transport.wrap_transport_error():

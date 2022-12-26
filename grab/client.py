@@ -1,42 +1,23 @@
 from __future__ import annotations
 
-import logging
-from collections.abc import Mapping, MutableMapping
-from copy import copy
 from pprint import pprint  # pylint: disable=unused-import
 from typing import Any
 
-from .base import BaseClient, BaseTransport
+from .base import BaseClient
 from .document import Document
 from .extensions import RedirectExtension
 from .request import HttpRequest
 from .transport import Urllib3Transport
-from .types import resolve_entity, resolve_transport_entity
+from .types import resolve_entity
 
 __all__ = ["HttpClient", "request"]
-logger = logging.getLogger(__name__)
-
-
-def copy_config(config: Mapping[str, Any]) -> MutableMapping[str, Any]:
-    """Copy grab config with correct handling of mutable config values."""
-    return {x: copy(y) for x, y in config.items()}
 
 
 class HttpClient(BaseClient[HttpRequest, Document]):
     document_class: type[Document] = Document
-    transport_class = Urllib3Transport
     extension = RedirectExtension()
     request_class = HttpRequest
-
-    def __init__(
-        self,
-        transport: None
-        | BaseTransport[HttpRequest, Document]
-        | type[BaseTransport[HttpRequest, Document]] = None,
-    ) -> None:
-        self.config: MutableMapping[str, Any] = {}
-        self.transport = resolve_transport_entity(transport, self.transport_class)
-        super().__init__()
+    default_transport_class = Urllib3Transport
 
     def request(
         self, req: None | str | HttpRequest = None, **request_kwargs: Any
@@ -50,8 +31,7 @@ class HttpClient(BaseClient[HttpRequest, Document]):
     def process_request_result(self, req: HttpRequest) -> Document:
         """Process result of real request performed via transport extension."""
         doc = self.transport.prepare_response(req, document_class=self.document_class)
-        for func in self.ext_handlers["response:post"]:
-            func(req, doc)
+        all(func(req, doc) for func in self.ext_handlers["response:post"])
         return doc
 
 

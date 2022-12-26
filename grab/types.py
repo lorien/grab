@@ -10,44 +10,9 @@ import inspect
 import typing
 from typing import TypeVar, cast
 
-from .base import BaseClient, BaseExtension, BaseTransport, RequestT, ResponseT
+from .base import BaseExtension, RequestT, ResponseT
 
 T = TypeVar("T")
-
-
-def resolve_transport_entity(
-    entity: None
-    | BaseTransport[RequestT, ResponseT]
-    | type[BaseTransport[RequestT, ResponseT]],
-    default: type[BaseTransport[RequestT, ResponseT]],
-) -> BaseTransport[RequestT, ResponseT]:
-    if entity and (
-        not isinstance(entity, BaseTransport) and not issubclass(entity, BaseTransport)
-    ):
-        raise TypeError("Invalid BaseTransport entity: {}".format(entity))
-    if entity is None:
-        return default()
-    if isinstance(entity, BaseTransport):
-        return entity
-    return entity()
-
-
-def resolve_grab_entity(
-    entity: None
-    | BaseClient[RequestT, ResponseT]
-    | type[BaseClient[RequestT, ResponseT]],
-    default: type[BaseClient[RequestT, ResponseT]],
-) -> BaseClient[RequestT, ResponseT]:
-    if entity and (
-        not isinstance(entity, BaseClient) and not issubclass(entity, BaseClient)
-    ):
-        raise TypeError("Invalid BaseClient entity: {}".format(entity))
-    if entity is None:
-        assert issubclass(default, BaseClient)
-        return default()
-    if isinstance(entity, BaseClient):
-        return entity
-    return entity()
 
 
 def resolve_extension_entity(

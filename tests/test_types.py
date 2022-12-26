@@ -1,40 +1,44 @@
 from unittest import TestCase
 
 from grab import HttpClient
+from grab.base import resolve_transport_entity
 from grab.transport import Urllib3Transport
-from grab.types import resolve_grab_entity, resolve_transport_entity
+from grab.types import resolve_entity
 
 
 class ResolveHttpClientEntityTestCase(TestCase):
-    def test_resolve_grab_entity_default(self) -> None:
-        class SuperHttpClient(HttpClient):
-            pass
-
-        self.assertTrue(
-            isinstance(resolve_grab_entity(None, SuperHttpClient), SuperHttpClient)
-        )
-
-    def test_resolve_grab_entity_none_nodefault(self) -> None:
-        with self.assertRaises(TypeError):
-            resolve_grab_entity(None, None)
-
-    def test_resolve_grab_entity_instance(self) -> None:
+    def test_resolve_entity_default(self) -> None:
         class SuperHttpClient(HttpClient):
             pass
 
         self.assertTrue(
             isinstance(
-                resolve_grab_entity(SuperHttpClient(), HttpClient), SuperHttpClient
+                resolve_entity(HttpClient, None, SuperHttpClient), SuperHttpClient
             )
         )
 
-    def test_resolve_grab_entity_class(self) -> None:
+    def test_resolve_entity_none_nodefault(self) -> None:
+        with self.assertRaises(TypeError):
+            resolve_entity(None, None, None)
+
+    def test_resolve_entity_instance(self) -> None:
         class SuperHttpClient(HttpClient):
             pass
 
         self.assertTrue(
             isinstance(
-                resolve_grab_entity(SuperHttpClient, HttpClient), SuperHttpClient
+                resolve_entity(HttpClient, SuperHttpClient(), HttpClient),
+                SuperHttpClient,
+            )
+        )
+
+    def test_resolve_entity_class(self) -> None:
+        class SuperHttpClient(HttpClient):
+            pass
+
+        self.assertTrue(
+            isinstance(
+                resolve_entity(HttpClient, SuperHttpClient, HttpClient), SuperHttpClient
             )
         )
 
