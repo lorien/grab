@@ -8,7 +8,7 @@ from .document import Document
 from .extensions import RedirectExtension
 from .request import HttpRequest
 from .transport import Urllib3Transport
-from .types import resolve_entity
+from .util.types import resolve_entity
 
 __all__ = ["HttpClient", "request"]
 

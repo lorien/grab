@@ -1,8 +1,11 @@
+import sys
 from unittest import TestCase
+
+import pytest
 
 from grab import HttpClient
 from grab.transport import Urllib3Transport
-from grab.types import resolve_entity
+from grab.util.types import resolve_entity
 
 
 class ResolveHttpClientEntityTestCase(TestCase):
