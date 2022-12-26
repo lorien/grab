@@ -47,7 +47,9 @@ class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     extension_point_handlers: Mapping[
         Literal["prepare_request_post"]
         | Literal["request_cookies"]
-        | Literal["response_post"],
+        | Literal["response_post"]
+        | Literal["init-retry"]
+        | Literal["retry"],
         Callable[..., Any],
     ] = {}
 
@@ -82,10 +84,12 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     __slots__ = ()
 
     extensions: MutableMapping[str, MutableMapping[str, Any]] = {}
-    extension_point_handlers: Mapping[str, list[Callable[..., None]]] = {
+    extension_point_handlers: Mapping[str, list[Callable[..., Any]]] = {
         "prepare_request_post": [],
         "request_cookies": [],
         "response_post": [],
+        "init-retry": [],
+        "retry": [],
     }
 
     def __init__(self) -> None:

@@ -2,13 +2,50 @@ from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping
 from http.cookiejar import Cookie, CookieJar
-from typing import Any
-from urllib.parse import urlsplit
+from typing import Any, cast
+from urllib.parse import urljoin, urlsplit
 
 from .base import BaseExtension
 from .document import Document
+from .errors import GrabTooManyRedirectsError
 from .request import HttpRequest
 from .util.cookies import build_jar, create_cookie
+
+
+class RedirectExtension(BaseExtension[HttpRequest, Document]):
+    def __init__(self, cookiejar: None | CookieJar = None) -> None:
+        self.cookiejar = cookiejar if cookiejar else CookieJar()
+        self.extension_point_handlers = {
+            "init-retry": self.process_init_retry,
+            "retry": self.process_retry,
+        }
+
+    def find_redirect_url(self, doc: Document) -> None | str:
+        assert doc.headers is not None
+        if doc.code in {301, 302, 303, 307, 308} and doc.headers["Location"]:
+            return cast(str, doc.headers["Location"])
+        return None
+
+    def process_init_retry(self, retry: Any) -> None:
+        retry.state["redirect_count"] = 0
+
+    def reset(self) -> None:
+        pass
+
+    def process_retry(
+        self, retry: Any, req: HttpRequest, resp: Document
+    ) -> tuple[None, None] | tuple[Any, HttpRequest]:
+        if (
+            req.follow_location
+            and (redir_url := self.find_redirect_url(resp)) is not None
+        ):
+            retry.state["redirect_count"] += 1
+            if retry.state["redirect_count"] > req.redirect_limit:
+                raise GrabTooManyRedirectsError()
+            redir_url = urljoin(req.url, redir_url)
+            req.url = redir_url
+            return retry, req
+        return None, None
 
 
 class CookiesExtension(BaseExtension[HttpRequest, Document]):

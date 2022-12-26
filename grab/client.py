@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 import logging
+import typing
 from collections.abc import Mapping, MutableMapping
 from copy import copy
 from http.cookiejar import CookieJar
 from pprint import pprint  # pylint: disable=unused-import
 from typing import Any, cast
-from urllib.parse import urljoin
 
 from .base import BaseClient, BaseTransport
 from .document import Document
-from .errors import GrabTooManyRedirectsError
+from .extensions import RedirectExtension
 from .request import HttpRequest
 from .transport import Urllib3Transport
 from .types import resolve_entity, resolve_transport_entity
@@ -24,9 +24,15 @@ def copy_config(config: Mapping[str, Any]) -> MutableMapping[str, Any]:
     return {x: copy(y) for x, y in config.items()}
 
 
+class Retry:
+    def __init__(self) -> None:
+        self.state: MutableMapping[str, int] = {}
+
+
 class HttpClient(BaseClient[HttpRequest, Document]):
     document_class: type[Document] = Document
     transport_class = Urllib3Transport
+    extension = RedirectExtension()
 
     def __init__(
         self,
@@ -56,12 +62,6 @@ class HttpClient(BaseClient[HttpRequest, Document]):
             func(req)
         return req
 
-    def find_redirect_url(self, doc: Document) -> None | str:
-        assert doc.headers is not None
-        if doc.code in {301, 302, 303, 307, 308} and doc.headers["Location"]:
-            return cast(str, doc.headers["Location"])
-        return None
-
     def get_request_cookies(self, req: HttpRequest) -> CookieJar:
         jar = CookieJar()
         for func in self.extension_point_handlers["request_cookies"]:
@@ -76,21 +76,21 @@ class HttpClient(BaseClient[HttpRequest, Document]):
                 assert isinstance(req, str)
                 request_kwargs["url"] = req
             req = self.prepare_request(request_kwargs)
-        redir_count = 0
+        # redir_count = 0
+        retry = Retry()
+        all(x(retry) for x in self.extension_point_handlers["init-retry"])
         while True:
             self.transport.request(req, self.get_request_cookies(req))
             with self.transport.wrap_transport_error():
                 doc = self.process_request_result(req)
-            if (
-                req.follow_location
-                and (redir_url := self.find_redirect_url(doc)) is not None
+            if any(
+                (
+                    (item := func(retry, req, doc)) != (None, None)
+                    for func in self.extension_point_handlers["retry"]
+                )
             ):
-                redir_count += 1
-                if redir_count > req.redirect_limit:
-                    raise GrabTooManyRedirectsError()
-                redir_url = urljoin(req.url, redir_url)
-                request_kwargs["url"] = redir_url
-                req = self.prepare_request(request_kwargs)
+                # pylint: disable=deprecated-typing-alias
+                retry, req = cast(typing.Tuple[Retry, HttpRequest], item)
                 continue
             return doc
 
