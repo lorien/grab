@@ -18,7 +18,7 @@ class ResolveHttpClientEntityTestCase(TestCase):
 
     def test_resolve_entity_none_nodefault(self) -> None:
         with self.assertRaises(TypeError):
-            resolve_entity(None, None, None)
+            resolve_entity(None, None, None)  # type: ignore
 
     def test_resolve_entity_instance(self) -> None:
         class SuperHttpClient(HttpClient):
@@ -55,7 +55,7 @@ class ResolveTransportEntityTestCase(TestCase):
 
     def test_resolve_transport_entity_none_nodefault(self) -> None:
         with self.assertRaises(TypeError):
-            Urllib3Transport.resolve_entity(None, None)
+            Urllib3Transport.resolve_entity(None, None)  # type: ignore
 
     def test_resolve_transport_entity_instance(self) -> None:
         class SuperTransport(Urllib3Transport):
@@ -63,7 +63,7 @@ class ResolveTransportEntityTestCase(TestCase):
 
         self.assertTrue(
             isinstance(
-                Urllib3Transport.resolve_entity(SuperTransport(), HttpClient),
+                Urllib3Transport.resolve_entity(SuperTransport(), Urllib3Transport),
                 SuperTransport,
             )
         )
@@ -74,7 +74,7 @@ class ResolveTransportEntityTestCase(TestCase):
 
         self.assertTrue(
             isinstance(
-                Urllib3Transport.resolve_entity(SuperTransport, HttpClient),
+                Urllib3Transport.resolve_entity(SuperTransport, Urllib3Transport),
                 SuperTransport,
             )
         )

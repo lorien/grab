@@ -22,11 +22,11 @@ class GrabSimpleTestCase(BaseTestCase):
     def setUp(self) -> None:
         self.server.reset()
 
-    def test_body_get_bytes_body_true(self) -> None:
+    def test_body(self) -> None:
         grab = CustomHttpClient()
         self.server.add_response(Response(data=b"bar"))
         doc = grab.request(self.server.get_url())
-        self.assertEqual(doc.get_bytes_body(), b"bar")
+        self.assertEqual(doc.body, b"bar")
 
     def test_external_set_document_body(self) -> None:
         grab = HttpClient()
@@ -58,7 +58,8 @@ class GrabSimpleTestCase(BaseTestCase):
         grab = HttpClient()
         doc = grab.request(self.server.get_url())
         items = []
-        for elem in doc.select('//a[contains(@class, "exploregrid-item")]'):
+        assert doc.url is not None
+        for elem in list(doc.select('//a[contains(@class, "exploregrid-item")]')):
             items.append(urljoin(doc.url, elem.attr("href")))
         self.assertTrue("tools-for-open-source" in items[2])
 

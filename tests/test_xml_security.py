@@ -1,7 +1,10 @@
 # Reference:
 # https://lxml.de/FAQ.html#how-do-i-use-lxml-safely-as-a-web-service-endpoint
+
 import os
+import typing
 from io import BytesIO
+from typing import cast
 
 from lxml.etree import parse
 
@@ -28,4 +31,8 @@ class GrabSimpleTestCase(BaseTestCase):
                 "<root>&ee;</root>"
             ).encode()
             tree = parse(BytesIO(bad_xml))
-            self.assertEqual(tree.xpath("//root/text()")[0], "Hey there!")
+            # pylint: disable=deprecated-typing-alias
+            self.assertEqual(
+                cast(typing.List[str], tree.xpath("//root/text()"))[0],
+                "Hey there!",
+            )
