@@ -1,4 +1,10 @@
-from lxml.html import fromstring
+from __future__ import annotations
+
+import typing
+from typing import cast
+
+from lxml.etree import _Element
+from lxml.html import HtmlElement, fromstring
 from test_server import Response
 
 from grab import DataNotFound, request
@@ -30,7 +36,6 @@ HTML = """
         <li id="num-2">item #2</li>
     </ul>
 """
-
 
 XML = b"""
 <root>
@@ -64,20 +69,36 @@ class LXMLExtensionTest(BaseTestCase):
     def test_lxml_text_content_fail(self) -> None:
         # lxml node text_content() method do not put spaces between text
         # content of adjacent XML nodes
+        # pylint: disable=deprecated-typing-alias
         self.assertEqual(
-            self.lxml_tree.xpath('//div[@id="bee"]/div')[0].text_content().strip(),
+            cast(
+                typing.List[HtmlElement], self.lxml_tree.xpath('//div[@id="bee"]/div')
+            )[0]
+            .text_content()
+            .strip(),
             "пчела",
         )
         self.assertEqual(
-            self.lxml_tree.xpath('//div[@id="fly"]')[0].text_content().strip(),
+            cast(typing.List[HtmlElement], self.lxml_tree.xpath('//div[@id="fly"]'))[0]
+            .text_content()
+            .strip(),
             "му\nха",
         )
 
     def test_lxml_xpath(self) -> None:
-        names = {x.tag for x in self.lxml_tree.xpath('//div[@id="bee"]//*')}
+        # pylint: disable=deprecated-typing-alias
+        names = {
+            x.tag
+            for x in cast(
+                typing.List[_Element], self.lxml_tree.xpath('//div[@id="bee"]//*')
+            )
+        }
         self.assertEqual({"em", "div", "strong", "style", "script"}, names)
         xpath_query = '//div[@id="bee"]//*[name() != "script" and name() != "style"]'
-        names = {x.tag for x in self.lxml_tree.xpath(xpath_query)}
+        names = {
+            x.tag
+            for x in cast(typing.List[_Element], self.lxml_tree.xpath(xpath_query))
+        }
         self.assertEqual({"em", "div", "strong"}, names)
 
     def test_xpath(self) -> None:
@@ -136,9 +157,12 @@ class LXMLExtensionTest(BaseTestCase):
         self.assertFalse(self.doc.select('//li[@id="num-3"]').exists())
 
     def test_cdata_issue(self) -> None:
+        # pylint: disable=deprecated-typing-alias
         self.server.add_response(Response(data=XML), count=2)
         doc = request(self.server.get_url(), document_type="xml")
-        self.assertEqual("30", doc.tree.xpath("//weight")[0].text)
+        self.assertEqual(
+            "30", cast(typing.List[_Element], doc.tree.xpath("//weight"))[0].text
+        )
 
     def test_xml_declaration(self) -> None:
         # HTML with XML declaration should be processed without errors.

@@ -1,10 +1,7 @@
-from pprint import pprint  # pylint: disable=unused-import
-
 from test_server import Response
 
 from grab import HttpClient
 from grab.document import Document
-from grab.errors import GrabMisuseError
 from tests.util import BaseTestCase
 
 
@@ -46,4 +43,4 @@ class GrabApiTestCase(BaseTestCase):
         data = """
         <h1>test</h1>
         """
-        self.assertRaises(GrabMisuseError, Document, data)
+        self.assertRaises(ValueError, Document, data)

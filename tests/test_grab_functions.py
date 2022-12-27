@@ -11,7 +11,7 @@ class RequestFuncTestCase(TestCase):
 
         class DummyHttpClient(HttpClient):
             def request(self, *_args, **_kwargs):
-                return DummyDocument()
+                return DummyDocument(b"")
 
         self.assertTrue(
             isinstance(

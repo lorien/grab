@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-# from proxylist.source import BaseFileProxySource
-# from proxylist import ProxyList
 from test_server import Response, TestServer
 
 from grab import request
 from tests.util import BaseTestCase  # , temp_file
+
+# from proxylist.source import BaseFileProxySource
+# from proxylist import ProxyList
+
 
 TestServer.__test__ = False  # make pytest do not explore it for test cases
 ADDRESS = "127.0.0.1"
@@ -21,6 +23,7 @@ class TestProxy(BaseTestCase):
         for _ in range(3):
             serv = TestServer(address=ADDRESS, port=0)
             serv.start()
+            assert serv.port is not None
             cls.extra_servers[serv.port] = {
                 "server": serv,
                 "proxy": "%s:%d" % (ADDRESS, serv.port),

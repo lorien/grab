@@ -34,3 +34,5 @@ ignore=F401,C812,C813,D100,D101,D102,D103,D104,D106,D107,D105,P101,PIE798,PIE786
 max-line-length=88
 inline-quotes = double
 max-complexity=10
+max-cognitive-complexity=17
+max-expression-complexity=8

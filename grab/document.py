@@ -1,4 +1,5 @@
 """The Document class is the result of network request made with Grab instance."""
+
 from __future__ import annotations
 
 import email
@@ -16,7 +17,6 @@ from contextlib import suppress
 from copy import copy, deepcopy
 from http.cookiejar import Cookie
 from io import BytesIO, StringIO
-from pprint import pprint  # pylint: disable=unused-import
 from re import Match, Pattern
 from typing import Any, TypedDict, cast
 from urllib.parse import SplitResult, parse_qs, urljoin, urlsplit
@@ -64,11 +64,11 @@ class Document(
         "document_type",
         "code",
         "head",
-        "_bytes_body",
         "headers",
         "url",
         "cookies",
         "encoding",
+        "_bytes_body",
         "_unicode_body",
         "download_size",
         "upload_size",
@@ -87,7 +87,7 @@ class Document(
 
     def __init__(
         self,
-        body: None | bytes = None,
+        body: bytes,
         *,
         document_type: None | str = "html",
         head: None | bytes = None,
@@ -98,7 +98,6 @@ class Document(
         cookies: None | Sequence[Cookie] = None,
     ) -> None:
         # Cache attributes
-        self._bytes_body: None | bytes = None
         self._unicode_body: None | str = None
         self._lxml_tree: None | _Element = None
         self._strict_lxml_tree: None | _Element = None
@@ -107,13 +106,12 @@ class Document(
         self._file_fields: MutableMapping[str, Any] = {}
         # Main attributes
         self.document_type = document_type
-        if body is not None:
-            if not isinstance(body, bytes):
-                raise GrabMisuseError("Document content must be bytes")
-            self.set_body(body)
+        if not isinstance(body, bytes):
+            raise ValueError("Argument 'body' must be bytes")
+        self._bytes_body = body
         self.code = code
         self.head = head
-        self.headers = headers
+        self.headers: email.message.Message = headers or email.message.Message()
         self.url = url
         # Encoding must be processed AFTER body and headers are set
         self.encoding = self.process_encoding(encoding)
@@ -171,7 +169,7 @@ class Document(
                 os.makedirs(path_dir)
 
         with open(path, "wb") as out:
-            out.write(self._bytes_body if self._bytes_body is not None else b"")
+            out.write(self.body)
 
     @property
     def status(self) -> None | int:
@@ -234,7 +232,7 @@ class Document(
         """
         assert self.body is not None
         if isinstance(anchor, str):
-            return anchor in cast(str, self.unicode_body())
+            return anchor in self.unicode_body()
         return anchor in self.body
 
     def text_assert(self, anchor: str | bytes) -> None:
@@ -242,7 +240,7 @@ class Document(
         if not self.text_search(anchor):
             raise DataNotFound("Substring not found: {}".format(str(anchor)))
 
-    def text_assert_any(self, anchors: list[str | bytes]) -> None:
+    def text_assert_any(self, anchors: Sequence[str | bytes]) -> None:
         """If no `anchors` were found then raise `DataNotFound` exception."""
         if not any(self.text_search(x) for x in anchors):
             raise DataNotFound(
@@ -284,7 +282,7 @@ class Document(
         match = (
             regexp.search(self.body)
             if isinstance(regexp.pattern, bytes)
-            else regexp.search(cast(str, self.unicode_body()))
+            else regexp.search(self.unicode_body())
         )
         if match:
             return match
@@ -317,17 +315,13 @@ class Document(
 
     # BodyExtension methods
 
-    def get_body_chunk(self) -> None | bytes:
-        if self._bytes_body:
-            return self._bytes_body[:4096]
-        return None
+    def get_body_chunk(self) -> bytes:
+        return self.body[:4096]
 
     def unicode_body(
         self,
-    ) -> None | str:  # , ignore_errors: bool = True) -> None | str:
+    ) -> str:
         """Return response body as unicode string."""
-        if self.body is None:
-            return None
         if not self._unicode_body:
             # FIXME: ignore_errors option
             self._unicode_body = unicodec.decode_content(
@@ -336,16 +330,12 @@ class Document(
         return self._unicode_body
 
     @property
-    def body(self) -> None | bytes:
-        return cast(bytes, self._bytes_body)
+    def body(self) -> bytes:
+        return self._bytes_body
 
     @body.setter
     def body(self, body: bytes) -> None:
         raise GrabMisuseError("Document body could be set only in constructor")
-
-    def set_body(self, body: bytes) -> None:
-        self._bytes_body = body
-        self._unicode_body = None
 
     # DomTreeExtension methods
 
