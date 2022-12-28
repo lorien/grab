@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Callable
+from typing import Any, cast
 
 from test_server import Response
 
@@ -7,13 +10,13 @@ from grab.errors import GrabInvalidResponse, GrabTooManyRedirectsError
 from tests.util import BaseTestCase
 
 
-def build_location_callback(url: str, counter: int) -> Callable:
+def build_location_callback(url: str, counter: int) -> Callable[[], dict[str, Any]]:
     meta = {
         "counter": counter,
         "url": url,
     }
 
-    def callback():
+    def callback() -> dict[str, Any]:
         if meta["counter"]:
             status = 301
             headers = [("Location", meta["url"])]
@@ -22,7 +25,7 @@ def build_location_callback(url: str, counter: int) -> Callable:
             status = 200
             headers = []
             data = b"done"
-        meta["counter"] -= 1
+        meta["counter"] = cast(int, meta["counter"]) - 1
         return {
             "type": "response",
             "status": status,
@@ -56,7 +59,7 @@ class GrabRedirectTestCase(BaseTestCase):
         self.assertTrue(b"done" in doc.body)
 
     def test_redirect_utf_location(self) -> None:
-        def callback():
+        def callback() -> bytes:
             url = (self.server.get_url() + "фыва").encode("utf-8")
             return (
                 b"HTTP/1.1 301 OK\nLocation: %s\nLocation-Length: 9\n\ncontent-1" % url

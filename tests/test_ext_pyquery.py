@@ -7,7 +7,7 @@ from tests.util import BaseTestCase
 class ExtensionPyqueryTestCase(BaseTestCase):
     backend = "pyquery"
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
     def test_pyquery_handler(self) -> None:

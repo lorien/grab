@@ -12,7 +12,7 @@ from tests.util import BaseTestCase, temp_dir
 
 
 class GrabSimpleTestCase(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
     def test_lxml_security_bug(self) -> None:

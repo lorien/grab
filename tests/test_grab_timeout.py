@@ -6,7 +6,7 @@ from tests.util import BaseTestCase
 
 
 class GrabTimeoutCase(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
     def test_timeout_raises(self) -> None:

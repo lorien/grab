@@ -1,23 +1,24 @@
 from test_server import Response
 
+from grab.document import Document
 from grab.spider import Spider, Task
 from tests.util import BaseTestCase
 
 
 class BasicSpiderTestCase(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
     def test_counters_and_collections(self) -> None:
         class TestSpider(Spider):
-            def prepare(self):
-                self.stat.logging_period = 0
+            def prepare(self) -> None:
+                self.stat.logging_interval = 0
                 self.stat.inc("foo")
 
-            def task_page_valid(self, unused_grab, unused_task):
+            def task_page_valid(self, _doc: Document, _task: Task) -> None:
                 self.stat.inc("foo")
 
-            def task_page_fail(self, unused_grab, unused_task):
+            def task_page_fail(self, _doc: Document, _task: Task) -> None:
                 raise Exception("Shit happens!")
 
         self.server.add_response(Response(), count=2)
@@ -32,11 +33,11 @@ class BasicSpiderTestCase(BaseTestCase):
         self.server.add_response(Response())
 
         class TestSpider(Spider):
-            def prepare(self):
-                self.stat.logging_period = 0
+            def prepare(self) -> None:
+                self.stat.logging_interval = 0
                 self.stat.inc("foo")
 
-            def task_page(self, grab, task):
+            def task_page(self, _doc: Document, _task: Task) -> None:
                 pass
 
         bot = TestSpider()

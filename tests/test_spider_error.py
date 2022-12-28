@@ -1,8 +1,11 @@
-from pprint import pprint  # pylint: disable=unused-import
+from __future__ import annotations
+
+from collections.abc import Generator
+from typing import Any
 
 from test_server import Response
 
-from grab import HttpRequest
+from grab import Document, HttpRequest
 from grab.spider import Spider, Task
 from tests.util import BaseTestCase
 
@@ -23,7 +26,7 @@ class SpiderErrorTestCase(BaseTestCase):
 
     def test_generator_with_invalid_url(self) -> None:
         class SomeSpider(Spider):
-            def task_generator(self):
+            def task_generator(self) -> Generator[Task, None, None]:
                 yield Task("page", url=INVALID_URL)
 
         bot = SomeSpider()
@@ -34,15 +37,15 @@ class SpiderErrorTestCase(BaseTestCase):
         server = self.server
 
         class TestSpider(Spider):
-            def __init__(self, *args, **kwargs):
+            def __init__(self, *args: Any, **kwargs: Any) -> None:
                 super().__init__(*args, **kwargs)
                 self.done_counter = 0
 
-            def task_generator(self):
+            def task_generator(self) -> Generator[Task, None, None]:
                 self.done_counter = 0
                 yield Task("page", url=server.get_url())
 
-            def task_page(self, grab, task):
+            def task_page(self, _doc: Document, task: Task) -> None:
                 pass
 
         self.server.add_response(
@@ -60,15 +63,15 @@ class SpiderErrorTestCase(BaseTestCase):
         server.add_response(Response(sleep=2))
 
         class SimpleSpider(Spider):
-            def prepare(self):
+            def prepare(self) -> None:
                 self.network_try_limit = 1
 
-            def task_generator(self):
+            def task_generator(self) -> Generator[Task, None, None]:
                 yield Task(
                     "page", HttpRequest(method="GET", url=server.get_url(), timeout=1)
                 )
 
-            def task_page(self, grab, unused_task):
+            def task_page(self, _doc: Document, _task: Task) -> None:
                 pass
 
         bot = SimpleSpider()

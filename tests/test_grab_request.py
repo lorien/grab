@@ -1,4 +1,6 @@
-from pprint import pprint  # pylint: disable=unused-import
+from __future__ import annotations
+
+from typing import Any
 
 from test_server import Response
 
@@ -7,7 +9,7 @@ from tests.util import BaseTestCase
 
 
 class GrabRequestTestCase(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
     def test_get_method(self) -> None:
@@ -27,7 +29,7 @@ class GrabRequestTestCase(BaseTestCase):
         self.assertEqual("3", self.server.request.headers.get("content-length"))
 
     def test_head_with_invalid_bytes(self) -> None:
-        def callback():
+        def callback() -> dict[str, Any]:
             return {
                 "type": "response",
                 "status": 200,

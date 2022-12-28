@@ -7,7 +7,7 @@
 #
 #
 # class TestUploadContent(BaseTestCase):
-#    def setUp(self):
+#    def setUp(self) -> None:
 #        self.server.reset()
 #
 #    def prepare_form_grab(self):

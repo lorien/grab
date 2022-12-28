@@ -1,8 +1,8 @@
 .PHONY: bootstrap venv deps dirs clean pytest test release mypy pylint flake8 bandit check build docs eradicate
 
 SHELL := /bin/bash
-FILES_CHECK_MYPY = grab
-FILES_CHECK_ALL = $(FILES_CHECK_MYPY) tests
+FILES_CHECK_MYPY = grab tests
+FILES_CHECK_ALL = $(FILES_CHECK_MYPY)
 
 bootstrap: venv deps dirs
 

@@ -7,7 +7,7 @@ DEFAULT_PLIST_DATA = b"1.1.1.1:8080\n1.1.1.2:8080\n"
 
 
 class ProxyListTestCase(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
     def generate_plist_file(self, path: str, data: bytes = DEFAULT_PLIST_DATA) -> str:

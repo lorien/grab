@@ -5,7 +5,7 @@ from tests.util import BaseTestCase
 
 
 class LXMLExtensionTest(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
     def test_dash_issue(self) -> None:

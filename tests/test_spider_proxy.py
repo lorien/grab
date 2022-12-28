@@ -1,21 +1,24 @@
 from __future__ import annotations
 
-# from proxylist import ProxyServer
-# from proxylist.base import BaseProxySource
+from typing import Any
+
 from test_server import Response, TestServer
 
-from grab import HttpRequest
+from grab import Document, HttpRequest
 from grab.spider import Spider, Task
 from tests.util import ADDRESS, BaseTestCase, temp_file
 
+# from proxylist import ProxyServer
+# from proxylist.base import BaseProxySource
+
 
 class SimpleSpider(Spider):
-    def task_baz(self, doc, unused_task):
-        self.collect_runtime_event("ports", int(doc.headers.get("Listen-Port", 0)))
+    def task_baz(self, doc: Document, _task: Task) -> None:
+        self.collect_runtime_event("ports", str(int(doc.headers.get("Listen-Port", 0))))
 
 
 class TestSpiderProxyCase(BaseTestCase):
-    extra_servers: dict[int, dict]
+    extra_servers: dict[int, dict[str, Any]]
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -141,7 +144,7 @@ class TestSpiderProxyCase(BaseTestCase):
                 "%s:%s" % (ADDRESS, self.server.port),
             )
             self.assertEqual(1, len(set(bot.runtime_events["ports"])))
-            self.assertEqual(bot.runtime_events["ports"][0], self.server.port)
+            self.assertEqual(bot.runtime_events["ports"][0], str(self.server.port))
 
     # def test_spider_custom_proxy_source(self):
     #    proxy_port = self.server.port

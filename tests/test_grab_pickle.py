@@ -5,7 +5,7 @@ from tests.util import BaseTestCase
 
 
 class TestGrab(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
     def test_pickle_grab(self) -> None:

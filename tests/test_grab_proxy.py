@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from test_server import Response, TestServer
 
 from grab import request
@@ -14,7 +16,7 @@ ADDRESS = "127.0.0.1"
 
 
 class TestProxy(BaseTestCase):
-    extra_servers: dict[int, dict]
+    extra_servers: dict[int, dict[str, Any]]
 
     @classmethod
     def setUpClass(cls) -> None:

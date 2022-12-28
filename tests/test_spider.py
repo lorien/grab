@@ -1,6 +1,11 @@
+from __future__ import annotations
+
+from collections.abc import Generator, Iterator
+from typing import Any
+
 from test_server import Response
 
-from grab import HttpRequest
+from grab import Document, HttpRequest
 from grab.spider import Spider, Task
 from grab.spider.errors import FatalError, SpiderError
 from grab.util.timeout import Timeout
@@ -8,12 +13,12 @@ from tests.util import BaseTestCase
 
 
 class SimpleSpider(Spider):
-    def task_baz(self, doc, unused_task):
-        self.collect_runtime_event("SAVED_ITEM", doc.body)
+    def task_baz(self, doc: Document, _task: Task) -> None:
+        self.collect_runtime_event("SAVED_ITEM", doc.unicode_body())
 
 
 class BasicSpiderTestCase(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
     def test_spider(self) -> None:
@@ -21,7 +26,7 @@ class BasicSpiderTestCase(BaseTestCase):
         bot = SimpleSpider()
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
-        self.assertEqual(b"Hello spider!", bot.runtime_events["SAVED_ITEM"][0])
+        self.assertEqual("Hello spider!", bot.runtime_events["SAVED_ITEM"][0])
 
     def test_network_limit(self) -> None:
         class CustomSimpleSpider(SimpleSpider):
@@ -102,7 +107,7 @@ class BasicSpiderTestCase(BaseTestCase):
         bot = SimpleSpider()
         bot.add_task(Task("baz", self.server.get_url()))
         bot.run()
-        self.assertEqual(b"xxx", bot.runtime_events["SAVED_ITEM"][0])
+        self.assertEqual("xxx", bot.runtime_events["SAVED_ITEM"][0])
 
     def testz_generator(self) -> None:
         number = 13
@@ -110,11 +115,11 @@ class BasicSpiderTestCase(BaseTestCase):
         server.add_response(Response(), count=number)
 
         class TestSpider(Spider):
-            def task_generator(self):
+            def task_generator(self) -> Iterator[Task]:
                 for _ in range(number):
                     yield Task("page", url=server.get_url())
 
-            def task_page(self, unused_grab, unused_task):
+            def task_page(self, _doc: Document, _task: Task) -> None:
                 self.stat.inc("count")
 
         bot = TestSpider()
@@ -123,14 +128,16 @@ class BasicSpiderTestCase(BaseTestCase):
 
     def test_handler_result_none(self) -> None:
         class TestSpider(Spider):
-            def __init__(self, *args, **kwargs):
+            def __init__(self, *args: Any, **kwargs: Any) -> None:
                 super().__init__(*args, **kwargs)
+                self.points: list[int] = []
+
+            def prepare(self) -> None:
                 self.points = []
 
-            def prepare(self):
-                self.points = []
-
-            def task_page(self, unused_grab, unused_task):
+            def task_page(
+                self, _doc: Document, _task: Task
+            ) -> Generator[None, None, None]:
                 yield None
 
         self.server.add_response(Response(), count=-1)
@@ -140,17 +147,17 @@ class BasicSpiderTestCase(BaseTestCase):
 
     def test_fallback_handler_by_default_name(self) -> None:
         class TestSpider(Spider):
-            def __init__(self, *args, **kwargs):
+            def __init__(self, *args: Any, **kwargs: Any) -> None:
                 super().__init__(*args, **kwargs)
+                self.points: list[int] = []
+
+            def prepare(self) -> None:
                 self.points = []
 
-            def prepare(self):
-                self.points = []
-
-            def task_page(self, grab, task):
+            def task_page(self, _doc: Document, _task: Task) -> None:
                 pass
 
-            def task_page_fallback(self, unused_task):
+            def task_page_fallback(self, _task: Task) -> None:
                 self.points.append(1)
 
         self.server.add_response(Response(status=403))
@@ -162,17 +169,17 @@ class BasicSpiderTestCase(BaseTestCase):
 
     def test_fallback_handler_by_fallback_name(self) -> None:
         class TestSpider(Spider):
-            def __init__(self, *args, **kwargs):
+            def __init__(self, *args: Any, **kwargs: Any) -> None:
                 super().__init__(*args, **kwargs)
+                self.points: list[int] = []
+
+            def prepare(self) -> None:
                 self.points = []
 
-            def prepare(self):
-                self.points = []
-
-            def task_page(self, grab, task):
+            def task_page(self, _doc: Document, task: Task) -> None:
                 pass
 
-            def fallback_zz(self, unused_task):
+            def fallback_zz(self, _task: Task) -> None:
                 self.points.append(1)
 
         self.server.add_response(Response(status=403))
@@ -186,10 +193,10 @@ class BasicSpiderTestCase(BaseTestCase):
 
     def test_check_task_limits_invalid_value(self) -> None:
         class TestSpider(Spider):
-            def task_page(self, grab, task):
+            def task_page(self, _doc: Document, _task: Task) -> None:
                 pass
 
-            def check_task_limits(self, task):
+            def check_task_limits(self, _task: Task) -> tuple[bool, str]:
                 return False, "zz"
 
         bot = TestSpider()
@@ -200,14 +207,16 @@ class BasicSpiderTestCase(BaseTestCase):
 
     def test_handler_result_invalid(self) -> None:
         class TestSpider(Spider):
-            def __init__(self, *args, **kwargs):
+            def __init__(self, *args: Any, **kwargs: Any) -> None:
                 super().__init__(*args, **kwargs)
+                self.points: list[int] = []
+
+            def prepare(self) -> None:
                 self.points = []
 
-            def prepare(self):
-                self.points = []
-
-            def task_page(self, unused_grab, unused_task):
+            def task_page(
+                self, _doc: Document, _task: Task
+            ) -> Generator[int, None, None]:
                 yield 1
 
         self.server.add_response(Response(), count=-1)
@@ -217,7 +226,7 @@ class BasicSpiderTestCase(BaseTestCase):
 
     def test_task_queue_clear(self) -> None:
         class TestSpider(Spider):
-            def task_page(self, unused_grab, unused_task):
+            def task_page(self, _doc: Document, _task: Task) -> None:
                 self.stop()
 
         self.server.add_response(Response(), count=-1)
@@ -230,7 +239,7 @@ class BasicSpiderTestCase(BaseTestCase):
 
     def test_fatal_error(self) -> None:
         class TestSpider(Spider):
-            def task_page(self, unused_grab, unused_task):
+            def task_page(self, _doc: Document, _task: Task) -> None:
                 raise FatalError
 
         self.server.add_response(Response(), count=-1)

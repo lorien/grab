@@ -6,7 +6,7 @@ from tests.util import BaseTestCase
 
 
 class GrabUrlProcessingTestCase(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
     def test_nonascii_path(self) -> None:

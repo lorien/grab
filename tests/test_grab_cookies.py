@@ -1,5 +1,3 @@
-from pprint import pprint  # pylint: disable=unused-import
-
 from test_server import Response
 
 from grab import Grab, request
@@ -7,7 +5,7 @@ from tests.util import BaseTestCase  # , temp_file
 
 
 class TestCookies(BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server.reset()
 
     def test_parsing_response_cookies(self) -> None:
@@ -189,7 +187,7 @@ class TestCookies(BaseTestCase):
     #    self.assertEqual(2, len(grab.cookies.items()))
 
     def test_unicode_cookie(self) -> None:
-        def callback():
+        def callback() -> bytes:
             return b"HTTP/1.0 200 OK\nSet-Cookie: preved=%s\n\n" % "медвед".encode(
                 "utf-8"
             )
