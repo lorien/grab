@@ -108,3 +108,41 @@ load-plugins=[
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--tb=short"
+
+[tool.ruff]
+select = ["ALL"]
+ignore = [
+    "A003", # Class attribute `type` is shadowing a python builtin
+    "ANN101", # Missing type annotation for `self` in method
+    "ANN401", # Dynamically typed expressions (typing.Any) are disallowed
+    "BLE001", # Do not catch blind exception: `Exception`
+    "COM812", # Trailing comma missing
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D102", # Missing docstring in public method1
+    "D103", # Missing docstring in public function
+    "D104", # Missing docstring in public package
+    "D105", # Missing docstring in magic method,
+    "D107", # Missing docstring in `__init__`
+    "D203", # 1 blank line required before class docstring
+    "D213", # Multi-line docstring summary should start at the second line
+    "EM101", # Check for raw usage of a string literal in Exception raising
+    "EM102", # Check for raw usage of an f-string literal in Exception raising
+    "EM103", # Check for raw usage of .format on a string literal in Exception raising
+    "F401", # Imported but unused
+    "FBT", # Boolean arg/value in function definition
+    "PTH", # A plugin finding use of functions that can be replaced by pathlib module
+    "S101", # Use of `assert` detected
+    "T201", # print found	
+    "T203", # pprint found
+    "TCH", # Move import into a type-checking block
+    "TRY003", # Avoid specifying long messages outside the exception class
+    "UP032", # Use f-string instead of format call
+    "ERA001", # Found commented-out code
+    "RUF001", # String contains ambiguous unicode character
+    "ANN102", # Missing type annotation for `cls` in classmethod
+    # TODO: remove following rules
+    "PT009", # Use a regular `assert` instead of unittest-style `assertEqual`
+]
+target-version = "py38"
+extend-exclude = ["var"]

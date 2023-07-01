@@ -11,6 +11,7 @@ pytest
 pytest-xdist
 build
 twine
+ruff
 
 coverage
 coveralls

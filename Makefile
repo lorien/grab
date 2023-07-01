@@ -4,7 +4,7 @@ SHELL := /bin/bash
 FILES_CHECK_MYPY = grab tests
 FILES_CHECK_ALL = $(FILES_CHECK_MYPY)
 
-bootstrap: venv deps dirs
+init: venv deps dirs
 
 venv:
 	virtualenv -p python3 .env
@@ -42,7 +42,10 @@ pylint:
 	pylint -j0  $(FILES_CHECK_ALL)
 
 flake8:
-	flake8 -j auto --max-cognitive-complexity=17 $(FILES_CHECK_ALL)
+	flake8 -j auto --isolated --select CCR --max-cognitive-complexity=17 $(FILES_CHECK_ALL)
+
+ruff:
+	ruff $(FILES_CHECK_ALL)
 
 eradicate:
 	tox -e eradicate -- flake8 -j auto --eradicate-whitelist-extend="License:" $(FILES_CHECK_ALL)
