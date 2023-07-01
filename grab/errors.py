@@ -1,7 +1,7 @@
 """Custom exception which Grab instance could generate.
 
-Exceptions
-----------
+## Exceptions
+
 - GrabError
     - GrabNetworkError
         - GrabTimeoutError
@@ -16,9 +16,10 @@ Exceptions
     - ResponseNotValid
 - DataNotFound == IndexError
 
-Warnings
---------
+## Warnings
+
 - GrabDeprecationWarning
+
 """
 from typing import Any
 
@@ -66,11 +67,11 @@ class GrabTooManyRedirectsError(GrabError):
     """Raised when max. allowed number of redirects is reaced."""
 
 
-class GrabInvalidUrl(GrabError):
+class GrabInvalidUrlError(GrabError):
     """Raised when error occurred while normalizing URL e.g. IDN processing."""
 
 
-class GrabInvalidResponse(OriginalExceptionGrabError):
+class GrabInvalidResponseError(OriginalExceptionGrabError):
     """Raised when network response's data could not be processed."""
 
 
@@ -78,12 +79,12 @@ class GrabInternalError(OriginalExceptionGrabError):
     pass
 
 
-class GrabFeatureIsDeprecated(GrabError):
+class GrabFeatureIsDeprecatedError(GrabError):
     """Raised when user tries to use feature that is deprecated and has been dropped."""
 
 
 def raise_feature_is_deprecated(feature_name: str) -> None:
-    raise GrabFeatureIsDeprecated(
+    raise GrabFeatureIsDeprecatedError(
         "{} is deprecated and have been disabled".format(feature_name)
     )
 
@@ -97,7 +98,7 @@ def raise_feature_is_deprecated(feature_name: str) -> None:
 DataNotFound = IndexError
 
 
-class ResponseNotValid(GrabError):
+class ResponseNotValidError(GrabError):
     pass
 
 

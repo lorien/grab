@@ -6,7 +6,7 @@ from typing import Any, cast
 from test_server import Response
 
 from grab import request
-from grab.errors import GrabInvalidResponse, GrabTooManyRedirectsError
+from grab.errors import GrabInvalidResponseError, GrabTooManyRedirectsError
 from tests.util import BaseTestCase
 
 
@@ -67,5 +67,5 @@ class GrabRedirectTestCase(BaseTestCase):
 
         self.server.add_response(Response(raw_callback=callback))
         self.server.add_response(Response(data=b"content-2"))
-        with self.assertRaises(GrabInvalidResponse):
+        with self.assertRaises(GrabInvalidResponseError):
             request(process_redirect=True, url=self.server.get_url())

@@ -48,7 +48,7 @@ class RedirectExtension(BaseExtension[HttpRequest, Document]):
         ):
             retry.state["redirect_count"] += 1
             if retry.state["redirect_count"] > req.redirect_limit:
-                raise GrabTooManyRedirectsError()
+                raise GrabTooManyRedirectsError
             redir_url = urljoin(req.url, redir_url)
             req.url = redir_url
             return retry, req
@@ -76,7 +76,9 @@ class CookiesStore:
             req.cookie_header = hdr
 
     def process_response_post(
-        self, req: HttpRequest, doc: Document  # pylint: disable=unused-argument
+        self,
+        req: HttpRequest,  # noqa: ARG002 pylint: disable=unused-argument
+        doc: Document,
     ) -> None:
         for item in doc.cookies:
             self.cookiejar.set_cookie(item)
@@ -123,7 +125,7 @@ class CookiesStore:
 
 
 class CookiesExtension(BaseExtension[HttpRequest, Document]):
-    __slots__ = []
+    __slots__ = ()
 
     owner_store_reg: MutableMapping[
         BaseClient[HttpRequest, Document], CookiesStore

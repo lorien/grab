@@ -4,9 +4,10 @@ import time
 from collections.abc import Callable, Iterator
 from queue import Queue
 
-from ..interface import FatalErrorQueueItem
-from ..queue_backend.base import BaseTaskQueue
-from ..task import Task
+from grab.spider.interface import FatalErrorQueueItem
+from grab.spider.queue_backend.base import BaseTaskQueue
+from grab.spider.task import Task
+
 from .base import BaseService, ServiceWorker
 from .parser import ParserService
 from .task_dispatcher import TaskDispatcherService

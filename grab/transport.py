@@ -20,7 +20,7 @@ from urllib3.util.timeout import Timeout
 
 from .base import BaseTransport
 from .document import Document
-from .errors import GrabConnectionError, GrabInvalidResponse, GrabTimeoutError
+from .errors import GrabConnectionError, GrabInvalidResponseError, GrabTimeoutError
 from .request import HttpRequest
 from .util.cookies import extract_response_cookies
 
@@ -83,12 +83,12 @@ class Urllib3Transport(BaseTransport[HttpRequest, Document]):
     ) -> PoolManager | ProxyManager | SOCKSProxyManager:
         if req.proxy:
             if req.proxy_userpwd:
-                headers = make_headers(
-                    proxy_basic_auth=req.proxy_userpwd
-                )  # type: ignore # FIXME
+                headers = make_headers(  # type: ignore
+                    proxy_basic_auth=req.proxy_userpwd  # TODO: fix
+                )
             else:
                 headers = None
-            proxy_url = "%s://%s" % (req.proxy_type, req.proxy)
+            proxy_url = "{}://{}".format(req.proxy_type, req.proxy)
             if req.proxy_type == "socks5":
                 return SOCKSProxyManager(
                     proxy_url, cert_reqs="CERT_REQUIRED", ca_certs=certifi.where()
@@ -137,7 +137,7 @@ class Urllib3Transport(BaseTransport[HttpRequest, Document]):
             req_data = req.compile_request_data()
             try:
                 start_time = time.time()
-                res = pool.urlopen(  # type: ignore # FIXME
+                res = pool.urlopen(  # type: ignore # TODO: fix
                     req_data["method"],
                     req_data["url"],
                     body=req_data["body"],
@@ -148,7 +148,7 @@ class Urllib3Transport(BaseTransport[HttpRequest, Document]):
                 )
                 self._connect_time = time.time() - start_time
             except LocationParseError as ex:
-                raise GrabInvalidResponse(str(ex), ex) from ex
+                raise GrabInvalidResponseError(str(ex), ex) from ex
 
         self._response = res
 
@@ -196,14 +196,13 @@ class Urllib3Transport(BaseTransport[HttpRequest, Document]):
         """
         assert self._response is not None
         try:
-
             head_str = ""
-            # FIXME: head must include first line like "GET / HTTP/1.1"
+            # TODO: head must include first line like "GET / HTTP/1.1"
             for key, val in self.get_response_header_items():
                 # WTF: is going here?
                 new_key = key.encode("latin").decode("utf-8", errors="ignore")
                 new_val = val.encode("latin").decode("utf-8", errors="ignore")
-                head_str += "%s: %s\r\n" % (new_key, new_val)
+                head_str += "{}: {}\r\n".format(new_key, new_val)
             head_str += "\r\n"
             head = head_str.encode("utf-8")
 

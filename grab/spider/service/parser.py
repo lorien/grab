@@ -9,10 +9,10 @@ from typing import Any
 from procstat import Stat
 
 from grab import Grab
+from grab.spider.errors import NoTaskHandlerError
+from grab.spider.interface import FatalErrorQueueItem
+from grab.spider.task import Task
 
-from ..errors import NoTaskHandler
-from ..interface import FatalErrorQueueItem
-from ..task import Task
 from .base import BaseService, ServiceWorker
 from .network import NetworkResult
 from .task_dispatcher import TaskDispatcherService
@@ -73,7 +73,7 @@ class ParserService(BaseService):  # pylint: disable=too-many-instance-attribute
                     process_request_count += 1
                     try:
                         handler = self.find_task_handler(task)
-                    except NoTaskHandler as ex:
+                    except NoTaskHandlerError as ex:
                         self.task_dispatcher.input_queue.put(
                             (ex, task, {"exc_info": sys.exc_info()})
                         )

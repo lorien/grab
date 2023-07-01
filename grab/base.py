@@ -47,10 +47,11 @@ class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     registry: MutableMapping[
         str,
         tuple[
-            type[BaseClient[RequestT, ResponseT]], BaseExtension[RequestT, ResponseT]
+            type[BaseClient[RequestT, ResponseT]],
+            BaseExtension[RequestT, ResponseT],
         ],
     ] = {}
-    __slots__ = ["owners"]
+    __slots__ = ("owners",)
 
     def __set_name__(
         self, owner: type[BaseClient[RequestT, ResponseT]], attr: str
@@ -91,7 +92,7 @@ class Retry:
 
 
 class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
-    __slots__ = ["transport", "ext_handlers"]
+    __slots__ = ("transport", "ext_handlers")
     transport: BaseTransport[RequestT, ResponseT]
 
     @property
@@ -104,7 +105,7 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     def default_transport_class(self) -> type[BaseTransport[RequestT, ResponseT]]:
         ...
 
-    extensions: MutableMapping[str, MutableMapping[str, Any]] = {}
+    # extensions: MutableMapping[str, MutableMapping[str, Any]] = {}
     ext_handlers: Mapping[str, list[Callable[..., Any]]]
 
     def __init__(
@@ -112,7 +113,7 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         transport: None
         | BaseTransport[RequestT, ResponseT]
         | type[BaseTransport[RequestT, ResponseT]] = None,
-    ):
+    ) -> None:
         self.ext_handlers = {
             "request:pre": [],
             "request_cookies": [],
@@ -122,14 +123,14 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         }
         for ext_key, _ext_proxy in BaseExtension.get_extensions(self):
             ext = getattr(self, ext_key)
-            print(self, ext_key, _ext_proxy, ext)
             for point_name, func in ext.ext_handlers.items():
                 self.ext_handlers[point_name].append(func)
         self.transport = self.default_transport_class.resolve_entity(
             transport, self.default_transport_class
         )
-        for item in self.extensions.values():
-            item["instance"].reset()
+        for ext_key, _ext_proxy in BaseExtension.get_extensions(self):
+            ext = getattr(self, ext_key)
+            ext.reset()
 
     @abstractmethod
     def process_request_result(self, req: RequestT) -> ResponseT:
@@ -147,10 +148,8 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
             with self.transport.wrap_transport_error():
                 doc = self.process_request_result(req)
             if any(
-                (
-                    (item := func(retry, req, doc)) != (None, None)
-                    for func in self.ext_handlers["retry"]
-                )
+                (item := func(retry, req, doc)) != (None, None)
+                for func in self.ext_handlers["retry"]
             ):
                 # pylint: disable=deprecated-typing-alias
                 retry, req = cast(typing.Tuple[Retry, RequestT], item)

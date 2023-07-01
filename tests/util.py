@@ -61,7 +61,7 @@ def temp_file(root_dir: None | str = None) -> Generator[str, None, None]:
         os.unlink(file_)
     except OSError:
         if "Windows" in platform.system():
-            logger.error(
+            logger.error(  # noqa: TRY400
                 "Ignoring IOError raised when trying to delete"
                 " temp file %s created in `temp_file` context"
                 " manager",

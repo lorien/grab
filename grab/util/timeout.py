@@ -19,7 +19,7 @@ class Timeout:
         total: None | float | UndefinedParam = UNDEFINED_PARAM,
         connect: None | float | UndefinedParam = UNDEFINED_PARAM,
         read: None | float | UndefinedParam = UNDEFINED_PARAM,
-    ):
+    ) -> None:
         """Timeout constructor.
 
         Unspecified total timeout is set to None.

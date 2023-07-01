@@ -20,7 +20,7 @@ class TestProxy(BaseTestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        super(TestProxy, cls).setUpClass()
+        super().setUpClass()
         cls.extra_servers = {}
         for _ in range(3):
             serv = TestServer(address=ADDRESS, port=0)
@@ -33,7 +33,7 @@ class TestProxy(BaseTestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        super(TestProxy, cls).tearDownClass()
+        super().tearDownClass()
         for item in cls.extra_servers.values():
             item["server"].stop()
 
@@ -44,7 +44,7 @@ class TestProxy(BaseTestCase):
 
     def test_proxy_option(self) -> None:
         self.server.add_response(Response(data=b"123"))
-        proxy = "%s:%s" % (ADDRESS, self.server.port)
+        proxy = "{}:{}".format(ADDRESS, self.server.port)
         doc = request("http://yandex.ru", proxy=proxy, proxy_type="http")
         self.assertEqual(b"123", doc.body)
         self.assertEqual("yandex.ru", self.server.request.headers.get("host"))

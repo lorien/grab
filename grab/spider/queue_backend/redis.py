@@ -12,14 +12,15 @@ from typing import Any, cast
 from fastrq.priorityqueue import PriorityQueue  # pytype: disable=import-error
 from redis import Redis
 
-from ..errors import SpiderMisuseError
-from ..task import Task
+from grab.spider.errors import SpiderMisuseError
+from grab.spider.task import Task
+
 from .base import BaseTaskQueue
 
 system_random = SystemRandom()
 
 
-class CustomPriorityQueue(PriorityQueue):  # type: ignore # FIXME
+class CustomPriorityQueue(PriorityQueue):  # type: ignore # TODO: fix
     def __init__(self, key: str, **kwargs: Any) -> None:
         # sets `key` to `self._key`
         super().__init__(key)
@@ -71,9 +72,10 @@ class RedisTaskQueue(BaseTaskQueue):
     def get(self) -> Task:
         task: None | tuple[Any, int] = self.queue_object.pop()
         if task is None:
-            raise queue.Empty()
+            raise queue.Empty
         return cast(
-            Task, pickle.loads(task[0])  # pylint: disable=unsubscriptable-object
+            Task,
+            pickle.loads(task[0]),  # noqa: S301 pylint: disable=unsubscriptable-object
         )
 
     def size(self) -> int:

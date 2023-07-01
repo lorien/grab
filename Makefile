@@ -53,7 +53,7 @@ eradicate:
 bandit:
 	bandit -qc pyproject.toml -r $(FILES_CHECK_ALL)
 
-check: mypy pylint flake8 bandit
+check: ruff mypy pylint flake8 bandit
 
 build:
 	rm -rf *.egg-info

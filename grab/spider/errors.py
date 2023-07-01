@@ -5,8 +5,8 @@ __all__ = (
     "SpiderMisuseError",
     "FatalError",
     "SpiderInternalError",
-    "NoTaskHandler",
-    "NoDataHandler",
+    "NoTaskHandlerError",
+    "NoDataHandlerError",
 )
 
 
@@ -33,9 +33,9 @@ class SpiderInternalError(SpiderError):
     """
 
 
-class NoTaskHandler(SpiderError):
+class NoTaskHandlerError(SpiderError):
     """Raise when no handler found to process network response."""
 
 
-class NoDataHandler(SpiderError):
+class NoDataHandlerError(SpiderError):
     """Raise when no handler found to process Data object."""

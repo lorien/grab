@@ -8,7 +8,7 @@ from threading import Event, Thread
 from types import TracebackType
 from typing import Any, Tuple, Type, cast
 
-from ..interface import FatalErrorQueueItem
+from grab.spider.interface import FatalErrorQueueItem
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class ServiceWorker:
             if hasattr(worker_callback, "__self__")
             else "NA"
         )
-        return "worker:%s:%s" % (cls_name, worker_callback.__name__)
+        return "worker:{}:{}".format(cls_name, worker_callback.__name__)
 
     def worker_callback_wrapper(
         self, callback: Callable[..., Any]
@@ -46,7 +46,7 @@ class ServiceWorker:
             try:
                 callback(*args, **kwargs)
             except Exception as ex:
-                logger.error("Spider Service Fatal Error", exc_info=ex)
+                logger.exception("Spider Service Fatal Error", exc_info=ex)
                 # pylint: disable=deprecated-typing-alias
                 self.fatal_error_queue.put(
                     cast(

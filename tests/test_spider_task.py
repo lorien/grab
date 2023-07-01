@@ -5,8 +5,8 @@ from collections.abc import Generator
 from test_server import Response
 
 from grab import Document, HttpRequest
-from grab.errors import GrabMisuseError, ResponseNotValid
-from grab.spider import NoTaskHandler, Spider, SpiderMisuseError, Task, base
+from grab.errors import GrabMisuseError, ResponseNotValidError
+from grab.spider import NoTaskHandlerError, Spider, SpiderMisuseError, Task, base
 from grab.spider.errors import SpiderError
 from tests.util import BaseTestCase
 
@@ -28,7 +28,7 @@ class TestSpiderTestCase(BaseTestCase):
         self.assertEqual(task.priority, None)
         bot.add_task(task)
         assert task.priority is not None
-        self.assertTrue(10 <= task.priority <= 20)
+        self.assertTrue(10 <= task.priority <= 20)  # noqa: PLR2004
 
         # Automatic constant priority
         base.DEFAULT_TASK_PRIORITY = 33
@@ -105,7 +105,7 @@ class TestSpiderTestCase(BaseTestCase):
 
         bot = TestSpider()
         bot.add_task(Task("page", url=self.server.get_url()))
-        self.assertRaises(NoTaskHandler, bot.run)
+        self.assertRaises(NoTaskHandlerError, bot.run)
 
     def test_task_raw(self) -> None:
         class TestSpider(Spider):
@@ -314,7 +314,9 @@ class TestSpiderTestCase(BaseTestCase):
         for _ in range(5):
             bot.add_task(Task("page", url=self.server.get_url()))
         bot.run()
-        self.assertTrue(bot.stat.counters["parser:worker-restarted"] == 2)
+        self.assertTrue(
+            bot.stat.counters["parser:worker-restarted"] == 2  # noqa: PLR2004
+        )
 
     def test_task_clone_post_request(self) -> None:
         self.server.add_response(Response(), count=2)
@@ -342,7 +344,7 @@ class TestSpiderTestCase(BaseTestCase):
         class SomeSimpleSpider(Spider):
             def task_page(self, _doc: Document, _task: Task) -> None:
                 self.stat.inc("xxx")
-                raise ResponseNotValid
+                raise ResponseNotValidError
 
         bot = SomeSimpleSpider()
         bot.add_task(Task("page", url=self.server.get_url()))

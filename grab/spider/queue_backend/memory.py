@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from contextlib import suppress
-from datetime import datetime
+from datetime import datetime, timezone
 from queue import Empty, PriorityQueue
 
 from grab.spider.queue_backend.base import BaseTaskQueue
@@ -23,7 +23,7 @@ class MemoryTaskQueue(BaseTaskQueue):
             self.schedule_list.append((schedule_time, task))
 
     def get(self) -> Task:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         removed_indexes = []
         for idx, item in enumerate(self.schedule_list):

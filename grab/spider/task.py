@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from copy import deepcopy
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from ..errors import GrabMisuseError
-from ..request import HttpRequest
+from grab.errors import GrabMisuseError
+from grab.request import HttpRequest
+
 from .errors import SpiderMisuseError
 
 
@@ -17,7 +18,8 @@ class BaseTask:
 class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
     """Task for spider."""
 
-    def __init__(  # pylint:disable=too-many-arguments,too-many-locals,too-many-branches
+    # pylint:disable=too-many-arguments,too-many-locals,too-many-branches
+    def __init__(  # noqa: PLR0913
         self,
         name: None | str = None,
         url: None | str | HttpRequest = None,
@@ -127,6 +129,8 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    # pylint:enable=too-many-arguments,too-many-locals,too-many-branches
+
     def check_init_kwargs(self, kwargs: Mapping[str, Any]) -> None:
         if "grab" in kwargs:
             raise GrabMisuseError("Task does not accept 'grab' parameter")
@@ -139,7 +143,7 @@ class Task(BaseTask):  # pylint: disable=too-many-instance-attributes
 
     def process_delay_option(self, delay: None | float) -> None:
         if delay:
-            self.schedule_time = datetime.utcnow() + timedelta(seconds=delay)
+            self.schedule_time = datetime.now(timezone.utc) + timedelta(seconds=delay)
         else:
             self.schedule_time = None
 

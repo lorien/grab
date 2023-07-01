@@ -110,6 +110,7 @@ testpaths = ["tests"]
 addopts = "--tb=short"
 
 [tool.ruff]
+pylint.max-args=9
 select = ["ALL"]
 ignore = [
     "A003", # Class attribute `type` is shadowing a python builtin
@@ -143,6 +144,19 @@ ignore = [
     "ANN102", # Missing type annotation for `cls` in classmethod
     # TODO: remove following rules
     "PT009", # Use a regular `assert` instead of unittest-style `assertEqual`
+    "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
+    "TD002", # Missing author in TODO
+    "TD003", # Missing issue link on the line following this TODO
+    "FIX002", # Line contains TODO
+    "S320", # Using `xml` to parse untrusted data is known to be vulnerable to XML attacks
+    "D416", # Section name should end with a colon
+    "D417", # Missing argument descriptions in the docstring
+    "D407", # Missing dashed underline after section
+    "D406", # Section name should end with a newline
+    "UP012", # Unnecessary call to `encode` as UTF-8
+    "S310", # Audit URL open for permitted schemes
+    "D106", # Missing docstring in public nested class
+    "PGH003", # Use specific rule codes when ignoring type issues
 ]
 target-version = "py38"
 extend-exclude = ["var"]

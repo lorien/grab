@@ -50,11 +50,11 @@ XML = b"""
 class LXMLExtensionTest(BaseTestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        super(LXMLExtensionTest, cls).setUpClass()
+        super().setUpClass()
 
     @classmethod
     def tearDownClass(cls) -> None:
-        super(LXMLExtensionTest, cls).tearDownClass()
+        super().tearDownClass()
 
     def setUp(self) -> None:
         self.server.reset()

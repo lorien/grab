@@ -22,7 +22,7 @@ class TestSpiderProxyCase(BaseTestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        super(TestSpiderProxyCase, cls).setUpClass()
+        super().setUpClass()
         cls.extra_servers = {}
         for _ in range(3):
             serv = TestServer(address=ADDRESS, port=0)
@@ -35,7 +35,7 @@ class TestSpiderProxyCase(BaseTestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        super(TestSpiderProxyCase, cls).tearDownClass()
+        super().tearDownClass()
         for item in cls.extra_servers.values():
             item["server"].stop()
 
@@ -141,7 +141,7 @@ class TestSpiderProxyCase(BaseTestCase):
 
             self.assertEqual(
                 self.server.request.headers.get("host"),
-                "%s:%s" % (ADDRESS, self.server.port),
+                "{}:{}".format(ADDRESS, self.server.port),
             )
             self.assertEqual(1, len(set(bot.runtime_events["ports"])))
             self.assertEqual(bot.runtime_events["ports"][0], str(self.server.port))

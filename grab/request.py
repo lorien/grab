@@ -45,7 +45,7 @@ class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
         "meta",
     }
 
-    def __init__(  # pylint: disable=too-many-arguments,too-many-locals
+    def __init__(  # noqa: PLR0913 pylint: disable=too-many-arguments,too-many-locals
         self,
         url: str,
         *,
@@ -117,7 +117,7 @@ class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
             return Timeout()
         return Timeout(total=float(value))
 
-    def compile_request_data(  # noqa: CCR001
+    def compile_request_data(  # noqa: RUF100,CCR001
         self,
     ) -> CompiledRequestData:
         req_url = self.url
@@ -139,9 +139,7 @@ class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
                         "Request.body and Request.fields could not be set both"
                     )
                 if self.multipart:
-                    req_body, content_type = encode_multipart_formdata(
-                        self.fields
-                    )
+                    req_body, content_type = encode_multipart_formdata(self.fields)
                 else:
                     req_body, content_type = (
                         urlencode(self.fields).encode(),

@@ -6,8 +6,9 @@ from collections.abc import Callable
 from queue import Empty, Queue
 from typing import Any, Dict, Literal
 
-from ..interface import FatalErrorQueueItem
-from ..task import Task
+from grab.spider.interface import FatalErrorQueueItem
+from grab.spider.task import Task
+
 from .base import BaseService, ServiceWorker
 
 NetworkResult = Dict[str, Any]  # pylint: disable=deprecated-typing-alias

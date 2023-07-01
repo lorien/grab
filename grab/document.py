@@ -107,7 +107,7 @@ class Document(
         # Main attributes
         self.document_type = document_type
         if not isinstance(body, bytes):
-            raise ValueError("Argument 'body' must be bytes")
+            raise TypeError("Argument 'body' must be bytes")
         self._bytes_body = body
         self.code = code
         self.head = head
@@ -322,7 +322,7 @@ class Document(
     ) -> str:
         """Return response body as unicode string."""
         if not self._unicode_body:
-            # FIXME: ignore_errors option
+            # TODO: ignore_errors option
             self._unicode_body = unicodec.decode_content(
                 self.body, encoding=self.encoding
             )
@@ -333,7 +333,7 @@ class Document(
         return self._bytes_body
 
     @body.setter
-    def body(self, body: bytes) -> None:
+    def body(self, _body: bytes) -> None:
         raise GrabMisuseError("Document body could be set only in constructor")
 
     # DomTreeExtension methods
@@ -382,7 +382,7 @@ class Document(
             try:
                 self._lxml_tree = self._build_dom(body, "html", self.encoding)
             except Exception as ex:
-                # FIXME: write test for this case
+                # TODO: write test for this case
                 if b"<html" not in body and (
                     # Fix for "just a string" body
                     (
@@ -586,7 +586,7 @@ class Document(
 
         return self.set_input(elem.get("name"), value)
 
-    # FIXME:
+    # TODO: following list of things:
     # * Remove set_input_by_id
     # * Remove set_input_by_number
     # * New method: set_input_by(id=None, number=None, xpath=None)
@@ -596,7 +596,6 @@ class Document(
         post_items: list[tuple[str, Any]],
         extra_post_items: Sequence[tuple[str, Any]],
     ) -> list[tuple[str, Any]]:
-
         # Drop existing post items with such key
         keys_to_drop = {x for x, y in extra_post_items}
         for key in keys_to_drop:
@@ -630,7 +629,7 @@ class Document(
             if submit_name is None or submit_name not in submit_control_names:
                 submit_name = sorted(submit_control_names)[0]
 
-            # FIXME: possibly need to update post
+            # TODO: possibly need to update post
             # if new submit_name is not in post
 
             # Form data should contain only one submit control

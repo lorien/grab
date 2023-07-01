@@ -43,4 +43,4 @@ class GrabApiTestCase(BaseTestCase):
         data = """
         <h1>test</h1>
         """
-        self.assertRaises(ValueError, Document, data)
+        self.assertRaises(TypeError, Document, data)

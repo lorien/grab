@@ -1,4 +1,4 @@
-"""This module provides things to operate with cookies.
+"""THe module provides things to operate with cookies.
 
 Manuals:
 
@@ -35,7 +35,7 @@ class MockRequest:
     appropriately. You probably want `get_cookie_header`, defined below.
     """
 
-    def __init__(self, url: str, headers: dict[str, str]):
+    def __init__(self, url: str, headers: dict[str, str]) -> None:
         self._url = url
         self._headers = headers
         self._new_headers: dict[str, Any] = {}
@@ -126,7 +126,7 @@ class MockResponse:
         return self._headers
 
 
-def create_cookie(  # pylint: disable=too-many-arguments, too-many-locals
+def create_cookie(  # noqa: PLR0913 pylint: disable=too-many-arguments, too-many-locals
     *,
     name: str,
     value: str,

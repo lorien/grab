@@ -4,8 +4,9 @@ from collections.abc import Callable
 from queue import Empty, Queue
 from typing import Any
 
-from ..interface import FatalErrorQueueItem
-from ..task import Task
+from grab.spider.interface import FatalErrorQueueItem
+from grab.spider.task import Task
+
 from .base import BaseService, ServiceWorker
 
 
@@ -14,7 +15,7 @@ class TaskDispatcherService(BaseService):
         self,
         fatal_error_queue: Queue[FatalErrorQueueItem],
         process_service_result: Callable[[Any, Task, None | dict[str, Any]], Any],
-    ):
+    ) -> None:
         super().__init__(fatal_error_queue)
         self.process_service_result = process_service_result
         self.input_queue: Queue[Any] = Queue()

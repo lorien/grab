@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pickle
 import queue
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, cast
 
 import pymongo
@@ -48,7 +48,7 @@ class MongodbTaskQueue(BaseTaskQueue):
         schedule_time: None | datetime = None,
     ) -> None:
         if schedule_time is None:
-            schedule_time = datetime.utcnow()
+            schedule_time = datetime.now(timezone.utc)
         item = {
             "task": Binary(pickle.dumps(task)),
             "priority": priority,
@@ -58,12 +58,12 @@ class MongodbTaskQueue(BaseTaskQueue):
 
     def get(self) -> Task:
         item = self.collection.find_one_and_delete(
-            {"schedule_time": {"$lt": datetime.utcnow()}},
+            {"schedule_time": {"$lt": datetime.now(timezone.utc)}},
             sort=[("priority", pymongo.ASCENDING)],
         )
         if item is None:
-            raise queue.Empty()
-        return cast(Task, pickle.loads(item["task"]))
+            raise queue.Empty
+        return cast(Task, pickle.loads(item["task"]))  # noqa: S301
 
     def clear(self) -> None:
         self.collection.delete_many({})

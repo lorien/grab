@@ -4,7 +4,7 @@ import logging
 import time
 import typing
 from collections.abc import Callable, Iterator
-from datetime import datetime
+from datetime import datetime, timezone
 from queue import Empty, Queue
 from secrets import SystemRandom
 from traceback import format_exception, format_stack
@@ -15,22 +15,23 @@ from procstat import Stat
 from proxylist import ProxyList, ProxyServer
 from proxylist.base import BaseProxySource
 
-from .. import Grab
-from ..base import BaseTransport
-from ..document import Document
-from ..errors import (
-    GrabFeatureIsDeprecated,
-    GrabInvalidResponse,
-    GrabInvalidUrl,
+from grab import Grab
+from grab.base import BaseTransport
+from grab.document import Document
+from grab.errors import (
+    GrabFeatureIsDeprecatedError,
+    GrabInvalidResponseError,
+    GrabInvalidUrlError,
     GrabMisuseError,
     GrabNetworkError,
     GrabTooManyRedirectsError,
     OriginalExceptionGrabError,
-    ResponseNotValid,
+    ResponseNotValidError,
 )
-from ..request import HttpRequest
-from ..util.metrics import format_traffic_value
-from .errors import FatalError, NoTaskHandler, SpiderError, SpiderMisuseError
+from grab.request import HttpRequest
+from grab.util.metrics import format_traffic_value
+
+from .errors import FatalError, NoTaskHandlerError, SpiderError, SpiderMisuseError
 from .interface import FatalErrorQueueItem
 from .queue_backend.base import BaseTaskQueue
 from .queue_backend.memory import MemoryTaskQueue
@@ -48,6 +49,9 @@ DEFAULT_NETWORK_TRY_LIMIT = 5
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
 logger = logging.getLogger("grab.spider.base")
 system_random = SystemRandom()
+HTTP_STATUS_ERROR = 400
+HTTP_STATUS_NOT_FOUND = 404
+WAIT_SERVICE_SHUTDOWN_SEC = 10
 
 
 # pylint: disable=too-many-instance-attributes, too-many-public-methods
@@ -69,7 +73,7 @@ class Spider:
     # **************
 
     # pylint: disable=too-many-locals, too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         task_queue: None | BaseTaskQueue = None,
         thread_number: None | int = None,
@@ -177,7 +181,7 @@ class Spider:
 
     def setup_queue(self, *_args: Any, **_kwargs: Any) -> None:
         """Set up queue."""
-        raise GrabFeatureIsDeprecated(
+        raise GrabFeatureIsDeprecatedError(
             """Method Spider.setup_queue is deprecated. Now MemoryTaskQueue is used
             by default. If you need custom task queue pass instance of queue class
             in task_queue parameter in constructor of Spider class."""
@@ -283,7 +287,7 @@ class Spider:
         # Process counters
         items = sorted(self.stat.counters.items(), key=lambda x: x[0], reverse=True)
         for item in items:
-            out.append("  %s: %s" % item)
+            out.append("  {}: {}".format(item[0], item[1]))
         out.append("")
 
         out.append("Lists:")
@@ -309,7 +313,8 @@ class Spider:
         minutes, seconds = divmod(seconds, 60)
         out.append("Time elapsed: %d:%d:%d (H:M:S)" % (hours, minutes, seconds))
         out.append(
-            "End time: %s" % datetime.utcnow().strftime("%d %b %Y, %H:%M:%S UTC")
+            "End time: %s"
+            % datetime.now(timezone.utc).strftime("%d %b %Y, %H:%M:%S UTC")
         )
         return "\n".join(out) + "\n"
 
@@ -384,7 +389,11 @@ class Spider:
         Valid response is handled with associated task handler.
         Failed respoosne is processed with error handler.
         """
-        return code < 400 or code == 404 or code in task.valid_status
+        return (
+            code < HTTP_STATUS_ERROR
+            or code == HTTP_STATUS_NOT_FOUND
+            or code in task.valid_status
+        )
 
     def process_parser_error(
         self,
@@ -404,7 +413,7 @@ class Spider:
         task_url = task.request.url if task else None
         self.collect_runtime_event(
             "fatal",
-            "%s|%s|%s|%s" % (func_name, ex.__class__.__name__, str(ex), task_url),
+            "{}|{}|{}|{}".format(func_name, ex.__class__.__name__, str(ex), task_url),
         )
 
     def find_task_handler(self, task: Task) -> Callable[..., Any]:
@@ -418,8 +427,8 @@ class Spider:
             return cast(typing.Callable[..., Any], getattr(self, "task_%s" % task.name))
             # pylint: enable=deprecated-typing-alias
         except AttributeError as ex:
-            raise NoTaskHandler(
-                "No handler or callback defined for " "task %s" % task.name
+            raise NoTaskHandlerError(
+                "No handler or callback defined for task {}".format(task.name)
             ) from ex
 
     def log_network_result_stats(self, res: NetworkResult, task: Task) -> None:
@@ -449,7 +458,7 @@ class Spider:
                 #    proxy_type=self.proxy.proxy_type,
                 # )
 
-    def change_active_proxy(self, task: Task, grab: Grab) -> None:
+    def change_active_proxy(self, task: Task, grab: Grab) -> None:  # noqa: ARG002
         # pylint: disable=unused-argument
         self.proxy = cast(ProxyList, self.proxylist).get_random_server()
         if not self.proxy.proxy_type:
@@ -524,7 +533,6 @@ class Spider:
             self.stat.shutdown(join_threads=True)
 
     def shutdown_services(self, services: list[BaseService]) -> None:
-        # TODO:
         for srv in services:
             # Resume service if it has been paused
             # to allow service to process stop signal
@@ -533,7 +541,7 @@ class Spider:
         start = time.time()
         while any(x.is_alive() for x in services):
             time.sleep(0.1)
-            if time.time() - start > 10:
+            if time.time() - start > WAIT_SERVICE_SHUTDOWN_SEC:
                 break
         for srv in services:
             if srv.is_alive():
@@ -592,7 +600,7 @@ class Spider:
         * Task
         * None
         * Task instance
-        * ResponseNotValid-based exception
+        * ResponseNotValidError-based exception
         * Arbitrary exception
         * Network response:
             {ok, ecode, emsg, exc, grab, grab_config_backup}
@@ -606,7 +614,7 @@ class Spider:
             self.add_task(result)
         elif result is None:
             pass
-        elif isinstance(result, ResponseNotValid):
+        elif isinstance(result, ResponseNotValidError):
             self.add_task(task.clone())
             error_code = result.__class__.__name__.replace("_", "-")
             self.stat.inc("integrity:%s" % error_code)
@@ -671,8 +679,8 @@ class Spider:
                     result["doc"] = grab.request(task.request)
                 except (
                     GrabNetworkError,
-                    GrabInvalidUrl,
-                    GrabInvalidResponse,
+                    GrabInvalidUrlError,
+                    GrabInvalidResponseError,
                     GrabTooManyRedirectsError,
                 ) as ex:
                     result.update({"ok": False, "exc": ex})

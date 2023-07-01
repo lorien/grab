@@ -2,7 +2,7 @@ from urllib3 import PoolManager
 from urllib3.exceptions import LocationParseError
 
 from grab import request
-from grab.errors import GrabInvalidResponse
+from grab.errors import GrabInvalidResponseError
 from tests.util import BaseTestCase
 
 
@@ -36,5 +36,5 @@ class GrabApiTestCase(BaseTestCase):
             "http://www.textbooksnow.com/webapp/wcs/stores"
             "/servlet/ProductDisplay?langId=-1&storeId="
         )
-        with self.assertRaises(GrabInvalidResponse):
+        with self.assertRaises(GrabInvalidResponseError):
             request(invalid_url)

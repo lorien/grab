@@ -25,9 +25,7 @@ class GrabXMLProcessingTestCase(BaseTestCase):
         # 3. Call xpath
         # 4. Get ValueError: Unicode strings with encoding
         #     declaration are not supported.
-        xml = (
-            b'<?xml version="1.0" encoding="UTF-8"?>' b"<tree><leaf>text</leaf></tree>"
-        )
+        xml = b'<?xml version="1.0" encoding="UTF-8"?><tree><leaf>text</leaf></tree>'
         doc = Document(xml)
         self.assertTrue(doc.text_search("text"))
         self.assertEqual(doc.select("//leaf").text(), "text")

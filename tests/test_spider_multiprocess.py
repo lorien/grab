@@ -16,7 +16,7 @@ class BasicSpiderTestCase(BaseTestCase):
             super().__init__(*args, **kwargs)
             self.foo_count = 1
 
-        # FIXME: is it required yet, after createing __init__
+        # TODO: is it required yet, after createing __init__
         # check all other similar cases
         def prepare(self) -> None:
             self.foo_count = 1

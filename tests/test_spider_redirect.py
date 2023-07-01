@@ -38,9 +38,7 @@ class BasicSpiderTestCase(BaseTestCase):
 
         def callback() -> bytes:
             invalid_url = b"http://\xa0" + server.get_url().encode("ascii")
-            return (
-                b"HTTP/1.1 301 Moved\r\n" b"Location: %s\r\n" b"\r\nFOO" % invalid_url
-            )
+            return b"HTTP/1.1 301 Moved\r\nLocation: %s\r\n\r\nFOO" % invalid_url
 
         self.server.add_response(Response(raw_callback=callback), count=-1)
 
