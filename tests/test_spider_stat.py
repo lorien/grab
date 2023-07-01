@@ -19,7 +19,7 @@ class BasicSpiderTestCase(BaseTestCase):
                 self.stat.inc("foo")
 
             def task_page_fail(self, _doc: Document, _task: Task) -> None:
-                raise Exception("Shit happens!")
+                raise RuntimeError("Shit happens!")
 
         self.server.add_response(Response(), count=2)
         bot = TestSpider()

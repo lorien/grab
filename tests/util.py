@@ -40,7 +40,7 @@ def load_test_config() -> MutableMapping[str, Any]:
     else:
         for key, val in local_config.items():
             if key in DEFAULT_CONFIG:
-                raise Exception("Invalid config key: {}".format(key))
+                raise KeyError("Invalid config key: {}".format(key))
             config[key] = val
     return config
 

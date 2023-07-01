@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping
 from copy import copy
-from typing import Any, TypedDict, cast
+from typing import Any, TypedDict
 from urllib.parse import urlencode
 
 from urllib3.filepost import encode_multipart_formdata
@@ -139,10 +139,9 @@ class HttpRequest(BaseRequest):  # pylint: disable=too-many-instance-attributes
                         "Request.body and Request.fields could not be set both"
                     )
                 if self.multipart:
-                    req_body, content_type = encode_multipart_formdata(  # type: ignore
+                    req_body, content_type = encode_multipart_formdata(
                         self.fields
                     )
-                    req_body = cast(bytes, req_body)
                 else:
                     req_body, content_type = (
                         urlencode(self.fields).encode(),

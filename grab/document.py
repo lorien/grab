@@ -144,7 +144,7 @@ class Document(
         return unicodec.detect_content_encoding(
             self.get_body_chunk() or b"",
             content_type_header=(
-                self.headers.get("Content-Type", None) if self.headers else None
+                self.headers.get("Content-Type") if self.headers else None
             ),
             markup="xml" if self.document_type == "xml" else "html",
         )
@@ -262,8 +262,7 @@ class Document(
             if default is UNDEFINED:
                 raise DataNotFound("Regexp not found") from ex
             return default
-        else:
-            return match.group(1)
+        return match.group(1)
 
     def rex_search(
         self,

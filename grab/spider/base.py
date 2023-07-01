@@ -442,7 +442,7 @@ class Spider:
             if self.proxy_auto_change:
                 self.change_active_proxy(task, grab)
             if self.proxy:
-                raise Exception("Look like it is not called from tests")
+                raise RuntimeError("Look like it is not called from tests")
                 # grab.zzzz(
                 #    proxy=self.proxy.get_address(),
                 #    proxy_userpwd=self.proxy.get_userpwd(),

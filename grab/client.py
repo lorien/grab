@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from pprint import pprint  # pylint: disable=unused-import
 from typing import Any
 
 from .base import BaseClient
