@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing
 from abc import ABCMeta, abstractmethod
-from collections.abc import Callable, Generator, Mapping, MutableMapping
+from collections.abc import Callable, Generator, Mapping, MutableMapping, Sequence
 from contextlib import contextmanager
 from copy import deepcopy
 from typing import Any, Generic, TypeVar, cast
@@ -44,18 +44,45 @@ class BaseResponse:
 
 class BaseExtension(Generic[RequestT, ResponseT], metaclass=ABCMeta):
     ext_handlers: Mapping[str, Callable[..., Any]] = {}
-    __slots__ = ()
+    registry: MutableMapping[
+        str,
+        tuple[
+            type[BaseClient[RequestT, ResponseT]], BaseExtension[RequestT, ResponseT]
+        ],
+    ] = {}
+    __slots__ = ["owners"]
 
-    def __set_name__(self, owner: BaseClient[RequestT, ResponseT], attr: str) -> None:
-        owner.extensions[attr] = {
-            "instance": self,
-        }
-        for point_name, func in self.ext_handlers.items():
-            owner.ext_handlers[point_name].append(func)
+    def __set_name__(
+        self, owner: type[BaseClient[RequestT, ResponseT]], attr: str
+    ) -> None:
+        self.registry[attr] = (owner, self)
 
     @abstractmethod
     def reset(self) -> None:
         ...
+
+    @classmethod
+    def get_extensions(
+        cls, obj: BaseClient[RequestT, ResponseT]
+    ) -> Sequence[tuple[str, BaseExtension[RequestT, ResponseT]]]:
+        owner_reg: MutableMapping[
+            type[BaseClient[RequestT, ResponseT]],
+            list[tuple[str, BaseExtension[RequestT, ResponseT]]],
+        ] = {}
+        for ext_key, ext_tuple in cls.registry.items():
+            owner_type, ext = ext_tuple
+            owner_reg.setdefault(owner_type, []).append((ext_key, ext))
+        ret = []
+        stack = [obj.__class__]
+        while stack:
+            ptr = stack.pop()
+            if ptr in owner_reg:
+                ext_list = owner_reg[ptr]
+                ret.extend(ext_list)
+            for base in ptr.__bases__:
+                if base != object().__class__:
+                    stack.append(base)
+        return ret
 
 
 class Retry:
@@ -64,7 +91,7 @@ class Retry:
 
 
 class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
-    __slots__ = ["transport"]
+    __slots__ = ["transport", "ext_handlers"]
     transport: BaseTransport[RequestT, ResponseT]
 
     @property
@@ -78,13 +105,7 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         ...
 
     extensions: MutableMapping[str, MutableMapping[str, Any]] = {}
-    ext_handlers: Mapping[str, list[Callable[..., Any]]] = {
-        "request:pre": [],
-        "request_cookies": [],
-        "response:post": [],
-        "init-retry": [],
-        "retry": [],
-    }
+    ext_handlers: Mapping[str, list[Callable[..., Any]]]
 
     def __init__(
         self,
@@ -92,6 +113,18 @@ class BaseClient(Generic[RequestT, ResponseT], metaclass=ABCMeta):
         | BaseTransport[RequestT, ResponseT]
         | type[BaseTransport[RequestT, ResponseT]] = None,
     ):
+        self.ext_handlers = {
+            "request:pre": [],
+            "request_cookies": [],
+            "response:post": [],
+            "init-retry": [],
+            "retry": [],
+        }
+        for ext_key, _ext_proxy in BaseExtension.get_extensions(self):
+            ext = getattr(self, ext_key)
+            print(self, ext_key, _ext_proxy, ext)
+            for point_name, func in ext.ext_handlers.items():
+                self.ext_handlers[point_name].append(func)
         self.transport = self.default_transport_class.resolve_entity(
             transport, self.default_transport_class
         )

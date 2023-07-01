@@ -17,7 +17,7 @@ class TestCookies(BaseTestCase):
 
     def test_multiple_cookies(self) -> None:
         self.server.add_response(Response())
-        request(self.server.get_url(), cookies={"foo": "1", "bar": "2"})
+        request(self.server.get_url(), client=Grab, cookies={"foo": "1", "bar": "2"})
         self.assertEqual(
             {(x.key, x.value) for x in self.server.request.cookies.values()},
             {("foo", "1"), ("bar", "2")},
@@ -199,3 +199,32 @@ class TestCookies(BaseTestCase):
         # request page one more time, sending cookie
         # should not fail
         request(self.server.get_url())
+
+    def test_different_instances(self) -> None:
+        grab1 = Grab()
+        self.server.add_response(Response(headers=[("Set-Cookie", "key1=val1")]))
+        doc1 = grab1.request(self.server.get_url())
+        self.assertTrue(
+            all(x.name == "key1" and x.value == "val1" for x in doc1.cookies)
+        )
+        self.assertTrue(
+            all(x.name == "key1" and x.value == "val1" for x in grab1.cookies.cookiejar)
+        )
+
+        grab2 = Grab()
+        self.server.add_response(Response(headers=[("Set-Cookie", "key2=val2")]))
+        doc2 = grab2.request(self.server.get_url())
+        self.assertTrue(
+            all(x.name == "key2" and x.value == "val2" for x in doc2.cookies)
+        )
+        self.assertTrue(
+            all(x.name == "key2" and x.value == "val2" for x in grab2.cookies.cookiejar)
+        )
+
+        # double check grab1
+        self.assertTrue(
+            all(x.name == "key1" and x.value == "val1" for x in doc1.cookies)
+        )
+        self.assertTrue(
+            all(x.name == "key1" and x.value == "val1" for x in grab1.cookies.cookiejar)
+        )

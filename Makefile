@@ -27,7 +27,7 @@ pytest:
 	pytest -n30 -x --cov grab --cov-report term-missing
 
 test: check pytest
-	tox -e py38-check
+	tox -e python38-check
 
 #release:
 #	git push \
