@@ -38,7 +38,7 @@ Let's see a small example of HEAD request::
 
     >>> g = Grab()
     >>> g.setup(method='head')
-    >>> resp = g.request('http://google.com/robots.txt')
+    >>> resp = g.request(url='http://google.com/robots.txt')
     >>> print len(resp.body)
     0
     >>> print resp.headers['Content-Length']
