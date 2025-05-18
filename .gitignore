@@ -24,3 +24,5 @@ dist/
 /build/
 /.pytype/
 /test.py
+
+tests/__pycache__/
