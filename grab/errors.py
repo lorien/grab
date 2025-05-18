@@ -7,6 +7,7 @@
         - GrabTimeoutError
         - GrabConnectionError
         - GrabCouldNotResolveHostError
+        - CloudflareProtectionDetectedError
     - GrabAuthError
     - GrabMisuseError
     - GrabTooManyRedirectsError
@@ -53,6 +54,10 @@ class GrabConnectionError(GrabNetworkError):
 
 class GrabCouldNotResolveHostError(GrabNetworkError):
     """Raised when couldn't resolve host. The given remote host was not resolved."""
+
+
+class CloudflareProtectionDetectedError(GrabNetworkError):
+    """Raised when Cloudflare anti-bot protection is detected."""
 
 
 class GrabAuthError(GrabError):
