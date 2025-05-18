@@ -6,7 +6,7 @@ from .base import BaseClient
 from .document import Document
 from .extensions import RedirectExtension
 from .request import HttpRequest
-from .transport import Urllib3Transport
+from .smart_transport import SmartTransport
 from .util.types import resolve_entity
 
 __all__ = ["HttpClient", "request"]
@@ -16,7 +16,7 @@ class HttpClient(BaseClient[HttpRequest, Document]):
     document_class: type[Document] = Document
     extension = RedirectExtension()
     request_class = HttpRequest
-    default_transport_class = Urllib3Transport
+    default_transport_class = SmartTransport
 
     def request(
         self, req: None | str | HttpRequest = None, **request_kwargs: Any

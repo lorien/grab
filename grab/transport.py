@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import email.message
 import logging
+import re
 import ssl
 import time
 from collections.abc import Generator, Mapping
@@ -20,7 +21,12 @@ from urllib3.util.timeout import Timeout
 
 from .base import BaseTransport
 from .document import Document
-from .errors import GrabConnectionError, GrabInvalidResponseError, GrabTimeoutError
+from .errors import (
+    CloudflareProtectionDetectedError,
+    GrabConnectionError,
+    GrabInvalidResponseError,
+    GrabTimeoutError,
+)
 from .request import HttpRequest
 from .util.cookies import extract_response_cookies
 
@@ -77,6 +83,30 @@ class Urllib3Transport(BaseTransport[HttpRequest, Document]):
             raise GrabConnectionError("SSLError", ex) from ex
         except ssl.SSLError as ex:
             raise GrabConnectionError("SSLError", ex) from ex
+
+    def detect_cloudflare_protection(self, body: bytes, status_code: int) -> bool:
+        """Detect if Cloudflare protection is active on the response."""
+        if status_code == 403 or status_code == 503:
+            # Check for common Cloudflare challenge page indicators
+            body_str = body.decode('utf-8', errors='ignore')
+            cf_patterns = [
+                r'cf-browser-verification',
+                r'_cf_chl_captcha',
+                r'cloudflare',
+                r'challenge-platform',
+                r'jschl-answer',
+                r'ray-id',
+                r'cf-ray',
+                r'security by cloudflare',
+                r'cloudflare.online',
+                r'checking your browser'
+            ]
+            
+            for pattern in cf_patterns:
+                if re.search(pattern, body_str, re.IGNORECASE):
+                    return True
+        
+        return False
 
     def select_pool_for_request(
         self, req: HttpRequest
@@ -207,6 +237,10 @@ class Urllib3Transport(BaseTransport[HttpRequest, Document]):
             head = head_str.encode("utf-8")
 
             body = self.read_with_timeout(req)
+            
+            # Check for Cloudflare protection before creating Document
+            if self.detect_cloudflare_protection(body, self._response.status):
+                raise CloudflareProtectionDetectedError("Cloudflare protection detected")
 
             hdr = email.message.Message()
             for key, val in self.get_response_header_items():

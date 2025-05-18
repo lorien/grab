@@ -1,7 +1,7 @@
 [project]
 
 name = "grab"
-version = "0.6.41"
+version = "0.6.42"
 description = "Web scraping framework"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -29,14 +29,15 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "proxylist>=0.2.1",
-    "unicodec>=0.0.8",
-    "procstat>=0.0.7",
+    "proxylist",
+    "unicodec",
+    "procstat",
     "user_agent",
-    "selection>=0.0.21",
+    "selection",
     "lxml",
     "urllib3[socks]",
     "certifi",
+    "cloudscraper",
 ]
 
 [project.urls]
@@ -79,6 +80,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["user_agent", "fastrq.priorityqueue"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "cloudscraper"
 ignore_missing_imports = true
 
 [tool.pylint.main]
