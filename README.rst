@@ -16,6 +16,13 @@ Grab
 .. image:: https://readthedocs.org/projects/grab/badge/?version=latest
     :target: http://docs.grablib.org/en/latest/
 
+Update (2025 year)
+------------------
+
+I have reset all project files to the state of recent pypi release dated by june 2018.
+
+If you need most recent state of the project before reset, use commit tagged as "cancelled-refactoring".
+
 
 What is Grab?
 -------------
