@@ -2,9 +2,9 @@
 
 ## Update (2025 year)
 
-I have reset all project files to the state of recent pypi release dated by june 2018.
+I have reset all project files to the state of recent pypi release 0.6.41 dated by june 2018.
 
-If you need most recent state of the project before reset, use commit tagged as "cancelled-refactoring".
+If you need most recent state of the project before reset, use the commit tagged as "cancelled-refactoring".
 
 
 ## What is Grab?
