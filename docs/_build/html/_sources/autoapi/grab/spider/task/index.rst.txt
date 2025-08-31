@@ -1,0 +1,70 @@
+:py:mod:`grab.spider.task`
+==========================
+
+.. py:module:: grab.spider.task
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.task.BaseTask
+   grab.spider.task.Task
+
+
+
+
+.. py:class:: BaseTask
+
+
+.. py:class:: Task(name: None | str = None, url: None | str = None, grab: None | Grab = None, grab_config: None | GrabConfig = None, priority: None | int = None, priority_set_explicitly: bool = True, network_try_count: int = 0, task_try_count: int = 1, valid_status: None | list[int] = None, use_proxylist: bool = True, delay: None | int = None, raw: bool = False, callback: None | Callable[..., None] = None, fallback_name: None | str = None, store: None | dict[str, Any] = None, disable_cache: bool = False, refresh_cache: bool = False, cache_timeout: None | int = None, **kwargs: Any)
+
+   Bases: :py:obj:`BaseTask`
+
+   Task for spider.
+
+   .. py:method:: process_init_url_grab_options(url: None | str, grab: None | Grab, grab_config: None | GrabConfig) -> None
+
+
+   .. py:method:: get(key: str, default: Any = None) -> Any
+
+      Return value of attribute or None if such attribute does not exist.
+
+
+   .. py:method:: process_delay_option(delay: None | float) -> None
+
+
+   .. py:method:: setup_grab_config(grab_config: grab.types.GrabConfig) -> None
+
+
+   .. py:method:: test_clone_options_integrity(url: None | str, grab: None | Grab, grab_config: None | GrabConfig) -> None
+
+
+   .. py:method:: clone(**kwargs: Any) -> Task
+
+      Clone Task instance.
+
+      Reset network_try_count, increase task_try_count.
+      Reset priority attribute if it was not set explicitly.
+
+
+   .. py:method:: __repr__() -> str
+
+      Return repr(self).
+
+
+   .. py:method:: __lt__(other: Task) -> bool
+
+      Return self<value.
+
+
+   .. py:method:: __eq__(other: object) -> bool
+
+      Return self==value.
+
+
+

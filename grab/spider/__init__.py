@@ -1,5 +1,4 @@
-from .base import Spider
-from .errors import *  # noqa: F403 pylint: disable=wildcard-import
-from .task import Task
-
-__all__ = ["Spider", "Task"]
+from grab.spider.base import Spider  # noqa
+from grab.spider.data import Data  # noqa
+from grab.spider.task import Task  # noqa
+from grab.spider.error import *  # noqa pylint: disable=wildcard-import

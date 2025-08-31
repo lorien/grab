@@ -1,0 +1,5 @@
+mysqlclient;platform_system!="Windows"
+psycopg2-binary
+pymongo
+qr
+redis

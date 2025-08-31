@@ -1,0 +1,30 @@
+:py:mod:`grab.spider.service.task_dispatcher`
+=============================================
+
+.. py:module:: grab.spider.service.task_dispatcher
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.service.task_dispatcher.TaskDispatcherService
+
+
+
+
+.. py:class:: TaskDispatcherService(fatal_error_queue: queue.Queue[grab.spider.interface.FatalErrorQueueItem], process_service_result: collections.abc.Callable[[Any, grab.spider.task.Task, None | dict[str, Any]], Any])
+
+   Bases: :py:obj:`grab.spider.service.base.BaseService`
+
+   .. py:method:: start() -> None
+
+
+   .. py:method:: worker_callback(worker: grab.spider.service.base.ServiceWorker) -> None
+
+
+

@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Form Processing &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Network Errors Handling" href="network_errors.html" />
+    <link rel="prev" title="Redirect Handling" href="redirect.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="form-processing">
+<span id="grab-forms"></span><h1>Form Processing<a class="headerlink" href="#form-processing" title="Permalink to this headline">¶</a></h1>
+<p>Grab can help you process web forms. It can automatically fill all input fields
+that have default values, letting you fill only fields you need.
+The typical workflow is:</p>
+<ul class="simple">
+<li><p>request a page</p></li>
+<li><p>fill input fields with <cite>set_input</cite> method</p></li>
+<li><p>submit the form with <cite>submit</cite> method</p></li>
+</ul>
+<p>When you are using <cite>set_input</cite> you just specify the name of an input and the value, and
+Grab automatically finds the form field containing the input with that name. When you
+call <cite>submit</cite>, the automatically-chosen form is submitted (the form that has
+the largest number of fields). You can also explicitly choose the form with
+the <cite>choose_form</cite> method.</p>
+<p>Let’s look at a simple example of how to use these form features:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://ya.ru/&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="s1">&#39;grab lib&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;//a[@class=&quot;b-serp-item__title-link&quot;]/@href&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+<span class="go">&#39;http://grablib.org/&#39;</span>
+</pre></div>
+</div>
+<p>The form that has been chosen automatically is available in the <cite>grab.form</cite> attribute.</p>
+<p>To specify input values you can use <cite>set_input</cite>, <cite>set_input_by_id</cite> and <cite>set_input_by_xpath</cite> methods.</p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_uploading.html">File Uploading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_base.html">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_base.html">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="redirect.html" title="previous chapter">Redirect Handling</a></li>
+      <li>Next: <a href="network_errors.html" title="next chapter">Network Errors Handling</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/grab/forms.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

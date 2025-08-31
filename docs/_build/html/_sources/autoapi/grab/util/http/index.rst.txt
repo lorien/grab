@@ -1,0 +1,22 @@
+:py:mod:`grab.util.http`
+========================
+
+.. py:module:: grab.util.http
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.util.http.merge_with_dict
+
+
+
+.. py:function:: merge_with_dict(hdr1: Sequence[tuple[str, Any]] | MutableMapping[str, Any], hdr2: collections.abc.Mapping[str, Any], replace: bool = False) -> None
+
+

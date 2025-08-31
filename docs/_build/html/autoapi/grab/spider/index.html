@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grab.spider &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="grab.spider.queue_backend" href="queue_backend/index.html" />
+    <link rel="prev" title="grab" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../util/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.util</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/grab/spider/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-grab.spider">
+<span id="grab-spider"></span><h1><a class="reference internal" href="#module-grab.spider" title="grab.spider"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider</span></code></a><a class="headerlink" href="#module-grab.spider" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="queue_backend/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.queue_backend</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="queue_backend/base/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.queue_backend.base</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="queue_backend/memory/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.queue_backend.memory</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="queue_backend/mongodb/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.queue_backend.mongodb</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="queue_backend/redis/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.queue_backend.redis</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="service/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.service</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="service/base/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.service.base</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="service/network/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.service.network</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="service/parser/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.service.parser</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="service/task_dispatcher/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.service.task_dispatcher</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="service/task_generator/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.service.task_generator</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="base/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.base</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="errors/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.errors</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="interface/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.interface</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="task/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.task</span></code></a></li>
+</ul>
+</div>
+</section>
+<section id="package-contents">
+<h2>Package Contents<a class="headerlink" href="#package-contents" title="Permalink to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grab.spider.Spider" title="grab.spider.Spider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Spider</span></code></a></p></td>
+<td><p>Asynchronous scraping framework.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grab.spider.Task" title="grab.spider.Task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Task</span></code></a></p></td>
+<td><p>Task for spider.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="grab.spider.Spider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.</span></span><span class="sig-name descname"><span class="pre">Spider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_queue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="queue_backend/base/index.html#grab.spider.queue_backend.base.BaseTaskQueue" title="grab.spider.queue_backend.base.BaseTaskQueue"><span class="pre">BaseTaskQueue</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thread_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_try_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_try_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'random'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_requests_per_process</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_pool_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_service</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="service/network/index.html#grab.spider.service.network.BaseNetworkService" title="grab.spider.service.network.BaseNetworkService"><span class="pre">BaseNetworkService</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grab_transport</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../base_transport/index.html#grab.base_transport.BaseTransport" title="grab.base_transport.BaseTransport"><span class="pre">BaseTransport</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../base_transport/index.html#grab.base_transport.BaseTransport" title="grab.base_transport.BaseTransport"><span class="pre">BaseTransport</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/grab/spider/base.html#Spider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.Spider" title="Permalink to this definition"></a></dt>
+<dd><p>Asynchronous scraping framework.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grab.spider.Spider.spider_name">
+<span class="sig-name descname"><span class="pre">spider_name</span></span><a class="headerlink" href="#grab.spider.Spider.spider_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grab.spider.Spider.initial_urls">
+<span class="sig-name descname"><span class="pre">initial_urls</span></span><em class="property"><span class="w"> </span><span class="pre">:list[str]</span> <span class="pre">=</span> <span class="pre">[]</span></em><a class="headerlink" href="#grab.spider.Spider.initial_urls" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.collect_runtime_event">
+<span class="sig-name descname"><span class="pre">collect_runtime_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.collect_runtime_event" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.setup_queue">
+<span class="sig-name descname"><span class="pre">setup_queue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.setup_queue" title="Permalink to this definition"></a></dt>
+<dd><p>Set up queue.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.add_task">
+<span class="sig-name descname"><span class="pre">add_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="queue_backend/base/index.html#grab.spider.queue_backend.base.BaseTaskQueue" title="grab.spider.queue_backend.base.BaseTaskQueue"><span class="pre">BaseTaskQueue</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#grab.spider.Spider.add_task" title="Permalink to this definition"></a></dt>
+<dd><p>Add task to the task queue.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.stop" title="Permalink to this definition"></a></dt>
+<dd><p>Instruct spider to stop processing new tasks and start shutting down.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.load_proxylist">
+<span class="sig-name descname"><span class="pre">load_proxylist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">BaseProxySource</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proxy_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'http'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_change</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.load_proxylist" title="Permalink to this definition"></a></dt>
+<dd><p>Load proxy list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> – Proxy source.
+Accepts string (file path, url) or <code class="docutils literal notranslate"><span class="pre">BaseProxySource</span></code> instance.</p></li>
+<li><p><strong>source_type</strong> – The type of the specified source.
+Should be one of the following: ‘text_file’ or ‘url’.</p></li>
+<li><p><strong>proxy_type</strong> – Should be one of the following: ‘socks4’, ‘socks5’ or’http’.</p></li>
+<li><p><strong>auto_change</strong> – If set to <cite>True</cite> then automatically random proxy rotation
+will be used.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Proxy source format should be one of the following (for each line):
+- ip:port
+- ip:port:login:password</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.render_stats">
+<span class="sig-name descname"><span class="pre">render_stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#grab.spider.Spider.render_stats" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.prepare" title="Permalink to this definition"></a></dt>
+<dd><p>Do additional spider customization here.</p>
+<p>This method runs before spider has started working.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.shutdown">
+<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.shutdown" title="Permalink to this definition"></a></dt>
+<dd><p>Override this method to do some final actions after parsing has been done.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.update_grab_instance">
+<span class="sig-name descname"><span class="pre">update_grab_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grab</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#grab.base.Grab" title="grab.base.Grab"><span class="pre">grab.base.Grab</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.update_grab_instance" title="Permalink to this definition"></a></dt>
+<dd><p>Update config of any <cite>Grab</cite> instance created by the spider.</p>
+<p>WTF it means?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.create_grab_instance">
+<span class="sig-name descname"><span class="pre">create_grab_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../base/index.html#grab.base.Grab" title="grab.base.Grab"><span class="pre">grab.base.Grab</span></a></span></span><a class="headerlink" href="#grab.spider.Spider.create_grab_instance" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.task_generator">
+<span class="sig-name descname"><span class="pre">task_generator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#grab.spider.Spider.task_generator" title="Permalink to this definition"></a></dt>
+<dd><p>You can override this method to load new tasks.</p>
+<p>It will be used each time as number of tasks
+in task queue is less then number of threads multiplied on 2
+This allows you to not overload all free memory if total number of
+tasks is big.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.check_task_limits">
+<span class="sig-name descname"><span class="pre">check_task_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#grab.spider.Spider.check_task_limits" title="Permalink to this definition"></a></dt>
+<dd><p>Check that task’s network &amp; try counters do not exceed limits.</p>
+<p>Returns:
+* if success: (True, None)
+* if error: (False, reason)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.generate_task_priority">
+<span class="sig-name descname"><span class="pre">generate_task_priority</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#grab.spider.Spider.generate_task_priority" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.process_initial_urls">
+<span class="sig-name descname"><span class="pre">process_initial_urls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.process_initial_urls" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.get_task_from_queue">
+<span class="sig-name descname"><span class="pre">get_task_from_queue</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">True</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#grab.spider.Task" title="grab.spider.Task"><span class="pre">Task</span></a></span></span><a class="headerlink" href="#grab.spider.Spider.get_task_from_queue" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.setup_grab_for_task">
+<span class="sig-name descname"><span class="pre">setup_grab_for_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../base/index.html#grab.base.Grab" title="grab.base.Grab"><span class="pre">grab.base.Grab</span></a></span></span><a class="headerlink" href="#grab.spider.Spider.setup_grab_for_task" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.is_valid_network_response_code">
+<span class="sig-name descname"><span class="pre">is_valid_network_response_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#grab.spider.Spider.is_valid_network_response_code" title="Permalink to this definition"></a></dt>
+<dd><p>Test if response is valid.</p>
+<p>Valid response is handled with associated task handler.
+Failed respoosne is processed with error handler.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.process_parser_error">
+<span class="sig-name descname"><span class="pre">process_parser_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">exc_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">type</span><span class="p"><span class="pre">[</span></span><span class="pre">Exception</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Exception</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">types.TracebackType</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.process_parser_error" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.find_task_handler">
+<span class="sig-name descname"><span class="pre">find_task_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#grab.spider.Spider.find_task_handler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.log_network_result_stats">
+<span class="sig-name descname"><span class="pre">log_network_result_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">grab.spider.service.network.NetworkResult</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.log_network_result_stats" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.process_grab_proxy">
+<span class="sig-name descname"><span class="pre">process_grab_proxy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">grab</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#grab.base.Grab" title="grab.base.Grab"><span class="pre">grab.base.Grab</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.process_grab_proxy" title="Permalink to this definition"></a></dt>
+<dd><p>Assign new proxy from proxylist to the task.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.change_active_proxy">
+<span class="sig-name descname"><span class="pre">change_active_proxy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">grab</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#grab.base.Grab" title="grab.base.Grab"><span class="pre">grab.base.Grab</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.change_active_proxy" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.get_task_queue">
+<span class="sig-name descname"><span class="pre">get_task_queue</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="queue_backend/base/index.html#grab.spider.queue_backend.base.BaseTaskQueue" title="grab.spider.queue_backend.base.BaseTaskQueue"><span class="pre">grab.spider.queue_backend.base.BaseTaskQueue</span></a></span></span><a class="headerlink" href="#grab.spider.Spider.get_task_queue" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.is_idle_estimated">
+<span class="sig-name descname"><span class="pre">is_idle_estimated</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#grab.spider.Spider.is_idle_estimated" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.is_idle_confirmed">
+<span class="sig-name descname"><span class="pre">is_idle_confirmed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">services</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="service/base/index.html#grab.spider.service.base.BaseService" title="grab.spider.service.base.BaseService"><span class="pre">grab.spider.service.base.BaseService</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#grab.spider.Spider.is_idle_confirmed" title="Permalink to this definition"></a></dt>
+<dd><p>Test if spider is fully idle.</p>
+<p>WARNING: As side effect it stops all services to get state of queues
+anaffected by sercies.</p>
+<p>Spider is full idle when all conditions are met:
+* all services are paused i.e. the do not change queues
+* all queues are empty
+* task generator is completed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.shutdown_services">
+<span class="sig-name descname"><span class="pre">shutdown_services</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">services</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="service/base/index.html#grab.spider.service.base.BaseService" title="grab.spider.service.base.BaseService"><span class="pre">grab.spider.service.base.BaseService</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.shutdown_services" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.log_failed_network_result">
+<span class="sig-name descname"><span class="pre">log_failed_network_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">grab.spider.service.network.NetworkResult</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.log_failed_network_result" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.log_rejected_task">
+<span class="sig-name descname"><span class="pre">log_rejected_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.log_rejected_task" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.get_fallback_handler">
+<span class="sig-name descname"><span class="pre">get_fallback_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#grab.spider.Spider.get_fallback_handler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.srv_process_service_result">
+<span class="sig-name descname"><span class="pre">srv_process_service_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#grab.spider.Task" title="grab.spider.Task"><span class="pre">Task</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Exception</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.srv_process_service_result" title="Permalink to this definition"></a></dt>
+<dd><p>Process result submitted from any service to task dispatcher service.</p>
+<p>Result could be:
+* Task
+* None
+* Task instance
+* ResponseNotValid-based exception
+* Arbitrary exception
+* Network response:</p>
+<blockquote>
+<div><p>{ok, ecode, emsg, exc, grab, grab_config_backup}</p>
+</div></blockquote>
+<p>Exception can come only from parser_service and it always has
+meta {“from”: “parser”, “exc_info”: &lt;…&gt;}</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.srv_process_network_result">
+<span class="sig-name descname"><span class="pre">srv_process_network_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">grab.spider.service.network.NetworkResult</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.srv_process_network_result" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Spider.srv_process_task">
+<span class="sig-name descname"><span class="pre">srv_process_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="task/index.html#grab.spider.task.Task" title="grab.spider.task.Task"><span class="pre">grab.spider.task.Task</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Spider.srv_process_task" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.spider.SpiderError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.</span></span><span class="sig-name descname"><span class="pre">SpiderError</span></span><a class="reference internal" href="../../../_modules/grab/spider/errors.html#SpiderError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.SpiderError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../errors/index.html#grab.errors.GrabError" title="grab.errors.GrabError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grab.errors.GrabError</span></code></a></p>
+<p>Base class for Spider exceptions.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.spider.SpiderMisuseError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.</span></span><span class="sig-name descname"><span class="pre">SpiderMisuseError</span></span><a class="reference internal" href="../../../_modules/grab/spider/errors.html#SpiderMisuseError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.SpiderMisuseError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.spider.SpiderError" title="grab.spider.SpiderError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiderError</span></code></a></p>
+<p>Improper usage of Spider framework.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.spider.FatalError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.</span></span><span class="sig-name descname"><span class="pre">FatalError</span></span><a class="reference internal" href="../../../_modules/grab/spider/errors.html#FatalError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.FatalError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.spider.SpiderError" title="grab.spider.SpiderError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiderError</span></code></a></p>
+<p>Fatal error which should stop parsing process.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.spider.SpiderInternalError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.</span></span><span class="sig-name descname"><span class="pre">SpiderInternalError</span></span><a class="reference internal" href="../../../_modules/grab/spider/errors.html#SpiderInternalError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.SpiderInternalError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.spider.SpiderError" title="grab.spider.SpiderError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiderError</span></code></a></p>
+<p>Raises when error throwned by internal spider logic.</p>
+<p>Like spider class discovering, CLI error.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.spider.NoTaskHandler">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.</span></span><span class="sig-name descname"><span class="pre">NoTaskHandler</span></span><a class="reference internal" href="../../../_modules/grab/spider/errors.html#NoTaskHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.NoTaskHandler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.spider.SpiderError" title="grab.spider.SpiderError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiderError</span></code></a></p>
+<p>Raise when no handler found to process network response.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.spider.NoDataHandler">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.</span></span><span class="sig-name descname"><span class="pre">NoDataHandler</span></span><a class="reference internal" href="../../../_modules/grab/spider/errors.html#NoDataHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.NoDataHandler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.spider.SpiderError" title="grab.spider.SpiderError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiderError</span></code></a></p>
+<p>Raise when no handler found to process Data object.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grab.spider.Task">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.</span></span><span class="sig-name descname"><span class="pre">Task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grab</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../base/index.html#grab.base.Grab" title="grab.base.Grab"><span class="pre">Grab</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grab_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">GrabConfig</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority_set_explicitly</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_try_count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_try_count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_proxylist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disable_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/grab/spider/task.html#Task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.Task" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTask</span></code></p>
+<p>Task for spider.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Task.process_init_url_grab_options">
+<span class="sig-name descname"><span class="pre">process_init_url_grab_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grab</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../base/index.html#grab.base.Grab" title="grab.base.Grab"><span class="pre">Grab</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">grab_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">GrabConfig</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Task.process_init_url_grab_options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Task.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#grab.spider.Task.get" title="Permalink to this definition"></a></dt>
+<dd><p>Return value of attribute or None if such attribute does not exist.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Task.process_delay_option">
+<span class="sig-name descname"><span class="pre">process_delay_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Task.process_delay_option" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Task.setup_grab_config">
+<span class="sig-name descname"><span class="pre">setup_grab_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grab_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">grab.types.GrabConfig</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Task.setup_grab_config" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Task.test_clone_options_integrity">
+<span class="sig-name descname"><span class="pre">test_clone_options_integrity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grab</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../base/index.html#grab.base.Grab" title="grab.base.Grab"><span class="pre">Grab</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">grab_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">GrabConfig</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grab.spider.Task.test_clone_options_integrity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Task.clone">
+<span class="sig-name descname"><span class="pre">clone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#grab.spider.Task" title="grab.spider.Task"><span class="pre">Task</span></a></span></span><a class="headerlink" href="#grab.spider.Task.clone" title="Permalink to this definition"></a></dt>
+<dd><p>Clone Task instance.</p>
+<p>Reset network_try_count, increase task_try_count.
+Reset priority attribute if it was not set explicitly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Task.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#grab.spider.Task.__repr__" title="Permalink to this definition"></a></dt>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Task.__lt__">
+<span class="sig-name descname"><span class="pre">__lt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#grab.spider.Task" title="grab.spider.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#grab.spider.Task.__lt__" title="Permalink to this definition"></a></dt>
+<dd><p>Return self&lt;value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.Task.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#grab.spider.Task.__eq__" title="Permalink to this definition"></a></dt>
+<dd><p>Return self==value.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="grab" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="queue_backend/index.html" class="btn btn-neutral float-right" title="grab.spider.queue_backend" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

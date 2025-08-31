@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grab.base &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../grab.html">grab</a></li>
+      <li class="breadcrumb-item active">grab.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for grab.base</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">MutableMapping</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">http.cookiejar</span> <span class="kn">import</span> <span class="n">CookieJar</span>
+<span class="kn">from</span> <span class="nn">secrets</span> <span class="kn">import</span> <span class="n">SystemRandom</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urljoin</span><span class="p">,</span> <span class="n">urlsplit</span>
+
+<span class="kn">from</span> <span class="nn">proxylist</span> <span class="kn">import</span> <span class="n">ProxyList</span>
+<span class="kn">from</span> <span class="nn">user_agent</span> <span class="kn">import</span> <span class="n">generate_user_agent</span>
+
+<span class="kn">from</span> <span class="nn">grab.base_transport</span> <span class="kn">import</span> <span class="n">BaseTransport</span>
+<span class="kn">from</span> <span class="nn">grab.document</span> <span class="kn">import</span> <span class="n">Document</span>
+<span class="kn">from</span> <span class="nn">grab.errors</span> <span class="kn">import</span> <span class="n">GrabError</span><span class="p">,</span> <span class="n">GrabMisuseError</span><span class="p">,</span> <span class="n">GrabTooManyRedirectsError</span>
+<span class="kn">from</span> <span class="nn">grab.request</span> <span class="kn">import</span> <span class="n">Request</span>
+<span class="kn">from</span> <span class="nn">grab.transport</span> <span class="kn">import</span> <span class="n">Urllib3Transport</span>
+<span class="kn">from</span> <span class="nn">grab.types</span> <span class="kn">import</span> <span class="n">GrabConfig</span>
+<span class="kn">from</span> <span class="nn">grab.util.cookies</span> <span class="kn">import</span> <span class="n">create_cookie</span>
+<span class="kn">from</span> <span class="nn">grab.util.html</span> <span class="kn">import</span> <span class="n">find_base_url</span>
+<span class="kn">from</span> <span class="nn">grab.util.http</span> <span class="kn">import</span> <span class="n">merge_with_dict</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Grab&quot;</span><span class="p">]</span>
+<span class="n">MUTABLE_CONFIG_KEYS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">,</span> <span class="s2">&quot;headers&quot;</span><span class="p">,</span> <span class="s2">&quot;cookies&quot;</span><span class="p">]</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;grab.base&quot;</span><span class="p">)</span>
+<span class="n">logger_network</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;grab.network&quot;</span><span class="p">)</span>
+<span class="n">system_random</span> <span class="o">=</span> <span class="n">SystemRandom</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">copy_config</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">GrabConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GrabConfig</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Copy grab config with correct handling of mutable config values.&quot;&quot;&quot;</span>
+    <span class="n">cloned_config</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">MUTABLE_CONFIG_KEYS</span><span class="p">:</span>
+        <span class="n">cloned_config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">cloned_config</span>
+
+
+<span class="k">def</span> <span class="nf">default_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">GrabConfig</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="c1"># Request Properties</span>
+        <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;proxy&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;proxy_type&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;proxy_userpwd&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;headers&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;cookies&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;encoding&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;document_type&quot;</span><span class="p">:</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;multipart&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># Needs refactoring</span>
+        <span class="s2">&quot;redirect_limit&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>  <span class="c1"># -&gt; Retry</span>
+        <span class="s2">&quot;follow_location&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># -&gt; Redirect</span>
+        <span class="c1"># Session Properties</span>
+        <span class="s2">&quot;common_headers&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;reuse_cookies&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;proxy_auto_change&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="p">}</span>
+
+
+<div class="viewcode-block" id="Grab"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab">[docs]</a><span class="k">class</span> <span class="nc">Grab</span><span class="p">:</span>
+<div class="viewcode-block" id="Grab.__slots__"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.__slots__">[docs]</a>    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;proxylist&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;config&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;transport&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;request_method&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cookies&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;meta&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_doc&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+<div class="viewcode-block" id="Grab.document_class"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.document_class">[docs]</a>    <span class="n">document_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Document</span><span class="p">]</span> <span class="o">=</span> <span class="n">Document</span></div>
+    <span class="c1"># Attributes which should be processed when Grab instance is cloned</span>
+<div class="viewcode-block" id="Grab.clonable_attributes"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.clonable_attributes">[docs]</a>    <span class="n">clonable_attributes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;proxylist&quot;</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">transport</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">BaseTransport</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseTransport</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_transport_option</span><span class="p">(</span><span class="n">transport</span><span class="p">,</span> <span class="n">Urllib3Transport</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_doc</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Document</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">:</span> <span class="n">GrabConfig</span> <span class="o">=</span> <span class="n">default_config</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;common_headers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">common_headers</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span> <span class="o">=</span> <span class="n">CookieJar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxylist</span> <span class="o">=</span> <span class="n">ProxyList</span><span class="o">.</span><span class="n">from_lines_list</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Grab.process_transport_option"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.process_transport_option">[docs]</a>    <span class="k">def</span> <span class="nf">process_transport_option</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">transport</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">BaseTransport</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseTransport</span><span class="p">],</span>
+        <span class="n">default_transport</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseTransport</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseTransport</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">transport</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">transport</span><span class="p">,</span> <span class="n">BaseTransport</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">transport</span><span class="p">,</span> <span class="n">BaseTransport</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="n">GrabMisuseError</span><span class="p">(</span><span class="s2">&quot;Invalid Grab transport: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">transport</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">transport</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default_transport</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">transport</span><span class="p">,</span> <span class="n">BaseTransport</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">transport</span>
+        <span class="k">return</span> <span class="n">transport</span><span class="p">()</span></div>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Grab.doc"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.doc">[docs]</a>    <span class="k">def</span> <span class="nf">doc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Document</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doc</span></div>
+
+    <span class="nd">@doc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">doc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Document</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_doc</span> <span class="o">=</span> <span class="n">obj</span>
+
+<div class="viewcode-block" id="Grab.clone"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.clone">[docs]</a>    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Grab</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create clone of Grab instance.</span>
+
+<span class="sd">        Cloned instance will have the same state: cookies, referrer, response</span>
+<span class="sd">        document data</span>
+
+<span class="sd">        :param \\**kwargs: overrides settings of cloned grab instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: self.transport must be cloned ?</span>
+        <span class="n">grab</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="n">transport</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">)</span>
+        <span class="n">grab</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dump_config</span><span class="p">()</span>
+        <span class="n">grab</span><span class="o">.</span><span class="n">doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clonable_attributes</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">grab</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+        <span class="n">jar</span> <span class="o">=</span> <span class="n">CookieJar</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span><span class="p">:</span>
+            <span class="n">jar</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="n">grab</span><span class="o">.</span><span class="n">cookies</span> <span class="o">=</span> <span class="n">jar</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">grab</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grab</span></div>
+
+<div class="viewcode-block" id="Grab.dump_config"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.dump_config">[docs]</a>    <span class="k">def</span> <span class="nf">dump_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Make clone of current config.&quot;&quot;&quot;</span>
+        <span class="n">conf</span> <span class="o">=</span> <span class="n">copy_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">conf</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;cookiejar_cookies&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cookies</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">conf</span></div>
+
+<div class="viewcode-block" id="Grab.load_config"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.load_config">[docs]</a>    <span class="k">def</span> <span class="nf">load_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">GrabConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Configure grab instance with external config object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">copy_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;cookiejar_cookies&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]:</span>
+            <span class="n">jar</span> <span class="o">=</span> <span class="n">CookieJar</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">cookie</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">][</span><span class="s2">&quot;cookiejar_cookies&quot;</span><span class="p">]:</span>
+                <span class="n">jar</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">cookie</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span> <span class="o">=</span> <span class="n">jar</span></div>
+
+<div class="viewcode-block" id="Grab.setup"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Set up Grab instance configuration.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">GrabMisuseError</span><span class="p">(</span><span class="s2">&quot;Unknown option: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;url&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_url_absolute</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Grab.prepare_request"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.prepare_request">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Request</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Configure all things to make real network request.</span>
+
+<span class="sd">        This method is called before doing real request via transport extension.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GrabMisuseError</span><span class="p">(</span><span class="s2">&quot;Request URL must be set&quot;</span><span class="p">)</span>
+        <span class="c1"># TODO: activate</span>
+        <span class="c1"># if self.config[&quot;method&quot;] is None:</span>
+        <span class="c1">#    raise GrabMisuseError(&quot;Request method must be set&quot;)</span>
+        <span class="c1"># TODO: remove</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;POST&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;GET&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="c1"># proxylist extension</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;proxy_auto_change&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">change_proxy</span><span class="p">()</span>
+        <span class="c1"># common headers extension</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;common_headers&quot;</span><span class="p">]:</span>
+            <span class="n">merge_with_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;common_headers&quot;</span><span class="p">])</span>
+        <span class="c1"># cookies extension</span>
+        <span class="n">req</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_request_from_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sync_cookie_manager_with_request_cookies</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">cookies</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">req</span></div>
+
+<div class="viewcode-block" id="Grab.create_request_from_config"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.create_request_from_config">[docs]</a>    <span class="k">def</span> <span class="nf">create_request_from_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Request</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Request</span><span class="p">(</span>
+            <span class="n">url</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">],</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">],</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">],</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;timeout&quot;</span><span class="p">],</span>
+            <span class="n">proxy</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;proxy&quot;</span><span class="p">],</span>
+            <span class="n">proxy_type</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;proxy_type&quot;</span><span class="p">],</span>
+            <span class="n">proxy_userpwd</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;proxy_userpwd&quot;</span><span class="p">],</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">],</span>
+            <span class="n">cookies</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;cookies&quot;</span><span class="p">],</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">],</span>
+            <span class="n">fields</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">],</span>
+            <span class="n">multipart</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;multipart&quot;</span><span class="p">],</span>
+            <span class="n">document_type</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;document_type&quot;</span><span class="p">],</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Grab.sync_cookie_manager_with_request_cookies"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.sync_cookie_manager_with_request_cookies">[docs]</a>    <span class="k">def</span> <span class="nf">sync_cookie_manager_with_request_cookies</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cookies</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">request_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">request_host</span> <span class="o">=</span> <span class="n">urlsplit</span><span class="p">(</span><span class="n">request_url</span><span class="p">)</span><span class="o">.</span><span class="n">hostname</span>
+        <span class="k">if</span> <span class="n">request_host</span> <span class="ow">and</span> <span class="n">cookies</span><span class="p">:</span>
+            <span class="c1"># If cookie item is provided in form with no domain specified,</span>
+            <span class="c1"># then use domain value extracted from request URL</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">cookies</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span>
+                    <span class="n">create_cookie</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">request_host</span><span class="p">)</span>
+                <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Grab.log_request"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.log_request">[docs]</a>    <span class="k">def</span> <span class="nf">log_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">extra</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Send request details to logging system.&quot;&quot;&quot;</span>
+        <span class="n">thread_name</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">current_thread</span><span class="p">()</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">proxy_info</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot; via </span><span class="si">{}</span><span class="s2"> proxy of type </span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">req</span><span class="o">.</span><span class="n">proxy</span><span class="p">,</span>
+                <span class="n">req</span><span class="o">.</span><span class="n">proxy_type</span><span class="p">,</span>
+                <span class="s2">&quot; with auth&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;proxy_userpwd&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">proxy</span>
+            <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">)</span>
+        <span class="n">logger_network</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%s%s%s</span><span class="s2"> </span><span class="si">%s%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">thread_name</span> <span class="o">==</span> <span class="s2">&quot;mainthread&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;[</span><span class="si">{}</span><span class="s2">] &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">thread_name</span><span class="p">),</span>
+            <span class="s2">&quot;[</span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">extra</span><span class="p">)</span> <span class="k">if</span> <span class="n">extra</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">req</span><span class="o">.</span><span class="n">method</span> <span class="ow">or</span> <span class="s2">&quot;GET&quot;</span><span class="p">,</span>
+            <span class="n">req</span><span class="o">.</span><span class="n">url</span><span class="p">,</span>
+            <span class="n">proxy_info</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Grab.find_redirect_url"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.find_redirect_url">[docs]</a>    <span class="k">def</span> <span class="nf">find_redirect_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">:</span> <span class="n">Document</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">doc</span><span class="o">.</span><span class="n">headers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;follow_location&quot;</span><span class="p">]</span>
+            <span class="ow">and</span> <span class="n">doc</span><span class="o">.</span><span class="n">code</span> <span class="ow">in</span> <span class="p">{</span><span class="mi">301</span><span class="p">,</span> <span class="mi">302</span><span class="p">,</span> <span class="mi">303</span><span class="p">,</span> <span class="mi">307</span><span class="p">,</span> <span class="mi">308</span><span class="p">}</span>
+            <span class="ow">and</span> <span class="n">doc</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Location&quot;</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Location&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Grab.request"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.request">[docs]</a>    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Document</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Perform network request.</span>
+
+<span class="sd">        You can specify grab settings in ``**kwargs``.</span>
+<span class="sd">        Any keyword argument will be passed to ``self.config``.</span>
+
+<span class="sd">        Returns: ``Document`` objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">req</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_request</span><span class="p">()</span>
+        <span class="n">redir_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_request</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">GrabError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reset_temporary_options</span><span class="p">()</span>
+                <span class="k">raise</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">wrap_transport_error</span><span class="p">():</span>
+                    <span class="n">doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_request_result</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+                <span class="n">redir_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_redirect_url</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">redir_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">redir_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">redir_count</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;redirect_limit&quot;</span><span class="p">]:</span>
+                        <span class="k">raise</span> <span class="n">GrabTooManyRedirectsError</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">make_url_absolute</span><span class="p">(</span><span class="n">redir_url</span><span class="p">))</span>
+                    <span class="n">req</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_request</span><span class="p">()</span>
+                    <span class="k">continue</span>
+                <span class="k">return</span> <span class="n">doc</span></div>
+
+<div class="viewcode-block" id="Grab.submit"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.submit">[docs]</a>    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">make_request</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Document</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Submit current form.</span>
+
+<span class="sd">        :param make_request: if `False` then grab instance will be</span>
+<span class="sd">            configured with form post data but request will not be</span>
+<span class="sd">            performed</span>
+
+<span class="sd">        For details see `Document.submit()` method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">is_multipart</span><span class="p">,</span> <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">get_form_request</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span>
+            <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">,</span>
+            <span class="n">multipart</span><span class="o">=</span><span class="n">is_multipart</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">make_request</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Grab.process_request_result"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.process_request_result">[docs]</a>    <span class="k">def</span> <span class="nf">process_request_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Document</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Process result of real request performed via transport extension.&quot;&quot;&quot;</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+
+        <span class="c1"># It&#39;s important to delete old POST data after request is performed.</span>
+        <span class="c1"># If POST data is not cleared then next request will try to use them</span>
+        <span class="c1"># again!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_temporary_options</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">prepare_response</span><span class="p">(</span>
+            <span class="n">req</span><span class="p">,</span> <span class="n">document_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">document_class</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;reuse_cookies&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">cookies</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">now</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span></div>
+
+<div class="viewcode-block" id="Grab.reset_temporary_options"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.reset_temporary_options">[docs]</a>    <span class="k">def</span> <span class="nf">reset_temporary_options</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;multipart&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Grab.change_proxy"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.change_proxy">[docs]</a>    <span class="k">def</span> <span class="nf">change_proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Set random proxy from proxylist.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">size</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">random</span><span class="p">:</span>
+                <span class="n">proxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">get_random_server</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">proxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">get_next_server</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">proxy</span><span class="o">.</span><span class="n">proxy_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">GrabMisuseError</span><span class="p">(</span><span class="s2">&quot;Could not use proxy without defined proxy type&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span>
+                <span class="n">proxy</span><span class="o">=</span><span class="n">proxy</span><span class="o">.</span><span class="n">get_address</span><span class="p">(),</span>
+                <span class="n">proxy_userpwd</span><span class="o">=</span><span class="n">proxy</span><span class="o">.</span><span class="n">get_userpwd</span><span class="p">(),</span>
+                <span class="n">proxy_type</span><span class="o">=</span><span class="n">proxy</span><span class="o">.</span><span class="n">proxy_type</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Proxy list is empty&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Grab.common_headers"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.common_headers">[docs]</a>    <span class="k">def</span> <span class="nf">common_headers</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Build headers which sends typical browser.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;text/xml,application/xml,application/xhtml+xml&quot;</span>
+            <span class="s2">&quot;,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.</span><span class="si">%d</span><span class="s2">&quot;</span>
+            <span class="o">%</span> <span class="n">system_random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+            <span class="s2">&quot;Accept-Language&quot;</span><span class="p">:</span> <span class="s2">&quot;en-us,en;q=0.</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">system_random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">)),</span>
+            <span class="s2">&quot;Accept-Charset&quot;</span><span class="p">:</span> <span class="s2">&quot;utf-8,windows-1251;q=0.7,*;q=0.</span><span class="si">%d</span><span class="s2">&quot;</span>
+            <span class="o">%</span> <span class="n">system_random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+            <span class="s2">&quot;Keep-Alive&quot;</span><span class="p">:</span> <span class="s2">&quot;300&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="n">generate_user_agent</span><span class="p">(),</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="Grab.make_url_absolute"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.make_url_absolute">[docs]</a>    <span class="k">def</span> <span class="nf">make_url_absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">resolve_base</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Make url absolute using previous request url as base url.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">resolve_base</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="p">:</span>
+                <span class="n">ubody</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">unicode_body</span><span class="p">()</span>
+                <span class="k">assert</span> <span class="n">ubody</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="n">base_url</span> <span class="o">=</span> <span class="n">find_base_url</span><span class="p">(</span><span class="n">ubody</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">base_url</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">base_url</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]),</span> <span class="n">url</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">url</span></div>
+
+<div class="viewcode-block" id="Grab.clear_cookies"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.clear_cookies">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cookies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Clear all remembered cookies.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;cookies&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Grab.__getstate__"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.__getstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="c1"># TODO: should we use deep traversing?</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
+            <span class="n">cls_slots</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__slots__&quot;</span><span class="p">,</span> <span class="p">())</span>
+            <span class="k">for</span> <span class="n">slot_name</span> <span class="ow">in</span> <span class="n">cls_slots</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot_name</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">slot_name</span> <span class="o">==</span> <span class="s2">&quot;cookies&quot;</span><span class="p">:</span>
+                        <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_cookies_items&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cookies</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">state</span><span class="p">[</span><span class="n">slot_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state</span></div>
+
+<div class="viewcode-block" id="Grab.__setstate__"><a class="viewcode-back" href="../../autoapi/grab/base/index.html#grab.base.Grab.__setstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># TODO: should we use deep traversing?</span>
+        <span class="c1"># TODO: check assigned key is in slots</span>
+        <span class="k">for</span> <span class="n">slot_name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">slot_name</span> <span class="o">==</span> <span class="s2">&quot;_cookies_items&quot;</span><span class="p">:</span>
+                <span class="n">jar</span> <span class="o">=</span> <span class="n">CookieJar</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                    <span class="n">jar</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span> <span class="o">=</span> <span class="n">jar</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

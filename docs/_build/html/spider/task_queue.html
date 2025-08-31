@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Queue &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Spider Error Handling" href="error_handling.html" />
+    <link rel="prev" title="Task Object" href="task.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Task Object</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Task Queue</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#task-priorities">Task Priorities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tasks-queue-backends">Tasks Queue Backends</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Task Queue</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/spider/task_queue.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="task-queue">
+<span id="spider-task-queue"></span><h1>Task Queue<a class="headerlink" href="#task-queue" title="Permalink to this heading"></a></h1>
+<section id="task-priorities">
+<span id="spider-task-priority"></span><h2>Task Priorities<a class="headerlink" href="#task-priorities" title="Permalink to this heading"></a></h2>
+<p>All new tasks are places into task queue. The Spider get tasks from task queue
+when there are free network streams. Each task has priority. Lower number means
+higher priority. Task are processed in the order of their priorities: from
+highest to lowest. If you do not specify the priority for the new task then it
+is assigned automatically. There are two algorithms of assigning default task
+priorities:</p>
+<dl class="field-list simple">
+<dt class="field-odd">random</dt>
+<dd class="field-odd"><p>random priorities</p>
+</dd>
+<dt class="field-even">const</dt>
+<dd class="field-even"><p>same priority for all tasks</p>
+</dd>
+</dl>
+<p>By default random priorities are used. You can control the algorithm of default
+priorities with <cite>priority_mode</cite> argument:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">(</span><span class="n">priority_mode</span><span class="o">=</span><span class="s1">&#39;const&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="tasks-queue-backends">
+<span id="spider-task-backend"></span><h2>Tasks Queue Backends<a class="headerlink" href="#tasks-queue-backends" title="Permalink to this heading"></a></h2>
+<p>You can choose the storage for the task queue. By default, Spider uses python
+<cite>PriorityQueue</cite> as storage. In other words, the storage is memory. You can
+also used redis and mongo backends.</p>
+<p>In-memory backend:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">()</span> <span class="c1"># task queue is stored in memory</span>
+<span class="c1"># OR (that is the same)</span>
+<span class="kn">from</span> <span class="nn">grab.spider.queue_backend.memory</span> <span class="kn">import</span> <span class="n">MemoryTaskQueue</span>
+
+<span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">(</span><span class="n">task_queue</span><span class="o">=</span><span class="n">MemoryTaskQueue</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>MongoDB backend:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">grab.spider.queue_backend.mongodb</span> <span class="kn">import</span> <span class="n">MongodbTaskQueue</span>
+
+<span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">(</span><span class="n">task_queue</span><span class="o">=</span><span class="n">MongodbTaskQueue</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Redis backend:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">grab.spider.queue_backend.redis</span> <span class="kn">import</span> <span class="n">RedisTaskQueue</span>
+
+<span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">(</span><span class="n">task_queue</span><span class="o">=</span><span class="n">RedisTaskQueue</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="task.html" class="btn btn-neutral float-left" title="Task Object" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="error_handling.html" class="btn btn-neutral float-right" title="Spider Error Handling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

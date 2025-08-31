@@ -1,0 +1,19 @@
+:py:mod:`grab.types`
+====================
+
+.. py:module:: grab.types
+
+
+Module Contents
+---------------
+
+.. py:data:: NULL
+   
+
+   
+
+.. py:data:: GrabConfig
+   :annotation: :typing_extensions.TypeAlias
+
+   
+

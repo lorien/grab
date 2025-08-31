@@ -1,52 +1,51 @@
-from __future__ import annotations
+from datetime import datetime
+try:
+    from Queue import PriorityQueue, Empty
+except ImportError:
+    from queue import PriorityQueue, Empty
 
-from contextlib import suppress
-from datetime import datetime, timezone
-from queue import Empty, PriorityQueue
-
-from grab.spider.queue_backend.base import BaseTaskQueue
-from grab.spider.task import Task
+from grab.spider.queue_backend.base import QueueInterface
 
 
-class MemoryTaskQueue(BaseTaskQueue):
-    def __init__(self) -> None:
-        super().__init__()
-        self.queue_object: PriorityQueue[tuple[int, Task]] = PriorityQueue()
-        self.schedule_list: list[tuple[datetime, Task]] = []
+class QueueBackend(QueueInterface):
+    def __init__(self, spider_name, **kwargs):
+        super(QueueBackend, self).__init__(spider_name, **kwargs)
+        self.queue_object = PriorityQueue()
+        self.schedule_list = []
 
-    def put(
-        self, task: Task, priority: int, schedule_time: None | datetime = None
-    ) -> None:
+    def put(self, task, priority, schedule_time=None):
         if schedule_time is None:
             self.queue_object.put((priority, task))
         else:
             self.schedule_list.append((schedule_time, task))
 
-    def get(self) -> Task:
-        now = datetime.now(timezone.utc)
+    def get(self):
+        now = datetime.utcnow()
 
         removed_indexes = []
-        for idx, item in enumerate(self.schedule_list):
-            schedule_time, task = item
+        index = 0
+        for schedule_time, task in self.schedule_list:
             if schedule_time <= now:
                 self.put(task, 1)
-                removed_indexes.append(idx)
+                removed_indexes.append(index)
+            index += 1
 
-        self.schedule_list = [
-            x for idx, x in enumerate(self.schedule_list) if idx not in removed_indexes
-        ]
+        self.schedule_list = [x for idx, x in enumerate(self.schedule_list)
+                              if idx not in removed_indexes]
 
         _, task = self.queue_object.get(block=False)
         return task
 
-    def size(self) -> int:
+    def size(self):
         return self.queue_object.qsize() + len(self.schedule_list)
 
-    def clear(self) -> None:
-        with suppress(Empty):
+    def clear(self):
+        try:
             while True:
                 self.queue_object.get(False)
+        except Empty:
+            pass
         self.schedule_list = []
 
-    def close(self) -> None:
+    def close(self):
         pass

@@ -1,0 +1,37 @@
+:py:mod:`grab.util.html`
+========================
+
+.. py:module:: grab.util.html
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.util.html.find_base_url
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.util.html.RE_BASE_URL
+
+
+.. py:data:: RE_BASE_URL
+   
+
+   
+
+.. py:function:: find_base_url(content: str) -> None | str
+
+   Find value of attribute "url" in "<base>" tag.
+
+

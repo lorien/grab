@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grab.response &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="grab.transport" href="../transport/index.html" />
+    <link rel="prev" title="grab.request" href="../request/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../base/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.base</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../base_transport/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.base_transport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../document/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.document</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../errors/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.errors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../request/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.request</span></code></a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.response</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../transport/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.transport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../types/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.types</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.response</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/grab/response/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-grab.response">
+<span id="grab-response"></span><h1><a class="reference internal" href="#module-grab.response" title="grab.response"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.response</span></code></a><a class="headerlink" href="#module-grab.response" title="Permalink to this heading"></a></h1>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../request/index.html" class="btn btn-neutral float-left" title="grab.request" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../transport/index.html" class="btn btn-neutral float-right" title="grab.transport" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

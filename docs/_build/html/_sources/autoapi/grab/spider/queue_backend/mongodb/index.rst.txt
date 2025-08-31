@@ -1,0 +1,52 @@
+:py:mod:`grab.spider.queue_backend.mongodb`
+===========================================
+
+.. py:module:: grab.spider.queue_backend.mongodb
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.queue_backend.mongodb.MongodbTaskQueue
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.queue_backend.mongodb.LOG
+
+
+.. py:data:: LOG
+   
+
+   
+
+.. py:class:: MongodbTaskQueue(connection_args: None | dict[str, Any] = None, collection_name: None | str = None, database_name: str = 'grab_spider')
+
+   Bases: :py:obj:`grab.spider.queue_backend.base.BaseTaskQueue`
+
+   .. py:method:: size() -> int
+
+
+   .. py:method:: put(task: grab.spider.task.Task, priority: int, schedule_time: None | datetime = None) -> None
+
+
+   .. py:method:: get() -> grab.spider.task.Task
+
+
+   .. py:method:: clear() -> None
+
+
+   .. py:method:: close() -> None
+
+
+

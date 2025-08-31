@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grab.spider.service.base &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="grab.spider.service.network" href="../network/index.html" />
+    <link rel="prev" title="grab.spider.service" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../util/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.util</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../index.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider</span></code></a></li>
+          <li class="breadcrumb-item"><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.service</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.service.base</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/autoapi/grab/spider/service/base/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-grab.spider.service.base">
+<span id="grab-spider-service-base"></span><h1><a class="reference internal" href="#module-grab.spider.service.base" title="grab.spider.service.base"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.service.base</span></code></a><a class="headerlink" href="#module-grab.spider.service.base" title="Permalink to this heading"></a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grab.spider.service.base.ServiceWorker" title="grab.spider.service.base.ServiceWorker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServiceWorker</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grab.spider.service.base.BaseService" title="grab.spider.service.base.BaseService"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseService</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grab.spider.service.base.logger" title="grab.spider.service.base.logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logger</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="grab.spider.service.base.logger">
+<span class="sig-prename descclassname"><span class="pre">grab.spider.service.base.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.logger" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grab.spider.service.base.ServiceWorker">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.service.base.</span></span><span class="sig-name descname"><span class="pre">ServiceWorker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fatal_error_queue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">queue.Queue</span><span class="p"><span class="pre">[</span></span><span class="pre">grab.spider.interface.FatalErrorQueueItem</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#ServiceWorker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.ServiceWorker" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.ServiceWorker.build_thread_name">
+<span class="sig-name descname"><span class="pre">build_thread_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">worker_callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#ServiceWorker.build_thread_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.ServiceWorker.build_thread_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.ServiceWorker.worker_callback_wrapper">
+<span class="sig-name descname"><span class="pre">worker_callback_wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#ServiceWorker.worker_callback_wrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.ServiceWorker.worker_callback_wrapper" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.ServiceWorker.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#ServiceWorker.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.ServiceWorker.start" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.ServiceWorker.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#ServiceWorker.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.ServiceWorker.stop" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.ServiceWorker.process_pause_signal">
+<span class="sig-name descname"><span class="pre">process_pause_signal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#ServiceWorker.process_pause_signal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.ServiceWorker.process_pause_signal" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.ServiceWorker.pause">
+<span class="sig-name descname"><span class="pre">pause</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#ServiceWorker.pause"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.ServiceWorker.pause" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.ServiceWorker.resume">
+<span class="sig-name descname"><span class="pre">resume</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#ServiceWorker.resume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.ServiceWorker.resume" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.ServiceWorker.is_alive">
+<span class="sig-name descname"><span class="pre">is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#ServiceWorker.is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.ServiceWorker.is_alive" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grab.spider.service.base.BaseService">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.service.base.</span></span><span class="sig-name descname"><span class="pre">BaseService</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fatal_error_queue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">queue.Queue</span><span class="p"><span class="pre">[</span></span><span class="pre">grab.spider.interface.FatalErrorQueueItem</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#BaseService"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.BaseService" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.BaseService.create_worker">
+<span class="sig-name descname"><span class="pre">create_worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">worker_action</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#grab.spider.service.base.ServiceWorker" title="grab.spider.service.base.ServiceWorker"><span class="pre">ServiceWorker</span></a></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#BaseService.create_worker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.BaseService.create_worker" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.BaseService.iterate_workers">
+<span class="sig-name descname"><span class="pre">iterate_workers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objects</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#grab.spider.service.base.ServiceWorker" title="grab.spider.service.base.ServiceWorker"><span class="pre">ServiceWorker</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#grab.spider.service.base.ServiceWorker" title="grab.spider.service.base.ServiceWorker"><span class="pre">ServiceWorker</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#BaseService.iterate_workers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.BaseService.iterate_workers" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.BaseService.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#BaseService.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.BaseService.start" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.BaseService.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#BaseService.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.BaseService.stop" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.BaseService.pause">
+<span class="sig-name descname"><span class="pre">pause</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#BaseService.pause"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.BaseService.pause" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.BaseService.resume">
+<span class="sig-name descname"><span class="pre">resume</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#BaseService.resume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.BaseService.resume" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.BaseService.register_workers">
+<span class="sig-name descname"><span class="pre">register_workers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#BaseService.register_workers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.BaseService.register_workers" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.BaseService.is_busy">
+<span class="sig-name descname"><span class="pre">is_busy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#BaseService.is_busy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.BaseService.is_busy" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.service.base.BaseService.is_alive">
+<span class="sig-name descname"><span class="pre">is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../../../_modules/grab/spider/service/base.html#BaseService.is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.service.base.BaseService.is_alive" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="grab.spider.service" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../network/index.html" class="btn btn-neutral float-right" title="grab.spider.service.network" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

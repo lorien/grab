@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>File Uploading &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Redirect Handling" href="redirect.html" />
+    <link rel="prev" title="Processing the Response Body" href="response_body.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="file-uploading">
+<span id="grab-file-uploading"></span><h1>File Uploading<a class="headerlink" href="#file-uploading" title="Permalink to this headline">¶</a></h1>
+<p>To upload file you should use <cite>UploadFile</cite> or <cite>UploadContent</cite> classes.</p>
+<p>UploadFile example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">grab</span> <span class="kn">import</span> <span class="n">Grab</span><span class="p">,</span> <span class="n">UploadFile</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;image&#39;</span><span class="p">:</span> <span class="n">UploadFile</span><span class="p">(</span><span class="s1">&#39;/path/to/image.jpg&#39;</span><span class="p">)})</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com/form.php&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>UploadContent example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">grab</span> <span class="kn">import</span> <span class="n">Grab</span><span class="p">,</span> <span class="n">UploadContent</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;image&#39;</span><span class="p">:</span> <span class="n">UploadContent</span><span class="p">(</span><span class="s1">&#39;......&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;image.jpg&#39;</span><span class="p">)})</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com/form.php&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="form-processing">
+<span id="grab-file-uploading-form"></span><h2>Form Processing<a class="headerlink" href="#form-processing" title="Permalink to this headline">¶</a></h2>
+<p>You can use <cite>UploadFile</cite> and <cite>UploadContent</cite> in all methods that set values in
+form fields:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">grab</span> <span class="kn">import</span> <span class="n">Grab</span><span class="p">,</span> <span class="n">UploadFile</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com/form.php&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">UploadFile</span><span class="p">(</span><span class="s1">&#39;/path/to/image.jpg&#39;</span><span class="p">))</span>
+<span class="n">g</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-file-name">
+<span id="grab-file-uploading-custom-name"></span><h2>Custom File Name<a class="headerlink" href="#custom-file-name" title="Permalink to this headline">¶</a></h2>
+<p>With both <cite>UploadFile</cite> and <cite>UploadContent</cite> you can use custom filename.</p>
+<p>If you do not specify filename then:</p>
+<ul class="simple">
+<li><p><cite>UploadFile</cite> will use the filename extracted from the path to the file passed in first argument.</p></li>
+<li><p><cite>UploadContent</cite> will generate random file name</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">grab</span> <span class="kn">import</span> <span class="n">UploadFile</span><span class="p">,</span> <span class="n">UploadContent</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">UploadFile</span><span class="p">(</span><span class="s1">&#39;/path/to/image.jpg&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">filename</span>
+<span class="go">&#39;image.jpg&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">UploadFile</span><span class="p">(</span><span class="s1">&#39;/path/to/image.jpg&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;avatar.jpg&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">filename</span>
+<span class="go">&#39;avatar.jpg&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">UploadContent</span><span class="p">(</span><span class="s1">&#39;.....&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">filename</span>
+<span class="go">&#39;528e418951&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">UploadContent</span><span class="p">(</span><span class="s1">&#39;.....&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;avatar.jpg&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">filename</span>
+<span class="go">&#39;avatar.jpg&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-content-type">
+<span id="grab-file-uploading-custom-content-type"></span><h2>Custom Content Type<a class="headerlink" href="#custom-content-type" title="Permalink to this headline">¶</a></h2>
+<p>With both <cite>UploadFile</cite> and <cite>UploadContent</cite> you can use custom content type.</p>
+<p>If you do not specify content type then filename will be used to guess the
+content type e.g. “image.jpg” will have “image/jpeg” content type and “asdfasdf”
+will be just a “application/octet-stream”</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">grab</span> <span class="kn">import</span> <span class="n">UploadFile</span><span class="p">,</span> <span class="n">UploadContent</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">UploadFile</span><span class="p">(</span><span class="s1">&#39;/path/to/image.jpg&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">content_type</span>
+<span class="go">&#39;image/jpeg&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">UploadFile</span><span class="p">(</span><span class="s1">&#39;/path/to/image.jpg&#39;</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s1">&#39;text/plain&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">content_type</span>
+<span class="go">&#39;text/plain&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">UploadContent</span><span class="p">(</span><span class="s1">&#39;/path/to/image.jpg&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">content_type</span>
+<span class="go">&#39;image/jpeg&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">UploadContent</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s1">&#39;text/plain&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">content_type</span>
+<span class="go">&#39;text/plain&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">File Uploading</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#form-processing">Form Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-file-name">Custom File Name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-content-type">Custom Content Type</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_base.html">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_base.html">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="response_body.html" title="previous chapter">Processing the Response Body</a></li>
+      <li>Next: <a href="redirect.html" title="next chapter">Redirect Handling</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/grab/file_uploading.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

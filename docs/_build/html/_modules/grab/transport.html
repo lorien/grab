@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grab.transport &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../grab.html">grab</a></li>
+      <li class="breadcrumb-item active">grab.transport</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for grab.transport</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">email.message</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">ssl</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">urllib.request</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Mapping</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+<span class="kn">from</span> <span class="nn">http.client</span> <span class="kn">import</span> <span class="n">HTTPResponse</span>
+<span class="kn">from</span> <span class="nn">http.cookiejar</span> <span class="kn">import</span> <span class="n">CookieJar</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>  <span class="c1"># pylint: disable=unused-import</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlencode</span>
+
+<span class="kn">import</span> <span class="nn">certifi</span>
+<span class="kn">from</span> <span class="nn">urllib3</span> <span class="kn">import</span> <span class="n">PoolManager</span><span class="p">,</span> <span class="n">ProxyManager</span><span class="p">,</span> <span class="n">exceptions</span><span class="p">,</span> <span class="n">make_headers</span>
+<span class="kn">from</span> <span class="nn">urllib3.contrib.socks</span> <span class="kn">import</span> <span class="n">SOCKSProxyManager</span>
+<span class="kn">from</span> <span class="nn">urllib3.exceptions</span> <span class="kn">import</span> <span class="n">LocationParseError</span>
+
+<span class="c1"># from urllib3.fields import RequestField</span>
+<span class="kn">from</span> <span class="nn">urllib3.filepost</span> <span class="kn">import</span> <span class="n">encode_multipart_formdata</span>
+<span class="kn">from</span> <span class="nn">urllib3.response</span> <span class="kn">import</span> <span class="n">HTTPResponse</span> <span class="k">as</span> <span class="n">Urllib3HTTPResponse</span>
+<span class="kn">from</span> <span class="nn">urllib3.util.retry</span> <span class="kn">import</span> <span class="n">Retry</span>
+<span class="kn">from</span> <span class="nn">urllib3.util.timeout</span> <span class="kn">import</span> <span class="n">Timeout</span>
+
+<span class="kn">from</span> <span class="nn">grab.document</span> <span class="kn">import</span> <span class="n">Document</span>
+<span class="kn">from</span> <span class="nn">grab.errors</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GrabConnectionError</span><span class="p">,</span>
+    <span class="n">GrabInvalidResponse</span><span class="p">,</span>
+    <span class="n">GrabMisuseError</span><span class="p">,</span>
+    <span class="n">GrabTimeoutError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">grab.request</span> <span class="kn">import</span> <span class="n">Request</span>
+<span class="kn">from</span> <span class="nn">grab.util.cookies</span> <span class="kn">import</span> <span class="n">MockRequest</span><span class="p">,</span> <span class="n">MockResponse</span><span class="p">,</span> <span class="n">build_cookie_header</span>
+<span class="kn">from</span> <span class="nn">grab.util.http</span> <span class="kn">import</span> <span class="n">merge_with_dict</span>
+
+<span class="kn">from</span> <span class="nn">.base_transport</span> <span class="kn">import</span> <span class="n">BaseTransport</span>
+
+<div class="viewcode-block" id="URL_DATA_METHODS"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.URL_DATA_METHODS">[docs]</a><span class="n">URL_DATA_METHODS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;DELETE&quot;</span><span class="p">,</span> <span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="s2">&quot;HEAD&quot;</span><span class="p">,</span> <span class="s2">&quot;OPTIONS&quot;</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="assemble"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.assemble">[docs]</a><span class="k">def</span> <span class="nf">assemble</span><span class="p">(</span>  <span class="c1"># noqa: CCR001</span>
+    <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">cookiejar</span><span class="p">:</span> <span class="n">CookieJar</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="n">req_url</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">url</span>
+    <span class="n">req_hdr</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+    <span class="n">req_body</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="n">URL_DATA_METHODS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GrabMisuseError</span><span class="p">(</span>
+                <span class="s2">&quot;It is not allowed to specify &#39;body&#39; option&quot;</span>
+                <span class="s2">&quot; for request of method &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="n">req_url</span> <span class="o">=</span> <span class="n">req_url</span> <span class="o">+</span> <span class="s2">&quot;?&quot;</span> <span class="o">+</span> <span class="n">urlencode</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
+            <span class="n">req_body</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">body</span>
+        <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">GrabMisuseError</span><span class="p">(</span>
+                    <span class="s2">&quot;It is not allowed to configure request with&quot;</span>
+                    <span class="s2">&quot; both &#39;body&#39; and &#39;fields&#39; options.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">multipart</span><span class="p">:</span>
+                <span class="n">req_body</span><span class="p">,</span> <span class="n">content_type</span> <span class="o">=</span> <span class="n">encode_multipart_formdata</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                    <span class="n">req</span><span class="o">.</span><span class="n">fields</span>
+                <span class="p">)</span>
+                <span class="n">req_body</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="n">req_body</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">req_body</span><span class="p">,</span> <span class="n">content_type</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">urlencode</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span>
+                    <span class="s2">&quot;application/x-www-form-urlencoded&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">merge_with_dict</span><span class="p">(</span>
+                <span class="n">req_hdr</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="n">content_type</span><span class="p">,</span> <span class="s2">&quot;Content-Length&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">req_body</span><span class="p">)},</span>
+                <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="n">cookie_hdr</span> <span class="o">=</span> <span class="n">build_cookie_header</span><span class="p">(</span><span class="n">cookiejar</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">req_hdr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cookie_hdr</span><span class="p">:</span>
+        <span class="n">req_hdr</span><span class="p">[</span><span class="s2">&quot;Cookie&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cookie_hdr</span>
+    <span class="k">return</span> <span class="n">req_url</span><span class="p">,</span> <span class="n">req_hdr</span><span class="p">,</span> <span class="n">req_body</span></div>
+
+
+<div class="viewcode-block" id="Urllib3Transport"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.Urllib3Transport">[docs]</a><span class="k">class</span> <span class="nc">Urllib3Transport</span><span class="p">(</span><span class="n">BaseTransport</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Grab network transport based on urllib3 library.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_pool</span><span class="p">()</span>
+        <span class="c1"># WTF: logging is configured here?</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;urllib3.connectionpool&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_response</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Urllib3HTTPResponse</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_connect_time</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Urllib3Transport.__getstate__"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.Urllib3Transport.__getstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># PoolManager could not be pickled</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;pool&quot;</span><span class="p">]</span>
+        <span class="c1"># urllib3.HTTPReponse is also not good for pickling</span>
+        <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_response&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># let&#39;s reset request object too</span>
+        <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_request&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">state</span></div>
+
+<div class="viewcode-block" id="Urllib3Transport.__setstate__"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.Urllib3Transport.__setstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">slot</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_pool</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Urllib3Transport.build_pool"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.Urllib3Transport.build_pool">[docs]</a>    <span class="k">def</span> <span class="nf">build_pool</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PoolManager</span><span class="p">:</span>
+        <span class="c1"># http://urllib3.readthedocs.io/en/latest/user-guide.html#certificate-verification</span>
+        <span class="k">return</span> <span class="n">PoolManager</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">cert_reqs</span><span class="o">=</span><span class="s2">&quot;CERT_REQUIRED&quot;</span><span class="p">,</span> <span class="n">ca_certs</span><span class="o">=</span><span class="n">certifi</span><span class="o">.</span><span class="n">where</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="Urllib3Transport.reset"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.Urllib3Transport.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_response</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_connect_time</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="nd">@contextmanager</span>
+<div class="viewcode-block" id="Urllib3Transport.wrap_transport_error"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.Urllib3Transport.wrap_transport_error">[docs]</a>    <span class="k">def</span> <span class="nf">wrap_transport_error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">yield</span>
+        <span class="k">except</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">ReadTimeoutError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GrabTimeoutError</span><span class="p">(</span><span class="s2">&quot;ReadTimeoutError&quot;</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span>
+        <span class="k">except</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">ConnectTimeoutError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GrabConnectionError</span><span class="p">(</span><span class="s2">&quot;ConnectTimeoutError&quot;</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span>
+        <span class="k">except</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">ProtocolError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GrabConnectionError</span><span class="p">(</span><span class="s2">&quot;ProtocolError&quot;</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span>
+        <span class="k">except</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">SSLError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GrabConnectionError</span><span class="p">(</span><span class="s2">&quot;SSLError&quot;</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span>
+        <span class="k">except</span> <span class="n">ssl</span><span class="o">.</span><span class="n">SSLError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GrabConnectionError</span><span class="p">(</span><span class="s2">&quot;SSLError&quot;</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span></div>
+
+<div class="viewcode-block" id="Urllib3Transport.select_pool_for_request"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.Urllib3Transport.select_pool_for_request">[docs]</a>    <span class="k">def</span> <span class="nf">select_pool_for_request</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PoolManager</span> <span class="o">|</span> <span class="n">ProxyManager</span> <span class="o">|</span> <span class="n">SOCKSProxyManager</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">proxy</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">proxy_userpwd</span><span class="p">:</span>
+                <span class="n">headers</span> <span class="o">=</span> <span class="n">make_headers</span><span class="p">(</span>
+                    <span class="n">proxy_basic_auth</span><span class="o">=</span><span class="n">req</span><span class="o">.</span><span class="n">proxy_userpwd</span>
+                <span class="p">)</span>  <span class="c1"># type: ignore # FIXME</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">headers</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">proxy_url</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">://</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">proxy_type</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">proxy</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">proxy_type</span> <span class="o">==</span> <span class="s2">&quot;socks5&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">SOCKSProxyManager</span><span class="p">(</span>
+                    <span class="n">proxy_url</span><span class="p">,</span> <span class="n">cert_reqs</span><span class="o">=</span><span class="s2">&quot;CERT_REQUIRED&quot;</span><span class="p">,</span> <span class="n">ca_certs</span><span class="o">=</span><span class="n">certifi</span><span class="o">.</span><span class="n">where</span><span class="p">()</span>
+                <span class="p">)</span>  <span class="c1"># , proxy_headers=headers)</span>
+            <span class="k">return</span> <span class="n">ProxyManager</span><span class="p">(</span>
+                <span class="n">proxy_url</span><span class="p">,</span>
+                <span class="n">proxy_headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">cert_reqs</span><span class="o">=</span><span class="s2">&quot;CERT_REQUIRED&quot;</span><span class="p">,</span>
+                <span class="n">ca_certs</span><span class="o">=</span><span class="n">certifi</span><span class="o">.</span><span class="n">where</span><span class="p">(),</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span></div>
+
+<div class="viewcode-block" id="Urllib3Transport.request"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.Urllib3Transport.request">[docs]</a>    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">cookiejar</span><span class="p">:</span> <span class="n">CookieJar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pool</span><span class="p">:</span> <span class="n">PoolManager</span> <span class="o">|</span> <span class="n">SOCKSProxyManager</span> <span class="o">|</span> <span class="n">ProxyManager</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">select_pool_for_request</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_transport_error</span><span class="p">():</span>
+            <span class="c1"># Retries can be disabled by passing False:</span>
+            <span class="c1"># http://urllib3.readthedocs.io/en/latest/reference/urllib3.util.html#module-urllib3.util.retry</span>
+            <span class="c1"># Do not use False because of warning:</span>
+            <span class="c1"># Converted retries value: False -&gt; Retry(total=False,</span>
+            <span class="c1"># connect=None, read=None, redirect=0, status=None)</span>
+            <span class="n">retry</span> <span class="o">=</span> <span class="n">Retry</span><span class="p">(</span>
+                <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">connect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">read</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">redirect</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># The read timeout is not total response time timeout</span>
+            <span class="c1"># It is the timeout on read of next data chunk from the server</span>
+            <span class="c1"># Total response timeout is handled by Grab</span>
+            <span class="n">timeout</span> <span class="o">=</span> <span class="n">Timeout</span><span class="p">(</span><span class="n">connect</span><span class="o">=</span><span class="n">req</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="n">req</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">read</span><span class="p">)</span>
+            <span class="n">req_url</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">url</span>
+            <span class="n">req_method</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">method</span>
+
+            <span class="n">req_url</span><span class="p">,</span> <span class="n">req_hdr</span><span class="p">,</span> <span class="n">req_data</span> <span class="o">=</span> <span class="n">assemble</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">cookiejar</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span>  <span class="c1"># type: ignore # FIXME</span>
+                    <span class="n">req_method</span><span class="p">,</span>
+                    <span class="n">req_url</span><span class="p">,</span>
+                    <span class="n">body</span><span class="o">=</span><span class="n">req_data</span><span class="p">,</span>
+                    <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+                    <span class="n">retries</span><span class="o">=</span><span class="n">retry</span><span class="p">,</span>
+                    <span class="n">headers</span><span class="o">=</span><span class="n">req_hdr</span><span class="p">,</span>
+                    <span class="n">preload_content</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_connect_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+            <span class="k">except</span> <span class="n">LocationParseError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">GrabInvalidResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">),</span> <span class="n">ex</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_response</span> <span class="o">=</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="Urllib3Transport.read_with_timeout"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.Urllib3Transport.read_with_timeout">[docs]</a>    <span class="k">def</span> <span class="nf">read_with_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">10000</span>
+        <span class="n">bytes_read</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">op_started</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">chunk_size</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>
+                <span class="n">bytes_read</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+                <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">req</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">total</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="p">(</span><span class="n">op_started</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect_time</span><span class="p">))</span>
+                <span class="o">&gt;</span> <span class="n">req</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">total</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="n">GrabTimeoutError</span>
+        <span class="k">return</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Urllib3Transport.get_response_header_items"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.Urllib3Transport.get_response_header_items">[docs]</a>    <span class="k">def</span> <span class="nf">get_response_header_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Return current response headers as items.</span>
+
+<span class="sd">        This funciton is required to isolated smalles part of untyped code</span>
+<span class="sd">        and hide it from mypy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">HTTPResponse</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response</span><span class="p">)</span><span class="o">.</span><span class="n">headers</span>
+        <span class="k">return</span> <span class="n">headers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Urllib3Transport.prepare_response"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.Urllib3Transport.prepare_response">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_response</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">document_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Document</span><span class="p">]</span> <span class="o">=</span> <span class="n">Document</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Document</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Prepare response, duh.</span>
+
+<span class="sd">        This methed is called after network request is completed</span>
+<span class="sd">        hence the &quot;self._request&quot; is not None.</span>
+
+<span class="sd">        Good to know: on python3 urllib3 headers are converted to str type</span>
+<span class="sd">        using latin encoding.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="n">head_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="c1"># FIXME: head must include first line like &quot;GET / HTTP/1.1&quot;</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_response_header_items</span><span class="p">():</span>
+                <span class="c1"># WTF: is going here?</span>
+                <span class="n">new_key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;latin&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+                <span class="n">new_val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;latin&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+                <span class="n">head_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="se">\r\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">new_key</span><span class="p">,</span> <span class="n">new_val</span><span class="p">)</span>
+            <span class="n">head_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+            <span class="n">head</span> <span class="o">=</span> <span class="n">head_str</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+            <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_with_timeout</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">email</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">Message</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_response_header_items</span><span class="p">():</span>
+                <span class="c1"># WTF: is happening here?</span>
+                <span class="n">new_key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;latin&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+                <span class="n">new_val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;latin&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+                <span class="n">hdr</span><span class="p">[</span><span class="n">new_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_val</span>
+            <span class="n">jar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_cookiejar</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>  <span class="c1"># self._response, self._request)</span>
+            <span class="k">return</span> <span class="n">document_class</span><span class="p">(</span>
+                <span class="n">document_type</span><span class="o">=</span><span class="p">(</span>
+                    <span class="n">req</span><span class="o">.</span><span class="n">document_type</span> <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">document_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;html&quot;</span>
+                <span class="p">),</span>
+                <span class="n">head</span><span class="o">=</span><span class="n">head</span><span class="p">,</span>
+                <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_response</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+                <span class="n">url</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_response</span><span class="o">.</span><span class="n">get_redirect_location</span><span class="p">()</span> <span class="ow">or</span> <span class="n">req</span><span class="o">.</span><span class="n">url</span><span class="p">),</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">hdr</span><span class="p">,</span>
+                <span class="n">encoding</span><span class="o">=</span><span class="n">req</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span>
+                <span class="n">cookies</span><span class="o">=</span><span class="n">jar</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_response</span><span class="o">.</span><span class="n">release_conn</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Urllib3Transport.extract_cookiejar"><a class="viewcode-back" href="../../autoapi/grab/transport/index.html#grab.transport.Urllib3Transport.extract_cookiejar">[docs]</a>    <span class="k">def</span> <span class="nf">extract_cookiejar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CookieJar</span><span class="p">:</span>
+        <span class="n">jar</span> <span class="o">=</span> <span class="n">CookieJar</span><span class="p">()</span>
+        <span class="c1"># TODO: WTF it means?</span>
+        <span class="c1"># self._respose could be None</span>
+        <span class="c1"># if this method is called from custom prepare response</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response</span><span class="p">:</span>
+            <span class="n">jar</span><span class="o">.</span><span class="n">extract_cookies</span><span class="p">(</span>
+                <span class="n">cast</span><span class="p">(</span><span class="n">HTTPResponse</span><span class="p">,</span> <span class="n">MockResponse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_response</span><span class="o">.</span><span class="n">headers</span><span class="p">)),</span>
+                <span class="n">cast</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">Request</span><span class="p">,</span> <span class="n">MockRequest</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">headers</span><span class="p">)),</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">jar</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

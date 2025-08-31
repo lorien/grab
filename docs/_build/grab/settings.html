@@ -1,0 +1,682 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Grab Settings &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Debugging" href="debugging.html" />
+    <link rel="prev" title="Setting up the Grab Request" href="request_setup.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="grab-settings">
+<span id="id1"></span><h1>Grab Settings<a class="headerlink" href="#grab-settings" title="Permalink to this headline">¶</a></h1>
+<section id="network-options">
+<h2>Network options<a class="headerlink" href="#network-options" title="Permalink to this headline">¶</a></h2>
+<section id="url">
+<span id="option-url"></span><h3>url<a class="headerlink" href="#url" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>The URL of the requested web page. You can use relative URLS, in which case Grab will build
+the absolute url by joining the relative URL with the URL or previously requested document.
+Be aware that Grab does not automatically escape unsafe characters in the URL.
+This is a design feature. You can use <cite>urllib.quote</cite> and <cite>urllib.quote_plus</cite> functions to make your URLs safe.</p>
+<p>More info about valid URLs is in <a class="reference external" href="http://www.ietf.org/rfc/rfc2396.txt">RFC 2396</a>.</p>
+</section>
+<section id="timeout">
+<span id="option-timeout"></span><h3>timeout<a class="headerlink" href="#timeout" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>15</p>
+</dd>
+</dl>
+<p>Maximum time for a network operation. If it is exceeded, GrabNetworkTimeout is raised.</p>
+</section>
+<section id="connect-timeout">
+<span id="option-connect-timeout"></span><h3>connect_timeout<a class="headerlink" href="#connect-timeout" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>3</p>
+</dd>
+</dl>
+<p>Maximum time for connection to the remote server and receipt of an initial
+response. If it is exceeded, GrabNetworkTimeout is raised.</p>
+</section>
+<section id="follow-refresh">
+<span id="option-follow-refresh"></span><h3>follow_refresh<a class="headerlink" href="#follow-refresh" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>False</p>
+</dd>
+</dl>
+<p>Automatically follow the URL specified in &lt;meta http-equiv=”refresh”&gt; tag.</p>
+</section>
+<section id="follow-location">
+<span id="option-follow-location"></span><h3>follow_location<a class="headerlink" href="#follow-location" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>True</p>
+</dd>
+</dl>
+<p>Automatically follow the location in 301/302 response.</p>
+</section>
+<section id="redirect-limit">
+<span id="option-redirect-limit"></span><h3>redirect_limit<a class="headerlink" href="#redirect-limit" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>10</p>
+</dd>
+</dl>
+<p>Set the maximum number of redirects that Grab will do for one request.
+Redirects follow the “Location” header in 301/302 network responses, and
+also follow the URL specified in meta refresh tags.</p>
+</section>
+<section id="userpwd">
+<span id="option-userpwd"></span><h3>userpwd<a class="headerlink" href="#userpwd" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>The username and the password to send during HTTP authorization. The value of that options is the string of format “username:password”.</p>
+</section>
+</section>
+<section id="http-options">
+<h2>HTTP Options<a class="headerlink" href="#http-options" title="Permalink to this headline">¶</a></h2>
+<section id="user-agent">
+<span id="option-user-agent"></span><h3>user_agent<a class="headerlink" href="#user-agent" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>see below</p>
+</dd>
+</dl>
+<p>Sets the content of the “User-Agent” HTTP-header. By default, Grab randomly chooses a user agent
+from the list of real user agents that is built into Grab itself.</p>
+</section>
+<section id="user-agent-file">
+<span id="option-user-agent-file"></span><h3>user_agent_file<a class="headerlink" href="#user-agent-file" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Path to the text file with User-Agent strings. If this option is specified, then
+Grab randomly chooses one line from that file.</p>
+</section>
+<section id="method">
+<span id="option-method"></span><h3>method<a class="headerlink" href="#method" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>“GET”</p>
+</dd>
+<dt class="field-odd">Possible values</dt>
+<dd class="field-odd"><p>“GET”, “POST”, “PUT”, “DELETE”</p>
+</dd>
+</dl>
+<p>The HTTP request method to use. By default, GET is used. If you specify <cite>post</cite> or
+<cite>multipart_post</cite> options, then Grab automatically changes the method to POST.</p>
+</section>
+<section id="post">
+<span id="option-post"></span><h3>post<a class="headerlink" href="#post" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>sequence of pairs or dict or string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Data to be sent with the POST request. Depending on the type of data, the corresponding method
+of handling that data is selected. The default type for POST requests is “application/x-www-form-urlencoded”.</p>
+<p>In case of <cite>dict</cite> or sequence of pairs, the following algorithm is applied to each value:</p>
+<ul class="simple">
+<li><p>objects of <cite>grab.upload.UploadFile</cite> class are converted into corresponding urllib3 objects</p></li>
+<li><p>unicode strings are converted into byte strings</p></li>
+<li><p>None values are converted into empty strings</p></li>
+</ul>
+<p>If <cite>post</cite> value is just a string, then it is placed into the network request without any modification.</p>
+</section>
+<section id="multipart-post">
+<span id="option-multipart-post"></span><h3>multipart_post<a class="headerlink" href="#multipart-post" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>sequence of pairs or dict</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Data to be sent with the POST request. This option forces the POST request to be
+in “multipart/form-data” form.</p>
+</section>
+<section id="headers">
+<span id="option-headers"></span><h3>headers<a class="headerlink" href="#headers" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Additional HTTP-headers. The value of this option will be added to headers
+that Grab generates by default. See details in <a class="reference internal" href="request_headers.html#grab-http-headers"><span class="std std-ref">Work with HTTP Headers</span></a>.</p>
+</section>
+<section id="common-headers">
+<span id="option-common-headers"></span><h3>common_headers<a class="headerlink" href="#common-headers" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>By default, Grab generates some common HTTP headers to mimic the behaviour of a real web browser.
+If you have trouble with these default headers, you can specify your own headers with
+this option. Please note that the usual way to specify a header is to use the <a class="reference internal" href="#option-headers"><span class="std std-ref">headers</span></a> option. See details in <a class="reference internal" href="request_headers.html#grab-http-headers"><span class="std std-ref">Work with HTTP Headers</span></a>.</p>
+</section>
+<section id="reuse-cookies">
+<span id="option-reuse-cookies"></span><h3>reuse_cookies<a class="headerlink" href="#reuse-cookies" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>True</p>
+</dd>
+</dl>
+<p>If this option is enabled, then all cookies in each network response are stored
+locally and sent back with further requests to the same server.</p>
+</section>
+<section id="cookies">
+<span id="option-cookies"></span><h3>cookies<a class="headerlink" href="#cookies" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Cookies to send to the server. If the option <a class="reference internal" href="#option-reuse-cookies"><span class="std std-ref">reuse_cookies</span></a> is also enabled,
+then cookies from the <cite>cookies</cite> option will be joined with stored cookies.</p>
+</section>
+<section id="cookiefile">
+<span id="option-cookiefile"></span><h3>cookiefile<a class="headerlink" href="#cookiefile" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Defaul</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Before each request, Grab will read cookies from this file and join them with stored cookies. After each response, Grab will save all cookies to that file.
+The data stored in the file is a dict serialized as JSON.</p>
+</section>
+<section id="referer">
+<span id="option-referer"></span><h3>referer<a class="headerlink" href="#referer" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>see below</p>
+</dd>
+</dl>
+<p>The content of the “Referer” HTTP-header. By default, Grab builds this header with the URL
+of the previously requested document.</p>
+</section>
+<section id="reuse-referer">
+<span id="option-reuse-referer"></span><h3>reuse_referer<a class="headerlink" href="#reuse-referer" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>True</p>
+</dd>
+</dl>
+<p>If this option is enabled, then Grab uses the URL of the previously requested document to build
+the content of the “Referer” HTTP header.</p>
+</section>
+</section>
+<section id="proxy-options">
+<h2>Proxy Options<a class="headerlink" href="#proxy-options" title="Permalink to this headline">¶</a></h2>
+<section id="proxy">
+<span id="option-proxy"></span><h3>proxy<a class="headerlink" href="#proxy" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>The address of the proxy server, in either “domain:port” or “ip:port” format.</p>
+</section>
+<section id="proxy-userpwd">
+<span id="option-proxy-userpwd"></span><h3>proxy_userpwd<a class="headerlink" href="#proxy-userpwd" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Security data to submit to the proxy if it requires authentication.
+Form of data is “username:password”</p>
+</section>
+<section id="proxy-type">
+<span id="option-proxy-type"></span><h3>proxy_type<a class="headerlink" href="#proxy-type" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Type of proxy server. Available values are “http”, “socks4” and “socks5”.</p>
+</section>
+<section id="proxy-auto-change">
+<span id="option-proxy-auto-change"></span><h3>proxy_auto_change<a class="headerlink" href="#proxy-auto-change" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>True</p>
+</dd>
+</dl>
+<p>If Grab should change the proxy before every network request.</p>
+</section>
+</section>
+<section id="response-processing-options">
+<h2>Response Processing Options<a class="headerlink" href="#response-processing-options" title="Permalink to this headline">¶</a></h2>
+<section id="encoding">
+<span id="option-encoding"></span><h3>encoding<a class="headerlink" href="#encoding" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>“gzip”</p>
+</dd>
+</dl>
+<p>List of methods that the remote server could use to compress the content of its response. The default value of this option is “gzip”. To disable all
+compression, pass the empty string to this option.</p>
+</section>
+<section id="document-charset">
+<span id="option-document-charset"></span><h3>document_charset<a class="headerlink" href="#document-charset" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>The character set of the document’s content.
+By default Grab detects the charset of the document automatically. If it detects the charset incorrectly you can specify exact charset with this option.
+The charset is used to get unicode representation of the document content and also to build DOM tree.</p>
+</section>
+<section id="charset">
+<span id="option-charset"></span><h3>charset<a class="headerlink" href="#charset" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>‘utf-8’</p>
+</dd>
+</dl>
+<p>To send a request to the network Grab should convert all unicode data into bytes. It uses the <cite>charset</cite> for encoding. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;abc&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>no conversion required. But if</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="s1">&#39;Превед, медвед!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>then the unicode data has to be converted to <cite>charset</cite> encoding. By default that would be utf-8.</p>
+</section>
+<section id="nobody">
+<span id="option-nobody"></span><h3>nobody<a class="headerlink" href="#nobody" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>False</p>
+</dd>
+</dl>
+<p>Ignore the body of the network response. When this option is enabled, the connection is
+abandoned at the moment when remote server transfers all response headers and
+begins to transfer the body of the response. You can use this option with any HTTP method.</p>
+</section>
+<section id="body-maxsize">
+<span id="option-body-maxsize"></span><h3>body_maxsize<a class="headerlink" href="#body-maxsize" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>A limit on the maximum size of data that should be received from the remote server.
+If the limit is reached, the connection is abandoned and you can work with the data
+received so far.</p>
+</section>
+<section id="lowercased-tree">
+<span id="option-lowercased-tree"></span><h3>lowercased_tree<a class="headerlink" href="#lowercased-tree" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>False</p>
+</dd>
+</dl>
+<p>Convert the content of the document to lowercase before passing it to the lxml library to build the DOM tree.
+This option does not affect the content of <cite>response.body</cite>, which always stores the original data.</p>
+</section>
+<section id="strip-null-bytes">
+<span id="option-strip-null-bytes"></span><h3>strip_null_bytes<a class="headerlink" href="#strip-null-bytes" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>True</p>
+</dd>
+</dl>
+<p>Control the removal of null bytes from the body of HTML documents before they a re passed to lxml to build a DOM tree.
+lxml stops processing HTML documents at the first place where it finds a null byte. To avoid such issues Grab,
+removes null bytes from the document body by default. This option does not affect the content of <cite>response.body</cite> that always stores the original data.</p>
+</section>
+<section id="body-inmemory">
+<span id="option-body-inmemory"></span><h3>body_inmemory<a class="headerlink" href="#body-inmemory" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>True</p>
+</dd>
+</dl>
+<p>Control the way the network response is received. By default, Grab downloads data into memory.
+To handle large files, you can set <cite>body_inmemory=False</cite> to download the network response directly to the disk.</p>
+</section>
+<section id="body-storage-dir">
+<span id="option-body-storage-dir"></span><h3>body_storage_dir<a class="headerlink" href="#body-storage-dir" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>If you use <cite>body_inmemory=False</cite>, then you have to specify the directory where Grab will save network requests.</p>
+</section>
+<section id="body-storage-filename">
+<span id="option-body-storage-filename"></span><h3>body_storage_filename<a class="headerlink" href="#body-storage-filename" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>If you use <cite>body_inmemory=False</cite>, you can let Grab automatically choose names for the files where it saves network responses.
+By default, Grab randomly builds unique names for files. With the <cite>body_storage_filename</cite> option, you can choose the
+exact file name to save response to. Note that Grab will save every response to that file, so you need to change
+the <cite>body_storage_filename</cite> option before each new request, or set it to None to enable default randomly generated file names.</p>
+</section>
+<section id="content-type">
+<span id="option-content-type"></span><h3>content_type<a class="headerlink" href="#content-type" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>“html”</p>
+</dd>
+<dt class="field-odd">Available values</dt>
+<dd class="field-odd"><p>“html” and “xml”</p>
+</dd>
+</dl>
+<p>This option controls which lxml parser is used to process the body of the response. By default, the html parser is used.
+If you want to parse XML, then you may need to change this option to “xml” to force the use of an XML parser which does not strip the content of CDATA nodes.</p>
+</section>
+<section id="fix-special-entities">
+<span id="option-fix-special-entities"></span><h3>fix_special_entities<a class="headerlink" href="#fix-special-entities" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>True</p>
+</dd>
+</dl>
+<p>Fix &amp;#X; entities, where X between 128 and 160. Such entities are parsed by modern
+browsers as windows-1251 entities, independently of the real charset of
+the document. If this option is True, then such entities
+will be replaced with appropriate unicode entities, e.g.: &amp;#151; -&gt;  &amp;#8212;</p>
+</section>
+</section>
+<section id="debugging">
+<h2>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h2>
+<section id="log-file">
+<span id="option-log-file"></span><h3>log_file<a class="headerlink" href="#log-file" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Path to the file where the body of the recent network response will be saved.
+See details at <a class="reference internal" href="debugging.html#grab-debugging-response-saving"><span class="std std-ref">Saving the content of requests and responses</span></a>.</p>
+</section>
+<section id="log-dir">
+<span id="option-log-dir"></span><h3>log_dir<a class="headerlink" href="#log-dir" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Directory to save the content of each response in. Each response will be saved to a unique file.
+See details at <a class="reference internal" href="debugging.html#grab-debugging-response-saving"><span class="std std-ref">Saving the content of requests and responses</span></a>.</p>
+</section>
+<section id="debug-post">
+<span id="option-debug-post"></span><h3>debug_post<a class="headerlink" href="#debug-post" title="Permalink to this headline">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>False</p>
+</dd>
+</dl>
+<p>Enable logging of POST request content.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Grab Settings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#network-options">Network options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#http-options">HTTP Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#proxy-options">Proxy Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#response-processing-options">Response Processing Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#debugging">Debugging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_uploading.html">File Uploading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_base.html">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_base.html">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="request_setup.html" title="previous chapter">Setting up the Grab Request</a></li>
+      <li>Next: <a href="debugging.html" title="next chapter">Debugging</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/grab/settings.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,14 @@
+:py:mod:`grab.spider.interface`
+===============================
+
+.. py:module:: grab.spider.interface
+
+
+Module Contents
+---------------
+
+.. py:data:: FatalErrorQueueItem
+   
+
+   
+

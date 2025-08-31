@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Request Methods &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Setting up the Grab Request" href="request_setup.html" />
+    <link rel="prev" title="Grab Quickstart" href="quickstart.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="request-methods">
+<span id="grab-request-method"></span><h1>Request Methods<a class="headerlink" href="#request-methods" title="Permalink to this headline">¶</a></h1>
+<p>You can make any type of HTTP request you need. By default Grab will make a
+GET request.</p>
+<section id="get-request">
+<span id="grab-request-get"></span><h2>GET Request<a class="headerlink" href="#get-request" title="Permalink to this headline">¶</a></h2>
+<p>GET is the default request method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com/&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you need to pass arguments in through the query string, then you
+have to build the URL manually:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">urllib</span> <span class="kn">import</span> <span class="n">urlencode</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">qs</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">({</span><span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="s1">&#39;arg&#39;</span><span class="p">:</span> <span class="s1">&#39;val&#39;</span><span class="p">})</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://dumpz.org/?</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If your URL contains unsafe characters then you must escape them manually.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">urllib</span> <span class="kn">import</span> <span class="n">quote</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">url</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;https://ru.wikipedia.org/wiki/Россия&#39;</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="n">quote</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)))</span>
+</pre></div>
+</div>
+</section>
+<section id="post-request">
+<span id="grab-request-post"></span><h2>POST Request<a class="headerlink" href="#post-request" title="Permalink to this headline">¶</a></h2>
+<p>To make a POST request you have to specify POST data with the <cite>post</cite> option.
+Usually, you will want to use a dictionary:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="s1">&#39;bar&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>You can pass unicode strings and numbers in as values for the <cite>post</cite> dict,
+they will be converted to byte strings automatically. If you want to specify a
+charset that will be used to convert unicode to byte string, then use
+<cite>request_charset</cite> option.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;who&#39;</span><span class="p">:</span> <span class="sa">u</span><span class="s1">&#39;конь в пальто&#39;</span><span class="p">},</span>
+     <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;cp1251&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the <cite>post</cite> option is a string then it is submitted as-is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="s1">&#39;raw data&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want to pass multiple values with the same key use the list of tuples
+version:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="s1">&#39;val1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="s1">&#39;val2&#39;</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>By default, Grab will compose a POST request with
+‘application/x-www-form-urlencoded` encoding method. To enable
+<cite>multipart/form-data</cite> use the <cite>post_multipart</cite> argument instead of <cite>post</cite>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">multipart_post</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="s1">&#39;val1&#39;</span><span class="p">),</span>
+                                            <span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="s1">&#39;val2&#39;</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>To upload a file, use the <cite>grab.upload.UploadFile</cite> class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com/&#39;</span><span class="p">,</span>
+     <span class="n">multipart_post</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="n">UploadFile</span><span class="p">(</span><span class="s1">&#39;/path/to/file&#39;</span><span class="p">)})</span>
+</pre></div>
+</div>
+</section>
+<section id="put-request">
+<span id="grab-request-put"></span><h2>PUT Request<a class="headerlink" href="#put-request" title="Permalink to this headline">¶</a></h2>
+<p>To make a PUT request use both the <cite>post</cite> and <cite>method</cite> arguments:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="s1">&#39;raw data&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;put&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="other-methods">
+<span id="grab-request-other"></span><h2>Other Methods<a class="headerlink" href="#other-methods" title="Permalink to this headline">¶</a></h2>
+<p>To make DELETE, OPTIONS and other HTTP requests, use the <cite>method</cite> option.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;options&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Request Methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#get-request">GET Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#post-request">POST Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#put-request">PUT Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-methods">Other Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_uploading.html">File Uploading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_base.html">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_base.html">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="quickstart.html" title="previous chapter">Grab Quickstart</a></li>
+      <li>Next: <a href="request_setup.html" title="next chapter">Setting up the Grab Request</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/grab/request_method.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

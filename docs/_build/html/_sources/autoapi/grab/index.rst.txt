@@ -1,0 +1,519 @@
+:py:mod:`grab`
+==============
+
+.. py:module:: grab
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   spider/index.rst
+   util/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   base/index.rst
+   base_transport/index.rst
+   document/index.rst
+   errors/index.rst
+   request/index.rst
+   response/index.rst
+   transport/index.rst
+   types/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.Grab
+   grab.Document
+   grab.Request
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.DataNotFound
+   grab.__version__
+
+
+.. py:class:: Grab(transport: None | BaseTransport | type[BaseTransport] = None, **kwargs: Any)
+
+   .. py:property:: doc
+      :type: None | Document
+
+
+   .. py:attribute:: __slots__
+      :annotation: = ['proxylist', 'config', 'transport', 'request_method', 'cookies', 'meta', '_doc']
+
+      
+
+   .. py:attribute:: document_class
+      :annotation: :type[grab.document.Document]
+
+      
+
+   .. py:attribute:: clonable_attributes
+      :annotation: = ['proxylist']
+
+      
+
+   .. py:method:: process_transport_option(transport: None | BaseTransport | type[BaseTransport], default_transport: type[grab.base_transport.BaseTransport]) -> grab.base_transport.BaseTransport
+
+
+   .. py:method:: clone(**kwargs: Any) -> Grab
+
+      Create clone of Grab instance.
+
+      Cloned instance will have the same state: cookies, referrer, response
+      document data
+
+      :param \\**kwargs: overrides settings of cloned grab instance
+
+
+   .. py:method:: dump_config() -> collections.abc.MutableMapping[str, Any]
+
+      Make clone of current config.
+
+
+   .. py:method:: load_config(config: grab.types.GrabConfig) -> None
+
+      Configure grab instance with external config object.
+
+
+   .. py:method:: setup(**kwargs: Any) -> None
+
+      Set up Grab instance configuration.
+
+
+   .. py:method:: prepare_request() -> grab.request.Request
+
+      Configure all things to make real network request.
+
+      This method is called before doing real request via transport extension.
+
+
+   .. py:method:: create_request_from_config(config: collections.abc.MutableMapping[str, Any]) -> grab.request.Request
+
+
+   .. py:method:: sync_cookie_manager_with_request_cookies(cookies: collections.abc.Mapping[str, Any], request_url: str) -> None
+
+
+   .. py:method:: log_request(req: grab.request.Request, extra: str = '') -> None
+
+      Send request details to logging system.
+
+
+   .. py:method:: find_redirect_url(doc: grab.document.Document) -> None | str
+
+
+   .. py:method:: request(url: None | str = None, **kwargs: Any) -> grab.document.Document
+
+      Perform network request.
+
+      You can specify grab settings in ``**kwargs``.
+      Any keyword argument will be passed to ``self.config``.
+
+      Returns: ``Document`` objects.
+
+
+   .. py:method:: submit(make_request: bool = True, **kwargs: Any) -> None | Document
+
+      Submit current form.
+
+      :param make_request: if `False` then grab instance will be
+          configured with form post data but request will not be
+          performed
+
+      For details see `Document.submit()` method
+
+
+   .. py:method:: process_request_result(req: grab.request.Request) -> grab.document.Document
+
+      Process result of real request performed via transport extension.
+
+
+   .. py:method:: reset_temporary_options() -> None
+
+
+   .. py:method:: change_proxy(random: bool = True) -> None
+
+      Set random proxy from proxylist.
+
+
+   .. py:method:: common_headers() -> dict[str, str]
+      :classmethod:
+
+      Build headers which sends typical browser.
+
+
+   .. py:method:: make_url_absolute(url: str, resolve_base: bool = False) -> str
+
+      Make url absolute using previous request url as base url.
+
+
+   .. py:method:: clear_cookies() -> None
+
+      Clear all remembered cookies.
+
+
+   .. py:method:: __getstate__() -> dict[str, Any]
+
+
+   .. py:method:: __setstate__(state: collections.abc.Mapping[str, Any]) -> None
+
+
+
+.. py:class:: Document(body: None | bytes = None, *, document_type: None | str = 'html', head: None | bytes = None, headers: None | email.message.Message = None, encoding: None | str = None, code: None | int = None, url: None | str = None, cookies: None | CookieJar = None)
+
+   Network response.
+
+   .. py:property:: status
+      :type: None | int
+
+
+   .. py:property:: json
+      :type: Any
+
+      Return response body deserialized into JSON object.
+
+   .. py:property:: pyquery
+      :type: Any
+
+      Return pyquery handler.
+
+   .. py:property:: body
+      :type: None | bytes
+
+
+   .. py:property:: tree
+      :type: lxml.etree._Element
+
+      Return DOM tree of the document built with HTML DOM builder.
+
+   .. py:property:: form
+      :type: lxml.html.FormElement
+
+      Return default document's form.
+
+      If form was not selected manually then select the form
+      which has the biggest number of input elements.
+
+      The form value is just an `lxml.html` form element.
+
+      Example::
+
+          g.request('some URL')
+          # Choose form automatically
+          print g.form
+
+          # And now choose form manually
+          g.choose_form(1)
+          print g.form
+
+   .. py:attribute:: __slots__
+      :annotation: = ['document_type', 'code', 'head', '_bytes_body', 'headers', 'url', 'cookies', 'encoding',...
+
+      
+
+   .. py:method:: __call__(query: str) -> selection.SelectorList[lxml.etree._Element]
+
+
+   .. py:method:: select(*args: Any, **kwargs: Any) -> selection.SelectorList[lxml.etree._Element]
+
+
+   .. py:method:: process_encoding(encoding: None | str = None) -> str
+
+      Process explicitly defined encoding or auto-detect it.
+
+      If encoding is explicitly defined, ensure it is a valid encoding the python
+      can deal with. If encoding is not specified, auto-detect it.
+
+      Raises unicodec.InvalidEncodingName if explicitly set encoding is invalid.
+
+
+   .. py:method:: copy() -> Document
+
+
+   .. py:method:: save(path: str) -> None
+
+      Save response body to file.
+
+
+   .. py:method:: url_details() -> urllib.parse.SplitResult
+
+      Return result of urlsplit function applied to response url.
+
+
+   .. py:method:: query_param(key: str) -> str
+
+      Return value of parameter in query string.
+
+
+   .. py:method:: browse() -> None
+
+      Save response in temporary file and open it in GUI browser.
+
+
+   .. py:method:: __getstate__() -> collections.abc.Mapping[str, Any]
+
+      Reset cached lxml objects which could not be pickled.
+
+
+   .. py:method:: __setstate__(state: collections.abc.Mapping[str, Any]) -> None
+
+
+   .. py:method:: text_search(anchor: str | bytes) -> bool
+
+      Search the substring in response body.
+
+      :param anchor: string to search
+      :param byte: if False then `anchor` should be the
+          unicode string, and search will be performed in
+          `response.unicode_body()` else `anchor` should be the byte-string
+          and search will be performed in `response.body`
+
+      If substring is found return True else False.
+
+
+   .. py:method:: text_assert(anchor: str | bytes) -> None
+
+      If `anchor` is not found then raise `DataNotFound` exception.
+
+
+   .. py:method:: text_assert_any(anchors: list[str | bytes]) -> None
+
+      If no `anchors` were found then raise `DataNotFound` exception.
+
+
+   .. py:method:: rex_text(regexp: str | bytes | Pattern[str] | Pattern[bytes], flags: int = 0, default: Any = NULL) -> Any
+
+      Return content of first matching group of regexp found in response body.
+
+
+   .. py:method:: rex_search(regexp: str | bytes | Pattern[str] | Pattern[bytes], flags: int = 0, default: Any = NULL) -> Any
+
+      Search the regular expression in response body.
+
+      Return found match object or None
+
+
+   .. py:method:: rex_assert(rex: str | bytes | Pattern[str] | Pattern[bytes]) -> None
+
+      Raise `DataNotFound` exception if `rex` expression is not found.
+
+
+   .. py:method:: get_body_chunk() -> None | bytes
+
+
+   .. py:method:: unicode_body() -> None | str
+
+      Return response body as unicode string.
+
+
+   .. py:method:: set_body(body: bytes) -> None
+
+
+   .. py:method:: wrap_io(inp: bytes | str) -> StringIO | BytesIO
+      :classmethod:
+
+
+   .. py:method:: _build_dom(content: bytes | str, mode: str, encoding: str) -> lxml.etree._Element
+      :classmethod:
+
+
+   .. py:method:: build_html_tree() -> lxml.etree._Element
+
+
+   .. py:method:: build_xml_tree() -> lxml.etree._Element
+
+
+   .. py:method:: choose_form(number: None | int = None, xpath: None | str = None, name: None | str = None, **kwargs: Any) -> None
+
+      Set the default form.
+
+      :param number: number of form (starting from zero)
+      :param id: value of "id" attribute
+      :param name: value of "name" attribute
+      :param xpath: XPath query
+      :raises: :class:`DataNotFound` if form not found
+      :raises: :class:`GrabMisuseError`
+          if method is called without parameters
+
+      Selected form will be available via `form` attribute of `Grab`
+      instance. All form methods will work with default form.
+
+      Examples::
+
+          # Select second form
+          g.choose_form(1)
+
+          # Select by id
+          g.choose_form(id="register")
+
+          # Select by name
+          g.choose_form(name="signup")
+
+          # Select by xpath
+          g.choose_form(xpath='//form[contains(@action, "/submit")]')
+
+
+   .. py:method:: get_cached_form() -> None | FormElement
+
+      Get form which has been already selected.
+
+      Returns None if form has not been selected yet.
+
+      It is for testing mainly. To not trigger pylint warnings about
+      accessing protected element.
+
+
+   .. py:method:: set_input(name: str, value: Any) -> None
+
+      Set the value of form element by its `name` attribute.
+
+      :param name: name of element
+      :param value: value which should be set to element
+
+      To check/uncheck the checkbox pass boolean value.
+
+      Example::
+
+          g.set_input('sex', 'male')
+
+          # Check the checkbox
+          g.set_input('accept', True)
+
+
+   .. py:method:: set_input_by_id(_id: str, value: Any) -> None
+
+      Set the value of form element by its `id` attribute.
+
+      :param _id: id of element
+      :param value: value which should be set to element
+
+
+   .. py:method:: set_input_by_number(number: int, value: Any) -> None
+
+      Set the value of form element by its number in the form.
+
+      :param number: number of element
+      :param value: value which should be set to element
+
+
+   .. py:method:: set_input_by_xpath(xpath: str, value: Any) -> None
+
+      Set the value of form element by xpath.
+
+      :param xpath: xpath path
+      :param value: value which should be set to element
+
+
+   .. py:method:: process_extra_post(post_items: list[tuple[str, Any]], extra_post_items: collections.abc.Sequence[tuple[str, Any]]) -> list[tuple[str, Any]]
+
+
+   .. py:method:: clean_submit_controls(post: collections.abc.MutableMapping[str, Any], submit_name: None | str) -> None
+
+
+   .. py:method:: get_form_request(submit_name: None | str = None, url: None | str = None, extra_post: None | Mapping[str, Any] | Sequence[tuple[str, Any]] = None, remove_from_post: None | Sequence[str] = None) -> tuple[str, str, bool, collections.abc.Sequence[tuple[str, Any]]]
+
+      Submit default form.
+
+      :param submit_name: name of button which should be "clicked" to
+          submit form
+      :param url: explicitly specify form action url
+      :param extra_post: (dict or list of pairs) additional form data which
+          will override data automatically extracted from the form.
+      :param remove_from_post: list of keys to remove from the submitted data
+
+      Following input elements are automatically processed:
+
+      * input[type="hidden"] - default value
+      * select: value of last option
+      * radio - ???
+      * checkbox - ???
+
+      Multipart forms are correctly recognized by grab library.
+
+
+   .. py:method:: build_fields_to_remove(fields: collections.abc.Mapping[str, Any], form_inputs: collections.abc.Sequence[lxml.html.HtmlElement]) -> set[str]
+
+
+   .. py:method:: process_form_fields(fields: collections.abc.MutableMapping[str, Any]) -> None
+
+
+   .. py:method:: form_fields() -> collections.abc.MutableMapping[str, lxml.html.HtmlElement]
+
+      Return fields of default form.
+
+      Fill some fields with reasonable values.
+
+
+   .. py:method:: choose_form_by_element(xpath: str) -> None
+
+
+
+.. py:data:: DataNotFound
+   
+
+   
+
+.. py:exception:: GrabError
+
+   Bases: :py:obj:`Exception`
+
+   All custom Grab exception should be children of that class.
+
+
+.. py:exception:: GrabMisuseError
+
+   Bases: :py:obj:`GrabError`
+
+   Indicates incorrect usage of grab API.
+
+
+.. py:exception:: GrabNetworkError(*args: Any, **kwargs: Any)
+
+   Bases: :py:obj:`OriginalExceptionGrabError`
+
+   Raises in case of network error.
+
+
+.. py:exception:: GrabTimeoutError(*args: Any, **kwargs: Any)
+
+   Bases: :py:obj:`GrabNetworkError`
+
+   Raises when configured time is outed for the request.
+
+
+.. py:class:: Request(method: str, url: str, *, headers: None | dict[str, Any] = None, timeout: None | int | Timeout = None, cookies: None | dict[str, Any] = None, encoding: None | str = None, proxy_type: None | str = None, proxy: None | str = None, proxy_userpwd: None | str = None, fields: Any = None, body: None | bytes = None, multipart: None | bool = None, document_type: None | str = None)
+
+   .. py:method:: get_full_url() -> str
+
+
+   .. py:method:: _process_timeout_param(value: None | float | Timeout) -> grab.util.timeout.Timeout
+
+
+
+.. py:data:: __version__
+   :annotation: = 0.6.41
+
+   
+

@@ -1,0 +1,39 @@
+:py:mod:`grab.spider.queue_backend.memory`
+==========================================
+
+.. py:module:: grab.spider.queue_backend.memory
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.queue_backend.memory.MemoryTaskQueue
+
+
+
+
+.. py:class:: MemoryTaskQueue
+
+   Bases: :py:obj:`grab.spider.queue_backend.base.BaseTaskQueue`
+
+   .. py:method:: put(task: grab.spider.task.Task, priority: int, schedule_time: None | datetime = None) -> None
+
+
+   .. py:method:: get() -> grab.spider.task.Task
+
+
+   .. py:method:: size() -> int
+
+
+   .. py:method:: clear() -> None
+
+
+   .. py:method:: close() -> None
+
+
+

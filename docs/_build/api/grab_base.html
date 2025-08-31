@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Module grab.base &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Module grab.error" href="grab_error.html" />
+    <link rel="prev" title="Explanation" href="../spider/transport.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <span class="target" id="module-grab.base"><span id="api-grab-base"></span></span><section id="module-grab-base">
+<h1>Module grab.base<a class="headerlink" href="#module-grab-base" title="Permalink to this headline">¶</a></h1>
+<p>Here is the heart of the library, the Grab class.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="grab.base.Grab">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.base.</span></span><span class="sig-name descname"><span class="pre">Grab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">document_body</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transport</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">document_body</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transport</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create Grab instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.setup_transport">
+<span class="sig-name descname"><span class="pre">setup_transport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transport_param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.setup_transport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.setup_transport" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset all attributes which could be modified during previous request
+or which is not initialized yet if this is the new Grab instance.</p>
+<p>This methods is automatically called before each network request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.clone">
+<span class="sig-name descname"><span class="pre">clone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.clone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create clone of Grab instance.</p>
+<p>Cloned instance will have the same state: cookies, referrer, response
+document data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – overrides settings of cloned grab instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.adopt">
+<span class="sig-name descname"><span class="pre">adopt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grab</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.adopt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.adopt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy the state of another <cite>Grab</cite> instance.</p>
+<p>Use case: create backup of current state to the cloned instance and
+then restore the state from it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.dump_config">
+<span class="sig-name descname"><span class="pre">dump_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.dump_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.dump_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make clone of current config.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.load_config">
+<span class="sig-name descname"><span class="pre">load_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.load_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.load_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure grab instance with external config object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setting up Grab instance configuration.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.go">
+<span class="sig-name descname"><span class="pre">go</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.go"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.go" title="Permalink to this definition">¶</a></dt>
+<dd><p>Go to <code class="docutils literal notranslate"><span class="pre">url</span></code></p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">url</dt>
+<dd class="field-odd"><p>could be absolute or relative. If relative then t will be
+appended to the absolute URL of previous request.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.download"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch document located at <code class="docutils literal notranslate"><span class="pre">url</span></code> and save to to <code class="docutils literal notranslate"><span class="pre">location</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.request">
+<span class="sig-name descname"><span class="pre">request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform network request.</p>
+<p>You can specify grab settings in <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>.
+Any keyword argument will be passed to <code class="docutils literal notranslate"><span class="pre">self.config</span></code>.</p>
+<p>Returns: <code class="docutils literal notranslate"><span class="pre">Document</span></code> objects.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.change_proxy">
+<span class="sig-name descname"><span class="pre">change_proxy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">random</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.change_proxy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.change_proxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set random proxy from proxylist.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.make_url_absolute">
+<span class="sig-name descname"><span class="pre">make_url_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolve_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.make_url_absolute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.make_url_absolute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make url absolute using previous request url as base url.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.clear_cookies">
+<span class="sig-name descname"><span class="pre">clear_cookies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.clear_cookies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.clear_cookies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear all remembered cookies.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.base.Grab.setup_with_proxyline">
+<span class="sig-name descname"><span class="pre">setup_with_proxyline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proxy_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'http'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/base.html#Grab.setup_with_proxyline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.base.Grab.setup_with_proxyline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grab.base.BaseGrab">
+<span class="sig-prename descclassname"><span class="pre">grab.base.</span></span><span class="sig-name descname"><span class="pre">BaseGrab</span></span><a class="headerlink" href="#grab.base.BaseGrab" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#grab.base.Grab" title="grab.base.Grab"><code class="xref py py-class docutils literal notranslate"><span class="pre">grab.base.Grab</span></code></a></p>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/file_uploading.html">File Uploading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab_spider_base.html">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../spider/transport.html" title="previous chapter">Explanation</a></li>
+      <li>Next: <a href="grab_error.html" title="next chapter">Module grab.error</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/grab_base.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grab.errors &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="grab.request" href="../request/index.html" />
+    <link rel="prev" title="grab.document" href="../document/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../base/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.base</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../base_transport/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.base_transport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../document/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.document</span></code></a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.errors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../request/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.request</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../response/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.response</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../transport/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.transport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../types/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.types</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.errors</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/grab/errors/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-grab.errors">
+<span id="grab-errors"></span><h1><a class="reference internal" href="#module-grab.errors" title="grab.errors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.errors</span></code></a><a class="headerlink" href="#module-grab.errors" title="Permalink to this heading"></a></h1>
+<p>Custom exception which Grab instance could generate.</p>
+<section id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><dl class="simple">
+<dt>GrabError</dt><dd><ul>
+<li><dl class="simple">
+<dt>GrabNetworkError</dt><dd><ul>
+<li><p>GrabTimeoutError</p></li>
+<li><p>GrabConnectionError</p></li>
+<li><p>GrabCouldNotResolveHostError</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>GrabAuthError</p></li>
+<li><p>GrabMisuseError</p></li>
+<li><p>GrabTooManyRedirectsError</p></li>
+<li><p>GrabInvalidUrl</p></li>
+<li><p>GrabInternalError</p></li>
+<li><p>GrabFeatureIsDeprecated</p></li>
+<li><p>ResponseNotValid</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>DataNotFound == IndexError</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<ul class="simple">
+<li><p>GrabDeprecationWarning</p></li>
+</ul>
+</div>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grab.errors.raise_feature_is_deprecated" title="grab.errors.raise_feature_is_deprecated"><code class="xref py py-obj docutils literal notranslate"><span class="pre">raise_feature_is_deprecated</span></code></a>(→ None)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grab.errors.DataNotFound" title="grab.errors.DataNotFound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataNotFound</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabError</span></span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>All custom Grab exception should be children of that class.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.OriginalExceptionGrabError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">OriginalExceptionGrabError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/grab/errors.html#OriginalExceptionGrabError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.OriginalExceptionGrabError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.GrabError" title="grab.errors.GrabError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GrabError</span></code></a></p>
+<p>Sub-class which constructor accepts original exception as second argument.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabNetworkError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabNetworkError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabNetworkError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabNetworkError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.OriginalExceptionGrabError" title="grab.errors.OriginalExceptionGrabError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OriginalExceptionGrabError</span></code></a></p>
+<p>Raises in case of network error.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabTimeoutError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabTimeoutError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabTimeoutError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabTimeoutError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.GrabNetworkError" title="grab.errors.GrabNetworkError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GrabNetworkError</span></code></a></p>
+<p>Raises when configured time is outed for the request.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabConnectionError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabConnectionError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabConnectionError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabConnectionError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.GrabNetworkError" title="grab.errors.GrabNetworkError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GrabNetworkError</span></code></a></p>
+<p>Raised when it is not possible to establish network connection.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabCouldNotResolveHostError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabCouldNotResolveHostError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabCouldNotResolveHostError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabCouldNotResolveHostError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.GrabNetworkError" title="grab.errors.GrabNetworkError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GrabNetworkError</span></code></a></p>
+<p>Raised when couldn’t resolve host. The given remote host was not resolved.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabAuthError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabAuthError</span></span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabAuthError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabAuthError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.GrabError" title="grab.errors.GrabError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GrabError</span></code></a></p>
+<p>Raised when remote server denies authentication credentials.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabMisuseError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabMisuseError</span></span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabMisuseError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabMisuseError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.GrabError" title="grab.errors.GrabError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GrabError</span></code></a></p>
+<p>Indicates incorrect usage of grab API.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabTooManyRedirectsError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabTooManyRedirectsError</span></span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabTooManyRedirectsError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabTooManyRedirectsError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.GrabError" title="grab.errors.GrabError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GrabError</span></code></a></p>
+<p>Raised when max. allowed number of redirects is reaced.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabInvalidUrl">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabInvalidUrl</span></span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabInvalidUrl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabInvalidUrl" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.GrabError" title="grab.errors.GrabError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GrabError</span></code></a></p>
+<p>Raised when error occurred while normalizing URL e.g. IDN processing.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabInvalidResponse">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabInvalidResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabInvalidResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabInvalidResponse" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.OriginalExceptionGrabError" title="grab.errors.OriginalExceptionGrabError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OriginalExceptionGrabError</span></code></a></p>
+<p>Raised when network response’s data could not be processed.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabInternalError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabInternalError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabInternalError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabInternalError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.OriginalExceptionGrabError" title="grab.errors.OriginalExceptionGrabError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OriginalExceptionGrabError</span></code></a></p>
+<p>Sub-class which constructor accepts original exception as second argument.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabFeatureIsDeprecated">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabFeatureIsDeprecated</span></span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabFeatureIsDeprecated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabFeatureIsDeprecated" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.GrabError" title="grab.errors.GrabError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GrabError</span></code></a></p>
+<p>Raised when user tries to use feature that is deprecated and has been dropped.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="grab.errors.raise_feature_is_deprecated">
+<span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">raise_feature_is_deprecated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/errors.html#raise_feature_is_deprecated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.raise_feature_is_deprecated" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="grab.errors.DataNotFound">
+<span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">DataNotFound</span></span><a class="reference internal" href="../../../_modules/grab/errors.html#DataNotFound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.DataNotFound" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.ResponseNotValid">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">ResponseNotValid</span></span><a class="reference internal" href="../../../_modules/grab/errors.html#ResponseNotValid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.ResponseNotValid" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.errors.GrabError" title="grab.errors.GrabError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GrabError</span></code></a></p>
+<p>All custom Grab exception should be children of that class.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.errors.GrabDeprecationWarning">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.errors.</span></span><span class="sig-name descname"><span class="pre">GrabDeprecationWarning</span></span><a class="reference internal" href="../../../_modules/grab/errors.html#GrabDeprecationWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.errors.GrabDeprecationWarning" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">UserWarning</span></code></p>
+<p>Base class for warnings generated by user code.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../document/index.html" class="btn btn-neutral float-left" title="grab.document" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../request/index.html" class="btn btn-neutral float-right" title="grab.request" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

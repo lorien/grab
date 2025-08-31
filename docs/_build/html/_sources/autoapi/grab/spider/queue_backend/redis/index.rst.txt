@@ -1,0 +1,78 @@
+:py:mod:`grab.spider.queue_backend.redis`
+=========================================
+
+.. py:module:: grab.spider.queue_backend.redis
+
+.. autoapi-nested-parse::
+
+   Spider task queue backend powered by redis.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.queue_backend.redis.CustomPriorityQueue
+   grab.spider.queue_backend.redis.RedisTaskQueue
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.queue_backend.redis.system_random
+
+
+.. py:data:: system_random
+   
+
+   
+
+.. py:class:: CustomPriorityQueue(key: str, **kwargs: Any)
+
+   Bases: :py:obj:`fastrq.priorityqueue.PriorityQueue`
+
+   Priority queue
+
+   The lower the score, the higher the priority.
+   Usage:
+       pq = PriorityQueue("hello-pq")
+       pq.push({"google": 100, "alibaba": 101})
+       pq.pop()
+
+
+   .. py:method:: connect() -> redis.Redis[Any]
+
+
+   .. py:method:: clear() -> None
+
+
+
+.. py:class:: RedisTaskQueue(queue_name: None | str = None, connection_args: None | dict[str, Any] = None)
+
+   Bases: :py:obj:`grab.spider.queue_backend.base.BaseTaskQueue`
+
+   .. py:method:: put(task: grab.spider.task.Task, priority: int, schedule_time: None | datetime = None) -> None
+
+
+   .. py:method:: get() -> grab.spider.task.Task
+
+
+   .. py:method:: size() -> int
+
+
+   .. py:method:: clear() -> None
+
+
+   .. py:method:: close() -> None
+
+
+

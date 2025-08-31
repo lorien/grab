@@ -1,0 +1,442 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>grab.cookie &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for grab.cookie</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">RTFM:</span>
+
+<span class="sd">* http://docs.python.org/2/library/cookielib.html#cookie-objects</span>
+
+<span class="sd">Some code got from</span>
+<span class="sd">    https://github.com/kennethreitz/requests/blob/master/requests/cookies.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">six.moves.http_cookiejar</span> <span class="kn">import</span> <span class="n">CookieJar</span><span class="p">,</span> <span class="n">Cookie</span>
+<span class="kn">from</span> <span class="nn">six.moves.urllib.parse</span> <span class="kn">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">urlunparse</span>
+
+<span class="kn">from</span> <span class="nn">grab.error</span> <span class="kn">import</span> <span class="n">GrabMisuseError</span>
+
+<span class="n">COOKIE_ATTRS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;value&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;version&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;port&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;domain&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;path&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;secure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;expires&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;discard&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;comment&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;comment_url&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rfc2109&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="c1"># Source:</span>
+<span class="c1"># https://github.com/kennethreitz/requests/blob/master/requests/cookies.py</span>
+<span class="k">class</span> <span class="nc">MockRequest</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wraps a `requests.Request` to mimic a `urllib2.Request`.</span>
+<span class="sd">    The code in `cookielib.CookieJar` expects this interface in order to</span>
+<span class="sd">    correctly manage cookie policies, i.e., determine whether a cookie can be</span>
+<span class="sd">    set, given the domains of the request and the cookie.</span>
+<span class="sd">    The original request object is read-only. The client is responsible for</span>
+<span class="sd">    collecting the new headers via `get_new_headers()` and interpreting them</span>
+<span class="sd">    appropriately. You probably want `get_cookie_header`, defined below.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_req</span> <span class="o">=</span> <span class="n">request</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_headers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_req</span><span class="o">.</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">scheme</span>
+
+    <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+
+    <span class="k">def</span> <span class="nf">get_host</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">urlparse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_req</span><span class="o">.</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">netloc</span>
+
+    <span class="k">def</span> <span class="nf">get_origin_req_host</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_host</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_full_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Only return the response&#39;s URL if the user hadn&#39;t set the Host</span>
+        <span class="c1"># header</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_req</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Host&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_req</span><span class="o">.</span><span class="n">url</span>
+        <span class="c1"># If they did set it, retrieve it and reconstruct the expected domain</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_req</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Host&quot;</span><span class="p">]</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_req</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="c1"># Reconstruct the URL as we expect it</span>
+        <span class="k">return</span> <span class="n">urlunparse</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">parsed</span><span class="o">.</span><span class="n">scheme</span><span class="p">,</span>
+                <span class="n">host</span><span class="p">,</span>
+                <span class="n">parsed</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                <span class="n">parsed</span><span class="o">.</span><span class="n">params</span><span class="p">,</span>
+                <span class="n">parsed</span><span class="o">.</span><span class="n">query</span><span class="p">,</span>
+                <span class="n">parsed</span><span class="o">.</span><span class="n">fragment</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">is_unverifiable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">has_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_req</span><span class="o">.</span><span class="n">headers</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_headers</span>
+
+    <span class="k">def</span> <span class="nf">get_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_req</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">add_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        cookielib has no legitimate use for this method;</span>
+<span class="sd">        add it back if you find one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Cookie headers should be added&quot;</span> <span class="s2">&quot; with add_unredirected_header()&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_unredirected_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_headers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">get_new_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_headers</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">unverifiable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_unverifiable</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">origin_req_host</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_origin_req_host</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">host</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_host</span><span class="p">()</span>
+
+
+<span class="c1"># https://github.com/kennethreitz/requests/blob/master/requests/cookies.py</span>
+<span class="k">class</span> <span class="nc">MockResponse</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wraps a `httplib.HTTPMessage` to mimic a `urllib.addinfourl`.</span>
+<span class="sd">    ...what? Basically, expose the parsed HTTP headers from the server response</span>
+<span class="sd">    the way `cookielib` expects to see them.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make a MockResponse for `cookielib` to read.</span>
+<span class="sd">        :param headers: a httplib.HTTPMessage or analogous carrying the headers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_headers</span> <span class="o">=</span> <span class="n">headers</span>
+
+    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_headers</span>
+
+    <span class="k">def</span> <span class="nf">getheaders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_headers</span><span class="o">.</span><span class="n">getheaders</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="create_cookie"><a class="viewcode-back" href="../../api/grab_cookie.html#grab.cookie.create_cookie">[docs]</a><span class="k">def</span> <span class="nf">create_cookie</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">httponly</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates `cookielib.Cookie` instance&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">domain</span> <span class="o">==</span> <span class="s2">&quot;localhost&quot;</span><span class="p">:</span>
+        <span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+        <span class="n">version</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+        <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="p">,</span>
+        <span class="n">secure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">expires</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">discard</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">comment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">comment_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">rfc2109</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">rest</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;HttpOnly&quot;</span><span class="p">:</span> <span class="n">httponly</span><span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GrabMisuseError</span><span class="p">(</span>
+                <span class="s2">&quot;Function `create_cookie` does not accept &quot;</span> <span class="s2">&quot;`</span><span class="si">%s</span><span class="s2">` argument&quot;</span> <span class="o">%</span> <span class="n">key</span>
+            <span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;rest&quot;</span><span class="p">][</span><span class="s2">&quot;HttpOnly&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">httponly</span>
+
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;port_specified&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;port&quot;</span><span class="p">])</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;domain_specified&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">])</span>
+    <span class="c1"># pytype: disable=attribute-error</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;domain_initial_dot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="c1"># pytype: enable=attribute-error</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;path_specified&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">Cookie</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CookieManager"><a class="viewcode-back" href="../../api/grab_cookie.html#grab.cookie.CookieManager">[docs]</a><span class="k">class</span> <span class="nc">CookieManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Each Grab instance has `cookies` attribute that is instance of</span>
+<span class="sd">    `CookieManager` class.</span>
+
+<span class="sd">    That class contains helpful methods to create, load, save cookies from/to</span>
+<span class="sd">    different places.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;cookiejar&quot;</span><span class="p">,)</span>
+
+<div class="viewcode-block" id="CookieManager.__init__"><a class="viewcode-back" href="../../api/grab_cookie.html#grab.cookie.CookieManager.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cookiejar</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cookiejar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cookiejar</span> <span class="o">=</span> <span class="n">cookiejar</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cookiejar</span> <span class="o">=</span> <span class="n">CookieJar</span><span class="p">()</span></div>
+        <span class="c1"># self.disable_cookiejar_lock(self.cookiejar)</span>
+
+    <span class="c1"># def disable_cookiejar_lock(self, cj):</span>
+    <span class="c1"># cj._cookies_lock = dummy_threading.RLock()</span>
+
+<div class="viewcode-block" id="CookieManager.set"><a class="viewcode-back" href="../../api/grab_cookie.html#grab.cookie.CookieManager.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add new cookie or replace existing cookie with same parameters.</span>
+
+<span class="sd">        :param name: name of cookie</span>
+<span class="sd">        :param value: value of cookie</span>
+<span class="sd">        :param kwargs: extra attributes of cookie</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">domain</span> <span class="o">==</span> <span class="s2">&quot;localhost&quot;</span><span class="p">:</span>
+            <span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cookiejar</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">create_cookie</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="CookieManager.update"><a class="viewcode-back" href="../../api/grab_cookie.html#grab.cookie.CookieManager.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cookies</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cookies</span><span class="p">,</span> <span class="n">CookieJar</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">cookie</span> <span class="ow">in</span> <span class="n">cookies</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cookiejar</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">cookie</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cookies</span><span class="p">,</span> <span class="n">CookieManager</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">cookie</span> <span class="ow">in</span> <span class="n">cookies</span><span class="o">.</span><span class="n">cookiejar</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cookiejar</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">cookie</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GrabMisuseError</span><span class="p">(</span>
+                <span class="s2">&quot;Unknown type of cookies argument: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">cookies</span><span class="p">)</span>
+            <span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_cookie_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">clist</span><span class="p">):</span>
+        <span class="n">jar</span> <span class="o">=</span> <span class="n">CookieJar</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">cookie</span> <span class="ow">in</span> <span class="n">clist</span><span class="p">:</span>
+            <span class="n">jar</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">cookie</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">jar</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CookieManager.clear"><a class="viewcode-back" href="../../api/grab_cookie.html#grab.cookie.CookieManager.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cookiejar</span> <span class="o">=</span> <span class="n">CookieJar</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
+            <span class="n">cls_slots</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__slots__&quot;</span><span class="p">,</span> <span class="p">())</span>
+            <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">cls_slots</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">slot</span> <span class="o">!=</span> <span class="s2">&quot;__weakref__&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot</span><span class="p">):</span>
+                        <span class="n">state</span><span class="p">[</span><span class="n">slot</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot</span><span class="p">)</span>
+
+        <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_cookiejar_cookies&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cookiejar</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;cookiejar&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">state</span><span class="p">[</span><span class="s2">&quot;cookiejar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CookieJar</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">cookie</span> <span class="ow">in</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_cookiejar_cookies&quot;</span><span class="p">]:</span>
+            <span class="n">state</span><span class="p">[</span><span class="s2">&quot;cookiejar&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">cookie</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_cookiejar_cookies&quot;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">slot</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CookieManager.__getitem__"><a class="viewcode-back" href="../../api/grab_cookie.html#grab.cookie.CookieManager.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">cookie</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cookiejar</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cookie</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">cookie</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span></div>
+
+<div class="viewcode-block" id="CookieManager.items"><a class="viewcode-back" href="../../api/grab_cookie.html#grab.cookie.CookieManager.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cookie</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cookiejar</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cookie</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cookie</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="CookieManager.load_from_file"><a class="viewcode-back" href="../../api/grab_cookie.html#grab.cookie.CookieManager.load_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load cookies from the file.</span>
+
+<span class="sd">        Content of file should be a JSON-serialized list of dicts.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">inf</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">inf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="n">extra</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">extra</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CookieManager.get_dict"><a class="viewcode-back" href="../../api/grab_cookie.html#grab.cookie.CookieManager.get_dict">[docs]</a>    <span class="k">def</span> <span class="nf">get_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cookie</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cookiejar</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cookie</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">COOKIE_ATTRS</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="CookieManager.save_to_file"><a class="viewcode-back" href="../../api/grab_cookie.html#grab.cookie.CookieManager.save_to_file">[docs]</a>    <span class="k">def</span> <span class="nf">save_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dump all cookies to file.</span>
+
+<span class="sd">        Cookies are dumped as JSON-serialized dict of keys and values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_dict</span><span class="p">()))</span></div>
+
+    <span class="k">def</span> <span class="nf">get_cookie_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param req: object with httplib.Request interface</span>
+<span class="sd">            Actually, it have to have `url` and `headers` attributes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mocked_req</span> <span class="o">=</span> <span class="n">MockRequest</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cookiejar</span><span class="o">.</span><span class="n">add_cookie_header</span><span class="p">(</span><span class="n">mocked_req</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mocked_req</span><span class="o">.</span><span class="n">get_new_headers</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Cookie&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/file_uploading.html">File Uploading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/grab_base.html">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/grab_spider_base.html">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Grab’s documentation! &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Grab Installation" href="usage/installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Welcome to Grab’s documentation!</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="welcome-to-grab-s-documentation">
+<h1>Welcome to Grab’s documentation!<a class="headerlink" href="#welcome-to-grab-s-documentation" title="Permalink to this heading"></a></h1>
+<section id="useful-links">
+<h2>Useful Links<a class="headerlink" href="#useful-links" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Source code: <a class="reference external" href="https://github.com/lorien/grab">https://github.com/lorien/grab</a></p></li>
+<li><p>Documentation: <a class="reference external" href="https://grab.readthedocs.io/en/latest/">https://grab.readthedocs.io/en/latest/</a></p></li>
+<li><p>Russian Web Scraping Chat Group: <a class="reference external" href="https://t.me/grablab_ru">https://t.me/grablab_ru</a></p></li>
+<li><p>English Web Scraping Chat Group: <a class="reference external" href="https://t.me/grablab">https://t.me/grablab</a></p></li>
+</ul>
+</section>
+<section id="what-is-grab">
+<h2>What is Grab?<a class="headerlink" href="#what-is-grab" title="Permalink to this heading"></a></h2>
+<p>Grab is a python framework for building web scrapers. With Grab you can build
+web scrapers of various complexity, from simple 5-line scripts to complex
+asynchronous website crawlers processing millions of web pages. Grab provides
+an API for performing network requests and for handling the received content
+e.g.  interacting with DOM tree of the HTML document.</p>
+<p>There are two main parts in the Grab library:</p>
+<blockquote>
+<div><p>1) The single request/response API that allows you to build network
+request, perform it and work with the received content. The API is built
+on top of urllib3 and lxml libraries.</p>
+<p>2) The Spider API to build asynchronous web crawlers. You write classes
+that define handlers for each type of network request. Each handler is able
+to spawn new network requests. Network requests are processed concurrently
+with a pool of asynchronous web sockets.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="table-of-contents">
+<h1>Table of Contents<a class="headerlink" href="#table-of-contents" title="Permalink to this heading"></a></h1>
+<section id="grab-user-manual">
+<span id="grab-toc"></span><h2>Grab User Manual<a class="headerlink" href="#grab-user-manual" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Grab Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/installation.html#installation-on-linux">Installation on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/installation.html#installation-on-windows">Installation on Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/installation.html#installation-on-macos">Installation on MacOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/installation.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/testing.html">Testing Grab Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/testing.html#building-test-environment">Building test environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/testing.html#fastest-way-to-run-all-grab-tests">Fastest way to run all Grab tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/testing.html#classic-way-to-run-tests">Classic way to run tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/testing.html#github-testing">Github Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/testing.html#test-coverage">Test Coverage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/testing.html#linters">Linters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/quickstart.html">Grab Quickstart</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/quickstart.html#make-a-request">Make a request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/quickstart.html#creating-post-requests">Creating POST requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/quickstart.html#response-content">Response Content</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/quickstart.html#response-status-code">Response Status Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/request_method.html">Request Methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/request_method.html#get-request">GET Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/request_method.html#post-request">POST Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/request_method.html#put-request">PUT Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/request_method.html#other-methods">Other Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/request_setup.html">Setting up the Grab Request</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/request_setup.html#grab-config-object">Grab Config Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/request_setup.html#grab-instance-cloning">Grab Instance Cloning</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/settings.html">Grab Settings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/settings.html#network-options">Network options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/settings.html#proxy-options">Proxy Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/settings.html#response-processing-options">Response Processing Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/settings.html#debugging">Debugging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/debugging.html">Debugging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/debugging.html#using-the-logging-module">Using the logging module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/debugging.html#logging-messages-about-network-request">Logging messages about network request</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/request_headers.html">Work with HTTP Headers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/request_headers.html#custom-headers">Custom headers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/redirect.html">Redirect Handling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/redirect.html#http-301-302-redirect">HTTP 301/302 Redirect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/redirect.html#original-and-destination-urls">Original and Destination URLs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab/network_errors.html">Network Errors Handling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/network_errors.html#network-errors">Network Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/network_errors.html#network-timeout">Network Timeout</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/encoding.html">HTML Document Encoding</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/encoding.html#why-does-encoding-matter">Why does encoding matter?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/encoding.html#encoding-detection-algorithm">Encoding Detection Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/encoding.html#setting-the-encoding-manually">Setting the encoding manually</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/cookies.html">Cookie Support</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/cookies.html#custom-cookies">Custom Cookies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/proxy.html">Proxy Server Support</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/proxy.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/proxy.html#proxy-list-support">Proxy List Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/proxy.html#automatic-proxy-rotation">Automatic Proxy Rotation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/proxy.html#getting-proxy-from-proxy-list">Getting Proxy From Proxy List</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/response_search.html">Searching the response body</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/response_search.html#string-search">String search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/response_search.html#regexp-search">Regexp Search</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/response.html">Work With Network Response</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/response.html#response-object">Response Object</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grab/transport.html">Network Transport</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grab/transport.html#urllib3-transport">Urllib3 transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grab/transport.html#use-your-own-transport">Use your own transport</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="grab-spider-user-manual">
+<span id="spider-toc"></span><h2>Grab::Spider User Manual<a class="headerlink" href="#grab-spider-user-manual" title="Permalink to this heading"></a></h2>
+<p>Grab::Spider is a framework to build well-structured asynchronous web-site
+crawlers.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spider/task.html">Task Object</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spider/task.html#constructor-of-task-class">Constructor of Task Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spider/task.html#task-object-as-data-storage">Task Object as Data Storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spider/task.html#cloning-task-object">Cloning Task Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spider/task.html#setting-up-initial-tasks">Setting Up Initial Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spider/task.html#explicit-ways-to-add-new-task">Explicit Ways to Add New Task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spider/task.html#default-grab-instance">Default Grab Instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spider/task.html#updating-any-grab-instance">Updating Any Grab Instance</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spider/task_queue.html">Task Queue</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spider/task_queue.html#task-priorities">Task Priorities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spider/task_queue.html#tasks-queue-backends">Tasks Queue Backends</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spider/error_handling.html">Spider Error Handling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spider/error_handling.html#rules-of-network-request-handling">Rules of Network Request Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spider/error_handling.html#network-errors">Network Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spider/error_handling.html#handling-of-failed-tasks">Handling of Failed Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spider/error_handling.html#manual-processing-of-failed-tasks">Manual Processing of Failed Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spider/error_handling.html#error-statistics">Error Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spider/transport.html">Explanation</a></li>
+</ul>
+</div>
+</section>
+<section id="api-reference">
+<span id="api-toc"></span><h2>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this heading"></a></h2>
+<p>Using the API Reference you can get an overview of what modules, classes, and
+methods exist, what they do, what they return, and what parameters they accept.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/grab/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="usage/installation.html" class="btn btn-neutral float-right" title="Grab Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

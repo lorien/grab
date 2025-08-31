@@ -1,0 +1,27 @@
+:py:mod:`grab.spider.service.task_generator`
+============================================
+
+.. py:module:: grab.spider.service.task_generator
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.service.task_generator.TaskGeneratorService
+
+
+
+
+.. py:class:: TaskGeneratorService(fatal_error_queue: queue.Queue[grab.spider.interface.FatalErrorQueueItem], real_generator: collections.abc.Iterator[grab.spider.task.Task], thread_number: int, get_task_queue: collections.abc.Callable[[], grab.spider.queue_backend.base.BaseTaskQueue], parser_service: grab.spider.service.parser.ParserService, task_dispatcher: grab.spider.service.task_dispatcher.TaskDispatcherService)
+
+   Bases: :py:obj:`grab.spider.service.base.BaseService`
+
+   .. py:method:: worker_callback(worker: grab.spider.service.base.ServiceWorker) -> None
+
+
+

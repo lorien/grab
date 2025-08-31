@@ -1,0 +1,36 @@
+:py:mod:`grab.spider.service.parser`
+====================================
+
+.. py:module:: grab.spider.service.parser
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.service.parser.ParserService
+
+
+
+
+.. py:class:: ParserService(fatal_error_queue: queue.Queue[grab.spider.interface.FatalErrorQueueItem], pool_size: int, task_dispatcher: grab.spider.service.task_dispatcher.TaskDispatcherService, stat: procstat.Stat, parser_requests_per_process: int, find_task_handler: collections.abc.Callable[[grab.spider.task.Task], collections.abc.Callable[Ellipsis, None]])
+
+   Bases: :py:obj:`grab.spider.service.base.BaseService`
+
+   .. py:method:: check_pool_health() -> None
+
+
+   .. py:method:: supervisor_callback(worker: grab.spider.service.base.ServiceWorker) -> None
+
+
+   .. py:method:: worker_callback(worker: grab.spider.service.base.ServiceWorker) -> None
+
+
+   .. py:method:: execute_task_handler(handler: collections.abc.Callable[[grab.base.Grab, grab.spider.task.Task], None], result: grab.spider.service.network.NetworkResult, task: grab.spider.task.Task) -> None
+
+
+

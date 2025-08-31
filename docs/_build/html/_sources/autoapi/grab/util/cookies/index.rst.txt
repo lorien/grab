@@ -1,0 +1,121 @@
+:py:mod:`grab.util.cookies`
+===========================
+
+.. py:module:: grab.util.cookies
+
+.. autoapi-nested-parse::
+
+   This module provides things to operate with cookies.
+
+   Manuals:
+
+   * http://docs.python.org/2/library/cookielib.html#cookie-objects
+
+   Some code got from
+       https://github.com/kennethreitz/requests/blob/master/requests/cookies.py
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.util.cookies.MockRequest
+   grab.util.cookies.MockResponse
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.util.cookies.create_cookie
+   grab.util.cookies.build_cookie_header
+
+
+
+.. py:class:: MockRequest(url: str, headers: dict[str, str])
+
+   Wraps a `requests.Request` to mimic a `urllib2.Request`.
+
+   The code in `cookielib.CookieJar` expects this interface in order to
+   correctly manage cookie policies, i.e., determine whether a cookie can be
+   set, given the domains of the request and the cookie.
+   The original request object is read-only. The client is responsible for
+   collecting the new headers via `get_new_headers()` and interpreting them
+   appropriately. You probably want `get_cookie_header`, defined below.
+
+   .. py:property:: unverifiable
+      :type: bool
+
+
+   .. py:property:: origin_req_host
+      :type: str
+
+
+   .. py:property:: host
+      :type: str
+
+
+   .. py:method:: get_type() -> str
+
+
+   .. py:method:: get_host() -> str
+
+
+   .. py:method:: get_origin_req_host() -> str
+
+
+   .. py:method:: get_full_url() -> str
+
+
+   .. py:method:: is_unverifiable() -> bool
+
+
+   .. py:method:: has_header(name: str) -> bool
+
+
+   .. py:method:: get_header(name: str, default: Any = None) -> str
+
+
+   .. py:method:: add_header(key: str, val: str) -> None
+      :abstractmethod:
+
+      Cookielib has no legitimate use for this method.
+
+      Add it back if you find one.
+
+
+   .. py:method:: add_unredirected_header(name: str, value: str) -> None
+
+
+   .. py:method:: get_new_headers() -> dict[str, str]
+
+
+
+.. py:class:: MockResponse(headers: HTTPMessage | HTTPHeaderDict)
+
+   Wraps a `httplib.HTTPMessage` to mimic a `urllib.addinfourl`.
+
+   ...what? Basically, expose the parsed HTTP headers from the server response
+   the way `cookielib` expects to see them.
+
+   .. py:method:: info() -> HTTPMessage | HTTPHeaderDict
+
+
+
+.. py:function:: create_cookie(*, name: str, value: str, domain: str, comment: None | str = None, comment_url: None | str = None, discard: bool = True, domain_initial_dot: None | bool = None, domain_specified: None | bool = None, expires: None | int = None, path: str = '/', path_specified: None | bool = None, port: None | int = None, port_specified: None | bool = None, rest: None | dict[str, Any] = None, rfc2109: bool = False, secure: bool = False, version: int = 0, httponly: None | bool = None) -> http.cookiejar.Cookie
+
+   Create cookielib.Cookie instance.
+
+
+.. py:function:: build_cookie_header(cookiejar: http.cookiejar.CookieJar, url: str, headers: dict[str, str]) -> None | str
+
+   Build HTTP Cookie header value for given cookies.
+
+

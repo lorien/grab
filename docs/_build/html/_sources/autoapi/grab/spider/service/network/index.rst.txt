@@ -1,0 +1,53 @@
+:py:mod:`grab.spider.service.network`
+=====================================
+
+.. py:module:: grab.spider.service.network
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.service.network.BaseNetworkService
+   grab.spider.service.network.NetworkServiceThreaded
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.service.network.NetworkResult
+
+
+.. py:data:: NetworkResult
+   
+
+   
+
+.. py:class:: BaseNetworkService
+
+   Bases: :py:obj:`grab.spider.service.base.BaseService`
+
+   .. py:method:: get_active_threads_number() -> int
+      :abstractmethod:
+
+
+
+.. py:class:: NetworkServiceThreaded(fatal_error_queue: queue.Queue[grab.spider.interface.FatalErrorQueueItem], thread_number: int, process_task: collections.abc.Callable[[grab.spider.task.Task], None], get_task_from_queue: collections.abc.Callable[[], None | Literal[True] | Task])
+
+   Bases: :py:obj:`BaseNetworkService`
+
+   .. py:method:: get_active_threads_number() -> int
+
+
+   .. py:method:: worker_callback(worker: grab.spider.service.base.ServiceWorker) -> None
+
+
+

@@ -1,0 +1,324 @@
+:py:mod:`grab.spider`
+=====================
+
+.. py:module:: grab.spider
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   queue_backend/index.rst
+   service/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   base/index.rst
+   errors/index.rst
+   interface/index.rst
+   task/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.Spider
+   grab.spider.Task
+
+
+
+
+.. py:class:: Spider(task_queue: None | BaseTaskQueue = None, thread_number: None | int = None, network_try_limit: None | int = None, task_try_limit: None | int = None, priority_mode: str = 'random', meta: None | dict[str, Any] = None, config: None | dict[str, Any] = None, parser_requests_per_process: int = 10000, parser_pool_size: int = 1, network_service: None | BaseNetworkService = None, grab_transport: None | BaseTransport | type[BaseTransport] = None)
+
+   Asynchronous scraping framework.
+
+   .. py:attribute:: spider_name
+      
+
+      
+
+   .. py:attribute:: initial_urls
+      :annotation: :list[str] = []
+
+      
+
+   .. py:method:: collect_runtime_event(name: str, value: None | str) -> None
+
+
+   .. py:method:: setup_queue(*_args: Any, **_kwargs: Any) -> None
+
+      Set up queue.
+
+
+   .. py:method:: add_task(task: grab.spider.task.Task, queue: None | BaseTaskQueue = None, raise_error: bool = False) -> bool
+
+      Add task to the task queue.
+
+
+   .. py:method:: stop() -> None
+
+      Instruct spider to stop processing new tasks and start shutting down.
+
+
+   .. py:method:: load_proxylist(source: str | BaseProxySource, source_type: None | str = None, proxy_type: str = 'http', auto_init: bool = True, auto_change: bool = True) -> None
+
+      Load proxy list.
+
+      :param source: Proxy source.
+          Accepts string (file path, url) or ``BaseProxySource`` instance.
+      :param source_type: The type of the specified source.
+          Should be one of the following: 'text_file' or 'url'.
+      :param proxy_type:
+          Should be one of the following: 'socks4', 'socks5' or'http'.
+      :param auto_change:
+          If set to `True` then automatically random proxy rotation
+          will be used.
+
+      Proxy source format should be one of the following (for each line):
+      - ip:port
+      - ip:port:login:password
+
+
+   .. py:method:: render_stats() -> str
+
+
+   .. py:method:: prepare() -> None
+
+      Do additional spider customization here.
+
+      This method runs before spider has started working.
+
+
+   .. py:method:: shutdown() -> None
+
+      Override this method to do some final actions after parsing has been done.
+
+
+   .. py:method:: update_grab_instance(grab: grab.base.Grab) -> None
+
+      Update config of any `Grab` instance created by the spider.
+
+      WTF it means?
+
+
+   .. py:method:: create_grab_instance(**kwargs: Any) -> grab.base.Grab
+
+
+   .. py:method:: task_generator() -> collections.abc.Iterator[grab.spider.task.Task]
+
+      You can override this method to load new tasks.
+
+      It will be used each time as number of tasks
+      in task queue is less then number of threads multiplied on 2
+      This allows you to not overload all free memory if total number of
+      tasks is big.
+
+
+   .. py:method:: check_task_limits(task: grab.spider.task.Task) -> tuple[bool, str]
+
+      Check that task's network & try counters do not exceed limits.
+
+      Returns:
+      * if success: (True, None)
+      * if error: (False, reason)
+
+
+
+   .. py:method:: generate_task_priority() -> int
+
+
+   .. py:method:: process_initial_urls() -> None
+
+
+   .. py:method:: get_task_from_queue() -> None | Literal[True] | Task
+
+
+   .. py:method:: setup_grab_for_task(task: grab.spider.task.Task) -> grab.base.Grab
+
+
+   .. py:method:: is_valid_network_response_code(code: int, task: grab.spider.task.Task) -> bool
+
+      Test if response is valid.
+
+      Valid response is handled with associated task handler.
+      Failed respoosne is processed with error handler.
+
+
+   .. py:method:: process_parser_error(func_name: str, task: grab.spider.task.Task, exc_info: tuple[type[Exception], Exception, types.TracebackType]) -> None
+
+
+   .. py:method:: find_task_handler(task: grab.spider.task.Task) -> collections.abc.Callable[Ellipsis, Any]
+
+
+   .. py:method:: log_network_result_stats(res: grab.spider.service.network.NetworkResult, task: grab.spider.task.Task) -> None
+
+
+   .. py:method:: process_grab_proxy(task: grab.spider.task.Task, grab: grab.base.Grab) -> None
+
+      Assign new proxy from proxylist to the task.
+
+
+   .. py:method:: change_active_proxy(task: grab.spider.task.Task, grab: grab.base.Grab) -> None
+
+
+   .. py:method:: get_task_queue() -> grab.spider.queue_backend.base.BaseTaskQueue
+
+
+   .. py:method:: is_idle_estimated() -> bool
+
+
+   .. py:method:: is_idle_confirmed(services: list[grab.spider.service.base.BaseService]) -> bool
+
+      Test if spider is fully idle.
+
+      WARNING: As side effect it stops all services to get state of queues
+      anaffected by sercies.
+
+      Spider is full idle when all conditions are met:
+      * all services are paused i.e. the do not change queues
+      * all queues are empty
+      * task generator is completed
+
+
+   .. py:method:: run() -> None
+
+
+   .. py:method:: shutdown_services(services: list[grab.spider.service.base.BaseService]) -> None
+
+
+   .. py:method:: log_failed_network_result(res: grab.spider.service.network.NetworkResult) -> None
+
+
+   .. py:method:: log_rejected_task(task: grab.spider.task.Task, reason: str) -> None
+
+
+   .. py:method:: get_fallback_handler(task: grab.spider.task.Task) -> None | Callable[..., Any]
+
+
+   .. py:method:: srv_process_service_result(result: Task | None | Exception | dict[str, Any], task: grab.spider.task.Task, meta: None | dict[str, Any] = None) -> None
+
+      Process result submitted from any service to task dispatcher service.
+
+      Result could be:
+      * Task
+      * None
+      * Task instance
+      * ResponseNotValid-based exception
+      * Arbitrary exception
+      * Network response:
+          {ok, ecode, emsg, exc, grab, grab_config_backup}
+
+      Exception can come only from parser_service and it always has
+      meta {"from": "parser", "exc_info": <...>}
+
+
+   .. py:method:: srv_process_network_result(result: grab.spider.service.network.NetworkResult, task: grab.spider.task.Task) -> None
+
+
+   .. py:method:: srv_process_task(task: grab.spider.task.Task) -> None
+
+
+
+.. py:exception:: SpiderError
+
+   Bases: :py:obj:`grab.errors.GrabError`
+
+   Base class for Spider exceptions.
+
+
+.. py:exception:: SpiderMisuseError
+
+   Bases: :py:obj:`SpiderError`
+
+   Improper usage of Spider framework.
+
+
+.. py:exception:: FatalError
+
+   Bases: :py:obj:`SpiderError`
+
+   Fatal error which should stop parsing process.
+
+
+.. py:exception:: SpiderInternalError
+
+   Bases: :py:obj:`SpiderError`
+
+   Raises when error throwned by internal spider logic.
+
+   Like spider class discovering, CLI error.
+
+
+.. py:exception:: NoTaskHandler
+
+   Bases: :py:obj:`SpiderError`
+
+   Raise when no handler found to process network response.
+
+
+.. py:exception:: NoDataHandler
+
+   Bases: :py:obj:`SpiderError`
+
+   Raise when no handler found to process Data object.
+
+
+.. py:class:: Task(name: None | str = None, url: None | str = None, grab: None | Grab = None, grab_config: None | GrabConfig = None, priority: None | int = None, priority_set_explicitly: bool = True, network_try_count: int = 0, task_try_count: int = 1, valid_status: None | list[int] = None, use_proxylist: bool = True, delay: None | int = None, raw: bool = False, callback: None | Callable[..., None] = None, fallback_name: None | str = None, store: None | dict[str, Any] = None, disable_cache: bool = False, refresh_cache: bool = False, cache_timeout: None | int = None, **kwargs: Any)
+
+   Bases: :py:obj:`BaseTask`
+
+   Task for spider.
+
+   .. py:method:: process_init_url_grab_options(url: None | str, grab: None | Grab, grab_config: None | GrabConfig) -> None
+
+
+   .. py:method:: get(key: str, default: Any = None) -> Any
+
+      Return value of attribute or None if such attribute does not exist.
+
+
+   .. py:method:: process_delay_option(delay: None | float) -> None
+
+
+   .. py:method:: setup_grab_config(grab_config: grab.types.GrabConfig) -> None
+
+
+   .. py:method:: test_clone_options_integrity(url: None | str, grab: None | Grab, grab_config: None | GrabConfig) -> None
+
+
+   .. py:method:: clone(**kwargs: Any) -> Task
+
+      Clone Task instance.
+
+      Reset network_try_count, increase task_try_count.
+      Reset priority attribute if it was not set explicitly.
+
+
+   .. py:method:: __repr__() -> str
+
+      Return repr(self).
+
+
+   .. py:method:: __lt__(other: Task) -> bool
+
+      Return self<value.
+
+
+   .. py:method:: __eq__(other: object) -> bool
+
+      Return self==value.
+
+
+

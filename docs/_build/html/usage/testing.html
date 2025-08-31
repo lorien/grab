@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Testing Grab Framework &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Grab Quickstart" href="../grab/quickstart.html" />
+    <link rel="prev" title="Grab Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Grab Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Testing Grab Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#building-test-environment">Building test environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fastest-way-to-run-all-grab-tests">Fastest way to run all Grab tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#classic-way-to-run-tests">Classic way to run tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#github-testing">Github Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-coverage">Test Coverage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linters">Linters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Testing Grab Framework</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/testing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="testing-grab-framework">
+<span id="usage-testing"></span><h1>Testing Grab Framework<a class="headerlink" href="#testing-grab-framework" title="Permalink to this heading"></a></h1>
+<section id="building-test-environment">
+<h2>Building test environment<a class="headerlink" href="#building-test-environment" title="Permalink to this heading"></a></h2>
+<p>Run command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>make bootstrap
+</pre></div>
+</div>
+</section>
+<section id="fastest-way-to-run-all-grab-tests">
+<h2>Fastest way to run all Grab tests<a class="headerlink" href="#fastest-way-to-run-all-grab-tests" title="Permalink to this heading"></a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pytest -n30
+</pre></div>
+</div>
+</section>
+<section id="classic-way-to-run-tests">
+<h2>Classic way to run tests<a class="headerlink" href="#classic-way-to-run-tests" title="Permalink to this heading"></a></h2>
+<p>Run the commands:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./runtest.py --test-all --backend<span class="o">=</span>mongodb,redis,pyquery
+</pre></div>
+</div>
+<p>With runtestpy you can choose which set of tests to run. Available runtest.py options:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">test</span><span class="o">-</span><span class="n">grab</span> <span class="o">-</span> <span class="n">Grab</span> <span class="n">API</span> <span class="n">tests</span>
+<span class="o">--</span><span class="n">test</span><span class="o">-</span><span class="n">spider</span> <span class="o">-</span> <span class="n">Grab</span><span class="p">::</span><span class="n">Spider</span> <span class="n">API</span> <span class="n">tests</span>
+<span class="o">--</span><span class="n">test</span><span class="o">-</span><span class="nb">all</span> <span class="o">-</span> <span class="n">shortcut</span> <span class="n">to</span> <span class="n">run</span> <span class="n">both</span> <span class="n">Grab</span> <span class="ow">and</span> <span class="n">Grab</span><span class="p">::</span><span class="n">Spider</span> <span class="n">tests</span>
+<span class="o">--</span><span class="n">backend</span><span class="o">=</span><span class="n">redis</span> <span class="o">-</span> <span class="n">enable</span> <span class="n">tests</span> <span class="n">of</span> <span class="n">things</span> <span class="n">that</span> <span class="n">work</span> <span class="k">with</span> <span class="n">redis</span>
+<span class="o">--</span><span class="n">backend</span><span class="o">=</span><span class="n">mysql</span> <span class="o">-</span> <span class="n">enable</span> <span class="n">tests</span> <span class="n">of</span> <span class="n">things</span> <span class="n">that</span> <span class="n">work</span> <span class="k">with</span> <span class="n">mysql</span>
+<span class="o">--</span><span class="n">backend</span><span class="o">=</span><span class="n">mongodb</span> <span class="o">-</span> <span class="n">enable</span> <span class="n">tests</span> <span class="n">of</span> <span class="n">things</span> <span class="n">that</span> <span class="n">work</span> <span class="k">with</span> <span class="n">mongo</span>
+<span class="o">--</span><span class="n">backend</span><span class="o">=</span><span class="n">pyquery</span> <span class="o">-</span> <span class="n">enable</span> <span class="n">tests</span> <span class="n">of</span> <span class="n">things</span> <span class="n">that</span> <span class="n">work</span> <span class="k">with</span> <span class="n">pyquery</span>
+</pre></div>
+</div>
+<p>If you want to run specific test cases then use the <cite>-t</cite> option. For example:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./runtest.py -t test.grab_api
+</pre></div>
+</div>
+</section>
+<section id="github-testing">
+<span id="usage-testing-travis"></span><h2>Github Testing<a class="headerlink" href="#github-testing" title="Permalink to this heading"></a></h2>
+<p>The Grab project is configured to run the full set of tests for each new
+commit placed into the project repository. You can see the status of a recent
+commit and the status of all previous commits here: <a class="reference external" href="https://github.com/lorien/grab/actions">https://github.com/lorien/grab/actions</a></p>
+</section>
+<section id="test-coverage">
+<span id="usage-testing-coverage"></span><h2>Test Coverage<a class="headerlink" href="#test-coverage" title="Permalink to this heading"></a></h2>
+<p>To see test coverage just run full set of tests through pytest</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pytest -n30 -x --cov grab --cov-report term-missing
+</pre></div>
+</div>
+<p>You can use shortcut:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">pytest</span>
+</pre></div>
+</div>
+<p>The Grab project is configured to submit coverage statistics to the
+coveralls.io service after each test session is completed by travis-ci. You
+can see the coverage history at this URL: <a class="reference external" href="https://coveralls.io/github/lorien/grab">https://coveralls.io/github/lorien/grab</a></p>
+</section>
+<section id="linters">
+<h2>Linters<a class="headerlink" href="#linters" title="Permalink to this heading"></a></h2>
+<p>Run with:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>make check
+</pre></div>
+</div>
+<p>That will run mypy, pylint and flake8 linters.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Grab Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../grab/quickstart.html" class="btn btn-neutral float-right" title="Grab Quickstart" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

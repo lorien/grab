@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grab.document &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="grab.errors" href="../errors/index.html" />
+    <link rel="prev" title="grab.base_transport" href="../base_transport/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../base/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.base</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../base_transport/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.base_transport</span></code></a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.document</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../errors/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.errors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../request/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.request</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../response/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.response</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../transport/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.transport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../types/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.types</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.document</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/grab/document/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-grab.document">
+<span id="grab-document"></span><h1><a class="reference internal" href="#module-grab.document" title="grab.document"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.document</span></code></a><a class="headerlink" href="#module-grab.document" title="Permalink to this heading"></a></h1>
+<p>The Document class is the result of network request made with Grab instance.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grab.document.Document" title="grab.document.Document"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Document</span></code></a></p></td>
+<td><p>Network response.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grab.document.normalize_pairs" title="grab.document.normalize_pairs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_pairs</span></code></a>(→ collections.abc.Sequence[tuple[str, ...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grab.document.THREAD_STORAGE" title="grab.document.THREAD_STORAGE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">THREAD_STORAGE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grab.document.logger" title="grab.document.logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logger</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="grab.document.THREAD_STORAGE">
+<span class="sig-prename descclassname"><span class="pre">grab.document.</span></span><span class="sig-name descname"><span class="pre">THREAD_STORAGE</span></span><a class="reference internal" href="../../../_modules/grab/document.html#THREAD_STORAGE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.THREAD_STORAGE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="grab.document.logger">
+<span class="sig-prename descclassname"><span class="pre">grab.document.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="reference internal" href="../../../_modules/grab/document.html#logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.logger" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="grab.document.normalize_pairs">
+<span class="sig-prename descclassname"><span class="pre">grab.document.</span></span><span class="sig-name descname"><span class="pre">normalize_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#normalize_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.normalize_pairs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grab.document.Document">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.document.</span></span><span class="sig-name descname"><span class="pre">Document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">document_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'html'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">head</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">email.message.Message</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cookies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">CookieJar</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/grab/document.html#Document"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document" title="Permalink to this definition"></a></dt>
+<dd><p>Network response.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="grab.document.Document.status">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></em><a class="reference internal" href="../../../_modules/grab/document.html#Document.status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.status" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="grab.document.Document.json">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">json</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="reference internal" href="../../../_modules/grab/document.html#Document.json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.json" title="Permalink to this definition"></a></dt>
+<dd><p>Return response body deserialized into JSON object.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="grab.document.Document.pyquery">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pyquery</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="reference internal" href="../../../_modules/grab/document.html#Document.pyquery"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.pyquery" title="Permalink to this definition"></a></dt>
+<dd><p>Return pyquery handler.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="grab.document.Document.body">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">body</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="reference internal" href="../../../_modules/grab/document.html#Document.body"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.body" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="grab.document.Document.tree">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tree</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">lxml.etree._Element</span></em><a class="reference internal" href="../../../_modules/grab/document.html#Document.tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.tree" title="Permalink to this definition"></a></dt>
+<dd><p>Return DOM tree of the document built with HTML DOM builder.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="grab.document.Document.form">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">lxml.html.FormElement</span></em><a class="reference internal" href="../../../_modules/grab/document.html#Document.form"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.form" title="Permalink to this definition"></a></dt>
+<dd><p>Return default document’s form.</p>
+<p>If form was not selected manually then select the form
+which has the biggest number of input elements.</p>
+<p>The form value is just an <cite>lxml.html</cite> form element.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;some URL&#39;</span><span class="p">)</span>
+<span class="c1"># Choose form automatically</span>
+<span class="nb">print</span> <span class="n">g</span><span class="o">.</span><span class="n">form</span>
+
+<span class="c1"># And now choose form manually</span>
+<span class="n">g</span><span class="o">.</span><span class="n">choose_form</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span> <span class="n">g</span><span class="o">.</span><span class="n">form</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grab.document.Document.__slots__">
+<span class="sig-name descname"><span class="pre">__slots__</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">['document_type',</span> <span class="pre">'code',</span> <span class="pre">'head',</span> <span class="pre">'_bytes_body',</span> <span class="pre">'headers',</span> <span class="pre">'url',</span> <span class="pre">'cookies',</span> <span class="pre">'encoding',...</span></em><a class="reference internal" href="../../../_modules/grab/document.html#Document.__slots__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.__slots__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">selection.SelectorList</span><span class="p"><span class="pre">[</span></span><span class="pre">lxml.etree._Element</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.__call__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">selection.SelectorList</span><span class="p"><span class="pre">[</span></span><span class="pre">lxml.etree._Element</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.select" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.process_encoding">
+<span class="sig-name descname"><span class="pre">process_encoding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.process_encoding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.process_encoding" title="Permalink to this definition"></a></dt>
+<dd><p>Process explicitly defined encoding or auto-detect it.</p>
+<p>If encoding is explicitly defined, ensure it is a valid encoding the python
+can deal with. If encoding is not specified, auto-detect it.</p>
+<p>Raises unicodec.InvalidEncodingName if explicitly set encoding is invalid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#grab.document.Document" title="grab.document.Document"><span class="pre">Document</span></a></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.copy" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.save" title="Permalink to this definition"></a></dt>
+<dd><p>Save response body to file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.url_details">
+<span class="sig-name descname"><span class="pre">url_details</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">urllib.parse.SplitResult</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.url_details"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.url_details" title="Permalink to this definition"></a></dt>
+<dd><p>Return result of urlsplit function applied to response url.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.query_param">
+<span class="sig-name descname"><span class="pre">query_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.query_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.query_param" title="Permalink to this definition"></a></dt>
+<dd><p>Return value of parameter in query string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.browse">
+<span class="sig-name descname"><span class="pre">browse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.browse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.browse" title="Permalink to this definition"></a></dt>
+<dd><p>Save response in temporary file and open it in GUI browser.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.__getstate__">
+<span class="sig-name descname"><span class="pre">__getstate__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.__getstate__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.__getstate__" title="Permalink to this definition"></a></dt>
+<dd><p>Reset cached lxml objects which could not be pickled.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.__setstate__">
+<span class="sig-name descname"><span class="pre">__setstate__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.__setstate__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.__setstate__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.text_search">
+<span class="sig-name descname"><span class="pre">text_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">anchor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.text_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.text_search" title="Permalink to this definition"></a></dt>
+<dd><p>Search the substring in response body.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>anchor</strong> – string to search</p></li>
+<li><p><strong>byte</strong> – if False then <cite>anchor</cite> should be the
+unicode string, and search will be performed in
+<cite>response.unicode_body()</cite> else <cite>anchor</cite> should be the byte-string
+and search will be performed in <cite>response.body</cite></p></li>
+</ul>
+</dd>
+</dl>
+<p>If substring is found return True else False.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.text_assert">
+<span class="sig-name descname"><span class="pre">text_assert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">anchor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.text_assert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.text_assert" title="Permalink to this definition"></a></dt>
+<dd><p>If <cite>anchor</cite> is not found then raise <cite>DataNotFound</cite> exception.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.text_assert_any">
+<span class="sig-name descname"><span class="pre">text_assert_any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">anchors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.text_assert_any"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.text_assert_any" title="Permalink to this definition"></a></dt>
+<dd><p>If no <cite>anchors</cite> were found then raise <cite>DataNotFound</cite> exception.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.rex_text">
+<span class="sig-name descname"><span class="pre">rex_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regexp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Pattern</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Pattern</span><span class="p"><span class="pre">[</span></span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">NULL</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.rex_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.rex_text" title="Permalink to this definition"></a></dt>
+<dd><p>Return content of first matching group of regexp found in response body.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.rex_search">
+<span class="sig-name descname"><span class="pre">rex_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regexp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Pattern</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Pattern</span><span class="p"><span class="pre">[</span></span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">NULL</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.rex_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.rex_search" title="Permalink to this definition"></a></dt>
+<dd><p>Search the regular expression in response body.</p>
+<p>Return found match object or None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.rex_assert">
+<span class="sig-name descname"><span class="pre">rex_assert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Pattern</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Pattern</span><span class="p"><span class="pre">[</span></span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.rex_assert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.rex_assert" title="Permalink to this definition"></a></dt>
+<dd><p>Raise <cite>DataNotFound</cite> exception if <cite>rex</cite> expression is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.get_body_chunk">
+<span class="sig-name descname"><span class="pre">get_body_chunk</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.get_body_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.get_body_chunk" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.unicode_body">
+<span class="sig-name descname"><span class="pre">unicode_body</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.unicode_body"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.unicode_body" title="Permalink to this definition"></a></dt>
+<dd><p>Return response body as unicode string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.set_body">
+<span class="sig-name descname"><span class="pre">set_body</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.set_body"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.set_body" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.wrap_io">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wrap_io</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">StringIO</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">BytesIO</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.wrap_io"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.wrap_io" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document._build_dom">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_build_dom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">lxml.etree._Element</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document._build_dom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document._build_dom" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.build_html_tree">
+<span class="sig-name descname"><span class="pre">build_html_tree</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">lxml.etree._Element</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.build_html_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.build_html_tree" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.build_xml_tree">
+<span class="sig-name descname"><span class="pre">build_xml_tree</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">lxml.etree._Element</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.build_xml_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.build_xml_tree" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.choose_form">
+<span class="sig-name descname"><span class="pre">choose_form</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.choose_form"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.choose_form" title="Permalink to this definition"></a></dt>
+<dd><p>Set the default form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> – number of form (starting from zero)</p></li>
+<li><p><strong>id</strong> – value of “id” attribute</p></li>
+<li><p><strong>name</strong> – value of “name” attribute</p></li>
+<li><p><strong>xpath</strong> – XPath query</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNotFound</span></code> if form not found</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">GrabMisuseError</span></code>
+if method is called without parameters</p>
+</dd>
+</dl>
+<p>Selected form will be available via <cite>form</cite> attribute of <cite>Grab</cite>
+instance. All form methods will work with default form.</p>
+<p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Select second form</span>
+<span class="n">g</span><span class="o">.</span><span class="n">choose_form</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Select by id</span>
+<span class="n">g</span><span class="o">.</span><span class="n">choose_form</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;register&quot;</span><span class="p">)</span>
+
+<span class="c1"># Select by name</span>
+<span class="n">g</span><span class="o">.</span><span class="n">choose_form</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;signup&quot;</span><span class="p">)</span>
+
+<span class="c1"># Select by xpath</span>
+<span class="n">g</span><span class="o">.</span><span class="n">choose_form</span><span class="p">(</span><span class="n">xpath</span><span class="o">=</span><span class="s1">&#39;//form[contains(@action, &quot;/submit&quot;)]&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.get_cached_form">
+<span class="sig-name descname"><span class="pre">get_cached_form</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">FormElement</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.get_cached_form"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.get_cached_form" title="Permalink to this definition"></a></dt>
+<dd><p>Get form which has been already selected.</p>
+<p>Returns None if form has not been selected yet.</p>
+<p>It is for testing mainly. To not trigger pylint warnings about
+accessing protected element.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.set_input">
+<span class="sig-name descname"><span class="pre">set_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.set_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.set_input" title="Permalink to this definition"></a></dt>
+<dd><p>Set the value of form element by its <cite>name</cite> attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – name of element</p></li>
+<li><p><strong>value</strong> – value which should be set to element</p></li>
+</ul>
+</dd>
+</dl>
+<p>To check/uncheck the checkbox pass boolean value.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s1">&#39;sex&#39;</span><span class="p">,</span> <span class="s1">&#39;male&#39;</span><span class="p">)</span>
+
+<span class="c1"># Check the checkbox</span>
+<span class="n">g</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s1">&#39;accept&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.set_input_by_id">
+<span class="sig-name descname"><span class="pre">set_input_by_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.set_input_by_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.set_input_by_id" title="Permalink to this definition"></a></dt>
+<dd><p>Set the value of form element by its <cite>id</cite> attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_id</strong> – id of element</p></li>
+<li><p><strong>value</strong> – value which should be set to element</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.set_input_by_number">
+<span class="sig-name descname"><span class="pre">set_input_by_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.set_input_by_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.set_input_by_number" title="Permalink to this definition"></a></dt>
+<dd><p>Set the value of form element by its number in the form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> – number of element</p></li>
+<li><p><strong>value</strong> – value which should be set to element</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.set_input_by_xpath">
+<span class="sig-name descname"><span class="pre">set_input_by_xpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.set_input_by_xpath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.set_input_by_xpath" title="Permalink to this definition"></a></dt>
+<dd><p>Set the value of form element by xpath.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xpath</strong> – xpath path</p></li>
+<li><p><strong>value</strong> – value which should be set to element</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.process_extra_post">
+<span class="sig-name descname"><span class="pre">process_extra_post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_post_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.process_extra_post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.process_extra_post" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.clean_submit_controls">
+<span class="sig-name descname"><span class="pre">clean_submit_controls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">submit_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.clean_submit_controls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.clean_submit_controls" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.get_form_request">
+<span class="sig-name descname"><span class="pre">get_form_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">submit_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_post</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_from_post</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.get_form_request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.get_form_request" title="Permalink to this definition"></a></dt>
+<dd><p>Submit default form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>submit_name</strong> – name of button which should be “clicked” to
+submit form</p></li>
+<li><p><strong>url</strong> – explicitly specify form action url</p></li>
+<li><p><strong>extra_post</strong> – (dict or list of pairs) additional form data which
+will override data automatically extracted from the form.</p></li>
+<li><p><strong>remove_from_post</strong> – list of keys to remove from the submitted data</p></li>
+</ul>
+</dd>
+</dl>
+<p>Following input elements are automatically processed:</p>
+<ul class="simple">
+<li><p>input[type=”hidden”] - default value</p></li>
+<li><p>select: value of last option</p></li>
+<li><p>radio - ???</p></li>
+<li><p>checkbox - ???</p></li>
+</ul>
+<p>Multipart forms are correctly recognized by grab library.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.build_fields_to_remove">
+<span class="sig-name descname"><span class="pre">build_fields_to_remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">form_inputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">lxml.html.HtmlElement</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.build_fields_to_remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.build_fields_to_remove" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.process_form_fields">
+<span class="sig-name descname"><span class="pre">process_form_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.process_form_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.process_form_fields" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.form_fields">
+<span class="sig-name descname"><span class="pre">form_fields</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">lxml.html.HtmlElement</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.form_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.form_fields" title="Permalink to this definition"></a></dt>
+<dd><p>Return fields of default form.</p>
+<p>Fill some fields with reasonable values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.document.Document.choose_form_by_element">
+<span class="sig-name descname"><span class="pre">choose_form_by_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/grab/document.html#Document.choose_form_by_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.document.Document.choose_form_by_element" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../base_transport/index.html" class="btn btn-neutral float-left" title="grab.base_transport" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../errors/index.html" class="btn btn-neutral float-right" title="grab.errors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

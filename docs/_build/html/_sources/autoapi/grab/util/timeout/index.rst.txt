@@ -1,0 +1,66 @@
+:py:mod:`grab.util.timeout`
+===========================
+
+.. py:module:: grab.util.timeout
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.util.timeout.UndefinedParam
+   grab.util.timeout.Timeout
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.util.timeout.UNDEFINED_PARAM
+   grab.util.timeout.DEFAULT_TOTAL_TIMEOUT
+
+
+.. py:class:: UndefinedParam
+
+   Bases: :py:obj:`enum.Enum`
+
+   Generic enumeration.
+
+   Derive from this class to define new enumerations.
+
+   .. py:attribute:: value
+      
+
+      
+
+
+.. py:data:: UNDEFINED_PARAM
+   :annotation: :UndefinedParam
+
+   
+
+.. py:data:: DEFAULT_TOTAL_TIMEOUT
+   
+
+   
+
+.. py:class:: Timeout(total: None | float | UndefinedParam = UNDEFINED_PARAM, connect: None | float | UndefinedParam = UNDEFINED_PARAM, read: None | float | UndefinedParam = UNDEFINED_PARAM)
+
+   .. py:attribute:: __slots__
+      :annotation: = ['total', 'connect', 'read']
+
+      
+
+   .. py:method:: __repr__() -> str
+
+      Return repr(self).
+
+
+

@@ -1,0 +1,10 @@
+{% extends '!layout.html' %}
+
+{% block footer %}
+    {{ super() }}
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://grablab.io">GrabLab</a> - web scraping and data mining services.</p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">He also does web scraping: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+    <!-- Yandex.Metrika counter --> <script type="text/javascript" > (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter13841917 = new Ya.Metrika({ id:13841917, clickmap:true, trackLinks:true, accurateTrackBounce:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/13841917" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
+
+{% endblock %}

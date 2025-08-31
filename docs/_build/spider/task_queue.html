@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Task Queue &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Spider Cache" href="cache.html" />
+    <link rel="prev" title="Task Object" href="task.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="task-queue">
+<span id="spider-task-queue"></span><h1>Task Queue<a class="headerlink" href="#task-queue" title="Permalink to this headline">¶</a></h1>
+<section id="task-priorities">
+<span id="spider-task-priority"></span><h2>Task Priorities<a class="headerlink" href="#task-priorities" title="Permalink to this headline">¶</a></h2>
+<p>All new tasks are places into task queue. The Spider get tasks from task queue
+when there are free network streams. Each task has priority. Lower number means
+higher priority. Task are processed in the order of their priorities: from
+highest to lowest. If you do not specify the priority for the new task then it
+is assigned automatically. There are two algorithms of assigning default task
+priorities:</p>
+<dl class="field-list simple">
+<dt class="field-odd">random</dt>
+<dd class="field-odd"><p>random priorities</p>
+</dd>
+<dt class="field-even">const</dt>
+<dd class="field-even"><p>same priority for all tasks</p>
+</dd>
+</dl>
+<p>By default random priorities are used. You can control the algorithm of default
+priorities with <cite>priority_mode</cite> argument:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">(</span><span class="n">priority_mode</span><span class="o">=</span><span class="s1">&#39;const&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="tasks-queue-backends">
+<span id="spider-task-backend"></span><h2>Tasks Queue Backends<a class="headerlink" href="#tasks-queue-backends" title="Permalink to this headline">¶</a></h2>
+<p>You can choose the storage for the task queue. By default, Spider uses python
+<cite>PriorityQueue</cite> as storage. In other words, the storage is memory. You can
+also used redis and mongo backends.</p>
+<p>In-memory backend:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">()</span>
+<span class="n">bot</span><span class="o">.</span><span class="n">setup_queue</span><span class="p">()</span> <span class="c1"># очередь в памяти</span>
+<span class="c1"># OR (that is the same)</span>
+<span class="n">bot</span><span class="o">.</span><span class="n">setup_queue</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">&#39;memory&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>MongoDB backend:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">()</span>
+<span class="n">bot</span><span class="o">.</span><span class="n">setup_queue</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">&#39;mongo&#39;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s1">&#39;database-name&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All arguments except <cite>backend</cite> go to MongoDB connection constructor. You
+can setup database name, host name, port, authorization arguments and other
+things.</p>
+<p>Redis backend:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">()</span>
+<span class="n">bot</span><span class="o">.</span><span class="n">setup_queue</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">&#39;redis&#39;</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">7777</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/file_uploading.html">File Uploading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Task Object</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Task Queue</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#task-priorities">Task Priorities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tasks-queue-backends">Tasks Queue Backends</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_base.html">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_base.html">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="task.html" title="previous chapter">Task Object</a></li>
+      <li>Next: <a href="cache.html" title="next chapter">Spider Cache</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/spider/task_queue.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

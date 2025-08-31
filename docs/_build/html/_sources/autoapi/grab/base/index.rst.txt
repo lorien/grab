@@ -1,0 +1,146 @@
+:py:mod:`grab.base`
+===================
+
+.. py:module:: grab.base
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.base.Grab
+
+
+
+
+.. py:class:: Grab(transport: None | BaseTransport | type[BaseTransport] = None, **kwargs: Any)
+
+   .. py:property:: doc
+      :type: None | Document
+
+
+   .. py:attribute:: __slots__
+      :annotation: = ['proxylist', 'config', 'transport', 'request_method', 'cookies', 'meta', '_doc']
+
+      
+
+   .. py:attribute:: document_class
+      :annotation: :type[grab.document.Document]
+
+      
+
+   .. py:attribute:: clonable_attributes
+      :annotation: = ['proxylist']
+
+      
+
+   .. py:method:: process_transport_option(transport: None | BaseTransport | type[BaseTransport], default_transport: type[grab.base_transport.BaseTransport]) -> grab.base_transport.BaseTransport
+
+
+   .. py:method:: clone(**kwargs: Any) -> Grab
+
+      Create clone of Grab instance.
+
+      Cloned instance will have the same state: cookies, referrer, response
+      document data
+
+      :param \\**kwargs: overrides settings of cloned grab instance
+
+
+   .. py:method:: dump_config() -> collections.abc.MutableMapping[str, Any]
+
+      Make clone of current config.
+
+
+   .. py:method:: load_config(config: grab.types.GrabConfig) -> None
+
+      Configure grab instance with external config object.
+
+
+   .. py:method:: setup(**kwargs: Any) -> None
+
+      Set up Grab instance configuration.
+
+
+   .. py:method:: prepare_request() -> grab.request.Request
+
+      Configure all things to make real network request.
+
+      This method is called before doing real request via transport extension.
+
+
+   .. py:method:: create_request_from_config(config: collections.abc.MutableMapping[str, Any]) -> grab.request.Request
+
+
+   .. py:method:: sync_cookie_manager_with_request_cookies(cookies: collections.abc.Mapping[str, Any], request_url: str) -> None
+
+
+   .. py:method:: log_request(req: grab.request.Request, extra: str = '') -> None
+
+      Send request details to logging system.
+
+
+   .. py:method:: find_redirect_url(doc: grab.document.Document) -> None | str
+
+
+   .. py:method:: request(url: None | str = None, **kwargs: Any) -> grab.document.Document
+
+      Perform network request.
+
+      You can specify grab settings in ``**kwargs``.
+      Any keyword argument will be passed to ``self.config``.
+
+      Returns: ``Document`` objects.
+
+
+   .. py:method:: submit(make_request: bool = True, **kwargs: Any) -> None | Document
+
+      Submit current form.
+
+      :param make_request: if `False` then grab instance will be
+          configured with form post data but request will not be
+          performed
+
+      For details see `Document.submit()` method
+
+
+   .. py:method:: process_request_result(req: grab.request.Request) -> grab.document.Document
+
+      Process result of real request performed via transport extension.
+
+
+   .. py:method:: reset_temporary_options() -> None
+
+
+   .. py:method:: change_proxy(random: bool = True) -> None
+
+      Set random proxy from proxylist.
+
+
+   .. py:method:: common_headers() -> dict[str, str]
+      :classmethod:
+
+      Build headers which sends typical browser.
+
+
+   .. py:method:: make_url_absolute(url: str, resolve_base: bool = False) -> str
+
+      Make url absolute using previous request url as base url.
+
+
+   .. py:method:: clear_cookies() -> None
+
+      Clear all remembered cookies.
+
+
+   .. py:method:: __getstate__() -> dict[str, Any]
+
+
+   .. py:method:: __setstate__(state: collections.abc.Mapping[str, Any]) -> None
+
+
+

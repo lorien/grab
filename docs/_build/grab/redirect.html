@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Redirect Handling &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Form Processing" href="forms.html" />
+    <link rel="prev" title="File Uploading" href="file_uploading.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="redirect-handling">
+<span id="grab-redirect"></span><h1>Redirect Handling<a class="headerlink" href="#redirect-handling" title="Permalink to this headline">¶</a></h1>
+<p>Grab supports two types of redirects:</p>
+<ul class="simple">
+<li><p>HTTP redirects with HTTP 301 and 302 status codes</p></li>
+<li><p>HTML redirects with the &lt;meta&gt; HTML tag</p></li>
+</ul>
+<section id="http-301-302-redirect">
+<h2>HTTP 301/302 Redirect<a class="headerlink" href="#http-301-302-redirect" title="Permalink to this headline">¶</a></h2>
+<p>By default, Grab follows any 301 or 302 redirect. You can control the maximum number
+of redirects per network query with the <a class="reference internal" href="settings.html#option-redirect-limit"><span class="std std-ref">redirect_limit</span></a> option. To completely
+disable handling of HTTP redirects, set <a class="reference internal" href="settings.html#option-follow-location"><span class="std std-ref">follow_location</span></a> to False.</p>
+<p>Let’s see how it works:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">follow_location</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://google.com&#39;</span><span class="p">)</span>
+<span class="go">&lt;grab.response.Response object at 0x1246ae0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">code</span>
+<span class="go">301</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Location&#39;</span><span class="p">]</span>
+<span class="go">&#39;http://www.google.com/&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">follow_location</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://google.com&#39;</span><span class="p">)</span>
+<span class="go">&lt;grab.response.Response object at 0x1246ae0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">code</span>
+<span class="go">200</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">url</span>
+<span class="go">&#39;http://www.google.ru/?gws_rd=cr&amp;ei=BspFUtS8EOWq4ATAooGADA&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="meta-refresh-redirect">
+<h2>Meta Refresh Redirect<a class="headerlink" href="#meta-refresh-redirect" title="Permalink to this headline">¶</a></h2>
+<p>An HTML Page could contain special tags that instructs the browser to go to a specified URL:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">meta</span> <span class="n">http</span><span class="o">-</span><span class="n">equiv</span><span class="o">=</span><span class="s2">&quot;Refresh&quot;</span> <span class="n">content</span><span class="o">=</span><span class="s2">&quot;0; url=http://some/url&quot;</span> <span class="o">/&gt;</span>
+</pre></div>
+</div>
+<p>By default, Grab ignores such instructions. If you want automatically follow meta refresh
+tags, then set <a class="reference internal" href="settings.html#option-follow-refresh"><span class="std std-ref">follow_refresh</span></a> to True.</p>
+</section>
+<section id="original-and-destination-urls">
+<h2>Original and Destination URLs<a class="headerlink" href="#original-and-destination-urls" title="Permalink to this headline">¶</a></h2>
+<p>You can always get information about what URL you’ve requested initially and what URL you ended up with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://google.com&#39;</span><span class="p">)</span>
+<span class="go">&lt;grab.response.Response object at 0x20fcae0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
+<span class="go">&#39;http://google.com&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">url</span>
+<span class="go">&#39;http://www.google.ru/?gws_rd=cr&amp;ei=8spFUo32Huem4gT6ooDwAg&#39;</span>
+</pre></div>
+</div>
+<p>The initial URL is stored on the config object. The destination URL is written into <cite>response</cite> object.</p>
+<p>You can even track redirect history with <cite>response.head</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">head</span>
+<span class="go">HTTP/1.1 301 Moved Permanently</span>
+<span class="go">Location: http://www.google.com/</span>
+<span class="go">Content-Type: text/html; charset=UTF-8</span>
+<span class="go">Date: Fri, 27 Sep 2013 18:19:13 GMT</span>
+<span class="go">Expires: Sun, 27 Oct 2013 18:19:13 GMT</span>
+<span class="go">Cache-Control: public, max-age=2592000</span>
+<span class="go">Server: gws</span>
+<span class="go">Content-Length: 219</span>
+<span class="go">X-XSS-Protection: 1; mode=block</span>
+<span class="go">X-Frame-Options: SAMEORIGIN</span>
+
+<span class="go">HTTP/1.1 302 Found</span>
+<span class="go">Location: http://www.google.ru/?gws_rd=cr&amp;ei=IsxFUp-8CsT64QTZooDwBA</span>
+<span class="go">Cache-Control: private</span>
+<span class="go">Content-Type: text/html; charset=UTF-8</span>
+<span class="go">Date: Fri, 27 Sep 2013 18:19:14 GMT</span>
+<span class="go">Server: gws</span>
+<span class="go">Content-Length: 258</span>
+<span class="go">X-XSS-Protection: 1; mode=block</span>
+<span class="go">X-Frame-Options: SAMEORIGIN</span>
+
+<span class="go">HTTP/1.1 200 OK</span>
+<span class="go">Date: Fri, 27 Sep 2013 18:19:14 GMT</span>
+<span class="go">Expires: -1</span>
+<span class="go">Cache-Control: private, max-age=0</span>
+<span class="go">Content-Type: text/html; charset=UTF-8</span>
+<span class="go">Content-Encoding: gzip</span>
+<span class="go">Server: gws</span>
+<span class="go">X-XSS-Protection: 1; mode=block</span>
+<span class="go">X-Frame-Options: SAMEORIGIN</span>
+<span class="go">Transfer-Encoding: chunked</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_uploading.html">File Uploading</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Redirect Handling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#http-301-302-redirect">HTTP 301/302 Redirect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#meta-refresh-redirect">Meta Refresh Redirect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#original-and-destination-urls">Original and Destination URLs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_base.html">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_base.html">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="file_uploading.html" title="previous chapter">File Uploading</a></li>
+      <li>Next: <a href="forms.html" title="next chapter">Form Processing</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/grab/redirect.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

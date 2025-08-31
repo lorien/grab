@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTML Document Encoding &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cookie Support" href="cookies.html" />
+    <link rel="prev" title="Network Errors Handling" href="network_errors.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">HTML Document Encoding</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#why-does-encoding-matter">Why does encoding matter?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#encoding-detection-algorithm">Encoding Detection Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-the-encoding-manually">Setting the encoding manually</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">HTML Document Encoding</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/grab/encoding.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="html-document-encoding">
+<span id="grab-encoding"></span><h1>HTML Document Encoding<a class="headerlink" href="#html-document-encoding" title="Permalink to this heading"></a></h1>
+<section id="why-does-encoding-matter">
+<h2>Why does encoding matter?<a class="headerlink" href="#why-does-encoding-matter" title="Permalink to this heading"></a></h2>
+<p>By default, Grab automatically detects the encoding of the body of the HTML document.
+It uses this detected encoding to</p>
+<ul class="simple">
+<li><p>build a DOM tree</p></li>
+<li><p>convert the bytes from the body of the document into a unicode stream</p></li>
+<li><p>search for some unicode string in the body of the document</p></li>
+<li><p>convert unicode into bytes data, then some unicode data needs to be sent
+to the server from which the response was received.</p></li>
+</ul>
+<p>The original content of the network response is always accessible with <cite>response.body</cite> attribute.
+A unicode representation of the document body can be obtained by calling <cite>response.unicode_body()</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;http://mail.ru/&#39;</span><span class="p">)</span>
+<span class="go">&lt;grab.response.Response object at 0x7f7d38af8940&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+<span class="go">&lt;type &#39;str&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">unicode_body</span><span class="p">())</span>
+<span class="go">&lt;type &#39;unicode&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">encoding</span>
+<span class="go">&#39;utf-8&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="encoding-detection-algorithm">
+<h2>Encoding Detection Algorithm<a class="headerlink" href="#encoding-detection-algorithm" title="Permalink to this heading"></a></h2>
+<p>Grab users <a class="reference external" href="https://github.com/lorien/unicodec">https://github.com/lorien/unicodec</a> library to detect encoding of the document. The unicodec library searches for
+encoding in following sources (from most priority to less):</p>
+<ul>
+<li><p>BOM (byte order mark)</p></li>
+<li><p>Content-Type HTTP header:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Content</span><span class="o">-</span><span class="n">Type</span><span class="p">:</span> <span class="n">text</span><span class="o">/</span><span class="n">html</span><span class="p">;</span> <span class="n">encoding</span><span class="o">=</span><span class="n">koi8</span><span class="o">-</span><span class="n">r</span>
+</pre></div>
+</div>
+</li>
+<li><p>HTML meta tag or XML declaration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;http-equiv&quot; content=&quot;text/html; encoding=cp1251&quot; &gt;
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot; ?&gt;
+</pre></div>
+</div>
+</li>
+</ul>
+<p>If no source indicates the encoding, or if the found encoding has an invalid value, then grab falls back to a default of UTF-8.</p>
+</section>
+<section id="setting-the-encoding-manually">
+<h2>Setting the encoding manually<a class="headerlink" href="#setting-the-encoding-manually" title="Permalink to this heading"></a></h2>
+<p>You can bypass automatic encoding detection and specify it manually with <a class="reference internal" href="settings.html#option-encoding"><span class="std std-ref">encoding</span></a> option.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="network_errors.html" class="btn btn-neutral float-left" title="Network Errors Handling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cookies.html" class="btn btn-neutral float-right" title="Cookie Support" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

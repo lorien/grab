@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Work with HTTP Headers &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Processing the Response Body" href="response_body.html" />
+    <link rel="prev" title="Debugging" href="debugging.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="work-with-http-headers">
+<span id="grab-http-headers"></span><h1>Work with HTTP Headers<a class="headerlink" href="#work-with-http-headers" title="Permalink to this headline">¶</a></h1>
+<section id="custom-headers">
+<h2>Custom headers<a class="headerlink" href="#custom-headers" title="Permalink to this headline">¶</a></h2>
+<p>If you need to submit custom HTTP headers, you can specify any number of them
+via <a class="reference internal" href="settings.html#option-headers"><span class="std std-ref">headers</span></a> option. A common case is to emulate an AJAX request:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;X-Requested-With&#39;</span><span class="p">:</span> <span class="s1">&#39;XMLHttpRequest&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Bear in mind, that except headers in <a class="reference internal" href="settings.html#option-headers"><span class="std std-ref">headers</span></a> option (that is
+empty by default) Grab also generates a bunch of headers to emulate a typical
+web browser. At the moment of writing these docs these headers are:</p>
+<ul class="simple">
+<li><p>Accept</p></li>
+<li><p>Accept-Language</p></li>
+<li><p>Accept-Charset</p></li>
+<li><p>Keep-Alive</p></li>
+<li><p>Except</p></li>
+</ul>
+<p>If you need to change one of these headers, you can override its value with the
+<a class="reference internal" href="settings.html#option-headers"><span class="std std-ref">headers</span></a> option. You can also subclass the Grab class and define
+your own <cite>common_headers</cite> method to completely override the logic of
+generating these extra headers.</p>
+</section>
+<section id="user-agent-header">
+<h2>User-Agent header<a class="headerlink" href="#user-agent-header" title="Permalink to this headline">¶</a></h2>
+<p>By default, for each request Grab randomly chooses one user agent from a
+builtin list of real user agents. You can specify the exact User-Agent value with
+the <a class="reference internal" href="settings.html#option-user-agent"><span class="std std-ref">user_agent</span></a> option. If you need to randomly choose user agents
+from your own list of user agents, then you can put your list into a text file
+and pass its location as <a class="reference internal" href="settings.html#option-user-agent-file"><span class="std std-ref">user_agent_file</span></a>.</p>
+</section>
+<section id="referer-header">
+<h2>Referer header<a class="headerlink" href="#referer-header" title="Permalink to this headline">¶</a></h2>
+<p>To specify the content of the Referer header, use the <a class="reference internal" href="settings.html#option-referer"><span class="std std-ref">referer</span></a>
+option. By default, Grab use the URL of previously request document as value
+of Referer header. If you do not like this behaviour, you can turn it off with
+<a class="reference internal" href="settings.html#option-reuse-referer"><span class="std std-ref">reuse_referer</span></a> option.</p>
+</section>
+<section id="http-authentication">
+<h2>HTTP Authentication<a class="headerlink" href="#http-authentication" title="Permalink to this headline">¶</a></h2>
+<p>To send HTTP authentication headers, use the <a class="reference internal" href="settings.html#option-userpwd"><span class="std std-ref">userpwd</span></a> option with
+a value of the form “username:password”.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Work with HTTP Headers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#custom-headers">Custom headers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#user-agent-header">User-Agent header</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#referer-header">Referer header</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#http-authentication">HTTP Authentication</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_uploading.html">File Uploading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_base.html">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_base.html">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="debugging.html" title="previous chapter">Debugging</a></li>
+      <li>Next: <a href="response_body.html" title="next chapter">Processing the Response Body</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/grab/request_headers.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

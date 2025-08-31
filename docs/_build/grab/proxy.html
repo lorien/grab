@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Proxy Server Support &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Searching the response body" href="response_search.html" />
+    <link rel="prev" title="Cookie Support" href="cookies.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="proxy-server-support">
+<span id="grab-proxy"></span><h1>Proxy Server Support<a class="headerlink" href="#proxy-server-support" title="Permalink to this headline">¶</a></h1>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
+<p>To make Grab send requests through a proxy server, use the <a class="reference internal" href="settings.html#option-proxy"><span class="std std-ref">proxy</span></a> option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">proxy</span><span class="o">=</span><span class="s1">&#39;example.com:8080&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the proxy server requires authentication, use the <a class="reference internal" href="settings.html#option-proxy-userpwd"><span class="std std-ref">proxy_userpwd</span></a> option
+to specify the username and password:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">proxy</span><span class="o">=</span><span class="s1">&#39;example.com:8080&#39;</span><span class="p">,</span> <span class="n">proxy_userpwd</span><span class="o">=</span><span class="s1">&#39;root:777&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also specify the type of proxy server: “http”, “socks4” or “socks5”. By default,
+Grab assumes that proxy is of type “http”:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">proxy</span><span class="o">=</span><span class="s1">&#39;example.com:8080&#39;</span><span class="p">,</span> <span class="n">proxy_userpwd</span><span class="o">=</span><span class="s1">&#39;root:777&#39;</span><span class="p">,</span> <span class="n">proxy_type</span><span class="o">=</span><span class="s1">&#39;socks5&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can always see which proxy is used at the moment in <cite>g.config[‘proxy’]</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">proxy</span><span class="o">=</span><span class="s1">&#39;example.com:8080&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;proxy&#39;</span><span class="p">]</span>
+<span class="go">&#39;example.com:8080&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="proxy-list-support">
+<h2>Proxy List Support<a class="headerlink" href="#proxy-list-support" title="Permalink to this headline">¶</a></h2>
+<p>Grab supports working with a list of multiple proxies. Use the <cite>g.proxylist</cite>
+attribute to get access to the proxy manager. By default, the proxy manager is created and initialized with an empty proxy list:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span>
+<span class="go">&lt;grab.proxy.ProxyList object at 0x2e15b10&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">proxy_list</span>
+<span class="go">[]</span>
+</pre></div>
+</div>
+</section>
+<section id="proxy-list-source">
+<h2>Proxy List Source<a class="headerlink" href="#proxy-list-source" title="Permalink to this headline">¶</a></h2>
+<p>You need to setup the proxy list manager with details of the source that
+manager will load proxies from. Using the <cite>g.proxylist.set_source</cite> method, the first
+positional argument defines the type of source. Currently, two types are supported:
+“file” and “remote”.</p>
+<p>Example of loading proxies from local file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">set_source</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s1">&#39;/web/proxy.txt&#39;</span><span class="p">)</span>
+<span class="go">&lt;grab.proxy.ProxyList object at 0x2e15b10&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">proxy_list</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">set_source</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s1">&#39;/web/proxy.txt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">get_next</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">get_next_proxy</span><span class="p">()</span>
+<span class="go">&lt;grab.proxy.Proxy object at 0x2d7c610&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">get_next_proxy</span><span class="p">()</span><span class="o">.</span><span class="n">server</span>
+<span class="go">&#39;example.com&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">get_next_proxy</span><span class="p">()</span><span class="o">.</span><span class="n">address</span>
+<span class="go">&#39;example.com:8080&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">proxy_list</span><span class="p">)</span>
+<span class="go">1000</span>
+</pre></div>
+</div>
+<p>And here is how to load proxies from the web:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">set_source</span><span class="p">(</span><span class="s1">&#39;remote&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s1">&#39;http://example.com/proxy.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="automatic-proxy-rotation">
+<h2>Automatic Proxy Rotation<a class="headerlink" href="#automatic-proxy-rotation" title="Permalink to this headline">¶</a></h2>
+<p>By default, if you set up any non-empty proxy source, Grab starts rotating through proxies from the proxy list for each request.
+You can disable proxy rotation with <a class="reference internal" href="settings.html#option-proxy-auto-change"><span class="std std-ref">proxy_auto_change</span></a> option set to False:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">grab</span> <span class="kn">import</span> <span class="n">Grab</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">set_source</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s1">&#39;/web/proxy.txt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://yandex.ru/&#39;</span><span class="p">)</span>
+<span class="go">DEBUG:grab.network:[02] GET http://yandex.ru/ via 91.210.101.31:8080 proxy of type http with authorization</span>
+<span class="go">&lt;grab.response.Response object at 0x109d9f0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://rambler.ru/&#39;</span><span class="p">)</span>
+<span class="go">DEBUG:grab.network:[03] GET http://rambler.ru/ via 194.29.185.38:8080 proxy of type http with authorization</span>
+<span class="go">&lt;grab.response.Response object at 0x109d9f0&gt;</span>
+</pre></div>
+</div>
+<p>Now let’s see how Grab works when <cite>proxy_auto_change</cite> is False:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">grab</span> <span class="kn">import</span> <span class="n">Grab</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">set_source</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s1">&#39;/web/proxy.txt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">proxy_auto_change</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://ya.ru&#39;</span><span class="p">)</span>
+<span class="go">DEBUG:grab.network:[04] GET http://ya.ru</span>
+<span class="go">&lt;grab.response.Response object at 0x109de50&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">change_proxy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://ya.ru&#39;</span><span class="p">)</span>
+<span class="go">DEBUG:grab.network:[05] GET http://ya.ru via 62.122.73.30:8080 proxy of type http with authorization</span>
+<span class="go">&lt;grab.response.Response object at 0x109d9f0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://ya.ru&#39;</span><span class="p">)</span>
+<span class="go">DEBUG:grab.network:[06] GET http://ya.ru via 62.122.73.30:8080 proxy of type http with authorization</span>
+<span class="go">&lt;grab.response.Response object at 0x109d9f0&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="getting-proxy-from-proxy-list">
+<h2>Getting Proxy From Proxy List<a class="headerlink" href="#getting-proxy-from-proxy-list" title="Permalink to this headline">¶</a></h2>
+<p>Each time you call <cite>g.proxylist.get_next_proxy</cite>, you get the next proxy from the proxy list.
+When you receive the last proxy in the list, you’ll continue receiving proxies from the beginning of the list.
+You can also use <cite>g.proxylist.get_random_proxy</cite> to pick a random proxy from the proxy list.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_uploading.html">File Uploading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cookies.html">Cookie Support</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Proxy Server Support</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#proxy-list-support">Proxy List Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#proxy-list-source">Proxy List Source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#automatic-proxy-rotation">Automatic Proxy Rotation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-proxy-from-proxy-list">Getting Proxy From Proxy List</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_base.html">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_base.html">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="cookies.html" title="previous chapter">Cookie Support</a></li>
+      <li>Next: <a href="response_search.html" title="next chapter">Searching the response body</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/grab/proxy.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

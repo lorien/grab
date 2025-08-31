@@ -1,0 +1,51 @@
+:py:mod:`grab.util.metrics`
+===========================
+
+.. py:module:: grab.util.metrics
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.util.metrics.in_unit
+   grab.util.metrics.format_traffic_value
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.util.metrics.KB
+   grab.util.metrics.MB
+   grab.util.metrics.GB
+
+
+.. py:data:: KB
+   :annotation: = 1000
+
+   
+
+.. py:data:: MB
+   
+
+   
+
+.. py:data:: GB
+   
+
+   
+
+.. py:function:: in_unit(num: int, unit: str) -> int | float
+
+
+.. py:function:: format_traffic_value(num: int) -> str
+
+

@@ -1,0 +1,28 @@
+:py:mod:`grab.request`
+======================
+
+.. py:module:: grab.request
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.request.Request
+
+
+
+
+.. py:class:: Request(method: str, url: str, *, headers: None | dict[str, Any] = None, timeout: None | int | Timeout = None, cookies: None | dict[str, Any] = None, encoding: None | str = None, proxy_type: None | str = None, proxy: None | str = None, proxy_userpwd: None | str = None, fields: Any = None, body: None | bytes = None, multipart: None | bool = None, document_type: None | str = None)
+
+   .. py:method:: get_full_url() -> str
+
+
+   .. py:method:: _process_timeout_param(value: None | float | Timeout) -> grab.util.timeout.Timeout
+
+
+

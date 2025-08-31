@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grab Settings &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Debugging" href="debugging.html" />
+    <link rel="prev" title="Setting up the Grab Request" href="request_setup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Grab Settings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#network-options">Network options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#url">url</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#timeout">timeout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#connect-timeout">connect_timeout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#follow-location">follow_location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#redirect-limit">redirect_limit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method">method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fields">fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multipart">multipart</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#body">body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#headers">headers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-headers">common_headers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reuse-cookies">reuse_cookies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cookies">cookies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cookiefile">cookiefile</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#proxy-options">Proxy Options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#proxy">proxy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#proxy-userpwd">proxy_userpwd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#proxy-type">proxy_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#proxy-auto-change">proxy_auto_change</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#response-processing-options">Response Processing Options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#encoding">encoding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#content-type">content_type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#debugging">Debugging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Grab Settings</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/grab/settings.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grab-settings">
+<span id="id1"></span><h1>Grab Settings<a class="headerlink" href="#grab-settings" title="Permalink to this heading"></a></h1>
+<section id="network-options">
+<h2>Network options<a class="headerlink" href="#network-options" title="Permalink to this heading"></a></h2>
+<section id="url">
+<span id="option-url"></span><h3>url<a class="headerlink" href="#url" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>The URL of the requested web page. You can use relative URLS, in which case Grab will build
+the absolute url by joining the relative URL with the URL or previously requested document.
+Be aware that Grab does not automatically escape unsafe characters in the URL.
+This is a design feature. You can use <cite>urllib.quote</cite> and <cite>urllib.quote_plus</cite> functions to make your URLs safe.</p>
+<p>More info about valid URLs is in <a class="reference external" href="http://www.ietf.org/rfc/rfc2396.txt">RFC 2396</a>.</p>
+</section>
+<section id="timeout">
+<span id="option-timeout"></span><h3>timeout<a class="headerlink" href="#timeout" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>15</p>
+</dd>
+</dl>
+<p>Maximum time for a network operation. If it is exceeded, GrabNetworkTimeout is raised.</p>
+</section>
+<section id="connect-timeout">
+<span id="option-connect-timeout"></span><h3>connect_timeout<a class="headerlink" href="#connect-timeout" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>3</p>
+</dd>
+</dl>
+<p>Maximum time for connection to the remote server and receipt of an initial
+response. If it is exceeded, GrabNetworkTimeout is raised.</p>
+</section>
+<section id="follow-location">
+<span id="option-follow-location"></span><h3>follow_location<a class="headerlink" href="#follow-location" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>True</p>
+</dd>
+</dl>
+<p>Automatically follow the location in 301/302 response.</p>
+</section>
+<section id="redirect-limit">
+<span id="option-redirect-limit"></span><h3>redirect_limit<a class="headerlink" href="#redirect-limit" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>10</p>
+</dd>
+</dl>
+<p>Set the maximum number of redirects that Grab will do for one request.
+Redirects follow the “Location” header in 301/302 network responses, and
+also follow the URL specified in meta refresh tags.</p>
+</section>
+<section id="method">
+<span id="option-method"></span><h3>method<a class="headerlink" href="#method" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>“GET”</p>
+</dd>
+<dt class="field-odd">Possible values</dt>
+<dd class="field-odd"><p>“GET”, “POST”, “PUT”, “DELETE”</p>
+</dd>
+</dl>
+<p>The HTTP request method to use. By default, GET is used. If you specify <cite>post</cite> or
+<cite>multipart_post</cite> options, then Grab automatically changes the method to POST.</p>
+</section>
+<section id="fields">
+<span id="option-post"></span><h3>fields<a class="headerlink" href="#fields" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>sequence of pairs or dict</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Data to be sent in serialized form. Serialization depends on the type of request.
+For GET on mulitpart post requests the “urlencode” method is used.
+By default POST/PUT requests are multipart.</p>
+</section>
+<section id="multipart">
+<span id="option-multipart"></span><h3>multipart<a class="headerlink" href="#multipart" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>True</p>
+</dd>
+</dl>
+<p>Control if multipart encoding must be used for PUT/POST requests.</p>
+</section>
+<section id="body">
+<span id="option-multipart-post"></span><h3>body<a class="headerlink" href="#body" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bytes</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Raw bytes content to send</p>
+</section>
+<section id="headers">
+<span id="option-headers"></span><h3>headers<a class="headerlink" href="#headers" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Additional HTTP-headers. The value of this option will be added to headers
+that Grab generates by default. See details in <a class="reference internal" href="request_headers.html#grab-http-headers"><span class="std std-ref">Work with HTTP Headers</span></a>.</p>
+</section>
+<section id="common-headers">
+<span id="option-common-headers"></span><h3>common_headers<a class="headerlink" href="#common-headers" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>By default, Grab generates some common HTTP headers to mimic the behaviour of a real web browser.
+If you have trouble with these default headers, you can specify your own headers with
+this option. Please note that the usual way to specify a header is to use the <a class="reference internal" href="#option-headers"><span class="std std-ref">headers</span></a> option. See details in <a class="reference internal" href="request_headers.html#grab-http-headers"><span class="std std-ref">Work with HTTP Headers</span></a>.</p>
+</section>
+<section id="reuse-cookies">
+<span id="option-reuse-cookies"></span><h3>reuse_cookies<a class="headerlink" href="#reuse-cookies" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>True</p>
+</dd>
+</dl>
+<p>If this option is enabled, then all cookies in each network response are stored
+locally and sent back with further requests to the same server.</p>
+</section>
+<section id="cookies">
+<span id="option-cookies"></span><h3>cookies<a class="headerlink" href="#cookies" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Cookies to send to the server. If the option <a class="reference internal" href="#option-reuse-cookies"><span class="std std-ref">reuse_cookies</span></a> is also enabled,
+then cookies from the <cite>cookies</cite> option will be joined with stored cookies.</p>
+</section>
+<section id="cookiefile">
+<span id="option-cookiefile"></span><h3>cookiefile<a class="headerlink" href="#cookiefile" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Before each request, Grab will read cookies from this file and join them with stored cookies. After each response, Grab will save all cookies to that file.
+The data stored in the file is a dict serialized as JSON.</p>
+</section>
+</section>
+<section id="proxy-options">
+<h2>Proxy Options<a class="headerlink" href="#proxy-options" title="Permalink to this heading"></a></h2>
+<section id="proxy">
+<span id="option-proxy"></span><h3>proxy<a class="headerlink" href="#proxy" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>The address of the proxy server, in either “domain:port” or “ip:port” format.</p>
+</section>
+<section id="proxy-userpwd">
+<span id="option-proxy-userpwd"></span><h3>proxy_userpwd<a class="headerlink" href="#proxy-userpwd" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Security data to submit to the proxy if it requires authentication.
+Form of data is “username:password”</p>
+</section>
+<section id="proxy-type">
+<span id="option-proxy-type"></span><h3>proxy_type<a class="headerlink" href="#proxy-type" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Type of proxy server. Available values are “http”, “socks4” and “socks5”.</p>
+</section>
+<section id="proxy-auto-change">
+<span id="option-proxy-auto-change"></span><h3>proxy_auto_change<a class="headerlink" href="#proxy-auto-change" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>True</p>
+</dd>
+</dl>
+<p>If Grab should change the proxy before every network request.</p>
+</section>
+</section>
+<section id="response-processing-options">
+<h2>Response Processing Options<a class="headerlink" href="#response-processing-options" title="Permalink to this heading"></a></h2>
+<section id="encoding">
+<span id="option-encoding"></span><h3>encoding<a class="headerlink" href="#encoding" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>The encoding (character set) is used to store document’s content as bytes.
+By default Grab detects encoding of document automatically. If it detects the encoding incorrectly you can specify exact encoding with this option.
+The encoding option is used to convert document’s bytes content into Unicode text also for biilding DOM tree of the document.</p>
+</section>
+<section id="content-type">
+<span id="option-content-type"></span><h3>content_type<a class="headerlink" href="#content-type" title="Permalink to this heading"></a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+<dt class="field-even">Default</dt>
+<dd class="field-even"><p>“html”</p>
+</dd>
+<dt class="field-odd">Available values</dt>
+<dd class="field-odd"><p>“html” and “xml”</p>
+</dd>
+</dl>
+<p>This option controls which lxml parser is used to process the body of the response. By default, the html parser is used.
+If you want to parse XML, then you may need to change this option to “xml” to force the use of an XML parser which does not strip the content of CDATA nodes.</p>
+</section>
+</section>
+<section id="debugging">
+<h2>Debugging<a class="headerlink" href="#debugging" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="request_setup.html" class="btn btn-neutral float-left" title="Setting up the Grab Request" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="debugging.html" class="btn btn-neutral float-right" title="Debugging" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

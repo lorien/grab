@@ -100,7 +100,7 @@
 ## [0.6.33] - 2017-01-28 
 ### Added
 - Add API documentation about few grab modules, by @rushter
-- Start running Grab tests in Windows environment on appveyor CI
+- Start running Grab tests in Windows enviroment on appveyor CI
 - New spider transport based on threads that allows to use Spider with any Grab network backend e.g. urllib3
 - Add `remove_from_post` option to grab.doc.submit method 
 - Add `random` option to grab.change_proxy method 
@@ -128,4 +128,4 @@
 
 ## [0.6.31] - 2017-12-31
 ### Added
-- Everything :) Probably later I'll extend changelog more deep to the history
+- Everyting :) Probably later I'll extend changelog more deep to the history

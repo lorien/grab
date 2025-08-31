@@ -1,72 +1,69 @@
-from __future__ import annotations
-
+try:
+    import Queue as queue
+except ImportError:
+    import queue
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 import logging
-import pickle
-import queue
-from datetime import datetime, timezone
-from typing import Any, cast
+from datetime import datetime
 
-import pymongo
 from bson import Binary
-from pymongo import MongoClient
-from pymongo.collection import Collection
+import pymongo
 
-from grab.spider.queue_backend.base import BaseTaskQueue
-from grab.spider.task import Task
+from grab.spider.queue_backend.base import QueueInterface
 
-LOG = logging.getLogger("grab.spider.queue_backend.mongodb")
+# pylint: disable=invalid-name
+logger = logging.getLogger('grab.spider.queue_backend.mongodb')
+# pylint: enable=invalid-name
 
 
-class MongodbTaskQueue(BaseTaskQueue):
-    def __init__(
-        self,
-        connection_args: None | dict[str, Any] = None,
-        collection_name: None | str = None,
-        database_name: str = "grab_spider",
-    ) -> None:
-        super().__init__()
-        self.database_name: str = database_name
-        self.collection_name: str = collection_name or self.random_queue_name()
-        self.connection: MongoClient[Any] = MongoClient(**(connection_args or {}))
-        self.collection: Collection[Any] = self.connection[self.database_name][
-            self.collection_name
-        ]
-        LOG.debug(
-            "Using collection %s in database %s",
-            self.collection_name,
-            self.database_name,
-        )
-        self.collection.create_index([("priority", 1)])
+class QueueBackend(QueueInterface):
+    def __init__(self, spider_name, database=None, queue_name=None,
+                 **kwargs):
+        """
+        All "unexpected" kwargs goes to `pymongo.MongoClient()` method
+        """
+        if queue_name is None:
+            queue_name = 'task_queue_%s' % spider_name
 
-    def size(self) -> int:
-        return self.collection.count_documents({})
+        self.database = database
+        self.queue_name = queue_name
+        self.connection = pymongo.MongoClient(**kwargs)
+        self.collection = self.connection[self.database][self.queue_name]
+        logger.debug('Using collection: %s', self.collection)
 
-    def put(
-        self,
-        task: Task,
-        priority: int,
-        schedule_time: None | datetime = None,
-    ) -> None:
+        self.collection.ensure_index('priority')
+
+        super(QueueBackend, self).__init__(spider_name, **kwargs)
+
+    def size(self):
+        return self.collection.count()
+
+    def put(self, task, priority, schedule_time=None):
         if schedule_time is None:
-            schedule_time = datetime.now(timezone.utc)
-        item = {
-            "task": Binary(pickle.dumps(task)),
-            "priority": priority,
-            "schedule_time": schedule_time,
-        }
-        self.collection.insert_one(item)
+            schedule_time = datetime.utcnow()
 
-    def get(self) -> Task:
+        item = {
+            'task': Binary(pickle.dumps(task)),
+            'priority': priority,
+            'schedule_time': schedule_time,
+        }
+        self.collection.save(item)
+
+    def get(self):
         item = self.collection.find_one_and_delete(
-            {"schedule_time": {"$lt": datetime.now(timezone.utc)}},
-            sort=[("priority", pymongo.ASCENDING)],
+            {'schedule_time': {'$lt': datetime.utcnow()}},
+            sort=[('priority', pymongo.ASCENDING)]
         )
         if item is None:
-            raise queue.Empty
-        return cast(Task, pickle.loads(item["task"]))  # noqa: S301
+            raise queue.Empty()
+        else:
+            return pickle.loads(item['task'])
 
-    def clear(self) -> None:
-        self.collection.delete_many({})
+    def clear(self):
+        self.collection.remove()
 
-    def close(self) -> None:
+    def close(self):
         self.connection.close()

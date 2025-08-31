@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grab.spider.task &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../grab.html">grab</a></li>
+          <li class="breadcrumb-item"><a href="../spider.html">grab.spider</a></li>
+      <li class="breadcrumb-item active">grab.spider.task</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for grab.spider.task</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">Grab</span><span class="p">,</span> <span class="n">copy_config</span>
+<span class="kn">from</span> <span class="nn">..errors</span> <span class="kn">import</span> <span class="n">raise_feature_is_deprecated</span>
+<span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="n">GrabConfig</span>
+<span class="kn">from</span> <span class="nn">.errors</span> <span class="kn">import</span> <span class="n">SpiderMisuseError</span>
+
+
+<div class="viewcode-block" id="BaseTask"><a class="viewcode-back" href="../../../autoapi/grab/spider/task/index.html#grab.spider.BaseTask">[docs]</a><span class="k">class</span> <span class="nc">BaseTask</span><span class="p">:</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Task"><a class="viewcode-back" href="../../../autoapi/grab/spider/index.html#grab.spider.Task">[docs]</a><span class="k">class</span> <span class="nc">Task</span><span class="p">(</span><span class="n">BaseTask</span><span class="p">):</span>  <span class="c1"># pylint: disable=too-many-instance-attributes</span>
+    <span class="sd">&quot;&quot;&quot;Task for spider.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>  <span class="c1"># pylint: disable=too-many-arguments, too-many-locals</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">grab</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Grab</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">grab_config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">GrabConfig</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">priority</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">priority_set_explicitly</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">network_try_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">task_try_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">valid_status</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_proxylist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">delay</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fallback_name</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># deprecated</span>
+        <span class="n">disable_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">refresh_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">cache_timeout</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># kwargs</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create `Task` object.</span>
+
+<span class="sd">        If more than one of url, grab and grab_config options are non-empty</span>
+<span class="sd">        then they processed in following order:</span>
+<span class="sd">        * grab overwrite grab_config</span>
+<span class="sd">        * grab_config overwrite url</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            :param name: name of the task. After successful network operation</span>
+<span class="sd">                task&#39;s result will be passed to `task_&lt;name&gt;` method.</span>
+<span class="sd">            :param url: URL of network document. Any task requires `url` or</span>
+<span class="sd">                `grab` option to be specified.</span>
+<span class="sd">            :param grab: configured `Grab` instance. You can use that option in</span>
+<span class="sd">                case when `url` option is not enough. Do not forget to</span>
+<span class="sd">                configure `url` option of `Grab` instance because in this case</span>
+<span class="sd">                the `url` option of `Task` constructor will be overwritten</span>
+<span class="sd">                with `grab.config[&#39;url&#39;]`.</span>
+<span class="sd">            :param priority: priority of the Task. Tasks with lower priority</span>
+<span class="sd">                will be processed earlier. By default each new task is assigned</span>
+<span class="sd">                with random priority from (80, 100) range.</span>
+<span class="sd">            :param priority_set_explicitly: internal flag which tells if that</span>
+<span class="sd">                task priority was assigned manually or generated by spider</span>
+<span class="sd">                according to priority generation rules.</span>
+<span class="sd">            :param network_try_count: you&#39;ll probably will not need to use it.</span>
+<span class="sd">                It is used internally to control how many times this task was</span>
+<span class="sd">                restarted due to network errors. The `Spider` instance has</span>
+<span class="sd">                `network_try_limit` option. When `network_try_count` attribute</span>
+<span class="sd">                of the task exceeds the `network_try_limit` attribute then</span>
+<span class="sd">                processing of the task is abandoned.</span>
+<span class="sd">            :param task_try_count: the as `network_try_count` but it increased</span>
+<span class="sd">                only then you use `clone` method. Also you can set it manually.</span>
+<span class="sd">                It is useful if you want to restart the task after it was</span>
+<span class="sd">                cancelled due to multiple network errors. As you might guessed</span>
+<span class="sd">                there is `task_try_limit` option in `Spider` instance. Both</span>
+<span class="sd">                options `network_try_count` and `network_try_limit` guarantee</span>
+<span class="sd">                you that you&#39;ll not get infinite loop of restarting some task.</span>
+<span class="sd">            :param valid_status: extra status codes which counts as valid</span>
+<span class="sd">            :param use_proxylist: it means to use proxylist which was</span>
+<span class="sd">                configured via `setup_proxylist` method of spider</span>
+<span class="sd">            :param delay: if specified tells the spider to schedule the task</span>
+<span class="sd">                and execute    it after `delay` seconds</span>
+<span class="sd">            :param raw: if `raw` is True then the network response is</span>
+<span class="sd">                forwarding to the corresponding handler without any check of</span>
+<span class="sd">                HTTP status code of network error, if `raw` is False (by</span>
+<span class="sd">                default) then failed response is putting back to task queue or</span>
+<span class="sd">                if tries limit is reached then the processing of this  request</span>
+<span class="sd">                is finished.</span>
+<span class="sd">            :param callback: if you pass some function in `callback` option</span>
+<span class="sd">                then the network response will be passed to this callback and</span>
+<span class="sd">                the usual &#39;task_*&#39; handler will be ignored and no error will be</span>
+<span class="sd">                raised if such &#39;task_*&#39; handler does not exist.</span>
+<span class="sd">            :param fallback_name: the name of method that is called when spider</span>
+<span class="sd">                gives up to do the task (due to multiple network errors)</span>
+
+<span class="sd">            Any non-standard named arguments passed to `Task` constructor will</span>
+<span class="sd">            be saved as attributes of the object. You can get their values</span>
+<span class="sd">            later as attributes or with `get` method which allows to use</span>
+<span class="sd">            default value if attribute does not exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schedule_time</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grab_config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">GrabConfig</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">disable_cache</span> <span class="ow">or</span> <span class="n">refresh_cache</span> <span class="ow">or</span> <span class="n">cache_timeout</span><span class="p">:</span>
+            <span class="n">raise_feature_is_deprecated</span><span class="p">(</span><span class="s2">&quot;Cache feature&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;generator&quot;</span><span class="p">:</span>
+            <span class="c1"># The name &quot;generator&quot; is restricted because</span>
+            <span class="c1"># `task_generator` handler could not be created because</span>
+            <span class="c1"># this name is already used for special method which</span>
+            <span class="c1"># generates new tasks</span>
+            <span class="k">raise</span> <span class="n">SpiderMisuseError</span><span class="p">(</span><span class="s1">&#39;Task name could not be &quot;generator&quot;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_init_url_grab_options</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">grab</span><span class="p">,</span> <span class="n">grab_config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">valid_status</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">valid_status</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">valid_status</span> <span class="o">=</span> <span class="n">valid_status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_delay_option</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fallback_name</span> <span class="o">=</span> <span class="n">fallback_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">priority_set_explicitly</span> <span class="o">=</span> <span class="n">priority_set_explicitly</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">priority</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network_try_count</span> <span class="o">=</span> <span class="n">network_try_count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_try_count</span> <span class="o">=</span> <span class="n">task_try_count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_proxylist</span> <span class="o">=</span> <span class="n">use_proxylist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">raw</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store</span> <span class="o">=</span> <span class="n">store</span> <span class="k">if</span> <span class="n">store</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Task.process_init_url_grab_options"><a class="viewcode-back" href="../../../autoapi/grab/spider/task/index.html#grab.spider.Task.process_init_url_grab_options">[docs]</a>    <span class="k">def</span> <span class="nf">process_init_url_grab_options</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">grab</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Grab</span><span class="p">,</span>
+        <span class="n">grab_config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">GrabConfig</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">grab</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">grab_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SpiderMisuseError</span><span class="p">(</span>
+                <span class="s2">&quot;Either url, grab or grab_config argument &quot;</span>
+                <span class="s2">&quot;of Task constructor should not be None&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">grab</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SpiderMisuseError</span><span class="p">(</span><span class="s2">&quot;Options url and grab could not be used together&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">grab_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SpiderMisuseError</span><span class="p">(</span>
+                <span class="s2">&quot;Options url and grab_config could not be used together&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">grab</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">grab_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SpiderMisuseError</span><span class="p">(</span>
+                <span class="s2">&quot;Options grab and grab_config could not be used together&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">grab</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_grab_config</span><span class="p">(</span><span class="n">grab</span><span class="o">.</span><span class="n">dump_config</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">grab_config</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_grab_config</span><span class="p">(</span><span class="n">grab_config</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grab_config</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span></div>
+
+<div class="viewcode-block" id="Task.get"><a class="viewcode-back" href="../../../autoapi/grab/spider/task/index.html#grab.spider.Task.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return value of attribute or None if such attribute does not exist.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Task.process_delay_option"><a class="viewcode-back" href="../../../autoapi/grab/spider/task/index.html#grab.spider.Task.process_delay_option">[docs]</a>    <span class="k">def</span> <span class="nf">process_delay_option</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">delay</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">schedule_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">delay</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">schedule_time</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Task.setup_grab_config"><a class="viewcode-back" href="../../../autoapi/grab/spider/task/index.html#grab.spider.Task.setup_grab_config">[docs]</a>    <span class="k">def</span> <span class="nf">setup_grab_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab_config</span><span class="p">:</span> <span class="n">GrabConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grab_config</span> <span class="o">=</span> <span class="n">copy_config</span><span class="p">(</span><span class="n">grab_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">grab_config</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Task.test_clone_options_integrity"><a class="viewcode-back" href="../../../autoapi/grab/spider/task/index.html#grab.spider.Task.test_clone_options_integrity">[docs]</a>    <span class="k">def</span> <span class="nf">test_clone_options_integrity</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">grab</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Grab</span><span class="p">,</span> <span class="n">grab_config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">GrabConfig</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">grab</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SpiderMisuseError</span><span class="p">(</span><span class="s2">&quot;Options url and grab could not be used together&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">grab_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SpiderMisuseError</span><span class="p">(</span>
+                <span class="s2">&quot;Options url and grab_config could not be used together&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">grab</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">grab_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SpiderMisuseError</span><span class="p">(</span>
+                <span class="s2">&quot;Options grab and grab_config could not be used together&quot;</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Task.clone"><a class="viewcode-back" href="../../../autoapi/grab/spider/task/index.html#grab.spider.Task.clone">[docs]</a>    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Task</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Clone Task instance.</span>
+
+<span class="sd">        Reset network_try_count, increase task_try_count.</span>
+<span class="sd">        Reset priority attribute if it was not set explicitly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First, create exact copy of the current Task object</span>
+        <span class="n">attr_copy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">attr_copy</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grab_config&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">attr_copy</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">attr_copy</span><span class="p">[</span><span class="s2">&quot;priority_set_explicitly&quot;</span><span class="p">]:</span>
+            <span class="n">attr_copy</span><span class="p">[</span><span class="s2">&quot;priority&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="o">**</span><span class="n">attr_copy</span><span class="p">)</span>
+        <span class="c1"># Reset some task properties if they have not</span>
+        <span class="c1"># been set explicitly in kwargs</span>
+        <span class="k">if</span> <span class="s2">&quot;network_try_count&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">network_try_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="s2">&quot;task_try_count&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">task_try_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_try_count</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_clone_options_integrity</span><span class="p">(</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">),</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grab&quot;</span><span class="p">),</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grab_config&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grab&quot;</span><span class="p">):</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">setup_grab_config</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;grab&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dump_config</span><span class="p">())</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;grab&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grab_config&quot;</span><span class="p">):</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">setup_grab_config</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;grab_config&quot;</span><span class="p">])</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;grab_config&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">):</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">grab_config</span><span class="p">:</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">grab_config</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">process_delay_option</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">task</span></div>
+
+<div class="viewcode-block" id="Task.__repr__"><a class="viewcode-back" href="../../../autoapi/grab/spider/task/index.html#grab.spider.Task.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Task: </span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span></div>
+
+<div class="viewcode-block" id="Task.__lt__"><a class="viewcode-back" href="../../../autoapi/grab/spider/task/index.html#grab.spider.Task.__lt__">[docs]</a>    <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">other</span><span class="o">.</span><span class="n">priority</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">priority</span></div>
+
+<div class="viewcode-block" id="Task.__eq__"><a class="viewcode-back" href="../../../autoapi/grab/spider/task/index.html#grab.spider.Task.__eq__">[docs]</a>    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Task</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">other</span><span class="o">.</span><span class="n">priority</span><span class="p">:</span>
+            <span class="c1"># WTF???</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">priority</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

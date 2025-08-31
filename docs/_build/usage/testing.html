@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Testing Grab Framework &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Grab Quickstart" href="../grab/quickstart.html" />
+    <link rel="prev" title="Grab Installation" href="installation.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="testing-grab-framework">
+<span id="usage-testing"></span><h1>Testing Grab Framework<a class="headerlink" href="#testing-grab-framework" title="Permalink to this headline">¶</a></h1>
+<p>To run the full set of Grab tests you should install the additional
+dependencies listed in <cite>requirements_dev.txt</cite> and
+<cite>requirements_dev_backend.txt.</cite></p>
+<p>To run all tests run the command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
+</pre></div>
+</div>
+<section id="controlling-what-parts-of-grab-to-test">
+<span id="usage-testing-control"></span><h2>Controlling what parts of Grab to test<a class="headerlink" href="#controlling-what-parts-of-grab-to-test" title="Permalink to this headline">¶</a></h2>
+<p>You can run tests for specific parts of the Grab framework. Here are the
+available options for <cite>runtest.py</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">test</span><span class="o">-</span><span class="n">grab</span> <span class="o">-</span> <span class="n">Grab</span> <span class="n">API</span> <span class="n">tests</span>
+<span class="o">--</span><span class="n">test</span><span class="o">-</span><span class="n">spider</span> <span class="o">-</span> <span class="n">Grab</span><span class="p">::</span><span class="n">Spider</span> <span class="n">API</span> <span class="n">tests</span>
+<span class="o">--</span><span class="n">test</span><span class="o">-</span><span class="nb">all</span> <span class="o">-</span> <span class="n">shortcut</span> <span class="n">to</span> <span class="n">run</span> <span class="n">both</span> <span class="n">Grab</span> <span class="ow">and</span> <span class="n">Grab</span><span class="p">::</span><span class="n">Spider</span> <span class="n">tests</span>
+<span class="o">--</span><span class="n">backend</span><span class="o">-</span><span class="n">redis</span> <span class="o">-</span> <span class="n">enable</span> <span class="n">tests</span> <span class="n">of</span> <span class="n">things</span> <span class="n">that</span> <span class="n">work</span> <span class="k">with</span> <span class="n">redis</span>
+<span class="o">--</span><span class="n">backend</span><span class="o">-</span><span class="n">mysql</span> <span class="o">-</span> <span class="n">enable</span> <span class="n">tests</span> <span class="n">of</span> <span class="n">things</span> <span class="n">that</span> <span class="n">work</span> <span class="k">with</span> <span class="n">mysql</span>
+<span class="o">--</span><span class="n">backend</span><span class="o">-</span><span class="n">postgresql</span> <span class="o">-</span> <span class="n">enable</span> <span class="n">tests</span> <span class="n">of</span> <span class="n">things</span> <span class="n">that</span> <span class="n">work</span> <span class="k">with</span> <span class="n">postgresql</span>
+<span class="o">--</span><span class="n">backend</span><span class="o">-</span><span class="n">mongo</span> <span class="o">-</span> <span class="n">enable</span> <span class="n">tests</span> <span class="n">of</span> <span class="n">things</span> <span class="n">that</span> <span class="n">work</span> <span class="k">with</span> <span class="n">mongo</span>
+</pre></div>
+</div>
+<p>If you want to run specific test cases then use the <cite>-t</cite> option. For example:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./runtest.py -t test.grab_api
+</pre></div>
+</div>
+</section>
+<section id="testing-with-tox">
+<span id="usage-testing-tox"></span><h2>Testing with Tox<a class="headerlink" href="#testing-with-tox" title="Permalink to this headline">¶</a></h2>
+<p>To run Grab tests in different python environments you can use <cite>tox</cite> command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tox</span>
+</pre></div>
+</div>
+<p>By default it will run the full set of tests in two environments: python3.4
+and python2.7</p>
+<p>You can specify a specific environment with <cite>-e</cite> option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tox</span> <span class="o">-</span><span class="n">e</span> <span class="n">py34</span>
+</pre></div>
+</div>
+<p>To run all tests except backend tests, use <cite>-nobackend</cite> suffix:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tox</span> <span class="o">-</span><span class="n">e</span> <span class="n">py34</span><span class="o">-</span><span class="n">nobackend</span><span class="p">,</span><span class="n">py27</span><span class="o">-</span><span class="n">nobackend</span>
+</pre></div>
+</div>
+</section>
+<section id="database-configuration">
+<span id="usage-testing-database-configuration"></span><h2>Database configuration<a class="headerlink" href="#database-configuration" title="Permalink to this headline">¶</a></h2>
+<p>To run tests on a specific machine you may need to change the default database
+connection settings. Default settings are stored in the <cite>test_settings.py</cite>
+file. You can override any default setting in the <cite>test_settings_local.py</cite>
+file.</p>
+</section>
+<section id="travis-testing">
+<span id="usage-testing-travis"></span><h2>Travis Testing<a class="headerlink" href="#travis-testing" title="Permalink to this headline">¶</a></h2>
+<p>The Grab project is configured to run the full set of tests for each new
+commit placed into the project repository. You can see the status of a recent
+commit and the status of all previous commits here: <a class="reference external" href="https://travis-ci.org/lorien/grab">https://travis-ci.org/lorien/grab</a></p>
+</section>
+<section id="test-coverage">
+<span id="usage-testing-coverage"></span><h2>Test Coverage<a class="headerlink" href="#test-coverage" title="Permalink to this headline">¶</a></h2>
+<p>To see test coverage run the commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">coverage</span> <span class="n">erase</span>
+<span class="n">coverage</span> <span class="n">run</span> <span class="o">--</span><span class="n">source</span><span class="o">=</span><span class="n">grab</span> <span class="o">./</span><span class="n">runtest</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">test</span><span class="o">-</span><span class="nb">all</span> <span class="o">--</span><span class="n">backend</span><span class="o">-</span><span class="n">mongo</span> <span class="o">--</span><span class="n">backend</span><span class="o">-</span><span class="n">mysql</span> <span class="o">--</span><span class="n">backend</span><span class="o">-</span><span class="n">redis</span> <span class="o">--</span><span class="n">backend</span><span class="o">-</span><span class="n">postgres</span>
+<span class="n">coverage</span> <span class="n">report</span> <span class="o">-</span><span class="n">m</span>
+</pre></div>
+</div>
+<p>Also you can use shortcut:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">coverage</span>
+</pre></div>
+</div>
+<p>The Grab project is configured to submit coverage statistics to the
+coveralls.io service after each test session is completed by travis-ci. You
+can see the coverage history at this URL: <a class="reference external" href="https://coveralls.io/r/lorien/grab">https://coveralls.io/r/lorien/grab</a></p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Grab Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Testing Grab Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#controlling-what-parts-of-grab-to-test">Controlling what parts of Grab to test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-with-tox">Testing with Tox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#database-configuration">Database configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#travis-testing">Travis Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-coverage">Test Coverage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/file_uploading.html">File Uploading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_base.html">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_base.html">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="installation.html" title="previous chapter">Grab Installation</a></li>
+      <li>Next: <a href="../grab/quickstart.html" title="next chapter">Grab Quickstart</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/usage/testing.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

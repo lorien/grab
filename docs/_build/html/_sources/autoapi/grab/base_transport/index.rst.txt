@@ -1,0 +1,48 @@
+:py:mod:`grab.base_transport`
+=============================
+
+.. py:module:: grab.base_transport
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.base_transport.BaseTransport
+
+
+
+
+.. py:class:: BaseTransport
+
+   .. py:method:: reset() -> None
+      :abstractmethod:
+
+
+   .. py:method:: prepare_response(req: grab.request.Request, *, document_class: type[grab.document.Document] = Document) -> grab.document.Document
+      :abstractmethod:
+
+
+   .. py:method:: wrap_transport_error() -> collections.abc.Generator[None, None, None]
+      :abstractmethod:
+
+
+   .. py:method:: request(req: grab.request.Request, cookiejar: http.cookiejar.CookieJar) -> None
+      :abstractmethod:
+
+
+   .. py:method:: setup_body_file(storage_dir: str, storage_filename: None | str, create_dir: bool = False) -> str
+
+
+   .. py:method:: detect_request_method(grab_config: collections.abc.Mapping[str, Any]) -> str
+
+      Analyze request config and find which request method will be used.
+
+      Returns request method in upper case
+
+
+

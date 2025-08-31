@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spider Error Handling &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Explanation" href="transport.html" />
+    <link rel="prev" title="Task Queue" href="task_queue.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_queue.html">Task Queue</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Spider Error Handling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rules-of-network-request-handling">Rules of Network Request Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#network-errors">Network Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#handling-of-failed-tasks">Handling of Failed Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manual-processing-of-failed-tasks">Manual Processing of Failed Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-statistics">Error Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Spider Error Handling</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/spider/error_handling.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="spider-error-handling">
+<span id="id1"></span><h1>Spider Error Handling<a class="headerlink" href="#spider-error-handling" title="Permalink to this heading"></a></h1>
+<section id="rules-of-network-request-handling">
+<h2>Rules of Network Request Handling<a class="headerlink" href="#rules-of-network-request-handling" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>If request is completed successfully then the corresponding handler is called</p></li>
+<li><p>If request is failed due the network error, then the task is submitted back
+to the task queue</p></li>
+<li><p>If the request is completed and the handler is called and failed due to any
+error inside the handler then the task processing is aborted. This type of
+errors is not fatal. The handler error is logged and other requests and
+handlers are processed in usual way.</p></li>
+</ul>
+</section>
+<section id="network-errors">
+<h2>Network Errors<a class="headerlink" href="#network-errors" title="Permalink to this heading"></a></h2>
+<p>Network error is:</p>
+<ul class="simple">
+<li><p>error occurred in process of data transmission to or back from the server e.g.
+connection aborted, connection timeout, server does not accept connection and
+so on</p></li>
+<li><p>data transmission has been completed but the HTTP status of received document
+differs from 2XX or from 404</p></li>
+</ul>
+<p>Yes, by default documents with 404 status code counts as valid! That makes
+sense to me :) If that is not you want then you can configure custom rule to
+mark status as valid or failed. You have two ways.</p>
+<p>First way is to use <cite>valid_status</cite> argument in Task constructor. With this
+argument you can only extend the default valid status. This arguments accepts
+list of additional valid status codes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;example&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s1">&#39;http://example.com&#39;</span><span class="p">,</span> <span class="n">valid_status</span><span class="o">=</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">501</span><span class="p">,</span> <span class="mi">502</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Second way is to redefine <cite>is_valid_network_response_code</cite> method. In this way you can
+implement any logic you want. Method accepts two arguments: status code and
+task object. Method returns boolean value, <cite>True</cite> means that the status code
+is valid:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SomeSpider</span><span class="p">(</span><span class="n">Spider</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">is_valid_network_response_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">301</span><span class="p">,</span> <span class="mi">302</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="handling-of-failed-tasks">
+<h2>Handling of Failed Tasks<a class="headerlink" href="#handling-of-failed-tasks" title="Permalink to this heading"></a></h2>
+<p>The task failed due to the network error is put back to tas queue. The number
+of tries is limited to the <cite>Spider.network_try_limit</cite> and is 10 by default.
+The try’s number is stored in the <cite>Task.network_try_count</cite>. If
+<cite>network_try_count</cite> reaches the <cite>network_try_limit</cite> the task is aborted.</p>
+<p>When the task is aborted and there is method with name
+<cite>task_&lt;task-name&gt;_fallback</cite> then it is called and receives the failed task as
+first argument.</p>
+<p>Also, it happens that you need to put task back to task queue even it was not
+failed due to the network error. For example, the response contains captcha
+challenge or other invalid data reasoned by the anti-scraping protection.
+You can control number of such tries. Max tries number is configured by
+<cite>Spider.task_try_count</cite>. The try’s number is stored in <cite>Task.task_try_count</cite>.
+Keep in mind, that you have to increase <cite>task_try_count</cite> explicitly when you
+put task back to task queue.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">task_google</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">captcha_found</span><span class="p">(</span><span class="n">grab</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;google&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">grab</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">],</span>
+                   <span class="n">task_try_count</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">task_try_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">task_google_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+    <span class="nb">print</span> <span class="s1">&#39;Google is not happy with you IP address&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="manual-processing-of-failed-tasks">
+<h2>Manual Processing of Failed Tasks<a class="headerlink" href="#manual-processing-of-failed-tasks" title="Permalink to this heading"></a></h2>
+<p>You can disable default mechanism of processing failed tasks and
+process failures manually. Use <cite>raw=True</cite> parameter in Task constructor.
+If the network request would fail then the grab object passed to the handler
+would contain information about failure in two attributes:
+<cite>grab.response.error_code</cite> and <cite>grab.response.error_msg</cite></p>
+<p>See example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TestSpider</span><span class="p">(</span><span class="n">Spider</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">task_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s1">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">task_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">grab</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">error_code</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Request failed. Reason: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">grab</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">error_msg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Request completed. HTTP code: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">grab</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="error-statistics">
+<h2>Error Statistics<a class="headerlink" href="#error-statistics" title="Permalink to this heading"></a></h2>
+<p>After spider has completed the work or even in the process of working you can
+receive the information about number of completed requests, failed requests,
+number of specific network errors with method <cite>Spider.render_stats</cite>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="task_queue.html" class="btn btn-neutral float-left" title="Task Queue" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="transport.html" class="btn btn-neutral float-right" title="Explanation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

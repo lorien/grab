@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Searching the response body &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Work With Network Response" href="response.html" />
+    <link rel="prev" title="Proxy Server Support" href="proxy.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Searching the response body</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#string-search">String search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#regexp-search">Regexp Search</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Searching the response body</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/grab/response_search.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="searching-the-response-body">
+<span id="grab-response-search"></span><h1>Searching the response body<a class="headerlink" href="#searching-the-response-body" title="Permalink to this heading"></a></h1>
+<section id="string-search">
+<h2>String search<a class="headerlink" href="#string-search" title="Permalink to this heading"></a></h2>
+<p>With the <cite>doc.text_search</cite> method, you can find out if the response body contains a certain string or not:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="s1">&#39;&lt;h1&gt;test&lt;/h1&gt;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">text_search</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;tes&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>If you prefer to raise an exception if string was not found, then use the <cite>doc.text_assert</cite> method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="s1">&#39;&lt;h1&gt;test&lt;/h1&gt;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">text_assert</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;tez&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;/home/lorien/web/grab/grab/document.py&quot;</span>, line <span class="m">109</span>, in <span class="n">text_assert</span>
+    <span class="k">raise</span> <span class="n">DataNotFound</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;Substring not found: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anchor</span><span class="p">)</span>
+<span class="gr">grab.error.DataNotFound</span>: <span class="n">Substring not found: tez</span>
+</pre></div>
+</div>
+<p>All text search methods understands both str and bytes queries. If you search for str the document
+body converted to str is used. If you search for bytes the original bytes document body is used.</p>
+</section>
+<section id="regexp-search">
+<h2>Regexp Search<a class="headerlink" href="#regexp-search" title="Permalink to this heading"></a></h2>
+<p>You can search for a regular expression with <cite>doc.rex_search</cite> method that accepts compiled regexp object or just a text of regular expression:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="s1">&#39;&lt;h1&gt;test&lt;/h1&gt;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">rex_search</span><span class="p">(</span><span class="s1">&#39;&lt;.+?&gt;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">u&#39;&lt;h1&gt;&#39;</span>
+</pre></div>
+</div>
+<p>Method <cite>doc.rex_text</cite> returns you text contents of <cite>.group(1)</cite> of the found match object:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="s1">&#39;&lt;h1&gt;test&lt;/h1&gt;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">rex_text</span><span class="p">(</span><span class="s1">&#39;&lt;.+?&gt;(.+)&lt;&#39;</span><span class="p">)</span>
+<span class="go">u&#39;test&#39;</span>
+</pre></div>
+</div>
+<p>Method <cite>doc.rex_assert</cite> raises <cite>DataNotFound</cite> exception if no match is found:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="s1">&#39;&lt;h1&gt;test&lt;/h1&gt;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">rex_assert</span><span class="p">(</span><span class="s1">&#39;\w</span><span class="si">{10}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;/home/lorien/web/grab/grab/document.py&quot;</span>, line <span class="m">189</span>, in <span class="n">rex_assert</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rex_search</span><span class="p">(</span><span class="n">rex</span><span class="p">)</span>
+  File <span class="nb">&quot;/home/lorien/web/grab/grab/document.py&quot;</span>, line <span class="m">180</span>, in <span class="n">rex_search</span>
+    <span class="k">raise</span> <span class="n">DataNotFound</span><span class="p">(</span><span class="s1">&#39;Could not find regexp: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">regexp</span><span class="p">)</span>
+<span class="gr">grab.error.DataNotFound</span>: <span class="n">Could not find regexp: &lt;_sre.SRE_Pattern object at 0x7fa40e97d1f8&gt;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="proxy.html" class="btn btn-neutral float-left" title="Proxy Server Support" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="response.html" class="btn btn-neutral float-right" title="Work With Network Response" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

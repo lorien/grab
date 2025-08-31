@@ -1,0 +1,96 @@
+:py:mod:`grab.transport`
+========================
+
+.. py:module:: grab.transport
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.transport.Urllib3Transport
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.transport.assemble
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.transport.URL_DATA_METHODS
+
+
+.. py:data:: URL_DATA_METHODS
+   
+
+   
+
+.. py:function:: assemble(req: grab.request.Request, cookiejar: http.cookiejar.CookieJar) -> tuple[str, dict[str, Any], bytes | None]
+
+
+.. py:class:: Urllib3Transport
+
+   Bases: :py:obj:`grab.base_transport.BaseTransport`
+
+   Grab network transport based on urllib3 library.
+
+   .. py:method:: __getstate__() -> dict[str, Any]
+
+
+   .. py:method:: __setstate__(state: collections.abc.Mapping[str, Any]) -> None
+
+
+   .. py:method:: build_pool() -> urllib3.PoolManager
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: wrap_transport_error() -> collections.abc.Generator[None, None, None]
+
+
+   .. py:method:: select_pool_for_request(req: grab.request.Request) -> PoolManager | ProxyManager | SOCKSProxyManager
+
+
+   .. py:method:: request(req: grab.request.Request, cookiejar: http.cookiejar.CookieJar) -> None
+
+
+   .. py:method:: read_with_timeout(req: grab.request.Request) -> bytes
+
+
+   .. py:method:: get_response_header_items() -> list[tuple[str, Any]]
+
+      Return current response headers as items.
+
+      This funciton is required to isolated smalles part of untyped code
+      and hide it from mypy
+
+
+   .. py:method:: prepare_response(req: grab.request.Request, *, document_class: type[grab.document.Document] = Document) -> grab.document.Document
+
+      Prepare response, duh.
+
+      This methed is called after network request is completed
+      hence the "self._request" is not None.
+
+      Good to know: on python3 urllib3 headers are converted to str type
+      using latin encoding.
+
+
+   .. py:method:: extract_cookiejar(req: grab.request.Request) -> http.cookiejar.CookieJar
+
+
+

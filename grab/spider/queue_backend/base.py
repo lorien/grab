@@ -1,43 +1,27 @@
-from __future__ import annotations
-
-from abc import abstractmethod
-from datetime import datetime
-from typing import Any
-from uuid import uuid4
-
-from grab.spider.task import Task
+"""
+QueueInterface defines interface of queue backend.
+"""
 
 
-class BaseTaskQueue:
-    def __init__(self, **kwargs: Any) -> None:
+class QueueInterface(object):
+    def __init__(self, spider_name, **kwargs):
         pass
 
-    def random_queue_name(self) -> str:
-        return "task_queue_{}".format(str(uuid4()).replace("-", "_"))
-
-    def put(
-        self,
-        task: Task,
-        priority: int,
-        schedule_time: None | datetime = None,
-    ) -> None:  # pragma: no cover
+    def put(self, task, priority, schedule_time=None):
         raise NotImplementedError
 
-    def get(self) -> Task:  # pragma: no cover
-        """Return `Task` object or raise `Queue.Empty` exception.
+    def get(self):
+        """
+        Return `Task` object or raise `Queue.Empty` exception
 
         @returns: `grab.spider.task.Task` object
         @raises: `Queue.Empty` exception
         """
         raise NotImplementedError
 
-    @abstractmethod
-    def size(self) -> int:  # pragma: no cover
+    def size(self):
         raise NotImplementedError
 
-    def clear(self) -> None:  # pragma: no cover
+    def clear(self):
         """Remove all tasks from the queue."""
-        raise NotImplementedError
-
-    def close(self) -> None:  # pragma: no cover
         raise NotImplementedError

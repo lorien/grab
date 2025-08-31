@@ -14,13 +14,8 @@ dist/
 /script/
 .idea/
 /.coverage
-/.coverage.lcov
-/docs/build/
-/docs/_build/
-/.python-version
-/.hg/
-/src/
-/test_server
-/build/
-/.pytype/
+/docs/en/build/
+/docs/ru/_build/
+/test_settings_local.py
 /test.py
+/.python-version

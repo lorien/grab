@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grab.document &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../grab.html">grab</a></li>
+      <li class="breadcrumb-item active">grab.document</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for grab.document</h1><div class="highlight"><pre>
+<span></span><span class="c1"># pylint: disable=too-many-lines</span>
+<span class="sd">&quot;&quot;&quot;The Document class is the result of network request made with Grab instance.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">email</span>
+<span class="kn">import</span> <span class="nn">email.message</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">webbrowser</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">MutableMapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">suppress</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">http.cookiejar</span> <span class="kn">import</span> <span class="n">CookieJar</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span><span class="p">,</span> <span class="n">StringIO</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>  <span class="c1"># pylint: disable=unused-import</span>
+<span class="kn">from</span> <span class="nn">re</span> <span class="kn">import</span> <span class="n">Match</span><span class="p">,</span> <span class="n">Pattern</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">SplitResult</span><span class="p">,</span> <span class="n">parse_qs</span><span class="p">,</span> <span class="n">urljoin</span><span class="p">,</span> <span class="n">urlsplit</span>
+
+<span class="kn">import</span> <span class="nn">unicodec</span>  <span class="c1"># pylint: disable=wrong-import-order</span>
+<span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">etree</span>
+<span class="kn">from</span> <span class="nn">lxml.etree</span> <span class="kn">import</span> <span class="n">_Element</span>
+<span class="kn">from</span> <span class="nn">lxml.html</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CheckboxValues</span><span class="p">,</span>
+    <span class="n">FormElement</span><span class="p">,</span>
+    <span class="n">HtmlElement</span><span class="p">,</span>
+    <span class="n">HTMLParser</span><span class="p">,</span>
+    <span class="n">MultipleSelectOptions</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">selection</span> <span class="kn">import</span> <span class="n">SelectorList</span><span class="p">,</span> <span class="n">XpathSelector</span>
+
+<span class="kn">from</span> <span class="nn">grab.errors</span> <span class="kn">import</span> <span class="n">DataNotFound</span><span class="p">,</span> <span class="n">GrabMisuseError</span>
+<span class="kn">from</span> <span class="nn">grab.types</span> <span class="kn">import</span> <span class="n">NULL</span>
+
+<div class="viewcode-block" id="THREAD_STORAGE"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.THREAD_STORAGE">[docs]</a><span class="n">THREAD_STORAGE</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">local</span><span class="p">()</span></div>
+<div class="viewcode-block" id="logger"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.logger">[docs]</a><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;grab.document&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="normalize_pairs"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.normalize_pairs">[docs]</a><span class="k">def</span> <span class="nf">normalize_pairs</span><span class="p">(</span>
+    <span class="n">inp</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+    <span class="c1"># pylint: disable=deprecated-typing-alias</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">inp</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span> <span class="k">else</span> <span class="n">inp</span></div>
+
+
+<div class="viewcode-block" id="Document"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document">[docs]</a><span class="k">class</span> <span class="nc">Document</span><span class="p">:</span>  <span class="c1"># pylint: disable=too-many-instance-attributes, too-many-public-methods</span>
+    <span class="sd">&quot;&quot;&quot;Network response.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Document.__slots__"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.__slots__">[docs]</a>    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;document_type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;code&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;head&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_bytes_body&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;headers&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;url&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cookies&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;encoding&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_unicode_body&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;timestamp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;download_size&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;upload_size&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;download_speed&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;error_code&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;error_msg&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grab&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;remote_ip&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_lxml_tree&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_strict_lxml_tree&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_pyquery&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_lxml_form&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_file_fields&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;from_cache&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">document_type</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span>
+        <span class="n">head</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">email</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">Message</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">encoding</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">code</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cookies</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">CookieJar</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Cache attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bytes_body</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unicode_body</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_tree</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">_Element</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_strict_lxml_tree</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">_Element</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pyquery</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_form</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_fields</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Main attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">document_type</span> <span class="o">=</span> <span class="n">document_type</span>
+        <span class="k">if</span> <span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">GrabMisuseError</span><span class="p">(</span><span class="s2">&quot;Document content must be bytes&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_body</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span> <span class="o">=</span> <span class="n">head</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="c1"># Encoding must be processed AFTER body and headers are set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_encoding</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
+        <span class="c1"># other</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span> <span class="o">=</span> <span class="n">cookies</span> <span class="ow">or</span> <span class="n">CookieJar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">download_size</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upload_size</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">download_speed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_code</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_msg</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_cache</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># WTF</span>
+<div class="viewcode-block" id="Document.__call__"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SelectorList</span><span class="p">[</span><span class="n">_Element</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">query</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Document.select"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SelectorList</span><span class="p">[</span><span class="n">_Element</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">XpathSelector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Document.process_encoding"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.process_encoding">[docs]</a>    <span class="k">def</span> <span class="nf">process_encoding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Process explicitly defined encoding or auto-detect it.</span>
+
+<span class="sd">        If encoding is explicitly defined, ensure it is a valid encoding the python</span>
+<span class="sd">        can deal with. If encoding is not specified, auto-detect it.</span>
+
+<span class="sd">        Raises unicodec.InvalidEncodingName if explicitly set encoding is invalid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">encoding</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">unicodec</span><span class="o">.</span><span class="n">normalize_encoding_name</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">unicodec</span><span class="o">.</span><span class="n">detect_content_encoding</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_body_chunk</span><span class="p">()</span> <span class="ow">or</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">content_type_header</span><span class="o">=</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">),</span>
+            <span class="n">markup</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">document_type</span> <span class="o">==</span> <span class="s2">&quot;xml&quot;</span> <span class="k">else</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Document.copy"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Document</span><span class="p">:</span>
+        <span class="n">cj</span> <span class="o">=</span> <span class="n">CookieJar</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span><span class="p">:</span>
+            <span class="n">cj</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">head</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">,</span>
+            <span class="n">body</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
+            <span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">),</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span>
+            <span class="n">document_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">document_type</span><span class="p">,</span>
+            <span class="n">cookies</span><span class="o">=</span><span class="n">cj</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Document.save"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Save response body to file.&quot;&quot;&quot;</span>
+        <span class="n">path_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_dir</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">suppress</span><span class="p">(</span><span class="ne">OSError</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path_dir</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bytes_body</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bytes_body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Document.status"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.status">[docs]</a>    <span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">code</span></div>
+
+    <span class="nd">@status</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Document.json"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.json">[docs]</a>    <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return response body deserialized into JSON object.&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Document.url_details"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.url_details">[docs]</a>    <span class="k">def</span> <span class="nf">url_details</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SplitResult</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return result of urlsplit function applied to response url.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">urlsplit</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Document.query_param"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.query_param">[docs]</a>    <span class="k">def</span> <span class="nf">query_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return value of parameter in query string.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">parse_qs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url_details</span><span class="p">()</span><span class="o">.</span><span class="n">query</span><span class="p">)[</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Document.browse"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.browse">[docs]</a>    <span class="k">def</span> <span class="nf">browse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Save response in temporary file and open it in GUI browser.&quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;file://&quot;</span> <span class="o">+</span> <span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Document.__getstate__"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.__getstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Reset cached lxml objects which could not be pickled.&quot;&quot;&quot;</span>
+        <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
+            <span class="n">cls_slots</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__slots__&quot;</span><span class="p">,</span> <span class="p">())</span>
+            <span class="k">for</span> <span class="n">slot_name</span> <span class="ow">in</span> <span class="n">cls_slots</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot_name</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">slot_name</span> <span class="o">==</span> <span class="s2">&quot;cookies&quot;</span><span class="p">:</span>
+                        <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_cookies_items&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cookies</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">state</span><span class="p">[</span><span class="n">slot_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot_name</span><span class="p">)</span>
+        <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_lxml_tree&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_strict_lxml_tree&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_lxml_form&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">state</span></div>
+
+<div class="viewcode-block" id="Document.__setstate__"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.__setstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># TODO: check assigned key is in slots</span>
+        <span class="k">for</span> <span class="n">slot_name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">slot_name</span> <span class="o">==</span> <span class="s2">&quot;_cookies_items&quot;</span><span class="p">:</span>
+                <span class="n">jar</span> <span class="o">=</span> <span class="n">CookieJar</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                    <span class="n">jar</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span> <span class="o">=</span> <span class="n">jar</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+    <span class="c1"># TextExtension methods</span>
+
+<div class="viewcode-block" id="Document.text_search"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.text_search">[docs]</a>    <span class="k">def</span> <span class="nf">text_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">anchor</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Search the substring in response body.</span>
+
+<span class="sd">        :param anchor: string to search</span>
+<span class="sd">        :param byte: if False then `anchor` should be the</span>
+<span class="sd">            unicode string, and search will be performed in</span>
+<span class="sd">            `response.unicode_body()` else `anchor` should be the byte-string</span>
+<span class="sd">            and search will be performed in `response.body`</span>
+
+<span class="sd">        If substring is found return True else False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">anchor</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">anchor</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unicode_body</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">anchor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span></div>
+
+<div class="viewcode-block" id="Document.text_assert"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.text_assert">[docs]</a>    <span class="k">def</span> <span class="nf">text_assert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">anchor</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;If `anchor` is not found then raise `DataNotFound` exception.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_search</span><span class="p">(</span><span class="n">anchor</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DataNotFound</span><span class="p">(</span><span class="s2">&quot;Substring not found: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anchor</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="Document.text_assert_any"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.text_assert_any">[docs]</a>    <span class="k">def</span> <span class="nf">text_assert_any</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">anchors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;If no `anchors` were found then raise `DataNotFound` exception.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text_search</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">anchors</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DataNotFound</span><span class="p">(</span>
+                <span class="s2">&quot;Substrings not found: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">anchors</span><span class="p">))</span>
+            <span class="p">)</span></div>
+
+    <span class="c1"># RegexpExtension methods</span>
+
+<div class="viewcode-block" id="Document.rex_text"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.rex_text">[docs]</a>    <span class="k">def</span> <span class="nf">rex_text</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">regexp</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="n">Pattern</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">Pattern</span><span class="p">[</span><span class="nb">bytes</span><span class="p">],</span>
+        <span class="n">flags</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return content of first matching group of regexp found in response body.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rex_search</span><span class="p">(</span><span class="n">regexp</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">DataNotFound</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">NULL</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DataNotFound</span><span class="p">(</span><span class="s2">&quot;Regexp not found&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span>
+            <span class="k">return</span> <span class="n">default</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Document.rex_search"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.rex_search">[docs]</a>    <span class="k">def</span> <span class="nf">rex_search</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">regexp</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="n">Pattern</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">Pattern</span><span class="p">[</span><span class="nb">bytes</span><span class="p">],</span>
+        <span class="n">flags</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Search the regular expression in response body.</span>
+
+<span class="sd">        Return found match object or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">match</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Match</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]</span> <span class="o">|</span> <span class="n">Match</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">regexp</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="n">regexp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regexp</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">regexp</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">regexp</span><span class="o">.</span><span class="n">pattern</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">regexp</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unicode_body</span><span class="p">()))</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">match</span>
+        <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">NULL</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DataNotFound</span><span class="p">(</span><span class="s2">&quot;Could not find regexp: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">regexp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">default</span></div>
+
+<div class="viewcode-block" id="Document.rex_assert"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.rex_assert">[docs]</a>    <span class="k">def</span> <span class="nf">rex_assert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">rex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="n">Pattern</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">Pattern</span><span class="p">[</span><span class="nb">bytes</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Raise `DataNotFound` exception if `rex` expression is not found.&quot;&quot;&quot;</span>
+        <span class="c1"># if given regexp not found, rex_search() will raise DataNotFound</span>
+        <span class="c1"># because default argument is not set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rex_search</span><span class="p">(</span><span class="n">rex</span><span class="p">)</span></div>
+
+    <span class="c1"># PyqueryExtension methods</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Document.pyquery"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.pyquery">[docs]</a>    <span class="k">def</span> <span class="nf">pyquery</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return pyquery handler.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyquery</span><span class="p">:</span>
+            <span class="c1"># pytype: disable=import-error</span>
+            <span class="kn">from</span> <span class="nn">pyquery</span> <span class="kn">import</span> <span class="n">PyQuery</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
+            <span class="c1"># pytype: enable=import-error</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pyquery</span> <span class="o">=</span> <span class="n">PyQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pyquery</span></div>
+
+    <span class="c1"># BodyExtension methods</span>
+
+<div class="viewcode-block" id="Document.get_body_chunk"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.get_body_chunk">[docs]</a>    <span class="k">def</span> <span class="nf">get_body_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bytes_body</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bytes_body</span><span class="p">[:</span><span class="mi">4096</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Document.unicode_body"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.unicode_body">[docs]</a>    <span class="k">def</span> <span class="nf">unicode_body</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span><span class="p">:</span>  <span class="c1"># , ignore_errors: bool = True) -&gt; None | str:</span>
+        <span class="sd">&quot;&quot;&quot;Return response body as unicode string.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unicode_body</span><span class="p">:</span>
+            <span class="c1"># FIXME: ignore_errors option</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unicode_body</span> <span class="o">=</span> <span class="n">unicodec</span><span class="o">.</span><span class="n">decode_content</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unicode_body</span></div>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Document.body"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.body">[docs]</a>    <span class="k">def</span> <span class="nf">body</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bytes_body</span><span class="p">)</span></div>
+
+    <span class="nd">@body</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">GrabMisuseError</span><span class="p">(</span><span class="s2">&quot;Document body could be set only in constructor&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Document.set_body"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.set_body">[docs]</a>    <span class="k">def</span> <span class="nf">set_body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bytes_body</span> <span class="o">=</span> <span class="n">body</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unicode_body</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="c1"># DomTreeExtension methods</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Document.tree"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.tree">[docs]</a>    <span class="k">def</span> <span class="nf">tree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Element</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return DOM tree of the document built with HTML DOM builder.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">document_type</span> <span class="o">==</span> <span class="s2">&quot;xml&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_xml_tree</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_html_tree</span><span class="p">()</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Document.wrap_io"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.wrap_io">[docs]</a>    <span class="k">def</span> <span class="nf">wrap_io</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StringIO</span> <span class="o">|</span> <span class="n">BytesIO</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">BytesIO</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">StringIO</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Document._build_dom"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document._build_dom">[docs]</a>    <span class="k">def</span> <span class="nf">_build_dom</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Element</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="s2">&quot;xml&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;html&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">THREAD_STORAGE</span><span class="p">,</span> <span class="s2">&quot;html_parsers&quot;</span><span class="p">):</span>
+                <span class="n">THREAD_STORAGE</span><span class="o">.</span><span class="n">html_parsers</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">parser</span> <span class="o">=</span> <span class="n">THREAD_STORAGE</span><span class="o">.</span><span class="n">html_parsers</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                <span class="n">encoding</span><span class="p">,</span> <span class="n">HTMLParser</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">dom</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">wrap_io</span><span class="p">(</span><span class="n">content</span><span class="p">),</span> <span class="n">parser</span><span class="o">=</span><span class="n">parser</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dom</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">THREAD_STORAGE</span><span class="p">,</span> <span class="s2">&quot;xml_parser&quot;</span><span class="p">):</span>
+            <span class="n">THREAD_STORAGE</span><span class="o">.</span><span class="n">xml_parsers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">THREAD_STORAGE</span><span class="o">.</span><span class="n">xml_parsers</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+            <span class="n">encoding</span><span class="p">,</span> <span class="n">etree</span><span class="o">.</span><span class="n">XMLParser</span><span class="p">(</span><span class="n">resolve_entities</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">dom</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">wrap_io</span><span class="p">(</span><span class="n">content</span><span class="p">),</span> <span class="n">parser</span><span class="o">=</span><span class="n">parser</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dom</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Document.build_html_tree"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.build_html_tree">[docs]</a>    <span class="k">def</span> <span class="nf">build_html_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Element</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_tree</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">ubody</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unicode_body</span><span class="p">()</span>
+            <span class="n">body</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ubody</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span> <span class="k">if</span> <span class="n">ubody</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">body</span><span class="p">:</span>
+                <span class="c1"># Generate minimal empty content</span>
+                <span class="c1"># which will not break lxml parser</span>
+                <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&lt;html&gt;&lt;/html&gt;&quot;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_dom</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                <span class="c1"># FIXME: write test for this case</span>
+                <span class="k">if</span> <span class="sa">b</span><span class="s2">&quot;&lt;html&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">body</span> <span class="ow">and</span> <span class="p">(</span>
+                    <span class="c1"># Fix for &quot;just a string&quot; body</span>
+                    <span class="p">(</span>
+                        <span class="nb">isinstance</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="n">etree</span><span class="o">.</span><span class="n">ParserError</span><span class="p">)</span>
+                        <span class="ow">and</span> <span class="s2">&quot;Document is empty&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="c1"># Fix for smth like &quot;&lt;frameset&gt;&lt;/frameset&gt;&quot;</span>
+                    <span class="ow">or</span> <span class="p">(</span>
+                        <span class="nb">isinstance</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span>
+                        <span class="ow">and</span> <span class="s2">&quot;object of type &#39;NoneType&#39; has no len&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&lt;html&gt;</span><span class="si">%s</span><span class="s2">&lt;/html&gt;&quot;</span> <span class="o">%</span> <span class="n">body</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_dom</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_tree</span></div>
+
+<div class="viewcode-block" id="Document.build_xml_tree"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.build_xml_tree">[docs]</a>    <span class="k">def</span> <span class="nf">build_xml_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Element</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strict_lxml_tree</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ubody</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unicode_body</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="n">ubody</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="n">ubody</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_strict_lxml_tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_dom</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strict_lxml_tree</span></div>
+
+    <span class="c1"># FormExtension methods</span>
+
+<div class="viewcode-block" id="Document.choose_form"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.choose_form">[docs]</a>    <span class="k">def</span> <span class="nf">choose_form</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">number</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">xpath</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Set the default form.</span>
+
+<span class="sd">        :param number: number of form (starting from zero)</span>
+<span class="sd">        :param id: value of &quot;id&quot; attribute</span>
+<span class="sd">        :param name: value of &quot;name&quot; attribute</span>
+<span class="sd">        :param xpath: XPath query</span>
+<span class="sd">        :raises: :class:`DataNotFound` if form not found</span>
+<span class="sd">        :raises: :class:`GrabMisuseError`</span>
+<span class="sd">            if method is called without parameters</span>
+
+<span class="sd">        Selected form will be available via `form` attribute of `Grab`</span>
+<span class="sd">        instance. All form methods will work with default form.</span>
+
+<span class="sd">        Examples::</span>
+
+<span class="sd">            # Select second form</span>
+<span class="sd">            g.choose_form(1)</span>
+
+<span class="sd">            # Select by id</span>
+<span class="sd">            g.choose_form(id=&quot;register&quot;)</span>
+
+<span class="sd">            # Select by name</span>
+<span class="sd">            g.choose_form(name=&quot;signup&quot;)</span>
+
+<span class="sd">            # Select by xpath</span>
+<span class="sd">            g.choose_form(xpath=&#39;//form[contains(@action, &quot;/submit&quot;)]&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;//form[@id=&quot;</span><span class="si">{}</span><span class="s1">&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;//form[@name=&quot;</span><span class="si">{}</span><span class="s1">&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">number</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;//form&quot;</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">number</span>
+        <span class="k">elif</span> <span class="n">xpath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="n">xpath</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GrabMisuseError</span><span class="p">(</span>
+                <span class="s2">&quot;choose_form methods requires one of &quot;</span>
+                <span class="s2">&quot;[number, id, name, xpath] arguments&quot;</span>
+            <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_form</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">HtmlElement</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">query</span><span class="p">)[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">node</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DataNotFound</span><span class="p">(</span><span class="s2">&quot;Could not find form with xpath: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">xpath</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span></div>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Document.form"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.form">[docs]</a>    <span class="k">def</span> <span class="nf">form</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FormElement</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return default document&#39;s form.</span>
+
+<span class="sd">        If form was not selected manually then select the form</span>
+<span class="sd">        which has the biggest number of input elements.</span>
+
+<span class="sd">        The form value is just an `lxml.html` form element.</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            g.request(&#39;some URL&#39;)</span>
+<span class="sd">            # Choose form automatically</span>
+<span class="sd">            print g.form</span>
+
+<span class="sd">            # And now choose form manually</span>
+<span class="sd">            g.choose_form(1)</span>
+<span class="sd">            print g.form</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">forms</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">fields</span><span class="p">)))</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">HtmlElement</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">)</span><span class="o">.</span><span class="n">forms</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="n">forms</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">forms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">choose_form</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DataNotFound</span><span class="p">(</span><span class="s2">&quot;Response does not contains any form&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_form</span></div>
+
+<div class="viewcode-block" id="Document.get_cached_form"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.get_cached_form">[docs]</a>    <span class="k">def</span> <span class="nf">get_cached_form</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">FormElement</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get form which has been already selected.</span>
+
+<span class="sd">        Returns None if form has not been selected yet.</span>
+
+<span class="sd">        It is for testing mainly. To not trigger pylint warnings about</span>
+<span class="sd">        accessing protected element.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_form</span></div>
+
+<div class="viewcode-block" id="Document.set_input"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.set_input">[docs]</a>    <span class="k">def</span> <span class="nf">set_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Set the value of form element by its `name` attribute.</span>
+
+<span class="sd">        :param name: name of element</span>
+<span class="sd">        :param value: value which should be set to element</span>
+
+<span class="sd">        To check/uncheck the checkbox pass boolean value.</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            g.set_input(&#39;sex&#39;, &#39;male&#39;)</span>
+
+<span class="sd">            # Check the checkbox</span>
+<span class="sd">            g.set_input(&#39;accept&#39;, True)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">choose_form_by_element</span><span class="p">(</span><span class="s1">&#39;.//*[@name=&quot;</span><span class="si">%s</span><span class="s1">&quot;]&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+        <span class="n">processed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;checkbox&quot;</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="n">elem</span><span class="o">.</span><span class="n">checked</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">processed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">processed</span><span class="p">:</span>
+            <span class="c1"># We need to remember original values of file fields</span>
+            <span class="c1"># Because lxml will convert UploadContent/UploadFile object to</span>
+            <span class="c1"># string</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;file&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_file_fields</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="n">elem</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">elem</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="Document.set_input_by_id"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.set_input_by_id">[docs]</a>    <span class="k">def</span> <span class="nf">set_input_by_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Set the value of form element by its `id` attribute.</span>
+
+<span class="sd">        :param _id: id of element</span>
+<span class="sd">        :param value: value which should be set to element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">xpath</span> <span class="o">=</span> <span class="s1">&#39;.//*[@id=&quot;</span><span class="si">%s</span><span class="s1">&quot;]&#39;</span> <span class="o">%</span> <span class="n">_id</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">choose_form_by_element</span><span class="p">(</span><span class="n">xpath</span><span class="p">)</span>
+        <span class="n">sel</span> <span class="o">=</span> <span class="n">XpathSelector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">sel</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">xpath</span><span class="p">)</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Document.set_input_by_number"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.set_input_by_number">[docs]</a>    <span class="k">def</span> <span class="nf">set_input_by_number</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Set the value of form element by its number in the form.</span>
+
+<span class="sd">        :param number: number of element</span>
+<span class="sd">        :param value: value which should be set to element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sel</span> <span class="o">=</span> <span class="n">XpathSelector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">sel</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;.//input[@type=&quot;text&quot;]&#39;</span><span class="p">)[</span><span class="n">number</span><span class="p">]</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Document.set_input_by_xpath"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.set_input_by_xpath">[docs]</a>    <span class="k">def</span> <span class="nf">set_input_by_xpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xpath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Set the value of form element by xpath.</span>
+
+<span class="sd">        :param xpath: xpath path</span>
+<span class="sd">        :param value: value which should be set to element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">xpath</span><span class="p">)</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Explicitly set the default form</span>
+            <span class="c1"># which contains found element</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">elem</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">getparent</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;form&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_form</span> <span class="o">=</span> <span class="n">parent</span>
+                    <span class="k">break</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span></div>
+
+    <span class="c1"># FIXME:</span>
+    <span class="c1"># * Remove set_input_by_id</span>
+    <span class="c1"># * Remove set_input_by_number</span>
+    <span class="c1"># * New method: set_input_by(id=None, number=None, xpath=None)</span>
+
+<div class="viewcode-block" id="Document.process_extra_post"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.process_extra_post">[docs]</a>    <span class="k">def</span> <span class="nf">process_extra_post</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">post_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+        <span class="n">extra_post_items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+
+        <span class="c1"># Drop existing post items with such key</span>
+        <span class="n">keys_to_drop</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">extra_post_items</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys_to_drop</span><span class="p">:</span>
+            <span class="n">post_items</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">post_items</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="n">key</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">extra_post_items</span><span class="p">:</span>
+            <span class="n">post_items</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">post_items</span></div>
+
+<div class="viewcode-block" id="Document.clean_submit_controls"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.clean_submit_controls">[docs]</a>    <span class="k">def</span> <span class="nf">clean_submit_controls</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">post</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">submit_name</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># All this code need only for one reason:</span>
+        <span class="c1"># to not send multiple submit keys in form data</span>
+        <span class="c1"># in real life only this key is submitted whose button</span>
+        <span class="c1"># was pressed</span>
+
+        <span class="c1"># Build list of submit buttons which have a name</span>
+        <span class="n">submit_control_names</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">elem</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;input&quot;</span>
+                <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;submit&quot;</span>
+                <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">):</span>
+                <span class="n">submit_control_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">submit_control_names</span><span class="p">:</span>
+            <span class="c1"># If name of submit control is not given then</span>
+            <span class="c1"># use the name of first submit control</span>
+            <span class="k">if</span> <span class="n">submit_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">submit_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">submit_control_names</span><span class="p">:</span>
+                <span class="n">submit_name</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">submit_control_names</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># FIXME: possibly need to update post</span>
+            <span class="c1"># if new submit_name is not in post</span>
+
+            <span class="c1"># Form data should contain only one submit control</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">submit_control_names</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="n">submit_name</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">post</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">post</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Document.get_form_request"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.get_form_request">[docs]</a>    <span class="k">def</span> <span class="nf">get_form_request</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">submit_name</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">extra_post</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">remove_from_post</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]:</span>
+        <span class="sd">&quot;&quot;&quot;Submit default form.</span>
+
+<span class="sd">        :param submit_name: name of button which should be &quot;clicked&quot; to</span>
+<span class="sd">            submit form</span>
+<span class="sd">        :param url: explicitly specify form action url</span>
+<span class="sd">        :param extra_post: (dict or list of pairs) additional form data which</span>
+<span class="sd">            will override data automatically extracted from the form.</span>
+<span class="sd">        :param remove_from_post: list of keys to remove from the submitted data</span>
+
+<span class="sd">        Following input elements are automatically processed:</span>
+
+<span class="sd">        * input[type=&quot;hidden&quot;] - default value</span>
+<span class="sd">        * select: value of last option</span>
+<span class="sd">        * radio - ???</span>
+<span class="sd">        * checkbox - ???</span>
+
+<span class="sd">        Multipart forms are correctly recognized by grab library.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">post</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_fields</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clean_submit_controls</span><span class="p">(</span><span class="n">post</span><span class="p">,</span> <span class="n">submit_name</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">action_url</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">urljoin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span> <span class="k">if</span> <span class="n">url</span> <span class="k">else</span> <span class="n">urljoin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># Values from `extra_post` should override values in form</span>
+        <span class="c1"># `extra_post` allows multiple value of one key</span>
+        <span class="c1"># Process saved values of file fields</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span> <span class="ow">and</span> <span class="s2">&quot;multipart&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;enctype&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">post</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="n">post_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">del</span> <span class="n">post</span>
+        <span class="k">if</span> <span class="n">extra_post</span><span class="p">:</span>
+            <span class="n">post_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_extra_post</span><span class="p">(</span>
+                <span class="n">post_items</span><span class="p">,</span> <span class="n">normalize_pairs</span><span class="p">(</span><span class="n">extra_post</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">remove_from_post</span><span class="p">:</span>
+            <span class="n">post_items</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">post_items</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">remove_from_post</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">action_url</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
+            <span class="s2">&quot;multipart&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;enctype&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="n">post_items</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Document.build_fields_to_remove"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.build_fields_to_remove">[docs]</a>    <span class="k">def</span> <span class="nf">build_fields_to_remove</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">form_inputs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">HtmlElement</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">fields_to_remove</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">form_inputs</span><span class="p">:</span>
+            <span class="c1"># Ignore elements without name</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="c1"># Do not submit disabled fields</span>
+            <span class="c1"># http://www.w3.org/TR/html4/interact/forms.html#h-17.12</span>
+            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;disabled&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+                <span class="n">fields_to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;checkbox&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="ow">not</span> <span class="n">elem</span><span class="o">.</span><span class="n">checked</span>
+                    <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">fields</span>
+                    <span class="ow">and</span> <span class="n">fields</span><span class="p">[</span><span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+                <span class="p">):</span>
+                    <span class="n">fields_to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">fields_to_remove</span><span class="p">:</span>
+                <span class="c1"># WHAT THE FUCK DOES THAT MEAN?</span>
+                <span class="n">fields_to_remove</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fields_to_remove</span></div>
+
+<div class="viewcode-block" id="Document.process_form_fields"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.process_form_fields">[docs]</a>    <span class="k">def</span> <span class="nf">process_form_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">fields</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">CheckboxValues</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">val</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">fields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">fields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">fields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">MultipleSelectOptions</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">val</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">fields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">fields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">fields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">val</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Document.form_fields"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.form_fields">[docs]</a>    <span class="k">def</span> <span class="nf">form_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HtmlElement</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return fields of default form.</span>
+
+<span class="sd">        Fill some fields with reasonable values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_form_fields</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">elem</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;select&quot;</span>
+                <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">fields</span>
+                <span class="ow">and</span> <span class="n">fields</span><span class="p">[</span><span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">value_options</span>
+            <span class="p">):</span>
+                <span class="n">fields</span><span class="p">[</span><span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">value_options</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;radio&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fields</span><span class="p">[</span><span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fields</span><span class="p">[</span><span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_fields_to_remove</span><span class="p">(</span><span class="n">fields</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">inputs</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">fields</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">fields</span></div>
+
+<div class="viewcode-block" id="Document.choose_form_by_element"><a class="viewcode-back" href="../../autoapi/grab/document/index.html#grab.document.Document.choose_form_by_element">[docs]</a>    <span class="k">def</span> <span class="nf">choose_form_by_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xpath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">xpath</span><span class="p">)</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">elem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;form&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_form</span> <span class="o">=</span> <span class="n">elem</span>
+                <span class="k">return</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">getparent</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lxml_form</span> <span class="o">=</span> <span class="kc">None</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

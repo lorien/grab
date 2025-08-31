@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grab.errors &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../grab.html">grab</a></li>
+      <li class="breadcrumb-item active">grab.errors</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for grab.errors</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Custom exception which Grab instance could generate.</span>
+
+<span class="sd">Exceptions</span>
+<span class="sd">----------</span>
+<span class="sd">- GrabError</span>
+<span class="sd">    - GrabNetworkError</span>
+<span class="sd">        - GrabTimeoutError</span>
+<span class="sd">        - GrabConnectionError</span>
+<span class="sd">        - GrabCouldNotResolveHostError</span>
+<span class="sd">    - GrabAuthError</span>
+<span class="sd">    - GrabMisuseError</span>
+<span class="sd">    - GrabTooManyRedirectsError</span>
+<span class="sd">    - GrabInvalidUrl</span>
+<span class="sd">    - GrabInternalError</span>
+<span class="sd">    - GrabFeatureIsDeprecated</span>
+<span class="sd">    - ResponseNotValid</span>
+<span class="sd">- DataNotFound == IndexError</span>
+
+<span class="sd">Warnings</span>
+<span class="sd">--------</span>
+<span class="sd">- GrabDeprecationWarning</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+
+<div class="viewcode-block" id="GrabError"><a class="viewcode-back" href="../../autoapi/grab/index.html#grab.errors.GrabError">[docs]</a><span class="k">class</span> <span class="nc">GrabError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;All custom Grab exception should be children of that class.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="OriginalExceptionGrabError"><a class="viewcode-back" href="../../autoapi/grab/errors/index.html#grab.errors.OriginalExceptionGrabError">[docs]</a><span class="k">class</span> <span class="nc">OriginalExceptionGrabError</span><span class="p">(</span><span class="n">GrabError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sub-class which constructor accepts original exception as second argument.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">original_exc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">original_exc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GrabNetworkError"><a class="viewcode-back" href="../../autoapi/grab/index.html#grab.errors.GrabNetworkError">[docs]</a><span class="k">class</span> <span class="nc">GrabNetworkError</span><span class="p">(</span><span class="n">OriginalExceptionGrabError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raises in case of network error.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="GrabTimeoutError"><a class="viewcode-back" href="../../autoapi/grab/index.html#grab.errors.GrabTimeoutError">[docs]</a><span class="k">class</span> <span class="nc">GrabTimeoutError</span><span class="p">(</span><span class="n">GrabNetworkError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raises when configured time is outed for the request.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="GrabConnectionError"><a class="viewcode-back" href="../../autoapi/grab/errors/index.html#grab.errors.GrabConnectionError">[docs]</a><span class="k">class</span> <span class="nc">GrabConnectionError</span><span class="p">(</span><span class="n">GrabNetworkError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when it is not possible to establish network connection.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="GrabCouldNotResolveHostError"><a class="viewcode-back" href="../../autoapi/grab/errors/index.html#grab.errors.GrabCouldNotResolveHostError">[docs]</a><span class="k">class</span> <span class="nc">GrabCouldNotResolveHostError</span><span class="p">(</span><span class="n">GrabNetworkError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when couldn&#39;t resolve host. The given remote host was not resolved.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="GrabAuthError"><a class="viewcode-back" href="../../autoapi/grab/errors/index.html#grab.errors.GrabAuthError">[docs]</a><span class="k">class</span> <span class="nc">GrabAuthError</span><span class="p">(</span><span class="n">GrabError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when remote server denies authentication credentials.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="GrabMisuseError"><a class="viewcode-back" href="../../autoapi/grab/index.html#grab.errors.GrabMisuseError">[docs]</a><span class="k">class</span> <span class="nc">GrabMisuseError</span><span class="p">(</span><span class="n">GrabError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Indicates incorrect usage of grab API.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="GrabTooManyRedirectsError"><a class="viewcode-back" href="../../autoapi/grab/errors/index.html#grab.errors.GrabTooManyRedirectsError">[docs]</a><span class="k">class</span> <span class="nc">GrabTooManyRedirectsError</span><span class="p">(</span><span class="n">GrabError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when max. allowed number of redirects is reaced.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="GrabInvalidUrl"><a class="viewcode-back" href="../../autoapi/grab/errors/index.html#grab.errors.GrabInvalidUrl">[docs]</a><span class="k">class</span> <span class="nc">GrabInvalidUrl</span><span class="p">(</span><span class="n">GrabError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when error occurred while normalizing URL e.g. IDN processing.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="GrabInvalidResponse"><a class="viewcode-back" href="../../autoapi/grab/errors/index.html#grab.errors.GrabInvalidResponse">[docs]</a><span class="k">class</span> <span class="nc">GrabInvalidResponse</span><span class="p">(</span><span class="n">OriginalExceptionGrabError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when network response&#39;s data could not be processed.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="GrabInternalError"><a class="viewcode-back" href="../../autoapi/grab/errors/index.html#grab.errors.GrabInternalError">[docs]</a><span class="k">class</span> <span class="nc">GrabInternalError</span><span class="p">(</span><span class="n">OriginalExceptionGrabError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="GrabFeatureIsDeprecated"><a class="viewcode-back" href="../../autoapi/grab/errors/index.html#grab.errors.GrabFeatureIsDeprecated">[docs]</a><span class="k">class</span> <span class="nc">GrabFeatureIsDeprecated</span><span class="p">(</span><span class="n">GrabError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when user tries to use feature that is deprecated and has been dropped.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="raise_feature_is_deprecated"><a class="viewcode-back" href="../../autoapi/grab/errors/index.html#grab.errors.raise_feature_is_deprecated">[docs]</a><span class="k">def</span> <span class="nf">raise_feature_is_deprecated</span><span class="p">(</span><span class="n">feature_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">GrabFeatureIsDeprecated</span><span class="p">(</span>
+        <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is deprecated and have been disabled&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+<span class="c1"># @date: Dec 08, 2022</span>
+<span class="c1"># @comment:</span>
+<span class="c1"># Previously DataNotFound (sublass of IndexError) exception were in weblib package.</span>
+<span class="c1"># I am moving away from using weblib package.</span>
+<span class="c1"># To minimize failures in external code which uses DataNotFound class I make</span>
+<span class="c1"># it alias of IndexError</span>
+<div class="viewcode-block" id="DataNotFound"><a class="viewcode-back" href="../../autoapi/grab/index.html#grab.errors.DataNotFound">[docs]</a><span class="n">DataNotFound</span> <span class="o">=</span> <span class="ne">IndexError</span></div>
+
+
+<div class="viewcode-block" id="ResponseNotValid"><a class="viewcode-back" href="../../autoapi/grab/errors/index.html#grab.errors.ResponseNotValid">[docs]</a><span class="k">class</span> <span class="nc">ResponseNotValid</span><span class="p">(</span><span class="n">GrabError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="GrabDeprecationWarning"><a class="viewcode-back" href="../../autoapi/grab/errors/index.html#grab.errors.GrabDeprecationWarning">[docs]</a><span class="k">class</span> <span class="nc">GrabDeprecationWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Module grab.spider &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Module grab.document" href="grab_document.html" />
+    <link rel="prev" title="Module grab.cookie" href="grab_cookie.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-grab.spider.base">
+<span id="module-grab-spider"></span><span id="api-grab-spider-base"></span><h1>Module grab.spider<a class="headerlink" href="#module-grab.spider.base" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="grab.spider.base.Spider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.base.</span></span><span class="sig-name descname"><span class="pre">Spider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thread_number=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_try_limit=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_try_limit=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_pause=&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority_mode='random'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_cache=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_requests_per_process=10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_pool_size=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_service='threaded'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grab_transport='urllib3'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transport=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider" title="Permalink to this definition">¶</a></dt>
+<dd><p>Asynchronous scraping framework.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.base.Spider.add_task">
+<span class="sig-name descname"><span class="pre">add_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider.add_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider.add_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add task to the task queue.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.base.Spider.check_task_limits">
+<span class="sig-name descname"><span class="pre">check_task_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider.check_task_limits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider.check_task_limits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that task’s network &amp; try counters do not exceed limits.</p>
+<p>Returns:
+* if success: (True, None)
+* if error: (False, reason)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.base.Spider.is_valid_network_response_code">
+<span class="sig-name descname"><span class="pre">is_valid_network_response_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider.is_valid_network_response_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider.is_valid_network_response_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Answer the question: if the response could be handled via
+usual task handler or the task failed and should be processed as error.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.base.Spider.load_proxylist">
+<span class="sig-name descname"><span class="pre">load_proxylist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proxy_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'http'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_change</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider.load_proxylist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider.load_proxylist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load proxy list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> – Proxy source.
+Accepts string (file path, url) or <code class="docutils literal notranslate"><span class="pre">BaseProxySource</span></code> instance.</p></li>
+<li><p><strong>source_type</strong> – The type of the specified source.
+Should be one of the following: ‘text_file’ or ‘url’.</p></li>
+<li><p><strong>proxy_type</strong> – Should be one of the following: ‘socks4’, ‘socks5’ or’http’.</p></li>
+<li><p><strong>auto_change</strong> – If set to <cite>True</cite> then automatical random proxy rotation
+will be used.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Proxy source format should be one of the following (for each line):</dt><dd><ul class="simple">
+<li><p>ip:port</p></li>
+<li><p>ip:port:login:password</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.base.Spider.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>You can do additional spider customization here
+before it has started working. Simply redefine
+this method in your Spider class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.base.Spider.process_grab_proxy">
+<span class="sig-name descname"><span class="pre">process_grab_proxy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grab</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider.process_grab_proxy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider.process_grab_proxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign new proxy from proxylist to the task</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.base.Spider.process_next_page">
+<span class="sig-name descname"><span class="pre">process_next_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grab</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolve_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider.process_next_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider.process_next_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate task for next page.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grab</strong> – Grab instance</p></li>
+<li><p><strong>task</strong> – Task object which should be assigned to next page url</p></li>
+<li><p><strong>xpath</strong> – xpath expression which calculates list of URLS</p></li>
+<li><p><strong>**kwargs</strong> – extra settings for new task object</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">follow_links</span><span class="p">(</span><span class="n">grab</span><span class="p">,</span> <span class="s1">&#39;topic&#39;</span><span class="p">,</span> <span class="s1">&#39;//div[@class=&quot;topic&quot;]/a/@href&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.base.Spider.setup_queue">
+<span class="sig-name descname"><span class="pre">setup_queue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'memory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider.setup_queue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider.setup_queue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup queue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>backend</strong> – Backend name
+Should be one of the following: ‘memory’, ‘redis’ or ‘mongo’.</p></li>
+<li><p><strong>kwargs</strong> – Additional credentials for backend.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.base.Spider.shutdown">
+<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider.shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>You can override this method to do some final actions
+after parsing has been done.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.base.Spider.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method set internal flag which signal spider
+to stop processing new task and shuts down.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.base.Spider.task_generator">
+<span class="sig-name descname"><span class="pre">task_generator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider.task_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider.task_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>You can override this method to load new tasks smoothly.</p>
+<p>It will be used each time as number of tasks
+in task queue is less then number of threads multiplied on 2
+This allows you to not overload all free memory if total number of
+tasks is big.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grab.spider.base.Spider.update_grab_instance">
+<span class="sig-name descname"><span class="pre">update_grab_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grab</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grab/spider/base.html#Spider.update_grab_instance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.base.Spider.update_grab_instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use this method to automatically update config of any
+<cite>Grab</cite> instance created by the spider.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/file_uploading.html">File Uploading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="grab_base.html">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="grab_cookie.html" title="previous chapter">Module grab.cookie</a></li>
+      <li>Next: <a href="grab_document.html" title="next chapter">Module grab.document</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/grab_spider_base.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

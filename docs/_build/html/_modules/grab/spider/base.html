@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grab.spider.base &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../grab.html">grab</a></li>
+          <li class="breadcrumb-item"><a href="../spider.html">grab.spider</a></li>
+      <li class="breadcrumb-item active">grab.spider.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for grab.spider.base</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Empty</span><span class="p">,</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">secrets</span> <span class="kn">import</span> <span class="n">SystemRandom</span>
+<span class="kn">from</span> <span class="nn">traceback</span> <span class="kn">import</span> <span class="n">format_exception</span><span class="p">,</span> <span class="n">format_stack</span>
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">TracebackType</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">cast</span>
+
+<span class="kn">from</span> <span class="nn">procstat</span> <span class="kn">import</span> <span class="n">Stat</span>
+<span class="kn">from</span> <span class="nn">proxylist</span> <span class="kn">import</span> <span class="n">ProxyList</span><span class="p">,</span> <span class="n">ProxyServer</span>
+<span class="kn">from</span> <span class="nn">proxylist.base</span> <span class="kn">import</span> <span class="n">BaseProxySource</span>
+
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">Grab</span>
+<span class="kn">from</span> <span class="nn">..base_transport</span> <span class="kn">import</span> <span class="n">BaseTransport</span>
+<span class="kn">from</span> <span class="nn">..errors</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GrabFeatureIsDeprecated</span><span class="p">,</span>
+    <span class="n">GrabInvalidResponse</span><span class="p">,</span>
+    <span class="n">GrabInvalidUrl</span><span class="p">,</span>
+    <span class="n">GrabMisuseError</span><span class="p">,</span>
+    <span class="n">GrabNetworkError</span><span class="p">,</span>
+    <span class="n">GrabTooManyRedirectsError</span><span class="p">,</span>
+    <span class="n">OriginalExceptionGrabError</span><span class="p">,</span>
+    <span class="n">ResponseNotValid</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..util.metrics</span> <span class="kn">import</span> <span class="n">format_traffic_value</span>
+<span class="kn">from</span> <span class="nn">.errors</span> <span class="kn">import</span> <span class="n">FatalError</span><span class="p">,</span> <span class="n">NoTaskHandler</span><span class="p">,</span> <span class="n">SpiderError</span><span class="p">,</span> <span class="n">SpiderMisuseError</span>
+<span class="kn">from</span> <span class="nn">.interface</span> <span class="kn">import</span> <span class="n">FatalErrorQueueItem</span>
+<span class="kn">from</span> <span class="nn">.queue_backend.base</span> <span class="kn">import</span> <span class="n">BaseTaskQueue</span>
+<span class="kn">from</span> <span class="nn">.queue_backend.memory</span> <span class="kn">import</span> <span class="n">MemoryTaskQueue</span>
+<span class="kn">from</span> <span class="nn">.service.base</span> <span class="kn">import</span> <span class="n">BaseService</span>
+<span class="kn">from</span> <span class="nn">.service.network</span> <span class="kn">import</span> <span class="n">BaseNetworkService</span><span class="p">,</span> <span class="n">NetworkResult</span><span class="p">,</span> <span class="n">NetworkServiceThreaded</span>
+<span class="kn">from</span> <span class="nn">.service.parser</span> <span class="kn">import</span> <span class="n">ParserService</span>
+<span class="kn">from</span> <span class="nn">.service.task_dispatcher</span> <span class="kn">import</span> <span class="n">TaskDispatcherService</span>
+<span class="kn">from</span> <span class="nn">.service.task_generator</span> <span class="kn">import</span> <span class="n">TaskGeneratorService</span>
+<span class="kn">from</span> <span class="nn">.task</span> <span class="kn">import</span> <span class="n">Task</span>
+
+<div class="viewcode-block" id="DEFAULT_TASK_PRIORITY"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.DEFAULT_TASK_PRIORITY">[docs]</a><span class="n">DEFAULT_TASK_PRIORITY</span> <span class="o">=</span> <span class="mi">100</span></div>
+<div class="viewcode-block" id="DEFAULT_NETWORK_STREAM_NUMBER"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.DEFAULT_NETWORK_STREAM_NUMBER">[docs]</a><span class="n">DEFAULT_NETWORK_STREAM_NUMBER</span> <span class="o">=</span> <span class="mi">3</span></div>
+<div class="viewcode-block" id="DEFAULT_TASK_TRY_LIMIT"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.DEFAULT_TASK_TRY_LIMIT">[docs]</a><span class="n">DEFAULT_TASK_TRY_LIMIT</span> <span class="o">=</span> <span class="mi">5</span></div>
+<div class="viewcode-block" id="DEFAULT_NETWORK_TRY_LIMIT"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.DEFAULT_NETWORK_TRY_LIMIT">[docs]</a><span class="n">DEFAULT_NETWORK_TRY_LIMIT</span> <span class="o">=</span> <span class="mi">5</span></div>
+<div class="viewcode-block" id="RANDOM_TASK_PRIORITY_RANGE"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.RANDOM_TASK_PRIORITY_RANGE">[docs]</a><span class="n">RANDOM_TASK_PRIORITY_RANGE</span> <span class="o">=</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span></div>
+<div class="viewcode-block" id="logger"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.logger">[docs]</a><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;grab.spider.base&quot;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="system_random"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.system_random">[docs]</a><span class="n">system_random</span> <span class="o">=</span> <span class="n">SystemRandom</span><span class="p">()</span></div>
+
+
+<span class="c1"># pylint: disable=too-many-instance-attributes, too-many-public-methods</span>
+<div class="viewcode-block" id="Spider"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider">[docs]</a><span class="k">class</span> <span class="nc">Spider</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Asynchronous scraping framework.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Spider.spider_name"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.spider_name">[docs]</a>    <span class="n">spider_name</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="c1"># You can define here some urls and initial tasks</span>
+    <span class="c1"># with name &quot;initial&quot; will be created from these</span>
+    <span class="c1"># urls</span>
+    <span class="c1"># If the logic of generating initial tasks is complex</span>
+    <span class="c1"># then consider to use `task_generator` method instead of</span>
+    <span class="c1"># `initial_urls` attribute</span>
+<div class="viewcode-block" id="Spider.initial_urls"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.initial_urls">[docs]</a>    <span class="n">initial_urls</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+    <span class="c1"># **************</span>
+    <span class="c1"># Public Methods</span>
+    <span class="c1"># **************</span>
+
+    <span class="c1"># pylint: disable=too-many-locals, too-many-arguments</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task_queue</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">BaseTaskQueue</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">thread_number</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">network_try_limit</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">task_try_limit</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">priority_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;random&quot;</span><span class="p">,</span>
+        <span class="n">meta</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">parser_requests_per_process</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+        <span class="n">parser_pool_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">network_service</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">BaseNetworkService</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">grab_transport</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">BaseTransport</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseTransport</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create Spider instance, duh.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        * thread-number - Number of concurrent network streams</span>
+<span class="sd">        * network_try_limit - How many times try to send request</span>
+<span class="sd">            again if network error was occurred, use 0 to disable</span>
+<span class="sd">        * task_try_limit - Limit of tries to execute some task</span>
+<span class="sd">            this is not the same as network_try_limit</span>
+<span class="sd">            network try limit limits the number of tries which</span>
+<span class="sd">            are performed automatically in case of network timeout</span>
+<span class="sd">            of some other physical error</span>
+<span class="sd">            but task_try_limit limits the number of attempts which</span>
+<span class="sd">            are scheduled manually in the spider business logic</span>
+<span class="sd">        * priority_mode - could be &quot;random&quot; or &quot;const&quot;</span>
+<span class="sd">        * meta - arbitrary user data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fatal_error_queue</span><span class="p">:</span> <span class="n">Queue</span><span class="p">[</span><span class="n">FatalErrorQueueItem</span><span class="p">]</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_started</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grab_transport</span> <span class="o">=</span> <span class="n">grab_transport</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser_requests_per_process</span> <span class="o">=</span> <span class="n">parser_requests_per_process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stat</span> <span class="o">=</span> <span class="n">Stat</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtime_events</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_queue</span><span class="p">:</span> <span class="n">BaseTaskQueue</span> <span class="o">=</span> <span class="n">task_queue</span> <span class="k">if</span> <span class="n">task_queue</span> <span class="k">else</span> <span class="n">MemoryTaskQueue</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">meta</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">meta</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thread_number</span> <span class="o">=</span> <span class="n">thread_number</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;thread_number&quot;</span><span class="p">,</span> <span class="n">DEFAULT_NETWORK_STREAM_NUMBER</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_try_limit</span> <span class="o">=</span> <span class="n">task_try_limit</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;task_try_limit&quot;</span><span class="p">,</span> <span class="n">DEFAULT_TASK_TRY_LIMIT</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network_try_limit</span> <span class="o">=</span> <span class="n">network_try_limit</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;network_try_limit&quot;</span><span class="p">,</span> <span class="n">DEFAULT_NETWORK_TRY_LIMIT</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">priority_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;random&quot;</span><span class="p">,</span> <span class="s2">&quot;const&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">SpiderMisuseError</span><span class="p">(</span>
+                <span class="s1">&#39;Value of priority_mode option should be &quot;random&quot; or &quot;const&quot;&#39;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">priority_mode</span> <span class="o">=</span> <span class="n">priority_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">work_allowed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxylist_enabled</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxylist</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ProxyList</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ProxyServer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxy_auto_change</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser_pool_size</span> <span class="o">=</span> <span class="n">parser_pool_size</span>
+        <span class="k">assert</span> <span class="n">network_service</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">network_service</span><span class="p">,</span> <span class="n">BaseNetworkService</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network_service</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">network_service</span>
+            <span class="k">if</span> <span class="n">network_service</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">NetworkServiceThreaded</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fatal_error_queue</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">thread_number</span><span class="p">,</span>
+                <span class="n">process_task</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">srv_process_task</span><span class="p">,</span>
+                <span class="n">get_task_from_queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_task_from_queue</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_dispatcher</span> <span class="o">=</span> <span class="n">TaskDispatcherService</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fatal_error_queue</span><span class="p">,</span>
+            <span class="n">process_service_result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">srv_process_service_result</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser_service</span> <span class="o">=</span> <span class="n">ParserService</span><span class="p">(</span>
+            <span class="n">fatal_error_queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fatal_error_queue</span><span class="p">,</span>
+            <span class="n">pool_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parser_pool_size</span><span class="p">,</span>
+            <span class="n">task_dispatcher</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">task_dispatcher</span><span class="p">,</span>
+            <span class="n">stat</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">,</span>
+            <span class="n">parser_requests_per_process</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parser_requests_per_process</span><span class="p">,</span>
+            <span class="n">find_task_handler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">find_task_handler</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_generator_service</span> <span class="o">=</span> <span class="n">TaskGeneratorService</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fatal_error_queue</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">task_generator</span><span class="p">(),</span>
+            <span class="n">thread_number</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">thread_number</span><span class="p">,</span>
+            <span class="n">get_task_queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_task_queue</span><span class="p">,</span>
+            <span class="n">parser_service</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parser_service</span><span class="p">,</span>
+            <span class="n">task_dispatcher</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">task_dispatcher</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="Spider.collect_runtime_event"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.collect_runtime_event">[docs]</a>    <span class="k">def</span> <span class="nf">collect_runtime_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtime_events</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+    <span class="c1"># pylint: enable=too-many-locals, too-many-arguments</span>
+
+<div class="viewcode-block" id="Spider.setup_queue"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.setup_queue">[docs]</a>    <span class="k">def</span> <span class="nf">setup_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">_args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Set up queue.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">GrabFeatureIsDeprecated</span><span class="p">(</span>
+            <span class="sd">&quot;&quot;&quot;Method Spider.setup_queue is deprecated. Now MemoryTaskQueue is used</span>
+<span class="sd">            by default. If you need custom task queue pass instance of queue class</span>
+<span class="sd">            in task_queue parameter in constructor of Spider class.&quot;&quot;&quot;</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.add_task"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.add_task">[docs]</a>    <span class="k">def</span> <span class="nf">add_task</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
+        <span class="n">queue</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">BaseTaskQueue</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Add task to the task queue.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">queue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_queue</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">priority</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">task</span><span class="o">.</span><span class="n">priority_set_explicitly</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_task_priority</span><span class="p">()</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">priority_set_explicitly</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">priority_set_explicitly</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">task</span><span class="o">.</span><span class="n">url</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">task</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;http://&quot;</span><span class="p">,</span> <span class="s2">&quot;https://&quot;</span><span class="p">,</span> <span class="s2">&quot;ftp://&quot;</span><span class="p">,</span> <span class="s2">&quot;file://&quot;</span><span class="p">,</span> <span class="s2">&quot;feed://&quot;</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">collect_runtime_event</span><span class="p">(</span><span class="s2">&quot;task-with-invalid-url&quot;</span><span class="p">,</span> <span class="n">task</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid task URL: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">task</span><span class="o">.</span><span class="n">url</span>
+            <span class="k">if</span> <span class="n">raise_error</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SpiderError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">Traceback:</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">msg</span><span class="p">,</span>
+                <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">format_stack</span><span class="p">()),</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="c1"># TODO: keep original task priority if it was set explicitly</span>
+        <span class="c1"># WTF the previous comment means?</span>
+        <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">schedule_time</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">schedule_time</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Spider.stop"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Instruct spider to stop processing new tasks and start shutting down.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">work_allowed</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Spider.load_proxylist"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.load_proxylist">[docs]</a>    <span class="k">def</span> <span class="nf">load_proxylist</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">BaseProxySource</span><span class="p">,</span>
+        <span class="n">source_type</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">proxy_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;http&quot;</span><span class="p">,</span>
+        <span class="n">auto_init</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">auto_change</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Load proxy list.</span>
+
+<span class="sd">        :param source: Proxy source.</span>
+<span class="sd">            Accepts string (file path, url) or ``BaseProxySource`` instance.</span>
+<span class="sd">        :param source_type: The type of the specified source.</span>
+<span class="sd">            Should be one of the following: &#39;text_file&#39; or &#39;url&#39;.</span>
+<span class="sd">        :param proxy_type:</span>
+<span class="sd">            Should be one of the following: &#39;socks4&#39;, &#39;socks5&#39; or&#39;http&#39;.</span>
+<span class="sd">        :param auto_change:</span>
+<span class="sd">            If set to `True` then automatically random proxy rotation</span>
+<span class="sd">            will be used.</span>
+
+<span class="sd">        Proxy source format should be one of the following (for each line):</span>
+<span class="sd">        - ip:port</span>
+<span class="sd">        - ip:port:login:password</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">BaseProxySource</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proxylist</span> <span class="o">=</span> <span class="n">ProxyList</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">source_type</span> <span class="o">==</span> <span class="s2">&quot;text_file&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proxylist</span> <span class="o">=</span> <span class="n">ProxyList</span><span class="o">.</span><span class="n">from_local_file</span><span class="p">(</span>
+                    <span class="n">source</span><span class="p">,</span> <span class="n">proxy_type</span><span class="o">=</span><span class="n">proxy_type</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">source_type</span> <span class="o">==</span> <span class="s2">&quot;url&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proxylist</span> <span class="o">=</span> <span class="n">ProxyList</span><span class="o">.</span><span class="n">from_network_file</span><span class="p">(</span>
+                    <span class="n">source</span><span class="p">,</span> <span class="n">proxy_type</span><span class="o">=</span><span class="n">proxy_type</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SpiderMisuseError</span><span class="p">(</span>
+                    <span class="s2">&quot;Method `load_proxylist` received &quot;</span>
+                    <span class="s2">&quot;invalid `source_type` argument: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">source_type</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SpiderMisuseError</span><span class="p">(</span>
+                <span class="s2">&quot;Method `load_proxylist` received &quot;</span>
+                <span class="s2">&quot;invalid `source` argument: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">source</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxylist_enabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">auto_change</span> <span class="ow">and</span> <span class="n">auto_init</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxylist</span><span class="o">.</span><span class="n">get_random_server</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">proxy_type</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">GrabMisuseError</span><span class="p">(</span><span class="s2">&quot;Could not use proxy without defined proxy type&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxy_auto_change</span> <span class="o">=</span> <span class="n">auto_change</span></div>
+
+<div class="viewcode-block" id="Spider.render_stats"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.render_stats">[docs]</a>    <span class="k">def</span> <span class="nf">render_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;------------ Stats: ------------&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Counters:&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Process counters</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">counters</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">item</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Lists:&quot;</span><span class="p">)</span>
+        <span class="c1"># Process event lists sorted by size in descendant order</span>
+        <span class="n">col_sizes</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runtime_events</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="n">col_sizes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">col_sizes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">col_size</span> <span class="ow">in</span> <span class="n">col_sizes</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">%s</span><span class="s2">: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">col_size</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Process extra metrics</span>
+        <span class="k">if</span> <span class="s2">&quot;download-size&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">counters</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;Network download: </span><span class="si">%s</span><span class="s2">&quot;</span>
+                <span class="o">%</span> <span class="n">format_traffic_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">counters</span><span class="p">[</span><span class="s2">&quot;download-size&quot;</span><span class="p">])</span>
+            <span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;Queue size: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_queue</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_queue</span> <span class="k">else</span> <span class="s2">&quot;NA&quot;</span>
+        <span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Network streams: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">thread_number</span><span class="p">)</span>
+        <span class="n">elapsed</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_started</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_started</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">hours</span><span class="p">,</span> <span class="n">seconds</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">elapsed</span><span class="p">,</span> <span class="mi">3600</span><span class="p">)</span>
+        <span class="n">minutes</span><span class="p">,</span> <span class="n">seconds</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Time elapsed: </span><span class="si">%d</span><span class="s2">:</span><span class="si">%d</span><span class="s2">:</span><span class="si">%d</span><span class="s2"> (H:M:S)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">hours</span><span class="p">,</span> <span class="n">minutes</span><span class="p">,</span> <span class="n">seconds</span><span class="p">))</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;End time: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> %b %Y, %H:%M:%S UTC&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span></div>
+
+    <span class="c1"># ********************************</span>
+    <span class="c1"># Methods for spider customization</span>
+    <span class="c1"># ********************************</span>
+
+<div class="viewcode-block" id="Spider.prepare"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Do additional spider customization here.</span>
+
+<span class="sd">        This method runs before spider has started working.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="Spider.shutdown"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Override this method to do some final actions after parsing has been done.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="Spider.update_grab_instance"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.update_grab_instance">[docs]</a>    <span class="k">def</span> <span class="nf">update_grab_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab</span><span class="p">:</span> <span class="n">Grab</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Update config of any `Grab` instance created by the spider.</span>
+
+<span class="sd">        WTF it means?</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="Spider.create_grab_instance"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.create_grab_instance">[docs]</a>    <span class="k">def</span> <span class="nf">create_grab_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Grab</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Grab</span><span class="p">(</span><span class="n">transport</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grab_transport</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.task_generator"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.task_generator">[docs]</a>    <span class="k">def</span> <span class="nf">task_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Task</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;You can override this method to load new tasks.</span>
+
+<span class="sd">        It will be used each time as number of tasks</span>
+<span class="sd">        in task queue is less then number of threads multiplied on 2</span>
+<span class="sd">        This allows you to not overload all free memory if total number of</span>
+<span class="sd">        tasks is big.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">yield from</span> <span class="p">()</span></div>
+
+    <span class="c1"># ***************</span>
+    <span class="c1"># Private Methods</span>
+    <span class="c1"># ***************</span>
+
+<div class="viewcode-block" id="Spider.check_task_limits"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.check_task_limits">[docs]</a>    <span class="k">def</span> <span class="nf">check_task_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Check that task&#39;s network &amp; try counters do not exceed limits.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        * if success: (True, None)</span>
+<span class="sd">        * if error: (False, reason)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">task_try_count</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_try_limit</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;task-try-count&quot;</span>
+
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">network_try_count</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_try_limit</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;network-try-count&quot;</span>
+
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;ok&quot;</span></div>
+
+<div class="viewcode-block" id="Spider.generate_task_priority"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.generate_task_priority">[docs]</a>    <span class="k">def</span> <span class="nf">generate_task_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">priority_mode</span> <span class="o">==</span> <span class="s2">&quot;const&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DEFAULT_TASK_PRIORITY</span>
+        <span class="k">return</span> <span class="n">system_random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="o">*</span><span class="n">RANDOM_TASK_PRIORITY_RANGE</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.process_initial_urls"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.process_initial_urls">[docs]</a>    <span class="k">def</span> <span class="nf">process_initial_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_urls</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_urls</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">Task</span><span class="p">(</span><span class="s2">&quot;initial&quot;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Spider.get_task_from_queue"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.get_task_from_queue">[docs]</a>    <span class="k">def</span> <span class="nf">get_task_from_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">|</span> <span class="n">Task</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_queue</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">size</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Spider.setup_grab_for_task"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.setup_grab_for_task">[docs]</a>    <span class="k">def</span> <span class="nf">setup_grab_for_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Grab</span><span class="p">:</span>
+        <span class="n">grab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_grab_instance</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">grab_config</span><span class="p">:</span>
+            <span class="n">grab</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">grab_config</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">grab</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+
+        <span class="c1"># Generate new common headers</span>
+        <span class="n">grab</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;common_headers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grab</span><span class="o">.</span><span class="n">common_headers</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_grab_instance</span><span class="p">(</span><span class="n">grab</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grab</span></div>
+
+<div class="viewcode-block" id="Spider.is_valid_network_response_code"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.is_valid_network_response_code">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_network_response_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Test if response is valid.</span>
+
+<span class="sd">        Valid response is handled with associated task handler.</span>
+<span class="sd">        Failed respoosne is processed with error handler.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">code</span> <span class="o">&lt;</span> <span class="mi">400</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">404</span> <span class="ow">or</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">valid_status</span></div>
+
+<div class="viewcode-block" id="Spider.process_parser_error"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.process_parser_error">[docs]</a>    <span class="k">def</span> <span class="nf">process_parser_error</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
+        <span class="n">exc_info</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="ne">Exception</span><span class="p">],</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">TracebackType</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ex</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">exc_info</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">&quot;spider:error-</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ex</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s2">&quot;Task handler [</span><span class="si">%s</span><span class="s2">] error</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">func_name</span><span class="p">,</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">format_exception</span><span class="p">(</span><span class="o">*</span><span class="n">exc_info</span><span class="p">)),</span>
+        <span class="p">)</span>
+
+        <span class="n">task_url</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">url</span> <span class="k">if</span> <span class="n">task</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collect_runtime_event</span><span class="p">(</span>
+            <span class="s2">&quot;fatal&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">|</span><span class="si">%s</span><span class="s2">|</span><span class="si">%s</span><span class="s2">|</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">),</span> <span class="n">task_url</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.find_task_handler"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.find_task_handler">[docs]</a>    <span class="k">def</span> <span class="nf">find_task_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">callback</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;callback&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">callback</span><span class="p">:</span>
+            <span class="c1"># pylint: disable=deprecated-typing-alias</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">callback</span><span class="p">)</span>
+            <span class="c1"># pylint: enable=deprecated-typing-alias</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># pylint: disable=deprecated-typing-alias</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;task_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="c1"># pylint: enable=deprecated-typing-alias</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoTaskHandler</span><span class="p">(</span>
+                <span class="s2">&quot;No handler or callback defined for &quot;</span> <span class="s2">&quot;task </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">task</span><span class="o">.</span><span class="n">name</span>
+            <span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span></div>
+
+<div class="viewcode-block" id="Spider.log_network_result_stats"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.log_network_result_stats">[docs]</a>    <span class="k">def</span> <span class="nf">log_network_result_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">NetworkResult</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Increase stat counters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">&quot;spider:request-processed&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">&quot;spider:task&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">&quot;spider:task-</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">network_try_count</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">task</span><span class="o">.</span><span class="n">task_try_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">&quot;spider:task-</span><span class="si">%s</span><span class="s2">-initial&quot;</span> <span class="o">%</span> <span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># Update traffic statistics</span>
+        <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;grab&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;grab&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">doc</span><span class="p">:</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;grab&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">doc</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">&quot;spider:download-size&quot;</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">download_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">&quot;spider:upload-size&quot;</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">upload_size</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.process_grab_proxy"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.process_grab_proxy">[docs]</a>    <span class="k">def</span> <span class="nf">process_grab_proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">grab</span><span class="p">:</span> <span class="n">Grab</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Assign new proxy from proxylist to the task.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">use_proxylist</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxylist_enabled</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy_auto_change</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">change_active_proxy</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">grab</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="p">:</span>
+                <span class="n">grab</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span>
+                    <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">get_address</span><span class="p">(),</span>
+                    <span class="n">proxy_userpwd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">get_userpwd</span><span class="p">(),</span>
+                    <span class="n">proxy_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">proxy_type</span><span class="p">,</span>
+                <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.change_active_proxy"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.change_active_proxy">[docs]</a>    <span class="k">def</span> <span class="nf">change_active_proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">grab</span><span class="p">:</span> <span class="n">Grab</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">ProxyList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxylist</span><span class="p">)</span><span class="o">.</span><span class="n">get_random_server</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">proxy_type</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SpiderMisuseError</span><span class="p">(</span>
+                <span class="s1">&#39;Value of priority_mode option should be &quot;random&quot; or &quot;const&quot;&#39;</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.get_task_queue"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.get_task_queue">[docs]</a>    <span class="k">def</span> <span class="nf">get_task_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseTaskQueue</span><span class="p">:</span>
+        <span class="c1"># this method is expected to be called</span>
+        <span class="c1"># after &quot;spider.run()&quot; is called</span>
+        <span class="c1"># i.e. the &quot;self.task_queue&quot; is set</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_queue</span></div>
+
+<div class="viewcode-block" id="Spider.is_idle_estimated"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.is_idle_estimated">[docs]</a>    <span class="k">def</span> <span class="nf">is_idle_estimated</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_generator_service</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_queue</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_dispatcher</span><span class="o">.</span><span class="n">input_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser_service</span><span class="o">.</span><span class="n">input_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser_service</span><span class="o">.</span><span class="n">is_busy</span><span class="p">()</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_service</span><span class="o">.</span><span class="n">get_active_threads_number</span><span class="p">()</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_service</span><span class="o">.</span><span class="n">is_busy</span><span class="p">()</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.is_idle_confirmed"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.is_idle_confirmed">[docs]</a>    <span class="k">def</span> <span class="nf">is_idle_confirmed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">services</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseService</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Test if spider is fully idle.</span>
+
+<span class="sd">        WARNING: As side effect it stops all services to get state of queues</span>
+<span class="sd">        anaffected by sercies.</span>
+
+<span class="sd">        Spider is full idle when all conditions are met:</span>
+<span class="sd">        * all services are paused i.e. the do not change queues</span>
+<span class="sd">        * all queues are empty</span>
+<span class="sd">        * task generator is completed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_idle_estimated</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">srv</span> <span class="ow">in</span> <span class="n">services</span><span class="p">:</span>
+                <span class="n">srv</span><span class="o">.</span><span class="n">pause</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_idle_estimated</span><span class="p">():</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">srv</span> <span class="ow">in</span> <span class="n">services</span><span class="p">:</span>
+                <span class="n">srv</span><span class="o">.</span><span class="n">resume</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Spider.run"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_started</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">services</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_initial_urls</span><span class="p">()</span>
+            <span class="n">services</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">task_dispatcher</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">task_generator_service</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parser_service</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">network_service</span><span class="p">,</span>
+            <span class="p">]</span>
+            <span class="k">for</span> <span class="n">srv</span> <span class="ow">in</span> <span class="n">services</span><span class="p">:</span>
+                <span class="n">srv</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_allowed</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">exc_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fatal_error_queue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># WTF: why? (see below)</span>
+                    <span class="c1"># The trackeback of fatal error MUST BE rendered by the sender</span>
+                    <span class="k">raise</span> <span class="n">exc_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_idle_confirmed</span><span class="p">(</span><span class="n">services</span><span class="p">):</span>
+                    <span class="k">break</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shutdown_services</span><span class="p">(</span><span class="n">services</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">join_threads</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.shutdown_services"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.shutdown_services">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown_services</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">services</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseService</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># TODO:</span>
+        <span class="k">for</span> <span class="n">srv</span> <span class="ow">in</span> <span class="n">services</span><span class="p">:</span>
+            <span class="c1"># Resume service if it has been paused</span>
+            <span class="c1"># to allow service to process stop signal</span>
+            <span class="n">srv</span><span class="o">.</span><span class="n">resume</span><span class="p">()</span>
+            <span class="n">srv</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">while</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">services</span><span class="p">):</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">for</span> <span class="n">srv</span> <span class="ow">in</span> <span class="n">services</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">srv</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;The </span><span class="si">%s</span><span class="s2"> has not stopped :(&quot;</span><span class="p">,</span> <span class="n">srv</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">render_moment</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_queue</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_queue</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Work done&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.log_failed_network_result"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.log_failed_network_result">[docs]</a>    <span class="k">def</span> <span class="nf">log_failed_network_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">NetworkResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">orig_exc</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">res</span><span class="p">[</span><span class="s2">&quot;exc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">original_exc</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;exc&quot;</span><span class="p">],</span> <span class="n">OriginalExceptionGrabError</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;exc&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;http-</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;grab&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;ok&quot;</span><span class="p">]</span>
+            <span class="k">else</span> <span class="n">orig_exc</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">&quot;error:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.log_rejected_task"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.log_rejected_task">[docs]</a>    <span class="k">def</span> <span class="nf">log_rejected_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">reason</span> <span class="o">==</span> <span class="s2">&quot;task-try-count&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">collect_runtime_event</span><span class="p">(</span><span class="s2">&quot;task-count-rejected&quot;</span><span class="p">,</span> <span class="n">task</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">reason</span> <span class="o">==</span> <span class="s2">&quot;network-try-count&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">collect_runtime_event</span><span class="p">(</span><span class="s2">&quot;network-count-rejected&quot;</span><span class="p">,</span> <span class="n">task</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SpiderError</span><span class="p">(</span><span class="s2">&quot;Unknown response from check_task_limits: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">reason</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.get_fallback_handler"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.get_fallback_handler">[docs]</a>    <span class="k">def</span> <span class="nf">get_fallback_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">fallback_name</span><span class="p">:</span>
+            <span class="c1"># pylint: disable=deprecated-typing-alias</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="o">.</span><span class="n">fallback_name</span><span class="p">))</span>
+            <span class="c1"># pylint: enable=deprecated-typing-alias</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">fb_name</span> <span class="o">=</span> <span class="s2">&quot;task_</span><span class="si">%s</span><span class="s2">_fallback&quot;</span> <span class="o">%</span> <span class="n">task</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fb_name</span><span class="p">):</span>
+                <span class="c1"># pylint: disable=deprecated-typing-alias</span>
+                <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fb_name</span><span class="p">))</span>
+                <span class="c1"># pylint: enable=deprecated-typing-alias</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+    <span class="c1"># #################</span>
+    <span class="c1"># REFACTORING STUFF</span>
+    <span class="c1"># #################</span>
+<div class="viewcode-block" id="Spider.srv_process_service_result"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.srv_process_service_result">[docs]</a>    <span class="k">def</span> <span class="nf">srv_process_service_result</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">result</span><span class="p">:</span> <span class="n">Task</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">|</span> <span class="ne">Exception</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
+        <span class="n">meta</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Process result submitted from any service to task dispatcher service.</span>
+
+<span class="sd">        Result could be:</span>
+<span class="sd">        * Task</span>
+<span class="sd">        * None</span>
+<span class="sd">        * Task instance</span>
+<span class="sd">        * ResponseNotValid-based exception</span>
+<span class="sd">        * Arbitrary exception</span>
+<span class="sd">        * Network response:</span>
+<span class="sd">            {ok, ecode, emsg, exc, grab, grab_config_backup}</span>
+
+<span class="sd">        Exception can come only from parser_service and it always has</span>
+<span class="sd">        meta {&quot;from&quot;: &quot;parser&quot;, &quot;exc_info&quot;: &lt;...&gt;}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">meta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">Task</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ResponseNotValid</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
+            <span class="n">error_code</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">&quot;integrity:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">error_code</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">task</span><span class="p">:</span>
+                <span class="n">handler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_task_handler</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+                <span class="n">handler_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="s2">&quot;NONE&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">handler_name</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_parser_error</span><span class="p">(</span>
+                <span class="n">handler_name</span><span class="p">,</span>
+                <span class="n">task</span><span class="p">,</span>
+                <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;exc_info&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">FatalError</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fatal_error_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;exc_info&quot;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;grab&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">srv_process_network_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SpiderError</span><span class="p">(</span><span class="s2">&quot;Unknown result received from a service: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">result</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.srv_process_network_result"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.srv_process_network_result">[docs]</a>    <span class="k">def</span> <span class="nf">srv_process_network_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">NetworkResult</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># TODO: Move to network service</span>
+        <span class="c1"># starts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_network_result_stats</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+        <span class="c1"># ends</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">):</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;ok&quot;</span><span class="p">]:</span>
+            <span class="n">res_code</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;grab&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">code</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid_network_response_code</span><span class="p">(</span><span class="n">res_code</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_valid</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser_service</span><span class="o">.</span><span class="n">input_queue</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">result</span><span class="p">,</span> <span class="n">task</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_failed_network_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="c1"># Try to do network request one more time</span>
+            <span class="c1"># TODO:</span>
+            <span class="c1"># Implement valid_try_limit</span>
+            <span class="c1"># Use it if request failed not because of network error</span>
+            <span class="c1"># But because of content integrity check</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_try_limit</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">setup_grab_config</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;grab_config_backup&quot;</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">&quot;spider:request&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spider.srv_process_task"><a class="viewcode-back" href="../../../autoapi/grab/spider/base/index.html#grab.spider.base.Spider.srv_process_task">[docs]</a>    <span class="k">def</span> <span class="nf">srv_process_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">network_try_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">is_valid</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_task_limits</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_valid</span><span class="p">:</span>
+            <span class="n">grab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_grab_for_task</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+            <span class="n">grab_config_backup</span> <span class="o">=</span> <span class="n">grab</span><span class="o">.</span><span class="n">dump_config</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_grab_proxy</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">grab</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">&quot;spider:request-network&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">&quot;spider:task-</span><span class="si">%s</span><span class="s2">-network&quot;</span> <span class="o">%</span> <span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;ecode&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;emsg&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;grab&quot;</span><span class="p">:</span> <span class="n">grab</span><span class="p">,</span>
+                    <span class="s2">&quot;grab_config_backup&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">grab_config_backup</span><span class="p">),</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
+                    <span class="s2">&quot;exc&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">grab</span><span class="o">.</span><span class="n">request</span><span class="p">()</span>
+                <span class="k">except</span> <span class="p">(</span>
+                    <span class="n">GrabNetworkError</span><span class="p">,</span>
+                    <span class="n">GrabInvalidUrl</span><span class="p">,</span>
+                    <span class="n">GrabInvalidResponse</span><span class="p">,</span>
+                    <span class="n">GrabTooManyRedirectsError</span><span class="p">,</span>
+                <span class="p">)</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;exc&quot;</span><span class="p">:</span> <span class="n">ex</span><span class="p">})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">task_dispatcher</span><span class="o">.</span><span class="n">input_queue</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">result</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_rejected_task</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fallback_handler</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">handler</span><span class="p">:</span>
+                <span class="n">handler</span><span class="p">(</span><span class="n">task</span><span class="p">)</span></div></div>
+
+
+<span class="c1"># pylint: enable=too-many-instance-attributes, too-many-public-methods</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

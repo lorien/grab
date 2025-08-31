@@ -1,0 +1,52 @@
+:py:mod:`grab.spider.queue_backend.base`
+========================================
+
+.. py:module:: grab.spider.queue_backend.base
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.queue_backend.base.BaseTaskQueue
+
+
+
+
+.. py:class:: BaseTaskQueue(**kwargs: Any)
+
+   .. py:method:: random_queue_name() -> str
+
+
+   .. py:method:: put(task: grab.spider.task.Task, priority: int, schedule_time: None | datetime = None) -> None
+      :abstractmethod:
+
+
+   .. py:method:: get() -> grab.spider.task.Task
+      :abstractmethod:
+
+      Return `Task` object or raise `Queue.Empty` exception.
+
+      @returns: `grab.spider.task.Task` object
+      @raises: `Queue.Empty` exception
+
+
+   .. py:method:: size() -> int
+      :abstractmethod:
+
+
+   .. py:method:: clear() -> None
+      :abstractmethod:
+
+      Remove all tasks from the queue.
+
+
+   .. py:method:: close() -> None
+      :abstractmethod:
+
+
+

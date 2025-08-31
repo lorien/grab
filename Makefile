@@ -1,65 +1,42 @@
-.PHONY: bootstrap venv deps dirs clean pytest test release mypy pylint flake8 bandit check build docs eradicate
+.PHONY: build venv deps develop flake flake_verbose test coverage_nobackend coverage coverage_missing clean upload doc doc_ru
 
-SHELL := /bin/bash
-FILES_CHECK_MYPY = grab tests
-FILES_CHECK_ALL = $(FILES_CHECK_MYPY)
-
-init: venv deps dirs
+build: venv deps develop
 
 venv:
-	virtualenv -p python3 .env
-
+	virtualenv --no-site-packages --python=python3 .env
+	
 deps:
 	.env/bin/pip install -r requirements_dev.txt
-	.env/bin/pip install -r requirements_backend.txt
-	.env/bin/pip install -e .[cssselect,pyquery]
+	.env/bin/pip install -r requirements_dev_backend.txt
 
-dirs:
-	if [ ! -e var/run ]; then mkdir -p var/run; fi
-	if [ ! -e var/log ]; then mkdir -p var/log; fi
+develop:
+	.env/bin/python setup.py develop
+
+test:
+	tox -e py34
+
+coverage_nobackend:
+	coverage erase
+	coverage run --source=grab ./runtest.py --test-all
+	coverage report -m
+
+coverage:
+	coverage erase
+	coverage run --source=grab ./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
+	coverage report -m
+
+coverage_missing:
+	coverage erase
+	coverage run --source=grab ./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
+	coverage report -m | grep -v '100%' | grep -v Missing | grep -v -- '----' | sort -k 3 -nr
 
 clean:
 	find -name '*.pyc' -delete
 	find -name '*.swp' -delete
 	find -name '__pycache__' -delete
 
-pytest:
-	pytest -n30 -x --cov grab --cov-report term-missing
+upload:
+	git push --tags; python setup.py clean sdist upload
 
-test: check pytest
-	tox -e python38-check
-
-#release:
-#	git push \
-#	&& git push --tags \
-#	&& make build \
-#	&& twine upload dist/*
-
-mypy:
-	mypy --python-version=3.8 --strict $(FILES_CHECK_MYPY)
-
-pylint:
-	pylint -j0  $(FILES_CHECK_ALL)
-
-flake8:
-	flake8 -j auto --isolated --select CCR --max-cognitive-complexity=17 $(FILES_CHECK_ALL)
-
-ruff:
-	ruff $(FILES_CHECK_ALL)
-
-eradicate:
-	tox -e eradicate -- flake8 -j auto --eradicate-whitelist-extend="License:" $(FILES_CHECK_ALL)
-
-bandit:
-	bandit -qc pyproject.toml -r $(FILES_CHECK_ALL)
-
-check: ruff mypy pylint flake8 bandit
-
-build:
-	rm -rf *.egg-info
-	rm -rf dist/*
-	python -m build --sdist
-
-docs:
-	rm -rf docs/_build/html 
-	sphinx-build -j auto docs docs/_build/html
+viewdoc:
+	x-www-browser docs/en/build/html/index.html

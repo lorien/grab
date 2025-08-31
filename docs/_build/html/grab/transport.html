@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Network Transport &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="What is Grab::Spider?" href="../spider/intro.html" />
+    <link rel="prev" title="Work With Network Response" href="response.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response.html">Work With Network Response</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Network Transport</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#urllib3-transport">Urllib3 transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-your-own-transport">Use your own transport</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Network Transport</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/grab/transport.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="network-transport">
+<span id="grab-transport"></span><h1>Network Transport<a class="headerlink" href="#network-transport" title="Permalink to this heading"></a></h1>
+<p>Network transport is a component which utilize one of well known 3rd-party network packages
+to do network requests and retrieve network response.  At the moment Grab supports only one
+network library: urllib3. You may access transport object with <cite>Grab.transport</cite> attribute.
+In most cases you do not need direct access to transport object.</p>
+<section id="urllib3-transport">
+<h2>Urllib3 transport<a class="headerlink" href="#urllib3-transport" title="Permalink to this heading"></a></h2>
+<p>This transport also could be used in gevent environment.
+The urllib3 uses native python sockets that could be patched by <cite>gevent.monkey.patch_all</cite>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gevent</span>
+<span class="kn">import</span> <span class="nn">gevent.monkey</span>
+<span class="kn">from</span> <span class="nn">grab</span> <span class="kn">import</span> <span class="n">Grab</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+<span class="k">def</span> <span class="nf">worker</span><span class="p">():</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="n">transport</span><span class="o">=</span><span class="s1">&#39;urllib3&#39;</span><span class="p">)</span>
+    <span class="c1"># Request the document that is served with 1 second delay</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;http://httpbin.org/delay/1&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">g</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;headers&#39;</span><span class="p">][</span><span class="s1">&#39;User-Agent&#39;</span><span class="p">]</span>
+
+
+<span class="n">started</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">gevent</span><span class="o">.</span><span class="n">monkey</span><span class="o">.</span><span class="n">patch_all</span><span class="p">()</span>
+<span class="n">pool</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gevent</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="n">worker</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">th</span> <span class="ow">in</span> <span class="n">pool</span><span class="p">:</span>
+    <span class="n">th</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">th</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;Medved&#39;</span>
+<span class="c1"># The total time would be less than 2 seconds</span>
+<span class="c1"># unless you have VERY bad internet connection</span>
+<span class="k">assert</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">started</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</section>
+<section id="use-your-own-transport">
+<h2>Use your own transport<a class="headerlink" href="#use-your-own-transport" title="Permalink to this heading"></a></h2>
+<p>You can implement you own transport class and use it. Just pass
+your transport class to <cite>transport</cite> option.</p>
+<p>Here is minimal example to build Grab transport powered by wget.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">email.message</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">check_output</span>
+
+<span class="kn">from</span> <span class="nn">grab</span> <span class="kn">import</span> <span class="n">Grab</span>
+<span class="kn">from</span> <span class="nn">grab.base_transport</span> <span class="kn">import</span> <span class="n">BaseTransport</span>
+<span class="kn">from</span> <span class="nn">grab.document</span> <span class="kn">import</span> <span class="n">Document</span>
+
+
+<span class="k">class</span> <span class="nc">WgetTransport</span><span class="p">(</span><span class="n">BaseTransport</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">process_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab_config</span><span class="p">,</span> <span class="n">cookies</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_request_url</span> <span class="o">=</span> <span class="n">grab_config</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">check_output</span><span class="p">([</span><span class="s2">&quot;/usr/bin/wget&quot;</span><span class="p">,</span> <span class="s2">&quot;-O&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_url</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_response_body</span> <span class="o">=</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">prepare_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab_config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">document_class</span><span class="o">=</span><span class="n">Document</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">document_class</span><span class="p">(</span>
+            <span class="n">grab_config</span><span class="o">=</span><span class="n">grab_config</span><span class="p">,</span>
+            <span class="n">body</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_response_body</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">email</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">Message</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+    <span class="nd">@contextmanager</span>
+    <span class="k">def</span> <span class="nf">wrap_transport_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">yield</span>
+
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="n">transport</span><span class="o">=</span><span class="n">WgetTransport</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;https://github.com&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">doc</span><span class="p">(</span><span class="s2">&quot;//title&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+<span class="k">assert</span> <span class="s2">&quot;github&quot;</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">doc</span><span class="p">(</span><span class="s2">&quot;//title&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="response.html" class="btn btn-neutral float-left" title="Work With Network Response" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../spider/intro.html" class="btn btn-neutral float-right" title="What is Grab::Spider?" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

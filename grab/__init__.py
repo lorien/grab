@@ -1,26 +1,11 @@
-from .client import HttpClient, request
-from .document import Document
-from .errors import (
-    DataNotFound,
-    GrabError,
-    GrabMisuseError,
-    GrabNetworkError,
-    GrabTimeoutError,
-)
-from .grab import Grab
-from .request import HttpRequest
+from __future__ import absolute_import
 
-__all__ = [
-    "Grab",
-    "DataNotFound",
-    "HttpClient",
-    "HttpRequest",
-    "request",
-    "Document",
-    "GrabError",
-    "GrabMisuseError",
-    "GrabNetworkError",
-    "GrabTimeoutError",
-]
+from weblib.logs import default_logging  # noqa
 
-__version__ = "0.6.41"
+from grab.error import (GrabError, DataNotFound, GrabNetworkError,  # noqa
+                        GrabMisuseError, GrabTimeoutError)
+from grab.upload import UploadContent, UploadFile  # noqa
+from grab.base import Grab  # noqa
+
+__version__ = '0.6.41'
+VERSION_NUMERIC = tuple(map(int, __version__.split('.')))

@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Debugging &#8212; Grab 0.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Work with HTTP Headers" href="request_headers.html" />
+    <link rel="prev" title="Grab Settings" href="settings.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="debugging">
+<span id="grab-debugging"></span><h1>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h1>
+<section id="using-the-logging-module">
+<span id="grab-debugging-logging"></span><h2>Using the logging module<a class="headerlink" href="#using-the-logging-module" title="Permalink to this headline">¶</a></h2>
+<p>The easiest way to see what is going on is to enable DEBUG logging messages.
+Write the following code at every entry point to your program:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>That logging configuration will output all logging messages to console, not
+just from Grab but from other modules too. If you are interested only
+in Grab’s messages:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;grab&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also use a <cite>default_logging</cite> function that configures logging as
+follows:</p>
+<ul class="simple">
+<li><p>all messages of any level except from Grab modules are printed to console</p></li>
+<li><p>all “grab*” messages with level INFO or higher are printed to console</p></li>
+<li><p>all “grab*” messages of any level are saved to /tmp/grab.log</p></li>
+<li><p>all “grab.network*” messages (usually these are URLs being requested) of any
+level are saved to /tmp/grab.network.log</p></li>
+</ul>
+<p>Usage of <cite>default_logging</cite> function is simple:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">weblib.logs</span> <span class="kn">import</span> <span class="n">default_logging</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">default_logging</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="logging-messages-about-network-request">
+<span id="grab-debugging-logging-network"></span><h2>Logging messages about network request<a class="headerlink" href="#logging-messages-about-network-request" title="Permalink to this headline">¶</a></h2>
+<p>For each network request, Grab generates the “grab.network” logging message
+with level DEBUG. Let’s look at an example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">5864</span><span class="p">]</span> <span class="n">GET</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">kino</span><span class="o">-</span><span class="n">govno</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">movies</span><span class="o">/</span><span class="n">rusichi</span> <span class="n">via</span> <span class="mf">188.120.244.68</span><span class="p">:</span><span class="mi">8080</span> <span class="n">proxy</span> <span class="n">of</span> <span class="nb">type</span> <span class="n">http</span> <span class="k">with</span> <span class="n">authorization</span>
+</pre></div>
+</div>
+<p>We can see the requested URL and also that request has ID 5864, that the HTTP
+method is GET, and that the request goes through a proxy with authorization.
+For each network request Grab uses the next ID value from the sequence that is
+shared by all Grab instances. That does mean that even different Grab instances
+will generates network logging messages with unique ID.</p>
+<p>You can also turn on logging of POST request content. Use the <cite>debug_post</cite>
+option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">debug_post</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output will be like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">01</span><span class="p">]</span> <span class="n">POST</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">yandex</span><span class="o">.</span><span class="n">ru</span>
+<span class="n">POST</span> <span class="n">request</span><span class="p">:</span>
+<span class="n">foo</span>                      <span class="p">:</span> <span class="n">bar</span>
+<span class="n">name</span>                     <span class="p">:</span> <span class="n">Ivan</span>
+</pre></div>
+</div>
+</section>
+<section id="saving-the-content-of-requests-and-responses">
+<span id="grab-debugging-response-saving"></span><h2>Saving the content of requests and responses<a class="headerlink" href="#saving-the-content-of-requests-and-responses" title="Permalink to this headline">¶</a></h2>
+<p>You can ask Grab to save the content of each network response to the file
+located at the path passed as the <cite>log_file</cite> option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">log_file</span><span class="o">=</span><span class="s1">&#39;log.html&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Of course, each new response will overwrite the content of the previous
+response.</p>
+<p>If you want to log all traffic, then consider using the <cite>log_dir</cite> option, which
+tells Grab to save the contents of all responses to files inside the specified
+directory. Note that each such file will contain a request ID in its filename.
+For each response, there will be two files: XXX.log and XXX.html. The file
+XXX.html contains the raw response. Even if you requested an image or
+large movie, you’ll get its raw content in that file. The file XXX.log contains
+headers of network response.  If you configure Grab with <cite>debug=True</cite>,
+the file XXX.log will also contain request headers.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Grab</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Grab Settings</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Debugging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-logging-module">Using the logging module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logging-messages-about-network-request">Logging messages about network request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#saving-the-content-of-requests-and-responses">Saving the content of requests and responses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_body.html">Processing the Response Body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_uploading.html">File Uploading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="charset.html">HTML Document Charset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/cache.html">Spider Cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spider/transport.html">Explanation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_base.html">Module grab.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_error.html">Module grab.error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_cookie.html">Module grab.cookie</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_base.html">Module grab.spider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_document.html">Module grab.document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/grab_spider_task.html">Module grab.spider.task</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="settings.html" title="previous chapter">Grab Settings</a></li>
+      <li>Next: <a href="request_headers.html" title="next chapter">Work with HTTP Headers</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015 – 2022, Gregory Petukhov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/grab/debugging.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

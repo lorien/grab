@@ -1,0 +1,90 @@
+:py:mod:`grab.spider.service.base`
+==================================
+
+.. py:module:: grab.spider.service.base
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.service.base.ServiceWorker
+   grab.spider.service.base.BaseService
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   grab.spider.service.base.logger
+
+
+.. py:data:: logger
+   
+
+   
+
+.. py:class:: ServiceWorker(fatal_error_queue: queue.Queue[grab.spider.interface.FatalErrorQueueItem], worker_callback: collections.abc.Callable[Ellipsis, Any])
+
+   .. py:method:: build_thread_name(worker_callback: collections.abc.Callable[Ellipsis, Any]) -> str
+
+
+   .. py:method:: worker_callback_wrapper(callback: collections.abc.Callable[Ellipsis, Any]) -> collections.abc.Callable[Ellipsis, None]
+
+
+   .. py:method:: start() -> None
+
+
+   .. py:method:: stop() -> None
+
+
+   .. py:method:: process_pause_signal() -> None
+
+
+   .. py:method:: pause() -> None
+
+
+   .. py:method:: resume() -> None
+
+
+   .. py:method:: is_alive() -> bool
+
+
+
+.. py:class:: BaseService(fatal_error_queue: queue.Queue[grab.spider.interface.FatalErrorQueueItem])
+
+   .. py:method:: create_worker(worker_action: collections.abc.Callable[Ellipsis, None]) -> ServiceWorker
+
+
+   .. py:method:: iterate_workers(objects: list[ServiceWorker]) -> collections.abc.Iterable[ServiceWorker]
+
+
+   .. py:method:: start() -> None
+
+
+   .. py:method:: stop() -> None
+
+
+   .. py:method:: pause() -> None
+
+
+   .. py:method:: resume() -> None
+
+
+   .. py:method:: register_workers(*args: Any) -> None
+
+
+   .. py:method:: is_busy() -> bool
+
+
+   .. py:method:: is_alive() -> bool
+
+
+

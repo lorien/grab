@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grab.spider.errors &mdash; Grab 0.6.41 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="grab.spider.interface" href="../interface/index.html" />
+    <link rel="prev" title="grab.spider.base" href="../base/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> Grab
+          </a>
+              <div class="version">
+                0.6.41
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/installation.html">Grab Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/testing.html">Testing Grab Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/quickstart.html">Grab Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/request_method.html">Request Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/request_setup.html">Setting up the Grab Request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/settings.html">Grab Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/request_headers.html">Work with HTTP Headers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/redirect.html">Redirect Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/forms.html">Form Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/network_errors.html">Network Errors Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/encoding.html">HTML Document Encoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/cookies.html">Cookie Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/proxy.html">Proxy Server Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/response_search.html">Searching the response body</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/response.html">Work With Network Response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grab/transport.html">Network Transport</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../spider/intro.html">What is Grab::Spider?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../spider/task.html">Task Object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../spider/task_queue.html">Task Queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../spider/error_handling.html">Spider Error Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../spider/transport.html">Explanation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../util/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.util</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../index.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Grab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab</span></code></a></li>
+          <li class="breadcrumb-item"><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.errors</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/autoapi/grab/spider/errors/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-grab.spider.errors">
+<span id="grab-spider-errors"></span><h1><a class="reference internal" href="#module-grab.spider.errors" title="grab.spider.errors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grab.spider.errors</span></code></a><a class="headerlink" href="#module-grab.spider.errors" title="Permalink to this heading"></a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.spider.errors.SpiderError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.errors.</span></span><span class="sig-name descname"><span class="pre">SpiderError</span></span><a class="reference internal" href="../../../../_modules/grab/spider/errors.html#SpiderError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.errors.SpiderError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../errors/index.html#grab.errors.GrabError" title="grab.errors.GrabError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grab.errors.GrabError</span></code></a></p>
+<p>Base class for Spider exceptions.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.spider.errors.SpiderMisuseError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.errors.</span></span><span class="sig-name descname"><span class="pre">SpiderMisuseError</span></span><a class="reference internal" href="../../../../_modules/grab/spider/errors.html#SpiderMisuseError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.errors.SpiderMisuseError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.spider.errors.SpiderError" title="grab.spider.errors.SpiderError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiderError</span></code></a></p>
+<p>Improper usage of Spider framework.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.spider.errors.FatalError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.errors.</span></span><span class="sig-name descname"><span class="pre">FatalError</span></span><a class="reference internal" href="../../../../_modules/grab/spider/errors.html#FatalError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.errors.FatalError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.spider.errors.SpiderError" title="grab.spider.errors.SpiderError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiderError</span></code></a></p>
+<p>Fatal error which should stop parsing process.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.spider.errors.SpiderInternalError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.errors.</span></span><span class="sig-name descname"><span class="pre">SpiderInternalError</span></span><a class="reference internal" href="../../../../_modules/grab/spider/errors.html#SpiderInternalError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.errors.SpiderInternalError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.spider.errors.SpiderError" title="grab.spider.errors.SpiderError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiderError</span></code></a></p>
+<p>Raises when error throwned by internal spider logic.</p>
+<p>Like spider class discovering, CLI error.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.spider.errors.NoTaskHandler">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.errors.</span></span><span class="sig-name descname"><span class="pre">NoTaskHandler</span></span><a class="reference internal" href="../../../../_modules/grab/spider/errors.html#NoTaskHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.errors.NoTaskHandler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.spider.errors.SpiderError" title="grab.spider.errors.SpiderError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiderError</span></code></a></p>
+<p>Raise when no handler found to process network response.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="grab.spider.errors.NoDataHandler">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grab.spider.errors.</span></span><span class="sig-name descname"><span class="pre">NoDataHandler</span></span><a class="reference internal" href="../../../../_modules/grab/spider/errors.html#NoDataHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grab.spider.errors.NoDataHandler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grab.spider.errors.SpiderError" title="grab.spider.errors.SpiderError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiderError</span></code></a></p>
+<p>Raise when no handler found to process Data object.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../base/index.html" class="btn btn-neutral float-left" title="grab.spider.base" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../interface/index.html" class="btn btn-neutral float-right" title="grab.spider.interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015 – 2023, Gregory Petukhov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

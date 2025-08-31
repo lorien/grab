@@ -1,47 +1,23 @@
-sphinx
-myst-nb
-sphinx_rtd_theme
-sphinx-autoapi
-
-tox
-test_server>=0.0.42
-mock
 bumpversion
-pytest
-pytest-xdist
-build
-twine
-ruff
-
 coverage
 coveralls
-pytest-cov
-
-# types
-# FAILS on python 3.7 # types-lxml
-lxml-stubs
-types-urllib3
-types-redis
-
-# Code Quality
-bandit[toml]
+cssselect
+feedparser
 flake8
-# flake8-broken-line # DISABLED, DEPENCIES ISSUES
-flake8-bugbear
-# flake8-commas # DISABLED, do not like C816 missing trailing comma in Python 3.6+
-flake8-comprehensions
-flake8-debugger
-flake8-docstrings
-flake8-expression-complexity
-flake8-isort
-flake8-pep585
-flake8-pie
-# flake8-quotes # DISABLED, BREAKS FLAKE8
-flake8-return
-flake8-simplify
-flake8-string-format
-flake8-cognitive-complexity
-mccabe
-mypy
-pep8-naming
+selenium
+test_server>=0.0.31
+mock
+runscript
+pyprof2calltree
+urllib3
+selection
+pyquery;platform_system!="Windows"
+lxml;platform_system!="Windows"
+pycurl;platform_system!="Windows"
+# to fix appveyor
+item;platform_system!="Windows"
 pylint
+psutil
+tox
+pysocks
+certifi

@@ -1,0 +1,53 @@
+:py:mod:`grab.spider.errors`
+============================
+
+.. py:module:: grab.spider.errors
+
+
+Module Contents
+---------------
+
+.. py:exception:: SpiderError
+
+   Bases: :py:obj:`grab.errors.GrabError`
+
+   Base class for Spider exceptions.
+
+
+.. py:exception:: SpiderMisuseError
+
+   Bases: :py:obj:`SpiderError`
+
+   Improper usage of Spider framework.
+
+
+.. py:exception:: FatalError
+
+   Bases: :py:obj:`SpiderError`
+
+   Fatal error which should stop parsing process.
+
+
+.. py:exception:: SpiderInternalError
+
+   Bases: :py:obj:`SpiderError`
+
+   Raises when error throwned by internal spider logic.
+
+   Like spider class discovering, CLI error.
+
+
+.. py:exception:: NoTaskHandler
+
+   Bases: :py:obj:`SpiderError`
+
+   Raise when no handler found to process network response.
+
+
+.. py:exception:: NoDataHandler
+
+   Bases: :py:obj:`SpiderError`
+
+   Raise when no handler found to process Data object.
+
+
