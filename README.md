@@ -6,6 +6,14 @@ I have reset all project files to the state of recent pypi release 0.6.41 dated 
 
 If you need most recent state of the project before reset, use the commit tagged as "cancelled-refactoring".
 
+## Support
+
+You are welcome to talk about web scraping and data processing in these Telegram chat groups: [@grablab](https://t.me/grablab) (English) and [@grablab\_ru](https://t.me/grablab_ru) (Russian)
+
+To report a bug create new issue in https://github.com/lorien/grab/issues
+
+Documentation: https://grab.readthedocs.io/en/stable/
+
 
 ## What is Grab?
 
@@ -36,6 +44,13 @@ Spider is a framework for writing web-site scrapers. Features:
 * Caching network results in permanent storage
 * Different backends for task queue (in-memory, redis, mongodb)
 * Tools to debug and collect statistics
+
+
+## Installation
+
+Run `pip install -U grab`
+
+See details about installing Grab on different platforms here https://grab.readthedocs.io/en/stable/usage/installation.html
 
 
 ## Grab Example
@@ -93,21 +108,3 @@ class ExampleSpider(Spider):
 bot = ExampleSpider(thread_number=2)
 bot.run()
 ```
-
-
-
-## Installation
-
-Run `pip install -U grab`
-
-See details about installing Grab on different platforms here https://grab.readthedocs.io/en/stable/usage/installation.html
-
-
-## Documentation and Help
-
-Documentation: https://grab.readthedocs.io/en/stable/
-
-
-## Bug Reports
-
-To report a bug create new issue in https://github.com/lorien/grab/issues
