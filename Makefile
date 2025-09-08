@@ -1,33 +1,53 @@
-.PHONY: build venv deps develop flake flake_verbose test coverage_nobackend coverage coverage_missing clean upload doc doc_ru
+.PHONY: init venv deps py2 py2-venv py2-deps dirs test coverage_nobackend coverage coverage_missing clean upload viewdoc
 
-build: venv deps develop
+PY2_ROOT = /home/user/.pyenv/versions/2.7.18
+PY2_VENV = .venv-py27
+COVERAGE_TARGET = grab
+
+# PY3
+init: venv deps dirs
 
 venv:
-	virtualenv --no-site-packages --python=python3 .env
-	
-deps:
-	.env/bin/pip install -r requirements_dev.txt
-	.env/bin/pip install -r requirements_dev_backend.txt
+	virtualenv -p python3 .venv
 
-develop:
-	.env/bin/python setup.py develop
+deps:
+	.venv/bin/pip install -r requirements_dev.txt
+	.venv/bin/pip install -r requirements_dev_backend.txt
+	.venv/bin/pip install .
+
+# PY2
+py2: py2-venv py2-deps dirs
+
+py2-venv:
+	$(PY2_ROOT)/bin/pip install virtualenv
+	$(PY2_ROOT)/bin/virtualenv --python=$(PY2_ROOT)/bin/python2.7 $(PY2_VENV)
+	
+py2-deps:
+	$(PY2_VENV)/bin/pip install -r requirements_dev.txt
+	$(PY2_VENV)/bin/pip install -r requirements_dev_backend.txt
+	$(PY2_VENV)/bin/pip install .
+
+dirs:
+	if [ ! -e var/run ]; then mkdir -p var/run; fi
+	if [ ! -e var/log ]; then mkdir -p var/log; fi
+	if [ ! -e var/bin ]; then mkdir -p var/bin; fi
 
 test:
 	tox -e py34
 
 coverage_nobackend:
 	coverage erase
-	coverage run --source=grab ./runtest.py --test-all
+	coverage run --source=$(COVERAGE_TARGET) ./runtest.py --test-all
 	coverage report -m
 
 coverage:
 	coverage erase
-	coverage run --source=grab ./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
+	coverage run --source=$(COVERAGE_TARGET) ./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
 	coverage report -m
 
 coverage_missing:
 	coverage erase
-	coverage run --source=grab ./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
+	coverage run --source=$(COVERAGE_TARGET) ./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
 	coverage report -m | grep -v '100%' | grep -v Missing | grep -v -- '----' | sort -k 3 -nr
 
 clean:

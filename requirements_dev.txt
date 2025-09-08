@@ -1,23 +1,40 @@
-bumpversion
-coverage
-coveralls
+# Common deps
+test_server
+user_agent
 cssselect
 feedparser
-flake8
 selenium
-test_server>=0.0.31
-mock
 runscript
 pyprof2calltree
 urllib3
 selection
+psutil
+pysocks
+certifi
+
+# Devel
+bumpversion
+pkginfo
+
+# Tests
+coverage
+coveralls
+mock
+tox
+
+# Non-windows deps
 pyquery;platform_system!="Windows"
 lxml;platform_system!="Windows"
 pycurl;platform_system!="Windows"
-# to fix appveyor
 item;platform_system!="Windows"
-pylint
-psutil
-tox
-pysocks
-certifi
+
+# py27 compat
+six
+# typing-extensions; python_version <= "2.7"
+
+# Linters and Type Checking
+ruff; python_version >= "3.0"
+mypy; python_version >= "3.0"
+pylint; python_version >= "3.0"
+types-urllib3; python_version >= "3.0"
+types-six; python_version >= "3.0"
