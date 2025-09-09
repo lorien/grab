@@ -5,7 +5,6 @@ import pickle
 from grab.cookie import CookieManager, create_cookie
 from grab.error import GrabMisuseError
 from test_server import Request, Response
-from test_server import Request, Response
 from tests.util import BaseGrabTestCase, build_grab, only_grab_transport, temp_file
 
 
@@ -30,7 +29,7 @@ class TestCookies(BaseGrabTestCase):
             set(
                 [
                     x.strip()
-                    for x in self.server.request["headers"]["Cookie"].split("; ")
+                    for x in self.server.get_request().headers["Cookie"].split("; ")
                 ]
             ),
             set(["foo=1", "bar=2"]),
@@ -397,5 +396,5 @@ class TestCookies(BaseGrabTestCase):
         # does not work yet, because test_server does not correclty
         # display request unicode cookies
         # self.assertEqual(
-        # u'медвед', self.server.request['cookies']['preved']['value']
+        # u'медвед', self.server.get_request().cookies['preved']['value']
         # )

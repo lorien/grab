@@ -3,7 +3,6 @@ from six.moves.urllib.parse import quote
 
 from grab.error import GrabConnectionError
 from test_server import Request, Response
-from test_server import Request, Response
 from tests.util import BaseGrabTestCase, build_grab, only_grab_transport
 
 
@@ -34,7 +33,7 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         self.assertEqual(
             #'/%D0%BF%D1%80%D0%B5%D0%B2%D0%B5%D0%B4',
             "/превед",
-            self.server.request["path"],
+            self.server.get_request().path,
         )
 
     def test_nonascii_query(self):
@@ -46,13 +45,12 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         self.assertEqual("превед", req.args["q"])
 
     def test_null_byte_url(self):
-        self.server.add_response(Response(status=302), count=1)
-        self.server.add_response(Response(data="x"), count=1)
-        self.server.add_response(Response(data="y"), count=1)
         redirect_url = self.server.get_url().rstrip("/") + "/\x00/"
         self.server.add_response(
-            Response(headers=[("Location", redirect_url)]), count=1
+            Response(status=302, data="x", headers=[("Location", redirect_url)]),
+            count=1,
         )
+        self.server.add_response(Response(data="y"), count=1)
         grab = build_grab()
         grab.go(self.server.get_url())
         self.assertEqual(b"y", grab.doc.body)

@@ -3,11 +3,9 @@ from copy import deepcopy
 
 import six
 
-from tests.util import build_grab, temp_file
+from grab import GrabError, GrabMisuseError
 from test_server import Request, Response
-from tests.util import BaseGrabTestCase
-from tests.util import reset_request_counter
-from grab import GrabMisuseError, GrabError
+from tests.util import BaseGrabTestCase, build_grab, reset_request_counter, temp_file
 
 
 class GrabApiTestCase(BaseGrabTestCase):
@@ -16,18 +14,17 @@ class GrabApiTestCase(BaseGrabTestCase):
 
     def test_incorrect_option_name(self):
         grab = build_grab()
-        self.assertRaises(GrabMisuseError, grab.setup,
-                          save_the_word=True)
+        self.assertRaises(GrabMisuseError, grab.setup, save_the_word=True)
 
     def test_clone(self):
         grab = build_grab()
         self.server.add_response(Response(data="Moon"), count=1, method="get")
         grab.go(self.server.get_url())
-        self.assertTrue(b'Moon' in grab.doc.body)
-        self.server.response['post.data'] = 'Foo'
-        grab2 = grab.clone(method='post', post='')
+        self.assertTrue(b"Moon" in grab.doc.body)
+        self.server.response["post.data"] = "Foo"
+        grab2 = grab.clone(method="post", post="")
         grab2.go(self.server.get_url())
-        self.assertTrue(b'Foo' in grab2.doc.body)
+        self.assertTrue(b"Foo" in grab2.doc.body)
 
     def test_empty_clone(self):
         grab = build_grab()
@@ -38,10 +35,10 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.server.add_response(Response(data="Moon"), count=1, method="get")
         grab.go(self.server.get_url())
         grab2 = build_grab()
-        self.assertEqual(grab2.config['url'], None)
+        self.assertEqual(grab2.config["url"], None)
         grab2.adopt(grab)
-        self.assertTrue(b'Moon' in grab2.doc.body)
-        self.assertEqual(grab2.config['url'], self.server.get_url())
+        self.assertTrue(b"Moon" in grab2.doc.body)
+        self.assertEqual(grab2.config["url"], self.server.get_url())
 
     def test_empty_adopt(self):
         grab = build_grab()
@@ -49,7 +46,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         grab2.adopt(grab)
 
     def test_default_content_for_fake_response(self):
-        content = b'<strong>test</strong>'
+        content = b"<strong>test</strong>"
         grab = build_grab(document_body=content)
         self.assertEqual(grab.doc.body, content)
 
@@ -57,7 +54,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         from grab import Grab
 
         class SimpleExtension(object):
-            data = {'counter': 0}
+            data = {"counter": 0}
 
             @classmethod
             def get_data(cls):
@@ -66,14 +63,14 @@ class GrabApiTestCase(BaseGrabTestCase):
         class CustomGrab(Grab, SimpleExtension):
             pass
 
-        SimpleExtension.get_data()['counter'] = 0
+        SimpleExtension.get_data()["counter"] = 0
         CustomGrab()
         # self.assertEqual(SimpleExtension.get_data()['counter'], 1)
 
         class VeryCustomGrab(CustomGrab):
             pass
 
-        SimpleExtension.get_data()['counter'] = 0
+        SimpleExtension.get_data()["counter"] = 0
         VeryCustomGrab()
         # self.assertEqual(SimpleExtension.get_data()['counter'], 1)
 
@@ -113,48 +110,49 @@ class GrabApiTestCase(BaseGrabTestCase):
 
     def test_make_url_absolute(self):
         grab = build_grab()
-        self.server.add_response(Response(data="<base href="), count=1, method="get")http://foo/bar/">'
+        self.server.add_response(
+            Response(data='<base href="http://foo/bar/">'), count=1, method="get"
+        )
         grab.go(self.server.get_url())
-        absolute_url = grab.make_url_absolute('/foobar', resolve_base=True)
-        self.assertEqual(absolute_url, 'http://foo/foobar')
+        absolute_url = grab.make_url_absolute("/foobar", resolve_base=True)
+        self.assertEqual(absolute_url, "http://foo/foobar")
         grab = build_grab()
-        absolute_url = grab.make_url_absolute('/foobar')
-        self.assertEqual(absolute_url, '/foobar')
+        absolute_url = grab.make_url_absolute("/foobar")
+        self.assertEqual(absolute_url, "/foobar")
 
     def test_error_request(self):
         grab = build_grab()
-        grab.setup(post={'foo': 'bar'})
+        grab.setup(post={"foo": "bar"})
 
-        self.assertRaises(GrabError, grab.go,
-                          url='Could-not-resolve-host-address')
-        self.assertEqual(grab.config['post'], None)
-        self.assertEqual(grab.config['multipart_post'], None)
-        self.assertEqual(grab.config['method'], None)
-        self.assertEqual(grab.config['body_storage_filename'], None)
+        self.assertRaises(GrabError, grab.go, url="Could-not-resolve-host-address")
+        self.assertEqual(grab.config["post"], None)
+        self.assertEqual(grab.config["multipart_post"], None)
+        self.assertEqual(grab.config["method"], None)
+        self.assertEqual(grab.config["body_storage_filename"], None)
 
     def test_setup_document(self):
-        data = b'''
+        data = b"""
         <h1>test</h1>
-        '''
+        """
         grab = build_grab(data)
-        self.assertTrue(b'test' in grab.doc.body)
+        self.assertTrue(b"test" in grab.doc.body)
 
     def test_setup_document_invalid_input(self):
-        data = u'''
+        data = """
         <h1>test</h1>
-        '''
+        """
         self.assertRaises(GrabMisuseError, build_grab, data)
 
     def test_headers_affects_common_headers(self):
         grab = build_grab()
-        ch_origin = deepcopy(grab.config['common_headers'])
+        ch_origin = deepcopy(grab.config["common_headers"])
         # Provide custom header which is also in common_headers
-        grab.setup(headers={'Accept': 'zzz'})
+        grab.setup(headers={"Accept": "zzz"})
         # To make request Grab processes config and build result headers
         # from `config['common_headers']` and `config['headers']
         # That merge should not change initial `config['common_headers']` value
         grab.go(self.server.get_url())
         self.assertEqual(
-            grab.config['common_headers']['Accept'],
-            ch_origin['Accept'],
+            grab.config["common_headers"]["Accept"],
+            ch_origin["Accept"],
         )
