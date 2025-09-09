@@ -4,6 +4,7 @@ from copy import deepcopy
 import six
 
 from tests.util import build_grab, temp_file
+from test_server import Request, Response
 from tests.util import BaseGrabTestCase
 from tests.util import reset_request_counter
 from grab import GrabMisuseError, GrabError
@@ -20,7 +21,7 @@ class GrabApiTestCase(BaseGrabTestCase):
 
     def test_clone(self):
         grab = build_grab()
-        self.server.response['get.data'] = 'Moon'
+        self.server.add_response(Response(data="Moon"), count=1, method="get")
         grab.go(self.server.get_url())
         self.assertTrue(b'Moon' in grab.doc.body)
         self.server.response['post.data'] = 'Foo'
@@ -34,7 +35,7 @@ class GrabApiTestCase(BaseGrabTestCase):
 
     def test_adopt(self):
         grab = build_grab()
-        self.server.response['get.data'] = 'Moon'
+        self.server.add_response(Response(data="Moon"), count=1, method="get")
         grab.go(self.server.get_url())
         grab2 = build_grab()
         self.assertEqual(grab2.config['url'], None)
@@ -106,13 +107,13 @@ class GrabApiTestCase(BaseGrabTestCase):
     def test_download(self):
         with temp_file() as save_file:
             grab = build_grab()
-            self.server.response['get.data'] = 'FOO'
+            self.server.add_response(Response(data="FOO"), count=1, method="get")
             length = grab.download(self.server.get_url(), save_file)
             self.assertEqual(3, length)
 
     def test_make_url_absolute(self):
         grab = build_grab()
-        self.server.response['get.data'] = '<base href="http://foo/bar/">'
+        self.server.add_response(Response(data="<base href="), count=1, method="get")http://foo/bar/">'
         grab.go(self.server.get_url())
         absolute_url = grab.make_url_absolute('/foobar', resolve_base=True)
         self.assertEqual(absolute_url, 'http://foo/foobar')

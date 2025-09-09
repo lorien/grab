@@ -2,6 +2,7 @@
 import os
 
 from tests.util import temp_dir, build_grab, TEST_DIR
+from test_server import Request, Response
 from tests.util import BaseGrabTestCase
 
 from grab import GrabMisuseError
@@ -36,7 +37,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             self.assertTrue(old_path != grab.doc.body_path)
 
         with temp_dir() as tmp_dir:
-            self.server.response['get.data'] = 'foo'
+            self.server.add_response(Response(data="foo"), count=1, method="get")
             grab = build_grab()
             grab.setup(body_inmemory=False)
             grab.setup(body_storage_dir=tmp_dir)

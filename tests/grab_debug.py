@@ -4,6 +4,7 @@ import threading
 
 from mock import patch
 
+from test_server import Request, Response
 from tests.util import BaseGrabTestCase
 from tests.util import build_grab, exclude_grab_transport, temp_dir
 from tests.util import reset_request_counter
@@ -23,7 +24,7 @@ class TestCookies(BaseGrabTestCase):
             log_file_path = os.path.join(tmp_dir, 'lograb.html')
             grab = build_grab()
             grab.setup(log_file=log_file_path)
-            self.server.response['get.data'] = 'omsk'
+            self.server.add_response(Response(data="omsk"), count=1, method="get")
 
             self.assertEqual(os.listdir(tmp_dir), [])
             grab.go(self.server.get_url())
@@ -37,8 +38,8 @@ class TestCookies(BaseGrabTestCase):
 
             grab = build_grab()
             grab.setup(log_dir=tmp_dir)
-            self.server.response_once['get.data'] = 'omsk1'
-            self.server.response['get.data'] = 'omsk2'
+            self.server.add_response(Response(data="omsk1"), count=1, method="get")
+            self.server.add_response(Response(data="omsk2"), count=1, method="get")
 
             self.assertEqual(os.listdir(tmp_dir), [])
             grab.go(self.server.get_url())
@@ -56,8 +57,8 @@ class TestCookies(BaseGrabTestCase):
 
             grab = build_grab()
             grab.setup(log_dir=tmp_dir)
-            self.server.response['get.data'] = 'omsk'
-            self.server.response['headers'] = [('X-Engine', 'PHP')]
+            self.server.add_response(Response(data="omsk"), count=1, method="get")
+            self.server.add_response(Response(headers=[('X-Engine', 'PHP')]), count=1)
 
             self.assertEqual(os.listdir(tmp_dir), [])
             grab.go(self.server.get_url())
@@ -73,8 +74,8 @@ class TestCookies(BaseGrabTestCase):
 
             grab = build_grab()
             grab.setup(log_dir=tmp_dir)
-            self.server.response['get.data'] = 'omsk'
-            self.server.response['headers'] = [('X-Engine', 'PHP')]
+            self.server.add_response(Response(data="omsk"), count=1, method="get")
+            self.server.add_response(Response(headers=[('X-Engine', 'PHP')]), count=1)
 
             self.assertEqual(os.listdir(tmp_dir), [])
 
@@ -99,8 +100,8 @@ class TestCookies(BaseGrabTestCase):
             grab = build_grab()
             grab.setup(log_dir=tmp_dir, timeout=1, user_agent='Perl',
                        debug=True)
-            self.server.response['get.data'] = 'omsk'
-            self.server.response['headers'] = [('X-Engine', 'PHP')]
+            self.server.add_response(Response(data="omsk"), count=1, method="get")
+            self.server.add_response(Response(headers=[('X-Engine', 'PHP')]), count=1)
             self.server.response['sleep'] = 2
 
             self.assertEqual(os.listdir(tmp_dir), [])

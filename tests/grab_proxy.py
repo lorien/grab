@@ -3,7 +3,9 @@ import six
 from test_server import TestServer
 
 from grab.proxylist import BaseProxySource
+from test_server import Request, Response
 from tests.util import build_grab, temp_file
+from test_server import Request, Response
 from tests.util import BaseGrabTestCase, TEST_SERVER_PORT
 
 ADDRESS = '127.0.0.1'
@@ -38,7 +40,7 @@ class TestProxy(BaseGrabTestCase):
 
         proxy = '%s:%s' % (ADDRESS, self.server.port)
         grab.setup(proxy=proxy, proxy_type='http', debug=True)
-        self.server.response['data'] = '123'
+        self.server.add_response(Response(data="123"), count=1)
 
         grab.go('http://yandex.ru')
         self.assertEqual(b'123', grab.doc.body)
@@ -51,7 +53,7 @@ class TestProxy(BaseGrabTestCase):
             with open(tmp_file, 'w') as out:
                 out.write(proxy)
             grab.proxylist.load_file(tmp_file)
-            self.server.response['get.data'] = '123'
+            self.server.add_response(Response(data="123"), count=1, method="get")
             grab.change_proxy()
             grab.go('http://yandex.ru')
             self.assertEqual(b'123', grab.doc.body)

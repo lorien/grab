@@ -3,6 +3,10 @@ from glob import glob
 
 # self.server.response["get.data"] = "Simple String"
 
+RE_DATA = re.compile(
+    r'^(\s+)self\.server\.response(_once)?\[["\']data["\']\]\s*=\s*["\'](.+?)["\']',
+    re.M,
+)
 RE_GET_DATA = re.compile(
     r'^(\s+)self\.server\.response(_once)?\[["\']get\.data["\']\]\s*=\s*["\'](.+?)["\']',
     re.M,
@@ -27,9 +31,20 @@ RE_CODE = re.compile(
     r'^(\s+)self\.server\.response(_once)?\[["\']code["\']\]\s*=\s*(\d+)',
     re.M,
 )
-RE_IMPORT = re.compile(r"^(from tests\.util[^\n]+BaseGrabTestCase)", re.M)
+RE_IMPORT = re.compile(r"^(from tests\.util)", re.M)
+RE_ASSERT_REQUEST_PATH = re.compile(
+    r"^(\s*)(self\.assert[^\n]+)self\.server\.request\['path'\]", re.M
+)
 
-# self.server.response['cookies'] = {'foo': 'bar', '1': '2'}.items()
+
+def handler_data(match):
+    # fmt: off
+    print(u"Fixing line: {}".format(match.group(0)))
+    return u'{}self.server.add_response(Response(data="{}"), count=1)'.format(
+        match.group(1),
+        match.group(3),
+    )
+    # fmt: on
 
 
 def handler_get_data(match):
@@ -65,7 +80,7 @@ def handler_cookies(match):
 def handler_code(match):
     # fmt: off
     #print(u"Fixing line: {}".format(match.group(0)))
-    return u'{}self.server.add_response(Response(code={}), count=1)'.format(
+    return u'{}self.server.add_response(Response(status={}), count=1)'.format(
         match.group(1),
         match.group(3),
     )
@@ -74,9 +89,20 @@ def handler_code(match):
 
 def handler_import(match):
     # fmt: off
-    print(u"Fixing line: {}".format(match.group(0)))
+    #print(u"Fixing line: {}".format(match.group(0)))
     return u'from test_server import Request, Response\n{}'.format(
         match.group(1),
+    )
+    # fmt: on
+
+
+def handler_assert_request_path(match):
+    # fmt: off
+    #print(u"Fixing line: {}".format(match.group(0)))
+    return u'{}req = self.server.get_request()\n{}{}req.path'.format(
+        match.group(1),
+        match.group(1),
+        match.group(2),
     )
     # fmt: on
 
@@ -86,17 +112,21 @@ def process_file(path):
     with open(path, "rb") as inp:
         content = inp.read().decode("utf-8")
         new_content = content
+        new_content = RE_DATA.sub(handler_data, new_content)
         new_content = RE_GET_DATA.sub(handler_get_data, new_content)
         new_content = RE_HEADERS.sub(handler_headers, new_content)
         new_content = RE_COOKIES_DICT.sub(handler_cookies, new_content)
         new_content = RE_COOKIES_DICT_EMPTY.sub(handler_cookies, new_content)
         new_content = RE_COOKIES_LIST.sub(handler_cookies, new_content)
         new_content = RE_CODE.sub(handler_code, new_content)
+        new_content = RE_ASSERT_REQUEST_PATH.sub(
+            handler_assert_request_path, new_content
+        )
         if new_content != content:
-            new_content = RE_IMPORT.sub(handler_import, new_content)
-            new_path = path.replace("tests/", "fix/")
-            with open(new_path, "wb") as out:
-                out.write(new_content.encode("utf-8"))
+            new_content = RE_IMPORT.sub(handler_import, new_content, count=1)
+        new_path = path.replace("tests/", "fix/")
+        with open(new_path, "wb") as out:
+            out.write(new_content.encode("utf-8"))
 
 
 def main():

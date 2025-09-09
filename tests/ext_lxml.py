@@ -2,6 +2,7 @@
 from grab import DataNotFound
 
 from tests.util import build_grab
+from test_server import Request, Response
 from tests.util import BaseGrabTestCase
 
 HTML = u"""
@@ -196,12 +197,12 @@ class LXMLExtensionTest(BaseGrabTestCase):
         self.assertEqual('test', grab.xpath_text('//h1'))
 
     def test_empty_document(self):
-        self.server.response['get.data'] = 'oops'
+        self.server.add_response(Response(data="oops"), count=1, method="get")
         grab = build_grab()
         grab.go(self.server.get_url())
         grab.xpath_exists('//anytag')
 
-        self.server.response['get.data'] = '<frameset></frameset>'
+        self.server.add_response(Response(data="<frameset></frameset>"), count=1, method="get")
         grab = build_grab()
         grab.go(self.server.get_url())
         grab.xpath_exists('//anytag')

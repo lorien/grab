@@ -17,6 +17,7 @@ import logging
 import six
 import mock
 
+from test_server import Request, Response
 from tests.util import BaseGrabTestCase, build_spider
 from test_settings import (
     MONGODB_CONNECTION,
@@ -166,7 +167,7 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
     def test_too_large_document(self):
         #print('TESTING TOO LARGE DOCUMENT SPECIAL CASE')
         # The maximum BSON document size is 16 megabytes.
-        self.server.response['get.data'] = 'x' * (1024 * 1024 * 17)
+        self.server.add_response(Response(data="x"), count=1, method="get") * (1024 * 1024 * 17)
         bot = self.get_configured_spider()
         bot.add_task(Task('null', url=self.server.get_url()))
         # Second task is needed just to give spider time to save network
