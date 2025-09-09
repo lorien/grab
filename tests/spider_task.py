@@ -4,6 +4,7 @@ from grab import Grab
 from grab.spider import NoTaskHandler, Spider, SpiderMisuseError, Task, base
 from grab.spider.error import SpiderError
 from test_server import Request, Response
+from test_server import Request, Response
 from tests.util import BaseGrabTestCase, build_grab, build_spider
 
 
@@ -103,7 +104,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
         task = Task("baz", grab=grab)
         bot.add_task(task.clone())
         bot.run()
-        self.assertEqual(self.server.request["headers"]["User-Agent"], "Foo")
+        req = self.server.get_request()
+        self.assertEqual(req.headers["User-Agent"], "Foo")
 
     def test_task_nohandler_error(self):
         class TestSpider(Spider):
@@ -360,7 +362,8 @@ class TestSpiderTestCase(BaseGrabTestCase):
         task = Task("foo", grab=grab)
         bot.add_task(task)
         bot.run()
-        self.assertEqual("POST", self.server.request["method"])
+        req = self.server.get_request()
+        self.assertEqual("POST", req.method)
 
     def test_response_not_valid(self):
         class SomeSimpleSpider(Spider):

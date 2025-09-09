@@ -32,8 +32,10 @@ RE_CODE = re.compile(
     re.M,
 )
 RE_IMPORT = re.compile(r"^(from tests\.util)", re.M)
-RE_ASSERT_REQUEST_PATH = re.compile(
-    r"^(\s*)(self\.assert[^\n]+)self\.server\.request\['path'\]", re.M
+RE_ASSERT_REQUEST_ATTR = re.compile(
+    r"^(\s*)(self\.assert[^\n]+)self\.server\.request"
+    r'\[["\'](path|headers|cookies|data|method|args|files)["\']\]',
+    re.M,
 )
 
 
@@ -96,13 +98,14 @@ def handler_import(match):
     # fmt: on
 
 
-def handler_assert_request_path(match):
+def handler_assert_request_attr(match):
     # fmt: off
-    #print(u"Fixing line: {}".format(match.group(0)))
-    return u'{}req = self.server.get_request()\n{}{}req.path'.format(
+    print(u"Fixing line: {}".format(match.group(0)))
+    return u'{}req = self.server.get_request()\n{}{}req.{}'.format(
         match.group(1),
         match.group(1),
         match.group(2),
+        match.group(3)
     )
     # fmt: on
 
@@ -119,8 +122,8 @@ def process_file(path):
         new_content = RE_COOKIES_DICT_EMPTY.sub(handler_cookies, new_content)
         new_content = RE_COOKIES_LIST.sub(handler_cookies, new_content)
         new_content = RE_CODE.sub(handler_code, new_content)
-        new_content = RE_ASSERT_REQUEST_PATH.sub(
-            handler_assert_request_path, new_content
+        new_content = RE_ASSERT_REQUEST_ATTR.sub(
+            handler_assert_request_attr, new_content
         )
         if new_content != content:
             new_content = RE_IMPORT.sub(handler_import, new_content, count=1)

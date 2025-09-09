@@ -1,6 +1,7 @@
 from test_server import TestServer
 import six
 
+from test_server import Request, Response
 from tests.util import (
     BaseGrabTestCase, TEST_SERVER_PORT,
     build_spider, ADDRESS, temp_file
@@ -119,7 +120,9 @@ class TestSpiderProxyCase(BaseGrabTestCase):
                 bot.add_task(Task('baz', self.server.get_url()))
             bot.run()
 
-            self.assertEqual(self.server.request['headers'].get('host'),
+            req = self.server.get_request()
+
+            self.assertEqual(req.headers.get('host'),
                              '%s:%s' % (ADDRESS, self.server.port))
             self.assertEqual(1, len(set(bot.stat.collections['ports'])))
             self.assertEqual(bot.stat.collections['ports'][0],
@@ -148,6 +151,8 @@ class TestSpiderProxyCase(BaseGrabTestCase):
         bot.add_task(Task('page', url='http://yandex.ru/'))
         bot.run()
 
-        self.assertEqual(self.server.request['headers']['host'], 'yandex.ru')
+        req = self.server.get_request()
+
+        self.assertEqual(req.headers['host'], 'yandex.ru')
         self.assertEqual(set(bot.stat.collections['ports']),
                          set([TEST_SERVER_PORT]))

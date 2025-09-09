@@ -4,6 +4,7 @@ from test_server import TestServer
 
 from grab.proxylist import BaseProxySource
 from test_server import Request, Response
+from test_server import Request, Response
 from tests.util import build_grab, temp_file
 from test_server import Request, Response
 from tests.util import BaseGrabTestCase, TEST_SERVER_PORT
@@ -44,7 +45,8 @@ class TestProxy(BaseGrabTestCase):
 
         grab.go('http://yandex.ru')
         self.assertEqual(b'123', grab.doc.body)
-        self.assertEqual('yandex.ru', self.server.request['headers']['host'])
+        req = self.server.get_request()
+        self.assertEqual('yandex.ru', req.headers['host'])
 
     def test_deprecated_setup_proxylist(self):
         with temp_file() as tmp_file:

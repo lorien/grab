@@ -5,6 +5,7 @@ import threading
 from mock import patch
 
 from test_server import Request, Response
+from test_server import Request, Response
 from tests.util import BaseGrabTestCase
 from tests.util import build_grab, exclude_grab_transport, temp_dir
 from tests.util import reset_request_counter
@@ -185,7 +186,8 @@ class TestCookies(BaseGrabTestCase):
         big_value = 'x' * 1000
         grab.setup(post=big_value)
         grab.go(self.server.get_url())
-        self.assertEqual(self.server.request['data'], big_value.encode())
+        req = self.server.get_request()
+        self.assertEqual(req.data, big_value.encode())
 
     def test_debug_post_dict_big_value(self):
         grab = build_grab(debug_post=True)
@@ -194,7 +196,8 @@ class TestCookies(BaseGrabTestCase):
             'foo': big_value,
         })
         grab.go(self.server.get_url())
-        self.assertEqual(self.server.request['data'],
+        req = self.server.get_request()
+        self.assertEqual(req.data,
                          ('foo=%s' % big_value).encode())
 
     def test_log_request_extra_argument(self):

@@ -5,6 +5,7 @@ except ImportError:
     from urllib.parse import parse_qsl
 
 from grab import DataNotFound, GrabMisuseError
+from test_server import Request, Response
 from tests.util import build_grab
 from tests.util import BaseGrabTestCase
 
@@ -139,28 +140,32 @@ class TestHtmlForms(BaseGrabTestCase):
         grab.go(self.server.get_url())
         grab.doc.set_input('name', 'Alex')
         grab.submit()
-        self.assert_equal_qs(self.server.request['data'],
+        req = self.server.get_request()
+        self.assert_equal_qs(req.data,
                              b'name=Alex&secret=123')
 
         # Default submit control
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
         grab.go(self.server.get_url())
         grab.submit()
-        self.assert_equal_qs(self.server.request['data'],
+        req = self.server.get_request()
+        self.assert_equal_qs(req.data,
                              b'secret=123&submit1=submit1')
 
         # Selected submit control
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
         grab.go(self.server.get_url())
         grab.submit(submit_name='submit2')
-        self.assert_equal_qs(self.server.request['data'],
+        req = self.server.get_request()
+        self.assert_equal_qs(req.data,
                              b'secret=123&submit2=submit2')
 
         # Default submit control if submit control name is invalid
         self.server.response['get.data'] = MULTIPLE_SUBMIT_FORM
         grab.go(self.server.get_url())
         grab.submit(submit_name='submit3')
-        self.assert_equal_qs(self.server.request['data'],
+        req = self.server.get_request()
+        self.assert_equal_qs(req.data,
                              b'secret=123&submit1=submit1')
 
     def test_submit_remove_from_post_argument(self):
@@ -169,12 +174,14 @@ class TestHtmlForms(BaseGrabTestCase):
 
         grab.go(self.server.get_url())
         grab.submit(submit_name='submit3')
-        self.assert_equal_qs(self.server.request['data'],
+        req = self.server.get_request()
+        self.assert_equal_qs(req.data,
                              b'secret=123&submit1=submit1')
 
         grab.go(self.server.get_url())
         grab.submit(remove_from_post=['submit1'])
-        self.assert_equal_qs(self.server.request['data'],
+        req = self.server.get_request()
+        self.assert_equal_qs(req.data,
                              b'secret=123')
 
     def test_set_methods(self):

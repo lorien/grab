@@ -5,6 +5,7 @@ import pickle
 from grab.cookie import CookieManager, create_cookie
 from grab.error import GrabMisuseError
 from test_server import Request, Response
+from test_server import Request, Response
 from tests.util import BaseGrabTestCase, build_grab, only_grab_transport, temp_file
 
 
@@ -44,9 +45,11 @@ class TestCookies(BaseGrabTestCase):
         grab.go(self.server.get_url())
         self.assertEqual(grab.doc.cookies["foo"], "bar")
         grab.go(self.server.get_url())
-        self.assertEqual(self.server.request["headers"]["Cookie"], "foo=bar")
+        req = self.server.get_request()
+        self.assertEqual(req.headers["Cookie"], "foo=bar")
         grab.go(self.server.get_url())
-        self.assertEqual(self.server.request["headers"]["Cookie"], "foo=bar")
+        req = self.server.get_request()
+        self.assertEqual(req.headers["Cookie"], "foo=bar")
 
         # Test reuse_cookies=False
         grab = build_grab()
@@ -55,7 +58,8 @@ class TestCookies(BaseGrabTestCase):
         grab.go(self.server.get_url())
         self.assertEqual(grab.doc.cookies["foo"], "baz")
         grab.go(self.server.get_url())
-        self.assertTrue(len(self.server.request["cookies"]) == 0)
+        req = self.server.get_request()
+        self.assertTrue(len(req.cookies) == 0)
 
         # Test something
         grab = build_grab()
@@ -65,7 +69,8 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual(grab.doc.cookies["foo"], "bar")
         grab.clear_cookies()
         grab.go(self.server.get_url())
-        self.assertTrue(len(self.server.request["cookies"]) == 0)
+        req = self.server.get_request()
+        self.assertTrue(len(req.cookies) == 0)
 
     def test_redirect_session(self):
         grab = build_grab()
@@ -87,7 +92,8 @@ class TestCookies(BaseGrabTestCase):
         )
         self.server.add_response(Response(status=302), count=1)
         grab.go(self.server.get_url())
-        self.assertEqual(self.server.request["cookies"]["foo"]["value"], "bar")
+        req = self.server.get_request()
+        self.assertEqual(req.cookies["foo"]["value"], "bar")
 
     def test_load_dump(self):
         with temp_file() as tmp_file:
@@ -150,7 +156,8 @@ class TestCookies(BaseGrabTestCase):
             )
             grab.setup(cookiefile=tmp_file, debug=True)
             grab.go(self.server.get_url())
-            self.assertEqual(self.server.request["cookies"]["spam"]["value"], "ham")
+            req = self.server.get_request()
+            self.assertEqual(req.cookies["spam"]["value"], "ham")
 
             # This is correct reslt of combining two cookies
             merged_cookies = [("godzilla", "monkey"), ("spam", "ham")]
@@ -274,7 +281,8 @@ class TestCookies(BaseGrabTestCase):
         self.assertEqual(dict(grab.doc.cookies.items()), {"foo": "foo"})
 
         grab.go("http://www.foo.bar:%d" % self.server.port)
-        self.assertEqual("foo", self.server.request["cookies"].get("foo")["value"])
+        req = self.server.get_request()
+        self.assertEqual("foo", req.cookies.get("foo")["value"])
 
     def test_path(self):
         self.server.add_response(
@@ -293,7 +301,8 @@ class TestCookies(BaseGrabTestCase):
         grab.go(self.server.get_url("/"))
         # submit received cookies
         grab.go(self.server.get_url("/"))
-        self.assertEqual(1, len(self.server.request["cookies"]))
+        req = self.server.get_request()
+        self.assertEqual(1, len(req.cookies))
 
         # work with "/admin" path
         grab = build_grab()
@@ -301,7 +310,8 @@ class TestCookies(BaseGrabTestCase):
         grab.go(self.server.get_url("/"))
         # submit received cookies
         grab.go(self.server.get_url("/admin/zz"))
-        self.assertEqual(2, len(self.server.request["cookies"]))
+        req = self.server.get_request()
+        self.assertEqual(2, len(req.cookies))
 
     @only_grab_transport("pycurl")
     def test_common_case_www_domain(self):
@@ -329,8 +339,10 @@ class TestCookies(BaseGrabTestCase):
         grab.go("http://www.foo.bar:%d" % self.server.port)
         # submit cookies
         grab.go("http://www.foo.bar:%d" % self.server.port)
-        self.assertEqual("1", (self.server.request["cookies"].get("foo")["value"]))
-        self.assertEqual("2", (self.server.request["cookies"].get("bar")["value"]))
+        req = self.server.get_request()
+        self.assertEqual("1", (req.cookies.get("foo")["value"]))
+        req = self.server.get_request()
+        self.assertEqual("2", (req.cookies.get("bar")["value"]))
 
     def test_cookie_merging_replace_with_cookies_option(self):
         with temp_file() as tmp_file:
@@ -350,7 +362,8 @@ class TestCookies(BaseGrabTestCase):
 
             grab.setup(cookies=cookies)
             grab.go(self.server.get_url())
-            self.assertEqual(2, len(self.server.request["cookies"].items()))
+            req = self.server.get_request()
+            self.assertEqual(2, len(req.cookies.items()))
 
     def test_cookie_merging_replace(self):
         grab = build_grab()

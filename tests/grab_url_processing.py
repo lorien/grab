@@ -3,6 +3,7 @@ from six.moves.urllib.parse import quote
 
 from grab.error import GrabConnectionError
 from test_server import Request, Response
+from test_server import Request, Response
 from tests.util import BaseGrabTestCase, build_grab, only_grab_transport
 
 
@@ -41,7 +42,8 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         self.server.add_response(Response(data="medved"), count=1)
         grab.go(self.server.get_url("/search?q=превед"))
         self.assertEqual(b"medved", grab.doc.body)
-        self.assertEqual("превед", self.server.request["args"]["q"])
+        req = self.server.get_request()
+        self.assertEqual("превед", req.args["q"])
 
     def test_null_byte_url(self):
         self.server.add_response(Response(status=302), count=1)

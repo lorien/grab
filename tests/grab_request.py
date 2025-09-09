@@ -1,6 +1,7 @@
 # coding: utf-8
 from grab.error import (GrabInternalError, GrabCouldNotResolveHostError,
                         GrabTimeoutError, GrabInvalidUrl)
+from test_server import Request, Response
 from tests.util import build_grab, exclude_grab_transport
 from tests.util import BaseGrabTestCase
 
@@ -12,20 +13,24 @@ class GrabRequestTestCase(BaseGrabTestCase):
     def test_get_method(self):
         grab = build_grab()
         grab.go(self.server.get_url())
-        self.assertEqual('GET', self.server.request['method'])
+        req = self.server.get_request()
+        self.assertEqual('GET', req.method)
 
     def test_delete_method(self):
         grab = build_grab()
         grab.setup(method='delete')
         grab.go(self.server.get_url())
-        self.assertEqual('DELETE', self.server.request['method'])
+        req = self.server.get_request()
+        self.assertEqual('DELETE', req.method)
 
     def test_put_method(self):
         grab = build_grab()
         grab.setup(method='put', post=b'abc')
         grab.go(self.server.get_url())
-        self.assertEqual('PUT', self.server.request['method'])
-        self.assertEqual('3', self.server.request['headers']['Content-Length'])
+        req = self.server.get_request()
+        self.assertEqual('PUT', req.method)
+        req = self.server.get_request()
+        self.assertEqual('3', req.headers['Content-Length'])
 
     def test_head_with_invalid_bytes(self):
         def callback():
@@ -65,14 +70,18 @@ class GrabRequestTestCase(BaseGrabTestCase):
         grab = build_grab()
         grab.setup(method='options', post=b'abc')
         grab.go(self.server.get_url())
-        self.assertEqual('OPTIONS', self.server.request['method'])
-        self.assertEqual('3', self.server.request['headers']['Content-Length'])
+        req = self.server.get_request()
+        self.assertEqual('OPTIONS', req.method)
+        req = self.server.get_request()
+        self.assertEqual('3', req.headers['Content-Length'])
 
         grab = build_grab()
         grab.setup(method='options')
         grab.go(self.server.get_url())
-        self.assertEqual('OPTIONS', self.server.request['method'])
-        self.assertTrue('Content-Length' not in self.server.request['headers'])
+        req = self.server.get_request()
+        self.assertEqual('OPTIONS', req.method)
+        req = self.server.get_request()
+        self.assertTrue('Content-Length' not in req.headers)
 
     @exclude_grab_transport('urllib3')
     def test_request_headers(self):
