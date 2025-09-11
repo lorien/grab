@@ -23,7 +23,8 @@ mock
 tox
 
 # Non-windows deps
-pyquery;platform_system!="Windows"
+pyquery; platform_system != "Windows" and python_version >= "3.0"
+pyquery <= 1.4.1; platform_system != "Windows" and python_version <= "2.7"
 lxml;platform_system!="Windows"
 pycurl;platform_system!="Windows"
 item;platform_system!="Windows"
