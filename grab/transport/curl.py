@@ -234,8 +234,10 @@ class CurlTransport(BaseTransport):
         # 30* redirects are handled by Grab
         self.curl.setopt(pycurl.FOLLOWLOCATION, 0)
         self.curl.setopt(pycurl.MAXREDIRS, grab.config["redirect_limit"])
-        self.curl.setopt(pycurl.CONNECTTIMEOUT, grab.config["connect_timeout"])
-        self.curl.setopt(pycurl.TIMEOUT, grab.config["timeout"])
+        self.curl.setopt(
+            pycurl.CONNECTTIMEOUT_MS, int(1000 * grab.config["connect_timeout"])
+        )
+        self.curl.setopt(pycurl.TIMEOUT_MS, int(1000 * grab.config["timeout"]))
         # self.curl.setopt(pycurl.IPRESOLVE, pycurl.IPRESOLVE_V4)
         # self.curl.setopt(pycurl.DNS_CACHE_TIMEOUT, 0)
         if not grab.config["connection_reuse"]:

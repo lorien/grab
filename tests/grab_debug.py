@@ -104,9 +104,9 @@ class TestCookies(BaseGrabTestCase):
             reset_request_counter()
 
             grab = build_grab()
-            grab.setup(log_dir=tmp_dir, timeout=1, user_agent="Perl", debug=True)
+            grab.setup(log_dir=tmp_dir, timeout=0.1, user_agent="Perl", debug=True)
             self.server.add_response(
-                Response(data="abc", sleep=2, headers=[("X-Engine", "PHP")]), count=1
+                Response(data="abc", sleep=0.2, headers=[("X-Engine", "PHP")]), count=1
             )
 
             self.assertEqual(os.listdir(tmp_dir), [])
