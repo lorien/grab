@@ -21,6 +21,7 @@ Exception
 """
 
 from __future__ import absolute_import
+
 from weblib.error import DataNotFound  # noqa pylint: disable=unused-import
 
 
@@ -102,4 +103,12 @@ class GrabInvalidUrl(GrabError):
 
 
 class GrabInternalError(OriginalExceptionError, GrabError):
+    pass
+
+
+class GrabInvalidResponseError(OriginalExceptionError, GrabError):
+    pass
+
+
+class GrabInvalidResponseHeaderError(OriginalExceptionError, GrabError):
     pass
