@@ -33,20 +33,22 @@ class TestCookies(BaseGrabTestCase):
     def test_pycurl_cookies(self):
         import pycurl
 
-        self.server.add_response(Response(status=302), count=1)
         self.server.add_response(
-            Response(cookies={"foo": "bar", "1": "2"}.items()), count=1
+            Response(
+                status=302,
+                headers=[
+                    ("Set-Cookie", "foo=bar"),
+                    ("Set-Cookie", "name=bob"),
+                    ("Location", self.server.get_url()),
+                ],
+            )
         )
-        self.server.add_response(
-            Response(headers=[("Location", self.server.get_url())]), count=1
-        )
-        self.server.add_response(Response(data="foo"), count=1, method="get")
+        self.server.add_response(Response(data="foo"))
 
         buf = BytesIO()
         header_buf = BytesIO()
 
         # Configure pycurl instance
-        # Usually all these crap is automatically handled by the Grab
         curl = pycurl.Curl()
         curl.setopt(pycurl.URL, self.server.get_url())
         curl.setopt(pycurl.WRITEFUNCTION, buf.write)
@@ -61,15 +63,17 @@ class TestCookies(BaseGrabTestCase):
 
         # Just make another request and check that pycurl has
         # submitted two cookies
+        self.server.add_response(Response())
         curl.setopt(pycurl.URL, self.server.get_url())
         curl.perform()
         req = self.server.get_request()
         self.assertEqual(2, len(req.cookies))
 
-        # Erase cookies
+        ## Erase cookies
         cookies = curl.getinfo(pycurl.INFO_COOKIELIST)
         curl.setopt(pycurl.COOKIELIST, "ALL")
         curl.setopt(pycurl.URL, self.server.get_url())
+        self.server.add_response(Response())
         curl.perform()
         req = self.server.get_request()
         self.assertEqual(0, len(req.cookies))
@@ -79,13 +83,12 @@ class TestCookies(BaseGrabTestCase):
         for cookie in cookies:
             curl.setopt(pycurl.COOKIELIST, cookie)
         curl.setopt(pycurl.URL, self.server.get_url())
+        self.server.add_response(Response())
         curl.perform()
         req = self.server.get_request()
         self.assertEqual(2, len(req.cookies))
-        req = self.server.get_request()
-        self.assertEqual("bar", req.cookies["foo"]["value"])
-        req = self.server.get_request()
-        self.assertEqual(set(("foo", "1")), set(req.cookies.keys()))
+        self.assertEqual("bar", req.cookies["foo"].value)
+        self.assertEqual(set(("foo", "name")), set(req.cookies.keys()))
 
         # Ok, now let's create third cookies that is binded to
         # the path /place, put this cookie into curl object
@@ -96,15 +99,17 @@ class TestCookies(BaseGrabTestCase):
         )
         curl.setopt(pycurl.COOKIELIST, cookie)
         curl.setopt(pycurl.URL, self.server.get_url())
+        self.server.add_response(Response())
         curl.perform()
         req = self.server.get_request()
-        self.assertEqual(set(("foo", "1")), set(req.cookies.keys()))
+        self.assertEqual(set(("foo", "name")), set(req.cookies.keys()))
 
         # Ok, now send request to /place
         curl.setopt(pycurl.URL, self.server.get_url("/place"))
+        self.server.add_response(Response())
         curl.perform()
         req = self.server.get_request()
-        self.assertEqual(set(("foo", "1", "no")), set(req.cookies.keys()))
+        self.assertEqual(set(("foo", "name", "no")), set(req.cookies.keys()))
 
         # Now, check that not all cookies set with cookieslist
         # are submitted
@@ -113,6 +118,7 @@ class TestCookies(BaseGrabTestCase):
         curl.setopt(pycurl.COOKIELIST, "Set-Cookie: 1=2; domain=microsoft.com")
         curl.setopt(pycurl.COOKIELIST, "Set-Cookie: 3=4")
         curl.setopt(pycurl.COOKIELIST, "Set-Cookie: 5=6")
+        self.server.add_response(Response())
         curl.perform()
         req = self.server.get_request()
         self.assertEqual(2, len(req.cookies))
