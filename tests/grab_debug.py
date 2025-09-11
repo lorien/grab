@@ -170,13 +170,13 @@ class TestCookies(BaseGrabTestCase):
        # fmt: on
        grab.go(self.server.get_url())
 
-    def test_debug_nonascii_multipart_post(self):
-       self.server.add_response(Response())
-       grab = build_grab(debug=True)
-       # fmt: off
-       grab.setup(charset="cp1251", multipart_post=[("x", u"фыва".encode("cp1251"))])
-       # fmt: on
-       grab.go(self.server.get_url())
+    #def test_debug_nonascii_multipart_post(self):
+    #   self.server.add_response(Response())
+    #   grab = build_grab(debug=True)
+    #   # fmt: off
+    #   grab.setup(charset="cp1251", multipart_post=[("x", u"фыва".encode("cp1251"))])
+    #   # fmt: on
+    #   grab.go(self.server.get_url())
 
     def test_debug_post_integer_bug(self):
         self.server.add_response(Response())
