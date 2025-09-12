@@ -4,10 +4,9 @@ try:
 except ImportError:
     from urllib.parse import quote
 
-from test_server import Request, Response
-from tests.util import build_grab
-from tests.util import BaseGrabTestCase
 from grab import GrabMisuseError
+from test_server import Request, Response
+from tests.util import BaseGrabTestCase, build_grab
 
 
 class TestPostFeature(BaseGrabTestCase):
@@ -18,64 +17,75 @@ class TestPostFeature(BaseGrabTestCase):
         grab = build_grab(url=self.server.get_url(), debug_post=True)
 
         # Provide POST data in dict
-        grab.setup(post={'foo': 'bar'})
+        grab.setup(post={"foo": "bar"})
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.data, b'foo=bar')
+        self.assertEqual(req.data, b"foo=bar")
 
         # Provide POST data in tuple
-        grab.setup(post=(('foo', 'TUPLE'),))
+        grab.setup(post=(("foo", "TUPLE"),))
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.data, b'foo=TUPLE')
+        self.assertEqual(req.data, b"foo=TUPLE")
 
         # Provide POST data in list
-        grab.setup(post=[('foo', 'LIST')])
+        grab.setup(post=[("foo", "LIST")])
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.data, b'foo=LIST')
+        self.assertEqual(req.data, b"foo=LIST")
 
         # Order of elements should not be changed (1)
-        grab.setup(post=[('foo', 'LIST'), ('bar', 'BAR')])
+        grab.setup(post=[("foo", "LIST"), ("bar", "BAR")])
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.data, b'foo=LIST&bar=BAR')
+        self.assertEqual(req.data, b"foo=LIST&bar=BAR")
 
         # Order of elements should not be changed (2)
-        grab.setup(post=[('bar', 'BAR'), ('foo', 'LIST')])
+        grab.setup(post=[("bar", "BAR"), ("foo", "LIST")])
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.data, b'bar=BAR&foo=LIST')
+        self.assertEqual(req.data, b"bar=BAR&foo=LIST")
 
         # Provide POST data in byte-string
-        grab.setup(post='Hello world!')
+        grab.setup(post="Hello world!")
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.data, b'Hello world!')
+        self.assertEqual(req.data, b"Hello world!")
 
         # Provide POST data in unicode-string
-        grab.setup(post=u'Hello world!')
+        grab.setup(post="Hello world!")
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.data, b'Hello world!')
+        self.assertEqual(req.data, b"Hello world!")
 
         # Provide POST data in non-ascii unicode-string
-        grab.setup(post=u'Привет, мир!')
+        grab.setup(post="Привет, мир!")
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.data,
-                         u'Привет, мир!'.encode('utf-8'))
+        # fmt: off
+        self.assertEqual(req.data, u"Привет, мир!".encode("utf-8"))
+        # fmt: on
 
         # Two values with one key
-        grab.setup(post=(('foo', 'bar'), ('foo', 'baz')))
+        grab.setup(post=(("foo", "bar"), ("foo", "baz")))
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.data, b'foo=bar&foo=baz')
+        self.assertEqual(req.data, b"foo=bar&foo=baz")
 
     def test_multipart_post(self):
         grab = build_grab(url=self.server.get_url(), debug_post=True)
         # Dict
-        grab.setup(multipart_post={'foo': 'bar'})
+        grab.setup(multipart_post={"foo": "bar"})
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
         self.assertTrue(b'name="foo"' in req.data)
@@ -92,13 +102,15 @@ class TestPostFeature(BaseGrabTestCase):
         #                   'foo=bar&gaz=Дельфин&abc=')
 
         # tuple with one pair
-        grab.setup(multipart_post=(('foo', 'bar'),))
+        grab.setup(multipart_post=(("foo", "bar"),))
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
         self.assertTrue(b'name="foo"' in req.data)
 
         # tuple with two pairs
-        grab.setup(multipart_post=(('foo', 'bar'), ('foo', 'baz')))
+        grab.setup(multipart_post=(("foo", "bar"), ("foo", "baz")))
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
         self.assertTrue(b'name="foo"' in req.data)
@@ -106,79 +118,91 @@ class TestPostFeature(BaseGrabTestCase):
     def test_unicode_post(self):
         # By default, unicode post should be converted into utf-8
         grab = build_grab()
-        data = u'фыва'
+        # fmt: off
+        data = u"фыва"
+        # fmt: on
         grab.setup(post=data, url=self.server.get_url())
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.data, data.encode('utf-8'))
+        self.assertEqual(req.data, data.encode("utf-8"))
 
         # Now try cp1251 with charset option
-        self.server.request['charset'] = 'cp1251'
+        # self.server.request["charset"] = "cp1251"
         grab = build_grab()
-        data = u'фыва'
-        grab.setup(post=data, url=self.server.get_url(),
-                   charset='cp1251', debug=True)
+        # fmt: off
+        data = u"фыва"
+        # fmt: on
+        grab.setup(post=data, url=self.server.get_url(), charset="cp1251", debug=True)
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.data, data.encode('cp1251'))
+        self.assertEqual(req.data, data.encode("cp1251"))
 
         # Now try dict with unicode value & charset option
-        self.server.request['charset'] = 'cp1251'
+        # self.server.request["charset"] = "cp1251"
         grab = build_grab()
-        data = u'фыва'
-        grab.setup(post={'foo': data}, url=self.server.get_url(),
-                   charset='cp1251', debug=True)
+        # fmt: off
+        data = u"фыва"
+        # fmt: on
+        grab.setup(
+            post={"foo": data}, url=self.server.get_url(), charset="cp1251", debug=True
+        )
+        self.server.add_response(Response())
         grab.request()
-        test = 'foo=%s' % quote(data.encode('cp1251'))
-        test = test.encode('utf-8')  # py3 hack
+        test = "foo=%s" % quote(data.encode("cp1251"))
+        test = test.encode("utf-8")  # py3 hack
         req = self.server.get_request()
         self.assertEqual(req.data, test)
 
     def test_put(self):
         grab = build_grab()
-        grab.setup(post=b'abc', url=self.server.get_url(),
-                   method='put', debug=True)
-        self.server.request['debug'] = True
+        grab.setup(post=b"abc", url=self.server.get_url(), method="put", debug=True)
+        # self.server.request["debug"] = True
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.method, 'PUT')
+        self.assertEqual(req.method, "PUT")
         req = self.server.get_request()
-        self.assertEqual(req.headers['content-length'], '3')
+        self.assertEqual(req.headers.get("content-length"), "3")
 
     def test_patch(self):
         grab = build_grab()
-        grab.setup(post=b'abc', url=self.server.get_url(), method='patch')
+        grab.setup(post=b"abc", url=self.server.get_url(), method="patch")
+        self.server.add_response(Response())
         grab.request()
         req = self.server.get_request()
-        self.assertEqual(req.method, 'PATCH')
+        self.assertEqual(req.method, "PATCH")
         req = self.server.get_request()
-        self.assertEqual(req.headers['content-length'], '3')
+        self.assertEqual(req.headers.get("content-length"), "3")
 
     def test_empty_post(self):
         grab = build_grab()
-        grab.setup(method='post', post='')
+        grab.setup(method="post", post="")
+
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         req = self.server.get_request()
-        self.assertEqual(req.method, 'POST')
+        self.assertEqual(req.method, "POST")
         req = self.server.get_request()
-        self.assertEqual(req.data, b'')
+        self.assertEqual(req.data, b"")
         req = self.server.get_request()
-        self.assertEqual(req.headers['content-length'], '0')
+        self.assertEqual(req.headers.get("content-length"), "0")
 
-        grab.go(self.server.get_url(), post='DATA')
+        self.server.add_response(Response())
+        grab.go(self.server.get_url(), post="DATA")
         req = self.server.get_request()
-        self.assertEqual(req.headers['content-length'], '4')
+        self.assertEqual(req.headers.get("content-length"), "4")
 
     def test_method_post_nobody(self):
         grab = build_grab()
-        grab.setup(method='post')
+        grab.setup(method="post")
+        self.server.add_response(Response())
         self.assertRaises(GrabMisuseError, grab.go, self.server.get_url())
 
     def test_post_multivalue_key(self):
         grab = build_grab()
-        grab.setup(post=[('foo', [1, 2])])
+        grab.setup(post=[("foo", [1, 2])])
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
-        self.assertEqual(
-            self.server.request['data'],
-            b'foo=1&foo=2'
-        )
+        self.assertEqual(self.server.get_request().data, b"foo=1&foo=2")
