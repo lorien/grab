@@ -1,9 +1,9 @@
 # coding: utf-8
 import time
 
-from tests.util import build_grab
-from tests.util import BaseGrabTestCase
 from grab.error import GrabTimeoutError
+from test_server import Response
+from tests.util import BaseGrabTestCase, build_grab
 
 
 class GrabTimeoutCase(BaseGrabTestCase):
@@ -11,15 +11,14 @@ class GrabTimeoutCase(BaseGrabTestCase):
         self.server.reset()
 
     def test_timeout(self):
-
         def callback():
-            time.sleep(2)
+            time.sleep(0.2)
             return {
-                'type': 'response',
-                'body': b'zzz',
+                "type": "response",
+                "data": b"zzz",
             }
 
-        self.server.response['callback'] = callback
+        self.server.add_response(Response(callback=callback))
         grab = build_grab()
-        grab.setup(timeout=1, url=self.server.get_url())
+        grab.setup(timeout=0.1, url=self.server.get_url())
         self.assertRaises(GrabTimeoutError, grab.request)

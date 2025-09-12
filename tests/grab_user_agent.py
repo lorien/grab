@@ -9,6 +9,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
     def test_default_random_user_agent(self):
         grab = build_grab()
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         self.assertTrue(
             self.server.get_request()
@@ -22,18 +23,21 @@ class GrabSimpleTestCase(BaseGrabTestCase):
 
         # Empty string disable default pycurl user-agent
         grab.setup(user_agent="")
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         req = self.server.get_request()
-        self.assertEqual(req.headers.get("user-agent", ""), "")
+        with self.assertRaises(KeyError):
+            req.headers.get("user-agent")
 
     def test_useragent_simple(self):
         grab = build_grab()
 
         # Simple case: setup user agent manually
         grab.setup(user_agent="foo")
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         req = self.server.get_request()
-        self.assertEqual(req.headers["user-agent"], "foo")
+        self.assertEqual(req.headers.get("user-agent"), "foo")
 
     def test_useragent(self):
         grab = build_grab()
@@ -43,49 +47,58 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         # like in Kit transport case
         grab = build_grab()
         grab.setup(user_agent=None)
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         req = self.server.get_request()
-        self.assertTrue(len(req.headers) > 0)
-        self.assertFalse("PycURL" in self.server.get_request().headers["user-agent"])
+        self.assertTrue(req.headers.count_items() > 0)
+        self.assertFalse(
+            "PycURL" in self.server.get_request().headers.get("user-agent")
+        )
 
         # By default user_agent is None => random user agent is generated
         grab = build_grab()
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         req = self.server.get_request()
-        self.assertTrue(len(req.headers) > 0)
-        self.assertFalse("PycURL" in req.headers["user-agent"])
+        self.assertTrue(req.headers.count_items() > 0)
+        self.assertFalse("PycURL" in req.headers.get("user-agent"))
 
         # Simple case: setup user agent manually
         grab.setup(user_agent="foo")
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         req = self.server.get_request()
-        self.assertEqual(req.headers["user-agent"], "foo")
+        self.assertEqual(req.headers.get("user-agent"), "foo")
 
         with temp_file() as ua_file:
             # user agent from file should be loaded
             with open(ua_file, "w") as out:
                 out.write("GOD")
             grab.setup(user_agent=None, user_agent_file=ua_file)
+            self.server.add_response(Response())
             grab.go(self.server.get_url())
             req = self.server.get_request()
-            self.assertEqual(req.headers["user-agent"], "GOD")
+            self.assertEqual(req.headers.get("user-agent"), "GOD")
 
         with temp_file() as ua_file:
             # random user agent from file should be loaded
             with open(ua_file, "w") as out:
                 out.write("GOD1\nGOD2")
             grab.setup(user_agent=None, user_agent_file=ua_file)
+            self.server.add_response(Response())
             grab.go(self.server.get_url())
             req = self.server.get_request()
-            self.assertTrue(req.headers["user-agent"] in ("GOD1", "GOD2"))
+            self.assertTrue(req.headers.get("user-agent") in ("GOD1", "GOD2"))
             agent = grab.config["user_agent"]
 
         # User-agent should not change
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         req = self.server.get_request()
-        self.assertEqual(req.headers["user-agent"], agent)
+        self.assertEqual(req.headers.get("user-agent"), agent)
 
         # User-agent should not change
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         req = self.server.get_request()
-        self.assertEqual(req.headers["user-agent"], agent)
+        self.assertEqual(req.headers.get("user-agent"), agent)

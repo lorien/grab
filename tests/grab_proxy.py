@@ -37,12 +37,18 @@ class TestProxy(BaseGrabTestCase):
 
         proxy = "%s:%s" % (ADDRESS, self.server.port)
         grab.setup(proxy=proxy, proxy_type="http", debug=True)
-        self.server.add_response(Response(data="123"), count=1)
+        self.server.add_response(Response(data="123"))
 
         grab.go("http://yandex.ru")
         self.assertEqual(b"123", grab.doc.body)
         req = self.server.get_request()
-        self.assertEqual("yandex.ru", req.headers["host"])
+        self.assertEqual("yandex.ru", req.headers.get("host"))
+
+    def add_responses_bulk(self, resp, count):
+        # type: (Response) -> None
+        self.server.add_response(Response())
+        for srv_item in self.extra_servers.values():
+            srv_item["server"].add_response(Response(), count=10)
 
     def test_deprecated_setup_proxylist(self):
         with temp_file() as tmp_file:
@@ -51,11 +57,12 @@ class TestProxy(BaseGrabTestCase):
             with open(tmp_file, "w") as out:
                 out.write(proxy)
             grab.proxylist.load_file(tmp_file)
-            self.server.add_response(Response(data="123"), count=1, method="get")
+            self.server.add_response(Response(data="123"))
             grab.change_proxy()
             grab.go("http://yandex.ru")
             self.assertEqual(b"123", grab.doc.body)
-            self.assertEqual("yandex.ru", self.server.get_request().headers["host"])
+            req = self.server.get_request()
+            self.assertEqual("yandex.ru", req.headers.get("host"))
 
     def test_load_proxylist(self):
         with temp_file() as tmp_file:
@@ -68,13 +75,14 @@ class TestProxy(BaseGrabTestCase):
             grab.proxylist.load_file(tmp_file)
             self.assertEqual(grab.config["proxy_auto_change"], True)
             servers = set()
+            self.add_responses_bulk(Response(), 10)
             for _ in six.moves.range(10):
                 grab.go("http://yandex.ru")
                 servers.add(grab.config["proxy"])
 
             self.assertTrue(len(servers) > 1)
 
-            # Disable auto_change
+            # # Disable auto_change
             # Change proxy manually
             grab = build_grab()
             grab.proxylist.load_file(tmp_file)
@@ -83,6 +91,7 @@ class TestProxy(BaseGrabTestCase):
             self.assertEqual(grab.config["proxy_auto_change"], False)
             # TODO: probably call proxy change manually
             servers = set()
+            self.add_responses_bulk(Response(), 10)
             for _ in six.moves.range(10):
                 grab.go("http://yandex.ru")
                 servers.add(grab.config["proxy"])
@@ -95,6 +104,7 @@ class TestProxy(BaseGrabTestCase):
             grab.proxylist.load_file(tmp_file)
             grab.setup(proxy_auto_change=False)
             self.assertEqual(grab.config["proxy_auto_change"], False)
+            self.add_responses_bulk(Response(), 10)
             grab.go(self.server.get_url())
             self.assertEqual(grab.config["proxy"], None)
 
@@ -126,6 +136,7 @@ class TestProxy(BaseGrabTestCase):
         grab = build_grab()
         items = [x["proxy"] for x in self.extra_servers.values()]
         grab.proxylist.load_list(items)
+        self.add_responses_bulk(Response(), 1)
         grab.go("http://yandex.ru")
         servers = [
             x["server"]
@@ -133,7 +144,7 @@ class TestProxy(BaseGrabTestCase):
             if x["server"].request_is_done()
         ]
         for serv in servers:
-            self.assertEqual(serv.get_request().headers["host"], "yandex.ru")
+            self.assertEqual(serv.get_request().headers.get("host"), "yandex.ru")
         self.assertTrue(grab.doc.headers["listen-port"] in map(str, self.extra_servers))
 
     def test_custom_proxysource(self):
@@ -147,14 +158,18 @@ class TestProxy(BaseGrabTestCase):
         grab.setup(proxy_auto_change=False)
         grab.proxylist.set_source(CustomProxySource())
         grab.change_proxy(random=False)
+
+        self.add_responses_bulk(Response(), 1)
         grab.go("http://yandex.ru")
         serv = extra_servers[0]["server"]
-        self.assertEqual((serv.get_request().headers["host"]), "yandex.ru")
+        self.assertEqual((serv.get_request().headers.get("host")), "yandex.ru")
         self.assertEqual(grab.doc.headers["listen-port"], str(serv.port))
         grab.change_proxy(random=False)
+
+        self.add_responses_bulk(Response(), 1)
         grab.go("http://yandex.ru")
         serv = extra_servers[1]["server"]
-        self.assertEqual(serv.get_request().headers["host"], "yandex.ru")
+        self.assertEqual(serv.get_request().headers.get("host"), "yandex.ru")
         self.assertEqual(grab.doc.headers["listen-port"], str(serv.port))
 
     def test_baseproxysource_constructor_arguments(self):
