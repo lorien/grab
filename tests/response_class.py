@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 import os.path
 
+from test_server import Request, Response
 from tests.util import TEST_DIR, build_grab, temp_dir
 from tests.util import BaseGrabTestCase
 
@@ -22,7 +23,7 @@ class TestResponse(BaseGrabTestCase):
             with open(IMG_FILE, 'rb') as inp:
                 img_data = inp.read()
             tmp_file = os.path.join(tmp_dir, 'file.bin')
-            self.server.response['get.data'] = img_data
+            self.server.add_response(Response(data=img_data), count=1, method="get")
 
             grab = build_grab()
             grab.go(self.server.get_url())
@@ -35,7 +36,7 @@ class TestResponse(BaseGrabTestCase):
         with temp_dir() as tmp_dir:
             with open(IMG_FILE, 'rb') as inp:
                 img_data = inp.read()
-            self.server.response['get.data'] = img_data
+            self.server.add_response(Response(data=img_data), count=1, method="get")
 
             grab = build_grab()
             grab.go(self.server.get_url())

@@ -1,6 +1,7 @@
 # coding: utf-8
 import six
 
+from test_server import Request, Response
 from tests.util import build_grab
 from tests.util import BaseGrabTestCase
 
@@ -11,7 +12,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
 
     def test_dash_issue(self):
         html = '<strong>&#151;</strong>'
-        self.server.response['get.data'] = html
+        self.server.add_response(Response(data=html), count=1, method="get")
         grab = build_grab()
         grab.go(self.server.get_url())
 
@@ -41,7 +42,7 @@ class LXMLExtensionTest(BaseGrabTestCase):
         html = '''<head><meta http-equiv="Content-Type"
                     content="text/html; charset=windows-874">'
                     </head><body>test</body>'''
-        self.server.response['get.data'] = html
+        self.server.add_response(Response(data=html), count=1, method="get")
         grab = build_grab()
         grab.go(self.server.get_url())
         #print(grab.doc.charset)

@@ -136,51 +136,68 @@ class TestHtmlForms(BaseGrabTestCase):
 
     def test_submit(self):
         grab = build_grab()
-        self.server.response["get.data"] = POST_FORM % self.server.get_url()
+        self.server.add_response(Response(data=POST_FORM % self.server.get_url()))
         grab.go(self.server.get_url())
         grab.doc.set_input("name", "Alex")
+        self.server.add_response(Response())
         grab.submit()
         req = self.server.get_request()
         self.assert_equal_qs(req.data, b"name=Alex&secret=123")
 
         # Default submit control
-        self.server.response["get.data"] = MULTIPLE_SUBMIT_FORM
+        self.server.add_response(
+            Response(data=MULTIPLE_SUBMIT_FORM), count=1, method="get"
+        )
         grab.go(self.server.get_url())
+        self.server.add_response(Response())
         grab.submit()
         req = self.server.get_request()
         self.assert_equal_qs(req.data, b"secret=123&submit1=submit1")
 
         # Selected submit control
-        self.server.response["get.data"] = MULTIPLE_SUBMIT_FORM
+        self.server.add_response(
+            Response(data=MULTIPLE_SUBMIT_FORM), count=1, method="get"
+        )
         grab.go(self.server.get_url())
+        self.server.add_response(Response())
         grab.submit(submit_name="submit2")
         req = self.server.get_request()
         self.assert_equal_qs(req.data, b"secret=123&submit2=submit2")
 
         # Default submit control if submit control name is invalid
-        self.server.response["get.data"] = MULTIPLE_SUBMIT_FORM
+        self.server.add_response(
+            Response(data=MULTIPLE_SUBMIT_FORM), count=1, method="get"
+        )
         grab.go(self.server.get_url())
+        self.server.add_response(Response())
         grab.submit(submit_name="submit3")
         req = self.server.get_request()
         self.assert_equal_qs(req.data, b"secret=123&submit1=submit1")
 
     def test_submit_remove_from_post_argument(self):
         grab = build_grab()
-        self.server.response["get.data"] = MULTIPLE_SUBMIT_FORM
-
+        self.server.add_response(
+            Response(data=MULTIPLE_SUBMIT_FORM), count=1, method="get"
+        )
         grab.go(self.server.get_url())
+
+        self.server.add_response(Response())
         grab.submit(submit_name="submit3")
         req = self.server.get_request()
         self.assert_equal_qs(req.data, b"secret=123&submit1=submit1")
 
+        self.server.add_response(
+            Response(data=MULTIPLE_SUBMIT_FORM), count=1, method="get"
+        )
         grab.go(self.server.get_url())
+        self.server.add_response(Response())
         grab.submit(remove_from_post=["submit1"])
         req = self.server.get_request()
         self.assert_equal_qs(req.data, b"secret=123")
 
     def test_set_methods(self):
         grab = build_grab()
-        self.server.response["get.data"] = FORMS_HTML
+        self.server.add_response(Response(data=FORMS_HTML), count=1, method="get")
         grab.go(self.server.get_url())
 
         # pylint: disable=protected-access
@@ -213,7 +230,7 @@ class TestHtmlForms(BaseGrabTestCase):
 
     def test_html_without_forms(self):
         grab = build_grab()
-        self.server.response["get.data"] = NO_FORM_HTML
+        self.server.add_response(Response(data=NO_FORM_HTML), count=1, method="get")
         grab.go(self.server.get_url())
         self.assertRaises(DataNotFound, lambda: grab.doc.form)
 
@@ -223,7 +240,9 @@ class TestHtmlForms(BaseGrabTestCase):
         """
 
         grab = build_grab()
-        self.server.response["get.data"] = DISABLED_RADIO_HTML
+        self.server.add_response(
+            Response(data=DISABLED_RADIO_HTML), count=1, method="get"
+        )
         grab.go(self.server.get_url())
         grab.submit(make_request=False)
 
@@ -241,7 +260,8 @@ class TestHtmlForms(BaseGrabTestCase):
         )
 
     def test_unicode_textarea_form(self):
-        html = """
+        # fmt: off
+        html = u"""
             <form enctype="multipart/form-data" action=""
                 method="post" accept-charset="UTF-8">
                 <textarea name="body">Beställa</textarea>
@@ -250,11 +270,16 @@ class TestHtmlForms(BaseGrabTestCase):
         """.encode(
             "utf-8"
         )
-        self.server.response["get.data"] = html
+        # fmt: on
+        self.server.add_response(Response(data=html), count=1, method="get")
         grab = build_grab()
         grab.go(self.server.get_url())
+        self.server.add_response(Response())
         grab.submit()
-        self.assertTrue("Beställa".encode("utf-8") in self.server.get_request().data)
+        req = self.server.get_request()
+        # fmt: off
+        self.assertTrue(u"Beställa".encode("utf-8") in req.data)
+        # fmt: on
 
     def test_field_disabled(self):
         html = b"""

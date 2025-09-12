@@ -170,6 +170,9 @@ class TestCookies(BaseGrabTestCase):
        # fmt: on
        grab.go(self.server.get_url())
 
+    # DISABLED because grab does not provide cp1251 charset in
+    # multipart data headers
+    # which results in test_server tries to decode data with utf8 charset
     #def test_debug_nonascii_multipart_post(self):
     #   self.server.add_response(Response())
     #   grab = build_grab(debug=True)
