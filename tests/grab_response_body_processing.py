@@ -1,6 +1,7 @@
 # coding: utf-8
 import os
 
+from test_server import Request, Response
 from tests.util import temp_dir, build_grab, TEST_DIR
 from test_server import Request, Response
 from tests.util import BaseGrabTestCase
@@ -108,7 +109,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         path = os.path.join(TEST_DIR, 'files/github_showcases.html')
         with open(path, 'rb') as inp:
             data = inp.read()
-        self.server.response['data'] = data
+        self.server.add_response(Response(data=data))
         grab = build_grab()
         grab.go(self.server.get_url())
         items = []

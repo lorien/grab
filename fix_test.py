@@ -11,6 +11,10 @@ RE_GET_DATA = re.compile(
     r'^(\s+)self\.server\.response(_once)?\[["\']get\.data["\']\]\s*=\s*["\'](.+?)["\']',
     re.M,
 )
+RE_DATA_VAR = re.compile(
+    r'^(\s+)self\.server\.response(_once)?\[["\']data["\']\]\s*=\s*(\w+)$',
+    re.M,
+)
 RE_GET_DATA_VAR = re.compile(
     r'^(\s+)self\.server\.response(_once)?\[["\']get\.data["\']\]\s*=\s*(\w+)$',
     re.M,
@@ -67,6 +71,16 @@ def handler_get_data_var(match):
     # fmt: off
     print(u"Fixing line: {}".format(match.group(0)))
     return u'{}self.server.add_response(Response(data={}), count=1, method="get")'.format(
+        match.group(1),
+        match.group(3),
+    )
+    # fmt: on
+
+
+def handler_data_var(match):
+    # fmt: off
+    print(u"Fixing line: {}".format(match.group(0)))
+    return u'{}self.server.add_response(Response(data={}))'.format(
         match.group(1),
         match.group(3),
     )
@@ -132,6 +146,7 @@ def process_file(path):
         new_content = RE_DATA.sub(handler_data, new_content)
         new_content = RE_GET_DATA.sub(handler_get_data, new_content)
         new_content = RE_GET_DATA_VAR.sub(handler_get_data_var, new_content)
+        new_content = RE_DATA_VAR.sub(handler_data_var, new_content)
         new_content = RE_HEADERS.sub(handler_headers, new_content)
         new_content = RE_COOKIES_DICT.sub(handler_cookies, new_content)
         new_content = RE_COOKIES_DICT_EMPTY.sub(handler_cookies, new_content)

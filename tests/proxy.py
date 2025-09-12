@@ -1,4 +1,5 @@
 # coding: utf-8
+from test_server import Request, Response
 from tests.util import build_grab, temp_file
 from tests.util import BaseGrabTestCase
 
@@ -40,7 +41,7 @@ class ProxyListTestCase(BaseGrabTestCase):
 
     def test_web_proxy_source(self):
         plist = ProxyList()
-        self.server.response['data'] = DEFAULT_PLIST_DATA
+        self.server.add_response(Response(data=DEFAULT_PLIST_DATA))
         plist.load_url(self.server.get_url())
         self.assertEqual(2, plist.size())
 
