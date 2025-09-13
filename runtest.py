@@ -60,7 +60,7 @@ GRAB_TEST_LIST = (
 
 SPIDER_TEST_LIST = (
     "tests.spider",
-    "tests.spider_cache",  # backends: mongodb TODO: mysql, postgresql
+    "tests.spider_cache",  # backends: mongodb, mysql, postgresql
     #'tests.spider_data',
     "tests.spider_error",
     "tests.spider_meta",
