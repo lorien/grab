@@ -10,21 +10,21 @@ CacheItem interface:
 
 TODO: WTF with cookies???
 """
-from hashlib import sha1
-import zlib
 import logging
 import time
+import zlib
+from hashlib import sha1
 
-import six
 import pymongo
+import six
 from bson import Binary
 from weblib.encoding import make_str
 
-from grab.document import Document
 from grab.cookie import CookieManager
+from grab.document import Document
 
 # pylint: disable=invalid-name
-logger = logging.getLogger('grab.spider.cache_backend.mongodb')
+logger = logging.getLogger("grab.spider.cache_backend.mongodb")
 # pylint: enable=invalid-name
 
 
@@ -48,7 +48,7 @@ class CacheBackend(object):
         """
 
         _hash = self.build_hash(url)
-        query = {'_id': _hash}
+        query = {"_id": _hash}
         return self.dbase.cache.find_one(query)
 
     def build_hash(self, url):
@@ -57,32 +57,32 @@ class CacheBackend(object):
 
     def remove_cache_item(self, url):
         _hash = self.build_hash(url)
-        self.dbase.cache.remove({'_id': _hash})
+        self.dbase.cache.remove({"_id": _hash})
 
     def load_response(self, grab, cache_item):
-        grab.setup_document(cache_item['body'])
+        grab.setup_document(cache_item["body"])
 
-        body = cache_item['body']
+        body = cache_item["body"]
         # Till the 0.6.39 version there was no compressed flag
         # so it was possible to detected the compressed item
         # only by analyzing the byte stream
         try:
-            is_compressed = cache_item['is_compressed']
+            is_compressed = cache_item["is_compressed"]
         except KeyError:
-            is_compressed = (body[0] == 120)
+            is_compressed = body[0] == 120
         if is_compressed:
             body = zlib.decompress(body)
 
         def custom_prepare_response_func(transport, grab):
             doc = Document()
-            doc.head = cache_item['head']
+            doc.head = cache_item["head"]
             doc.body = body
-            doc.code = cache_item['response_code']
+            doc.code = cache_item["response_code"]
             doc.download_size = len(body)
             doc.upload_size = 0
             doc.download_speed = 0
-            doc.url = cache_item['response_url']
-            doc.parse(charset=grab.config['document_charset'])
+            doc.url = cache_item["response_url"]
+            doc.parse(charset=grab.config["document_charset"])
             doc.cookies = CookieManager(transport.extract_cookiejar())
             doc.from_cache = True
             return doc
@@ -96,31 +96,34 @@ class CacheBackend(object):
 
         _hash = self.build_hash(url)
         item = {
-            '_id': _hash,
-            'timestamp': int(time.time()),
-            'url': url,
-            'response_url': grab.doc.url,
-            'body': Binary(body),
-            'head': Binary(grab.doc.head),
-            'response_code': grab.doc.code,
-            'cookies': None,
-            'is_compressed': self.use_compression,
+            "_id": _hash,
+            "timestamp": int(time.time()),
+            "url": url,
+            "response_url": grab.doc.url,
+            "body": Binary(body),
+            "head": Binary(grab.doc.head),
+            "response_code": grab.doc.code,
+            "cookies": None,
+            "is_compressed": self.use_compression,
         }
-        #print('Before saving')
+        # print('Before saving')
         try:
             self.dbase.cache.save(item, w=1)
-        except Exception as ex: # pylint: disable=broad-except
-            #from traceback import format_exc
-            #print('FATA ERROR WHILE SAVING CACHE ITEM')
-            #print(format_exc())
-            if 'document too large' in six.text_type(ex):
-                logging.error('Document too large. It was not saved into'
-                              'mongodb cache. Url: %s', url)
+        except Exception as ex:  # pylint: disable=broad-except
+            # from traceback import format_exc
+            # print('FATA ERROR WHILE SAVING CACHE ITEM')
+            # print(format_exc())
+            if "document too large" in six.text_type(ex):
+                logging.error(
+                    "Document too large. It was not saved into"
+                    " mongodb cache. Url: %s",
+                    url,
+                )
             else:
                 raise
-        #else:
+        # else:
         #    print('COUNT: %d' % self.dbase.cache.count({'_id': item['_id']}))
-        #finally:
+        # finally:
         #    print('After saving')
 
     def clear(self):
@@ -135,6 +138,6 @@ class CacheBackend(object):
         """
 
         _hash = self.build_hash(url)
-        query = {'_id': _hash}
-        doc = self.dbase.cache.find_one(query, {'id': 1})
+        query = {"_id": _hash}
+        doc = self.dbase.cache.find_one(query, {"id": 1})
         return doc is not None
