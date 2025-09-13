@@ -12,56 +12,44 @@ from tests.util import GLOBAL
 # Grab Tests
 # **********
 
-# FIXME:
-# * Test redirect and response.url after redirect
 GRAB_TEST_LIST = (
-    # *** Internal API
     "tests.grab_api",
-    "tests.grab_transport",
-    "tests.response_class",
-    "tests.grab_debug",  # FIXME: fix tests excluded for urllib3
-    # *** Response processing
-    "tests.grab_xml_processing",
     "tests.grab_response_body_processing",
+    "tests.grab_transport",
+    "tests.grab_debug",
+    "tests.grab_xml_processing",
     "tests.grab_charset",
     "tests.grab_redirect",
     "tests.grab_defusedxml",
+    "tests.response_class",
     "tests.grab_document",
-    # *** Network
     "tests.grab_get_request",
     "tests.grab_post_request",
-    "tests.grab_request",  # FIXME: fix tests excluded for urllib3
+    "tests.grab_request",
     "tests.grab_user_agent",
-    "tests.grab_cookies",  # FIXME: fix tests excluded for urllib3
+    "tests.grab_cookies",
     "tests.grab_url_processing",
     "tests.grab_timeout",
-    # *** Refactor
     "tests.grab_proxy",
     "tests.grab_upload_file",
     "tests.grab_limit_option",
     "tests.grab_charset_issue",
-    "tests.grab_pickle",  # FIXME: fix tests excluded for urllib3
+    "tests.grab_pickle",
     "tests.proxy",
-    # *** Extensions
     "tests.ext_text",
     "tests.ext_rex",
     "tests.ext_lxml",
     "tests.ext_form",
     "tests.ext_doc",
-    # *** Pycurl Test
     "tests.pycurl_cookie",
-    # *** util.module
     "tests.util_module",
     "tests.util_log",
-    # *** grab.export
     "tests.util_config",
     "tests.script_crawl",
     "tests.grab_error",
     "tests.grab_deprecated",
     "tests.ext_pyquery",
-    # *** process control
     "tests.grab_sigint",
-    # *** Other things
     "tests.raw_server",
     "tests.lib_weblib",
 )

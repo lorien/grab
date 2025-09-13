@@ -14,6 +14,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         with temp_dir() as tmp_dir:
             grab = build_grab()
             grab.setup(body_inmemory=False)
+            self.server.add_response(Response())
             with self.assertRaises(GrabMisuseError):
                 grab.go(self.server.get_url())
 

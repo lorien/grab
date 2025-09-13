@@ -1,5 +1,6 @@
-from tests.util import BaseGrabTestCase, build_spider
 from grab.spider import Spider, Task
+from test_server import Response
+from tests.util import BaseGrabTestCase, build_spider
 
 
 class BasicSpiderTestCase(BaseGrabTestCase):
@@ -14,8 +15,8 @@ class BasicSpiderTestCase(BaseGrabTestCase):
 
         def task_page(self, unused_grab, task):
             self.foo_count += 1
-            if not task.get('last'):
-                yield Task('page', url=self.meta['url'], last=True)
+            if not task.get("last"):
+                yield Task("page", url=self.meta["url"], last=True)
 
         def task_page2(self, unused_grab, task):
             yield task.clone(last=True)
@@ -31,7 +32,8 @@ class BasicSpiderTestCase(BaseGrabTestCase):
         inside handler applied to main spider instance."""
         bot = build_spider(self.SimpleSpider)
         bot.setup_queue()
-        bot.meta['url'] = self.server.get_url()
-        bot.add_task(Task('page', self.server.get_url()))
+        bot.meta["url"] = self.server.get_url()
+        bot.add_task(Task("page", self.server.get_url()))
+        self.server.add_response(Response(), count=2)
         bot.run()
         self.assertEqual(4, bot.foo_count)

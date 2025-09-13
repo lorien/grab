@@ -1,4 +1,5 @@
 from grab.spider import Spider, Task
+from test_server import Response
 from tests.util import BaseGrabTestCase, build_spider
 
 
@@ -15,15 +16,16 @@ class MiscTest(BaseGrabTestCase):
 
         class SimpleSpider(Spider):
             def task_generator(self):
-                yield Task('one', url=server.get_url())
+                yield Task("one", url=server.get_url())
 
             def task_one(self, grab, unused_task):
-                self.stat.inc('page_count')
-                yield Task('two', grab=grab)
+                self.stat.inc("page_count")
+                yield Task("two", grab=grab)
 
             def task_two(self, unused_grab, unused_task):
-                self.stat.inc('page_count')
+                self.stat.inc("page_count")
 
         bot = build_spider(SimpleSpider, thread_number=1)
+        self.server.add_response(Response(), count=2)
         bot.run()
-        self.assertEqual(2, bot.stat.counters['page_count'])
+        self.assertEqual(2, bot.stat.counters["page_count"])

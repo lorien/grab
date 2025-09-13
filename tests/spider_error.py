@@ -1,8 +1,11 @@
+import logging
+
 import mock
 from six import StringIO
 
 from grab import Grab, GrabTimeoutError
 from grab.spider import Spider, Task
+from test_server import Response
 from tests.util import (
     GLOBAL,
     BaseGrabTestCase,
@@ -46,12 +49,12 @@ class SpiderErrorTestCase(BaseGrabTestCase):
             def task_page(self, grab, task):
                 pass
 
-        self.server.add_response(Response(status=301), count=1)
         self.server.add_response(
             Response(
+                status=301,
                 headers=[
                     ("Location", INVALID_URL),
-                ]
+                ],
             ),
             count=1,
         )
@@ -59,13 +62,12 @@ class SpiderErrorTestCase(BaseGrabTestCase):
         bot.run()
 
     def test_no_warning(self):
-        """Simple spider should not generate
-        any warnings (warning module sends messages to stderr)
-        """
-        out = StringIO()
-        with mock.patch("sys.stderr", out):
+        # Simple spider should not generate
+        # any warnings (warning module sends messages to stderr)
+        out_buffer = StringIO()
+        with mock.patch("sys.stderr", out_buffer):
             server = self.server
-            server.response["data"] = b"<div>test</div>"
+            server.add_response(Response(data=b"<div>test</div>"), count=2)
 
             class SimpleSpider(Spider):
                 # pylint: disable=unused-argument
@@ -79,16 +81,20 @@ class SpiderErrorTestCase(BaseGrabTestCase):
 
             bot = build_spider(SimpleSpider)
             bot.run()
-        self.assertTrue(out.getvalue() == "")
+        # Expect here only two lines which are
+        # test server request logs
+        out = out_buffer.getvalue()
+        self.assertEqual(len(out.splitlines()), 2)
+        self.assertTrue(all("GET /" in x for x in out.splitlines()))
 
     def test_grab_attribute_exception(self):
         server = self.server
-        server.response["sleep"] = 2
+        server.add_response(Response(sleep=1))
 
         class SimpleSpider(Spider):
             def task_generator(self):
                 grab = Grab()
-                grab.setup(url=server.get_url(), timeout=1)
+                grab.setup(url=server.get_url(), timeout=0.1)
                 yield Task("page", grab=grab, raw=True)
 
             def task_page(self, grab, unused_task):
@@ -107,14 +113,14 @@ class SpiderErrorTestCase(BaseGrabTestCase):
     )
     def test_stat_error_name_multi_pycurl(self):
         server = self.server
-        server.response["sleep"] = 2
+        server.add_response(Response(sleep=1))
 
         class SimpleSpider(Spider):
             def prepare(self):
                 self.network_try_limit = 1
 
             def task_generator(self):
-                grab = Grab(url=server.get_url(), timeout=1)
+                grab = Grab(url=server.get_url(), timeout=0.1)
                 yield Task("page", grab=grab)
 
             def task_page(self, grab, unused_task):
@@ -133,14 +139,14 @@ class SpiderErrorTestCase(BaseGrabTestCase):
     )
     def test_stat_error_name_threaded_pycurl(self):
         server = self.server
-        server.response["sleep"] = 2
+        server.add_response(Response(sleep=1))
 
         class SimpleSpider(Spider):
             def prepare(self):
                 self.network_try_limit = 1
 
             def task_generator(self):
-                grab = Grab(url=server.get_url(), timeout=1)
+                grab = Grab(url=server.get_url(), timeout=0.1)
                 yield Task("page", grab=grab)
 
             def task_page(self, grab, unused_task):
@@ -159,14 +165,14 @@ class SpiderErrorTestCase(BaseGrabTestCase):
     )
     def test_stat_error_name_threaded_urllib3(self):
         server = self.server
-        server.response["sleep"] = 2
+        server.add_response(Response(sleep=1))
 
         class SimpleSpider(Spider):
             def prepare(self):
                 self.network_try_limit = 1
 
             def task_generator(self):
-                grab = Grab(url=server.get_url(), timeout=1)
+                grab = Grab(url=server.get_url(), timeout=0.1)
                 yield Task("page", grab=grab)
 
             def task_page(self, grab, unused_task):

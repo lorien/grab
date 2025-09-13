@@ -79,9 +79,11 @@ class GrabApiTestCase(BaseGrabTestCase):
 
         reset_request_counter()
         grab = build_grab()
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         self.assertEqual(grab.request_counter, 1)
 
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         self.assertEqual(grab.request_counter, 2)
 
@@ -91,6 +93,7 @@ class GrabApiTestCase(BaseGrabTestCase):
 
         # Make 10 requests in concurrent threads
         threads = []
+        self.server.add_response(Response(), count=10)
         for _ in six.moves.range(10):
             thread = threading.Thread(target=func)
             threads.append(thread)
@@ -98,6 +101,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         for thread in threads:
             thread.join()
 
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         self.assertEqual(grab.request_counter, 13)
 
@@ -132,8 +136,8 @@ class GrabApiTestCase(BaseGrabTestCase):
 
     def test_setup_document(self):
         data = b"""
-        <h1>test</h1>
-        """
+       <h1>test</h1>
+       """
         grab = build_grab(data)
         self.assertTrue(b"test" in grab.doc.body)
 
@@ -153,6 +157,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         # To make request Grab processes config and build result headers
         # from `config['common_headers']` and `config['headers']
         # That merge should not change initial `config['common_headers']` value
+        self.server.add_response(Response())
         grab.go(self.server.get_url())
         self.assertEqual(
             grab.config["common_headers"]["Accept"],
