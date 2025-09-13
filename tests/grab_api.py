@@ -21,7 +21,7 @@ class GrabApiTestCase(BaseGrabTestCase):
         self.server.add_response(Response(data="Moon"), count=1, method="get")
         grab.go(self.server.get_url())
         self.assertTrue(b"Moon" in grab.doc.body)
-        self.server.response["post.data"] = "Foo"
+        self.server.add_response(Response(data="Foo"), method="post")
         grab2 = grab.clone(method="post", post="")
         grab2.go(self.server.get_url())
         self.assertTrue(b"Foo" in grab2.doc.body)
