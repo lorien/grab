@@ -14,7 +14,6 @@ class GrabSimpleTestCase(BaseGrabTestCase):
         with temp_dir() as tmp_dir:
             grab = build_grab()
             grab.setup(body_inmemory=False)
-            self.server.add_response(Response())
             with self.assertRaises(GrabMisuseError):
                 grab.go(self.server.get_url())
 
@@ -32,6 +31,7 @@ class GrabSimpleTestCase(BaseGrabTestCase):
             # pylint: enable=protected-access
             old_path = grab.doc.body_path
 
+            self.server.add_response(Response())
             grab.go(self.server.get_url())
             self.assertTrue(old_path != grab.doc.body_path)
 
