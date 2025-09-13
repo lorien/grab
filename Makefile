@@ -1,19 +1,20 @@
-.PHONY: init venv deps py2 py2-venv py2-deps dirs test coverage_nobackend coverage coverage_missing clean upload viewdoc
+.PHONY: py3 py3-venv py3-deps py2 py2-venv py2-deps dirs test coverage_nobackend coverage coverage_missing clean upload viewdoc
 
 PY2_ROOT = /home/user/.pyenv/versions/2.7.18
-PY2_VENV = .venv-py27
+PY2_VENV = .venv-py2
+PY3_VENV = .venv-py3
 COVERAGE_TARGET = grab
 
 # PY3
-init: venv deps dirs
+py3: py3-venv py3-deps dirs
 
-venv:
-	virtualenv -p python3 .venv
+py3-venv:
+	virtualenv -p python3 $(PY3_VENV)
 
-deps:
-	.venv/bin/pip install -r requirements_dev.txt
-	.venv/bin/pip install -r requirements_dev_backend.txt
-	.venv/bin/pip install .
+py3-deps:
+	$(PY3_VENV)/bin/pip install -r requirements_dev.txt
+	$(PY3_VENV)/bin/pip install -r requirements_dev_backend.txt
+	$(PY3_VENV)/bin/pip install .
 
 # PY2
 py2: py2-venv py2-deps dirs
