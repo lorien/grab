@@ -222,9 +222,9 @@ def main():
         result = runner.run(suite)
 
     th_list = list(threading.enumerate())
-    print("Active threads (%d):" % len(th_list))
+    print("Active threads ({}):".format(len(th_list)))
     for th in th_list:
-        print("Thread: %s (isAlive:%s)" % (th, th.isAlive()))
+        print("Thread: {} (isAlive:{})".format(th, th.is_alive()))
 
     if result.wasSuccessful():
         sys.exit(0)
