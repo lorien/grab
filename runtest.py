@@ -85,6 +85,7 @@ def setup_logging():
         ("grab.spider.base", logging.INFO),
         ("grab.spider.parser_pipeline", logging.INFO),
         ("grab.stat", logging.INFO),
+        ("pymongo", logging.INFO),
     ):
         logger = logging.getLogger(name)
         logger.setLevel(level)

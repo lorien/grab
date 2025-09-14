@@ -30,14 +30,22 @@ logger = logging.getLogger("grab.spider.cache_backend.mongodb")
 
 class CacheBackend(object):
     def __init__(self, database, use_compression=False, spider=None, **kwargs):
+        self.colname = "cache"
+        self.dbname = database
         self.spider = spider
-        self.connection_config = kwargs
+        self.init_kwargs = kwargs
         self.connect()
-        self.dbase = self.connection[database]
+        self.connection, self.db, self.collection = self.connect()
         self.use_compression = use_compression
 
     def connect(self):
-        self.connection = pymongo.MongoClient(**self.connection_config)
+        connection = pymongo.MongoClient(**self.init_kwargs)
+        db = connection[self.dbname]
+        collection = db[self.colname]
+        return connection, db, collection
+
+    def reconnect(self):
+        self.connection, self.db, self.collection = self.connect()
 
     def close(self):
         self.connection.close()
@@ -49,7 +57,7 @@ class CacheBackend(object):
 
         _hash = self.build_hash(url)
         query = {"_id": _hash}
-        return self.dbase.cache.find_one(query)
+        return self.collection.find_one(query)
 
     def build_hash(self, url):
         utf_url = make_str(url)
@@ -57,7 +65,7 @@ class CacheBackend(object):
 
     def remove_cache_item(self, url):
         _hash = self.build_hash(url)
-        self.dbase.cache.remove({"_id": _hash})
+        self.collection.delete_one({"_id": _hash})
 
     def load_response(self, grab, cache_item):
         grab.setup_document(cache_item["body"])
@@ -108,7 +116,7 @@ class CacheBackend(object):
         }
         # print('Before saving')
         try:
-            self.dbase.cache.save(item, w=1)
+            self.collection.insert_one(item)
         except Exception as ex:  # pylint: disable=broad-except
             # from traceback import format_exc
             # print('FATA ERROR WHILE SAVING CACHE ITEM')
@@ -122,15 +130,15 @@ class CacheBackend(object):
             else:
                 raise
         # else:
-        #    print('COUNT: %d' % self.dbase.cache.count({'_id': item['_id']}))
+        #    print('COUNT: %d' % self.collection.count({'_id': item['_id']}))
         # finally:
         #    print('After saving')
 
     def clear(self):
-        self.dbase.cache.remove()
+        self.collection.delete_many({})
 
     def size(self):
-        return self.dbase.cache.count()
+        return self.collection.count_documents({})
 
     def has_item(self, url):
         """
@@ -139,5 +147,5 @@ class CacheBackend(object):
 
         _hash = self.build_hash(url)
         query = {"_id": _hash}
-        doc = self.dbase.cache.find_one(query, {"id": 1})
+        doc = self.collection.find_one(query, {"id": 1})
         return doc is not None

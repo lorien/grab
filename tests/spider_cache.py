@@ -19,11 +19,7 @@ import six
 
 from grab.spider import Spider, Task
 from test_server import Request, Response
-from test_settings import (
-    MONGODB_CONNECTION,
-    MYSQL_CONNECTION,
-    POSTGRESQL_CONNECTION,
-)
+from test_settings import MONGODB_CONNECTION, MYSQL_CONNECTION, POSTGRESQL_CONNECTION
 from tests.util import BaseGrabTestCase, build_spider
 
 
@@ -34,7 +30,7 @@ class ContentGenerator:
     def callback(self):
         return {
             "type": "response",
-            "data": "<b>{}</b>".format(self.counter),
+            "data": ("<b>{}</b>".format(self.counter)).encode(),
         }
         self.counter += 1
 
@@ -133,8 +129,9 @@ class SpiderCacheMixin(object):
         bot = self.get_configured_spider()
         bot.add_task(Task("simple", self.server.get_url()))
         bot.run()
-        bot.cache_reader_service.backend.connect()
+        bot.cache_reader_service.backend.reconnect()
         self.assertEqual(bot.cache_reader_service.backend.size(), 1)
+        bot.cache_reader_service.backend.close()
 
     def test_cache_task_queue_delay(self):
         """Cache task queue must support the delay parameter"""
@@ -159,10 +156,11 @@ class SpiderCacheMixin(object):
         bot.add_task(Task("simple", url=self.server.get_url()))
         bot.add_task(Task("simple", url=self.server.get_url("/foo")))
         bot.run()
-        bot.cache_reader_service.backend.connect()
+        bot.cache_reader_service.backend.reconnect()
         self.assertEqual(2, bot.cache_reader_service.backend.size())
         bot.cache_reader_service.backend.remove_cache_item(self.server.get_url())
         self.assertEqual(1, bot.cache_reader_service.backend.size())
+        bot.cache_reader_service.backend.close()
 
     @skip_postgres_test
     def test_has_item(self):
@@ -173,11 +171,12 @@ class SpiderCacheMixin(object):
         bot.add_task(Task("simple", url=self.server.get_url()))
         bot.add_task(Task("simple", url=self.server.get_url("/foo")))
         bot.run()
-        bot.cache_reader_service.backend.connect()
         backend = bot.cache_reader_service.backend
+        backend.reconnect()
         self.assertTrue(backend.has_item(self.server.get_url()))
         self.assertTrue(backend.has_item(self.server.get_url("/foo")))
         self.assertFalse(backend.has_item(self.server.get_url("/bar")))
+        backend.close()
 
 
 class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
@@ -211,7 +210,9 @@ class SpiderMongoCacheTestCase(SpiderCacheMixin, BaseGrabTestCase):
         # pylint: enable=unsubscriptable-object
         # bk = bot.cache_reader_service.backend
         # import pdb; pdb.set_trace()  # fmt: skip
+        bot.cache_reader_service.backend.reconnect()
         self.assertEqual(bot.cache_reader_service.backend.size(), 0)
+        bot.cache_reader_service.backend.close()
 
     # def test_connection_kwargs(self):
     #    # WTF is testing here?

@@ -16,11 +16,7 @@ from grab.base import Grab
 from grab.error import GrabInvalidUrl
 from grab.proxylist import BaseProxySource, ProxyList
 from grab.spider.cache_service import CacheReaderService, CacheWriterService
-from grab.spider.error import (
-    NoTaskHandler,
-    SpiderError,
-    SpiderMisuseError,
-)
+from grab.spider.error import NoTaskHandler, SpiderError, SpiderMisuseError
 from grab.spider.http_api_service import HttpApiService
 from grab.spider.parser_service import ParserService
 from grab.spider.task import Task
@@ -708,6 +704,7 @@ class Spider(object):
         finally:
             # TODO:
             if self.task_queue:
+                self.task_queue.clear()
                 self.task_queue.close()
             # print('Start stopping services')
             for srv in services:
@@ -726,8 +723,8 @@ class Spider(object):
                     print("The %s has not stopped :(" % srv)
             self.stat.print_progress_line()
             self.shutdown()
-            if self.task_queue:
-                self.task_queue.clear()
+            # if self.task_queue:
+            #    self.task_queue.clear()
             logger.debug("Work done")
 
     def is_idle(self):

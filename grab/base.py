@@ -17,6 +17,7 @@ from datetime import datetime
 from random import randint
 
 import six
+from six.moves.collections_abc import Callable
 from six.moves.urllib.parse import urljoin
 from weblib.html import find_base_url
 from weblib.http import make_str, normalize_http_values
@@ -256,7 +257,7 @@ class Grab(DeprecatedThings):
                     cls = getattr(mod, cls_name)
                     TRANSPORT_CACHE[(mod_path, cls_name)] = cls
                 self.transport = cls()
-        elif isinstance(transport_param, collections.Callable):
+        elif isinstance(transport_param, Callable):
             self.transport = transport_param()
         else:
             raise error.GrabMisuseError(

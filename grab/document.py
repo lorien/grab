@@ -26,6 +26,7 @@ import six
 import weblib.encoding
 from lxml.etree import ParserError, XMLParser
 from lxml.html import CheckboxValues, HTMLParser, MultipleSelectOptions
+from selection import SelectionNotFoundError, XpathSelector
 from six import BytesIO, StringIO
 from six.moves.urllib.parse import parse_qs, urljoin, urlsplit
 from weblib.files import hashed_path
@@ -38,21 +39,14 @@ from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabMisuseError
 from grab.unset import UNSET, UnsetType
 from grab.util.warning import warn
-from selection import SelectionNotFoundError, XpathSelector
 
 NULL_BYTE = chr(0)
-# r"".encode() is needed for py2 which lacks rb"" syntax
-RE_XML_DECLARATION = re.compile(r"^[^<]{,100}<\?xml[^>]+\?>".encode(), re.I)
-RE_DECLARATION_ENCODING = re.compile(b"encoding\s*=\s*[\"']([^\"']+)[\"']".encode())
-RE_META_CHARSET = re.compile(
-    r"<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)".encode(), re.I
-)
-RE_META_CHARSET_HTML5 = re.compile(
-    r'<meta[^>]+charset\s*=\s*[\'"]?([-\w]+)'.encode(), re.I
-)
-RE_UNICODE_XML_DECLARATION = re.compile(
-    RE_XML_DECLARATION.pattern.decode("utf-8"), re.I
-)
+# Could not use rb"" because py2 lacks this syntax
+RE_XML_DECLARATION = re.compile(b"^[^<]{,100}<\?xml[^>]+\?>", re.I)
+RE_DECLARATION_ENCODING = re.compile(b"""encoding\s*=\s*["']([^"']+)["']""")
+RE_META_CHARSET = re.compile(b"<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)", re.I)
+RE_META_CHARSET_HTML5 = re.compile(b"""<meta[^>]+charset\s*=\s*['"]?([-\w]+)""", re.I)
+RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode(), re.I)
 
 # Bom processing logic was copied from
 # https://github.com/scrapy/w3lib/blob/master/w3lib/encoding.py
