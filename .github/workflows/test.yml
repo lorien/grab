@@ -1,0 +1,43 @@
+name: Tests
+
+on: ["push", "pull_request"]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python: [2.7, 3.13]
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - name: Install python ${{ matrix.python }} with LisardByte/setup_python action
+      if: matrix.python <= 2.7
+      uses: LizardByte/actions/actions/setup_python@master
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Install python ${{ matrix.python }} with standard setup-python action
+      if: matrix.python > 2.7
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Install dependencies
+      run: |
+        pip install -U -r requirements_dev.txt
+        pip install -U .[full]
+
+    - name: Build wheel and install
+      run: |
+        make build
+        mv grab backup_grab
+        mv dist/*.whl dist/grab-0.0.1-py2.py3-none-any.whl
+        pip install -U dist/grab-0.0.1-py2.py3-none-any.whl
+
+    - name: Run tests
+      run: |
+        python runtest.py --test-all
+

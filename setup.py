@@ -19,7 +19,7 @@ setup(
         "user_agent",
         "selection>=2.0.1",
         'lxml;platform_system!="Windows"',
-        'pycurl<7.43.0.2;platform_system!="Windows"',
+        'pycurl;platform_system!="Windows"',
         "defusedxml",
         'typing-extensions; python_version <= "2.7"',
     ],
