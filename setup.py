@@ -17,10 +17,11 @@ setup(
         "weblib>=0.1.28",
         "six",
         "user_agent",
-        "selection",
+        "selection>=2.0.1",
         'lxml;platform_system!="Windows"',
         'pycurl<7.43.0.2;platform_system!="Windows"',
         "defusedxml",
+        'typing-extensions; python_version <= "2.7"',
     ],
     extras_require={
         "full": ["urllib3", "certifi"],
