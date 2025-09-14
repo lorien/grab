@@ -13,6 +13,9 @@ certifi
 # Devel
 bumpversion
 pkginfo
+build
+setuptools
+wheel
 
 # Tests
 coverage
