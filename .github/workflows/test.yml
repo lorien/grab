@@ -28,14 +28,13 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -U -r requirements_dev.txt
-        pip install -U .[full]
 
     - name: Build wheel and install
       run: |
         make build
         mv grab backup_grab
         mv dist/*.whl dist/grab-0.0.1-py2.py3-none-any.whl
-        pip install -U dist/grab-0.0.1-py2.py3-none-any.whl
+        pip install -U "grab[full] @ file://$(pwd)/dist/grab-0.0.1-py2.py3-none-any.whl"
 
     - name: Run tests
       run: |
