@@ -27,7 +27,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        apt install libcurl4-openssl-dev libssl-dev
+        sudo apt install libcurl4-openssl-dev libssl-dev
         pip install -U -r requirements_dev.txt
 
     - name: Build wheel and install
