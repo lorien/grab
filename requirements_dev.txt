@@ -1,5 +1,4 @@
 # Common deps
-test_server
 cssselect
 feedparser
 selenium
@@ -11,6 +10,7 @@ pysocks
 certifi
 
 # Devel
+test_server >= 0.1
 bumpversion
 pkginfo
 build
