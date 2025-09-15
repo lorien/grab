@@ -20,7 +20,7 @@ exceptions anymore. Now Grab uses DataNotFound and InvalidResponseError exceptio
 So, if your code imports `DataNotFound` or `ResponseNotValid` from weblib, you should fix such imports. Also, if
 your code explicitly catches these weblib exceptions then you should convert it to catch new `grab.error` exceptions.
 
-The new release has version 1.0.0. If you use Grab in your project and you want to keep old release to be sure
+The major version of new release is 1. If you use Grab in your project and you want to keep old release to be sure
 there is no backward-compatility bugs, then use this specification in your requirements file  `grab<1.0`.
 
 
