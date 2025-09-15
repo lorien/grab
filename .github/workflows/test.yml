@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: [3.13]
+        python: [2.7, 3.13]
     services:
       redis:
         image: redis:7.2
@@ -28,7 +28,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [windows-latest]
         python: [3.13]
     steps:
       - uses: actions/checkout@v4
