@@ -1,4 +1,4 @@
-.PHONY: py3 py3-venv py3-deps py2 py2-venv py2-deps dirs test coverage_nobackend coverage coverage_missing clean upload viewdoc build yaml
+.PHONY: py3 py3-venv py3-deps py2 py2-venv py2-deps dirs test coverage_nobackend coverage coverage_missing clean build yaml release
 
 PY2_ROOT = /home/user/.pyenv/versions/2.7.18
 PY2_VENV = .venv-py2
@@ -56,12 +56,6 @@ clean:
 	find -name '*.swp' -delete
 	find -name '__pycache__' -delete
 
-upload:
-	git push --tags; python setup.py clean sdist upload
-
-viewdoc:
-	x-www-browser docs/en/build/html/index.html
-
 build:
 	rm -rf *.egg-info
 	rm -rf dist/*
@@ -69,3 +63,9 @@ build:
 
 yaml:
 	yamllint .github
+
+release:
+	git push \
+	&& git push --tags \
+	&& make build \
+	&& twine upload dist/*
