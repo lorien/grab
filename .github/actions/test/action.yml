@@ -2,7 +2,7 @@ name: test-action
 
 inputs:
   python:
-    type: number
+    type: string
     required: true
   database_enabled:
     type: boolean
@@ -17,13 +17,13 @@ runs:
     - uses: actions/checkout@v4
 
     - name: Install python ${{ inputs.python }} with LisardByte/setup_python action
-      if: ${{ fromJSON(inputs.python) < 3.11 }}
+      if: ${{ (inputs.python | replace('.', '')) < '311' }}
       uses: LizardByte/actions/actions/setup_python@master
       with:
         python-version: ${{ inputs.python }}
 
     - name: Install python ${{ inputs.python }} with standard setup-python action
-      if: ${{ fromJSON(inputs.python) >= 3.11 }}
+      if: ${{ (inputs.python | replace('.', '')) >= '311' }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ inputs.python }}
