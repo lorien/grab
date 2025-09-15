@@ -45,8 +45,8 @@ dependencies = [
         "six",
         "user_agent",
         "selection>=2.0.1",
-        'lxml;platform_system!="Windows"',
-        'pycurl;platform_system!="Windows"',
+        'lxml;platform_system != "Windows" or python_version >= "3.13"',
+        'pycurl;platform_system != "Windows" or python_version >= "3.13"',
         "defusedxml",
         'typing-extensions; python_version <= "2.7"',
 ]
