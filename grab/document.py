@@ -31,7 +31,7 @@ from six import BytesIO, StringIO
 from six.moves.urllib.parse import parse_qs, urljoin, urlsplit
 from weblib.files import hashed_path
 from weblib.rex import normalize_regexp
-from weblib.text import normalize_space
+from grab.util.text import normalize_space
 
 from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabMisuseError

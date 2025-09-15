@@ -4,7 +4,7 @@ import six
 from selection import SelectionNotFoundError
 from selection.const import UNDEFINED
 from weblib.etree import get_node_text
-from weblib.text import find_number
+from grab.util.text import find_number
 
 from grab import error
 from grab.error import DataNotFound, GrabMisuseError
