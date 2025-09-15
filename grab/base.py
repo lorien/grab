@@ -20,13 +20,14 @@ import six
 from six.moves.collections_abc import Callable
 from six.moves.urllib.parse import urljoin
 from weblib.html import find_base_url
-from weblib.http import make_str, normalize_http_values
 
 from grab import error
 from grab.cookie import CookieManager
 from grab.deprecated import DeprecatedThings
 from grab.document import Document
 from grab.proxylist import ProxyList, parse_proxy_line
+from grab.util.encoding import make_str
+from grab.util.http import normalize_http_values
 
 __all__ = ("Grab",)
 # This counter will used in enumerating network queries.

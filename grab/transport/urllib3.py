@@ -18,7 +18,6 @@ from urllib3.filepost import encode_multipart_formdata
 from urllib3.util.retry import Retry
 from urllib3.util.timeout import Timeout
 from user_agent import generate_user_agent
-from weblib.http import normalize_http_values, normalize_post_data, normalize_url
 
 from grab import error
 from grab.cookie import CookieManager, MockRequest, MockResponse
@@ -27,6 +26,7 @@ from grab.error import GrabMisuseError, GrabTimeoutError
 from grab.transport.base import BaseTransport
 from grab.upload import UploadContent, UploadFile
 from grab.util.encoding import decode_pairs, make_str, make_unicode
+from grab.util.http import normalize_http_values, normalize_post_data, normalize_url
 
 
 def process_upload_items(items):
