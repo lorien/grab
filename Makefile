@@ -14,7 +14,7 @@ py3-venv:
 py3-deps:
 	$(PY3_VENV)/bin/pip install -r requirements_dev.txt
 	$(PY3_VENV)/bin/pip install -r requirements_dev_backend.txt
-	$(PY3_VENV)/bin/pip install .
+	$(PY3_VENV)/bin/pip install .[urllib3,pyquery]
 
 # PY2
 py2: py2-venv py2-deps dirs
@@ -26,7 +26,7 @@ py2-venv:
 py2-deps:
 	$(PY2_VENV)/bin/pip install -r requirements_dev.txt
 	$(PY2_VENV)/bin/pip install -r requirements_dev_backend.txt
-	$(PY2_VENV)/bin/pip install .
+	$(PY2_VENV)/bin/pip install .[urllib3,pyquery]
 
 dirs:
 	if [ ! -e var/run ]; then mkdir -p var/run; fi
