@@ -17,13 +17,13 @@ runs:
     - uses: actions/checkout@v4
 
     - name: Install python ${{ inputs.python }} with LisardByte/setup_python action
-      if: ${{ fromJSON(inputs.python) < 3.3 }}
+      if: ${{ fromJSON(inputs.python) < 3.11 }}
       uses: LizardByte/actions/actions/setup_python@master
       with:
         python-version: ${{ inputs.python }}
 
     - name: Install python ${{ inputs.python }} with standard setup-python action
-      if: ${{ fromJSON(inputs.python) >= 3.3 }}
+      if: ${{ fromJSON(inputs.python) >= 3.11 }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ inputs.python }}
