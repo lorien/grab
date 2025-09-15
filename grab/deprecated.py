@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import six
 from selection import SelectionNotFoundError
 from selection.const import UNDEFINED
-from weblib.etree import get_node_text
+from grab.util.etree import get_node_text
 from grab.util.text import find_number
 
 from grab import error

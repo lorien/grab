@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-from weblib.logs import default_logging  # noqa
-
 from grab.base import Grab  # noqa
 from grab.error import (  # noqa
     DataNotFound,
@@ -11,6 +9,7 @@ from grab.error import (  # noqa
     GrabTimeoutError,
 )
 from grab.upload import UploadContent, UploadFile  # noqa
+from grab.util.log import default_logging  # noqa
 
 __version__ = "1.0.0"
 VERSION_NUMERIC = tuple(map(int, __version__.split(".")))

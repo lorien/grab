@@ -14,7 +14,6 @@ setup(
         "grab.util",
     ],
     install_requires=[
-        "weblib>=0.1.28",
         "six",
         "user_agent",
         "selection>=2.0.1",

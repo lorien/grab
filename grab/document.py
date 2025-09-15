@@ -29,15 +29,15 @@ from lxml.html import CheckboxValues, HTMLParser, MultipleSelectOptions
 from selection import SelectionNotFoundError, XpathSelector
 from six import BytesIO, StringIO
 from six.moves.urllib.parse import parse_qs, urljoin, urlsplit
-from weblib.files import hashed_path
-from weblib.rex import normalize_regexp
-from grab.util.text import normalize_space
 
 from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabMisuseError
 from grab.unset import UNSET, UnsetType
+from grab.util.files import hashed_path
 from grab.util.html import decode_entities, find_refresh_url
 from grab.util.http import smart_urlencode
+from grab.util.rex import normalize_regexp
+from grab.util.text import normalize_space
 from grab.util.warning import warn
 
 NULL_BYTE = chr(0)

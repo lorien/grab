@@ -41,7 +41,6 @@ classifiers = [
     #"Typing :: Typed",
 ]
 dependencies = [
-        "weblib>=0.1.28",
         "six",
         "user_agent",
         "selection>=2.0.1",

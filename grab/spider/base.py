@@ -10,7 +10,6 @@ from traceback import format_exception, format_stack
 
 import six
 from six.moves.queue import Empty, Queue
-from weblib import metric
 
 from grab.base import Grab
 from grab.error import GrabInvalidUrl
@@ -24,6 +23,7 @@ from grab.spider.task_dispatcher_service import TaskDispatcherService
 from grab.spider.task_generator_service import TaskGeneratorService
 from grab.stat import Stat
 from grab.unset import UNSET
+from grab.util.metric import format_traffic_value
 from grab.util.misc import camel_case_to_underscore
 from grab.util.warning import warn
 
@@ -425,7 +425,7 @@ class Spider(object):
         if "download-size" in self.stat.counters:
             out.append(
                 "Network download: %s"
-                % metric.format_traffic_value(self.stat.counters["download-size"])
+                % format_traffic_value(self.stat.counters["download-size"])
             )
         out.append(
             "Queue size: %d" % self.task_queue.size() if self.task_queue else "NA"

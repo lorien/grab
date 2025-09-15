@@ -4,10 +4,10 @@ import os
 from argparse import ArgumentParser
 
 import six
-from weblib.files import clear_directory
 
 from grab.util.config import build_root_config, build_spider_config
 from grab.util.encoding import make_str
+from grab.util.files import clear_directory
 from grab.util.log import default_logging
 from grab.util.module import load_spider_class
 
