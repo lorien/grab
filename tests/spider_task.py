@@ -1,9 +1,9 @@
-from weblib.error import ResponseNotValid
+from test_server import Request, Response
 
 from grab import Grab
+from grab.error import InvalidResponseError
 from grab.spider import NoTaskHandler, Spider, SpiderMisuseError, Task, base
 from grab.spider.error import SpiderError
-from test_server import Request, Response
 from tests.util import BaseGrabTestCase, build_grab, build_spider
 
 
@@ -360,7 +360,7 @@ class TestSpiderTestCase(BaseGrabTestCase):
         class SomeSimpleSpider(Spider):
             def task_page(self, unused_grab, unused_task):
                 self.stat.inc("xxx")
-                raise ResponseNotValid
+                raise InvalidResponseError
 
         bot = build_spider(SomeSimpleSpider)
         bot.setup_queue()

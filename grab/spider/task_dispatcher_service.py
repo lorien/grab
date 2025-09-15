@@ -1,9 +1,9 @@
 from six.moves.queue import Empty, Queue
-from weblib.error import ResponseNotValid
 
+from grab.error import InvalidResponseError
 from grab.spider.base_service import BaseService
-from grab.spider.task import Task
 from grab.spider.error import FatalError, SpiderError
+from grab.spider.task import Task
 
 
 class TaskDispatcherService(BaseService):
@@ -34,7 +34,7 @@ class TaskDispatcherService(BaseService):
         * Task
         * None
         * Task instance
-        * ResponseNotValid-based exception
+        * InvalidResponseError-based exception
         * Arbitrary exception
         * Network response:
             {ok, ecode, emsg, error_abbr, exc, grab, grab_config_backup}
@@ -46,46 +46,46 @@ class TaskDispatcherService(BaseService):
         if meta is None:
             meta = {}
         if isinstance(result, Task):
-            if meta.get('source') == 'cache_reader':
+            if meta.get("source") == "cache_reader":
                 self.spider.add_task(result, queue=self.spider.task_queue)
             else:
                 self.spider.add_task(result)
         elif result is None:
             pass
-        elif isinstance(result, ResponseNotValid):
+        elif isinstance(result, InvalidResponseError):
             self.spider.add_task(task.clone(refresh_cache=True))
-            error_code = result.__class__.__name__.replace('_', '-')
-            self.spider.stat.inc('integrity:%s' % error_code)
+            error_code = result.__class__.__name__.replace("_", "-")
+            self.spider.stat.inc("integrity:%s" % error_code)
         elif isinstance(result, Exception):
             if task:
                 handler = self.spider.find_task_handler(task)
-                handler_name = getattr(handler, '__name__', 'NONE')
+                handler_name = getattr(handler, "__name__", "NONE")
             else:
-                handler_name = 'NA'
+                handler_name = "NA"
             self.spider.process_parser_error(
-                handler_name, task, meta['exc_info'],
+                handler_name,
+                task,
+                meta["exc_info"],
             )
             if isinstance(result, FatalError):
-                self.spider.fatal_error_queue.put(meta['exc_info'])
-        elif isinstance(result, dict) and 'grab' in result:
-            if (self.spider.cache_writer_service
-                    and not result.get('from_cache')
-                    and result['ok']):
-                self.spider.cache_writer_service.input_queue.put(
-                    (task, result['grab'])
-                )
+                self.spider.fatal_error_queue.put(meta["exc_info"])
+        elif isinstance(result, dict) and "grab" in result:
+            if (
+                self.spider.cache_writer_service
+                and not result.get("from_cache")
+                and result["ok"]
+            ):
+                self.spider.cache_writer_service.input_queue.put((task, result["grab"]))
             # TODO: Move to network service
             # starts
             self.spider.log_network_result_stats(result, task)
             # ends
             is_valid = False
-            if task.get('raw'):
+            if task.get("raw"):
                 is_valid = True
-            elif result['ok']:
-                res_code = result['grab'].doc.code
-                is_valid = self.spider.is_valid_network_response_code(
-                    res_code, task
-                )
+            elif result["ok"]:
+                res_code = result["grab"].doc.code
+                is_valid = self.spider.is_valid_network_response_code(res_code, task)
             if is_valid:
                 self.spider.parser_service.input_queue.put((result, task))
             else:
@@ -97,13 +97,10 @@ class TaskDispatcherService(BaseService):
                 # But because of content integrity check
                 if self.spider.network_try_limit > 0:
                     task.refresh_cache = True
-                    task.setup_grab_config(
-                        result['grab_config_backup'])
+                    task.setup_grab_config(result["grab_config_backup"])
                     self.spider.add_task(task)
-            if result.get('from_cache'):
-                self.spider.stat.inc('spider:task-%s-cache'
-                                     % task.name)
-            self.spider.stat.inc('spider:request')
+            if result.get("from_cache"):
+                self.spider.stat.inc("spider:task-%s-cache" % task.name)
+            self.spider.stat.inc("spider:request")
         else:
-            raise SpiderError('Unknown result received from a service: %s'
-                              % result)
+            raise SpiderError("Unknown result received from a service: %s" % result)

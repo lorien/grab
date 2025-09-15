@@ -637,6 +637,6 @@ def build_grab_exception(ex, curl):
         elif ex.args[0] == 3:
             return error.GrabInvalidUrl(ex.args[1], ex)
         elif ex.args[0] == 8:
-            return error.GrabInvalidResponseHeaderError(ex.args[1], ex)
+            return error.InvalidResponseHeaderError(ex.args[1], ex)
         else:
             return error.GrabNetworkError(ex.args[1], ex)

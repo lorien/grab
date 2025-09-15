@@ -2,9 +2,9 @@
 import mock
 import pycurl
 from six.moves.urllib.parse import quote
-
-from grab.error import GrabConnectionError, GrabInvalidResponseHeaderError
 from test_server import Request, Response
+
+from grab.error import GrabConnectionError, InvalidResponseHeaderError
 from tests.util import BaseGrabTestCase, build_grab, only_grab_transport
 
 
@@ -57,7 +57,7 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
         )
         self.server.add_response(Response(data="y"), count=1)
         grab = build_grab()
-        with self.assertRaises(GrabInvalidResponseHeaderError):
+        with self.assertRaises(InvalidResponseHeaderError):
             grab.go(self.server.get_url())
         # self.assertEqual(b"y", grab.doc.body)
         # self.assertEqual(grab.doc.url, quote(redirect_url, safe=":./?&"))

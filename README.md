@@ -15,9 +15,10 @@ and Python 3.13.
 There is NO new features. It is just an updated code base which is alive now i.e. it can run on Python 2.7 or on
 modern python, and its tests pass, and it has github CI config to run tests on new commits.
 
-One backward-incompatible change is that I do not use `weblib.error::DataNotFound` exception anymore. Now Grab
-uses DataNotFound exception which is stored in `grab.errors` module. So, if your code imports `DataNotFound`
-from weblib, you should fix such imports.
+One backward-incompatible change is that I do not use `weblib.error::DataNotFound` and `weblib.error::ResponseNotValid`
+exceptions anymore. Now Grab uses DataNotFound and InvalidResponseError exceptions which is stored in `grab.errors` module.
+So, if your code imports `DataNotFound` or `ResponseNotValid` from weblib, you should fix such imports. Also, if
+your code explicitly catches these weblib exceptions then you should convert it to catch new `grab.error` exceptions.
 
 The new release has version 1.0.0. If you use Grab in your project and you want to keep old release to be sure
 there is no backward-compatility bugs, then use this specification in your requirements file  `grab<1.0`.

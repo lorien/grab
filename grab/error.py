@@ -101,13 +101,13 @@ class GrabInternalError(OriginalExceptionError, GrabError):
     pass
 
 
-class GrabInvalidResponseError(OriginalExceptionError, GrabError):
-    pass
-
-
-class GrabInvalidResponseHeaderError(OriginalExceptionError, GrabError):
-    pass
-
-
 class DataNotFound(GrabError):
+    pass
+
+
+class InvalidResponseError(OriginalExceptionError, GrabError):
+    pass
+
+
+class InvalidResponseHeaderError(InvalidResponseError):
     pass

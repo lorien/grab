@@ -1,14 +1,15 @@
 import functools
 
-from weblib.error import ResponseNotValid
+from grab.error import InvalidResponseError
 
 
-def integrity(integrity_func, retry_errors=(ResponseNotValid,)):
+def integrity(integrity_func, retry_errors=(InvalidResponseError,)):
     """
     Args:
         :param integrity_func: couldb callable or string contains name of
             method to call
     """
+
     def build_decorator(func):
         @functools.wraps(func)
         def func_wrapper(self, grab, task):
@@ -24,8 +25,8 @@ def integrity(integrity_func, retry_errors=(ResponseNotValid,)):
                         int_func(grab)
             except retry_errors as ex:
                 yield task.clone(refresh_cache=True)
-                error_code = ex.__class__.__name__.replace('_', '-')
-                self.stat.inc('integrity:%s' % error_code)
+                error_code = ex.__class__.__name__.replace("_", "-")
+                self.stat.inc("integrity:%s" % error_code)
             except Exception as ex:
                 raise
             else:
@@ -33,6 +34,8 @@ def integrity(integrity_func, retry_errors=(ResponseNotValid,)):
                 if result is not None:
                     for event in result:
                         yield event
-        func_wrapper._original_func = func # pylint: disable=protected-access
+
+        func_wrapper._original_func = func  # pylint: disable=protected-access
         return func_wrapper
+
     return build_decorator
