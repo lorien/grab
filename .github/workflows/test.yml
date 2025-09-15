@@ -1,43 +1,37 @@
-name: Tests
-
+name: Linters
 on: ["push", "pull_request"]
-
 jobs:
-  test:
+  with-db:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [3.13]
+    services:
+      redis:
+        image: redis:7.2
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/test
+        with:
+          python: ${{ matrix.python }}
+          database_enabled: true
+
+  without-db:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        python: [2.7, 3.13]
+        os: [ubuntu-latest, windows-latest]
+        python: [3.13]
     steps:
-
-    - uses: actions/checkout@v2
-
-    - name: Install python ${{ matrix.python }} with LisardByte/setup_python action
-      if: matrix.python <= 2.7
-      uses: LizardByte/actions/actions/setup_python@master
-      with:
-        python-version: ${{ matrix.python }}
-
-    - name: Install python ${{ matrix.python }} with standard setup-python action
-      if: matrix.python > 2.7
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python }}
-
-    - name: Install dependencies
-      run: |
-        sudo apt install libcurl4-openssl-dev libssl-dev
-        pip install -U -r requirements_dev.txt
-
-    - name: Build wheel and install
-      run: |
-        make build
-        mv grab backup_grab
-        mv dist/*.whl dist/grab-0.0.1-py2.py3-none-any.whl
-        pip install -U "grab[full] @ file://$(pwd)/dist/grab-0.0.1-py2.py3-none-any.whl"
-
-    - name: Run tests
-      run: |
-        python runtest.py --test-all
-
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/test
+        with:
+          python: ${{ matrix.python }}
+          database_enabled: false

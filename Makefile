@@ -1,4 +1,4 @@
-.PHONY: py3 py3-venv py3-deps py2 py2-venv py2-deps dirs test coverage_nobackend coverage coverage_missing clean upload viewdoc build
+.PHONY: py3 py3-venv py3-deps py2 py2-venv py2-deps dirs test coverage_nobackend coverage coverage_missing clean upload viewdoc build yaml
 
 PY2_ROOT = /home/user/.pyenv/versions/2.7.18
 PY2_VENV = .venv-py2
@@ -66,3 +66,6 @@ build:
 	rm -rf *.egg-info
 	rm -rf dist/*
 	python -m build
+
+yaml:
+	yamllint .github

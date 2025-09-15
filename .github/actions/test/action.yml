@@ -1,0 +1,58 @@
+name: test-action
+
+inputs:
+  python:
+    type: number
+    required: true
+  database_enabled:
+    type: boolean
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Install python ${{ inputs.python }} with LisardByte/setup_python action
+      if: ${{ fromJSON(inputs.python) <= 2.7 }}
+      uses: LizardByte/actions/actions/setup_python@master
+      with:
+        python-version: ${{ inputs.python }}
+
+    - name: Install python ${{ inputs.python }} with standard setup-python action
+      if: ${{ fromJSON(inputs.python) > 2.7 }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python }}
+
+    - name: Install deps
+      shell: bash
+      run: |
+        sudo apt install libcurl4-openssl-dev libssl-dev
+        pip install -U -r requirements_dev.txt
+
+    - name: Install database deps
+      if: ${{ fromJSON(inputs.database_enabled) }}
+      shell: bash
+      run: |
+        pip install -r requirements_dev_database.txt
+
+    - name: Build wheel and install
+      # step in composite action requires shell be specified
+      # this step runs ok both on windown and linux if shell is "pwsh"
+      shell: pwsh
+      run: |
+        make build
+        mv grab backup_grab
+        mv dist/*.whl dist/grab-0.0.1-py2.py3-none-any.whl
+        pip install -U "grab[full] @ file://$(pwd)/dist/grab-0.0.1-py2.py3-none-any.whl"
+
+    - name: Run all tests
+      if: ${{ fromJSON(inputs.database_enabled) }}
+      run: |
+        python runtest.py --test-all --backend-redis
+
+    - name: Run only non-database tests
+      if: ${{ ! fromJSON(inputs.database_enabled) }}
+      run: |
+        python runtest.py --test-all
