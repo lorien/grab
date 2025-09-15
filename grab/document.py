@@ -23,7 +23,6 @@ from datetime import datetime
 
 import defusedxml.lxml
 import six
-import weblib.encoding
 from lxml.etree import ParserError, XMLParser
 from lxml.html import CheckboxValues, HTMLParser, MultipleSelectOptions
 from selection import SelectionNotFoundError, XpathSelector
@@ -33,6 +32,7 @@ from six.moves.urllib.parse import parse_qs, urljoin, urlsplit
 from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabMisuseError
 from grab.unset import UNSET, UnsetType
+from grab.util.encoding import fix_special_entities as fix_special_entities_func
 from grab.util.files import hashed_path
 from grab.util.html import decode_entities, find_refresh_url
 from grab.util.http import smart_urlencode
@@ -581,7 +581,7 @@ class Document(object):
         if bom:
             body = body[len(self.bom) :]
         if fix_special_entities:
-            body = weblib.encoding.fix_special_entities(body)
+            body = fix_special_entities_func(body)
         if ignore_errors:
             errors = "ignore"
         else:

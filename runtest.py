@@ -43,7 +43,6 @@ GRAB_TEST_LIST = (
     "tests.grab_url_processing",
     "tests.grab_user_agent",
     "tests.grab_xml_processing",
-    "tests.lib_weblib",
     "tests.proxy",
     "tests.pycurl_cookie",
     "tests.raw_server",
