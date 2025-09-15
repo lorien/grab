@@ -36,6 +36,7 @@ jobs:
         image: mysql:8.0
         env:
           # same config must be in test_settings.py
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_USER: github
           MYSQL_PASSWORD: github
           MYSQL_DATABASE: grab_test
