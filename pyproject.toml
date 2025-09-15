@@ -1,7 +1,7 @@
 [project]
 
 name = "grab"
-version = "1.0.0"
+version = "1.0.1"
 description = "Web scraping framework"
 readme = "README.md"
 requires-python = ">=2.7"
