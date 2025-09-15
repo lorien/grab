@@ -49,10 +49,12 @@ runs:
 
     - name: Run all tests
       if: ${{ fromJSON(inputs.database_enabled) }}
+      shell: bash
       run: |
         python runtest.py --test-all --backend-redis
 
     - name: Run only non-database tests
       if: ${{ ! fromJSON(inputs.database_enabled) }}
+      shell: bash
       run: |
         python runtest.py --test-all
