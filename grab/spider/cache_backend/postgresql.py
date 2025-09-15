@@ -18,10 +18,10 @@ from hashlib import sha1
 
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_READ_COMMITTED
-from weblib.encoding import make_str
 
 from grab.cookie import CookieManager
 from grab.document import Document
+from grab.util.encoding import make_str
 
 # pylint: disable=invalid-name
 logger = logging.getLogger("grab.spider.cache_backend.postgresql")

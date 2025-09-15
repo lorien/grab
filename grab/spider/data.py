@@ -1,4 +1,4 @@
-from grab.const import NULL
+from grab.unset import UNSET
 
 
 class Data(object):
@@ -13,11 +13,11 @@ class Data(object):
     def __getitem__(self, key):
         return self.storage[key]
 
-    def get(self, key, default=NULL):
+    def get(self, key, default=UNSET):
         try:
             return self.storage[key]
         except KeyError:
-            if default is NULL:
+            if default is UNSET:
                 raise
             else:
                 return default

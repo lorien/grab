@@ -23,6 +23,7 @@ from grab.spider.task import Task
 from grab.spider.task_dispatcher_service import TaskDispatcherService
 from grab.spider.task_generator_service import TaskGeneratorService
 from grab.stat import Stat
+from grab.unset import UNSET
 from grab.util.misc import camel_case_to_underscore
 from grab.util.warning import warn
 
@@ -31,7 +32,6 @@ DEFAULT_NETWORK_STREAM_NUMBER = 3
 DEFAULT_TASK_TRY_LIMIT = 5
 DEFAULT_NETWORK_TRY_LIMIT = 5
 RANDOM_TASK_PRIORITY_RANGE = (50, 100)
-NULL = object()
 
 # pylint: disable=invalid-name
 logger = logging.getLogger("grab.spider.base")
@@ -119,7 +119,7 @@ class Spider(object):
         thread_number=None,
         network_try_limit=None,
         task_try_limit=None,
-        request_pause=NULL,
+        request_pause=UNSET,
         priority_mode="random",
         meta=None,
         only_cache=False,
@@ -191,7 +191,7 @@ class Spider(object):
             self.priority_mode = priority_mode
         self.only_cache = only_cache
         self.work_allowed = True
-        if request_pause is not NULL:
+        if request_pause is not UNSET:
             warn("Option `request_pause` is deprecated and is not " "supported anymore")
         self.proxylist_enabled = None
         self.proxylist = None

@@ -20,7 +20,6 @@ import pycurl
 import six
 from six.moves.http_cookiejar import CookieJar
 from user_agent import generate_user_agent
-from weblib.encoding import make_str, make_unicode
 from weblib.http import normalize_http_values, normalize_post_data, normalize_url
 
 from grab import error
@@ -29,6 +28,7 @@ from grab.document import Document
 from grab.error import GrabMisuseError
 from grab.transport.base import BaseTransport
 from grab.upload import UploadContent, UploadFile
+from grab.util.encoding import make_str, make_unicode
 from grab.util.log import PycurlSigintHandler
 
 # pylint: disable=invalid-name
@@ -321,7 +321,7 @@ class CurlTransport(BaseTransport):
                 )
                 # py3 hack
                 # if six.PY3:
-                #    post_data = smart_unicode(post_data,
+                #    post_data = make_unicode(post_data,
                 #                              grab.config['charset'])
                 self.curl.setopt(pycurl.POSTFIELDS, post_data)
             else:
