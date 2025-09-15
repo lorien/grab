@@ -23,9 +23,7 @@ coveralls
 mock
 tox
 
-# Non-windows deps
-pyquery; platform_system != "Windows" and python_version >= "3.0"
-pyquery <= 1.4.1; platform_system != "Windows" and python_version <= "2.7"
+# Misc
 item;platform_system!="Windows"
 
 # Linters and Type Checking
