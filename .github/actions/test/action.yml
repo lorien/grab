@@ -43,7 +43,7 @@ runs:
       if: ${{ fromJSON(inputs.database_enabled) }}
       shell: bash
       run: |
-        pip install -r requirements_dev_database.txt
+        pip install -r requirements_dev_backend.txt
 
     - name: Build wheel and install
       # step in composite action requires shell be specified
