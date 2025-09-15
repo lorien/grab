@@ -17,16 +17,16 @@ runs:
     - uses: actions/checkout@v4
 
     - name: Install python ${{ inputs.python }} with LisardByte/setup_python action
-      #if: ${{ startsWith(inputs.python < '311' }}
+      if: ${{ inputs.python == '2.7' }}
       uses: LizardByte/actions/actions/setup_python@master
       with:
         python-version: ${{ inputs.python }}
 
-    #- name: Install python ${{ inputs.python }} with standard setup-python action
-    #  if: ${{ inputs.python  >= '311' }}
-    #  uses: actions/setup-python@v4
-    #  with:
-    #    python-version: ${{ inputs.python }}
+    - name: Install python ${{ inputs.python }} with standard setup-python action
+      if: ${{ inputs.python  != '2.7' }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python }}
 
     - name: Install deps
       shell: bash
