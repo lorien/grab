@@ -1,3 +1,0 @@
-[flake8]
-ignore = E261,E265,W503
-exclude = tests/files/invalid_import.py

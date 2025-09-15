@@ -21,7 +21,6 @@ wheel
 coverage
 coveralls
 mock
-tox
 
 # Misc
 item;platform_system!="Windows"

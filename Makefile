@@ -34,7 +34,7 @@ dirs:
 	if [ ! -e var/bin ]; then mkdir -p var/bin; fi
 
 test:
-	tox -e py34
+	./runtest.py --test-all --backend-mongo --backend-mysql --backend-redis --backend-postgres
 
 coverage_nobackend:
 	coverage erase
