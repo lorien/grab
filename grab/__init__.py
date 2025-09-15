@@ -12,5 +12,5 @@ from grab.error import (  # noqa
 )
 from grab.upload import UploadContent, UploadFile  # noqa
 
-__version__ = "0.6.41"
+__version__ = "1.0.0"
 VERSION_NUMERIC = tuple(map(int, __version__.split(".")))

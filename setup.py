@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="grab",
-    version="0.6.41",
+    version="1.0.0",
     packages=[
         "grab",
         "grab.script",
