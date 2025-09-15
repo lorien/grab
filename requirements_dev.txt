@@ -23,7 +23,7 @@ coveralls
 mock
 
 # Misc
-item;platform_system!="Windows"
+#item;platform_system!="Windows"
 
 # Linters and Type Checking
 ruff; python_version >= "3.0"
