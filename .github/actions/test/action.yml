@@ -7,6 +7,9 @@ inputs:
   database_enabled:
     type: boolean
     required: true
+  os:
+    type: string
+    required: true
 
 runs:
   using: "composite"
@@ -28,8 +31,13 @@ runs:
     - name: Install deps
       shell: bash
       run: |
-        sudo apt install libcurl4-openssl-dev libssl-dev
         pip install -U -r requirements_dev.txt
+
+    - name: Install deps to build pycurl
+      if: ${{ inputs.os == "ubuntu-latest" }}
+      shell: bash
+      run: |
+        sudo apt install libcurl4-openssl-dev libssl-dev
 
     - name: Install database deps
       if: ${{ fromJSON(inputs.database_enabled) }}

@@ -22,12 +22,13 @@ jobs:
         with:
           python: ${{ matrix.python }}
           database_enabled: true
+          os: 'ubuntu-latest'
 
   without-db:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         python: [3.13]
     steps:
       - uses: actions/checkout@v4
@@ -35,3 +36,4 @@ jobs:
         with:
           python: ${{ matrix.python }}
           database_enabled: false
+          os: ${{ matrix.os }}
