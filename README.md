@@ -8,23 +8,30 @@ I have decided to reset all project files to the state of most recent pypi relea
 At least, now the code base corresponds to live version of the product which is being used by some people,
 according to [pypi stats](https://clickpy.clickhouse.com/dashboard/grab).
 
-I've updated Grab code base and code base of its dependencies to be compatible with py27 and py13 (and, hopefully,
-all py versions between these two). I have set up github action to run all tests on py27 and py13. In near time
-I am going to make a release of updated Grab's code base to pypi. There is NO new features. It is just update code
-base which is alive now i.e. it can run on py27 or on modern python and its tests passes and it has github CI
-config to run tests on new commits.
+I've updated Grab code base and code base of its dependencies to be compatible with Python 2.7 and Python 3.13
+(and, hopefully, all py versions between these two). I have set up github action to run all tests on Python 2.7
+and Python 3.13. In near time I am going to make a release of updated Grab's code base to pypi.
 
-One backward-incompatible change is that I do not use `weblib::DataNotFound` exception anymore. Now Grab
-raises DataNotFound exception which is stored in `grab.errors` module. So, if your code imports `DataNotFound`
+There is NO new features. It is just update code base which is alive now i.e. it can run on Python 2.7 or on
+modern python and its tests passes and it has github CI config to run tests on new commits.
+
+One backward-incompatible change is that I do not use `weblib.error::DataNotFound` exception anymore. Now Grab
+uses DataNotFound exception which is stored in `grab.errors` module. So, if your code imports `DataNotFound`
 from weblib, you should fix such imports.
+
 
 ## Support
 
 You are welcome to talk about web scraping and data processing in these Telegram chat groups: [@grablab](https://t.me/grablab) (English) and [@grablab\_ru](https://t.me/grablab_ru) (Russian)
 
-To report a bug create new issue in https://github.com/lorien/grab/issues
-
 Documentation: https://grab.readthedocs.io/en/stable/
+
+
+## Installation
+
+Run `pip install -U grab`
+
+See details about installing Grab on different platforms here https://grab.readthedocs.io/en/stable/usage/installation.html
 
 
 ## What is Grab?
@@ -56,13 +63,6 @@ Spider is a framework for writing web-site scrapers. Features:
 * Caching network results in permanent storage
 * Different backends for task queue (in-memory, redis, mongodb)
 * Tools to debug and collect statistics
-
-
-## Installation
-
-Run `pip install -U grab`
-
-See details about installing Grab on different platforms here https://grab.readthedocs.io/en/stable/usage/installation.html
 
 
 ## Grab Example
