@@ -55,11 +55,17 @@ runs:
         mv dist/*.whl dist/grab-0.0.1-py2.py3-none-any.whl
         pip install -U "grab[urllib3,pyquery] @ file://$(pwd)/dist/grab-0.0.1-py2.py3-none-any.whl"
 
+    - name: Prepare database connection config
+      if: ${{ fromJSON(inputs.database_enabled) }}
+      shell: bash
+      run: |
+        cp test_settings_github.py test_settings.py
+
     - name: Run all tests
       if: ${{ fromJSON(inputs.database_enabled) }}
       shell: bash
       run: |
-        python runtest.py --test-all --backend-redis
+        python runtest.py --test-all --backend-redis --backend-mongodb --backend-mysql --backend-postgresql
 
     - name: Run only non-database tests
       if: ${{ ! fromJSON(inputs.database_enabled) }}

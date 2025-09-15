@@ -1,28 +1,6 @@
 name: Test
 on: ["push", "pull_request"]
 jobs:
-  with-db:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python: [2.7, 3.13]
-    services:
-      redis:
-        image: redis:7.2
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 2s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/test
-        with:
-          python: ${{ matrix.python }}
-          database_enabled: true
-          os: 'ubuntu-latest'
 
   without-db:
     runs-on: ${{ matrix.os }}
@@ -37,3 +15,60 @@ jobs:
           python: ${{ matrix.python }}
           database_enabled: false
           os: ${{ matrix.os }}
+
+  with-db:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [2.7, 3.13]
+
+    services:
+      redis:
+        image: redis:7.2
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 5
+      mysql:
+        image: mysql:8.0
+        env:
+          # same config must be in test_settings.py
+          MYSQL_USER: github
+          MYSQL_PASSWORD: github
+          MYSQL_DATABASE: grab_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -uroot -prootpassword"
+          --health-interval=5s
+          --health-timeout=2s
+          --health-retries=10
+      postgres:
+        image: postgres:16
+        env:
+          # same config must be in test_settings.py
+          POSTGRES_USER: github
+          POSTGRES_PASSWORD: github
+          POSTGRES_DB: grab_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U testuser"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 10
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/test
+        with:
+          python: ${{ matrix.python }}
+          database_enabled: true
+          os: 'ubuntu-latest'
