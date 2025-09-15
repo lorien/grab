@@ -12,8 +12,8 @@ I've updated Grab code base and code base of its dependencies to be compatible w
 (and, hopefully, all py versions between these two). I have set up github action to run all tests on Python 2.7
 and Python 3.13.
 
-There is NO new features. It is just update code base which is alive now i.e. it can run on Python 2.7 or on
-modern python and its tests passes and it has github CI config to run tests on new commits.
+There is NO new features. It is just an updated code base which is alive now i.e. it can run on Python 2.7 or on
+modern python, and its tests pass, and it has github CI config to run tests on new commits.
 
 One backward-incompatible change is that I do not use `weblib.error::DataNotFound` exception anymore. Now Grab
 uses DataNotFound exception which is stored in `grab.errors` module. So, if your code imports `DataNotFound`
