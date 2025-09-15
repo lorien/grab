@@ -19,7 +19,7 @@ from random import randint
 import six
 from six.moves.collections_abc import Callable
 from six.moves.urllib.parse import urljoin
-from weblib.html import find_base_url
+from grab.util.html import find_base_url
 
 from grab import error
 from grab.cookie import CookieManager
