@@ -4,9 +4,9 @@ This test fails in py3.3 environment because `grab.doc.body`
 contains <str>, but it should contains <bytes>
 """
 import six
+from test_server import Request, Response
 
 from grab import Grab
-from test_server import Request, Response
 from tests.util import BaseGrabTestCase, build_grab
 
 
@@ -36,7 +36,8 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
         grab.go(self.server.get_url())
         self.assertEqual(u"фуу".encode("cp1251"), grab.doc.body)
         # fmt: on
-        self.assertEqual(grab.doc.charset, "cp1251")
+        # cp1251 will be normalized to windows-1251
+        self.assertEqual(grab.doc.charset, "windows-1251")
 
     # def test_document_charset_lowercase(self):
     #    self.server.response["charset"] = "UTF-8"

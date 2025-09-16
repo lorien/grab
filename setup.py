@@ -21,6 +21,7 @@ setup(
         'pycurl;platform_system != "Windows" or python_version >= "3.13"',
         "defusedxml",
         'typing-extensions; python_version <= "2.7"',
+        "unicodec",
     ],
     extras_require={
         "full": [  # deprecated

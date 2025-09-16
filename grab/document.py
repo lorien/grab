@@ -28,6 +28,7 @@ from lxml.html import CheckboxValues, HTMLParser, MultipleSelectOptions
 from selection import SelectionNotFoundError, XpathSelector
 from six import BytesIO, StringIO
 from six.moves.urllib.parse import parse_qs, urljoin, urlsplit
+from unicodec import detect_content_encoding, normalize_encoding_name
 
 from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabMisuseError
@@ -40,12 +41,13 @@ from grab.util.rex import normalize_regexp
 from grab.util.text import normalize_space
 from grab.util.warning import warn
 
+DEFAULT_DOCUMENT_CHARSET = "utf-8"
 NULL_BYTE = chr(0)
 # Could not use rb"" because py2 lacks this syntax
 RE_XML_DECLARATION = re.compile(b"^[^<]{,100}<\?xml[^>]+\?>", re.I)
-RE_DECLARATION_ENCODING = re.compile(b"""encoding\s*=\s*["']([^"']+)["']""")
-RE_META_CHARSET = re.compile(b"<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)", re.I)
-RE_META_CHARSET_HTML5 = re.compile(b"""<meta[^>]+charset\s*=\s*['"]?([-\w]+)""", re.I)
+# RE_DECLARATION_ENCODING = re.compile(b"""encoding\s*=\s*["']([^"']+)["']""")
+# RE_META_CHARSET = re.compile(b"<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)", re.I)
+# RE_META_CHARSET_HTML5 = re.compile(b"""<meta[^>]+charset\s*=\s*['"]?([-\w]+)""", re.I)
 RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode(), re.I)
 
 # Bom processing logic was copied from
@@ -125,7 +127,7 @@ class Document(object):
         self.headers = None
         self.url = None
         self.cookies = CookieManager()
-        self.charset = "utf-8"
+        self.charset = DEFAULT_DOCUMENT_CHARSET
         self.bom = None
         self.timestamp = datetime.utcnow()
         self.name_lookup_time = 0
@@ -204,79 +206,90 @@ class Document(object):
             self.headers = email.message_from_string(response)
 
         if charset is None:
-            if isinstance(self.body, six.text_type):
-                self.charset = "utf-8"
-            else:
-                self.detect_charset()
-        else:
-            self.charset = charset.lower()
+            charset = (
+                DEFAULT_DOCUMENT_ENCODING
+                if isinstance(self.body, six.text_type)
+                else (
+                    detect_content_encoding(
+                        self.get_body_chunk() or b"",
+                        self.headers.get("content-type", ""),
+                        "xml"
+                        if self._grab_config.get("content_type", "") == "xml"
+                        else "html",
+                    )
+                )
+            )
+        try:
+            self.charset = normalize_encoding_name(charset)
+        except InvalidEncodingNameError:
+            self.charset = DEFAULT_DOCUMENT_ENCODING
 
         self._unicode_body = None
 
-    def detect_charset(self):
-        """
-        Detect charset of the response.
+    # def detect_document_encoding(self):
+    #    """
+    #    Detect charset of the response.
 
-        Try following methods:
-        * meta[name="Http-Equiv"]
-        * XML declaration
-        * HTTP Content-Type header
+    #    Try following methods:
+    #    * meta[name="Http-Equiv"]
+    #    * XML declaration
+    #    * HTTP Content-Type header
 
-        Ignore unknown charsets.
+    #    Ignore unknown charsets.
 
-        Use utf-8 as fallback charset.
-        """
+    #    Use utf-8 as fallback charset.
+    #    """
 
-        charset = None
+    #    charset = None
 
-        body_chunk = self.get_body_chunk()
+    #    body_chunk = self.get_body_chunk()
 
-        if body_chunk:
-            # Try to extract charset from http-equiv meta tag
-            match_charset = RE_META_CHARSET.search(body_chunk)
-            if match_charset:
-                charset = match_charset.group(1)
-            else:
-                match_charset_html5 = RE_META_CHARSET_HTML5.search(body_chunk)
-                if match_charset_html5:
-                    charset = match_charset_html5.group(1)
+    #    if body_chunk:
+    #        # Try to extract charset from http-equiv meta tag
+    #        match_charset = RE_META_CHARSET.search(body_chunk)
+    #        if match_charset:
+    #            charset = match_charset.group(1)
+    #        else:
+    #            match_charset_html5 = RE_META_CHARSET_HTML5.search(body_chunk)
+    #            if match_charset_html5:
+    #                charset = match_charset_html5.group(1)
 
-            # TODO: <meta charset="utf-8" />
-            bom_enc, bom = read_bom(body_chunk)
-            if bom_enc:
-                charset = bom_enc
-                self.bom = bom
+    #        # TODO: <meta charset="utf-8" />
+    #        bom_enc, bom = read_bom(body_chunk)
+    #        if bom_enc:
+    #            charset = bom_enc
+    #            self.bom = bom
 
-            # Try to process XML declaration
-            if not charset:
-                if body_chunk.startswith(b"<?xml"):
-                    match = RE_XML_DECLARATION.search(body_chunk)
-                    if match:
-                        enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
-                        if enc_match:
-                            charset = enc_match.group(1)
+    #        # Try to process XML declaration
+    #        if not charset:
+    #            if body_chunk.startswith(b"<?xml"):
+    #                match = RE_XML_DECLARATION.search(body_chunk)
+    #                if match:
+    #                    enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
+    #                    if enc_match:
+    #                        charset = enc_match.group(1)
 
-        if not charset:
-            if "Content-Type" in self.headers:
-                pos = self.headers["Content-Type"].find("charset=")
-                if pos > -1:
-                    charset = self.headers["Content-Type"][(pos + 8) :]
+    #    if not charset:
+    #        if "Content-Type" in self.headers:
+    #            pos = self.headers["Content-Type"].find("charset=")
+    #            if pos > -1:
+    #                charset = self.headers["Content-Type"][(pos + 8) :]
 
-        if charset:
-            charset = charset.lower()
-            if not isinstance(charset, str):
-                # Convert to unicode (py2.x) or string (py3.x)
-                charset = charset.decode("utf-8")
-            # Check that python knows such charset
-            try:
-                codecs.lookup(charset)
-            except LookupError:
-                logger.debug(
-                    "Unknown charset found: %s." " Using utf-8 istead.", charset
-                )
-                self.charset = "utf-8"
-            else:
-                self.charset = charset
+    #    if charset:
+    #        charset = charset.lower()
+    #        if not isinstance(charset, str):
+    #            # Convert to unicode (py2.x) or string (py3.x)
+    #            charset = charset.decode("utf-8")
+    #        # Check that python knows such charset
+    #        try:
+    #            codecs.lookup(charset)
+    #        except LookupError:
+    #            logger.debug(
+    #                "Unknown charset found: %s." " Using utf-8 istead.", charset
+    #            )
+    #            self.charset = "utf-8"
+    #        else:
+    #            self.charset = charset
 
     def copy(self, new_grab=None):
         """
@@ -582,10 +595,7 @@ class Document(object):
             body = body[len(self.bom) :]
         if fix_special_entities:
             body = fix_special_entities_func(body)
-        if ignore_errors:
-            errors = "ignore"
-        else:
-            errors = "strict"
+        errors = "ignore" if ignore_errors else "strict"
         return body.decode(charset, errors).strip()
 
     def read_body_from_file(self):
