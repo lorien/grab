@@ -72,7 +72,7 @@ class GrabCharsetDetectionTestCase(BaseGrabTestCase):
         self.server.add_response(Response(data=html))
         grab.go(self.server.get_url())
         # print(':::', grab.doc.unicode_body())
-        self.assertTrue("&#8212;" in grab.doc.unicode_body())
+        self.assertTrue(six.unichr(8212) in grab.doc.unicode_body())
 
     def test_invalid_charset(self):
         html = """<head><meta http-equiv="Content-Type"

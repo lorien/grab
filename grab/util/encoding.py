@@ -2,8 +2,6 @@ import re
 
 import six
 
-RE_SPECIAL_ENTITY = re.compile(b"&#(1[2-6][0-9]);")
-
 
 def make_str(value, encoding="utf-8", errors="strict"):
     """
@@ -29,22 +27,6 @@ def make_unicode(value, encoding="utf-8", errors="strict"):
         return value.decode(encoding, errors=errors)
     else:
         return six.u(str(value))
-
-
-def special_entity_handler(match):
-    num = int(match.group(1))
-    if 128 <= num <= 160:
-        try:
-            num = six.unichr(num).encode("utf-8")
-            return make_str("&#%d;" % ord(num.decode("cp1252")[1]))
-        except UnicodeDecodeError:
-            return match.group(0)
-    else:
-        return match.group(0)
-
-
-def fix_special_entities(body):
-    return RE_SPECIAL_ENTITY.sub(special_entity_handler, body)
 
 
 def decode_dict(values, encoding="utf-8"):

@@ -28,12 +28,11 @@ from lxml.html import CheckboxValues, HTMLParser, MultipleSelectOptions
 from selection import SelectionNotFoundError, XpathSelector
 from six import BytesIO, StringIO
 from six.moves.urllib.parse import parse_qs, urljoin, urlsplit
-from unicodec import detect_content_encoding, normalize_encoding_name
+from unicodec import decode_content, detect_content_encoding, normalize_encoding_name
 
 from grab.cookie import CookieManager
 from grab.error import DataNotFound, GrabMisuseError
 from grab.unset import UNSET, UnsetType
-from grab.util.encoding import fix_special_entities as fix_special_entities_func
 from grab.util.files import hashed_path
 from grab.util.html import decode_entities, find_refresh_url
 from grab.util.http import smart_urlencode
@@ -167,7 +166,6 @@ class Document(object):
         # process content of the document
         for key in (
             "content_type",
-            "fix_special_entities",
             "lowercased_tree",
             "strip_null_bytes",
         ):
@@ -585,35 +583,34 @@ class Document(object):
             body_chunk = self._bytes_body[:4096]
         return body_chunk
 
-    def convert_body_to_unicode(
-        self, body, bom, charset, ignore_errors, fix_special_entities
-    ):
-        # How could it be unicode???
-        # if isinstance(body, unicode):
-        # body = body.encode('utf-8')
-        if bom:
-            body = body[len(self.bom) :]
-        if fix_special_entities:
-            body = fix_special_entities_func(body)
-        errors = "ignore" if ignore_errors else "strict"
-        return body.decode(charset, errors).strip()
+    # def convert_body_to_unicode(self, body, bom, charset, ignore_errors):
+    #    # How could it be unicode???
+    #    # if isinstance(body, unicode):
+    #    # body = body.encode('utf-8')
+    #    if bom:
+    #        body = body[len(self.bom) :]
+    #    errors = "ignore" if ignore_errors else "strict"
+    #    return body.decode(charset, errors).strip()
 
     def read_body_from_file(self):
         with open(self.body_path, "rb") as inp:
             return inp.read()
 
-    def unicode_body(self, ignore_errors=True, fix_special_entities=True):
+    def unicode_body(self, ignore_errors=True, fix_special_entities=UNSET):
         """
         Return response body as unicode string.
         """
-
+        if fix_special_entities is not UNSET:
+            warn(
+                "Parameter fix_special_entities is deprecated"
+                " and does not change anything",
+                category=DeprecationWarning,
+            )
         if not self._unicode_body:
-            self._unicode_body = self.convert_body_to_unicode(
-                body=self.body,
-                bom=self.bom,
-                charset=self.charset,
-                ignore_errors=ignore_errors,
-                fix_special_entities=fix_special_entities,
+            self._unicode_body = decode_content(
+                data=self.body,
+                encoding=self.charset,
+                errors="ignore" if ignore_errors else "strict",
             )
         return self._unicode_body
 
@@ -671,8 +668,7 @@ class Document(object):
         from grab.base import GLOBAL_STATE
 
         if self._lxml_tree is None:
-            fix_setting = self._grab_config["fix_special_entities"]
-            body = self.unicode_body(fix_special_entities=fix_setting).strip()
+            body = self.unicode_body().strip()
             if self._grab_config["lowercased_tree"]:
                 body = body.lower()
             if self._grab_config["strip_null_bytes"]:

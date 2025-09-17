@@ -15,18 +15,20 @@ import weakref
 from copy import copy, deepcopy
 from datetime import datetime
 from random import randint
+from warnings import warn
 
 import six
 from six.moves.collections_abc import Callable
 from six.moves.urllib.parse import urljoin
-from grab.util.html import find_base_url
 
 from grab import error
 from grab.cookie import CookieManager
 from grab.deprecated import DeprecatedThings
 from grab.document import Document
 from grab.proxylist import ProxyList, parse_proxy_line
+from grab.unset import UNSET
 from grab.util.encoding import make_str
+from grab.util.html import find_base_url
 from grab.util.http import normalize_http_values
 
 __all__ = ("Grab",)
@@ -150,7 +152,8 @@ def default_config():
         # the document, If this option is True then such entities
         # will be replaced with correct unicode entities e.g.:
         # &#151; ->  &#8212;
-        fix_special_entities=True,
+        # THIS SETTING IS DEPRECATED AND IS NOT USED ANYMORE
+        fix_special_entities=UNSET,
         # Convert document body to lower case before building LXML tree
         # It does not affect `self.doc.body`
         lowercased_tree=False,
@@ -354,6 +357,13 @@ class Grab(DeprecatedThings):
         for key in kwargs:
             if key not in self.config.keys():
                 raise error.GrabMisuseError("Unknown option: %s" % key)
+        if "fix_special_entities" in kwargs:
+            warn(
+                "Option fix_special_entities is deprecated"
+                " and does not change anything",
+                category=DeprecationWarning,
+            )
+            del kwargs["fix_special_entities"]
 
         if "url" in kwargs:
             if self.config.get("url"):
