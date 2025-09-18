@@ -556,8 +556,6 @@ class Document(object):
             return dom.getroot()
 
     def build_html_tree(self):
-        from grab.base import GLOBAL_STATE
-
         if self._lxml_tree is None:
             body = self.unicode_body().strip()
             if self._grab_config["lowercased_tree"]:
@@ -593,8 +591,6 @@ class Document(object):
                     self._lxml_tree = self._build_dom(body, "html")
                 else:
                     raise
-
-            GLOBAL_STATE["dom_build_time"] += time.time() - start
         return self._lxml_tree
 
     @property

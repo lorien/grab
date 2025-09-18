@@ -41,9 +41,6 @@ __all__ = ("Grab",)
 # creates multiple Grab instances - in case of shared counter
 # grab instances do not overwrite dump logs
 REQUEST_COUNTER = itertools.count(1)
-GLOBAL_STATE = {
-    "dom_build_time": 0,
-}
 MUTABLE_CONFIG_KEYS = ("post", "multipart_post", "headers", "cookies")
 TRANSPORT_CACHE = {}
 TRANSPORT_ALIAS = {
