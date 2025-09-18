@@ -10,9 +10,9 @@ jobs:
         python: ['3.13']
         network_service: ['multicurl', 'threaded']
         grab_transport: ['pycurl', 'urllib3']
-      exclude:
-        - network_service: 'multicurl'
-          grab_transport: 'urllib3'
+        exclude:
+          - network_service: 'multicurl'
+            grab_transport: 'urllib3'
 
     steps:
       - uses: actions/checkout@v4
@@ -31,9 +31,9 @@ jobs:
         python: ['2.7', '3.9', '3.10', '3.11', '3.12', '3.13']
         network_service: ['multicurl', 'threaded']
         grab_transport: ['pycurl', 'urllib3']
-      exclude:
-        - network_service: 'multicurl'
-          grab_transport: 'urllib3'
+        exclude:
+          - network_service: 'multicurl'
+            grab_transport: 'urllib3'
 
     services:
       redis:
