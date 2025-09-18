@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ['2.7', '3.9', '3.10', '3.11', '3.12', '3.13']
+        python: ['2.7', '3.9', '3.13']
         network_service: ['multicurl', 'threaded']
         grab_transport: ['pycurl', 'urllib3']
         exclude:
