@@ -13,6 +13,9 @@ inputs:
   network_service:
     type: string
     required: true
+  grab_transport:
+    type: string
+    required: true
 
 runs:
   using: "composite"
@@ -74,4 +77,4 @@ runs:
       if: ${{ ! fromJSON(inputs.database_enabled) }}
       shell: bash
       run: |
-        python runtest.py --test-all --network-service=${{ inputs.network_service }}
+        python runtest.py --test-all --network-service=${{ inputs.network_service }} --grab-transport=${{ inputs.grab_transport }}

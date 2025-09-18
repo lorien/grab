@@ -9,6 +9,11 @@ jobs:
         os: [windows-latest]
         python: ['3.13']
         network_service: ['multicurl', 'threaded']
+        grab_transport: ['pycurl', 'urllib3']
+      exclude:
+        - network_service: 'multicurl'
+          grab_transport: 'urllib3'
+
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/test
@@ -17,6 +22,7 @@ jobs:
           database_enabled: false
           os: ${{ matrix.os }}
           network_service: ${{ matrix.network_service }}
+          grab_transport: ${{ matrix.grab_transport }}
 
   with-db:
     runs-on: ubuntu-latest
@@ -24,6 +30,10 @@ jobs:
       matrix:
         python: ['2.7', '3.9', '3.10', '3.11', '3.12', '3.13']
         network_service: ['multicurl', 'threaded']
+        grab_transport: ['pycurl', 'urllib3']
+      exclude:
+        - network_service: 'multicurl'
+          grab_transport: 'urllib3'
 
     services:
       redis:
@@ -77,3 +87,4 @@ jobs:
           database_enabled: true
           os: 'ubuntu-latest'
           network_service: ${{ matrix.network_service }}
+          grab_transport: ${{ matrix.grab_transport }}
