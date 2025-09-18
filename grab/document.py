@@ -1,6 +1,3 @@
-# Copyright: 2013, Grigoriy Petukhov
-# Author: Grigoriy Petukhov (http://lorien.name)
-# License: MIT
 """
 The Document class is the result of network request made with Grab instance.
 """
@@ -14,7 +11,6 @@ import tempfile
 import threading
 import time
 
-# FIXME: split to modules, make smaller
 # pylint: disable=too-many-lines
 import weakref
 import webbrowser
@@ -44,37 +40,10 @@ DEFAULT_DOCUMENT_CHARSET = "utf-8"
 NULL_BYTE = chr(0)
 # Could not use rb"" because py2 lacks this syntax
 RE_XML_DECLARATION = re.compile(b"^[^<]{,100}<\?xml[^>]+\?>", re.I)
-# RE_DECLARATION_ENCODING = re.compile(b"""encoding\s*=\s*["']([^"']+)["']""")
-# RE_META_CHARSET = re.compile(b"<meta[^>]+content\s*=\s*[^>]+charset=([-\w]+)", re.I)
-# RE_META_CHARSET_HTML5 = re.compile(b"""<meta[^>]+charset\s*=\s*['"]?([-\w]+)""", re.I)
 RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode(), re.I)
 
-# Bom processing logic was copied from
-# https://github.com/scrapy/w3lib/blob/master/w3lib/encoding.py
-_BOM_TABLE = [
-    (codecs.BOM_UTF32_BE, "utf-32-be"),
-    (codecs.BOM_UTF32_LE, "utf-32-le"),
-    (codecs.BOM_UTF16_BE, "utf-16-be"),
-    (codecs.BOM_UTF16_LE, "utf-16-le"),
-    (codecs.BOM_UTF8, "utf-8"),
-]
-_FIRST_CHARS = set(char[0] for (char, name) in _BOM_TABLE)
 THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")  # pylint: disable=invalid-name
-
-
-def read_bom(data):
-    """Read the byte order mark in the text, if present, and
-    return the encoding represented by the BOM and the BOM.
-
-    If no BOM can be detected, (None, None) is returned.
-    """
-    # common case is no BOM, so this is fast
-    if data and data[0] in _FIRST_CHARS:
-        for bom, encoding in _BOM_TABLE:
-            if data.startswith(bom):
-                return encoding, bom
-    return None, None
 
 
 class Document(object):
@@ -223,71 +192,6 @@ class Document(object):
             self.charset = DEFAULT_DOCUMENT_ENCODING
 
         self._unicode_body = None
-
-    # def detect_document_encoding(self):
-    #    """
-    #    Detect charset of the response.
-
-    #    Try following methods:
-    #    * meta[name="Http-Equiv"]
-    #    * XML declaration
-    #    * HTTP Content-Type header
-
-    #    Ignore unknown charsets.
-
-    #    Use utf-8 as fallback charset.
-    #    """
-
-    #    charset = None
-
-    #    body_chunk = self.get_body_chunk()
-
-    #    if body_chunk:
-    #        # Try to extract charset from http-equiv meta tag
-    #        match_charset = RE_META_CHARSET.search(body_chunk)
-    #        if match_charset:
-    #            charset = match_charset.group(1)
-    #        else:
-    #            match_charset_html5 = RE_META_CHARSET_HTML5.search(body_chunk)
-    #            if match_charset_html5:
-    #                charset = match_charset_html5.group(1)
-
-    #        # TODO: <meta charset="utf-8" />
-    #        bom_enc, bom = read_bom(body_chunk)
-    #        if bom_enc:
-    #            charset = bom_enc
-    #            self.bom = bom
-
-    #        # Try to process XML declaration
-    #        if not charset:
-    #            if body_chunk.startswith(b"<?xml"):
-    #                match = RE_XML_DECLARATION.search(body_chunk)
-    #                if match:
-    #                    enc_match = RE_DECLARATION_ENCODING.search(match.group(0))
-    #                    if enc_match:
-    #                        charset = enc_match.group(1)
-
-    #    if not charset:
-    #        if "Content-Type" in self.headers:
-    #            pos = self.headers["Content-Type"].find("charset=")
-    #            if pos > -1:
-    #                charset = self.headers["Content-Type"][(pos + 8) :]
-
-    #    if charset:
-    #        charset = charset.lower()
-    #        if not isinstance(charset, str):
-    #            # Convert to unicode (py2.x) or string (py3.x)
-    #            charset = charset.decode("utf-8")
-    #        # Check that python knows such charset
-    #        try:
-    #            codecs.lookup(charset)
-    #        except LookupError:
-    #            logger.debug(
-    #                "Unknown charset found: %s." " Using utf-8 istead.", charset
-    #            )
-    #            self.charset = "utf-8"
-    #        else:
-    #            self.charset = charset
 
     def copy(self, new_grab=None):
         """
@@ -582,15 +486,6 @@ class Document(object):
         elif self._bytes_body:
             body_chunk = self._bytes_body[:4096]
         return body_chunk
-
-    # def convert_body_to_unicode(self, body, bom, charset, ignore_errors):
-    #    # How could it be unicode???
-    #    # if isinstance(body, unicode):
-    #    # body = body.encode('utf-8')
-    #    if bom:
-    #        body = body[len(self.bom) :]
-    #    errors = "ignore" if ignore_errors else "strict"
-    #    return body.decode(charset, errors).strip()
 
     def read_body_from_file(self):
         with open(self.body_path, "rb") as inp:
@@ -907,11 +802,6 @@ class Document(object):
 
         # pylint: disable=no-member
         return self.set_input(elem.get("name"), value)
-
-    # FIXME:
-    # * Remove set_input_by_id
-    # * Remove set_input_by_number
-    # * New method: set_input_by(id=None, number=None, xpath=None)
 
     def get_form_request(
         self, submit_name=None, url=None, extra_post=None, remove_from_post=None
