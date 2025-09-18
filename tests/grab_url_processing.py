@@ -5,6 +5,7 @@ from six.moves.urllib.parse import quote
 from test_server import Request, Response
 
 from grab.error import GrabConnectionError, InvalidResponseHeaderError
+from grab.transport.curl import CurlTransport
 from tests.util import BaseGrabTestCase, build_grab, only_grab_transport
 
 
@@ -49,18 +50,22 @@ class GrabUrlProcessingTestCase(BaseGrabTestCase):
        req = self.server.get_request()
        self.assertEqual("превед", req.args["q"])
 
-    def test_null_byte_url(self):
+    def test_location_header_contains_null_byte(self):
         redirect_url = self.server.get_url().rstrip("/") + "/\x00/zz"
         self.server.add_response(
             Response(status=302, data="x", headers=[("Location", redirect_url)]),
-            count=1,
         )
-        self.server.add_response(Response(data="y"), count=1)
+        self.server.add_response(Response(data="y"))
         grab = build_grab()
-        with self.assertRaises(InvalidResponseHeaderError):
+        # Behaviour depends on grab transport
+        grab.init_transport()
+        if isinstance(grab.transport, CurlTransport):
+            with self.assertRaises(InvalidResponseHeaderError):
+                grab.go(self.server.get_url())
+        else:
             grab.go(self.server.get_url())
-        # self.assertEqual(b"y", grab.doc.body)
-        # self.assertEqual(grab.doc.url, quote(redirect_url, safe=":./?&"))
+            self.assertEqual(b"y", grab.doc.body)
+            self.assertEqual(grab.doc.url, quote(redirect_url, safe=":./?&"))
 
     @only_grab_transport("urllib3")
     def test_urllib3_idna_error(self):

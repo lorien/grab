@@ -10,9 +10,10 @@ import time
 import certifi
 import six
 from six.moves.http_cookiejar import CookieJar
-from six.moves.urllib.parse import urlsplit
+from six.moves.urllib.parse import urlsplit, urlunsplit
 from urllib3 import PoolManager, ProxyManager, exceptions, make_headers
 from urllib3.contrib.socks import SOCKSProxyManager
+from urllib3.exceptions import LocationParseError
 from urllib3.fields import RequestField
 from urllib3.filepost import encode_multipart_formdata
 from urllib3.util.retry import Retry
@@ -289,6 +290,8 @@ class Urllib3Transport(BaseTransport):
                 )
             except UnicodeError as ex:
                 raise error.GrabConnectionError("GrabInvalidUrl", ex)
+            except LocationParseError as ex:
+                raise error.GrabConnectionError("GrabInvalidUrl", ex)
         except exceptions.ReadTimeoutError as ex:
             raise error.GrabTimeoutError("ReadTimeoutError", ex)
         except exceptions.ConnectTimeoutError as ex:
@@ -401,7 +404,19 @@ class Urllib3Transport(BaseTransport):
             # response.download_speed = self.curl.getinfo(pycurl.SPEED_DOWNLOAD)
             # response.remote_ip = self.curl.getinfo(pycurl.PRIMARY_IP)
 
-            response.url = self._response.get_redirect_location() or self._request.url
+            # Make behaviour same as with pycurl, add "/" if path is empty
+            res_url = self._response.get_redirect_location() or self._request.url
+            parts = urlsplit(res_url)
+            res_url = urlunsplit(
+                (
+                    parts.scheme,
+                    parts.netloc,
+                    parts.path or "/",
+                    parts.query,
+                    parts.fragment,
+                )
+            )
+            response.url = res_url
 
             import email.message
 
