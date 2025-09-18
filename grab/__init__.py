@@ -11,5 +11,5 @@ from grab.error import (  # noqa
 from grab.upload import UploadContent, UploadFile  # noqa
 from grab.util.log import default_logging  # noqa
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 VERSION_NUMERIC = tuple(map(int, __version__.split(".")))
