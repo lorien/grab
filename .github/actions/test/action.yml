@@ -10,6 +10,9 @@ inputs:
   os:
     type: string
     required: true
+  network_service:
+    type: string
+    required: true
 
 runs:
   using: "composite"
@@ -71,4 +74,4 @@ runs:
       if: ${{ ! fromJSON(inputs.database_enabled) }}
       shell: bash
       run: |
-        python runtest.py --test-all
+        python runtest.py --test-all --network-service=${{ inputs.network_service }}

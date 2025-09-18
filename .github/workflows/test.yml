@@ -8,6 +8,7 @@ jobs:
       matrix:
         os: [windows-latest]
         python: ['3.13']
+        network_service: ['multicurl', 'threaded']
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/test
@@ -15,12 +16,14 @@ jobs:
           python: ${{ matrix.python }}
           database_enabled: false
           os: ${{ matrix.os }}
+          network_service: ${{ matrix.network_service }}
 
   with-db:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python: ['2.7', '3.9', '3.10', '3.11', '3.12', '3.13']
+        network_service: ['multicurl', 'threaded']
 
     services:
       redis:
@@ -73,3 +76,4 @@ jobs:
           python: ${{ matrix.python }}
           database_enabled: true
           os: 'ubuntu-latest'
+          network_service: ${{ matrix.network_service }}
