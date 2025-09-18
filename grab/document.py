@@ -37,7 +37,6 @@ from grab.util.text import normalize_space
 from grab.util.warning import warn
 
 DEFAULT_DOCUMENT_CHARSET = "utf-8"
-NULL_BYTE = chr(0)
 # Could not use rb"" because py2 lacks this syntax
 RE_XML_DECLARATION = re.compile(b"^[^<]{,100}<\?xml[^>]+\?>", re.I)
 RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode(), re.I)
@@ -133,11 +132,7 @@ class Document(object):
 
         # Save some grab.config items required to
         # process content of the document
-        for key in (
-            "content_type",
-            "lowercased_tree",
-            "strip_null_bytes",
-        ):
+        for key in ["content_type", "lowercased_tree"]:
             self._grab_config[key] = self.grab.config[key]
 
     def __call__(self, query):
@@ -566,8 +561,6 @@ class Document(object):
             body = self.unicode_body().strip()
             if self._grab_config["lowercased_tree"]:
                 body = body.lower()
-            if self._grab_config["strip_null_bytes"]:
-                body = body.replace(NULL_BYTE, "")
             # py3 hack
             if six.PY3:
                 body = RE_UNICODE_XML_DECLARATION.sub("", body)

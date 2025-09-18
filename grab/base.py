@@ -159,7 +159,8 @@ def default_config():
         lowercased_tree=False,
         # Strip null bytes from document body before building lXML tree
         # It does not affect `self.doc.body`
-        strip_null_bytes=True,
+        # THIS SETTING IS DEPREATED AND IS NOT USED ANYMORE
+        strip_null_bytes=UNSET,
         # Internal object to store
         state={},
     )
@@ -357,13 +358,13 @@ class Grab(DeprecatedThings):
         for key in kwargs:
             if key not in self.config.keys():
                 raise error.GrabMisuseError("Unknown option: %s" % key)
-        if "fix_special_entities" in kwargs:
-            warn(
-                "Option fix_special_entities is deprecated"
-                " and does not change anything",
-                category=DeprecationWarning,
-            )
-            del kwargs["fix_special_entities"]
+        for key in ["fix_special_entities", "strip_null_bytes"]:
+            if key in kwargs:
+                warn(
+                    "Option {} is deprecated and does not affect anything".format(key),
+                    category=DeprecationWarning,
+                )
+                del kwargs[key]
 
         if "url" in kwargs:
             if self.config.get("url"):
