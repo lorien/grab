@@ -38,8 +38,9 @@ from grab.util.warning import warn
 
 DEFAULT_DOCUMENT_CHARSET = "utf-8"
 # Could not use rb"" because py2 lacks this syntax
-RE_XML_DECLARATION = re.compile(b"^[^<]{,100}<\?xml[^>]+\?>", re.I)
-RE_UNICODE_XML_DECLARATION = re.compile(RE_XML_DECLARATION.pattern.decode(), re.I)
+# fmt: off
+RE_XML_DECLARATION = re.compile(u"^[^<]{,100}<\?xml[^>]+\?>", re.IGNORECASE)
+# fmt: on
 
 THREAD_STORAGE = threading.local()
 logger = logging.getLogger("grab.document")  # pylint: disable=invalid-name
@@ -561,11 +562,7 @@ class Document(object):
             body = self.unicode_body().strip()
             if self._grab_config["lowercased_tree"]:
                 body = body.lower()
-            # py3 hack
-            if six.PY3:
-                body = RE_UNICODE_XML_DECLARATION.sub("", body)
-            else:
-                body = RE_XML_DECLARATION.sub("", body)
+            body = RE_XML_DECLARATION.sub("", body)
             if not body:
                 # Generate minimal empty content
                 # which will not break lxml parser
