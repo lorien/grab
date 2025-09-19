@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Setting up the Grab Request &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Grab Settings" href="settings.html" />
+    <link rel="prev" title="Request Methods" href="request_method.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="settings.html" title="Grab Settings"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="request_method.html" title="Request Methods"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Setting up the Grab Request</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="setting-up-the-grab-request">
+<span id="grab-request-setup"></span><h1>Setting up the Grab Request<a class="headerlink" href="#setting-up-the-grab-request" title="Link to this heading">¶</a></h1>
+<p>To set up specific parameters of a network request you need to build the Grab
+object and configure it. You can do both things at the same time:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;head&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+         <span class="n">user_agent</span><span class="o">=</span><span class="s1">&#39;grab&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">request</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Or you can build the Grab object with some initial settings and configure it
+later:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">user_agent</span><span class="o">=</span><span class="s1">&#39;grab&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;http://example.com&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;head&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">request</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Also you can pass settings as parameters to <cite>request</cite> or <cite>go</cite>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;head&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;http://example.com&#39;</span><span class="p">,</span> <span class="n">user_agent</span><span class="o">=</span><span class="s1">&#39;grab&#39;</span><span class="p">)</span>
+<span class="c1"># OR</span>
+<span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://example.com&#39;</span><span class="p">,</span> <span class="n">user_agent</span><span class="o">=</span><span class="s1">&#39;grab&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><cite>request</cite> and <cite>go</cite> are almost same except for one small thing. You do not
+need to specify the explicit name of the first argument with <cite>go</cite>. The first
+argument of the <cite>go</cite> method is always <cite>url</cite>. Except for this, all other named
+arguments of <cite>go</cite> and <cite>request</cite> are just passed to the <cite>setup</cite> function.</p>
+<p>For a full list of available settings you can check <a class="reference internal" href="settings.html#grab-settings"><span class="std std-ref">Grab Settings</span></a></p>
+<section id="grab-config-object">
+<h2>Grab Config Object<a class="headerlink" href="#grab-config-object" title="Link to this heading">¶</a></h2>
+<p>Every time you configure a Grab instance, all options are saved in the
+special object, <cite>grab.config</cite>, that holds all Grab instance settings. You can
+receive a copy of the config object and also you can setup a Grab instance
+with the config object:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;http://google.com/&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
+<span class="go">&#39;http://google.com/&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">dump_config</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g2</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g2</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g2</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
+<span class="go">&#39;http://google.com/&#39;</span>
+</pre></div>
+</div>
+<p>The Grab config object is simply a <cite>dict</cite> object. Some of the values may also
+be a <cite>dict</cite>.</p>
+</section>
+<section id="grab-instance-cloning">
+<span id="grab-configuration-cloning"></span><h2>Grab Instance Cloning<a class="headerlink" href="#grab-instance-cloning" title="Link to this heading">¶</a></h2>
+<p>If you need to copy a Grab object there is a more elegant way than using the
+<cite>dump_config</cite> and <cite>load_config</cite> methods:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g2</span> <span class="o">=</span> <span class="n">g1</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><cite>g2</cite> gets the same state as <cite>g1</cite>. In particular, <cite>g2</cite> will have the same
+cookies.</p>
+<p>There is also <cite>adopt</cite>, which does the opposite of the <cite>clone</cite> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g2</span><span class="o">.</span><span class="n">adopt</span><span class="p">(</span><span class="n">g1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <cite>g2</cite> instance receives the state of the <cite>g1</cite> instance.</p>
+</section>
+<section id="setting-up-the-pycurl-object">
+<span id="grab-configuration-pycurl"></span><h2>Setting Up the Pycurl Object<a class="headerlink" href="#setting-up-the-pycurl-object" title="Link to this heading">¶</a></h2>
+<p>Sometimes you need more detailed control of network requests than Grab allows.
+In such cases you can configure pycurl directly. All Grab’s network
+features are only a wrapper to the pycurl library. Any available Grab
+option just sets some option of the underlying pycurl object. Here is a
+simple example of how to change the type of the HTTP authentication:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pycurl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">grab</span><span class="w"> </span><span class="kn">import</span> <span class="n">Grab</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">userpwd</span><span class="o">=</span><span class="s1">&#39;root:123&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">curl</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">pycurl</span><span class="o">.</span><span class="n">HTTPAUTH</span><span class="p">,</span> <span class="n">pycurl</span><span class="o">.</span><span class="n">HTTPAUTH_NTLM</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Setting up the Grab Request</a><ul>
+<li><a class="reference internal" href="#grab-config-object">Grab Config Object</a></li>
+<li><a class="reference internal" href="#grab-instance-cloning">Grab Instance Cloning</a></li>
+<li><a class="reference internal" href="#setting-up-the-pycurl-object">Setting Up the Pycurl Object</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="request_method.html"
+                          title="previous chapter">Request Methods</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="settings.html"
+                          title="next chapter">Grab Settings</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/grab/request_setup.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="settings.html" title="Grab Settings"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="request_method.html" title="Request Methods"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Setting up the Grab Request</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

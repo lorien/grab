@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Processing the Response Body &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="File Uploading" href="file_uploading.html" />
+    <link rel="prev" title="Work with HTTP Headers" href="request_headers.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="file_uploading.html" title="File Uploading"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="request_headers.html" title="Work with HTTP Headers"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Processing the Response Body</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="processing-the-response-body">
+<span id="grab-response-body"></span><h1>Processing the Response Body<a class="headerlink" href="#processing-the-response-body" title="Link to this heading">¶</a></h1>
+<p>In this document, options related to processing the body of network response are discussed.</p>
+<section id="partial-response-body-download">
+<h2>Partial Response Body Download<a class="headerlink" href="#partial-response-body-download" title="Link to this heading">¶</a></h2>
+<p>If you do not need the response body at all, use <a class="reference internal" href="settings.html#option-nobody"><span class="std std-ref">nobody</span></a> option. When it is
+enabled, Grab closes the network connection to the server right after it
+receives all response headers from the server. This is not the same as sending a GET request. You can
+submit a request of any type, e.g. POST, and not download the response body if you do not need it.</p>
+<p>Another option to limit body processing is <a class="reference internal" href="settings.html#option-body-maxsize"><span class="std std-ref">body_maxsize</span></a>. It allows you to download
+as many bytes of the response body as you need, and then closes the connection.</p>
+<p>Note that neither of these options break the processing of the response into a Python object.
+In both cases you get a response object with a body attribute that contains only part of the response
+body data - whatever was received before connection interrupted.</p>
+</section>
+<section id="response-compression-method">
+<h2>Response Compression Method<a class="headerlink" href="#response-compression-method" title="Link to this heading">¶</a></h2>
+<p>You can control the compression of the server response body with <a class="reference internal" href="settings.html#option-encoding"><span class="std std-ref">encoding</span></a>. The default value is “gzip”.
+That means that Grab sends “Accept-Encoding: gzip” to the server, and if the server answers with a response body packed
+with gzip then Grab automatically unpacks the gzipped body, and you have unpacked data in the <cite>response.body</cite>.
+If you do not want the server to send you gziped data, use an empty string as the value of <a class="reference internal" href="settings.html#option-encoding"><span class="std std-ref">encoding</span></a>.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Processing the Response Body</a><ul>
+<li><a class="reference internal" href="#partial-response-body-download">Partial Response Body Download</a></li>
+<li><a class="reference internal" href="#response-compression-method">Response Compression Method</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="request_headers.html"
+                          title="previous chapter">Work with HTTP Headers</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="file_uploading.html"
+                          title="next chapter">File Uploading</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/grab/response_body.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="file_uploading.html" title="File Uploading"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="request_headers.html" title="Work with HTTP Headers"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Processing the Response Body</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

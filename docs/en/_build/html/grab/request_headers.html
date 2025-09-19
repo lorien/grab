@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Work with HTTP Headers &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Processing the Response Body" href="response_body.html" />
+    <link rel="prev" title="Debugging" href="debugging.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="response_body.html" title="Processing the Response Body"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="debugging.html" title="Debugging"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Work with HTTP Headers</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="work-with-http-headers">
+<span id="grab-http-headers"></span><h1>Work with HTTP Headers<a class="headerlink" href="#work-with-http-headers" title="Link to this heading">¶</a></h1>
+<section id="custom-headers">
+<h2>Custom headers<a class="headerlink" href="#custom-headers" title="Link to this heading">¶</a></h2>
+<p>If you need to submit custom HTTP headers, you can specify any number of them
+via <a class="reference internal" href="settings.html#option-headers"><span class="std std-ref">headers</span></a> option. A common case is to emulate an AJAX request:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;X-Requested-With&#39;</span><span class="p">:</span> <span class="s1">&#39;XMLHttpRequest&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Bear in mind, that except headers in <a class="reference internal" href="settings.html#option-headers"><span class="std std-ref">headers</span></a> option (that is
+empty by default) Grab also generates a bunch of headers to emulate a typical
+web browser. At the moment of writing these docs these headers are:</p>
+<ul class="simple">
+<li><p>Accept</p></li>
+<li><p>Accept-Language</p></li>
+<li><p>Accept-Charset</p></li>
+<li><p>Keep-Alive</p></li>
+<li><p>Except</p></li>
+</ul>
+<p>If you need to change one of these headers, you can override its value with the
+<a class="reference internal" href="settings.html#option-headers"><span class="std std-ref">headers</span></a> option. You can also subclass the Grab class and define
+your own <cite>common_headers</cite> method to completely override the logic of
+generating these extra headers.</p>
+</section>
+<section id="user-agent-header">
+<h2>User-Agent header<a class="headerlink" href="#user-agent-header" title="Link to this heading">¶</a></h2>
+<p>By default, for each request Grab randomly chooses one user agent from a
+builtin list of real user agents. You can specify the exact User-Agent value with
+the <a class="reference internal" href="settings.html#option-user-agent"><span class="std std-ref">user_agent</span></a> option. If you need to randomly choose user agents
+from your own list of user agents, then you can put your list into a text file
+and pass its location as <a class="reference internal" href="settings.html#option-user-agent-file"><span class="std std-ref">user_agent_file</span></a>.</p>
+</section>
+<section id="referer-header">
+<h2>Referer header<a class="headerlink" href="#referer-header" title="Link to this heading">¶</a></h2>
+<p>To specify the content of the Referer header, use the <a class="reference internal" href="settings.html#option-referer"><span class="std std-ref">referer</span></a>
+option. By default, Grab use the URL of previously request document as value
+of Referer header. If you do not like this behaviour, you can turn it off with
+<a class="reference internal" href="settings.html#option-reuse-referer"><span class="std std-ref">reuse_referer</span></a> option.</p>
+</section>
+<section id="http-authentication">
+<h2>HTTP Authentication<a class="headerlink" href="#http-authentication" title="Link to this heading">¶</a></h2>
+<p>To send HTTP authentication headers, use the <a class="reference internal" href="settings.html#option-userpwd"><span class="std std-ref">userpwd</span></a> option with
+a value of the form “username:password”.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Work with HTTP Headers</a><ul>
+<li><a class="reference internal" href="#custom-headers">Custom headers</a></li>
+<li><a class="reference internal" href="#user-agent-header">User-Agent header</a></li>
+<li><a class="reference internal" href="#referer-header">Referer header</a></li>
+<li><a class="reference internal" href="#http-authentication">HTTP Authentication</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="debugging.html"
+                          title="previous chapter">Debugging</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="response_body.html"
+                          title="next chapter">Processing the Response Body</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/grab/request_headers.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="response_body.html" title="Processing the Response Body"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="debugging.html" title="Debugging"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Work with HTTP Headers</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

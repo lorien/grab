@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Form Processing &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Network Errors Handling" href="network_errors.html" />
+    <link rel="prev" title="Redirect Handling" href="redirect.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="network_errors.html" title="Network Errors Handling"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="redirect.html" title="Redirect Handling"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Form Processing</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="form-processing">
+<span id="grab-forms"></span><h1>Form Processing<a class="headerlink" href="#form-processing" title="Link to this heading">¶</a></h1>
+<p>Grab can help you process web forms. It can automatically fill all input fields
+that have default values, letting you fill only fields you need.
+The typical workflow is:</p>
+<ul class="simple">
+<li><p>request a page</p></li>
+<li><p>fill input fields with <cite>set_input</cite> method</p></li>
+<li><p>submit the form with <cite>submit</cite> method</p></li>
+</ul>
+<p>When you are using <cite>set_input</cite> you just specify the name of an input and the value, and
+Grab automatically finds the form field containing the input with that name. When you
+call <cite>submit</cite>, the automatically-chosen form is submitted (the form that has
+the largest number of fields). You can also explicitly choose the form with
+the <cite>choose_form</cite> method.</p>
+<p>Let’s look at a simple example of how to use these form features:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://ya.ru/&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="s1">&#39;grab lib&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;//a[@class=&quot;b-serp-item__title-link&quot;]/@href&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+<span class="go">&#39;http://grablib.org/&#39;</span>
+</pre></div>
+</div>
+<p>The form that has been chosen automatically is available in the <cite>grab.form</cite> attribute.</p>
+<p>To specify input values you can use <cite>set_input</cite>, <cite>set_input_by_id</cite> and <cite>set_input_by_xpath</cite> methods.</p>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="redirect.html"
+                          title="previous chapter">Redirect Handling</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="network_errors.html"
+                          title="next chapter">Network Errors Handling</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/grab/forms.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="network_errors.html" title="Network Errors Handling"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="redirect.html" title="Redirect Handling"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Form Processing</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

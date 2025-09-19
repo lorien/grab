@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Task Queue &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Spider Cache" href="cache.html" />
+    <link rel="prev" title="Task Object" href="task.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cache.html" title="Spider Cache"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="task.html" title="Task Object"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Task Queue</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="task-queue">
+<span id="spider-task-queue"></span><h1>Task Queue<a class="headerlink" href="#task-queue" title="Link to this heading">¶</a></h1>
+<section id="task-priorities">
+<span id="spider-task-priority"></span><h2>Task Priorities<a class="headerlink" href="#task-priorities" title="Link to this heading">¶</a></h2>
+<p>All new tasks are places into task queue. The Spider get tasks from task queue
+when there are free network streams. Each task has priority. Lower number means
+higher priority. Task are processed in the order of their priorities: from
+highest to lowest. If you do not specify the priority for the new task then it
+is assigned automatically. There are two algorithms of assigning default task
+priorities:</p>
+<dl class="field-list simple">
+<dt class="field-odd">random<span class="colon">:</span></dt>
+<dd class="field-odd"><p>random priorities</p>
+</dd>
+<dt class="field-even">const<span class="colon">:</span></dt>
+<dd class="field-even"><p>same priority for all tasks</p>
+</dd>
+</dl>
+<p>By default random priorities are used. You can control the algorithm of default
+priorities with <cite>priority_mode</cite> argument:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">(</span><span class="n">priority_mode</span><span class="o">=</span><span class="s1">&#39;const&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="tasks-queue-backends">
+<span id="spider-task-backend"></span><h2>Tasks Queue Backends<a class="headerlink" href="#tasks-queue-backends" title="Link to this heading">¶</a></h2>
+<p>You can choose the storage for the task queue. By default, Spider uses python
+<cite>PriorityQueue</cite> as storage. In other words, the storage is memory. You can
+also used redis and mongo backends.</p>
+<p>In-memory backend:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">()</span>
+<span class="n">bot</span><span class="o">.</span><span class="n">setup_queue</span><span class="p">()</span> <span class="c1"># очередь в памяти</span>
+<span class="c1"># OR (that is the same)</span>
+<span class="n">bot</span><span class="o">.</span><span class="n">setup_queue</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">&#39;memory&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>MongoDB backend:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">()</span>
+<span class="n">bot</span><span class="o">.</span><span class="n">setup_queue</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">&#39;mongo&#39;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s1">&#39;database-name&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All arguments except <cite>backend</cite> go to MongoDB connection constructor. You
+can setup database name, host name, port, authorization arguments and other
+things.</p>
+<p>Redis backend:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bot</span> <span class="o">=</span> <span class="n">SomeSpider</span><span class="p">()</span>
+<span class="n">bot</span><span class="o">.</span><span class="n">setup_queue</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">&#39;redis&#39;</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">7777</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Task Queue</a><ul>
+<li><a class="reference internal" href="#task-priorities">Task Priorities</a></li>
+<li><a class="reference internal" href="#tasks-queue-backends">Tasks Queue Backends</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="task.html"
+                          title="previous chapter">Task Object</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="cache.html"
+                          title="next chapter">Spider Cache</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/spider/task_queue.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cache.html" title="Spider Cache"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="task.html" title="Task Object"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Task Queue</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

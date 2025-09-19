@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Spider Cache &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Spider Error Handling" href="error_handling.html" />
+    <link rel="prev" title="Task Queue" href="task_queue.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="error_handling.html" title="Spider Error Handling"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="task_queue.html" title="Task Queue"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Spider Cache</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="spider-cache">
+<span id="id1"></span><h1>Spider Cache<a class="headerlink" href="#spider-cache" title="Link to this heading">¶</a></h1>
+<p>There is cache built in the spider. It could be helpful on development stage.
+When you need to scrape same documents for many times to check the results
+and to fix bugs. Also you can crawl whole web-site, put it into cache and
+then work only with cache.</p>
+<p>Keep in mind that if the web-site is large, millions of web pages then working
+with cache could be slower than working with live web-site. This is because of
+limited disk I/O where the cache storage is hosted.</p>
+<p>Also keep in mind the the spider cache is very simple:</p>
+<ul class="simple">
+<li><p>it allows to cache only GET requests</p></li>
+<li><dl class="simple">
+<dt>it does not allow to differentiate documents with same URL but</dt><dd><p>different cookies/headers</p>
+</dd>
+</dl>
+</li>
+<li><p>it does not support max-age and other cache headers</p></li>
+</ul>
+<section id="spider-cache-backends">
+<span id="id2"></span><h2>Spider Cache Backends<a class="headerlink" href="#spider-cache-backends" title="Link to this heading">¶</a></h2>
+<p>You can choose what storage to use for the cache. You can use mongodb, mysql
+and postgresql.</p>
+<p>MongoDB example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bot</span> <span class="o">=</span> <span class="n">ExampleSpider</span><span class="p">()</span>
+<span class="n">bot</span><span class="o">.</span><span class="n">setup_cache</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">&#39;mongo&#39;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s1">&#39;some-database&#39;</span><span class="p">)</span>
+<span class="n">bot</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In this example the spider is configured to use mongodb as cache storage.
+The name of database is “some-database”. The name of collection would
+be “cache”.</p>
+<p>All arguments except <cite>backend</cite>, <cite>database</cite> and <cite>use_compression</cite> go to
+database connection constructor. You can setup database name, host name, port,
+authorization arguments and other things.</p>
+<p>Example of custom host name and port for mongodb connection:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">code</span><span class="p">::</span> <span class="n">python</span>
+</pre></div>
+</div>
+<blockquote>
+<div><p>bot = SomeSpider()
+bot.setup_cache(backend=’mongo’, port=7777, host=’mongo.localhost’)</p>
+</div></blockquote>
+</section>
+<section id="cache-compression">
+<span id="spider-cache-compression"></span><h2>Cache Compression<a class="headerlink" href="#cache-compression" title="Link to this heading">¶</a></h2>
+<p>By default cache compression is enabled. That means that all documents placed in
+the cache are compressed with gzip library. Compression decreases the disk space
+required to store the cache and increases the CPU load (a bit).</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Spider Cache</a><ul>
+<li><a class="reference internal" href="#spider-cache-backends">Spider Cache Backends</a></li>
+<li><a class="reference internal" href="#cache-compression">Cache Compression</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="task_queue.html"
+                          title="previous chapter">Task Queue</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="error_handling.html"
+                          title="next chapter">Spider Error Handling</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/spider/cache.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="error_handling.html" title="Spider Error Handling"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="task_queue.html" title="Task Queue"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Spider Cache</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

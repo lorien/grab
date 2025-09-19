@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Spider Transport &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Module grab.base" href="../api/grab_base.html" />
+    <link rel="prev" title="Spider Error Handling" href="error_handling.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../api/grab_base.html" title="Module grab.base"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="error_handling.html" title="Spider Error Handling"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Spider Transport</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="spider-transport">
+<span id="id1"></span><h1>Spider Transport<a class="headerlink" href="#spider-transport" title="Link to this heading">¶</a></h1>
+<p>Spider transport is a component of Spider that controls network connections
+i.e.  makes possible multiple network requests to run in parallel.</p>
+<section id="multicurl-transport">
+<h2>Multicurl transport<a class="headerlink" href="#multicurl-transport" title="Link to this heading">¶</a></h2>
+<p>This is default spider transport. It operates with multiple pycurl instances.
+You can use only pycurl Grab transport with multicurl Spider transport.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">grab.spider</span><span class="w"> </span><span class="kn">import</span> <span class="n">Spider</span><span class="p">,</span> <span class="n">Task</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">grab</span><span class="w"> </span><span class="kn">import</span> <span class="n">Grab</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SimpleSpider</span><span class="p">(</span><span class="n">Spider</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">task_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;reddit&#39;</span><span class="p">,</span> <span class="s1">&#39;http://reddit.com&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">task_reddit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">grab</span><span class="o">.</span><span class="n">doc</span><span class="p">(</span><span class="s1">&#39;//p[contains(@class, &quot;title&quot;)]/a/@href&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="c1"># DO NOT DO THAT:</span>
+        <span class="c1"># &gt; g = Grab()</span>
+        <span class="c1"># &gt; g.go(url)</span>
+        <span class="c1"># Do not use Grab directly</span>
+        <span class="c1"># that will blocks all other parallel network requests</span>
+        <span class="c1"># Only use `yield Task(...)`</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">grab</span><span class="o">.</span><span class="n">make_url_absolute</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;link&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">task_link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Title: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">grab</span><span class="o">.</span><span class="n">doc</span><span class="p">(</span><span class="s1">&#39;//title&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+<span class="n">bot</span> <span class="o">=</span> <span class="n">SimpleSpider</span><span class="p">();</span>
+<span class="n">bot</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="threaded-transport">
+<h2>Threaded transport<a class="headerlink" href="#threaded-transport" title="Link to this heading">¶</a></h2>
+<p>The threaded transport operates with a pool of threads. Network requests are
+spread by these threads. You can use pycurl or urllib3 Grab transport with
+threaded transport.</p>
+<p>Grab can use two libraries to submit network requests: pycurl and urllib3. You may acess
+transport object with <cite>Grab.transport</cite> attribute. In most cases you do not need direct
+access to transport object.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">grab.spider</span><span class="w"> </span><span class="kn">import</span> <span class="n">Spider</span><span class="p">,</span> <span class="n">Task</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">grab</span><span class="w"> </span><span class="kn">import</span> <span class="n">Grab</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SimpleSpider</span><span class="p">(</span><span class="n">Spider</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">task_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;reddit&#39;</span><span class="p">,</span> <span class="s1">&#39;http://reddit.com&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">task_reddit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">grab</span><span class="o">.</span><span class="n">doc</span><span class="p">(</span><span class="s1">&#39;//p[contains(@class, &quot;title&quot;)]/a/@href&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="c1"># DO NOT DO THAT:</span>
+        <span class="c1"># &gt; g = Grab()</span>
+        <span class="c1"># &gt; g.go(url)</span>
+        <span class="c1"># Do not use Grab directly</span>
+        <span class="c1"># that will blocks all other parallel network requests</span>
+        <span class="c1"># Only use `yield Task(...)`</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">grab</span><span class="o">.</span><span class="n">make_url_absolute</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;link&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">task_link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Title: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">grab</span><span class="o">.</span><span class="n">doc</span><span class="p">(</span><span class="s1">&#39;//title&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+<span class="n">bot</span> <span class="o">=</span> <span class="n">SimpleSpider</span><span class="p">(</span><span class="n">transport</span><span class="o">=</span><span class="s1">&#39;threaded&#39;</span><span class="p">,</span> <span class="n">grab_transport</span><span class="o">=</span><span class="s1">&#39;urllib3&#39;</span><span class="p">)</span>
+<span class="c1"># Also you can use pycurl Grab transport with threaded transport</span>
+<span class="c1"># bot = SimpleSpider(transport=&#39;threaded&#39;, grab_transport=&#39;pycurl&#39;)</span>
+<span class="n">bot</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Spider Transport</a><ul>
+<li><a class="reference internal" href="#multicurl-transport">Multicurl transport</a></li>
+<li><a class="reference internal" href="#threaded-transport">Threaded transport</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="error_handling.html"
+                          title="previous chapter">Spider Error Handling</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../api/grab_base.html"
+                          title="next chapter">Module grab.base</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/spider/transport.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../api/grab_base.html" title="Module grab.base"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="error_handling.html" title="Spider Error Handling"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Spider Transport</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

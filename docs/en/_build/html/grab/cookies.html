@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Cookie Support &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Proxy Server Support" href="proxy.html" />
+    <link rel="prev" title="HTML Document Charset" href="charset.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="proxy.html" title="Proxy Server Support"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="charset.html" title="HTML Document Charset"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Cookie Support</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="cookie-support">
+<span id="grab-cookies"></span><h1>Cookie Support<a class="headerlink" href="#cookie-support" title="Link to this heading">¶</a></h1>
+<p>By default, Grab automatically handles all cookies it receives from the remote server. Grab remembers all cookies and
+sends them back in future requests. That allows you to easily implement scripts that log in to some site and then do
+some activity in a member-only area. If you do not want Grab to automatically process cookies,
+use <a class="reference internal" href="settings.html#option-reuse-cookies"><span class="std std-ref">reuse_cookies</span></a> option to disable it.</p>
+<section id="custom-cookies">
+<h2>Custom Cookies<a class="headerlink" href="#custom-cookies" title="Link to this heading">¶</a></h2>
+<p>To send some custom cookies, use the <a class="reference internal" href="settings.html#option-cookies"><span class="std std-ref">cookies</span></a> option. The value of that option should be a dict.
+When you specify some cookies with <a class="reference internal" href="settings.html#option-cookies"><span class="std std-ref">cookies</span></a> option and then fire network request, all specified
+cookies are bound to the hostname of the request. If you want more granular control on custom cookies, you can
+use the <cite>grab.cookies</cite> cookie manager to specify a cookie with any attributes you want:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">cookies</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s1">&#39;yandex.ru&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;/host&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="loading-dumping-cookies">
+<h2>Loading/dumping cookies<a class="headerlink" href="#loading-dumping-cookies" title="Link to this heading">¶</a></h2>
+<p>To dump current cookies to a file, use <code class="xref py py-meth docutils literal notranslate"><span class="pre">grab.cookie.CookieManager.save_to_file()</span></code>.</p>
+<p>To load cookies from a file, use <code class="xref py py-meth docutils literal notranslate"><span class="pre">grab.cookie.CookieManager.load_from_file()</span></code>.</p>
+</section>
+<section id="permanent-file-to-load-store-cookies">
+<h2>Permanent file to load/store cookies<a class="headerlink" href="#permanent-file-to-load-store-cookies" title="Link to this heading">¶</a></h2>
+<p>With the <a class="reference internal" href="settings.html#option-cookiefile"><span class="std std-ref">cookiefile</span></a> option, you can specify the path to the file that Grab will use to store/load
+cookies for each request. Grab will load any cookies from that file before each network request, and after a response
+is received Grab will save all cookies to that file.</p>
+<p>More details about <cite>grab.cookies</cite> you can get in <a class="reference internal" href="../api/grab_cookie.html#api-grab-cookie"><span class="std std-ref">API grab.cookie</span></a></p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Cookie Support</a><ul>
+<li><a class="reference internal" href="#custom-cookies">Custom Cookies</a></li>
+<li><a class="reference internal" href="#loading-dumping-cookies">Loading/dumping cookies</a></li>
+<li><a class="reference internal" href="#permanent-file-to-load-store-cookies">Permanent file to load/store cookies</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="charset.html"
+                          title="previous chapter">HTML Document Charset</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="proxy.html"
+                          title="next chapter">Proxy Server Support</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/grab/cookies.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="proxy.html" title="Proxy Server Support"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="charset.html" title="HTML Document Charset"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Cookie Support</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>What is Grab::Spider? &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Task Object" href="task.html" />
+    <link rel="prev" title="Network Transport" href="../grab/transport.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="task.html" title="Task Object"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../grab/transport.html" title="Network Transport"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">What is Grab::Spider?</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="what-is-grab-spider">
+<span id="spider-intro"></span><h1>What is Grab::Spider?<a class="headerlink" href="#what-is-grab-spider" title="Link to this heading">¶</a></h1>
+<p>The Spider is a framework that allow to describe web-site crawler as set of
+handlers. Each handler handles only one specific type of web pages crawled on
+web-site e.g. home page, user profile page, search results page. Each handler
+could spawn new requests which will be processed in turn by other handlers.</p>
+<p>The Spider process network requests asynchronously. There is only one process
+that handles all network, business logic and HTML-processing tasks. Network
+requests are performed by multicurl library. In short, when you create new
+network request it is processed by multicurl and when the response is ready,
+then the corresponding handler from your spider class is called with result
+of network request.</p>
+<p>Each handler receives two arguments. First argument is a Grab object, that
+contains all data bout network request and response. The second argument is
+Task object. Whenever you need to send network request you create Task object.</p>
+<p>Let’s check out simple example. Let’s say we want to go to habrahabr.ru
+web-site, read titles of recent news, then for each title find the image on
+images.yandex.ru and save found data to the file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># coding: utf-8</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">grab.spider</span><span class="w"> </span><span class="kn">import</span> <span class="n">Spider</span><span class="p">,</span> <span class="n">Task</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleSpider</span><span class="p">(</span><span class="n">Spider</span><span class="p">):</span>
+    <span class="c1"># List of initial tasks</span>
+    <span class="c1"># For each URL in this list the Task object will be created</span>
+    <span class="n">initial_urls</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;http://habrahabr.ru/&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Prepare the file handler to save results.</span>
+        <span class="c1"># The method `prepare` is called one time before the</span>
+        <span class="c1"># spider has started working</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result_file</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;result.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">))</span>
+
+        <span class="c1"># This counter will be used to enumerate found images</span>
+        <span class="c1"># to simplify image file naming</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">task_initial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s1">&#39;Habrahabr home page&#39;</span>
+
+        <span class="c1"># This handler for the task named `initial i.e.</span>
+        <span class="c1"># for tasks that have been created from the</span>
+        <span class="c1"># `self.initial_urls` list</span>
+
+        <span class="c1"># As you see, inside handler you can work with Grab</span>
+        <span class="c1"># in usual way i.e. just if you have done network request</span>
+        <span class="c1"># manually</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">grab</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;//h1[@class=&quot;title&quot;]&#39;</span>
+                                    <span class="s1">&#39;/a[@class=&quot;post_title&quot;]&#39;</span><span class="p">):</span>
+            <span class="c1"># For each title link create new Task</span>
+            <span class="c1"># with name &quot;habrapost&quot;</span>
+            <span class="c1"># Pay attention, that we create new tasks</span>
+            <span class="c1"># with yield call. Also you can use `add_task` method:</span>
+            <span class="c1"># self.add_task(Task(&#39;habrapost&#39;, url=...))</span>
+            <span class="k">yield</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;habrapost&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">attr</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">task_habrapost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s1">&#39;Habrahabr topic: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">task</span><span class="o">.</span><span class="n">url</span>
+
+        <span class="c1"># This handler receives results of tasks we</span>
+        <span class="c1"># created for each topic title found on home page</span>
+
+        <span class="c1"># First, save URL and title into dictionary</span>
+        <span class="n">post</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">url</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">grab</span><span class="o">.</span><span class="n">xpath_text</span><span class="p">(</span><span class="s1">&#39;//h1/span[@class=&quot;post_title&quot;]&#39;</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Next, create new network request to search engine to find</span>
+        <span class="c1"># the image related to the title.</span>
+        <span class="c1"># We pass info about the found publication in the arguments to</span>
+        <span class="c1"># the Task object. That allows us to pass information to next</span>
+        <span class="c1"># handler that will be called for found image.</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">quote_plus</span><span class="p">(</span><span class="n">post</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+        <span class="n">search_url</span> <span class="o">=</span> <span class="s1">&#39;http://images.yandex.ru/yandsearch&#39;</span>\
+                     <span class="s1">&#39;?text=</span><span class="si">%s</span><span class="s1">&amp;rpt=image&#39;</span> <span class="o">%</span> <span class="n">query</span>
+        <span class="k">yield</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;image_search&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">search_url</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="n">post</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">task_image_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s1">&#39;Images search result for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">task</span><span class="o">.</span><span class="n">post</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>
+
+        <span class="c1"># In this handler we have received result of image search.</span>
+        <span class="c1"># That is not image! This is just a list of found images.</span>
+        <span class="c1"># Now, we take URL of first image and spawn new network</span>
+        <span class="c1"># request to download the image.</span>
+        <span class="c1"># Also we pass the info about pulication, we need it be</span>
+        <span class="c1"># available in next handler.</span>
+        <span class="n">image_url</span> <span class="o">=</span> <span class="n">grab</span><span class="o">.</span><span class="n">xpath_text</span><span class="p">(</span><span class="s1">&#39;//div[@class=&quot;b-image&quot;]/a/img/@src&#39;</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">image_url</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">post</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">task_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grab</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s1">&#39;Image downloaded for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">task</span><span class="o">.</span><span class="n">post</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>
+
+        <span class="c1"># OK, this is last handler in our spider.</span>
+        <span class="c1"># We have received the content of image,</span>
+        <span class="c1"># we need to save it.</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;images/</span><span class="si">%s</span><span class="s1">.jpg&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">result_counter</span>
+        <span class="n">grab</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result_file</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">post</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">post</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span>
+            <span class="n">path</span>
+        <span class="p">])</span>
+        <span class="c1"># Increment image counter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="c1"># Let&#39;s start spider with two network concurrent streams</span>
+    <span class="n">bot</span> <span class="o">=</span> <span class="n">ExampleSpider</span><span class="p">(</span><span class="n">thread_number</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">bot</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In this example, we have considered the simple spider. I hope you have got idea
+about how it works. See other parts of <a class="reference internal" href="../index.html#spider-toc"><span class="std std-ref">Grab::Spider User Manual</span></a> to get detailed description
+of spider features.</p>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../grab/transport.html"
+                          title="previous chapter">Network Transport</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="task.html"
+                          title="next chapter">Task Object</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/spider/intro.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="task.html" title="Task Object"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../grab/transport.html" title="Network Transport"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">What is Grab::Spider?</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

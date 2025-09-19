@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Work With Network Response &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Network Transport" href="transport.html" />
+    <link rel="prev" title="Pycurl Tips" href="pycurl.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="transport.html" title="Network Transport"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pycurl.html" title="Pycurl Tips"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Work With Network Response</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="work-with-network-response">
+<span id="grab-response"></span><h1>Work With Network Response<a class="headerlink" href="#work-with-network-response" title="Link to this heading">¶</a></h1>
+<section id="response-object">
+<h2>Response Object<a class="headerlink" href="#response-object" title="Link to this heading">¶</a></h2>
+<p>The result of doing a network request via Grab is a <cite>Response</cite> object.</p>
+<p>You get a Response object as a result of calling to <cite>g.go</cite>, <cite>g.request</cite> and <cite>g.submit</cite> methods.
+You can also access the response object of a recent network query via the <cite>g.response</cite> attribute:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">grab</span><span class="w"> </span><span class="kn">import</span> <span class="n">Grab</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://google.com&#39;</span><span class="p">)</span>
+<span class="go">&lt;grab.response.Response object at 0x2cff9f0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span>
+<span class="go">&lt;grab.response.Response object at 0x2cff9f0&gt;</span>
+</pre></div>
+</div>
+<p>You can find a full list of response attributes in the Response API document. Here are the most
+important things you should know:</p>
+<dl class="field-list simple">
+<dt class="field-odd">body<span class="colon">:</span></dt>
+<dd class="field-odd"><p>original body contents of HTTP response</p>
+</dd>
+<dt class="field-even">code<span class="colon">:</span></dt>
+<dd class="field-even"><p>HTTP status of response</p>
+</dd>
+<dt class="field-odd">headers<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HTTP headers of response</p>
+</dd>
+<dt class="field-even">charset<span class="colon">:</span></dt>
+<dd class="field-even"><p>charset of the response</p>
+</dd>
+<dt class="field-odd">cookies<span class="colon">:</span></dt>
+<dd class="field-odd"><p>cookies in the response</p>
+</dd>
+<dt class="field-even">url<span class="colon">:</span></dt>
+<dd class="field-even"><p>the URL of the response document. In case of some automatically processed redirect, the
+<cite>url</cite> attribute contains the final URL.</p>
+</dd>
+<dt class="field-odd">name_lookup_time<span class="colon">:</span></dt>
+<dd class="field-odd"><p>time spent to resolve host name</p>
+</dd>
+<dt class="field-even">connect_time<span class="colon">:</span></dt>
+<dd class="field-even"><p>time spent to connect to remote server</p>
+</dd>
+<dt class="field-odd">total_time<span class="colon">:</span></dt>
+<dd class="field-odd"><p>total time spent to complete the request</p>
+</dd>
+<dt class="field-even">download_size<span class="colon">:</span></dt>
+<dd class="field-even"><p>size of received data</p>
+</dd>
+<dt class="field-odd">upload_size<span class="colon">:</span></dt>
+<dd class="field-odd"><p>size of uploaded data except the HTTP headers</p>
+</dd>
+</dl>
+<p>Now, a real example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">grab</span><span class="w"> </span><span class="kn">import</span> <span class="n">Grab</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://wikipedia.org&#39;</span><span class="p">)</span>
+<span class="go">&lt;grab.response.Response object at 0x1ff99f0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">[:</span><span class="mi">100</span><span class="p">]</span>
+<span class="go">&#39;&lt;!DOCTYPE html&gt;\n&lt;html lang=&quot;mul&quot; dir=&quot;ltr&quot;&gt;\n&lt;head&gt;\n&lt;!-- Sysops: Please do not edit the main template&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">code</span>
+<span class="go">200</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Content-Type&#39;</span><span class="p">]</span>
+<span class="go">&#39;text/html; charset=utf-8&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">charset</span>
+<span class="go">&#39;utf-8&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">cookies</span>
+<span class="go">&lt;grab.cookie.CookieManager object at 0x1f6b248&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">url</span>
+<span class="go">&#39;http://www.wikipedia.org/&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">name_lookup_time</span>
+<span class="go">0.103931</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">connect_time</span>
+<span class="go">0.221996</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">total_time</span>
+<span class="go">0.7791399999999999</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">download_size</span>
+<span class="go">11100.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">upload_size</span>
+<span class="go">0.0</span>
+</pre></div>
+</div>
+<p>Now let’s see some useful methods available in the response object:</p>
+<dl class="field-list simple">
+<dt class="field-odd">unicode_body()<span class="colon">:</span></dt>
+<dd class="field-odd"><p>this method returns the response body converted to unicode</p>
+</dd>
+<dt class="field-even">copy()<span class="colon">:</span></dt>
+<dd class="field-even"><p>returns a clone of the response object</p>
+</dd>
+<dt class="field-odd">save(path)<span class="colon">:</span></dt>
+<dd class="field-odd"><p>saves the response object to the given location</p>
+</dd>
+<dt class="field-even">json<span class="colon">:</span></dt>
+<dd class="field-even"><p>treats the response content as json-serialized data and de-serializes it into a python object. Actually, this is not a method, it is a property.</p>
+</dd>
+<dt class="field-odd">url_details()<span class="colon">:</span></dt>
+<dd class="field-odd"><p>return the result of calling <cite>urlparse.urlsplit</cite> with <cite>response.url</cite> as an argument.</p>
+</dd>
+<dt class="field-even">query_param(name)<span class="colon">:</span></dt>
+<dd class="field-even"><p>extracts the value of the <cite>key</cite> argument from the query string of <cite>response.url</cite>.</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Work With Network Response</a><ul>
+<li><a class="reference internal" href="#response-object">Response Object</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="pycurl.html"
+                          title="previous chapter">Pycurl Tips</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="transport.html"
+                          title="next chapter">Network Transport</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/grab/response.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="transport.html" title="Network Transport"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pycurl.html" title="Pycurl Tips"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Work With Network Response</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

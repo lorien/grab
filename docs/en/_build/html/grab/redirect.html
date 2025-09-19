@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Redirect Handling &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Form Processing" href="forms.html" />
+    <link rel="prev" title="File Uploading" href="file_uploading.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="forms.html" title="Form Processing"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="file_uploading.html" title="File Uploading"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Redirect Handling</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="redirect-handling">
+<span id="grab-redirect"></span><h1>Redirect Handling<a class="headerlink" href="#redirect-handling" title="Link to this heading">¶</a></h1>
+<p>Grab supports two types of redirects:</p>
+<ul class="simple">
+<li><p>HTTP redirects with HTTP 301 and 302 status codes</p></li>
+<li><p>HTML redirects with the &lt;meta&gt; HTML tag</p></li>
+</ul>
+<section id="http-301-302-redirect">
+<h2>HTTP 301/302 Redirect<a class="headerlink" href="#http-301-302-redirect" title="Link to this heading">¶</a></h2>
+<p>By default, Grab follows any 301 or 302 redirect. You can control the maximum number
+of redirects per network query with the <a class="reference internal" href="settings.html#option-redirect-limit"><span class="std std-ref">redirect_limit</span></a> option. To completely
+disable handling of HTTP redirects, set <a class="reference internal" href="settings.html#option-follow-location"><span class="std std-ref">follow_location</span></a> to False.</p>
+<p>Let’s see how it works:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">follow_location</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://google.com&#39;</span><span class="p">)</span>
+<span class="go">&lt;grab.response.Response object at 0x1246ae0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">code</span>
+<span class="go">301</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Location&#39;</span><span class="p">]</span>
+<span class="go">&#39;http://www.google.com/&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">follow_location</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://google.com&#39;</span><span class="p">)</span>
+<span class="go">&lt;grab.response.Response object at 0x1246ae0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">code</span>
+<span class="go">200</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">url</span>
+<span class="go">&#39;http://www.google.ru/?gws_rd=cr&amp;ei=BspFUtS8EOWq4ATAooGADA&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="meta-refresh-redirect">
+<h2>Meta Refresh Redirect<a class="headerlink" href="#meta-refresh-redirect" title="Link to this heading">¶</a></h2>
+<p>An HTML Page could contain special tags that instructs the browser to go to a specified URL:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">meta</span> <span class="n">http</span><span class="o">-</span><span class="n">equiv</span><span class="o">=</span><span class="s2">&quot;Refresh&quot;</span> <span class="n">content</span><span class="o">=</span><span class="s2">&quot;0; url=http://some/url&quot;</span> <span class="o">/&gt;</span>
+</pre></div>
+</div>
+<p>By default, Grab ignores such instructions. If you want automatically follow meta refresh
+tags, then set <a class="reference internal" href="settings.html#option-follow-refresh"><span class="std std-ref">follow_refresh</span></a> to True.</p>
+</section>
+<section id="original-and-destination-urls">
+<h2>Original and Destination URLs<a class="headerlink" href="#original-and-destination-urls" title="Link to this heading">¶</a></h2>
+<p>You can always get information about what URL you’ve requested initially and what URL you ended up with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Grab</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://google.com&#39;</span><span class="p">)</span>
+<span class="go">&lt;grab.response.Response object at 0x20fcae0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
+<span class="go">&#39;http://google.com&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">url</span>
+<span class="go">&#39;http://www.google.ru/?gws_rd=cr&amp;ei=8spFUo32Huem4gT6ooDwAg&#39;</span>
+</pre></div>
+</div>
+<p>The initial URL is stored on the config object. The destination URL is written into <cite>response</cite> object.</p>
+<p>You can even track redirect history with <cite>response.head</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">g</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">head</span>
+<span class="go">HTTP/1.1 301 Moved Permanently</span>
+<span class="go">Location: http://www.google.com/</span>
+<span class="go">Content-Type: text/html; charset=UTF-8</span>
+<span class="go">Date: Fri, 27 Sep 2013 18:19:13 GMT</span>
+<span class="go">Expires: Sun, 27 Oct 2013 18:19:13 GMT</span>
+<span class="go">Cache-Control: public, max-age=2592000</span>
+<span class="go">Server: gws</span>
+<span class="go">Content-Length: 219</span>
+<span class="go">X-XSS-Protection: 1; mode=block</span>
+<span class="go">X-Frame-Options: SAMEORIGIN</span>
+
+<span class="go">HTTP/1.1 302 Found</span>
+<span class="go">Location: http://www.google.ru/?gws_rd=cr&amp;ei=IsxFUp-8CsT64QTZooDwBA</span>
+<span class="go">Cache-Control: private</span>
+<span class="go">Content-Type: text/html; charset=UTF-8</span>
+<span class="go">Date: Fri, 27 Sep 2013 18:19:14 GMT</span>
+<span class="go">Server: gws</span>
+<span class="go">Content-Length: 258</span>
+<span class="go">X-XSS-Protection: 1; mode=block</span>
+<span class="go">X-Frame-Options: SAMEORIGIN</span>
+
+<span class="go">HTTP/1.1 200 OK</span>
+<span class="go">Date: Fri, 27 Sep 2013 18:19:14 GMT</span>
+<span class="go">Expires: -1</span>
+<span class="go">Cache-Control: private, max-age=0</span>
+<span class="go">Content-Type: text/html; charset=UTF-8</span>
+<span class="go">Content-Encoding: gzip</span>
+<span class="go">Server: gws</span>
+<span class="go">X-XSS-Protection: 1; mode=block</span>
+<span class="go">X-Frame-Options: SAMEORIGIN</span>
+<span class="go">Transfer-Encoding: chunked</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Redirect Handling</a><ul>
+<li><a class="reference internal" href="#http-301-302-redirect">HTTP 301/302 Redirect</a></li>
+<li><a class="reference internal" href="#meta-refresh-redirect">Meta Refresh Redirect</a></li>
+<li><a class="reference internal" href="#original-and-destination-urls">Original and Destination URLs</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="file_uploading.html"
+                          title="previous chapter">File Uploading</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="forms.html"
+                          title="next chapter">Form Processing</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/grab/redirect.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="forms.html" title="Form Processing"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="file_uploading.html" title="File Uploading"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Redirect Handling</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

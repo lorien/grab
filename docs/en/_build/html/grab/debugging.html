@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Debugging &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Work with HTTP Headers" href="request_headers.html" />
+    <link rel="prev" title="Grab Settings" href="settings.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="request_headers.html" title="Work with HTTP Headers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="settings.html" title="Grab Settings"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Debugging</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="debugging">
+<span id="grab-debugging"></span><h1>Debugging<a class="headerlink" href="#debugging" title="Link to this heading">¶</a></h1>
+<section id="using-the-logging-module">
+<span id="grab-debugging-logging"></span><h2>Using the logging module<a class="headerlink" href="#using-the-logging-module" title="Link to this heading">¶</a></h2>
+<p>The easiest way to see what is going on is to enable DEBUG logging messages.
+Write the following code at every entry point to your program:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>That logging configuration will output all logging messages to console, not
+just from Grab but from other modules too. If you are interested only
+in Grab’s messages:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;grab&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also use a <cite>default_logging</cite> function that configures logging as
+follows:</p>
+<ul class="simple">
+<li><p>all messages of any level except from Grab modules are printed to console</p></li>
+<li><p>all “grab*” messages with level INFO or higher are printed to console</p></li>
+<li><p>all “grab*” messages of any level are saved to /tmp/grab.log</p></li>
+<li><p>all “grab.network*” messages (usually these are URLs being requested) of any
+level are saved to /tmp/grab.network.log</p></li>
+</ul>
+<p>Usage of <cite>default_logging</cite> function is simple:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">weblib.logs</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_logging</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">default_logging</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="logging-messages-about-network-request">
+<span id="grab-debugging-logging-network"></span><h2>Logging messages about network request<a class="headerlink" href="#logging-messages-about-network-request" title="Link to this heading">¶</a></h2>
+<p>For each network request, Grab generates the “grab.network” logging message
+with level DEBUG. Let’s look at an example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">5864</span><span class="p">]</span> <span class="n">GET</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">kino</span><span class="o">-</span><span class="n">govno</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">movies</span><span class="o">/</span><span class="n">rusichi</span> <span class="n">via</span> <span class="mf">188.120.244.68</span><span class="p">:</span><span class="mi">8080</span> <span class="n">proxy</span> <span class="n">of</span> <span class="nb">type</span> <span class="n">http</span> <span class="k">with</span> <span class="n">authorization</span>
+</pre></div>
+</div>
+<p>We can see the requested URL and also that request has ID 5864, that the HTTP
+method is GET, and that the request goes through a proxy with authorization.
+For each network request Grab uses the next ID value from the sequence that is
+shared by all Grab instances. That does mean that even different Grab instances
+will generates network logging messages with unique ID.</p>
+<p>You can also turn on logging of POST request content. Use the <cite>debug_post</cite>
+option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">debug_post</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output will be like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">01</span><span class="p">]</span> <span class="n">POST</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">yandex</span><span class="o">.</span><span class="n">ru</span>
+<span class="n">POST</span> <span class="n">request</span><span class="p">:</span>
+<span class="n">foo</span>                      <span class="p">:</span> <span class="n">bar</span>
+<span class="n">name</span>                     <span class="p">:</span> <span class="n">Ivan</span>
+</pre></div>
+</div>
+</section>
+<section id="saving-the-content-of-requests-and-responses">
+<span id="grab-debugging-response-saving"></span><h2>Saving the content of requests and responses<a class="headerlink" href="#saving-the-content-of-requests-and-responses" title="Link to this heading">¶</a></h2>
+<p>You can ask Grab to save the content of each network response to the file
+located at the path passed as the <cite>log_file</cite> option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">log_file</span><span class="o">=</span><span class="s1">&#39;log.html&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Of course, each new response will overwrite the content of the previous
+response.</p>
+<p>If you want to log all traffic, then consider using the <cite>log_dir</cite> option, which
+tells Grab to save the contents of all responses to files inside the specified
+directory. Note that each such file will contain a request ID in its filename.
+For each response, there will be two files: XXX.log and XXX.html. The file
+XXX.html contains the raw response. Even if you requested an image or
+large movie, you’ll get its raw content in that file. The file XXX.log contains
+headers of network response.  If you configure Grab with <cite>debug=True</cite>,
+the file XXX.log will also contain request headers.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Debugging</a><ul>
+<li><a class="reference internal" href="#using-the-logging-module">Using the logging module</a></li>
+<li><a class="reference internal" href="#logging-messages-about-network-request">Logging messages about network request</a></li>
+<li><a class="reference internal" href="#saving-the-content-of-requests-and-responses">Saving the content of requests and responses</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="settings.html"
+                          title="previous chapter">Grab Settings</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="request_headers.html"
+                          title="next chapter">Work with HTTP Headers</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/grab/debugging.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="request_headers.html" title="Work with HTTP Headers"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="settings.html" title="Grab Settings"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Debugging</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

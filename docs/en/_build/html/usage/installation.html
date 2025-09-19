@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Grab Installation &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Testing Grab Framework" href="testing.html" />
+    <link rel="prev" title="Welcome to Grab’s documentation!" href="../index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="testing.html" title="Testing Grab Framework"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to Grab’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Grab Installation</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="grab-installation">
+<span id="usage-installation"></span><h1>Grab Installation<a class="headerlink" href="#grab-installation" title="Link to this heading">¶</a></h1>
+<section id="common-problems">
+<span id="requirement-parsing-error"></span><h2>Common problems<a class="headerlink" href="#common-problems" title="Link to this heading">¶</a></h2>
+<p>1) If you got the error <cite>requirement specifiers; Expected version spec …</cite> while
+installing grab via the pip then you have outdated setuptools or pip packages.</p>
+<p>Fix the error with following command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>setuptools<span class="w"> </span>pip
+</pre></div>
+</div>
+<p>2) If you got out of memory error while installing lxml on linux machine with 512Mb RAM
+or less then check that you swap file is enabled.</p>
+</section>
+<section id="installation-on-linux">
+<span id="installation-linux"></span><h2>Installation on Linux<a class="headerlink" href="#installation-on-linux" title="Link to this heading">¶</a></h2>
+<p>Update installation tools:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>setuptools<span class="w"> </span>pip
+</pre></div>
+</div>
+<p>Run the command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>grab
+</pre></div>
+</div>
+<p>This command will install Grab and all dependencies. Be aware that you need
+to have some libraries installed in your system to successfully build lxml and
+pycurl dependencies.</p>
+<p>To build pycurl successfully you need to install:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>apt-get<span class="w"> </span>install<span class="w"> </span>libcurl4-openssl-dev
+</pre></div>
+</div>
+<p>To build lxml successfully you need to install:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>apt-get<span class="w"> </span>install<span class="w"> </span>libxml2-dev<span class="w"> </span>libxslt-dev
+</pre></div>
+</div>
+<p>If your system has 512Mb RAM or less you might experience issues during instalation
+of Grab dependencies. Installation of lxml requries quite a few RAM. In such case
+enable swap file if it is disabled.</p>
+</section>
+<section id="installation-on-windows">
+<span id="installation-windows"></span><h2>Installation on Windows<a class="headerlink" href="#installation-on-windows" title="Link to this heading">¶</a></h2>
+<p>Step 1. Install lxml. You can get lxml here <a class="reference external" href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml">http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml</a></p>
+<p>Step 2. Install pycurl.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Do not use the recent version of pycurl (7.43.0 at the moment). This version fails randomly on windows platform. Use 7.19.5.3 version. You can get it here <a class="reference external" href="https://bintray.com/pycurl/pycurl/pycurl/view#files">https://bintray.com/pycurl/pycurl/pycurl/view#files</a></p>
+</div>
+<p>Step 3. Update installation tools</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>pip<span class="w"> </span>setuptools
+</pre></div>
+</div>
+<p>If you don’t have pip installed, install pip first. Download the file get-pip.py from
+<a class="reference external" href="https://bootstrap.pypa.io/get-pip.py">https://bootstrap.pypa.io/get-pip.py</a> and then run the command</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>get-pip.py
+</pre></div>
+</div>
+<p>Step 4. Install Grab</p>
+<p>Now you can install Grab via pip with this command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">grab</span>
+</pre></div>
+</div>
+</section>
+<section id="installation-on-freebsd">
+<span id="installation-freebsd"></span><h2>Installation on FreeBSD<a class="headerlink" href="#installation-on-freebsd" title="Link to this heading">¶</a></h2>
+<p>Update installation tools:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>setuptools<span class="w"> </span>pip
+</pre></div>
+</div>
+<p>Run the command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>grab
+</pre></div>
+</div>
+<p>You can also install Grab from FreeBSD ports (thanks to Ruslan Makhmatkhanov):</p>
+<ul class="simple">
+<li><p>To install the port: cd /usr/ports/devel/py-grab/ &amp;&amp; make install clean</p></li>
+<li><p>To add the package: pkg_add -r py27-grab</p></li>
+</ul>
+</section>
+<section id="installation-on-macos">
+<span id="installation-macos"></span><h2>Installation on MacOS<a class="headerlink" href="#installation-on-macos" title="Link to this heading">¶</a></h2>
+<p>Update installation tools:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>setuptools<span class="w"> </span>pip
+</pre></div>
+</div>
+<p>Run the command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>grab
+</pre></div>
+</div>
+</section>
+<section id="dependencies">
+<span id="installation-deps"></span><h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h2>
+<p>All required dependencies should be installed automatically if you
+install Grab with pip. Here is list of Grab dependencies:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lxml</span>
+<span class="n">pycurl</span>
+<span class="n">selection</span>
+<span class="n">weblib</span>
+<span class="n">six</span>
+<span class="n">user_agent</span>
+</pre></div>
+</div>
+</section>
+<section id="upgrade-grab-from-0-5-x-version-to-0-6-x">
+<span id="installation-upgrade"></span><h2>Upgrade Grab from 0.5.x version to 0.6.x<a class="headerlink" href="#upgrade-grab-from-0-5-x-version-to-0-6-x" title="Link to this heading">¶</a></h2>
+<p>In Grab 0.6.x some features were moved out into separate packages. If
+you install/upgrade Grab with pip, all dependencies should be installed
+automatically. Anyway, if you have some ImportError issues then try to
+install dependencies manually with the command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>lxml<span class="w"> </span>pycurl<span class="w"> </span>selection<span class="w"> </span>weblib<span class="w"> </span>six<span class="w"> </span>user_agent
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Grab Installation</a><ul>
+<li><a class="reference internal" href="#common-problems">Common problems</a></li>
+<li><a class="reference internal" href="#installation-on-linux">Installation on Linux</a></li>
+<li><a class="reference internal" href="#installation-on-windows">Installation on Windows</a></li>
+<li><a class="reference internal" href="#installation-on-freebsd">Installation on FreeBSD</a></li>
+<li><a class="reference internal" href="#installation-on-macos">Installation on MacOS</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#upgrade-grab-from-0-5-x-version-to-0-6-x">Upgrade Grab from 0.5.x version to 0.6.x</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="../index.html"
+                          title="previous chapter">Welcome to Grab’s documentation!</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="testing.html"
+                          title="next chapter">Testing Grab Framework</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/usage/installation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="testing.html" title="Testing Grab Framework"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to Grab’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Grab Installation</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Network Errors Handling &#8212; Grab 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="HTML Document Charset" href="charset.html" />
+    <link rel="prev" title="Form Processing" href="forms.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="charset.html" title="HTML Document Charset"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="forms.html" title="Form Processing"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Network Errors Handling</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="network-errors-handling">
+<span id="grab-network-errors"></span><h1>Network Errors Handling<a class="headerlink" href="#network-errors-handling" title="Link to this heading">¶</a></h1>
+<section id="network-errors">
+<h2>Network Errors<a class="headerlink" href="#network-errors" title="Link to this heading">¶</a></h2>
+<p>If a network request fails, Grab raises <code class="xref py py-class docutils literal notranslate"><span class="pre">grab.error.GrabNetworkError</span></code>.
+There are two situations when a network error exception will raise:</p>
+<ul class="simple">
+<li><p>the server broke connection or the connection timed out</p></li>
+<li><p>the response had any HTTP status code that is not 2XX or 404</p></li>
+</ul>
+<p>Note particularly that 404 is a valid status code, and does not cause an exception to be raised.</p>
+</section>
+<section id="network-timeout">
+<h2>Network Timeout<a class="headerlink" href="#network-timeout" title="Link to this heading">¶</a></h2>
+<p>You can configure timeouts with the following options:</p>
+<ul class="simple">
+<li><p>connect to server timeout with <a class="reference internal" href="settings.html#option-connect-timeout"><span class="std std-ref">connect_timeout</span></a> option</p></li>
+<li><p>whole request/response operation timeout with <a class="reference internal" href="settings.html#option-timeout"><span class="std std-ref">timeout</span></a> option</p></li>
+</ul>
+<p>In case of a timeout, Grab raises <code class="xref py py-class docutils literal notranslate"><span class="pre">grab.error.GrabTimeoutError</span></code>.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Network Errors Handling</a><ul>
+<li><a class="reference internal" href="#network-errors">Network Errors</a></li>
+<li><a class="reference internal" href="#network-timeout">Network Timeout</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="forms.html"
+                          title="previous chapter">Form Processing</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="charset.html"
+                          title="next chapter">HTML Document Charset</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/grab/network_errors.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="charset.html" title="HTML Document Charset"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="forms.html" title="Form Processing"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Grab 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Network Errors Handling</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2013-2025, Gregory Petukhov.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Developed by <a href="http://github.com/lorien">me</a></p>
+    <p style="margin-top: 0; text-align: center; font-size: 0.8em;">Jut a friend of mine who does web-scrpaing too: <a href="https://www.imscraping.ninja">www.imscraping.ninja</a>.</p>
+
+  </body>
+</html>
