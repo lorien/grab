@@ -1,6 +1,0 @@
-:py:mod:`grab.response`
-=======================
-
-.. py:module:: grab.response
-
-
